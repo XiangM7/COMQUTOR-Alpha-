@@ -40,6 +40,7 @@ from cli.utils import (
     select_research_depth,
     select_shallow_thinking_agent,
 )
+from tradingagents.comqutor_outputs import save_comqutor_run_outputs
 from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.graph.analyst_execution import (
     AnalystWallTimeTracker,
@@ -1223,6 +1224,24 @@ def run_analysis(checkpoint: bool | None = None):
         final_state = {}
         for chunk in trace:
             final_state.update(chunk)
+
+        try:
+            comqutor_output_dir = save_comqutor_run_outputs(
+                final_state=final_state,
+                ticker=selections["ticker"],
+                config=config,
+                selected_analysts=selected_analyst_keys,
+                analysis_date=selections["analysis_date"],
+            )
+            message_buffer.add_message(
+                "System",
+                f"COMQUTOR outputs saved to: {comqutor_output_dir}",
+            )
+        except Exception as e:
+            message_buffer.add_message(
+                "System",
+                f"COMQUTOR output save failed: {e}",
+            )
 
         # Update all agent statuses to completed
         for agent in message_buffer.agent_status:
