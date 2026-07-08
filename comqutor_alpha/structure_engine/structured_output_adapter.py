@@ -192,10 +192,10 @@ def validate_structured_output(record):
     return all(record.get(field) for field in required)
 
 
-def safe_default_record(run_id, ticker, agent, raw_text, reason):
+def safe_default_record(run_id, ticker, agent, raw_text, reason, source_agent_output_id=None):
     del raw_text
     return {
-        "agent_output_id": f"{normalize_agent_name(agent)}_default",
+        "agent_output_id": source_agent_output_id or f"{normalize_agent_name(agent)}_default",
         "run_id": run_id,
         "ticker": ticker,
         "agent": normalize_agent_name(agent),
@@ -207,7 +207,7 @@ def safe_default_record(run_id, ticker, agent, raw_text, reason):
         "direction": "unknown",
         "confidence": 0.0,
         "source_type": "unknown",
-        "source_refs": [],
+        "source_refs": [source_agent_output_id] if source_agent_output_id else [],
         "adapter_warning": reason,
     }
 
@@ -224,10 +224,21 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
         return safe_default_record(run_id, ticker, "unknown_agent", "", "raw row is not an object")
     agent = normalize_agent_name(raw_record.get("agent") or raw_record.get("tradingagents_agent"))
     raw_text = raw_record.get("raw_output")
+    # Preserve traceability: the raw writer stamps every record with a stable
+    # agent_output_id, so structured output should inherit it rather than mint
+    # an unrelated identifier.
+    source_agent_output_id = raw_record.get("agent_output_id")
     if not _normalize_text(raw_text):
-        return safe_default_record(run_id, ticker, agent, raw_text, "raw output is empty")
+        return safe_default_record(
+            run_id,
+            ticker,
+            agent,
+            raw_text,
+            "raw output is empty",
+            source_agent_output_id=source_agent_output_id,
+        )
     record = {
-        "agent_output_id": raw_record.get("id")
+        "agent_output_id": source_agent_output_id
         or f"{agent}_{hashlib.sha1(_normalize_text(raw_text).encode('utf-8')).hexdigest()[:10]}",
         "run_id": run_id,
         "ticker": ticker,
@@ -240,11 +251,18 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
         "direction": normalize_direction(infer_direction(raw_text)),
         "confidence": estimate_confidence(raw_text),
         "source_type": infer_source_type(agent, raw_text),
-        "source_refs": [],
+        "source_refs": [source_agent_output_id] if source_agent_output_id else [],
     }
     if validate_structured_output(record):
         return record
-    return safe_default_record(run_id, ticker, agent, raw_text, "structured record failed validation")
+    return safe_default_record(
+        run_id,
+        ticker,
+        agent,
+        raw_text,
+        "structured record failed validation",
+        source_agent_output_id=source_agent_output_id,
+    )
 
 
 def adapt_run_outputs(run_dir):

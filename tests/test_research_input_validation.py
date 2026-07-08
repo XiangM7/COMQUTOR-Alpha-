@@ -1,9 +1,10 @@
 import json
+import logging
 from pathlib import Path
 
 import pytest
 
-from comqutor_alpha.api.routes_research import run_research_request
+from comqutor_alpha.api.routes_research import _create_offline_run, run_research_request
 from comqutor_alpha.structure_engine.structured_output_adapter import extract_entities
 
 
@@ -86,6 +87,56 @@ def test_injected_runner_with_invalid_run_id_fails_safely(tmp_path):
     assert response["status"] == "failed"
     assert response["error_code"] == "INVALID_RUN_ID"
     assert not (tmp_path / "bad run id!" / "structured_agent_outputs.json").exists()
+
+
+def test_expected_validation_error_is_logged_without_traceback(tmp_path, caplog):
+    with caplog.at_level(logging.DEBUG, logger="comqutor_alpha.api.routes_research"):
+        response = run_research_request(
+            {"ticker": "'; DROP", "offline_raw_agent_outputs": _offline_outputs()},
+            output_root=tmp_path,
+        )
+
+    assert response["error_code"] == "INVALID_TICKER"
+    records = [r for r in caplog.records if r.name == "comqutor_alpha.api.routes_research"]
+    assert len(records) == 1
+    assert records[0].levelname == "WARNING"
+    assert records[0].exc_info is None
+
+
+def test_unexpected_internal_failure_is_logged_with_traceback(tmp_path, caplog):
+    def broken_runner(payload, output_root):
+        raise RuntimeError("boom - unexpected internal failure")
+
+    with caplog.at_level(logging.DEBUG, logger="comqutor_alpha.api.routes_research"):
+        response = run_research_request(
+            {"ticker": "NVDA"},
+            runner=broken_runner,
+            output_root=tmp_path,
+        )
+
+    assert response["error_code"] == "INTERNAL_ERROR"
+    records = [r for r in caplog.records if r.name == "comqutor_alpha.api.routes_research"]
+    assert len(records) == 1
+    assert records[0].levelname == "ERROR"
+    assert records[0].exc_info is not None
+
+
+def test_create_offline_run_rejects_invalid_ticker_directly(tmp_path):
+    with pytest.raises(ValueError, match="INVALID_TICKER"):
+        _create_offline_run({"ticker": "'; DROP", "offline_raw_agent_outputs": []}, tmp_path)
+
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_create_offline_run_normalizes_lowercase_ticker_directly(tmp_path):
+    run_id, run_dir = _create_offline_run(
+        {"ticker": "nvda", "offline_raw_agent_outputs": []},
+        tmp_path,
+    )
+
+    metadata = json.loads((run_dir / "metadata.json").read_text())
+    assert metadata["ticker"] == "NVDA"
+    assert run_id
 
 
 def test_extract_entities_uses_word_boundaries():

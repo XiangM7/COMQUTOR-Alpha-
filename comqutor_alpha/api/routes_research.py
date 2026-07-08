@@ -64,6 +64,21 @@ def _error_response(payload, error_code, message):
     }
 
 
+# Error codes for expected client/input rejections (bad ticker, bad run_id, disabled
+# feature, etc.) rather than unexpected internal failures. These are logged at a
+# lower level without a traceback so probing/malformed requests don't flood logs.
+_EXPECTED_CLIENT_ERROR_CODES = frozenset(
+    {
+        "INVALID_RUN_ID",
+        "INVALID_ARTIFACT_FILENAME",
+        "INVALID_OFFLINE_OUTPUTS",
+        "INVALID_TICKER",
+        "REAL_RUN_DISABLED",
+        "OFFLINE_DISABLED",
+    }
+)
+
+
 def _map_exception_to_error(payload, exc):
     message = str(exc)
     if isinstance(exc, ValueError):
@@ -99,7 +114,7 @@ def _map_exception_to_error(payload, exc):
 def _create_offline_run(payload, output_root):
     payload = _normalize_payload(payload)
     run_id = str(payload.get("run_id") or uuid4())
-    ticker = str(payload.get("ticker") or "unknown").upper()
+    ticker = validate_ticker(payload.get("ticker"))
     run_dir = run_dir_for(run_id, output_root)
     run_dir.mkdir(parents=True, exist_ok=False)
 
@@ -232,12 +247,21 @@ def run_research_request(payload, runner=None, output_root="outputs/runs"):
         save_structured_agent_outputs(run_dir)
         return build_research_response(run_id, output_root=output_root)
     except Exception as exc:
-        logger.exception(
-            "research request failed (ticker=%s, run_id=%s)",
-            payload.get("ticker"),
-            payload.get("run_id"),
-        )
-        return _map_exception_to_error(payload, exc)
+        error_response = _map_exception_to_error(payload, exc)
+        if error_response["error_code"] in _EXPECTED_CLIENT_ERROR_CODES:
+            logger.warning(
+                "research request rejected (ticker=%s, run_id=%s, error_code=%s)",
+                payload.get("ticker"),
+                payload.get("run_id"),
+                error_response["error_code"],
+            )
+        else:
+            logger.exception(
+                "research request failed (ticker=%s, run_id=%s)",
+                payload.get("ticker"),
+                payload.get("run_id"),
+            )
+        return error_response
 
 
 def get_research_run(run_id, output_root="outputs/runs"):

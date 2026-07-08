@@ -1,5 +1,6 @@
 import json
 
+from comqutor_alpha.adapters.tradingagents_output_writer import build_raw_agent_output_record
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     SCHEMA_VERSION,
     adapt_raw_agent_output,
@@ -21,6 +22,48 @@ def test_nvda_ai_text_extracts_factors_and_source_type():
     assert "GPU Demand" in record["factors"]
     assert "Datacenter CapEx" in record["factors"]
     assert record["source_type"] == "technical"
+
+
+def _raw_record(raw_output, agent="news_agent"):
+    return build_raw_agent_output_record(
+        run_id="run1",
+        ticker="NVDA",
+        agent=agent,
+        tradingagents_agent="News Analyst",
+        source_field="news_report",
+        source_path="news_report",
+        source_candidates=["news_report"],
+        raw_value=raw_output,
+        created_at="2026-07-01T00:00:00Z",
+    )
+
+
+def test_structured_record_traces_back_to_raw_agent_output_id():
+    raw_record = _raw_record("AI demand supports GPU demand and datacenter capex.")
+
+    structured = adapt_raw_agent_output(raw_record, "run1", "NVDA")
+
+    assert structured["agent_output_id"] == raw_record["agent_output_id"]
+    assert structured["source_refs"] == [raw_record["agent_output_id"]]
+
+
+def test_safe_default_record_preserves_traceability_for_empty_raw_output():
+    raw_record = _raw_record("")
+
+    structured = adapt_raw_agent_output(raw_record, "run1", "NVDA")
+
+    assert structured["claim"] == "unknown"
+    assert structured["adapter_warning"] == "raw output is empty"
+    assert structured["agent_output_id"] == raw_record["agent_output_id"]
+    assert structured["source_refs"] == [raw_record["agent_output_id"]]
+
+
+def test_safe_default_record_has_no_traceability_when_raw_row_is_invalid():
+    structured = adapt_raw_agent_output("not-a-mapping", "run1", "NVDA")
+
+    assert structured["adapter_warning"] == "raw row is not an object"
+    assert structured["source_refs"] == []
+    assert structured["agent_output_id"] == "unknown_agent_default"
 
 
 def test_adapter_writes_file_and_logs_invalid_rows(tmp_path):
