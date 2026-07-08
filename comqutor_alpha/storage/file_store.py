@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from uuid import uuid4
 
-
+# Constants for validating run IDs and allowed artifact filenames.
 RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
 ALLOWED_ARTIFACT_FILENAMES = {
     "metadata.json",
@@ -18,7 +18,7 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "research_response.json",
 }
 
-
+# Validate and normalize a request run_id.
 def validate_run_id_for_path(run_id) -> str:
     if run_id is None:
         raise ValueError("INVALID_RUN_ID: run_id is required")
@@ -37,7 +37,7 @@ def validate_run_id_for_path(run_id) -> str:
         raise ValueError("INVALID_RUN_ID: run_id may contain only letters, numbers, underscore, or dash")
     return value
 
-
+# Validate an artifact filename against the allowed set.
 def validate_artifact_filename(filename) -> str:
     value = str(filename or "")
     if "/" in value or "\\" in value or ".." in value:
@@ -46,7 +46,7 @@ def validate_artifact_filename(filename) -> str:
         raise ValueError(f"INVALID_ARTIFACT_FILENAME: unsupported artifact filename {value!r}")
     return value
 
-
+# Resolve the output root directory, using the provided argument, environment variable, or default path.
 def resolve_output_root(output_root=None) -> Path:
     if output_root is not None:
         return Path(output_root).expanduser().resolve()
@@ -57,7 +57,7 @@ def resolve_output_root(output_root=None) -> Path:
 
     return (Path.cwd() / "outputs" / "runs").resolve()
 
-
+# Get the run directory for a given run_id, ensuring it is within the output root.
 def run_dir_for(run_id, output_root="outputs/runs"):
     safe_run_id = validate_run_id_for_path(run_id)
     root = resolve_output_root(output_root)
@@ -68,7 +68,7 @@ def run_dir_for(run_id, output_root="outputs/runs"):
         raise ValueError("INVALID_RUN_DIR: resolved run directory escapes output_root") from exc
     return run_dir
 
-
+# Atomically write text to a file, ensuring the parent directory exists and using a temporary file for safety.
 def atomic_write_text(path, text, encoding="utf-8") -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -92,7 +92,7 @@ def atomic_write_text(path, text, encoding="utf-8") -> Path:
             except OSError:
                 pass
 
-
+# Save a JSON record to the run directory, ensuring atomic write and proper encoding.
 def save_json_record(run_id, filename, data, output_root="outputs/runs"):
     run_dir = run_dir_for(run_id, output_root)
     filename = validate_artifact_filename(filename)
@@ -102,13 +102,13 @@ def save_json_record(run_id, filename, data, output_root="outputs/runs"):
         encoding="utf-8",
     )
 
-
+# Load a JSON record from the run directory, raising an error if it does not exist.
 def load_json_record(run_id, filename, output_root="outputs/runs"):
     path = run_dir_for(run_id, output_root) / validate_artifact_filename(filename)
     with path.open(encoding="utf-8") as f:
         return json.load(f)
 
-
+# Load a JSON record from the run directory if it exists, returning an empty dict if not.
 def load_json_record_if_exists(run_id, filename, output_root="outputs/runs"):
     path = run_dir_for(run_id, output_root) / validate_artifact_filename(filename)
     if not path.exists():
@@ -116,7 +116,7 @@ def load_json_record_if_exists(run_id, filename, output_root="outputs/runs"):
     with path.open(encoding="utf-8") as f:
         return json.load(f)
 
-
+# List all valid run_ids in the output root directory, ignoring invalid directories.
 def list_runs(output_root="outputs/runs"):
     root = resolve_output_root(output_root)
     if not root.exists():
