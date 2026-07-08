@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import json
-import os
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 from comqutor_alpha.storage.file_store import (
     atomic_write_text,
+    resolve_output_root,
     run_dir_for,
     save_json_record,
     validate_artifact_filename,
@@ -106,17 +105,6 @@ def _utc_timestamp() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _resolve_output_root(output_root: str | os.PathLike[str] | None) -> Path:
-    if output_root is not None:
-        return Path(output_root)
-
-    env_output_root = os.environ.get("COMQUTOR_OUTPUT_DIR")
-    if env_output_root:
-        return Path(env_output_root)
-
-    return Path.cwd() / "outputs" / "runs"
-
-
 def _path_label(path: tuple[str, ...]) -> str:
     return ".".join(path)
 
@@ -198,6 +186,39 @@ def _select_source(final_state: Mapping[str, Any], field: AgentOutputField) -> t
     return None, None
 
 
+def build_raw_agent_output_record(
+    *,
+    run_id: str,
+    ticker: str,
+    agent: str,
+    tradingagents_agent: str,
+    source_field: str,
+    source_path: str,
+    source_candidates: list[str],
+    raw_value,
+    created_at: str,
+    record_suffix: str | None = None,
+) -> dict:
+    raw_output = _to_string(raw_value)
+    raw_output, content_length, original_content_length, truncated = _truncate_raw_output(raw_output)
+    suffix = f":{record_suffix}" if record_suffix is not None else ""
+    return {
+        "agent_output_id": f"{run_id}:{agent}:{source_field}{suffix}",
+        "run_id": run_id,
+        "ticker": ticker,
+        "agent": agent,
+        "tradingagents_agent": tradingagents_agent,
+        "source_field": source_field,
+        "source_path": source_path,
+        "source_candidates": list(source_candidates),
+        "raw_output": raw_output,
+        "content_length": content_length,
+        "original_content_length": original_content_length,
+        "truncated": truncated,
+        "created_at": created_at,
+    }
+
+
 def _extract_agent_outputs(
     final_state: Mapping[str, Any],
     run_id: str,
@@ -210,26 +231,20 @@ def _extract_agent_outputs(
         if source_path is None:
             continue
 
-        raw_output = _to_string(value)
-        raw_output, content_length, original_content_length, truncated = _truncate_raw_output(raw_output)
         agent_outputs.append(
-            {
-                "agent_output_id": f"{run_id}:{field.agent}:{field.source_field}",
-                "run_id": run_id,
-                "ticker": ticker,
-                "agent": field.agent,
-                "tradingagents_agent": field.tradingagents_agent,
-                "source_field": field.source_field,
-                "source_path": source_path,
-                "source_candidates": [
+            build_raw_agent_output_record(
+                run_id=run_id,
+                ticker=ticker,
+                agent=field.agent,
+                tradingagents_agent=field.tradingagents_agent,
+                source_field=field.source_field,
+                source_path=source_path,
+                source_candidates=[
                     _path_label(path) for path in (field.primary_path, *field.fallback_paths)
                 ],
-                "raw_output": raw_output,
-                "content_length": content_length,
-                "original_content_length": original_content_length,
-                "truncated": truncated,
-                "created_at": created_at,
-            }
+                raw_value=value,
+                created_at=created_at,
+            )
         )
     return agent_outputs
 
@@ -277,7 +292,7 @@ def save_comqutor_run_outputs(
     """Save COMQUTOR-standard raw outputs for a completed TradingAgents run."""
     final_state = _validate_final_state(final_state, allow_empty_final_state)
     run_id = str(uuid4())
-    output_root = _resolve_output_root(output_root)
+    output_root = resolve_output_root(output_root)
     run_dir = run_dir_for(run_id, output_root)
     run_dir.mkdir(parents=True, exist_ok=False)
 

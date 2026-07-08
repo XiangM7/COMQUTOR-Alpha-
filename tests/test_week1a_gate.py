@@ -53,6 +53,32 @@ def test_run_research_request_with_offline_raw_outputs(tmp_path):
     assert response["structured_output_count"] == 4
 
 
+def test_offline_raw_outputs_use_hardened_schema(tmp_path):
+    response = run_research_request(_payload(), output_root=tmp_path)
+    raw = json.loads((tmp_path / response["run_id"] / "raw_agent_outputs.json").read_text())
+    first = raw["agent_outputs"][0]
+
+    assert raw["schema_version"] == "week1a.raw_agent_outputs.v1"
+    for field in (
+        "agent_output_id",
+        "run_id",
+        "ticker",
+        "agent",
+        "tradingagents_agent",
+        "source_field",
+        "source_path",
+        "source_candidates",
+        "raw_output",
+        "content_length",
+        "original_content_length",
+        "truncated",
+        "created_at",
+    ):
+        assert field in first
+    assert first["source_field"] == "offline_raw_agent_outputs"
+    assert first["source_candidates"] == ["offline_raw_agent_outputs"]
+
+
 def test_research_response_has_structured_rows(tmp_path):
     response = run_research_request(_payload(), output_root=tmp_path)
     structured = json.loads((tmp_path / response["run_id"] / "structured_agent_outputs.json").read_text())
@@ -146,7 +172,59 @@ def test_real_tradingagents_run_is_blocked_by_default(tmp_path):
     )
 
     assert response["status"] == "failed"
-    assert "disabled by default" in response["error"]
+    assert response["error_code"] == "REAL_RUN_DISABLED"
+    assert "disabled by default" in response["message"]
+
+
+def test_invalid_run_id_returns_stable_error_code(tmp_path):
+    response = run_research_request(
+        {
+            "run_id": "../secret",
+            "ticker": "NVDA",
+            "offline_raw_agent_outputs": [],
+        },
+        output_root=tmp_path,
+    )
+
+    assert response["status"] == "failed"
+    assert response["error_code"] == "INVALID_RUN_ID"
+    assert response["message"] == "Invalid run_id."
+
+
+def test_too_many_offline_outputs_returns_stable_error_code(tmp_path):
+    response = run_research_request(
+        {
+            "ticker": "NVDA",
+            "offline_raw_agent_outputs": [
+                {"agent": f"agent_{index}", "raw_output": "text"} for index in range(21)
+            ],
+        },
+        output_root=tmp_path,
+    )
+
+    assert response["status"] == "failed"
+    assert response["error_code"] == "INVALID_OFFLINE_OUTPUTS"
+
+
+def test_non_list_offline_outputs_returns_stable_error_code(tmp_path):
+    response = run_research_request(
+        {
+            "ticker": "NVDA",
+            "offline_raw_agent_outputs": "not-a-list",
+        },
+        output_root=tmp_path,
+    )
+
+    assert response["status"] == "failed"
+    assert response["error_code"] == "INVALID_OFFLINE_OUTPUTS"
+
+
+def test_get_research_run_invalid_run_id_returns_stable_error_code(tmp_path):
+    response = get_research_run("../secret", output_root=tmp_path)
+
+    assert response["status"] == "failed"
+    assert response["error_code"] == "INVALID_RUN_ID"
+    assert response["message"] == "Invalid run_id."
 
 
 def test_api_module_imports_without_server():

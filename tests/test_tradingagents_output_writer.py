@@ -8,6 +8,7 @@ from comqutor_alpha.adapters.tradingagents_output_writer import (
     OUTPUT_VERSION,
     TRUNCATION_MARKER,
     _to_string,
+    build_raw_agent_output_record,
     save_comqutor_run_outputs,
 )
 
@@ -166,6 +167,26 @@ def test_oversized_raw_output_is_truncated(tmp_path):
     assert record["original_content_length"] == MAX_RAW_OUTPUT_CHARS + 100
     assert record["content_length"] == MAX_RAW_OUTPUT_CHARS
     assert record["raw_output"].endswith(TRUNCATION_MARKER)
+
+
+def test_build_raw_agent_output_record_truncates_large_raw_value():
+    record = build_raw_agent_output_record(
+        run_id="run_1",
+        ticker="NVDA",
+        agent="market_agent",
+        tradingagents_agent="Market Analyst",
+        source_field="market_report",
+        source_path="market_report",
+        source_candidates=["market_report"],
+        raw_value="x" * (MAX_RAW_OUTPUT_CHARS + 1),
+        created_at="2026-07-08T00:00:00Z",
+        record_suffix="0",
+    )
+
+    assert record["agent_output_id"] == "run_1:market_agent:market_report:0"
+    assert record["truncated"] is True
+    assert record["content_length"] == MAX_RAW_OUTPUT_CHARS
+    assert record["original_content_length"] == MAX_RAW_OUTPUT_CHARS + 1
 
 
 def test_final_report_is_not_written_by_default(tmp_path):

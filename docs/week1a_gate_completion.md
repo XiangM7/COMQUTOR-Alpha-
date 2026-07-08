@@ -46,6 +46,14 @@ Week 1A 是 Engineer A 的 backend / agent-output / research-entrypoint 工作�
 - metadata 只保存 provider/model 白名单字段，不保存 API key、secret、token、password、backend_url 或完整 config。
 - `POST /api/research` response 不再暴露 raw output、本地路径或 config，只返回 artifact booleans。
 
+## Remaining Week 1A cleanup completed
+
+- API failure response 使用稳定的 `error_code` 和 `message`。
+- `offline_raw_agent_outputs` 写入格式已对齐真实 TradingAgents writer 的 hardened raw schema。
+- storage 读取 helper 已集中到 `file_store.py`。
+- `list_runs()` 只返回合法 run_id 目录，并忽略异常目录名。
+- output root resolution 已集中到 `file_store.resolve_output_root()`。
+
 ## File-backed 说明
 
 Week 1A 目前不使用数据库。

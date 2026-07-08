@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
-import json
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from comqutor_alpha.adapters.tradingagents_output_writer import OUTPUT_VERSION
-from comqutor_alpha.storage.file_store import load_json_record, run_dir_for, save_json_record
+from comqutor_alpha.adapters.tradingagents_output_writer import (
+    OUTPUT_VERSION,
+    build_raw_agent_output_record,
+)
+from comqutor_alpha.storage.file_store import (
+    load_json_record,
+    load_json_record_if_exists,
+    run_dir_for,
+    save_json_record,
+)
 from comqutor_alpha.structure_engine.structured_output_adapter import save_structured_agent_outputs
 
 
@@ -16,16 +23,47 @@ def _utc_timestamp():
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _read_json_if_exists(path):
-    path = Path(path)
-    if not path.exists():
-        return {}
-    with path.open(encoding="utf-8") as f:
-        return json.load(f)
-
-
 def _normalize_payload(payload):
     return payload if isinstance(payload, dict) else {}
+
+
+def _error_response(payload, error_code, message):
+    payload = _normalize_payload(payload)
+    return {
+        "run_id": payload.get("run_id"),
+        "ticker": payload.get("ticker"),
+        "status": "failed",
+        "error_code": error_code,
+        "message": message,
+    }
+
+
+def _map_exception_to_error(payload, exc):
+    message = str(exc)
+    if isinstance(exc, ValueError):
+        if message.startswith("INVALID_RUN_ID"):
+            return _error_response(payload, "INVALID_RUN_ID", "Invalid run_id.")
+        if message.startswith("INVALID_ARTIFACT_FILENAME"):
+            return _error_response(
+                payload,
+                "INVALID_ARTIFACT_FILENAME",
+                "Invalid artifact filename.",
+            )
+        if message.startswith("INVALID_OFFLINE_OUTPUTS"):
+            return _error_response(
+                payload,
+                "INVALID_OFFLINE_OUTPUTS",
+                "Invalid offline_raw_agent_outputs.",
+            )
+    if isinstance(exc, FileNotFoundError) and "raw_agent_outputs.json" in message:
+        return _error_response(payload, "RAW_OUTPUT_NOT_FOUND", "Raw agent outputs not found.")
+    if isinstance(exc, RuntimeError) and "Real TradingAgents execution is disabled" in message:
+        return _error_response(
+            payload,
+            "REAL_RUN_DISABLED",
+            "Real TradingAgents execution is disabled by default.",
+        )
+    return _error_response(payload, "INTERNAL_ERROR", "Research request failed.")
 
 
 def _create_offline_run(payload, output_root):
@@ -35,12 +73,42 @@ def _create_offline_run(payload, output_root):
     run_dir = run_dir_for(run_id, output_root)
     run_dir.mkdir(parents=True, exist_ok=False)
 
-    raw_outputs = payload.get("offline_raw_agent_outputs") or []
+    raw_outputs = payload.get("offline_raw_agent_outputs")
+    if raw_outputs is None:
+        raw_outputs = []
+    if not isinstance(raw_outputs, list):
+        raise ValueError("INVALID_OFFLINE_OUTPUTS: offline_raw_agent_outputs must be a list")
+    if len(raw_outputs) > 20:
+        raise ValueError("INVALID_OFFLINE_OUTPUTS: too many offline_raw_agent_outputs")
+
+    created_at = _utc_timestamp()
+    agent_outputs = []
+    for index, raw_record in enumerate(raw_outputs):
+        if not isinstance(raw_record, dict):
+            raise ValueError("INVALID_OFFLINE_OUTPUTS: each offline output must be a mapping")
+        agent = str(raw_record.get("agent") or "offline_agent")
+        tradingagents_agent = str(raw_record.get("tradingagents_agent") or agent)
+        source_field = str(raw_record.get("source_field") or "offline_raw_agent_outputs")
+        agent_outputs.append(
+            build_raw_agent_output_record(
+                run_id=run_id,
+                ticker=ticker,
+                agent=agent,
+                tradingagents_agent=tradingagents_agent,
+                source_field=source_field,
+                source_path=source_field,
+                source_candidates=[source_field],
+                raw_value=raw_record.get("raw_output"),
+                created_at=created_at,
+                record_suffix=str(index),
+            )
+        )
+
     metadata = {
         "run_id": run_id,
         "ticker": ticker,
         "analysis_date": payload.get("analysis_date"),
-        "created_at": _utc_timestamp(),
+        "created_at": created_at,
         "selected_analysts": payload.get("selected_analysts", []),
         "source": "COMQUTOR Week 1A offline research entrypoint",
         "output_version": "week1a.api.v1",
@@ -55,11 +123,11 @@ def _create_offline_run(payload, output_root):
         "schema_version": OUTPUT_VERSION,
         "run_id": run_id,
         "ticker": ticker,
-        "agent_outputs": raw_outputs,
+        "agent_outputs": agent_outputs,
     }
     save_json_record(run_id, "metadata.json", metadata, output_root=output_root)
     save_json_record(run_id, "raw_agent_outputs.json", raw_payload, output_root=output_root)
-    return run_dir
+    return run_id, run_dir
 
 
 def _count_raw_outputs(raw_payload):
@@ -72,16 +140,23 @@ def _count_structured_outputs(structured_payload):
     return len(records) if isinstance(records, list) else 0
 
 
-def build_research_response(run_dir):
-    run_dir = Path(run_dir)
+def build_research_response(run_id, output_root="outputs/runs"):
+    run_dir = run_dir_for(run_id, output_root)
     metadata_path = run_dir / "metadata.json"
     raw_path = run_dir / "raw_agent_outputs.json"
     structured_path = run_dir / "structured_agent_outputs.json"
     final_report_path = run_dir / "final_report.md"
-    metadata = _read_json_if_exists(metadata_path)
-    raw_payload = _read_json_if_exists(raw_path)
-    structured_payload = _read_json_if_exists(structured_path)
-    run_id = metadata.get("run_id") or raw_payload.get("run_id") or run_dir.name
+    metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
+    raw_payload = load_json_record_if_exists(
+        run_id,
+        "raw_agent_outputs.json",
+        output_root=output_root,
+    )
+    structured_payload = load_json_record_if_exists(
+        run_id,
+        "structured_agent_outputs.json",
+        output_root=output_root,
+    )
     ticker = metadata.get("ticker") or raw_payload.get("ticker") or structured_payload.get("ticker")
     artifacts = {
         "metadata": metadata_path.exists(),
@@ -105,47 +180,46 @@ def run_research_request(payload, runner=None, output_root="outputs/runs"):
     try:
         if runner is not None:
             run_dir = Path(runner(payload, output_root=output_root))
+            run_id = run_dir.name
         elif payload.get("offline_raw_agent_outputs") is not None:
-            run_dir = _create_offline_run(payload, output_root)
+            run_id, run_dir = _create_offline_run(payload, output_root)
         else:
             from comqutor_alpha.runners.tradingagents_runner import (
                 run_original_tradingagents_research,
             )
 
             run_dir = Path(run_original_tradingagents_research(payload, output_root=output_root))
+            run_id = run_dir.name
 
         raw_path = run_dir / "raw_agent_outputs.json"
         if not raw_path.exists():
             raise FileNotFoundError("raw_agent_outputs.json not found")
         save_structured_agent_outputs(run_dir)
-        return build_research_response(run_dir)
+        return build_research_response(run_id, output_root=output_root)
     except Exception as exc:
-        return {
-            "run_id": payload.get("run_id"),
-            "ticker": payload.get("ticker"),
-            "status": "failed",
-            "error": str(exc),
-        }
+        return _map_exception_to_error(payload, exc)
 
 
 def get_research_run(run_id, output_root="outputs/runs"):
     try:
         run_dir = run_dir_for(run_id, output_root)
-    except ValueError as exc:
+    except ValueError:
         return {
             "run_id": str(run_id),
             "ticker": None,
             "status": "failed",
-            "error": str(exc),
+            "error_code": "INVALID_RUN_ID",
+            "message": "Invalid run_id.",
         }
     if not run_dir.exists():
         return {
             "run_id": str(run_id),
             "ticker": None,
             "status": "failed",
-            "error": "Run directory not found",
+            "error_code": "RUN_NOT_FOUND",
+            "message": "Run not found.",
         }
-    return build_research_response(run_dir)
+    return build_research_response(str(run_id), output_root=output_root)
 
 
 def get_research_response(run_id, output_root="outputs/runs"):

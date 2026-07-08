@@ -47,9 +47,20 @@ def validate_artifact_filename(filename) -> str:
     return value
 
 
+def resolve_output_root(output_root=None) -> Path:
+    if output_root is not None:
+        return Path(output_root).expanduser().resolve()
+
+    env_output_root = os.environ.get("COMQUTOR_OUTPUT_DIR")
+    if env_output_root:
+        return Path(env_output_root).expanduser().resolve()
+
+    return (Path.cwd() / "outputs" / "runs").resolve()
+
+
 def run_dir_for(run_id, output_root="outputs/runs"):
     safe_run_id = validate_run_id_for_path(run_id)
-    root = Path(output_root).expanduser().resolve()
+    root = resolve_output_root(output_root)
     run_dir = (root / safe_run_id).resolve()
     try:
         run_dir.relative_to(root)
@@ -98,8 +109,24 @@ def load_json_record(run_id, filename, output_root="outputs/runs"):
         return json.load(f)
 
 
+def load_json_record_if_exists(run_id, filename, output_root="outputs/runs"):
+    path = run_dir_for(run_id, output_root) / validate_artifact_filename(filename)
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as f:
+        return json.load(f)
+
+
 def list_runs(output_root="outputs/runs"):
-    root = Path(output_root)
+    root = resolve_output_root(output_root)
     if not root.exists():
         return []
-    return sorted(path.name for path in root.iterdir() if path.is_dir())
+    run_ids = []
+    for path in root.iterdir():
+        if not path.is_dir():
+            continue
+        try:
+            run_ids.append(validate_run_id_for_path(path.name))
+        except ValueError:
+            continue
+    return sorted(run_ids)
