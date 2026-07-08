@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import logging
+import os
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -17,6 +20,28 @@ from comqutor_alpha.storage.file_store import (
     save_json_record,
 )
 from comqutor_alpha.structure_engine.structured_output_adapter import save_structured_agent_outputs
+
+
+logger = logging.getLogger(__name__)
+
+TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
+
+
+def validate_ticker(raw):
+    """Normalize and validate a request ticker. Uppercase, then whitelist-check.
+
+    Accepts 1-10 chars starting with a letter, using A-Z, 0-9, '.', '-'
+    (covers tickers like NVDA, BRK.B, RDS-A). Raises ValueError('INVALID_TICKER: ...').
+    """
+    ticker = str(raw or "").strip().upper()
+    if not ticker:
+        raise ValueError("INVALID_TICKER: ticker is required")
+    if not TICKER_PATTERN.fullmatch(ticker):
+        raise ValueError(
+            "INVALID_TICKER: ticker must be 1-10 chars from A-Z, 0-9, '.', '-' "
+            "and start with a letter"
+        )
+    return ticker
 
 
 def _utc_timestamp():
@@ -55,6 +80,8 @@ def _map_exception_to_error(payload, exc):
                 "INVALID_OFFLINE_OUTPUTS",
                 "Invalid offline_raw_agent_outputs.",
             )
+        if message.startswith("INVALID_TICKER"):
+            return _error_response(payload, "INVALID_TICKER", "Invalid ticker.")
     if isinstance(exc, FileNotFoundError) and "raw_agent_outputs.json" in message:
         return _error_response(payload, "RAW_OUTPUT_NOT_FOUND", "Raw agent outputs not found.")
     if isinstance(exc, RuntimeError) and "Real TradingAgents execution is disabled" in message:
@@ -63,6 +90,8 @@ def _map_exception_to_error(payload, exc):
             "REAL_RUN_DISABLED",
             "Real TradingAgents execution is disabled by default.",
         )
+    if isinstance(exc, RuntimeError) and message.startswith("OFFLINE_DISABLED"):
+        return _error_response(payload, "OFFLINE_DISABLED", "Offline outputs are disabled.")
     return _error_response(payload, "INTERNAL_ERROR", "Research request failed.")
 
 
@@ -178,10 +207,15 @@ def build_research_response(run_id, output_root="outputs/runs"):
 def run_research_request(payload, runner=None, output_root="outputs/runs"):
     payload = _normalize_payload(payload)
     try:
+        payload = {**payload, "ticker": validate_ticker(payload.get("ticker"))}
         if runner is not None:
             run_dir = Path(runner(payload, output_root=output_root))
             run_id = run_dir.name
         elif payload.get("offline_raw_agent_outputs") is not None:
+            if os.environ.get("COMQUTOR_ENV", "").strip().lower() == "production":
+                raise RuntimeError(
+                    "OFFLINE_DISABLED: offline_raw_agent_outputs is not allowed in production"
+                )
             run_id, run_dir = _create_offline_run(payload, output_root)
         else:
             from comqutor_alpha.runners.tradingagents_runner import (
@@ -197,6 +231,11 @@ def run_research_request(payload, runner=None, output_root="outputs/runs"):
         save_structured_agent_outputs(run_dir)
         return build_research_response(run_id, output_root=output_root)
     except Exception as exc:
+        logger.exception(
+            "research request failed (ticker=%s, run_id=%s)",
+            payload.get("ticker"),
+            payload.get("run_id"),
+        )
         return _map_exception_to_error(payload, exc)
 
 
@@ -228,12 +267,27 @@ def get_research_response(run_id, output_root="outputs/runs"):
 
 try:
     from fastapi import APIRouter
+    from pydantic import BaseModel, Field, field_validator
+
+    class ResearchRequest(BaseModel):
+        ticker: str
+        analysis_date: str | None = None
+        selected_analysts: list[str] | None = None
+        offline_raw_agent_outputs: list[dict] | None = Field(default=None, max_length=20)
+        run_id: str | None = None
+        # NOTE: allow_real_tradingagents_run and config are intentionally NOT exposed here.
+        # Real runs are server-controlled; clients cannot trigger paid LLM/data calls via HTTP.
+
+        @field_validator("ticker")
+        @classmethod
+        def _validate_ticker(cls, value):
+            return validate_ticker(value)
 
     router = APIRouter()
 
     @router.post("/api/research")
-    def post_research(payload: dict):
-        return run_research_request(payload)
+    def post_research(request: ResearchRequest):
+        return run_research_request(request.model_dump(exclude_none=True))
 
     @router.get("/api/research/{run_id}")
     def get_research_run_route(run_id: str):

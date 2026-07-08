@@ -136,7 +136,7 @@ def extract_entities(raw_text, ticker):
     if ticker:
         entities.append(str(ticker).upper())
     for term in ENTITY_TERMS:
-        if term.lower() in text and term not in entities:
+        if re.search(rf"\b{re.escape(term.lower())}\b", text) and term not in entities:
             entities.append(term)
     return entities
 
