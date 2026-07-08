@@ -1,25 +1,99 @@
-"""File-backed persistence for local COMQUTOR validation."""
+"""File-backed persistence helpers for local COMQUTOR validation."""
 
 from __future__ import annotations
 
 import json
+import os
+import re
 from pathlib import Path
+from uuid import uuid4
+
+
+RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
+ALLOWED_ARTIFACT_FILENAMES = {
+    "metadata.json",
+    "raw_agent_outputs.json",
+    "structured_agent_outputs.json",
+    "final_report.md",
+    "research_response.json",
+}
+
+
+def validate_run_id_for_path(run_id) -> str:
+    if run_id is None:
+        raise ValueError("INVALID_RUN_ID: run_id is required")
+
+    value = str(run_id)
+    stripped = value.strip()
+    if not stripped:
+        raise ValueError("INVALID_RUN_ID: run_id is empty")
+    if value != stripped:
+        raise ValueError("INVALID_RUN_ID: run_id must not contain leading or trailing whitespace")
+    if ".." in value or "/" in value or "\\" in value:
+        raise ValueError("INVALID_RUN_ID: run_id must not contain path traversal characters")
+    if Path(value).is_absolute():
+        raise ValueError("INVALID_RUN_ID: run_id must not be an absolute path")
+    if not RUN_ID_PATTERN.fullmatch(value):
+        raise ValueError("INVALID_RUN_ID: run_id may contain only letters, numbers, underscore, or dash")
+    return value
+
+
+def validate_artifact_filename(filename) -> str:
+    value = str(filename or "")
+    if "/" in value or "\\" in value or ".." in value:
+        raise ValueError("INVALID_ARTIFACT_FILENAME: filename must not contain path separators")
+    if value not in ALLOWED_ARTIFACT_FILENAMES:
+        raise ValueError(f"INVALID_ARTIFACT_FILENAME: unsupported artifact filename {value!r}")
+    return value
 
 
 def run_dir_for(run_id, output_root="outputs/runs"):
-    return Path(output_root) / str(run_id)
+    safe_run_id = validate_run_id_for_path(run_id)
+    root = Path(output_root).expanduser().resolve()
+    run_dir = (root / safe_run_id).resolve()
+    try:
+        run_dir.relative_to(root)
+    except ValueError as exc:
+        raise ValueError("INVALID_RUN_DIR: resolved run directory escapes output_root") from exc
+    return run_dir
+
+
+def atomic_write_text(path, text, encoding="utf-8") -> Path:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
+    try:
+        tmp_path.write_text(text, encoding=encoding)
+        try:
+            os.chmod(tmp_path, 0o600)
+        except (AttributeError, NotImplementedError, OSError):
+            pass
+        os.replace(tmp_path, path)
+        try:
+            os.chmod(path, 0o600)
+        except (AttributeError, NotImplementedError, OSError):
+            pass
+        return path
+    finally:
+        if tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
 
 
 def save_json_record(run_id, filename, data, output_root="outputs/runs"):
     run_dir = run_dir_for(run_id, output_root)
-    run_dir.mkdir(parents=True, exist_ok=True)
-    path = run_dir / filename
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return path
+    filename = validate_artifact_filename(filename)
+    return atomic_write_text(
+        run_dir / filename,
+        json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def load_json_record(run_id, filename, output_root="outputs/runs"):
-    path = run_dir_for(run_id, output_root) / filename
+    path = run_dir_for(run_id, output_root) / validate_artifact_filename(filename)
     with path.open(encoding="utf-8") as f:
         return json.load(f)
 
@@ -29,4 +103,3 @@ def list_runs(output_root="outputs/runs"):
     if not root.exists():
         return []
     return sorted(path.name for path in root.iterdir() if path.is_dir())
-

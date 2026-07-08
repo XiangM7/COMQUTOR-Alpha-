@@ -40,7 +40,7 @@ from cli.utils import (
     select_research_depth,
     select_shallow_thinking_agent,
 )
-from tradingagents.comqutor_outputs import save_comqutor_run_outputs
+from comqutor_alpha.adapters.tradingagents_output_writer import save_comqutor_run_outputs
 from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.graph.analyst_execution import (
     AnalystWallTimeTracker,

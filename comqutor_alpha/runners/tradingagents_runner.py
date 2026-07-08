@@ -22,7 +22,9 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
     payload = payload or {}
 
     if payload.get("final_state") is not None:
-        from tradingagents.comqutor_outputs import save_comqutor_run_outputs
+        from comqutor_alpha.adapters.tradingagents_output_writer import (
+            save_comqutor_run_outputs,
+        )
 
         return save_comqutor_run_outputs(
             final_state=payload.get("final_state"),
@@ -51,8 +53,10 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
         )
 
     try:
+        from comqutor_alpha.adapters.tradingagents_output_writer import (
+            save_comqutor_run_outputs,
+        )
         from tradingagents.graph.trading_graph import TradingAgentsGraph
-        from tradingagents.comqutor_outputs import save_comqutor_run_outputs
     except Exception as exc:
         raise RuntimeError(f"Unable to import TradingAgents graph entrypoint: {exc}") from exc
 

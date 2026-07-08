@@ -39,16 +39,23 @@ def test_run_research_request_with_offline_raw_outputs(tmp_path):
 
     assert response["status"] == "completed"
     assert response["run_id"]
-    assert Path(response["metadata_path"]).exists()
-    assert Path(response["raw_agent_outputs_path"]).exists()
-    assert Path(response["structured_agent_outputs_path"]).exists()
+    run_dir = tmp_path / response["run_id"]
+    assert (run_dir / "metadata.json").exists()
+    assert (run_dir / "raw_agent_outputs.json").exists()
+    assert (run_dir / "structured_agent_outputs.json").exists()
+    assert response["artifacts"] == {
+        "metadata": True,
+        "raw_agent_outputs": True,
+        "structured_agent_outputs": True,
+        "final_report": False,
+    }
     assert response["agent_output_count"] == 4
     assert response["structured_output_count"] == 4
 
 
 def test_research_response_has_structured_rows(tmp_path):
     response = run_research_request(_payload(), output_root=tmp_path)
-    structured = json.loads(Path(response["structured_agent_outputs_path"]).read_text())
+    structured = json.loads((tmp_path / response["run_id"] / "structured_agent_outputs.json").read_text())
 
     assert "records" in structured
     for record in structured["records"]:
@@ -74,8 +81,8 @@ def test_get_research_run(tmp_path):
     assert loaded["ticker"] == "NVDA"
     assert loaded["agent_output_count"] == 4
     assert loaded["structured_output_count"] == 4
-    assert loaded["raw_agent_outputs_path"]
-    assert loaded["structured_agent_outputs_path"]
+    assert loaded["artifacts"]["raw_agent_outputs"] is True
+    assert loaded["artifacts"]["structured_agent_outputs"] is True
 
 
 def test_fake_runner_injection(tmp_path):
@@ -110,7 +117,36 @@ def test_fake_runner_injection(tmp_path):
     assert response["status"] == "completed"
     assert response["run_id"] == "fake_runner_week1a"
     assert response["structured_output_count"] == 4
-    assert Path(response["structured_agent_outputs_path"]).exists()
+    assert (tmp_path / "fake_runner_week1a" / "structured_agent_outputs.json").exists()
+
+
+def test_research_response_does_not_expose_raw_output_paths_or_config(tmp_path):
+    response = run_research_request(_payload(), output_root=tmp_path)
+    serialized = json.dumps(response, ensure_ascii=False)
+
+    assert "raw_output" not in serialized
+    assert "metadata_path" not in response
+    assert "raw_agent_outputs_path" not in response
+    assert "structured_agent_outputs_path" not in response
+    assert "run_dir" not in response
+    assert "config" not in response
+    assert str(tmp_path) not in serialized
+    assert response["artifacts"]["metadata"] is True
+    assert response["artifacts"]["raw_agent_outputs"] is True
+
+
+def test_real_tradingagents_run_is_blocked_by_default(tmp_path):
+    response = run_research_request(
+        {
+            "ticker": "NVDA",
+            "analysis_date": "2026-06-30",
+            "selected_analysts": ["market"],
+        },
+        output_root=tmp_path,
+    )
+
+    assert response["status"] == "failed"
+    assert "disabled by default" in response["error"]
 
 
 def test_api_module_imports_without_server():
