@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 
-
+# Validate and normalize a request ticker.
 def validate_ticker(raw):
     """Normalize and validate a request ticker. Uppercase, then whitelist-check.
 
@@ -44,15 +44,15 @@ def validate_ticker(raw):
         )
     return ticker
 
-
+# Get the current UTC timestamp as a string.
 def _utc_timestamp():
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
-
+# Normalize the request payload.
 def _normalize_payload(payload):
     return payload if isinstance(payload, dict) else {}
 
-
+# Create a standardized error response payload.
 def _error_response(payload, error_code, message):
     payload = _normalize_payload(payload)
     return {
@@ -78,12 +78,16 @@ _EXPECTED_CLIENT_ERROR_CODES = frozenset(
     }
 )
 
-
+# Map known exceptions to standardized error responses.
 def _map_exception_to_error(payload, exc):
     message = str(exc)
     if isinstance(exc, ValueError):
         if message.startswith("INVALID_RUN_ID"):
-            return _error_response(payload, "INVALID_RUN_ID", "Invalid run_id.")
+            return _error_response(
+                payload, 
+                "INVALID_RUN_ID", 
+                "Invalid run_id.",
+            )
         if message.startswith("INVALID_ARTIFACT_FILENAME"):
             return _error_response(
                 payload,
@@ -97,9 +101,17 @@ def _map_exception_to_error(payload, exc):
                 "Invalid offline_raw_agent_outputs.",
             )
         if message.startswith("INVALID_TICKER"):
-            return _error_response(payload, "INVALID_TICKER", "Invalid ticker.")
+            return _error_response(
+                payload, 
+                "INVALID_TICKER",
+                "Invalid ticker.",
+            )
     if isinstance(exc, FileNotFoundError) and "raw_agent_outputs.json" in message:
-        return _error_response(payload, "RAW_OUTPUT_NOT_FOUND", "Raw agent outputs not found.")
+        return _error_response(
+            payload, 
+            "RAW_OUTPUT_NOT_FOUND", 
+            "Raw agent outputs not found.",
+        )
     if isinstance(exc, RuntimeError) and "Real TradingAgents execution is disabled" in message:
         return _error_response(
             payload,
@@ -107,10 +119,18 @@ def _map_exception_to_error(payload, exc):
             "Real TradingAgents execution is disabled by default.",
         )
     if isinstance(exc, RuntimeError) and message.startswith("OFFLINE_DISABLED"):
-        return _error_response(payload, "OFFLINE_DISABLED", "Offline outputs are disabled.")
-    return _error_response(payload, "INTERNAL_ERROR", "Research request failed.")
+        return _error_response(
+            payload, 
+            "OFFLINE_DISABLED", 
+            "Offline outputs are disabled.",
+        )
+    return _error_response(
+        payload, 
+        "INTERNAL_ERROR", 
+        "Research request failed.",
+        )
 
-
+# Create an offline research run with provided payload and save outputs.
 def _create_offline_run(payload, output_root):
     payload = _normalize_payload(payload)
     run_id = str(payload.get("run_id") or uuid4())
@@ -174,17 +194,17 @@ def _create_offline_run(payload, output_root):
     save_json_record(run_id, "raw_agent_outputs.json", raw_payload, output_root=output_root)
     return run_id, run_dir
 
-
+# Count the number of raw agent outputs in the payload.
 def _count_raw_outputs(raw_payload):
     outputs = raw_payload.get("agent_outputs", [])
     return len(outputs) if isinstance(outputs, list) else 0
 
-
+# Count the number of structured outputs in the payload.
 def _count_structured_outputs(structured_payload):
     records = structured_payload.get("records", [])
     return len(records) if isinstance(records, list) else 0
 
-
+# Build a research response payload summarizing the run status and artifacts.
 def build_research_response(run_id, output_root="outputs/runs"):
     run_dir = run_dir_for(run_id, output_root)
     metadata_path = run_dir / "metadata.json"
@@ -219,7 +239,7 @@ def build_research_response(run_id, output_root="outputs/runs"):
         "structured_output_count": _count_structured_outputs(structured_payload),
     }
 
-
+# Run a research request with the given payload, optionally using a custom runner.
 def run_research_request(payload, runner=None, output_root="outputs/runs"):
     payload = _normalize_payload(payload)
     try:
@@ -263,7 +283,7 @@ def run_research_request(payload, runner=None, output_root="outputs/runs"):
             )
         return error_response
 
-
+# Retrieve the research run status and artifacts for a given run_id.
 def get_research_run(run_id, output_root="outputs/runs"):
     try:
         run_dir = run_dir_for(run_id, output_root)
@@ -285,7 +305,7 @@ def get_research_run(run_id, output_root="outputs/runs"):
         }
     return build_research_response(str(run_id), output_root=output_root)
 
-
+# Retrieve the research response for a given run_id, loading from the stored JSON record.
 def get_research_response(run_id, output_root="outputs/runs"):
     return load_json_record(run_id, "research_response.json", output_root=output_root)
 
@@ -312,7 +332,7 @@ try:
         # Pydantic v2 uses model_dump(); v1 only has dict().
         dump = getattr(model, "model_dump", None)
         return dump(exclude_none=True) if dump is not None else model.dict(exclude_none=True)
-
+    
     class ResearchRequest(BaseModel):
         ticker: str
         analysis_date: str | None = None
