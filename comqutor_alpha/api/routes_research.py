@@ -18,6 +18,7 @@ from comqutor_alpha.storage.file_store import (
     load_json_record_if_exists,
     run_dir_for,
     save_json_record,
+    validate_run_id_for_path,
 )
 from comqutor_alpha.structure_engine.structured_output_adapter import save_structured_agent_outputs
 
@@ -210,7 +211,7 @@ def run_research_request(payload, runner=None, output_root="outputs/runs"):
         payload = {**payload, "ticker": validate_ticker(payload.get("ticker"))}
         if runner is not None:
             run_dir = Path(runner(payload, output_root=output_root))
-            run_id = run_dir.name
+            run_id = validate_run_id_for_path(run_dir.name)
         elif payload.get("offline_raw_agent_outputs") is not None:
             if os.environ.get("COMQUTOR_ENV", "").strip().lower() == "production":
                 raise RuntimeError(
@@ -223,7 +224,7 @@ def run_research_request(payload, runner=None, output_root="outputs/runs"):
             )
 
             run_dir = Path(run_original_tradingagents_research(payload, output_root=output_root))
-            run_id = run_dir.name
+            run_id = validate_run_id_for_path(run_dir.name)
 
         raw_path = run_dir / "raw_agent_outputs.json"
         if not raw_path.exists():
@@ -267,19 +268,37 @@ def get_research_response(run_id, output_root="outputs/runs"):
 
 try:
     from fastapi import APIRouter
-    from pydantic import BaseModel, Field, field_validator
+    from pydantic import BaseModel
+
+    # Support both Pydantic v2 (field_validator) and v1 (validator) without
+    # pinning a new dependency version.
+    try:
+        from pydantic import field_validator
+
+        def _ticker_field_validator(func):
+            return field_validator("ticker")(classmethod(func))
+
+    except ImportError:  # Pydantic v1
+        from pydantic import validator
+
+        def _ticker_field_validator(func):
+            return validator("ticker", allow_reuse=True)(classmethod(func))
+
+    def _model_to_payload(model):
+        # Pydantic v2 uses model_dump(); v1 only has dict().
+        dump = getattr(model, "model_dump", None)
+        return dump(exclude_none=True) if dump is not None else model.dict(exclude_none=True)
 
     class ResearchRequest(BaseModel):
         ticker: str
         analysis_date: str | None = None
         selected_analysts: list[str] | None = None
-        offline_raw_agent_outputs: list[dict] | None = Field(default=None, max_length=20)
+        offline_raw_agent_outputs: list[dict] | None = None
         run_id: str | None = None
         # NOTE: allow_real_tradingagents_run and config are intentionally NOT exposed here.
         # Real runs are server-controlled; clients cannot trigger paid LLM/data calls via HTTP.
 
-        @field_validator("ticker")
-        @classmethod
+        @_ticker_field_validator
         def _validate_ticker(cls, value):
             return validate_ticker(value)
 
@@ -287,7 +306,7 @@ try:
 
     @router.post("/api/research")
     def post_research(request: ResearchRequest):
-        return run_research_request(request.model_dump(exclude_none=True))
+        return run_research_request(_model_to_payload(request))
 
     @router.get("/api/research/{run_id}")
     def get_research_run_route(run_id: str):

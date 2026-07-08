@@ -1,6 +1,7 @@
 import json
 
 from comqutor_alpha.structure_engine.structured_output_adapter import (
+    SCHEMA_VERSION,
     adapt_raw_agent_output,
     save_structured_agent_outputs,
 )
@@ -40,5 +41,7 @@ def test_adapter_writes_file_and_logs_invalid_rows(tmp_path):
     path = save_structured_agent_outputs(run_dir)
     assert path.exists()
     payload = json.loads(path.read_text())
+    assert payload["schema_version"] == SCHEMA_VERSION
+    assert SCHEMA_VERSION == "week1a.structured_agent_outputs.v1"
     assert len(payload["records"]) == 2
     assert (run_dir / "error_logs" / "structured_output_adapter_errors.jsonl").exists()

@@ -9,10 +9,11 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 
+from comqutor_alpha.storage.file_store import atomic_write_text
 from comqutor_alpha.structure_engine.structure_schema import clamp_score, normalize_direction
 
 
-SCHEMA_VERSION = "week2.structured_agent_outputs.v1"
+SCHEMA_VERSION = "week1a.structured_agent_outputs.v1"
 ENTITY_TERMS = (
     "NVDA",
     "NVIDIA",
@@ -269,7 +270,7 @@ def save_structured_agent_outputs(run_dir):
     run_dir = Path(run_dir)
     output = adapt_run_outputs(run_dir)
     output_path = run_dir / "structured_agent_outputs.json"
-    output_path.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(output_path, json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return output_path
 
 
