@@ -40,6 +40,8 @@ class StructuredAgentOutput:
     direction: str = "unknown"
     confidence: float = 0.0
     source_type: str = "unknown"
+    output_type: str = "unknown"
+    source_agent_output_id: str | None = None
     source_refs: list[str] = field(default_factory=list)
 
     def to_dict(self):

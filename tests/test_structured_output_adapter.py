@@ -44,6 +44,7 @@ def test_structured_record_traces_back_to_raw_agent_output_id():
     structured = adapt_raw_agent_output(raw_record, "run1", "NVDA")
 
     assert structured["agent_output_id"] == raw_record["agent_output_id"]
+    assert structured["source_agent_output_id"] == raw_record["agent_output_id"]
     assert structured["source_refs"] == [raw_record["agent_output_id"]]
 
 
@@ -87,4 +88,39 @@ def test_adapter_writes_file_and_logs_invalid_rows(tmp_path):
     assert payload["schema_version"] == SCHEMA_VERSION
     assert SCHEMA_VERSION == "week1a.structured_agent_outputs.v1"
     assert len(payload["records"]) == 2
-    assert (run_dir / "error_logs" / "structured_output_adapter_errors.jsonl").exists()
+    log_path = run_dir / "error_logs" / "structured_output_adapter_errors.jsonl"
+    assert log_path.exists()
+
+    entries = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
+    assert entries[0]["run_id"] == "run1"
+    assert entries[0]["ticker"] == "NVDA"
+    assert entries[0]["agent"] == "fundamental_agent"
+    assert entries[0]["error_code"] == "EMPTY_RAW_OUTPUT"
+    assert "raw_preview" in entries[0]
+    assert "record_preview" in entries[0]
+    assert str(tmp_path) not in json.dumps(entries[0])
+
+
+def test_malformed_raw_record_does_not_crash_full_run(tmp_path):
+    run_dir = tmp_path / "run1"
+    run_dir.mkdir()
+    (run_dir / "raw_agent_outputs.json").write_text(
+        json.dumps(
+            {
+                "run_id": "run1",
+                "ticker": "NVDA",
+                "agent_outputs": [
+                    "not-a-mapping",
+                    {"agent": "news_agent", "raw_output": "AI demand drives GPU demand."},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    path = save_structured_agent_outputs(run_dir)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+
+    assert len(payload["records"]) == 2
+    assert payload["records"][0]["adapter_error_code"] == "INVALID_RAW_RECORD"
+    assert payload["records"][1]["claim"] != "unknown"

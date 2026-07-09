@@ -9,11 +9,22 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 
-from comqutor_alpha.storage.file_store import atomic_write_text
-from comqutor_alpha.structure_engine.structure_schema import clamp_score, normalize_direction
+from comqutor_alpha.storage.file_store import (
+    append_jsonl_record,
+    load_json_record,
+    save_json_record,
+    validate_run_id_for_path,
+)
+from comqutor_alpha.structure_engine.structure_schema import (
+    VALID_DIRECTIONS,
+    clamp_score,
+    normalize_direction,
+)
 
 # Constants for structured output schema and entity/factor extraction
 SCHEMA_VERSION = "week1a.structured_agent_outputs.v1"
+ERROR_LOG_ARTIFACT_PATH = "error_logs/structured_output_adapter_errors.jsonl"
+MAX_ERROR_PREVIEW_CHARS = 500
 ENTITY_TERMS = (
     "NVDA",
     "NVIDIA",
@@ -72,6 +83,22 @@ NEGATIVE_WORDS = (
 NEUTRAL_WORDS = ("hold", "mixed", "wait", "balanced", "neutral")
 EVIDENCE_WORDS = ("because", "due to", "driven by", "supports", "data", "guidance", "%", "$")
 CERTAINTY_WORDS = ("clearly", "strong", "confirmed", "raised", "improving", "increasing")
+ANALYST_AGENTS = {
+    "market_agent",
+    "sentiment_agent",
+    "news_agent",
+    "fundamental_agent",
+    "fundamentals_agent",
+    "technical_agent",
+}
+RESEARCH_AGENTS = {"bull_researcher", "bear_researcher", "research_manager"}
+TRADER_AGENTS = {"trader"}
+RISK_PORTFOLIO_AGENTS = {
+    "aggressive_risk_analyst",
+    "conservative_risk_analyst",
+    "neutral_risk_analyst",
+    "portfolio_manager",
+}
 
 
 def _now():
@@ -88,9 +115,23 @@ def _normalize_text(value):
     return re.sub(r"\s+", " ", text).strip()
 
 
+def _safe_preview(value, max_chars=MAX_ERROR_PREVIEW_CHARS):
+    preview = _normalize_text(value)
+    if len(preview) <= max_chars:
+        return preview
+    return preview[:max_chars] + "...[truncated]"
+
+
+def _run_context_from_dir(run_dir):
+    run_dir = Path(run_dir).expanduser().resolve()
+    run_id = validate_run_id_for_path(run_dir.name)
+    output_root = run_dir.parent
+    return run_dir, run_id, output_root
+
+
 def load_raw_agent_outputs(run_dir):
-    with (Path(run_dir) / "raw_agent_outputs.json").open(encoding="utf-8") as f:
-        return json.load(f)
+    _, run_id, output_root = _run_context_from_dir(run_dir)
+    return load_json_record(run_id, "raw_agent_outputs.json", output_root=output_root)
 
 
 def normalize_agent_name(agent):
@@ -111,6 +152,27 @@ def infer_source_type(agent, raw_text):
         return "analyst"
     if "price" in _normalize_text(raw_text).lower():
         return "price"
+    return "unknown"
+
+
+def infer_output_type(agent):
+    agent = normalize_agent_name(agent)
+    if agent in ANALYST_AGENTS:
+        return "analyst"
+    if agent in RESEARCH_AGENTS:
+        return "research_debate"
+    if agent in TRADER_AGENTS:
+        return "trader"
+    if agent in RISK_PORTFOLIO_AGENTS:
+        return "risk_portfolio"
+    if "research" in agent or "bull" in agent or "bear" in agent:
+        return "research_debate"
+    if "trader" in agent:
+        return "trader"
+    if "risk" in agent or "portfolio" in agent:
+        return "risk_portfolio"
+    if "agent" in agent or "analyst" in agent:
+        return "analyst"
     return "unknown"
 
 def extract_claim(raw_text):
@@ -185,19 +247,56 @@ def estimate_confidence(raw_text):
         score += 0.10
     return clamp_score(score)
 
-# Validate that the structured output record contains all required fields and they are not empty
+
+def _normalize_source_refs(source_refs, source_agent_output_id=None):
+    refs = []
+    if isinstance(source_refs, str):
+        refs = [source_refs]
+    elif isinstance(source_refs, (list, tuple, set)):
+        refs = [str(item) for item in source_refs if str(item).strip()]
+    if source_agent_output_id and source_agent_output_id not in refs:
+        refs.insert(0, str(source_agent_output_id))
+    return refs
+
+
+# Validate that the structured output record contains required fields with stable types.
 def validate_structured_output(record):
-    required = {"run_id", "ticker", "agent", "claim", "evidence"}
-    return all(record.get(field) for field in required)
+    if not isinstance(record, dict):
+        return False
+    required_text = ("run_id", "ticker", "agent", "claim", "evidence")
+    if any(not _normalize_text(record.get(field)) for field in required_text):
+        return False
+    if not isinstance(record.get("entities"), list):
+        return False
+    if not isinstance(record.get("factors"), list):
+        return False
+    if normalize_direction(record.get("direction")) not in VALID_DIRECTIONS:
+        return False
+    try:
+        float(record.get("confidence"))
+    except (TypeError, ValueError):
+        return False
+    if record.get("source_refs") is not None and not isinstance(record.get("source_refs"), list):
+        return False
+    return True
 
 # Return a safe default structured record with a warning reason if the raw output is invalid or missing
-def safe_default_record(run_id, ticker, agent, raw_text, reason, source_agent_output_id=None):
+def safe_default_record(
+    run_id,
+    ticker,
+    agent,
+    raw_text,
+    reason,
+    source_agent_output_id=None,
+    error_code="INVALID_STRUCTURED_OUTPUT",
+):
     del raw_text
+    agent = normalize_agent_name(agent)
     return {
         "agent_output_id": source_agent_output_id or f"{normalize_agent_name(agent)}_default",
         "run_id": run_id,
         "ticker": ticker,
-        "agent": normalize_agent_name(agent),
+        "agent": agent,
         "timestamp": _now(),
         "claim": "unknown",
         "evidence": "unknown",
@@ -206,21 +305,43 @@ def safe_default_record(run_id, ticker, agent, raw_text, reason, source_agent_ou
         "direction": "unknown",
         "confidence": 0.0,
         "source_type": "unknown",
+        "output_type": infer_output_type(agent),
+        "source_agent_output_id": source_agent_output_id,
         "source_refs": [source_agent_output_id] if source_agent_output_id else [],
         "adapter_warning": reason,
+        "adapter_error_code": error_code,
     }
 
-# Log an error payload to a structured output adapter error log file in the run directory
-def _log_error(run_dir, payload):
-    log_dir = Path(run_dir) / "error_logs"
-    log_dir.mkdir(parents=True, exist_ok=True)
-    with (log_dir / "structured_output_adapter_errors.jsonl").open("a", encoding="utf-8") as f:
-        f.write(json.dumps(payload, ensure_ascii=False, default=str) + "\n")
+
+# Log an error payload through the storage boundary.
+def _log_error(run_id, output_root, payload):
+    append_jsonl_record(run_id, ERROR_LOG_ARTIFACT_PATH, payload, output_root=output_root)
+
+
+def _error_payload(run_id, ticker, raw_record, structured_record):
+    return {
+        "run_id": run_id,
+        "ticker": ticker,
+        "agent": structured_record.get("agent"),
+        "source_agent_output_id": structured_record.get("source_agent_output_id"),
+        "error_code": structured_record.get("adapter_error_code", "INVALID_STRUCTURED_OUTPUT"),
+        "message": structured_record.get("adapter_warning", "Structured output adapter warning."),
+        "raw_preview": _safe_preview(raw_record),
+        "record_preview": _safe_preview(structured_record),
+        "created_at": _now(),
+    }
 
 # Adapt a single raw agent output record into a structured claim record, handling validation and warnings
 def adapt_raw_agent_output(raw_record, run_id, ticker):
     if not isinstance(raw_record, dict):
-        return safe_default_record(run_id, ticker, "unknown_agent", "", "raw row is not an object")
+        return safe_default_record(
+            run_id,
+            ticker,
+            "unknown_agent",
+            "",
+            "raw row is not an object",
+            error_code="INVALID_RAW_RECORD",
+        )
     agent = normalize_agent_name(raw_record.get("agent") or raw_record.get("tradingagents_agent"))
     raw_text = raw_record.get("raw_output")
     # Preserve traceability: the raw writer stamps every record with a stable
@@ -235,6 +356,7 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
             raw_text,
             "raw output is empty",
             source_agent_output_id=source_agent_output_id,
+            error_code="EMPTY_RAW_OUTPUT",
         )
     record = {
         "agent_output_id": source_agent_output_id
@@ -250,7 +372,9 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
         "direction": normalize_direction(infer_direction(raw_text)),
         "confidence": estimate_confidence(raw_text),
         "source_type": infer_source_type(agent, raw_text),
-        "source_refs": [source_agent_output_id] if source_agent_output_id else [],
+        "output_type": infer_output_type(agent),
+        "source_agent_output_id": source_agent_output_id,
+        "source_refs": _normalize_source_refs(raw_record.get("source_refs"), source_agent_output_id),
     }
     if validate_structured_output(record):
         return record
@@ -261,19 +385,19 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
         raw_text,
         "structured record failed validation",
         source_agent_output_id=source_agent_output_id,
+        error_code="STRUCTURED_VALIDATION_FAILED",
     )
 
 # Adapt all raw agent output records in a run directory into structured claim records, logging any warnings
 def adapt_run_outputs(run_dir):
-    run_dir = Path(run_dir)
+    run_dir, run_id, output_root = _run_context_from_dir(run_dir)
     raw_payload = load_raw_agent_outputs(run_dir)
-    run_id = str(raw_payload.get("run_id") or run_dir.name)
     ticker = str(raw_payload.get("ticker") or "unknown").upper()
     records = []
     for raw_record in raw_payload.get("agent_outputs", []):
         record = adapt_raw_agent_output(raw_record, run_id, ticker)
         if record.get("adapter_warning"):
-            _log_error(run_dir, {"agent": record.get("agent"), "warning": record["adapter_warning"]})
+            _log_error(run_id, output_root, _error_payload(run_id, ticker, raw_record, record))
         records.append(record)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -284,11 +408,14 @@ def adapt_run_outputs(run_dir):
 
 # Save the adapted structured agent outputs to a JSON file in the run directory, returning the path
 def save_structured_agent_outputs(run_dir):
-    run_dir = Path(run_dir)
+    run_dir, run_id, output_root = _run_context_from_dir(run_dir)
     output = adapt_run_outputs(run_dir)
-    output_path = run_dir / "structured_agent_outputs.json"
-    atomic_write_text(output_path, json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return output_path
+    return save_json_record(
+        run_id,
+        "structured_agent_outputs.json",
+        output,
+        output_root=output_root,
+    )
 
 
 def _main():

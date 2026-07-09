@@ -3,6 +3,7 @@ import json
 import pytest
 
 from comqutor_alpha.storage.file_store import (
+    append_jsonl_record,
     list_runs,
     load_json_record,
     load_json_record_if_exists,
@@ -10,6 +11,7 @@ from comqutor_alpha.storage.file_store import (
     run_dir_for,
     save_json_record,
     validate_artifact_filename,
+    validate_artifact_path,
     validate_run_id_for_path,
 )
 
@@ -71,3 +73,23 @@ def test_resolve_output_root_uses_explicit_output_root(tmp_path):
     root = tmp_path / "runs"
 
     assert resolve_output_root(root) == root.resolve()
+
+
+def test_append_jsonl_record_writes_allowlisted_error_log(tmp_path):
+    path = append_jsonl_record(
+        "run_1",
+        "error_logs/structured_output_adapter_errors.jsonl",
+        {"error_code": "EMPTY_RAW_OUTPUT"},
+        output_root=tmp_path,
+    )
+
+    assert path.relative_to((tmp_path / "run_1").resolve())
+    assert '"EMPTY_RAW_OUTPUT"' in path.read_text(encoding="utf-8")
+
+
+def test_validate_artifact_path_rejects_unallowlisted_subpaths():
+    with pytest.raises(ValueError):
+        validate_artifact_path("../error_logs/structured_output_adapter_errors.jsonl")
+
+    with pytest.raises(ValueError):
+        validate_artifact_path("error_logs/secret.jsonl")

@@ -14,8 +14,14 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "metadata.json",
     "raw_agent_outputs.json",
     "structured_agent_outputs.json",
+    "alpha_matches.json",
+    "extracted_structures.json",
     "final_report.md",
     "research_response.json",
+}
+ALLOWED_ARTIFACT_PATHS = {
+    *ALLOWED_ARTIFACT_FILENAMES,
+    "error_logs/structured_output_adapter_errors.jsonl",
 }
 
 # Validate and normalize a request run_id.
@@ -46,6 +52,19 @@ def validate_artifact_filename(filename) -> str:
         raise ValueError(f"INVALID_ARTIFACT_FILENAME: unsupported artifact filename {value!r}")
     return value
 
+
+# Validate an artifact path against the small allowlist of run-local artifacts.
+def validate_artifact_path(artifact_path) -> str:
+    value = str(artifact_path or "").strip()
+    if not value:
+        raise ValueError("INVALID_ARTIFACT_PATH: artifact path is required")
+    path = Path(value)
+    if path.is_absolute() or ".." in path.parts or "\\" in value:
+        raise ValueError("INVALID_ARTIFACT_PATH: artifact path must stay inside the run directory")
+    if value not in ALLOWED_ARTIFACT_PATHS:
+        raise ValueError(f"INVALID_ARTIFACT_PATH: unsupported artifact path {value!r}")
+    return value
+
 # Resolve the output root directory, using the provided argument, environment variable, or default path.
 def resolve_output_root(output_root=None) -> Path:
     if output_root is not None:
@@ -67,6 +86,18 @@ def run_dir_for(run_id, output_root="outputs/runs"):
     except ValueError as exc:
         raise ValueError("INVALID_RUN_DIR: resolved run directory escapes output_root") from exc
     return run_dir
+
+
+# Resolve a safe artifact path for a run, ensuring the final path stays under that run directory.
+def artifact_path_for(run_id, artifact_path, output_root="outputs/runs"):
+    run_dir = run_dir_for(run_id, output_root)
+    safe_artifact_path = validate_artifact_path(artifact_path)
+    path = (run_dir / safe_artifact_path).resolve()
+    try:
+        path.relative_to(run_dir)
+    except ValueError as exc:
+        raise ValueError("INVALID_ARTIFACT_PATH: resolved artifact escapes run directory") from exc
+    return path
 
 # Atomically write text to a file, ensuring the parent directory exists and using a temporary file for safety.
 def atomic_write_text(path, text, encoding="utf-8") -> Path:
@@ -115,6 +146,14 @@ def load_json_record_if_exists(run_id, filename, output_root="outputs/runs"):
         return {}
     with path.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+# Atomically append a JSONL record to an allowlisted run-local artifact.
+def append_jsonl_record(run_id, artifact_path, data, output_root="outputs/runs"):
+    path = artifact_path_for(run_id, artifact_path, output_root)
+    existing = path.read_text(encoding="utf-8") if path.exists() else ""
+    line = json.dumps(data, ensure_ascii=False, default=str) + "\n"
+    return atomic_write_text(path, existing + line, encoding="utf-8")
 
 # List all valid run_ids in the output root directory, ignoring invalid directories.
 def list_runs(output_root="outputs/runs"):
