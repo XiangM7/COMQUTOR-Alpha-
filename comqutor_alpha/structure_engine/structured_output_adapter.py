@@ -12,7 +12,7 @@ from pathlib import Path
 from comqutor_alpha.storage.file_store import atomic_write_text
 from comqutor_alpha.structure_engine.structure_schema import clamp_score, normalize_direction
 
-
+# Constants for structured output schema and entity/factor extraction
 SCHEMA_VERSION = "week1a.structured_agent_outputs.v1"
 ENTITY_TERMS = (
     "NVDA",
@@ -96,7 +96,7 @@ def load_raw_agent_outputs(run_dir):
 def normalize_agent_name(agent):
     return str(agent or "unknown_agent").strip().lower().replace(" ", "_")
 
-
+# Infer the source type of the agent based on its name and raw text
 def infer_source_type(agent, raw_text):
     agent = normalize_agent_name(agent)
     if "technical" in agent:
@@ -112,7 +112,6 @@ def infer_source_type(agent, raw_text):
     if "price" in _normalize_text(raw_text).lower():
         return "price"
     return "unknown"
-
 
 def extract_claim(raw_text):
     text = _normalize_text(raw_text)
@@ -150,7 +149,7 @@ def extract_factors(raw_text):
             factors.append(factor)
     return factors
 
-
+# Infer the direction of the claim based on the presence of positive, negative, and neutral words
 def infer_direction(raw_text):
     text = _normalize_text(raw_text).lower()
     if not text:
@@ -168,7 +167,7 @@ def infer_direction(raw_text):
         return "neutral"
     return "unknown"
 
-
+# Estimate the confidence score of the claim based on text length, presence of evidence words, numbers, and certainty words
 def estimate_confidence(raw_text):
     text = _normalize_text(raw_text).lower()
     if not text:
@@ -186,12 +185,12 @@ def estimate_confidence(raw_text):
         score += 0.10
     return clamp_score(score)
 
-
+# Validate that the structured output record contains all required fields and they are not empty
 def validate_structured_output(record):
     required = {"run_id", "ticker", "agent", "claim", "evidence"}
     return all(record.get(field) for field in required)
 
-
+# Return a safe default structured record with a warning reason if the raw output is invalid or missing
 def safe_default_record(run_id, ticker, agent, raw_text, reason, source_agent_output_id=None):
     del raw_text
     return {
@@ -211,14 +210,14 @@ def safe_default_record(run_id, ticker, agent, raw_text, reason, source_agent_ou
         "adapter_warning": reason,
     }
 
-
+# Log an error payload to a structured output adapter error log file in the run directory
 def _log_error(run_dir, payload):
     log_dir = Path(run_dir) / "error_logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     with (log_dir / "structured_output_adapter_errors.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps(payload, ensure_ascii=False, default=str) + "\n")
 
-
+# Adapt a single raw agent output record into a structured claim record, handling validation and warnings
 def adapt_raw_agent_output(raw_record, run_id, ticker):
     if not isinstance(raw_record, dict):
         return safe_default_record(run_id, ticker, "unknown_agent", "", "raw row is not an object")
@@ -264,7 +263,7 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
         source_agent_output_id=source_agent_output_id,
     )
 
-
+# Adapt all raw agent output records in a run directory into structured claim records, logging any warnings
 def adapt_run_outputs(run_dir):
     run_dir = Path(run_dir)
     raw_payload = load_raw_agent_outputs(run_dir)
@@ -283,7 +282,7 @@ def adapt_run_outputs(run_dir):
         "records": records,
     }
 
-
+# Save the adapted structured agent outputs to a JSON file in the run directory, returning the path
 def save_structured_agent_outputs(run_dir):
     run_dir = Path(run_dir)
     output = adapt_run_outputs(run_dir)

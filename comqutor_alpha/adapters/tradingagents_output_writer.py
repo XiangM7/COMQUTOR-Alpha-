@@ -100,15 +100,15 @@ AGENT_OUTPUT_FIELDS: tuple[AgentOutputField, ...] = (
     ),
 )
 
-
+# Utility functions
 def _utc_timestamp() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
-
+# Path utilities
 def _path_label(path: tuple[str, ...]) -> str:
     return ".".join(path)
 
-
+# Nested mapping access
 def _get_nested(mapping: Mapping[str, Any], path: tuple[str, ...]) -> Any:
     current: Any = mapping
     for key in path:
@@ -117,7 +117,7 @@ def _get_nested(mapping: Mapping[str, Any], path: tuple[str, ...]) -> Any:
         current = current[key]
     return current
 
-
+# Check if a value is considered empty (None, empty string, or empty collection)
 def _is_empty(value: Any) -> bool:
     if value is None:
         return True
@@ -127,7 +127,7 @@ def _is_empty(value: Any) -> bool:
         return len(value) == 0
     return False
 
-
+# Convert a value to a string, using JSON serialization for non-string types
 def _to_string(value: Any) -> str:
     if isinstance(value, str):
         return value
@@ -136,7 +136,7 @@ def _to_string(value: Any) -> str:
     except (TypeError, ValueError, RecursionError):
         return str(value)
 
-
+# Truncate raw output to a maximum length, appending a truncation marker if necessary
 def _truncate_raw_output(raw_output: str) -> tuple[str, int, int, bool]:
     original_length = len(raw_output)
     if original_length <= MAX_RAW_OUTPUT_CHARS:
@@ -146,7 +146,7 @@ def _truncate_raw_output(raw_output: str) -> tuple[str, int, int, bool]:
     truncated_output = raw_output[:keep_chars] + TRUNCATION_MARKER
     return truncated_output, len(truncated_output), original_length, True
 
-
+# Normalize selected analysts
 def _normalize_selected_analysts(selected_analysts: Any) -> list[str]:
     if selected_analysts is None:
         return []
@@ -167,7 +167,7 @@ def _normalize_selected_analysts(selected_analysts: Any) -> list[str]:
             normalized.append(text)
     return normalized
 
-
+# Safe config value extraction
 def _safe_config_value(config: Any, key: str) -> str | None:
     if key not in SAFE_CONFIG_KEYS or not isinstance(config, Mapping):
         return None
@@ -176,7 +176,7 @@ def _safe_config_value(config: Any, key: str) -> str | None:
         return None
     return str(value)
 
-
+# Source selection
 def _select_source(final_state: Mapping[str, Any], field: AgentOutputField) -> tuple[Any, str | None]:
     candidates = (field.primary_path, *field.fallback_paths)
     for source_path in candidates:
@@ -185,7 +185,7 @@ def _select_source(final_state: Mapping[str, Any], field: AgentOutputField) -> t
             return value, _path_label(source_path)
     return None, None
 
-
+# Build a raw agent output record for storage
 def build_raw_agent_output_record(
     *,
     run_id: str,
@@ -218,7 +218,7 @@ def build_raw_agent_output_record(
         "created_at": created_at,
     }
 
-
+# Extract agent outputs from the final state, returning a list of raw agent output records
 def _extract_agent_outputs(
     final_state: Mapping[str, Any],
     run_id: str,
@@ -248,7 +248,7 @@ def _extract_agent_outputs(
         )
     return agent_outputs
 
-
+# Build a final report in Markdown format from the agent outputs
 def _build_final_report(ticker: str, run_id: str, analysis_date: str | None, agent_outputs) -> str:
     lines = [
         "# COMQUTOR TradingAgents Final Report",
@@ -265,7 +265,7 @@ def _build_final_report(ticker: str, run_id: str, analysis_date: str | None, age
 
     return "\n".join(lines).rstrip() + "\n"
 
-
+# Validate the final_state input, ensuring it is a non-empty mapping unless allowed
 def _validate_final_state(final_state: Any, allow_empty_final_state: bool) -> Mapping[str, Any]:
     if final_state is None:
         raise ValueError("INVALID_FINAL_STATE: final_state is required")
@@ -278,7 +278,7 @@ def _validate_final_state(final_state: Any, allow_empty_final_state: bool) -> Ma
         )
     return final_state
 
-
+# Save COMQUTOR-standard raw outputs for a completed TradingAgents run, including metadata and optional final report
 def save_comqutor_run_outputs(
     final_state,
     ticker,
