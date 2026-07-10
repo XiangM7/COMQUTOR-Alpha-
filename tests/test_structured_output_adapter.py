@@ -132,8 +132,10 @@ def test_error_log_redacts_quoted_json_style_secrets_from_previews():
     raw_record = {
         "agent": "news_agent",
         "raw_output": "Some innocuous claim text.",
+        "api_key": "sk-jsonstyle123",
         "token": "abcdef123456",
         "password": "hunter2",
+        "secret": "topsecret",
     }
     structured_record = safe_default_record(
         "run1",
@@ -147,10 +149,14 @@ def test_error_log_redacts_quoted_json_style_secrets_from_previews():
     payload = _error_payload("run1", "NVDA", raw_record, structured_record)
     serialized = json.dumps(payload)
 
+    assert "sk-jsonstyle123" not in serialized
     assert "abcdef123456" not in serialized
     assert "hunter2" not in serialized
+    assert "topsecret" not in serialized
+    assert '"api_key": "[REDACTED]"' in payload["raw_preview"]
     assert '"token": "[REDACTED]"' in payload["raw_preview"]
     assert '"password": "[REDACTED]"' in payload["raw_preview"]
+    assert '"secret": "[REDACTED]"' in payload["raw_preview"]
 
 
 def test_malformed_raw_record_does_not_crash_full_run(tmp_path):

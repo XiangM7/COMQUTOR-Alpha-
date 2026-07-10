@@ -1,7 +1,11 @@
 import json
 from pathlib import Path
 
-from comqutor_alpha.api.routes_research import get_research_run, run_research_request
+from comqutor_alpha.api.routes_research import (
+    build_research_response,
+    get_research_run,
+    run_research_request,
+)
 from comqutor_alpha.structure_engine.alpha_mapper import save_alpha_matches
 from comqutor_alpha.structure_engine.structure_extractor import save_extracted_structures
 
@@ -175,6 +179,46 @@ def test_research_response_reports_week2_artifact_booleans(tmp_path):
     assert updated["artifacts"]["structured_output_error_logs"] is False
     assert str(tmp_path) not in serialized
     assert "run_dir" not in updated
+
+
+def test_build_research_response_reports_week2_artifacts_without_local_paths(tmp_path):
+    run_id = "manual_week2_artifacts"
+    run_dir = tmp_path / run_id
+    error_dir = run_dir / "error_logs"
+    error_dir.mkdir(parents=True)
+
+    (run_dir / "metadata.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": "NVDA"}),
+        encoding="utf-8",
+    )
+    (run_dir / "raw_agent_outputs.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": "NVDA", "agent_outputs": []}),
+        encoding="utf-8",
+    )
+    (run_dir / "structured_agent_outputs.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": "NVDA", "records": []}),
+        encoding="utf-8",
+    )
+    (run_dir / "alpha_matches.json").write_text(
+        json.dumps({"run_id": run_id, "matches": []}),
+        encoding="utf-8",
+    )
+    (run_dir / "extracted_structures.json").write_text(
+        json.dumps({"run_id": run_id, "nodes": [], "edges": []}),
+        encoding="utf-8",
+    )
+    (error_dir / "structured_output_adapter_errors.jsonl").write_text(
+        json.dumps({"run_id": run_id, "error_code": "EMPTY_RAW_OUTPUT"}) + "\n",
+        encoding="utf-8",
+    )
+
+    response = build_research_response(run_id, output_root=tmp_path)
+    serialized = json.dumps(response, ensure_ascii=False)
+
+    assert response["artifacts"]["alpha_matches"] is True
+    assert response["artifacts"]["extracted_structures"] is True
+    assert response["artifacts"]["structured_output_error_logs"] is True
+    assert str(tmp_path) not in serialized
 
 
 def test_research_response_does_not_expose_raw_output_paths_or_config(tmp_path):

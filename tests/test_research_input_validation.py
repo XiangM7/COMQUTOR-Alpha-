@@ -121,6 +121,26 @@ def test_unexpected_internal_failure_is_logged_with_traceback(tmp_path, caplog):
     assert records[0].exc_info is not None
 
 
+def test_missing_raw_outputs_is_logged_without_traceback(tmp_path, caplog):
+    def missing_raw_runner(payload, output_root):
+        run_dir = Path(output_root) / "missing_raw_outputs"
+        run_dir.mkdir(parents=True)
+        return run_dir
+
+    with caplog.at_level(logging.DEBUG, logger="comqutor_alpha.api.routes_research"):
+        response = run_research_request(
+            {"ticker": "NVDA"},
+            runner=missing_raw_runner,
+            output_root=tmp_path,
+        )
+
+    assert response["error_code"] == "RAW_OUTPUT_NOT_FOUND"
+    records = [r for r in caplog.records if r.name == "comqutor_alpha.api.routes_research"]
+    assert len(records) == 1
+    assert records[0].levelname == "WARNING"
+    assert records[0].exc_info is None
+
+
 def test_create_offline_run_rejects_invalid_ticker_directly(tmp_path):
     with pytest.raises(ValueError, match="INVALID_TICKER"):
         _create_offline_run({"ticker": "'; DROP", "offline_raw_agent_outputs": []}, tmp_path)
