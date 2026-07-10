@@ -96,6 +96,31 @@ def test_ambiguous_text_does_not_hallucinate_causal_edge():
     assert payload["edges"] == []
 
 
+def test_reversed_causal_phrasing_does_not_emit_wrong_direction_edge():
+    """"GPU demand drives AI demand" mentions both factors plus causal
+    language ("drives"), but in the reversed order from the canonical
+    AI Demand -> GPU Demand rule. The extractor must not emit that edge
+    (in either direction) rather than hallucinate the canonical direction.
+    """
+    payload = extract_structures_from_records(
+        [_record("GPU demand drives AI demand as model usage rises.")]
+    )
+
+    assert not _has_edge(payload, "AI Demand", "GPU Demand", "causal")
+    assert not _has_edge(payload, "GPU Demand", "AI Demand", "causal")
+    labels = {node["label"] for node in payload["nodes"]}
+    assert labels == {"AI Demand", "GPU Demand"}
+
+
+def test_vague_coexistence_does_not_hallucinate_causal_edge():
+    payload = extract_structures_from_records(
+        [_record("Both AI capex and GPU demand were mentioned in the same earnings call.")]
+    )
+
+    assert payload["nodes"]
+    assert payload["edges"] == []
+
+
 def test_save_extracted_structures_writes_week2_artifact(tmp_path):
     run_dir = tmp_path / "run1"
     run_dir.mkdir()

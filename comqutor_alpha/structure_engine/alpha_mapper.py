@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-import re
 from collections.abc import Iterable, Mapping
 from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
 from comqutor_alpha.storage.file_store import load_json_record, save_json_record
+from comqutor_alpha.structure_engine.factor_normalizer import (
+    extract_known_factors_from_text,
+    normalize_factor_label,
+    normalize_text,
+    term_in_text,
+)
 from comqutor_alpha.structure_engine.structure_schema import clamp_score, normalize_direction
 
 
@@ -34,121 +39,9 @@ FACTOR_ALPHA_WEIGHTS = {
     "Inference Demand": {"A102": 1.0, "A101": 0.25},
 }
 
-FACTOR_ALIASES = {
-    "AI Demand": (
-        "ai demand",
-        "artificial intelligence demand",
-        "ai training demand",
-        "model training demand",
-    ),
-    "AI CapEx": (
-        "ai capex",
-        "ai capital spending",
-        "cloud capex",
-        "hyperscaler capex",
-        "infrastructure spending",
-    ),
-    "GPU Demand": (
-        "gpu demand",
-        "accelerator demand",
-        "compute demand",
-        "demand for accelerators",
-        "demand for gpus",
-    ),
-    "Datacenter CapEx": (
-        "datacenter capex",
-        "data center capex",
-        "datacenter spending",
-        "data center spending",
-        "power and cooling",
-        "networking orders",
-        "server demand",
-    ),
-    "Revenue Growth": (
-        "revenue growth",
-        "revenue acceleration",
-        "sales growth",
-        "guidance raised",
-        "beat and raise",
-        "eps revisions",
-    ),
-    "Valuation Risk": (
-        "valuation risk",
-        "rich valuation",
-        "high valuation",
-        "multiple compression",
-        "priced for perfection",
-        "expensive growth",
-    ),
-    "Recession Risk": (
-        "recession risk",
-        "economic slowdown",
-        "credit spreads",
-        "widening spreads",
-        "pmi weaken",
-        "default risk",
-    ),
-    "Liquidity Expansion": (
-        "liquidity expansion",
-        "liquidity improves",
-        "cash moves into risk assets",
-        "reserves rise",
-        "money supply",
-        "risk appetite",
-    ),
-    "Narrative Momentum": (
-        "narrative momentum",
-        "investor attention",
-        "media attention",
-        "crowded trade",
-        "reflexive flows",
-        "theme flows",
-        "price momentum",
-    ),
-    "Semiconductor Cycle": (
-        "semiconductor cycle",
-        "chip cycle",
-        "inventory recovery",
-        "inventory improves",
-        "chip demand",
-        "wafer orders",
-        "asp stabilizes",
-    ),
-    "Rate Cut Cycle": (
-        "rate cut",
-        "falling rates",
-        "lower rates",
-        "fed cut",
-        "easing cycle",
-        "discount rates fall",
-        "treasury yields fall",
-    ),
-    "Inference Demand": (
-        "inference demand",
-        "inference workload",
-        "enterprise ai",
-        "ai agents",
-        "token generation",
-        "copilot usage",
-    ),
-}
-
-
-def normalize_text(value: Any) -> str:
-    text = str(value or "").lower()
-    text = re.sub(r"[^a-z0-9%$]+", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
-
 
 def _iter_text_values(values: Iterable[Any]) -> list[str]:
     return [str(item) for item in values if str(item or "").strip()]
-
-
-def _term_in_text(term: str, text: str) -> bool:
-    term = normalize_text(term)
-    if not term:
-        return False
-    return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", text) is not None
 
 
 def _alpha_terms(alpha: AlphaDefinition) -> list[tuple[str, float]]:
@@ -169,7 +62,7 @@ def keyword_score(claim: str, alpha: AlphaDefinition) -> float:
     matched_weight = 0.0
     for term, weight in _alpha_terms(alpha):
         normalized_term = normalize_text(term)
-        if _term_in_text(normalized_term, text):
+        if term_in_text(normalized_term, text):
             matched_weight += weight
 
     # One highly specific term should matter, while many repeated taxonomy terms
@@ -177,21 +70,17 @@ def keyword_score(claim: str, alpha: AlphaDefinition) -> float:
     return clamp_score(matched_weight / 2.6)
 
 
-def _factors_from_claim_text(claim: str) -> list[str]:
-    text = normalize_text(claim)
-    factors = []
-    for factor, aliases in FACTOR_ALIASES.items():
-        if any(_term_in_text(alias, text) for alias in aliases):
-            factors.append(factor)
-    return factors
-
-
 def _record_factors(record: Mapping[str, Any]) -> list[str]:
-    factors = _iter_text_values(record.get("factors") or [])
-    factors.extend(_factors_from_claim_text(str(record.get("claim") or "")))
+    # Explicit record factors may be raw aliases ("AI demand", "artificial
+    # intelligence demand") rather than the canonical label, so normalize
+    # them the same way claim text is normalized instead of dropping them.
+    raw_factors = _iter_text_values(record.get("factors") or [])
+    candidate_factors = [normalize_factor_label(factor) for factor in raw_factors]
+    candidate_factors.extend(extract_known_factors_from_text(str(record.get("claim") or "")))
+
     seen = set()
     normalized = []
-    for factor in factors:
+    for factor in candidate_factors:
         if factor in FACTOR_ALPHA_WEIGHTS and factor not in seen:
             normalized.append(factor)
             seen.add(factor)

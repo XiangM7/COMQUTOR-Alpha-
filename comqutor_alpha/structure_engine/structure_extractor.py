@@ -7,7 +7,13 @@ from collections.abc import Iterable, Mapping
 from typing import Any
 
 from comqutor_alpha.storage.file_store import load_json_record, save_json_record
-from comqutor_alpha.structure_engine.alpha_mapper import FACTOR_ALIASES, normalize_text
+from comqutor_alpha.structure_engine.factor_normalizer import (
+    extract_known_factors_from_text,
+    factor_mention_start,
+    normalize_factor_label,
+    normalize_text,
+    term_in_text,
+)
 from comqutor_alpha.structure_engine.structure_schema import clamp_score
 
 
@@ -68,24 +74,6 @@ def _slug(value: str) -> str:
     return slug or "unknown"
 
 
-def _term_in_text(term: str, text: str) -> bool:
-    term = normalize_text(term)
-    if not term:
-        return False
-    return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", text) is not None
-
-
-def normalize_factor_label(value: Any) -> str:
-    text = normalize_text(value)
-    if not text:
-        return "Unknown"
-    for factor, aliases in FACTOR_ALIASES.items():
-        terms = (factor, *aliases)
-        if any(normalize_text(term) == text for term in terms):
-            return factor
-    return " ".join(part.capitalize() for part in text.split())
-
-
 def _display_label(factor: str, ticker: str | None) -> str:
     if factor == "Revenue Growth" and ticker:
         return f"{str(ticker).upper()} Revenue Growth"
@@ -99,10 +87,7 @@ def _extract_factors(record: Mapping[str, Any]) -> list[str]:
         if normalized != "Unknown":
             factors.append(normalized)
 
-    text = normalize_text(record.get("claim"))
-    for factor, aliases in FACTOR_ALIASES.items():
-        if any(_term_in_text(alias, text) for alias in aliases):
-            factors.append(factor)
+    factors.extend(extract_known_factors_from_text(record.get("claim")))
 
     seen = set()
     result = []
@@ -114,7 +99,7 @@ def _extract_factors(record: Mapping[str, Any]) -> list[str]:
 
 
 def _has_any(text: str, terms: Iterable[str]) -> bool:
-    return any(_term_in_text(term, text) for term in terms)
+    return any(term_in_text(term, text) for term in terms)
 
 
 def _source_record_id(record: Mapping[str, Any]) -> str | None:
@@ -174,6 +159,23 @@ def _edge(
     }
 
 
+def _causal_order_confirmed(source: str, target: str, text: str) -> bool:
+    """Require the source factor to be mentioned before the target factor.
+
+    CAUSAL_FACTOR_RULES only encode one canonical direction (e.g. AI Demand ->
+    GPU Demand). Without an order check, a reversed sentence like "GPU demand
+    drives AI demand" would still match both factors plus causal language and
+    silently emit the wrong direction. Requiring the source mention to appear
+    first is a minimal, deterministic proxy for "who is doing the driving"
+    that avoids hallucinating a wrongly-directed edge without any NLP/LLM.
+    """
+    source_start = factor_mention_start(source, text)
+    target_start = factor_mention_start(target, text)
+    if source_start is None or target_start is None:
+        return False
+    return source_start < target_start
+
+
 def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[str, Any]]:
     text = normalize_text(record.get("claim"))
     if len(factors) < 2 or not text:
@@ -182,18 +184,23 @@ def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[s
     edges = []
     has_causal_language = _has_any(text, CAUSAL_WORDS)
     for source, target, rule_name in CAUSAL_FACTOR_RULES:
-        if source in factors and target in factors and has_causal_language:
-            edges.append(
-                _edge(
-                    source,
-                    target,
-                    "causal",
-                    rule_name,
-                    record,
-                    f"{source} and {target} appear with causal language.",
-                    0.82,
-                )
+        if not (source in factors and target in factors and has_causal_language):
+            continue
+        if not _causal_order_confirmed(source, target, text):
+            # Reversed or indeterminate phrasing: skip rather than risk
+            # extracting a strong causal edge in the wrong direction.
+            continue
+        edges.append(
+            _edge(
+                source,
+                target,
+                "causal",
+                rule_name,
+                record,
+                f"{source} and {target} appear with causal language.",
+                0.82,
             )
+        )
 
     if _has_any(text, SUPPORT_WORDS):
         causal_pairs = {(edge["source_label"], edge["target_label"]) for edge in edges}

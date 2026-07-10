@@ -20,7 +20,10 @@ from comqutor_alpha.storage.file_store import (
     save_json_record,
     validate_run_id_for_path,
 )
-from comqutor_alpha.structure_engine.structured_output_adapter import save_structured_agent_outputs
+from comqutor_alpha.structure_engine.structured_output_adapter import (
+    ERROR_LOG_ARTIFACT_PATH,
+    save_structured_agent_outputs,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -211,6 +214,11 @@ def build_research_response(run_id, output_root="outputs/runs"):
     raw_path = run_dir / "raw_agent_outputs.json"
     structured_path = run_dir / "structured_agent_outputs.json"
     final_report_path = run_dir / "final_report.md"
+    # Week 2 artifacts. Presence is reported as booleans only; the paths
+    # themselves never leave this function.
+    alpha_matches_path = run_dir / "alpha_matches.json"
+    extracted_structures_path = run_dir / "extracted_structures.json"
+    error_log_path = run_dir / ERROR_LOG_ARTIFACT_PATH
     metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
     raw_payload = load_json_record_if_exists(
         run_id,
@@ -228,6 +236,9 @@ def build_research_response(run_id, output_root="outputs/runs"):
         "raw_agent_outputs": raw_path.exists(),
         "structured_agent_outputs": structured_path.exists(),
         "final_report": final_report_path.exists(),
+        "alpha_matches": alpha_matches_path.exists(),
+        "extracted_structures": extracted_structures_path.exists(),
+        "structured_output_error_logs": error_log_path.exists(),
     }
 
     return {

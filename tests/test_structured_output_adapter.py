@@ -3,7 +3,9 @@ import json
 from comqutor_alpha.adapters.tradingagents_output_writer import build_raw_agent_output_record
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     SCHEMA_VERSION,
+    _error_payload,
     adapt_raw_agent_output,
+    safe_default_record,
     save_structured_agent_outputs,
 )
 
@@ -99,6 +101,26 @@ def test_adapter_writes_file_and_logs_invalid_rows(tmp_path):
     assert "raw_preview" in entries[0]
     assert "record_preview" in entries[0]
     assert str(tmp_path) not in json.dumps(entries[0])
+
+
+def test_error_log_redacts_secret_like_tokens_from_previews():
+    raw_record = {
+        "agent": "news_agent",
+        "raw_output": "Leaked credential api_key=sk-testsecret123 in the report.",
+    }
+    structured_record = safe_default_record(
+        "run1",
+        "NVDA",
+        "news_agent",
+        raw_record["raw_output"],
+        "structured record failed validation",
+        error_code="STRUCTURED_VALIDATION_FAILED",
+    )
+
+    payload = _error_payload("run1", "NVDA", raw_record, structured_record)
+
+    assert "sk-testsecret123" not in json.dumps(payload)
+    assert "api_key=[REDACTED]" in payload["raw_preview"]
 
 
 def test_malformed_raw_record_does_not_crash_full_run(tmp_path):

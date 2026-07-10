@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 
 from comqutor_alpha.api.routes_research import get_research_run, run_research_request
+from comqutor_alpha.structure_engine.alpha_mapper import save_alpha_matches
+from comqutor_alpha.structure_engine.structure_extractor import save_extracted_structures
 
 
 def _offline_outputs():
@@ -48,6 +50,12 @@ def test_run_research_request_with_offline_raw_outputs(tmp_path):
         "raw_agent_outputs": True,
         "structured_agent_outputs": True,
         "final_report": False,
+        # Week 2 artifacts are produced by a separate, explicit step
+        # (save_alpha_matches / save_extracted_structures), not automatically
+        # by run_research_request, so they are absent for this offline run.
+        "alpha_matches": False,
+        "extracted_structures": False,
+        "structured_output_error_logs": False,
     }
     assert response["agent_output_count"] == 4
     assert response["structured_output_count"] == 4
@@ -144,6 +152,29 @@ def test_fake_runner_injection(tmp_path):
     assert response["run_id"] == "fake_runner_week1a"
     assert response["structured_output_count"] == 4
     assert (tmp_path / "fake_runner_week1a" / "structured_agent_outputs.json").exists()
+
+
+def test_research_response_reports_week2_artifact_booleans(tmp_path):
+    response = run_research_request(_payload(), output_root=tmp_path)
+    run_id = response["run_id"]
+
+    assert response["artifacts"]["alpha_matches"] is False
+    assert response["artifacts"]["extracted_structures"] is False
+    assert response["artifacts"]["structured_output_error_logs"] is False
+
+    save_alpha_matches(run_id, output_root=tmp_path)
+    save_extracted_structures(run_id, output_root=tmp_path)
+
+    updated = get_research_run(run_id, output_root=tmp_path)
+    serialized = json.dumps(updated, ensure_ascii=False)
+
+    assert updated["artifacts"]["alpha_matches"] is True
+    assert updated["artifacts"]["extracted_structures"] is True
+    # No Week2/Week1A error occurred for this offline run, so the error log
+    # artifact should still be absent even though the other two now exist.
+    assert updated["artifacts"]["structured_output_error_logs"] is False
+    assert str(tmp_path) not in serialized
+    assert "run_dir" not in updated
 
 
 def test_research_response_does_not_expose_raw_output_paths_or_config(tmp_path):

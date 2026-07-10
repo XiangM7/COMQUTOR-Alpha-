@@ -48,6 +48,24 @@ def test_factor_score_uses_structured_factors():
     assert factor_score(record, taxonomy["A101"]) == 0.0
 
 
+def test_factor_score_handles_ai_demand_alias_lowercase():
+    """factor_score must normalize a raw "AI demand" alias in record["factors"]
+    the same way it normalizes claim text, instead of silently dropping it
+    because it does not exactly match the canonical "AI Demand" key.
+    """
+    taxonomy = load_alpha_taxonomy()
+    record = _record("Demand is improving.", factors=["AI demand"])
+
+    assert factor_score(record, taxonomy["A101"]) == 1.0
+
+
+def test_factor_score_handles_artificial_intelligence_demand_alias():
+    taxonomy = load_alpha_taxonomy()
+    record = _record("Demand is improving.", factors=["artificial intelligence demand"])
+
+    assert factor_score(record, taxonomy["A101"]) == 1.0
+
+
 def test_clear_ai_demand_claim_maps_to_ai_expansion():
     result = map_claim_to_alpha(
         _record(
@@ -74,31 +92,54 @@ def test_clear_valuation_risk_claim_maps_to_multiple_compression():
 
 
 def test_labeled_claim_accuracy_is_at_least_80_percent():
+    """Official Week 2 gate: a claim only counts as correct when the mapper
+    actually committed to a match (match_status == "matched") on the right
+    alpha. Counting a claim as correct just because the right alpha happened
+    to be the top candidate (even under no_match/ambiguous) would be too
+    loose for the official gate, so that is tracked separately as a
+    diagnostic-only metric below.
+    """
     taxonomy = load_alpha_taxonomy()
     cases = json.loads(GOLDEN_PATH.read_text(encoding="utf-8"))
-    correct = 0
+    strict_correct = 0
+    top_candidate_correct = 0
     mismatches = []
     for case in cases:
         result = map_claim_to_alpha(
             _record(case["text"], direction=case.get("expected_direction", "unknown")),
             taxonomy,
         )
-        top_alpha = result["candidate_scores"][0]["alpha_id"] if result["candidate_scores"] else None
-        if case["expected_alpha"] in {result["matched_alpha"], top_alpha}:
-            correct += 1
-        else:
+        top_candidate = result["candidate_scores"][0] if result["candidate_scores"] else None
+        top_alpha = top_candidate["alpha_id"] if top_candidate else None
+        is_strict_correct = (
+            result["match_status"] == "matched"
+            and result["matched_alpha"] == case["expected_alpha"]
+        )
+        if is_strict_correct:
+            strict_correct += 1
+        if case["expected_alpha"] == top_alpha:
+            top_candidate_correct += 1
+        if not is_strict_correct:
             mismatches.append(
                 {
                     "id": case["id"],
-                    "expected": case["expected_alpha"],
-                    "matched": result["matched_alpha"],
-                    "top": top_alpha,
-                    "status": result["match_status"],
+                    "text": case["text"],
+                    "expected_alpha": case["expected_alpha"],
+                    "matched_alpha": result["matched_alpha"],
+                    "match_status": result["match_status"],
+                    "top_candidate": top_candidate,
+                    "candidate_scores": result["candidate_scores"],
                 }
             )
 
-    accuracy = correct / len(cases)
-    assert accuracy >= 0.80, {"accuracy": accuracy, "mismatches": mismatches}
+    strict_accuracy = strict_correct / len(cases)
+    top_candidate_accuracy = top_candidate_correct / len(cases)  # diagnostic only, not the gate
+
+    assert strict_accuracy >= 0.80, {
+        "strict_accuracy": strict_accuracy,
+        "top_candidate_accuracy": top_candidate_accuracy,
+        "mismatches": mismatches,
+    }
 
 
 def test_no_match_does_not_force_bad_alpha():

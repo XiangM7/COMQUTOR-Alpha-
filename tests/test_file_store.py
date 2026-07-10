@@ -22,7 +22,10 @@ def test_validate_run_id_for_path_accepts_uuid_like_run_id():
     assert validate_run_id_for_path(run_id) == run_id
 
 
-@pytest.mark.parametrize("run_id", ["../secret", "abc/def", "abc\\def", ""])
+@pytest.mark.parametrize(
+    "run_id",
+    ["../secret", "abc/def", "abc\\def", "", "/etc/passwd", "/", "C:\\Windows\\System32"],
+)
 def test_validate_run_id_for_path_rejects_unsafe_values(run_id):
     with pytest.raises(ValueError):
         validate_run_id_for_path(run_id)
@@ -93,3 +96,17 @@ def test_validate_artifact_path_rejects_unallowlisted_subpaths():
 
     with pytest.raises(ValueError):
         validate_artifact_path("error_logs/secret.jsonl")
+
+
+@pytest.mark.parametrize("filename", ["alpha_matches.json", "extracted_structures.json"])
+def test_week2_artifacts_can_be_saved_and_loaded(tmp_path, filename):
+    save_json_record("run_1", filename, {"schema_version": "week2.v1"}, output_root=tmp_path)
+
+    assert load_json_record("run_1", filename, output_root=tmp_path) == {
+        "schema_version": "week2.v1"
+    }
+
+
+def test_unallowlisted_artifact_filename_is_rejected_by_save(tmp_path):
+    with pytest.raises(ValueError):
+        save_json_record("run_1", "arbitrary_secret.json", {"a": 1}, output_root=tmp_path)

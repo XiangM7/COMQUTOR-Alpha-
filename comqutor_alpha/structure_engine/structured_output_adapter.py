@@ -115,8 +115,27 @@ def _normalize_text(value):
     return re.sub(r"\s+", " ", text).strip()
 
 
+# Redact obvious secret-like tokens (api keys, bearer tokens, passwords) from
+# error log previews. This is a simple, deterministic best-effort filter for
+# debugging safety, not a full secret scanner.
+_SECRET_KEY_VALUE_PATTERN = re.compile(
+    r"(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*(\S+)"
+)
+_SECRET_BEARER_PATTERN = re.compile(r"(?i)\bbearer\s+(\S+)")
+_SECRET_SK_TOKEN_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{3,}")
+
+
+def _redact_secrets(text):
+    if not text:
+        return text
+    redacted = _SECRET_KEY_VALUE_PATTERN.sub(lambda m: f"{m.group(1)}=[REDACTED]", text)
+    redacted = _SECRET_BEARER_PATTERN.sub("Bearer [REDACTED]", redacted)
+    redacted = _SECRET_SK_TOKEN_PATTERN.sub("[REDACTED]", redacted)
+    return redacted
+
+
 def _safe_preview(value, max_chars=MAX_ERROR_PREVIEW_CHARS):
-    preview = _normalize_text(value)
+    preview = _redact_secrets(_normalize_text(value))
     if len(preview) <= max_chars:
         return preview
     return preview[:max_chars] + "...[truncated]"
