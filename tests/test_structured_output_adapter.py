@@ -123,6 +123,36 @@ def test_error_log_redacts_secret_like_tokens_from_previews():
     assert "api_key=[REDACTED]" in payload["raw_preview"]
 
 
+def test_error_log_redacts_quoted_json_style_secrets_from_previews():
+    """raw_record is a dict, so _safe_preview() serializes it with json.dumps(),
+    which double-quotes both keys and values (e.g. `"token": "abcdef123456"`).
+    The plain key=value redaction pattern cannot match through that extra
+    quoting, so the JSON-aware pattern must catch it instead.
+    """
+    raw_record = {
+        "agent": "news_agent",
+        "raw_output": "Some innocuous claim text.",
+        "token": "abcdef123456",
+        "password": "hunter2",
+    }
+    structured_record = safe_default_record(
+        "run1",
+        "NVDA",
+        "news_agent",
+        raw_record["raw_output"],
+        "structured record failed validation",
+        error_code="STRUCTURED_VALIDATION_FAILED",
+    )
+
+    payload = _error_payload("run1", "NVDA", raw_record, structured_record)
+    serialized = json.dumps(payload)
+
+    assert "abcdef123456" not in serialized
+    assert "hunter2" not in serialized
+    assert '"token": "[REDACTED]"' in payload["raw_preview"]
+    assert '"password": "[REDACTED]"' in payload["raw_preview"]
+
+
 def test_malformed_raw_record_does_not_crash_full_run(tmp_path):
     run_dir = tmp_path / "run1"
     run_dir.mkdir()

@@ -52,6 +52,80 @@ def test_alpha_match_record_to_dict_forces_no_matched_alpha_unless_matched():
     assert data["direction"] == "positive"
 
 
+def test_alpha_match_record_to_dict_normalizes_direction():
+    record = AlphaMatchRecord(
+        run_id="run1",
+        ticker="NVDA",
+        agent="news_agent",
+        source_agent_output_id="src1",
+        claim="AI demand is strong.",
+        direction="bullish",
+        matched_alpha="A101",
+        matched_alpha_name="AI Expansion",
+        score=0.9,
+        keyword_score=0.9,
+        factor_score=0.5,
+        direction_score=1.0,
+        candidate_scores=[],
+        match_status="matched",
+        reason="top alpha score passed threshold and separation checks",
+    )
+
+    assert record.to_dict()["direction"] == "positive"
+
+
+def test_alpha_match_record_to_dict_clears_matched_alpha_when_no_match():
+    record = AlphaMatchRecord(
+        run_id="run1",
+        ticker="NVDA",
+        agent="news_agent",
+        source_agent_output_id="src1",
+        claim="The company signed an ordinary office lease.",
+        direction="unknown",
+        matched_alpha="A101",
+        matched_alpha_name="AI Expansion",
+        score=0.1,
+        keyword_score=0.1,
+        factor_score=0.0,
+        direction_score=0.0,
+        candidate_scores=[],
+        match_status="no_match",
+        reason="top score below minimum match threshold",
+    )
+
+    data = record.to_dict()
+
+    assert data["match_status"] == "no_match"
+    assert data["matched_alpha"] is None
+    assert data["matched_alpha_name"] is None
+
+
+def test_alpha_match_record_to_dict_clears_matched_alpha_when_ambiguous():
+    record = AlphaMatchRecord(
+        run_id="run1",
+        ticker="NVDA",
+        agent="news_agent",
+        source_agent_output_id="src1",
+        claim="AI demand is strong, but rich valuation creates downside risk.",
+        direction="neutral",
+        matched_alpha="A101",
+        matched_alpha_name="AI Expansion",
+        score=0.5,
+        keyword_score=0.5,
+        factor_score=0.5,
+        direction_score=0.35,
+        candidate_scores=[],
+        match_status="ambiguous",
+        reason="top alpha candidates are too close to force a single match",
+    )
+
+    data = record.to_dict()
+
+    assert data["match_status"] == "ambiguous"
+    assert data["matched_alpha"] is None
+    assert data["matched_alpha_name"] is None
+
+
 def test_alpha_match_record_to_dict_normalizes_candidate_scores_and_limits_to_five():
     candidates = [
         {

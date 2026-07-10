@@ -78,6 +78,7 @@ _EXPECTED_CLIENT_ERROR_CODES = frozenset(
         "INVALID_TICKER",
         "REAL_RUN_DISABLED",
         "OFFLINE_DISABLED",
+        "RAW_OUTPUT_NOT_FOUND",
     }
 )
 

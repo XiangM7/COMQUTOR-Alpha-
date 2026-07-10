@@ -15,6 +15,7 @@ from comqutor_alpha.storage.file_store import (
     save_json_record,
     validate_run_id_for_path,
 )
+from comqutor_alpha.structure_engine.factor_normalizer import extract_known_factors_from_text
 from comqutor_alpha.structure_engine.structure_schema import (
     VALID_DIRECTIONS,
     clamp_score,
@@ -40,18 +41,6 @@ ENTITY_TERMS = (
     "semiconductor",
     "chip",
 )
-FACTOR_PATTERNS = {
-    "AI Demand": ("ai demand", "ai training", "artificial intelligence", "ai workload"),
-    "AI CapEx": ("ai capex", "ai capital spending", "cloud capex", "infrastructure spending"),
-    "GPU Demand": ("gpu demand", "accelerator demand", "compute demand", "gpu", "accelerator"),
-    "Datacenter CapEx": ("datacenter", "data center", "power", "cooling", "networking"),
-    "Revenue Growth": ("revenue growth", "revenue guidance", "guidance raised", "eps revisions"),
-    "Valuation Risk": ("valuation", "multiple compression", "rich valuation", "high valuation"),
-    "Recession Risk": ("recession", "economic slowdown", "credit spreads", "slowdown"),
-    "Liquidity Expansion": ("liquidity", "risk appetite", "cash moves", "monetary liquidity"),
-    "Narrative Momentum": ("narrative", "investor attention", "momentum", "reflexive flows"),
-    "Semiconductor Cycle": ("semiconductor", "chip demand", "inventory", "asp", "chip cycle"),
-}
 POSITIVE_WORDS = (
     "bullish",
     "growth",
@@ -121,6 +110,12 @@ def _normalize_text(value):
 _SECRET_KEY_VALUE_PATTERN = re.compile(
     r"(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*(\S+)"
 )
+# Quoted JSON-style secrets, e.g. `"api_key": "sk-abc123"` (raw records are
+# often previewed as json.dumps() output, so the key/value are both
+# double-quoted and the plain key=value pattern above cannot match).
+_SECRET_JSON_KV_PATTERN = re.compile(
+    r'(?i)"(api[_-]?key|secret|token|password)"\s*:\s*"[^"]*"'
+)
 _SECRET_BEARER_PATTERN = re.compile(r"(?i)\bbearer\s+(\S+)")
 _SECRET_SK_TOKEN_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{3,}")
 
@@ -128,7 +123,8 @@ _SECRET_SK_TOKEN_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{3,}")
 def _redact_secrets(text):
     if not text:
         return text
-    redacted = _SECRET_KEY_VALUE_PATTERN.sub(lambda m: f"{m.group(1)}=[REDACTED]", text)
+    redacted = _SECRET_JSON_KV_PATTERN.sub(lambda m: f'"{m.group(1)}": "[REDACTED]"', text)
+    redacted = _SECRET_KEY_VALUE_PATTERN.sub(lambda m: f"{m.group(1)}=[REDACTED]", redacted)
     redacted = _SECRET_BEARER_PATTERN.sub("Bearer [REDACTED]", redacted)
     redacted = _SECRET_SK_TOKEN_PATTERN.sub("[REDACTED]", redacted)
     return redacted
@@ -223,12 +219,7 @@ def extract_entities(raw_text, ticker):
 
 
 def extract_factors(raw_text):
-    text = _normalize_text(raw_text).lower()
-    factors = []
-    for factor, patterns in FACTOR_PATTERNS.items():
-        if any(pattern in text for pattern in patterns):
-            factors.append(factor)
-    return factors
+    return extract_known_factors_from_text(_normalize_text(raw_text))
 
 # Infer the direction of the claim based on the presence of positive, negative, and neutral words
 def infer_direction(raw_text):
