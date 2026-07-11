@@ -24,6 +24,7 @@ DEFAULT_AMBIGUITY_DELTA = 0.14
 POSITIVE_ALPHA_IDS = {"A001", "A003", "A101", "A102", "A103", "A201", "A301", "A601"}
 RISK_ALPHA_IDS = {"A304", "A501"}
 
+# Weights for each factor's contribution to the alpha score.
 FACTOR_ALPHA_WEIGHTS = {
     "AI Demand": {"A101": 1.0, "A301": 0.45, "A601": 0.25},
     "AI CapEx": {"A101": 0.85, "A103": 0.75, "A301": 0.35},
@@ -39,11 +40,11 @@ FACTOR_ALPHA_WEIGHTS = {
     "Inference Demand": {"A102": 1.0, "A101": 0.25},
 }
 
-
+# Iterate over text values, normalizing them.
 def _iter_text_values(values: Iterable[Any]) -> list[str]:
     return [str(item) for item in values if str(item or "").strip()]
 
-
+# Extract alpha terms from an AlphaDefinition.
 def _alpha_terms(alpha: AlphaDefinition) -> list[tuple[str, float]]:
     terms: list[tuple[str, float]] = []
     terms.extend((term, 1.0) for term in alpha.keywords)
@@ -52,7 +53,7 @@ def _alpha_terms(alpha: AlphaDefinition) -> list[tuple[str, float]]:
     terms.extend((term, 0.35) for term in (alpha.name_en, alpha.core_thesis))
     return [(term, weight) for term, weight in terms if str(term).strip()]
 
-
+# Compute the keyword score for a claim against an alpha definition.
 def keyword_score(claim: str, alpha: AlphaDefinition) -> float:
     """Score direct phrase evidence between a claim and one alpha definition."""
     text = normalize_text(claim)
@@ -86,7 +87,7 @@ def _record_factors(record: Mapping[str, Any]) -> list[str]:
             seen.add(factor)
     return normalized
 
-
+# Compute the factor score for a claim against an alpha definition.
 def factor_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> float:
     """Score explicit factor compatibility between a structured claim and an alpha."""
     scores = []
@@ -98,7 +99,7 @@ def factor_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> float:
         return 0.0
     return clamp_score(max(scores))
 
-
+# Compute the direction score for a claim against an alpha definition.
 def direction_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> float:
     direction = normalize_direction(record.get("direction"))
     if direction == "positive" and alpha.alpha_id in POSITIVE_ALPHA_IDS:
@@ -109,7 +110,7 @@ def direction_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> float:
         return 0.35
     return 0.0
 
-
+# Compute the overall candidate score for a claim against an alpha definition.
 def _candidate_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> dict[str, Any]:
     claim = str(record.get("claim") or "")
     keyword = keyword_score(claim, alpha)
@@ -125,15 +126,15 @@ def _candidate_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> dict[
         "direction_score": direction,
     }
 
-
+# Sort candidate scores by descending score and ascending alpha_id for tie-breaking.
 def _sort_candidates(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(candidates, key=lambda item: (-item["score"], item["alpha_id"]))
 
-
+# Extract the set of conflicting alpha IDs for a given alpha definition.
 def _conflict_ids(alpha: AlphaDefinition) -> set[str]:
     return {conflict.alpha_id for conflict in alpha.conflict_alphas}
 
-
+# Map a structured claim record to the best matching alpha definition, returning a detailed match result.
 def map_claim_to_alpha(
     record: Mapping[str, Any],
     taxonomy: Mapping[str, AlphaDefinition] | None = None,
@@ -192,7 +193,7 @@ def map_claim_to_alpha(
         "reason": reason,
     }
 
-
+# Map a list of structured claim records to their best matching alpha definitions, returning a list of match results.
 def map_structured_records(
     records: Iterable[Mapping[str, Any]],
     taxonomy: Mapping[str, AlphaDefinition] | None = None,
@@ -205,7 +206,7 @@ def map_structured_records(
         results.append(map_claim_to_alpha(record, taxonomy))
     return results
 
-
+# Build the final alpha matches payload from structured agent outputs, including metadata and match results.
 def build_alpha_matches_payload(
     structured_payload: Mapping[str, Any],
     taxonomy: Mapping[str, AlphaDefinition] | None = None,
@@ -221,7 +222,7 @@ def build_alpha_matches_payload(
         "matches": map_structured_records(records, taxonomy),
     }
 
-
+# Save the alpha matches for a given run ID, loading structured agent outputs and saving the resulting matches payload.
 def save_alpha_matches(run_id, output_root="outputs/runs") -> dict[str, Any]:
     structured_payload = load_json_record(
         run_id,

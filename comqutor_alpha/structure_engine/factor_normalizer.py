@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-
+# Mapping of canonical factor labels to known aliases (case-insensitive, whitespace-insensitive).
 FACTOR_ALIASES = {
     "AI Demand": (
         "ai demand",
@@ -112,14 +112,14 @@ FACTOR_ALIASES = {
     ),
 }
 
-
+# Mapping of canonical factor labels to their corresponding alpha weights.
 def normalize_text(value: Any) -> str:
     """Lowercase and collapse a value down to plain alphanumeric words."""
     text = str(value or "").lower()
     text = re.sub(r"[^a-z0-9%$]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
 
-
+# Check if a term is present in a normalized text.
 def term_in_text(term: str, text: str) -> bool:
     """Whole word/phrase match of a normalized term inside already-normalized text."""
     term = normalize_text(term)
@@ -127,7 +127,7 @@ def term_in_text(term: str, text: str) -> bool:
         return False
     return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", text) is not None
 
-
+# Normalize a raw factor string to its canonical label.
 def normalize_factor_label(value: Any) -> str:
     """Map a raw factor string (canonical name or known alias) to its canonical label.
 
@@ -143,7 +143,7 @@ def normalize_factor_label(value: Any) -> str:
             return factor
     return " ".join(part.capitalize() for part in text.split())
 
-
+# Extract known factors from free text.
 def extract_known_factors_from_text(text: Any) -> list[str]:
     """Return canonical factor labels whose aliases appear in free text."""
     normalized = normalize_text(text)
@@ -155,7 +155,7 @@ def extract_known_factors_from_text(text: Any) -> list[str]:
             factors.append(factor)
     return factors
 
-
+# Find the earliest mention of a factor or its aliases in normalized text.
 def factor_mention_start(factor: str, text: str) -> int | None:
     """Return the earliest character offset where `factor` (or an alias) is
     mentioned in already-normalized `text`, or None if it is not mentioned.
