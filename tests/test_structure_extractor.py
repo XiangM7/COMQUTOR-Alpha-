@@ -7,18 +7,21 @@ from comqutor_alpha.structure_engine.structure_extractor import (
 )
 
 
-def _record(claim, factors=None, confidence=0.8):
+def _record(claim, factors=None, confidence=0.8, *, claim_id=None, raw_id=None, evidence=None):
+    raw_id = raw_id or f"source:{abs(hash(claim))}"
     return {
         "run_id": "run1",
         "ticker": "NVDA",
         "agent": "news_agent",
         "claim": claim,
-        "evidence": claim,
+        "evidence": evidence or claim,
         "entities": ["NVDA"],
         "factors": factors or [],
         "direction": "positive",
         "confidence": confidence,
-        "source_agent_output_id": f"source:{abs(hash(claim))}",
+        "claim_id": claim_id or f"{raw_id}:claim:1",
+        "agent_output_id": claim_id or f"{raw_id}:claim:1",
+        "source_agent_output_id": raw_id,
     }
 
 
@@ -143,6 +146,14 @@ def test_negated_causal_relation_is_marked_negated():
     assert edge["confidence"] < 0.5
 
 
+def test_no_evidence_causal_phrase_is_not_asserted():
+    payload = extract_structures_from_records(
+        [_record("There is no evidence that AI demand drives GPU demand.")]
+    )
+
+    assert all(edge["assertion_status"] != "asserted" for edge in payload["edges"])
+
+
 def test_vague_coexistence_does_not_hallucinate_causal_edge():
     payload = extract_structures_from_records(
         [_record("Both AI capex and GPU demand were mentioned in the same earnings call.")]
@@ -150,6 +161,45 @@ def test_vague_coexistence_does_not_hallucinate_causal_edge():
 
     assert payload["nodes"]
     assert payload["edges"] == []
+
+
+def test_same_raw_output_keeps_edges_from_distinct_claims():
+    raw_id = "run1:news_agent:news_report"
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "AI demand drives GPU demand in training workloads.",
+                claim_id=f"{raw_id}:claim:1",
+                raw_id=raw_id,
+            ),
+            _record(
+                "AI demand drives GPU demand across cloud workloads.",
+                claim_id=f"{raw_id}:claim:2",
+                raw_id=raw_id,
+            ),
+        ]
+    )
+
+    edges = [edge for edge in payload["edges"] if edge["edge_type"] == "causal"]
+    assert len(edges) == 2
+    assert {edge["source_record_id"] for edge in edges} == {
+        f"{raw_id}:claim:1",
+        f"{raw_id}:claim:2",
+    }
+    assert all(edge["source_agent_output_id"] == raw_id for edge in edges)
+    assert all(edge["evidence"] for edge in edges)
+
+
+def test_legacy_v1_identity_remains_traceable():
+    record = _record("AI demand drives GPU demand.")
+    record.pop("claim_id")
+    record.pop("source_agent_output_id")
+    record["agent_output_id"] = "legacy_raw_output_id"
+
+    payload = extract_structures_from_records([record])
+
+    assert payload["edges"][0]["source_record_id"] == "legacy_raw_output_id"
+    assert payload["edges"][0]["source_agent_output_id"] == "legacy_raw_output_id"
 
 
 def test_save_extracted_structures_writes_week2_artifact(tmp_path):
@@ -169,6 +219,6 @@ def test_save_extracted_structures_writes_week2_artifact(tmp_path):
 
     payload = save_extracted_structures("run1", output_root=tmp_path)
 
-    assert payload["schema_version"] == "week2.extracted_structures.v1"
+    assert payload["schema_version"] == "week2.extracted_structures.v2"
     assert _has_edge(payload, "GPU Demand", "NVDA Revenue Growth", "causal")
     assert (run_dir / "extracted_structures.json").exists()

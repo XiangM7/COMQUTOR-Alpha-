@@ -1,3 +1,5 @@
+import pytest
+
 from comqutor_alpha.structure_engine.structure_schema import (
     AlphaCandidateScore,
     AlphaMatchRecord,
@@ -161,6 +163,7 @@ def test_alpha_match_record_to_dict_normalizes_candidate_scores_and_limits_to_fi
     assert data["score"] == 1.0
     assert len(data["candidate_scores"]) == 5
     assert all(item["score"] == 1.0 for item in data["candidate_scores"])
+    assert len(data["top_candidates"]) == 3
 
 
 def test_alpha_match_record_to_dict_rejects_invalid_match_status():
@@ -218,6 +221,20 @@ def test_structure_edge_to_dict_clamps_confidence():
 
     assert data["confidence"] == 1.0
     assert data["edge_type"] == "causal"
+
+
+def test_structure_edge_to_dict_rejects_invalid_edge_type():
+    edge = StructureEdge(
+        source="ai_demand",
+        target="gpu_demand",
+        source_label="AI Demand",
+        target_label="GPU Demand",
+        edge_type="dominance",
+        confidence=0.8,
+    )
+
+    with pytest.raises(ValueError, match="Invalid structure edge type"):
+        edge.to_dict()
 
 
 def test_structured_agent_output_to_dict_normalizes_direction_and_confidence():

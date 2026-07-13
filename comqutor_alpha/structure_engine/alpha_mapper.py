@@ -1,11 +1,11 @@
-"""Deterministic Week 2 alpha mapper for structured COMQUTOR claims."""
+"""Week 2 alpha mapping with deterministic admissibility and optional LLM selection."""
 
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
 from typing import Any
 
-from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
+from comqutor_alpha.alpha_library.alpha_loader import build_keyword_index, load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
 from comqutor_alpha.storage.file_store import load_json_record, save_json_record
 from comqutor_alpha.structure_engine.claim_semantics import (
@@ -22,10 +22,12 @@ from comqutor_alpha.structure_engine.factor_normalizer import (
     term_in_text,
 )
 from comqutor_alpha.structure_engine.structure_schema import clamp_score, normalize_direction
+from comqutor_alpha.structure_engine.week2_llm import call_with_timeout
 
 
-SCHEMA_VERSION = "week2.alpha_matches.v1"
-DEFAULT_MIN_MATCH_SCORE = 0.38
+SCHEMA_VERSION = "week2.alpha_matches.v2"
+MAPPER_VERSION = "week2.alpha_mapper.v2"
+DEFAULT_MIN_MATCH_SCORE = 0.35
 DEFAULT_AMBIGUITY_DELTA = 0.14
 DEFAULT_SECONDARY_DELTA = 0.25
 DEFAULT_CLASSIFIER_TIMEOUT_SECONDS = 5.0
@@ -70,6 +72,14 @@ FACTOR_ALPHA_WEIGHTS = {
 def _iter_text_values(values: Iterable[Any]) -> list[str]:
     return [str(item) for item in values if str(item or "").strip()]
 
+
+def _record_text(record: Mapping[str, Any]) -> str:
+    claim = str(record.get("claim") or "").strip()
+    evidence = str(record.get("evidence") or "").strip()
+    if not evidence or normalize_text(evidence) == normalize_text(claim):
+        return claim
+    return f"{claim} {evidence}"
+
 # Extract alpha terms from an AlphaDefinition.
 def _alpha_terms(alpha: AlphaDefinition) -> list[tuple[str, float]]:
     terms: list[tuple[str, float]] = []
@@ -98,13 +108,27 @@ def keyword_score(claim: str, alpha: AlphaDefinition) -> float:
     return clamp_score(matched_weight / 2.6)
 
 
+def _indexed_keyword_matches(
+    text: str,
+    keyword_index: Mapping[str, set[str]],
+) -> dict[str, list[str]]:
+    normalized = normalize_text(text)
+    matches: dict[str, list[str]] = {}
+    for term, alpha_ids in keyword_index.items():
+        if not term_in_text(term, normalized):
+            continue
+        for alpha_id in alpha_ids:
+            matches.setdefault(alpha_id, []).append(term)
+    return {alpha_id: sorted(set(terms)) for alpha_id, terms in matches.items()}
+
+
 def _record_factors(record: Mapping[str, Any]) -> list[str]:
     # Explicit record factors may be raw aliases ("AI demand", "artificial
     # intelligence demand") rather than the canonical label, so normalize
     # them the same way claim text is normalized instead of dropping them.
     raw_factors = _iter_text_values(record.get("factors") or [])
     candidate_factors = [normalize_factor_label(factor) for factor in raw_factors]
-    candidate_factors.extend(extract_known_factors_from_text(str(record.get("claim") or "")))
+    candidate_factors.extend(extract_known_factors_from_text(_record_text(record)))
 
     seen = set()
     normalized = []
@@ -129,7 +153,7 @@ def factor_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> float:
 # Compute the direction score for a claim against an alpha definition.
 def direction_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> float:
     direction = normalize_direction(record.get("direction"))
-    relation = alpha_relation(record.get("claim"), alpha.alpha_id)
+    relation = alpha_relation(_record_text(record), alpha.alpha_id)
     if relation == "risk_relief" and alpha.alpha_id in RISK_ALPHA_IDS:
         return 1.0
     if relation == "invalidation" and alpha.alpha_id in POSITIVE_ALPHA_IDS:
@@ -147,15 +171,25 @@ def direction_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> float:
     return 0.0
 
 # Compute the overall candidate score for a claim against an alpha definition.
-def _candidate_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> dict[str, Any]:
-    claim = str(record.get("claim") or "")
-    keyword = keyword_score(claim, alpha)
+def _candidate_score(
+    record: Mapping[str, Any],
+    alpha: AlphaDefinition,
+    keyword_matches: Mapping[str, list[str]],
+) -> dict[str, Any]:
+    text = _record_text(record)
+    keyword = keyword_score(text, alpha)
     factor = factor_score(record, alpha)
     direction = direction_score(record, alpha)
-    relation = alpha_relation(claim, alpha.alpha_id)
+    relation = alpha_relation(text, alpha.alpha_id)
     semantic = semantic_score_for_relation(relation) if keyword > 0 or factor > 0 else 0.0
-    semantics = analyze_claim_semantics(claim)
-    eligible = keyword > 0 or factor > 0
+    semantics = analyze_claim_semantics(text)
+    matched_factors = [
+        factor_name
+        for factor_name in _record_factors(record)
+        if alpha.alpha_id in FACTOR_ALPHA_WEIGHTS.get(factor_name, {})
+    ]
+    matched_keywords = keyword_matches.get(alpha.alpha_id, [])
+    eligible = bool(matched_keywords) or factor > 0
     rejection_reason = None
     if relation == "mention":
         eligible = False
@@ -181,6 +215,8 @@ def _candidate_score(record: Mapping[str, Any], alpha: AlphaDefinition) -> dict[
         "relation": relation,
         "eligible": eligible,
         "rejection_reason": rejection_reason,
+        "matched_keywords": matched_keywords,
+        "matched_factors": matched_factors,
     }
 
 # Sort candidate scores by descending score and ascending alpha_id for tie-breaking.
@@ -224,23 +260,19 @@ def _apply_optional_classifier(
     classifier: Callable[..., Mapping[str, Any]] | None,
     classifier_enabled: bool,
     timeout_seconds: float,
+    llm_gateway: Any = None,
 ) -> dict[str, Any]:
-    """Apply an injected classifier that enforces the supplied timeout.
-
-    Provider adapters must raise ``TimeoutError`` when that deadline expires.
-    No provider object, raw response, exception text, or credentials are added
-    to the returned artifact.
-    """
+    """Apply selection only after deterministic candidate admissibility."""
     if not classifier_enabled:
         result["classifier"] = _classifier_metadata(False, "disabled")
         return result
     if result["match_status"] == "no_match":
         result["classifier"] = _classifier_metadata(True, "blocked_by_deterministic_no_match")
         return result
-    if result["match_status"] != "ambiguous":
+    if len(result.get("eligible_candidates", [])) < 2:
         result["classifier"] = _classifier_metadata(True, "not_needed")
         return result
-    if classifier is None:
+    if classifier is None and llm_gateway is None:
         result["classifier"] = _classifier_metadata(True, "unavailable")
         return result
 
@@ -250,19 +282,59 @@ def _apply_optional_classifier(
             "alpha_name": item["alpha_name"],
             "score": item["score"],
             "relation": item["relation"],
+            "score_components": {
+                "keyword": item["keyword_score"],
+                "factor": item["factor_score"],
+                "direction": item["direction_score"],
+                "semantic": item["semantic_score"],
+            },
+            "matched_keywords": item.get("matched_keywords", []),
+            "matched_factors": item.get("matched_factors", []),
+            "taxonomy": {
+                "core_thesis": taxonomy[item["alpha_id"]].core_thesis,
+                "trigger_signals": taxonomy[item["alpha_id"]].trigger_signals,
+                "confirmation_signals": taxonomy[item["alpha_id"]].confirmation_signals,
+            },
         }
         for item in result.get("eligible_candidates", [])[:MAX_CLASSIFIER_CANDIDATES]
     ]
     allowed_ids = {item["alpha_id"] for item in candidates}
     request = {
         "claim": str(record.get("claim") or ""),
+        "evidence": str(record.get("evidence") or ""),
+        "factors": _record_factors(record),
         "direction": normalize_direction(record.get("direction")),
         "allowed_alpha_ids": sorted(allowed_ids),
         "candidates": candidates,
     }
 
     try:
-        response = classifier(request, timeout_seconds=timeout_seconds)
+        if llm_gateway is not None:
+            def validate_response(payload):
+                if set(payload) != {"decision", "selected_alpha_id"}:
+                    raise ValueError("classifier response has unexpected fields")
+                decision = str(payload.get("decision") or "").strip().lower()
+                selected_alpha_id = payload.get("selected_alpha_id")
+                if decision == "defer" and selected_alpha_id in (None, ""):
+                    return {"match_status": "ambiguous", "alpha_id": ""}
+                selected_alpha_id = str(selected_alpha_id or "").strip()
+                if decision == "select" and selected_alpha_id in allowed_ids:
+                    return {"match_status": "matched", "alpha_id": selected_alpha_id}
+                raise ValueError("classifier response violates the candidate contract")
+
+            response = llm_gateway.invoke_json(
+                "alpha_classifier",
+                request,
+                validate_response,
+            )
+            if response is None:
+                result["classifier"] = _classifier_metadata(True, "fallback", used=True)
+                return result
+        else:
+            response = call_with_timeout(
+                lambda: classifier(request, timeout_seconds=timeout_seconds),
+                timeout_seconds,
+            )
     except TimeoutError:
         result["classifier"] = _classifier_metadata(True, "timeout", used=True)
         return result
@@ -271,6 +343,9 @@ def _apply_optional_classifier(
         return result
 
     if not isinstance(response, Mapping):
+        result["classifier"] = _classifier_metadata(True, "invalid_output", used=True)
+        return result
+    if set(response) != {"match_status", "alpha_id"}:
         result["classifier"] = _classifier_metadata(True, "invalid_output", used=True)
         return result
 
@@ -299,19 +374,16 @@ def _apply_optional_classifier(
         result["classifier"] = _classifier_metadata(True, "applied", used=True)
         return result
     if status == "ambiguous" and not alpha_id:
-        result["classifier"] = _classifier_metadata(True, "confirmed_ambiguous", used=True)
-        return result
-    if status == "no_match" and not alpha_id:
         result.update(
             {
                 "matched_alpha": None,
                 "matched_alpha_name": None,
-                "match_status": "no_match",
-                "reason": "optional classifier declined all deterministic eligible candidates",
+                "match_status": "ambiguous",
+                "reason": "optional classifier deferred among admissible candidates",
                 "secondary_alphas": [],
             }
         )
-        result["classifier"] = _classifier_metadata(True, "applied", used=True)
+        result["classifier"] = _classifier_metadata(True, "confirmed_ambiguous", used=True)
         return result
 
     result["classifier"] = _classifier_metadata(True, "invalid_output", used=True)
@@ -327,15 +399,22 @@ def map_claim_to_alpha(
     classifier: Callable[..., Mapping[str, Any]] | None = None,
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
+    llm_gateway: Any = None,
 ) -> dict[str, Any]:
     taxonomy = taxonomy or load_alpha_taxonomy()
-    candidates = _sort_candidates([_candidate_score(record, alpha) for alpha in taxonomy.values()])
+    keyword_matches = _indexed_keyword_matches(
+        _record_text(record),
+        build_keyword_index(taxonomy),
+    )
+    candidates = _sort_candidates(
+        [_candidate_score(record, alpha, keyword_matches) for alpha in taxonomy.values()]
+    )
     eligible_candidates = [
         item for item in candidates if item.get("eligible") and item["score"] >= min_score
     ]
     top = eligible_candidates[0] if eligible_candidates else None
     second = eligible_candidates[1] if len(eligible_candidates) > 1 else None
-    semantics = analyze_claim_semantics(record.get("claim"))
+    semantics = analyze_claim_semantics(_record_text(record))
 
     status = "no_match"
     reason = "top score below minimum match threshold"
@@ -387,9 +466,12 @@ def map_claim_to_alpha(
         "run_id": record.get("run_id"),
         "ticker": record.get("ticker"),
         "agent": record.get("agent"),
+        "claim_id": record.get("claim_id") or record.get("agent_output_id"),
         "source_agent_output_id": record.get("source_agent_output_id")
         or record.get("agent_output_id"),
         "claim": record.get("claim"),
+        "evidence": record.get("evidence"),
+        "factors": _record_factors(record),
         "direction": normalize_direction(record.get("direction")),
         "matched_alpha": matched_alpha,
         "matched_alpha_name": matched_alpha_name,
@@ -398,6 +480,7 @@ def map_claim_to_alpha(
         "factor_score": top["factor_score"] if top else 0.0,
         "direction_score": top["direction_score"] if top else 0.0,
         "candidate_scores": candidates[:5],
+        "top_candidates": candidates[:3],
         "eligible_candidates": plausible_candidates,
         "plausible_alphas": [item["alpha_id"] for item in plausible_candidates],
         "secondary_alphas": secondary_alphas,
@@ -412,8 +495,9 @@ def map_claim_to_alpha(
         record,
         taxonomy,
         classifier,
-        classifier_enabled,
+        classifier_enabled or llm_gateway is not None,
         classifier_timeout_seconds,
+        llm_gateway,
     )
 
 # Map a list of structured claim records to their best matching alpha definitions, returning a list of match results.
@@ -424,6 +508,7 @@ def map_structured_records(
     classifier: Callable[..., Mapping[str, Any]] | None = None,
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
+    llm_gateway: Any = None,
 ) -> list[dict[str, Any]]:
     taxonomy = taxonomy or load_alpha_taxonomy()
     results = []
@@ -437,6 +522,7 @@ def map_structured_records(
                 classifier=classifier,
                 classifier_enabled=classifier_enabled,
                 classifier_timeout_seconds=classifier_timeout_seconds,
+                llm_gateway=llm_gateway,
             )
         )
     return results
@@ -449,6 +535,7 @@ def build_alpha_matches_payload(
     classifier: Callable[..., Mapping[str, Any]] | None = None,
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
+    llm_gateway: Any = None,
 ) -> dict[str, Any]:
     taxonomy = taxonomy or load_alpha_taxonomy()
     records = structured_payload.get("records", [])
@@ -456,7 +543,8 @@ def build_alpha_matches_payload(
         records = []
     return {
         "schema_version": SCHEMA_VERSION,
-        "mapper_version": "week2.semantic_mapper.v2",
+        "mapper_version": MAPPER_VERSION,
+        "minimum_match_score": DEFAULT_MIN_MATCH_SCORE,
         "run_id": structured_payload.get("run_id"),
         "ticker": structured_payload.get("ticker"),
         "matches": map_structured_records(
@@ -465,6 +553,7 @@ def build_alpha_matches_payload(
             classifier=classifier,
             classifier_enabled=classifier_enabled,
             classifier_timeout_seconds=classifier_timeout_seconds,
+            llm_gateway=llm_gateway,
         ),
     }
 
@@ -476,6 +565,7 @@ def save_alpha_matches(
     classifier: Callable[..., Mapping[str, Any]] | None = None,
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
+    llm_gateway: Any = None,
 ) -> dict[str, Any]:
     structured_payload = load_json_record(
         run_id,
@@ -487,6 +577,7 @@ def save_alpha_matches(
         classifier=classifier,
         classifier_enabled=classifier_enabled,
         classifier_timeout_seconds=classifier_timeout_seconds,
+        llm_gateway=llm_gateway,
     )
     save_json_record(run_id, "alpha_matches.json", payload, output_root=output_root)
     return payload

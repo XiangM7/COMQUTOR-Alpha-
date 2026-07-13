@@ -16,7 +16,17 @@ VALID_DIRECTIONS = {"positive", "negative", "neutral", "unknown"}
 VALID_EDGE_TYPES = {"causal", "supportive", "conflicting"}
 VALID_MATCH_STATUSES = {"matched", "no_match", "ambiguous"}
 VALID_ASSERTION_STATUSES = {"asserted", "conditional", "negated", "mixed", "unknown"}
+VALID_ALPHA_RELATIONS = {
+    "activation",
+    "invalidation",
+    "risk_relief",
+    "conditional",
+    "mixed",
+    "mention",
+    "unknown",
+}
 MAX_CANDIDATE_SCORES = 5
+MAX_TOP_CANDIDATES = 3
 
 
 def clamp_score(value, minimum=0.0, maximum=1.0):
@@ -64,6 +74,7 @@ class StructuredAgentOutput:
     confidence: float = 0.0
     source_type: str = "unknown"
     output_type: str = "unknown"
+    claim_id: str | None = None
     agent_output_id: str | None = None
     source_agent_output_id: str | None = None
     source_refs: list[str] = field(default_factory=list)
@@ -71,6 +82,7 @@ class StructuredAgentOutput:
     source_section: str | None = None
     assertion_status: str = "unknown"
     semantic_polarity: str = "unknown"
+    extraction_method: str = "deterministic_splitter"
 
     def to_dict(self):
         data = asdict(self)
@@ -97,6 +109,8 @@ class AlphaCandidateScore:
     relation: str = "unknown"
     eligible: bool = False
     rejection_reason: str | None = None
+    matched_keywords: list[str] = field(default_factory=list)
+    matched_factors: list[str] = field(default_factory=list)
 
     def to_dict(self):
         data = asdict(self)
@@ -108,6 +122,14 @@ class AlphaCandidateScore:
             "semantic_score",
         ):
             data[key] = clamp_score(data[key])
+        relation = str(data.get("relation") or "unknown").strip().lower()
+        data["relation"] = relation if relation in VALID_ALPHA_RELATIONS else "unknown"
+        data["matched_keywords"] = _dedupe(
+            [str(value) for value in data.get("matched_keywords") or [] if str(value).strip()]
+        )
+        data["matched_factors"] = _dedupe(
+            [str(value) for value in data.get("matched_factors") or [] if str(value).strip()]
+        )
         return data
 
 
@@ -137,6 +159,10 @@ class AlphaMatchRecord:
     plausible_alphas: list[str] = field(default_factory=list)
     secondary_alphas: list[str] = field(default_factory=list)
     classifier: dict[str, Any] = field(default_factory=dict)
+    claim_id: str | None = None
+    evidence: str = ""
+    factors: list[str] = field(default_factory=list)
+    top_candidates: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self):
         data = asdict(self)
@@ -146,6 +172,10 @@ class AlphaMatchRecord:
 
         status = str(data.get("match_status") or "no_match").strip().lower()
         data["match_status"] = status if status in VALID_MATCH_STATUSES else "no_match"
+        if data["match_status"] == "matched" and not (
+            data.get("matched_alpha") and data.get("matched_alpha_name")
+        ):
+            data["match_status"] = "no_match"
         if data["match_status"] != "matched":
             # A non-matched record must never carry a matched alpha, regardless
             # of what the caller passed in.
@@ -169,9 +199,31 @@ class AlphaMatchRecord:
                         relation=str(candidate.get("relation", "unknown")),
                         eligible=bool(candidate.get("eligible", False)),
                         rejection_reason=candidate.get("rejection_reason"),
+                        matched_keywords=list(candidate.get("matched_keywords") or []),
+                        matched_factors=list(candidate.get("matched_factors") or []),
                     ).to_dict()
                 )
         data["candidate_scores"] = normalized_candidates[:MAX_CANDIDATE_SCORES]
+        top_candidates = data.get("top_candidates") or normalized_candidates
+        normalized_top = []
+        for candidate in top_candidates:
+            if isinstance(candidate, AlphaCandidateScore):
+                normalized_top.append(candidate.to_dict())
+            elif isinstance(candidate, dict):
+                match = next(
+                    (
+                        item
+                        for item in normalized_candidates
+                        if item["alpha_id"] == str(candidate.get("alpha_id") or "")
+                    ),
+                    None,
+                )
+                if match is not None:
+                    normalized_top.append(match)
+        data["top_candidates"] = normalized_top[:MAX_TOP_CANDIDATES]
+        data["factors"] = _dedupe(
+            [str(value) for value in data.get("factors") or [] if str(value).strip()]
+        )
         return data
 
 
@@ -185,12 +237,16 @@ class StructureNode:
     node_type: str = "factor"
     source_records: list[str] = field(default_factory=list)
     evidence: list[str] = field(default_factory=list)
+    source_agent_output_ids: list[str] = field(default_factory=list)
     score: float = 0.0
 
     def to_dict(self):
         data = asdict(self)
         data["score"] = clamp_score(data["score"])
         data["source_records"] = _dedupe([v for v in data["source_records"] if v])
+        data["source_agent_output_ids"] = _dedupe(
+            [v for v in data["source_agent_output_ids"] if v]
+        )
         data["evidence"] = _dedupe([v for v in data["evidence"] if v])
         return data
 
@@ -211,13 +267,16 @@ class StructureEdge:
     source_record_id: str | None = None
     source_agent_output_id: str | None = None
     assertion_status: str = "asserted"
+    evidence: str = ""
+    extraction_method: str = "deterministic_rules"
 
     def to_dict(self):
         data = asdict(self)
         data["confidence"] = clamp_score(data["confidence"])
         edge_type = str(data.get("edge_type") or "").strip().lower()
-        if edge_type in VALID_EDGE_TYPES:
-            data["edge_type"] = edge_type
+        if edge_type not in VALID_EDGE_TYPES:
+            raise ValueError(f"Invalid structure edge type: {edge_type or '<empty>'}")
+        data["edge_type"] = edge_type
         assertion_status = str(data.get("assertion_status") or "unknown").strip().lower()
         data["assertion_status"] = (
             assertion_status if assertion_status in VALID_ASSERTION_STATUSES else "unknown"

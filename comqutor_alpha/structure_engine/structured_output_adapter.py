@@ -6,8 +6,10 @@ import argparse
 import hashlib
 import json
 import re
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from comqutor_alpha.storage.file_store import (
     append_jsonl_record,
@@ -16,7 +18,10 @@ from comqutor_alpha.storage.file_store import (
     validate_run_id_for_path,
 )
 from comqutor_alpha.structure_engine.claim_semantics import analyze_claim_semantics
-from comqutor_alpha.structure_engine.factor_normalizer import extract_known_factors_from_text
+from comqutor_alpha.structure_engine.factor_normalizer import (
+    extract_known_factors_from_text,
+    normalize_factor_label,
+)
 from comqutor_alpha.structure_engine.structure_schema import (
     VALID_DIRECTIONS,
     clamp_score,
@@ -24,7 +29,8 @@ from comqutor_alpha.structure_engine.structure_schema import (
 )
 
 # Constants for structured output schema and entity/factor extraction
-SCHEMA_VERSION = "week1a.structured_agent_outputs.v1"
+SCHEMA_VERSION = "week1a.structured_agent_outputs.v2"
+ADAPTER_VERSION = "week1.claim_extraction.v2"
 ERROR_LOG_ARTIFACT_PATH = "error_logs/structured_output_adapter_errors.jsonl"
 MAX_ERROR_PREVIEW_CHARS = 500
 MAX_CLAIMS_PER_RAW_OUTPUT = 64
@@ -98,6 +104,14 @@ DISCLAIMER_MARKERS = (
     "for informational purposes only",
     "past performance is not indicative",
 )
+LLM_STRUCTURED_AGENTS = {
+    "market_agent",
+    "technical_agent",
+    "sentiment_agent",
+    "news_agent",
+    "fundamental_agent",
+    "fundamentals_agent",
+}
 
 
 def _now():
@@ -392,7 +406,15 @@ def _normalize_source_refs(source_refs, source_agent_output_id=None):
 def validate_structured_output(record):
     if not isinstance(record, dict):
         return False
-    required_text = ("run_id", "ticker", "agent", "claim", "evidence")
+    required_text = (
+        "claim_id",
+        "source_agent_output_id",
+        "run_id",
+        "ticker",
+        "agent",
+        "claim",
+        "evidence",
+    )
     if any(not _normalize_text(record.get(field)) for field in required_text):
         return False
     if not isinstance(record.get("entities"), list):
@@ -419,10 +441,16 @@ def safe_default_record(
     source_agent_output_id=None,
     error_code="INVALID_STRUCTURED_OUTPUT",
 ):
-    del raw_text
     agent = normalize_agent_name(agent)
+    normalized_raw = _normalize_text(raw_text)
+    raw_id = source_agent_output_id
+    if raw_id is None and normalized_raw:
+        raw_id = f"{agent}_{hashlib.sha1(normalized_raw.encode('utf-8')).hexdigest()[:10]}"
+    claim_base = raw_id or f"{agent}_default"
+    claim_id = f"{claim_base}:claim:1"
     return {
-        "agent_output_id": source_agent_output_id or f"{normalize_agent_name(agent)}_default",
+        "claim_id": claim_id,
+        "agent_output_id": claim_id,
         "run_id": run_id,
         "ticker": ticker,
         "agent": agent,
@@ -435,10 +463,13 @@ def safe_default_record(
         "confidence": 0.0,
         "source_type": "unknown",
         "output_type": infer_output_type(agent),
-        "source_agent_output_id": source_agent_output_id,
-        "source_refs": [source_agent_output_id] if source_agent_output_id else [],
+        "source_agent_output_id": raw_id,
+        "source_refs": [raw_id] if raw_id else [],
+        "claim_index": 0,
+        "source_section": None,
         "assertion_status": "unknown",
         "semantic_polarity": "unknown",
+        "extraction_method": "deterministic_fallback",
         "adapter_warning": reason,
         "adapter_error_code": error_code,
     }
@@ -462,8 +493,99 @@ def _error_payload(run_id, ticker, raw_record, structured_record):
         "created_at": _now(),
     }
 
+
+def _validated_llm_segments(payload: Mapping[str, Any], raw_text: str) -> list[dict[str, Any]]:
+    if set(payload) != {"claims"}:
+        raise ValueError("structured claim response has unexpected fields")
+    claims = payload.get("claims")
+    if not isinstance(claims, list) or not 1 <= len(claims) <= MAX_CLAIMS_PER_RAW_OUTPUT:
+        raise ValueError("claims must be a non-empty bounded list")
+
+    normalized_raw = _normalize_text(raw_text).lower()
+    segments = []
+    required_fields = {
+        "claim",
+        "evidence",
+        "entities",
+        "factors",
+        "direction",
+        "confidence",
+        "source_section",
+    }
+    for item in claims:
+        if not isinstance(item, Mapping):
+            raise ValueError("claim item must be an object")
+        if set(item) != required_fields:
+            raise ValueError("claim item fields do not match the strict schema")
+        claim = _normalize_text(item.get("claim"))
+        evidence = str(item.get("evidence") or "").strip()
+        normalized_evidence = _normalize_text(evidence)
+        if not _is_meaningful_claim(claim) or not normalized_evidence:
+            raise ValueError("claim and evidence are required")
+        if len(claim) > MAX_CLAIM_CHARS or len(evidence) > MAX_CLAIM_CHARS:
+            raise ValueError("claim or evidence is too long")
+        if normalized_evidence.lower() not in normalized_raw:
+            raise ValueError("evidence must be present in the raw report")
+
+        entities = item.get("entities")
+        factors = item.get("factors")
+        if not isinstance(entities, list) or not isinstance(factors, list):
+            raise ValueError("entities and factors must be lists")
+        if len(entities) > 32 or len(factors) > 32:
+            raise ValueError("entities or factors exceed bounds")
+
+        raw_direction = str(item.get("direction") or "unknown").strip().lower()
+        direction = normalize_direction(raw_direction)
+        if direction == "unknown" and raw_direction not in {"", "unknown"}:
+            raise ValueError("invalid direction")
+        try:
+            confidence = float(item.get("confidence"))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("invalid confidence") from exc
+        if not 0.0 <= confidence <= 1.0:
+            raise ValueError("confidence must be between zero and one")
+
+        source_section = item.get("source_section")
+        if source_section is not None and not isinstance(source_section, str):
+            raise ValueError("source_section must be text or null")
+        segments.append(
+            {
+                "claim": claim,
+                "evidence": evidence,
+                "entities": [str(value)[:200] for value in entities if str(value).strip()],
+                "factors": [str(value)[:200] for value in factors if str(value).strip()],
+                "direction": direction,
+                "confidence": confidence,
+                "source_section": _normalize_text(source_section)[:200] or None,
+                "extraction_method": "llm_strict_json",
+            }
+        )
+    return segments
+
+
+def _llm_segments(
+    llm_gateway: Any,
+    *,
+    agent: str,
+    ticker: str,
+    raw_text: str,
+) -> list[dict[str, Any]] | None:
+    if llm_gateway is None or agent not in LLM_STRUCTURED_AGENTS:
+        return None
+    return llm_gateway.invoke_json(
+        "structured_claims",
+        {"ticker": ticker, "agent": agent, "report": raw_text},
+        lambda payload: _validated_llm_segments(payload, raw_text),
+    )
+
+
+def _normalized_values(values: Any) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    return list(dict.fromkeys(str(value) for value in values if str(value).strip()))
+
 # Adapt one raw agent output into one or more structured claim records.
-def adapt_raw_agent_outputs(raw_record, run_id, ticker):
+def adapt_raw_agent_outputs(raw_record, run_id, ticker, *, llm_gateway=None):
     if not isinstance(raw_record, dict):
         return [safe_default_record(
             run_id,
@@ -475,9 +597,6 @@ def adapt_raw_agent_outputs(raw_record, run_id, ticker):
         )]
     agent = normalize_agent_name(raw_record.get("agent") or raw_record.get("tradingagents_agent"))
     raw_text = raw_record.get("raw_output")
-    # Preserve traceability: the raw writer stamps every record with a stable
-    # agent_output_id, so structured output should inherit it rather than mint
-    # an unrelated identifier.
     source_agent_output_id = raw_record.get("agent_output_id")
     if not _normalize_text(raw_text):
         return [safe_default_record(
@@ -490,7 +609,20 @@ def adapt_raw_agent_outputs(raw_record, run_id, ticker):
             error_code="EMPTY_RAW_OUTPUT",
         )]
 
-    segments = extract_claim_segments(raw_text)
+    base_id = source_agent_output_id or (
+        f"{agent}_{hashlib.sha1(_normalize_text(raw_text).encode('utf-8')).hexdigest()[:10]}"
+    )
+    source_agent_output_id = str(base_id)
+    segments = _llm_segments(
+        llm_gateway,
+        agent=agent,
+        ticker=ticker,
+        raw_text=str(raw_text),
+    )
+    if segments is None:
+        segments = extract_claim_segments(raw_text)
+        for segment in segments:
+            segment["extraction_method"] = "deterministic_splitter"
     if not segments:
         return [safe_default_record(
             run_id,
@@ -502,26 +634,44 @@ def adapt_raw_agent_outputs(raw_record, run_id, ticker):
             error_code="NO_MEANINGFUL_CLAIMS",
         )]
 
-    base_id = source_agent_output_id or (
-        f"{agent}_{hashlib.sha1(_normalize_text(raw_text).encode('utf-8')).hexdigest()[:10]}"
-    )
     records = []
     for index, segment in enumerate(segments):
         claim = segment["claim"]
-        semantics = analyze_claim_semantics(claim)
-        record_id = base_id if len(segments) == 1 else f"{base_id}:claim:{index + 1}"
+        evidence = segment["evidence"]
+        semantics = analyze_claim_semantics(f"{claim} {evidence}")
+        claim_id = f"{base_id}:claim:{index + 1}"
+        verified_entities = extract_entities(evidence, ticker)
+        normalized_source = _normalize_text(evidence).lower()
+        proposed_entities = [
+            value
+            for value in _normalized_values(segment.get("entities"))
+            if value.lower() in normalized_source
+        ]
+        entities = [*proposed_entities, *verified_entities]
+        verified_factors = extract_factors(evidence)
+        factors = [
+            normalize_factor_label(value)
+            for value in _normalized_values(segment.get("factors"))
+            if normalize_factor_label(value) in verified_factors
+        ]
+        factors.extend(verified_factors)
         record = {
-            "agent_output_id": record_id,
+            "claim_id": claim_id,
+            "agent_output_id": claim_id,
             "run_id": run_id,
             "ticker": ticker,
             "agent": agent,
             "timestamp": _now(),
             "claim": claim,
-            "evidence": segment["evidence"],
-            "entities": extract_entities(claim, ticker),
-            "factors": extract_factors(claim),
-            "direction": normalize_direction(infer_direction(claim)),
-            "confidence": estimate_confidence(claim),
+            "evidence": evidence,
+            "entities": list(dict.fromkeys(entities)),
+            "factors": list(dict.fromkeys(value for value in factors if value != "Unknown")),
+            "direction": normalize_direction(segment.get("direction") or infer_direction(claim)),
+            "confidence": clamp_score(
+                segment.get("confidence")
+                if segment.get("confidence") is not None
+                else estimate_confidence(claim)
+            ),
             "source_type": infer_source_type(agent, claim),
             "output_type": infer_output_type(agent),
             "source_agent_output_id": source_agent_output_id,
@@ -532,6 +682,7 @@ def adapt_raw_agent_outputs(raw_record, run_id, ticker):
             "source_section": segment.get("source_section"),
             "assertion_status": semantics.assertion_status,
             "semantic_polarity": semantics.semantic_polarity,
+            "extraction_method": segment.get("extraction_method", "deterministic_splitter"),
         }
         if validate_structured_output(record):
             records.append(record)
@@ -545,24 +696,35 @@ def adapt_raw_agent_outputs(raw_record, run_id, ticker):
             source_agent_output_id=source_agent_output_id,
             error_code="STRUCTURED_VALIDATION_FAILED",
         )
-        fallback["agent_output_id"] = record_id
+        fallback["claim_id"] = claim_id
+        fallback["agent_output_id"] = claim_id
         fallback["claim_index"] = index
         records.append(fallback)
     return records
 
 
 # Preserve the original single-record helper for existing callers.
-def adapt_raw_agent_output(raw_record, run_id, ticker):
-    return adapt_raw_agent_outputs(raw_record, run_id, ticker)[0]
+def adapt_raw_agent_output(raw_record, run_id, ticker, *, llm_gateway=None):
+    return adapt_raw_agent_outputs(
+        raw_record,
+        run_id,
+        ticker,
+        llm_gateway=llm_gateway,
+    )[0]
 
 # Adapt all raw agent output records in a run directory into structured claim records, logging any warnings
-def adapt_run_outputs(run_dir):
+def adapt_run_outputs(run_dir, *, llm_gateway=None):
     run_dir, run_id, output_root = _run_context_from_dir(run_dir)
     raw_payload = load_raw_agent_outputs(run_dir)
     ticker = str(raw_payload.get("ticker") or "unknown").upper()
     records = []
     for raw_record in raw_payload.get("agent_outputs", []):
-        adapted_records = adapt_raw_agent_outputs(raw_record, run_id, ticker)
+        adapted_records = adapt_raw_agent_outputs(
+            raw_record,
+            run_id,
+            ticker,
+            llm_gateway=llm_gateway,
+        )
         for record in adapted_records:
             if record.get("adapter_warning"):
                 _log_error(
@@ -573,16 +735,22 @@ def adapt_run_outputs(run_dir):
             records.append(record)
     return {
         "schema_version": SCHEMA_VERSION,
-        "adapter_version": "week1.claim_splitter.v2",
+        "adapter_version": ADAPTER_VERSION,
         "run_id": run_id,
         "ticker": ticker,
         "records": records,
+        "metadata": {
+            "llm_enabled": llm_gateway is not None,
+            "llm_record_count": sum(
+                record.get("extraction_method") == "llm_strict_json" for record in records
+            ),
+        },
     }
 
 # Save the adapted structured agent outputs to a JSON file in the run directory, returning the path
-def save_structured_agent_outputs(run_dir):
+def save_structured_agent_outputs(run_dir, *, llm_gateway=None):
     run_dir, run_id, output_root = _run_context_from_dir(run_dir)
-    output = adapt_run_outputs(run_dir)
+    output = adapt_run_outputs(run_dir, llm_gateway=llm_gateway)
     return save_json_record(
         run_id,
         "structured_agent_outputs.json",

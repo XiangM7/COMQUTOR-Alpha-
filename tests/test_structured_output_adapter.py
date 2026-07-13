@@ -46,7 +46,9 @@ def test_structured_record_traces_back_to_raw_agent_output_id():
 
     structured = adapt_raw_agent_output(raw_record, "run1", "NVDA")
 
-    assert structured["agent_output_id"] == raw_record["agent_output_id"]
+    assert structured["claim_id"] == f"{raw_record['agent_output_id']}:claim:1"
+    assert structured["agent_output_id"] == structured["claim_id"]
+    assert structured["claim_id"] != raw_record["agent_output_id"]
     assert structured["source_agent_output_id"] == raw_record["agent_output_id"]
     assert structured["source_refs"] == [raw_record["agent_output_id"]]
 
@@ -58,7 +60,8 @@ def test_safe_default_record_preserves_traceability_for_empty_raw_output():
 
     assert structured["claim"] == "unknown"
     assert structured["adapter_warning"] == "raw output is empty"
-    assert structured["agent_output_id"] == raw_record["agent_output_id"]
+    assert structured["claim_id"] == f"{raw_record['agent_output_id']}:claim:1"
+    assert structured["source_agent_output_id"] == raw_record["agent_output_id"]
     assert structured["source_refs"] == [raw_record["agent_output_id"]]
 
 
@@ -67,7 +70,8 @@ def test_safe_default_record_has_no_traceability_when_raw_row_is_invalid():
 
     assert structured["adapter_warning"] == "raw row is not an object"
     assert structured["source_refs"] == []
-    assert structured["agent_output_id"] == "unknown_agent_default"
+    assert structured["source_agent_output_id"] is None
+    assert structured["claim_id"] == "unknown_agent_default:claim:1"
 
 
 def test_adapter_writes_file_and_logs_invalid_rows(tmp_path):
@@ -89,7 +93,7 @@ def test_adapter_writes_file_and_logs_invalid_rows(tmp_path):
     assert path.exists()
     payload = json.loads(path.read_text())
     assert payload["schema_version"] == SCHEMA_VERSION
-    assert SCHEMA_VERSION == "week1a.structured_agent_outputs.v1"
+    assert SCHEMA_VERSION == "week1a.structured_agent_outputs.v2"
     assert len(payload["records"]) == 2
     log_path = run_dir / "error_logs" / "structured_output_adapter_errors.jsonl"
     assert log_path.exists()
@@ -206,7 +210,7 @@ Custom silicon could reduce NVIDIA dependency over time.
     records = adapt_raw_agent_outputs(raw_record, "run1", "NVDA")
 
     assert len(records) == 3
-    assert len({record["agent_output_id"] for record in records}) == 3
+    assert len({record["claim_id"] for record in records}) == 3
     assert {record["source_section"] for record in records} == {"Demand", "Risk"}
     assert all(record["source_agent_output_id"] == raw_record["agent_output_id"] for record in records)
     assert all(record["source_refs"] == [raw_record["agent_output_id"]] for record in records)
@@ -227,4 +231,6 @@ def test_legacy_raw_record_without_agent_output_id_still_adapts():
 
     assert len(records) == 1
     assert records[0]["agent_output_id"].startswith("news_agent_")
-    assert records[0]["source_agent_output_id"] is None
+    assert records[0]["source_agent_output_id"].startswith("news_agent_")
+    assert records[0]["claim_id"].endswith(":claim:1")
+    assert records[0]["claim_id"] != records[0]["source_agent_output_id"]

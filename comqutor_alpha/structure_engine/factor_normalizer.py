@@ -111,7 +111,9 @@ FACTOR_ALIASES = {
         "fed cut",
         "easing cycle",
         "discount rates fall",
+        "discount rates are easing",
         "treasury yields fall",
+        "treasury yields are falling",
     ),
     "Inference Demand": (
         "inference demand",

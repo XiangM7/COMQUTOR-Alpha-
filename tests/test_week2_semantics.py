@@ -1,4 +1,5 @@
 import json
+import time
 
 import pytest
 
@@ -148,6 +149,9 @@ def test_optional_classifier_can_choose_only_from_deterministic_candidates():
     )
 
     assert set(seen["allowed_alpha_ids"]) == {"A101", "A304"}
+    assert seen["evidence"]
+    assert set(seen["factors"]) == {"AI Demand", "Valuation Risk"}
+    assert all(candidate["taxonomy"]["core_thesis"] for candidate in seen["candidates"])
     assert result["match_status"] == "matched"
     assert result["matched_alpha"] == "A101"
     selected = next(
@@ -224,3 +228,53 @@ def test_classifier_cannot_bypass_deterministic_no_match():
     assert calls == []
     assert result["match_status"] == "no_match"
     assert result["classifier"]["status"] == "blocked_by_deterministic_no_match"
+
+
+def test_mapper_uses_evidence_and_preserves_top_three_contract():
+    record = _record("Management discussed demand conditions.")
+    record["evidence"] = (
+        "AI training demand is accelerating and cloud providers are buying more GPUs."
+    )
+
+    result = map_claim_to_alpha(record)
+
+    assert result["match_status"] == "matched"
+    assert result["matched_alpha"] == "A101"
+    assert result["evidence"] == record["evidence"]
+    assert 1 <= len(result["top_candidates"]) <= 3
+    assert result["top_candidates"] == result["candidate_scores"][:3]
+    assert result["top_candidates"][0]["matched_keywords"]
+
+
+def test_classifier_cannot_turn_admissible_candidates_into_no_match():
+    def classifier(_request, *, timeout_seconds):
+        del timeout_seconds
+        return {"match_status": "no_match", "alpha_id": None}
+
+    result = map_claim_to_alpha(
+        _ambiguous_record(),
+        classifier=classifier,
+        classifier_enabled=True,
+    )
+
+    assert result["match_status"] == "ambiguous"
+    assert result["classifier"]["status"] == "invalid_output"
+
+
+def test_injected_classifier_has_a_real_caller_side_timeout():
+    def classifier(_request, *, timeout_seconds):
+        del timeout_seconds
+        time.sleep(0.2)
+        return {"match_status": "matched", "alpha_id": "A101"}
+
+    started = time.monotonic()
+    result = map_claim_to_alpha(
+        _ambiguous_record(),
+        classifier=classifier,
+        classifier_enabled=True,
+        classifier_timeout_seconds=0.02,
+    )
+
+    assert result["match_status"] == "ambiguous"
+    assert result["classifier"]["status"] == "timeout"
+    assert time.monotonic() - started < 0.15

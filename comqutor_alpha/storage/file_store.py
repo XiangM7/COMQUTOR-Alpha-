@@ -22,6 +22,8 @@ ALLOWED_ARTIFACT_FILENAMES = {
 ALLOWED_ARTIFACT_PATHS = {
     *ALLOWED_ARTIFACT_FILENAMES,
     "error_logs/structured_output_adapter_errors.jsonl",
+    "error_logs/week2_llm_errors.jsonl",
+    "error_logs/week2_pipeline_errors.jsonl",
 }
 
 # Validate and normalize a request run_id.

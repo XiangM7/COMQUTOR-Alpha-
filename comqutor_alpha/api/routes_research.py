@@ -14,21 +14,35 @@ from comqutor_alpha.adapters.tradingagents_output_writer import (
     build_raw_agent_output_record,
 )
 from comqutor_alpha.storage.file_store import (
+    append_jsonl_record,
     load_json_record,
     load_json_record_if_exists,
     run_dir_for,
     save_json_record,
     validate_run_id_for_path,
 )
+from comqutor_alpha.structure_engine.alpha_mapper import save_alpha_matches
+from comqutor_alpha.structure_engine.structure_extractor import save_extracted_structures
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     ERROR_LOG_ARTIFACT_PATH,
     save_structured_agent_outputs,
+)
+from comqutor_alpha.structure_engine.week2_llm import (
+    ERROR_LOG_ARTIFACT_PATH as WEEK2_LLM_ERROR_LOG_ARTIFACT_PATH,
+    build_server_week2_llm_gateway,
 )
 
 
 logger = logging.getLogger(__name__)
 
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
+PIPELINE_ERROR_LOG_ARTIFACT_PATH = "error_logs/week2_pipeline_errors.jsonl"
+REQUIRED_COMPLETION_ARTIFACTS = (
+    "raw_agent_outputs",
+    "structured_agent_outputs",
+    "alpha_matches",
+    "extracted_structures",
+)
 
 # Validate and normalize a request ticker.
 def validate_ticker(raw):
@@ -185,6 +199,8 @@ def _create_offline_run(payload, output_root):
             "metadata": True,
             "raw_agent_outputs": True,
             "structured_agent_outputs": False,
+            "alpha_matches": False,
+            "extracted_structures": False,
             "final_report": False,
         },
     }
@@ -220,6 +236,8 @@ def build_research_response(run_id, output_root="outputs/runs"):
     alpha_matches_path = run_dir / "alpha_matches.json"
     extracted_structures_path = run_dir / "extracted_structures.json"
     error_log_path = run_dir / ERROR_LOG_ARTIFACT_PATH
+    week2_llm_error_log_path = run_dir / WEEK2_LLM_ERROR_LOG_ARTIFACT_PATH
+    pipeline_error_log_path = run_dir / PIPELINE_ERROR_LOG_ARTIFACT_PATH
     metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
     raw_payload = load_json_record_if_exists(
         run_id,
@@ -240,19 +258,64 @@ def build_research_response(run_id, output_root="outputs/runs"):
         "alpha_matches": alpha_matches_path.exists(),
         "extracted_structures": extracted_structures_path.exists(),
         "structured_output_error_logs": error_log_path.exists(),
+        "week2_llm_error_logs": week2_llm_error_log_path.exists(),
+        "week2_pipeline_error_logs": pipeline_error_log_path.exists(),
     }
+    complete = all(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
+    has_any = any(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
 
     return {
         "run_id": run_id,
         "ticker": ticker,
-        "status": "completed" if raw_path.exists() and structured_path.exists() else "partial",
+        "status": "completed" if complete else ("partial" if has_any else "failed"),
         "artifacts": artifacts,
         "agent_output_count": _count_raw_outputs(raw_payload),
         "structured_output_count": _count_structured_outputs(structured_payload),
     }
 
 # Run a research request with the given payload, optionally using a custom runner.
-def run_research_request(payload, runner=None, output_root="outputs/runs"):
+def _log_pipeline_error(run_id, output_root, stage):
+    append_jsonl_record(
+        run_id,
+        PIPELINE_ERROR_LOG_ARTIFACT_PATH,
+        {
+            "run_id": run_id,
+            "stage": stage,
+            "error_code": "WEEK2_ARTIFACT_GENERATION_FAILED",
+            "created_at": _utc_timestamp(),
+        },
+        output_root=output_root,
+    )
+
+
+def _run_week1_week2_artifact_pipeline(run_dir, llm_gateway=None):
+    run_dir = Path(run_dir).expanduser().resolve()
+    run_id = validate_run_id_for_path(run_dir.name)
+    output_root = run_dir.parent
+
+    try:
+        save_structured_agent_outputs(run_dir, llm_gateway=llm_gateway)
+    except Exception:
+        _log_pipeline_error(run_id, output_root, "structured_agent_outputs")
+        return
+
+    for stage, writer in (
+        ("alpha_matches", save_alpha_matches),
+        ("extracted_structures", save_extracted_structures),
+    ):
+        try:
+            writer(run_id, output_root=output_root, llm_gateway=llm_gateway)
+        except Exception:
+            _log_pipeline_error(run_id, output_root, stage)
+
+
+def run_research_request(
+    payload,
+    runner=None,
+    output_root="outputs/runs",
+    *,
+    week2_llm_gateway=None,
+):
     payload = _normalize_payload(payload)
     try:
         payload = {**payload, "ticker": validate_ticker(payload.get("ticker"))}
@@ -276,7 +339,9 @@ def run_research_request(payload, runner=None, output_root="outputs/runs"):
         raw_path = run_dir / "raw_agent_outputs.json"
         if not raw_path.exists():
             raise FileNotFoundError("raw_agent_outputs.json not found")
-        save_structured_agent_outputs(run_dir)
+        if week2_llm_gateway is None:
+            week2_llm_gateway = build_server_week2_llm_gateway(run_id, run_dir.parent)
+        _run_week1_week2_artifact_pipeline(run_dir, week2_llm_gateway)
         return build_research_response(run_id, output_root=output_root)
     except Exception as exc:
         error_response = _map_exception_to_error(payload, exc)

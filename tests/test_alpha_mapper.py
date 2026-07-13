@@ -2,6 +2,8 @@ import inspect
 import json
 from pathlib import Path
 
+import pytest
+
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.structure_engine import alpha_mapper
 from comqutor_alpha.structure_engine.alpha_mapper import (
@@ -142,6 +144,48 @@ def test_labeled_claim_accuracy_is_at_least_80_percent():
     }
 
 
+@pytest.mark.parametrize(
+    ("text", "direction", "expected_alpha"),
+    [
+        ("GPU demand is increasing due to AI training.", "positive", "A101"),
+        (
+            "Enterprise AI applications are driving inference workloads.",
+            "positive",
+            "A102",
+        ),
+        ("Datacenter power and cooling demand is rising.", "positive", "A103"),
+        (
+            "Semiconductor inventory is improving and chip demand is recovering.",
+            "positive",
+            "A201",
+        ),
+        (
+            "Revenue guidance was raised due to strong customer demand.",
+            "positive",
+            "A301",
+        ),
+        ("High valuation is creating downside risk.", "negative", "A304"),
+        (
+            "Credit spreads are widening and recession risk is rising.",
+            "negative",
+            "A501",
+        ),
+        (
+            "AI stocks are rising due to strong investor attention.",
+            "positive",
+            "A601",
+        ),
+    ],
+)
+def test_development_plan_acceptance_sentence_maps_strictly(
+    text, direction, expected_alpha
+):
+    result = map_claim_to_alpha(_record(text, direction=direction))
+
+    assert result["match_status"] == "matched"
+    assert result["matched_alpha"] == expected_alpha
+
+
 def test_no_match_does_not_force_bad_alpha():
     result = map_claim_to_alpha(
         _record("The company signed an ordinary office lease with no market signal.")
@@ -149,6 +193,20 @@ def test_no_match_does_not_force_bad_alpha():
 
     assert result["match_status"] == "no_match"
     assert result["matched_alpha"] is None
+
+
+def test_legacy_v1_identity_remains_traceable():
+    record = _record(
+        "AI training demand is accelerating and GPU demand is rising.",
+        factors=["AI Demand", "GPU Demand"],
+    )
+    record.pop("source_agent_output_id")
+    record["agent_output_id"] = "legacy_raw_output_id"
+
+    result = map_claim_to_alpha(record)
+
+    assert result["claim_id"] == "legacy_raw_output_id"
+    assert result["source_agent_output_id"] == "legacy_raw_output_id"
 
 
 def test_ambiguous_match_is_explicit():
@@ -195,6 +253,6 @@ def test_save_alpha_matches_writes_week2_artifact(tmp_path):
 
     payload = save_alpha_matches("run1", output_root=tmp_path)
 
-    assert payload["schema_version"] == "week2.alpha_matches.v1"
+    assert payload["schema_version"] == "week2.alpha_matches.v2"
     assert payload["matches"][0]["matched_alpha"] == "A101"
     assert (run_dir / "alpha_matches.json").exists()

@@ -1,4 +1,4 @@
-"""Deterministic Week 2 structure extraction from structured claim records."""
+"""Week 2 claim-level structure extraction with a deterministic fallback."""
 
 from __future__ import annotations
 
@@ -15,10 +15,16 @@ from comqutor_alpha.structure_engine.factor_normalizer import (
     normalize_text,
     term_in_text,
 )
-from comqutor_alpha.structure_engine.structure_schema import clamp_score
+from comqutor_alpha.structure_engine.structure_schema import (
+    VALID_ASSERTION_STATUSES,
+    VALID_EDGE_TYPES,
+    clamp_score,
+)
 
 
-SCHEMA_VERSION = "week2.extracted_structures.v1"
+SCHEMA_VERSION = "week2.extracted_structures.v2"
+EXTRACTOR_VERSION = "week2.structure_extractor.v2"
+MAX_LLM_EDGES_PER_CLAIM = 32
 
 CONFLICT_WORDS = (
     "but",
@@ -32,11 +38,13 @@ CONFLICT_WORDS = (
     "downside risk",
 )
 ACTIVE_CAUSAL_PATTERN = re.compile(
-    r"\b(drive|drives|raise|raises|boost|boosts|fuel|fuels|lead to|leads to|"
-    r"push|pushes|increase|increases|expand|expands)\b"
+    r"\b(drive|drives|driving|raise|raises|raising|boost|boosts|boosting|fuel|fuels|"
+    r"fueling|lead to|leads to|leading to|push|pushes|pushing|increase|increases|"
+    r"increasing|expand|expands|expanding)\b"
 )
 ACTIVE_SUPPORT_PATTERN = re.compile(
-    r"\b(support|supports|reinforce|reinforces|confirm|confirms|help|helps)\b"
+    r"\b(support|supports|supporting|reinforce|reinforces|reinforcing|confirm|confirms|"
+    r"confirming|help|helps|helping)\b"
 )
 PASSIVE_RELATION_PATTERN = re.compile(
     r"\b(?:is|are|was|were|be|been|being)\s+"
@@ -95,7 +103,7 @@ def _extract_factors(record: Mapping[str, Any]) -> list[str]:
         if normalized != "Unknown":
             factors.append(normalized)
 
-    factors.extend(extract_known_factors_from_text(record.get("claim")))
+    factors.extend(extract_known_factors_from_text(_record_text(record)))
 
     seen = set()
     result = []
@@ -111,8 +119,31 @@ def _has_any(text: str, terms: Iterable[str]) -> bool:
 
 
 def _source_record_id(record: Mapping[str, Any]) -> str | None:
-    value = record.get("source_agent_output_id") or record.get("agent_output_id")
+    value = (
+        record.get("claim_id")
+        or record.get("agent_output_id")
+        or record.get("source_agent_output_id")
+    )
     return str(value) if value else None
+
+
+def _source_agent_output_id(record: Mapping[str, Any]) -> str | None:
+    value = record.get("source_agent_output_id")
+    if value is None and not record.get("claim_id"):
+        value = record.get("agent_output_id")
+    return str(value) if value else None
+
+
+def _record_text(record: Mapping[str, Any]) -> str:
+    claim = str(record.get("claim") or "").strip()
+    evidence = str(record.get("evidence") or "").strip()
+    if not evidence or normalize_text(evidence) == normalize_text(claim):
+        return claim
+    return f"{claim} {evidence}"
+
+
+def _evidence_text(record: Mapping[str, Any]) -> str:
+    return str(record.get("evidence") or record.get("claim") or "").strip()
 
 
 def _make_node(factor: str, record: Mapping[str, Any]) -> dict[str, Any]:
@@ -124,14 +155,19 @@ def _make_node(factor: str, record: Mapping[str, Any]) -> dict[str, Any]:
         "canonical_factor": factor,
         "node_type": "factor",
         "source_records": [_source_record_id(record)] if _source_record_id(record) else [],
-        "evidence": [str(record.get("claim") or "")],
+        "source_agent_output_ids": (
+            [_source_agent_output_id(record)]
+            if _source_agent_output_id(record)
+            else []
+        ),
+        "evidence": [str(record.get("evidence") or record.get("claim") or "")],
         "score": clamp_score(record.get("confidence", 0.0)),
     }
 
 
 def _merge_node(existing: dict[str, Any], node: dict[str, Any]) -> dict[str, Any]:
     existing["score"] = clamp_score(max(existing.get("score", 0.0), node.get("score", 0.0)))
-    for key in ("source_records", "evidence"):
+    for key in ("source_records", "source_agent_output_ids", "evidence"):
         for value in node.get(key, []):
             if value and value not in existing[key]:
                 existing[key].append(value)
@@ -147,6 +183,7 @@ def _edge(
     reason: str,
     confidence: float,
     assertion_status: str = "asserted",
+    extraction_method: str = "deterministic_rules",
 ) -> dict[str, Any]:
     ticker = record.get("ticker")
     source_label = _display_label(source_factor, ticker)
@@ -165,7 +202,9 @@ def _edge(
         "assertion_status": assertion_status,
         "source_claim": claim,
         "source_record_id": record_id,
-        "source_agent_output_id": record.get("source_agent_output_id"),
+        "source_agent_output_id": _source_agent_output_id(record),
+        "evidence": str(record.get("evidence") or claim),
+        "extraction_method": extraction_method,
     }
 
 
@@ -176,9 +215,9 @@ def _plausible_causal_direction(source: str, target: str) -> bool:
 
 
 def _assertion_status(text: str, bridge: str) -> str:
-    if NEGATED_RELATION_PATTERN.search(bridge):
-        return "negated"
     semantics = analyze_claim_semantics(text)
+    if NEGATED_RELATION_PATTERN.search(bridge) or semantics.negated:
+        return "negated"
     if semantics.conditional:
         return "conditional"
     return "asserted"
@@ -203,7 +242,7 @@ def _relation_reason(edge_type: str, assertion_status: str, passive: bool = Fals
 
 
 def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[str, Any]]:
-    text = normalize_text(record.get("claim"))
+    text = normalize_text(_evidence_text(record))
     if len(factors) < 2 or not text:
         return []
 
@@ -311,11 +350,125 @@ def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[s
     return edges
 
 
-def extract_structures_from_records(records: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+def _llm_relation_is_evidence_backed(
+    edge_type: str,
+    source_factor: str,
+    target_factor: str,
+    text: str,
+) -> bool:
+    if factor_mention_span(source_factor, text) is None:
+        return False
+    if factor_mention_span(target_factor, text) is None:
+        return False
+    if edge_type == "causal":
+        return bool(ACTIVE_CAUSAL_PATTERN.search(text) or PASSIVE_RELATION_PATTERN.search(text))
+    if edge_type == "supportive":
+        return bool(ACTIVE_SUPPORT_PATTERN.search(text) or "supported by" in text)
+    return _has_any(text, CONFLICT_WORDS)
+
+
+def _validated_llm_edges(
+    payload: Mapping[str, Any],
+    record: Mapping[str, Any],
+    factors: list[str],
+) -> list[dict[str, Any]]:
+    raw_edges = payload.get("edges")
+    if set(payload) != {"edges"}:
+        raise ValueError("structure response has unexpected fields")
+    if not isinstance(raw_edges, list) or len(raw_edges) > MAX_LLM_EDGES_PER_CLAIM:
+        raise ValueError("edges must be a bounded list")
+
+    allowed = set(factors)
+    text = normalize_text(_evidence_text(record))
+    semantics = analyze_claim_semantics(text)
+    edges = []
+    required_fields = {
+        "source_factor",
+        "target_factor",
+        "edge_type",
+        "assertion_status",
+        "confidence",
+    }
+    for item in raw_edges:
+        if not isinstance(item, Mapping):
+            raise ValueError("edge must be an object")
+        if set(item) != required_fields:
+            raise ValueError("edge fields do not match the strict schema")
+        source_factor = normalize_factor_label(item.get("source_factor"))
+        target_factor = normalize_factor_label(item.get("target_factor"))
+        edge_type = str(item.get("edge_type") or "").strip().lower()
+        assertion_status = str(item.get("assertion_status") or "unknown").strip().lower()
+        if source_factor not in allowed or target_factor not in allowed:
+            raise ValueError("edge factor is outside the deterministic factor set")
+        if source_factor == target_factor or edge_type not in VALID_EDGE_TYPES:
+            raise ValueError("invalid edge endpoints or type")
+        if assertion_status not in VALID_ASSERTION_STATUSES:
+            raise ValueError("invalid assertion status")
+        try:
+            confidence = float(item.get("confidence"))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("invalid edge confidence") from exc
+        if not 0.0 <= confidence <= 1.0:
+            raise ValueError("edge confidence must be between zero and one")
+        if not _llm_relation_is_evidence_backed(
+            edge_type,
+            source_factor,
+            target_factor,
+            text,
+        ):
+            raise ValueError("edge is not supported by relation evidence")
+        if edge_type == "causal" and not _plausible_causal_direction(
+            source_factor,
+            target_factor,
+        ):
+            raise ValueError("causal edge direction is not admissible")
+        if semantics.negated:
+            assertion_status = "negated"
+        elif semantics.conditional and assertion_status == "asserted":
+            assertion_status = "conditional"
+
+        edges.append(
+            _edge(
+                source_factor,
+                target_factor,
+                edge_type,
+                "llm_relation_validated",
+                record,
+                "Strict JSON relation passed deterministic evidence validation.",
+                confidence,
+                assertion_status,
+                "llm_strict_json",
+            )
+        )
+    return edges
+
+
+def _llm_edges(llm_gateway: Any, record: Mapping[str, Any], factors: list[str]):
+    if llm_gateway is None or len(factors) < 2:
+        return None
+    return llm_gateway.invoke_json(
+        "structure_extractor",
+        {
+            "claim_id": _source_record_id(record),
+            "claim": str(record.get("claim") or ""),
+            "evidence": str(record.get("evidence") or ""),
+            "allowed_factors": factors,
+        },
+        lambda payload: _validated_llm_edges(payload, record, factors),
+    )
+
+
+def extract_structures_from_records(
+    records: Iterable[Mapping[str, Any]],
+    *,
+    llm_gateway: Any = None,
+) -> dict[str, Any]:
     nodes: dict[str, dict[str, Any]] = {}
     edges: dict[tuple[str, str, str, str | None], dict[str, Any]] = {}
     run_id = None
     ticker = None
+    llm_edge_count = 0
+    deterministic_edge_count = 0
 
     for record in records:
         if not isinstance(record, Mapping):
@@ -330,7 +483,14 @@ def extract_structures_from_records(records: Iterable[Mapping[str, Any]]) -> dic
             else:
                 nodes[node["id"]] = node
 
-        for edge in _extract_edges(record, factors):
+        extracted_edges = _llm_edges(llm_gateway, record, factors)
+        if extracted_edges:
+            llm_edge_count += len(extracted_edges)
+        else:
+            extracted_edges = _extract_edges(record, factors)
+            deterministic_edge_count += len(extracted_edges)
+
+        for edge in extracted_edges:
             key = (
                 edge["source"],
                 edge["target"],
@@ -346,33 +506,53 @@ def extract_structures_from_records(records: Iterable[Mapping[str, Any]]) -> dic
         "nodes": sorted(nodes.values(), key=lambda item: item["id"]),
         "edges": sorted(
             edges.values(),
-            key=lambda item: (item["edge_type"], item["source"], item["target"]),
+            key=lambda item: (
+                item["edge_type"],
+                item["source"],
+                item["target"],
+                item.get("source_record_id") or "",
+            ),
         ),
         "metadata": {
             "node_count": len(nodes),
             "edge_count": len(edges),
-            "extractor": "deterministic_week2_rules",
-            "extractor_version": "week2.relation_semantics.v2",
+            "extractor": "llm_with_deterministic_validation_and_fallback",
+            "extractor_version": EXTRACTOR_VERSION,
+            "llm_enabled": llm_gateway is not None,
+            "llm_edge_count": llm_edge_count,
+            "deterministic_edge_count": deterministic_edge_count,
         },
     }
 
 
-def build_extracted_structures_payload(structured_payload: Mapping[str, Any]) -> dict[str, Any]:
+def build_extracted_structures_payload(
+    structured_payload: Mapping[str, Any],
+    *,
+    llm_gateway: Any = None,
+) -> dict[str, Any]:
     records = structured_payload.get("records", [])
     if not isinstance(records, list):
         records = []
-    payload = extract_structures_from_records(records)
+    payload = extract_structures_from_records(records, llm_gateway=llm_gateway)
     payload["run_id"] = structured_payload.get("run_id") or payload.get("run_id")
     payload["ticker"] = structured_payload.get("ticker") or payload.get("ticker")
     return payload
 
 
-def save_extracted_structures(run_id, output_root="outputs/runs") -> dict[str, Any]:
+def save_extracted_structures(
+    run_id,
+    output_root="outputs/runs",
+    *,
+    llm_gateway: Any = None,
+) -> dict[str, Any]:
     structured_payload = load_json_record(
         run_id,
         "structured_agent_outputs.json",
         output_root=output_root,
     )
-    payload = build_extracted_structures_payload(structured_payload)
+    payload = build_extracted_structures_payload(
+        structured_payload,
+        llm_gateway=llm_gateway,
+    )
     save_json_record(run_id, "extracted_structures.json", payload, output_root=output_root)
     return payload

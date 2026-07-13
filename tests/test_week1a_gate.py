@@ -6,10 +6,6 @@ from comqutor_alpha.api.routes_research import (
     get_research_run,
     run_research_request,
 )
-from comqutor_alpha.structure_engine.alpha_mapper import save_alpha_matches
-from comqutor_alpha.structure_engine.structure_extractor import save_extracted_structures
-
-
 def _offline_outputs():
     return [
         {
@@ -49,17 +45,18 @@ def test_run_research_request_with_offline_raw_outputs(tmp_path):
     assert (run_dir / "metadata.json").exists()
     assert (run_dir / "raw_agent_outputs.json").exists()
     assert (run_dir / "structured_agent_outputs.json").exists()
+    assert (run_dir / "alpha_matches.json").exists()
+    assert (run_dir / "extracted_structures.json").exists()
     assert response["artifacts"] == {
         "metadata": True,
         "raw_agent_outputs": True,
         "structured_agent_outputs": True,
         "final_report": False,
-        # Week 2 artifacts are produced by a separate, explicit step
-        # (save_alpha_matches / save_extracted_structures), not automatically
-        # by run_research_request, so they are absent for this offline run.
-        "alpha_matches": False,
-        "extracted_structures": False,
+        "alpha_matches": True,
+        "extracted_structures": True,
         "structured_output_error_logs": False,
+        "week2_llm_error_logs": False,
+        "week2_pipeline_error_logs": False,
     }
     assert response["agent_output_count"] == 4
     assert response["structured_output_count"] == 4
@@ -107,8 +104,27 @@ def test_research_response_has_structured_rows(tmp_path):
             "direction",
             "confidence",
             "source_type",
+            "claim_id",
+            "source_agent_output_id",
         ):
             assert field in record
+
+
+def test_offline_week1_to_week2_artifacts_are_traceable(tmp_path):
+    response = run_research_request(_payload(), output_root=tmp_path)
+    run_dir = tmp_path / response["run_id"]
+    structured = json.loads((run_dir / "structured_agent_outputs.json").read_text())
+    matches = json.loads((run_dir / "alpha_matches.json").read_text())
+    structures = json.loads((run_dir / "extracted_structures.json").read_text())
+
+    claim_ids = {record["claim_id"] for record in structured["records"]}
+    raw_ids = {record["source_agent_output_id"] for record in structured["records"]}
+    assert claim_ids
+    assert all(match["claim_id"] in claim_ids for match in matches["matches"])
+    assert all(match["source_agent_output_id"] in raw_ids for match in matches["matches"])
+    assert structures["edges"]
+    assert all(edge["source_record_id"] in claim_ids for edge in structures["edges"])
+    assert all(edge["evidence"] for edge in structures["edges"])
 
 
 def test_get_research_run(tmp_path):
@@ -158,16 +174,13 @@ def test_fake_runner_injection(tmp_path):
     assert (tmp_path / "fake_runner_week1a" / "structured_agent_outputs.json").exists()
 
 
-def test_research_response_reports_week2_artifact_booleans(tmp_path):
+def test_research_response_reports_generated_week2_artifacts(tmp_path):
     response = run_research_request(_payload(), output_root=tmp_path)
     run_id = response["run_id"]
 
-    assert response["artifacts"]["alpha_matches"] is False
-    assert response["artifacts"]["extracted_structures"] is False
+    assert response["artifacts"]["alpha_matches"] is True
+    assert response["artifacts"]["extracted_structures"] is True
     assert response["artifacts"]["structured_output_error_logs"] is False
-
-    save_alpha_matches(run_id, output_root=tmp_path)
-    save_extracted_structures(run_id, output_root=tmp_path)
 
     updated = get_research_run(run_id, output_root=tmp_path)
     serialized = json.dumps(updated, ensure_ascii=False)
@@ -218,6 +231,7 @@ def test_build_research_response_reports_week2_artifacts_without_local_paths(tmp
     assert response["artifacts"]["alpha_matches"] is True
     assert response["artifacts"]["extracted_structures"] is True
     assert response["artifacts"]["structured_output_error_logs"] is True
+    assert response["status"] == "completed"
     assert str(tmp_path) not in serialized
 
 
@@ -234,6 +248,26 @@ def test_research_response_does_not_expose_raw_output_paths_or_config(tmp_path):
     assert str(tmp_path) not in serialized
     assert response["artifacts"]["metadata"] is True
     assert response["artifacts"]["raw_agent_outputs"] is True
+
+
+def test_week2_stage_failure_returns_safe_partial_response(tmp_path, monkeypatch):
+    import comqutor_alpha.api.routes_research as routes_research
+
+    def fail_alpha_matches(*_args, **_kwargs):
+        raise RuntimeError(f"private failure at {tmp_path} with token=secret")
+
+    monkeypatch.setattr(routes_research, "save_alpha_matches", fail_alpha_matches)
+    response = routes_research.run_research_request(_payload(), output_root=tmp_path)
+    serialized = json.dumps(response, ensure_ascii=False)
+
+    assert response["status"] == "partial"
+    assert response["artifacts"]["structured_agent_outputs"] is True
+    assert response["artifacts"]["alpha_matches"] is False
+    assert response["artifacts"]["extracted_structures"] is True
+    assert response["artifacts"]["week2_pipeline_error_logs"] is True
+    assert str(tmp_path) not in serialized
+    assert "secret" not in serialized
+    assert "traceback" not in serialized.lower()
 
 
 def test_real_tradingagents_run_is_blocked_by_default(tmp_path):
