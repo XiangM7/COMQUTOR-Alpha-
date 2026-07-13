@@ -1,0 +1,31 @@
+schema_version: research_cases_v1
+source: COMQUTOR Alpha Development Plan v1.0 sections 10 and 12
+cases:
+  - ticker: NVDA
+    review_status: reviewed
+    reports:
+      market: High valuation is creating downside risk.
+      sentiment: AI stocks are rising due to strong investor attention.
+      news: GPU demand is increasing due to AI training.
+      fundamentals: Revenue guidance was raised due to strong customer demand.
+    expected_bull: A101
+    expected_bear: A304
+  - ticker: QQQ
+    review_status: reviewed
+    reports:
+      market: Falling rates support long-duration growth assets in a rate cut cycle.
+      sentiment: Investor attention is reinforcing narrative momentum.
+      news: Liquidity conditions are improving and risk appetite is rising.
+      fundamentals: Credit spreads are widening and recession risk is rising.
+    expected_bull_any: [A001, A003]
+    expected_bear: A501
+  - ticker: MSFT
+    review_status: reviewed
+    reports:
+      market: High valuation is creating downside risk.
+      sentiment: Investor attention toward enterprise AI remains constructive.
+      news: Enterprise AI applications are driving inference workloads.
+      fundamentals: Revenue guidance was raised due to strong customer demand.
+    expected_bull: A102
+    expected_bear: A304
+    blocked_reason: Taxonomy does not declare A102/A304 and no source supplies its weight.

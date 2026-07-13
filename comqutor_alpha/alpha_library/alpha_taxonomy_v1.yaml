@@ -1,0 +1,223 @@
+schema_version: alpha_taxonomy_v1
+source_note: >-
+  MVP identifiers, names, layers, required relations, acceptance examples, and the
+  A101/A304 weight come from COMQUTOR Alpha Development Plan v1.0. Other numeric
+  seed weights were recovered from the user's committed project taxonomy at
+  commit 9b2b8a5 and require product confirmation because the referenced full
+  Alpha Taxonomy v1.0 document was not supplied in the current source set.
+review_status: pending_product_review
+alphas:
+  - alpha_id: A001
+    name_en: Rate Cut Cycle
+    name_cn: 利率下降周期
+    layer: Macro
+    status: active
+    core_thesis: Falling discount rates support long-duration and growth assets.
+    keywords: [rate cut, falling rates, lower rates, fed cut, easing cycle, discount rate, duration, treasury yield]
+    trigger_signals: [Fed pivots dovish, yields fall, inflation cools]
+    confirmation_signals: [growth multiples expand, financial conditions ease]
+    beneficiary_assets: [growth equities, technology, long-duration assets, QQQ]
+    risk_assets: [cash, short-duration defensives]
+    conflict_alphas:
+      - alpha_id: A501
+        contradiction_weight: 0.85
+        source_note: Recovered committed seed; pending product confirmation.
+        review_status: pending_product_review
+    invalidation_conditions: [inflation reaccelerates, rates rise, Fed stays restrictive]
+    agent_sources: [news, fundamentals, market]
+    causal_graph:
+      - {source: A001, target: A304, relation_type: relieves, weight: 0.70, source_note: "Required relation; recovered seed weight pending review."}
+      - {source: A001, target: A601, relation_type: amplifies, weight: 0.65, source_note: "Required relation; recovered seed weight pending review."}
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A003
+    name_en: Liquidity Expansion
+    name_cn: 流动性扩张
+    layer: Macro
+    status: active
+    core_thesis: Liquidity release lifts risk appetite and asset multiples.
+    keywords: [liquidity, liquidity conditions, liquidity expansion, monetary liquidity, cash deployment, risk appetite, risk assets, money supply, reserves]
+    trigger_signals: [cash moves into risk assets, liquidity improves, reserves rise]
+    confirmation_signals: [broad equity participation, credit conditions improve]
+    beneficiary_assets: [equities, growth assets, high beta, QQQ]
+    risk_assets: [cash, credit stress hedges]
+    conflict_alphas:
+      - alpha_id: A501
+        contradiction_weight: 0.85
+        source_note: Recovered committed seed; pending product confirmation.
+        review_status: pending_product_review
+    invalidation_conditions: [liquidity drains, credit tightens, cash hoarding rises]
+    agent_sources: [news, sentiment, market]
+    causal_graph:
+      - {source: A003, target: A601, relation_type: amplifies, weight: 0.70, source_note: "Required relation; recovered seed weight pending review."}
+      - {source: A003, target: A304, relation_type: relieves, weight: 0.60, source_note: "Required relation; recovered seed weight pending review."}
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A101
+    name_en: AI Expansion
+    name_cn: AI扩张
+    layer: Theme
+    status: active
+    core_thesis: Training-compute demand growth propagates across the AI supply chain.
+    keywords: [AI, artificial intelligence, AI training, training workload, GPU, accelerator, NVIDIA, NVDA, cloud AI, AI capex]
+    trigger_signals: [AI training demand increases, cloud providers raise AI capex]
+    confirmation_signals: [GPU demand rises, accelerator supply tightens, AI revenue grows]
+    beneficiary_assets: [NVDA, semiconductor leaders, cloud infrastructure]
+    risk_assets: [legacy compute, non-AI software laggards]
+    conflict_alphas:
+      - alpha_id: A304
+        contradiction_weight: 0.90
+        source_note: Development Plan conflict worked example.
+        review_status: reviewed
+    invalidation_conditions: [AI capex cuts, model demand slows, GPU oversupply]
+    agent_sources: [news, fundamentals, sentiment]
+    causal_graph:
+      - {source: A101, target: A103, relation_type: supportive, weight: 0.85, source_note: "Required relation; recovered seed weight pending review."}
+      - {source: A101, target: A201, relation_type: supportive, weight: 0.75, source_note: "Required relation; recovered seed weight pending review."}
+      - {source: A101, target: A301, relation_type: supportive, weight: 0.80, source_note: "Required relation; recovered seed weight pending review."}
+      - {source: A101, target: A601, relation_type: supportive, weight: 0.65, source_note: "Required relation; recovered seed weight pending review."}
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A102
+    name_en: Inference Explosion
+    name_cn: 推理爆发
+    layer: Theme
+    status: active
+    core_thesis: Inference-side compute demand grows with AI applications and agents.
+    keywords: [inference, AI inference, enterprise AI, AI applications, AI agents, inference workload, token generation]
+    trigger_signals: [enterprise AI usage rises, inference workloads grow]
+    confirmation_signals: [cloud inference capacity expands, deployment activity rises]
+    beneficiary_assets: [AI chips, cloud platforms, datacenter infrastructure]
+    risk_assets: [CPU-only workloads]
+    conflict_alphas: []
+    invalidation_conditions: [enterprise AI adoption slows, inference costs block deployment]
+    agent_sources: [news, fundamentals]
+    causal_graph:
+      - {source: A102, target: A103, relation_type: supportive, weight: 0.80, source_note: "Required relation; recovered seed weight pending review."}
+      - {source: A102, target: A301, relation_type: supportive, weight: 0.70, source_note: "Required relation; recovered seed weight pending review."}
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A103
+    name_en: AI Infrastructure
+    name_cn: AI基础设施
+    layer: Theme/Infra
+    status: active
+    core_thesis: Datacenter, power, cooling, and networking build-out supports AI capacity.
+    keywords: [datacenter, data center, AI infrastructure, power demand, cooling, networking, server, AI buildout, capex]
+    trigger_signals: [datacenter spending rises, power and cooling demand increases]
+    confirmation_signals: [networking orders rise, server demand rises]
+    beneficiary_assets: [AI infrastructure suppliers, power equipment, networking, servers]
+    risk_assets: [underinvested infrastructure]
+    conflict_alphas: []
+    invalidation_conditions: [datacenter capex delayed, infrastructure bottlenecks worsen]
+    agent_sources: [news, fundamentals]
+    causal_graph: []
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A201
+    name_en: Semiconductor Supercycle
+    name_cn: 半导体超级周期
+    layer: Industry
+    status: active
+    core_thesis: A chip-cycle upturn improves inventory, orders, pricing, and capex.
+    keywords: [semiconductor, chip, chip demand, inventory improving, inventory recovery, ASP, wafer, orders, capex recovery]
+    trigger_signals: [inventory improves, orders recover, chip demand rises]
+    confirmation_signals: [ASP stabilizes, capex recovers, backlog improves]
+    beneficiary_assets: [semiconductor equities, equipment makers, NVDA]
+    risk_assets: [semiconductor shorts]
+    conflict_alphas: []
+    invalidation_conditions: [inventory glut returns, order cuts resume]
+    agent_sources: [fundamentals, news, market]
+    causal_graph:
+      - {source: A201, target: A301, relation_type: supportive, weight: 0.75, source_note: "Required relation; recovered seed weight pending review."}
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A301
+    name_en: Revenue Expansion
+    name_cn: 收入扩张
+    layer: Fundamental
+    status: active
+    core_thesis: Company revenue growth drives EPS revision and repricing potential.
+    keywords: [revenue, revenue growth, guidance raised, strong demand, EPS revisions, customer demand, sales growth, beat and raise]
+    trigger_signals: [guidance raised, demand beats expectations, revenue accelerates]
+    confirmation_signals: [EPS revisions rise, margins hold, bookings strengthen]
+    beneficiary_assets: [profitable growth equities, NVDA]
+    risk_assets: [low-growth equities]
+    conflict_alphas:
+      - alpha_id: A304
+        contradiction_weight: 0.85
+        source_note: Recovered committed seed; pending product confirmation.
+        review_status: pending_product_review
+    invalidation_conditions: [revenue misses, guide-down, demand weakens]
+    agent_sources: [fundamentals, news]
+    causal_graph: []
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A304
+    name_en: Multiple Compression
+    name_cn: 估值压缩
+    layer: Valuation/Risk
+    status: active
+    core_thesis: Rich valuation creates downside pressure even when thematic demand is strong.
+    keywords: [valuation, high valuation, rich valuation, multiple compression, downside risk, expensive, PE multiple, priced for perfection]
+    trigger_signals: [multiples stretch, valuation risk rises, discount rate rises]
+    confirmation_signals: [stock falls despite earnings, estimates fail to support price]
+    beneficiary_assets: [value rotation, hedges]
+    risk_assets: [expensive growth equities, crowded AI stocks]
+    conflict_alphas:
+      - {alpha_id: A101, contradiction_weight: 0.90, source_note: "Development Plan conflict worked example.", review_status: reviewed}
+      - {alpha_id: A301, contradiction_weight: 0.85, source_note: "Recovered committed seed; pending product confirmation.", review_status: pending_product_review}
+      - {alpha_id: A601, contradiction_weight: 0.80, source_note: "Recovered committed seed; pending product confirmation.", review_status: pending_product_review}
+    invalidation_conditions: [earnings growth exceeds valuation, rates fall sharply]
+    agent_sources: [fundamentals, market]
+    causal_graph: []
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A501
+    name_en: Recession Risk
+    name_cn: 衰退风险
+    layer: Macro Risk
+    status: active
+    core_thesis: Economic downturn and earnings-recession risk pressure risk assets.
+    keywords: [recession, recession risk, economic slowdown, credit spreads, widening spreads, earnings recession, slowdown, default risk]
+    trigger_signals: [credit spreads widen, unemployment rises, PMIs weaken]
+    confirmation_signals: [earnings estimates fall, defensives outperform]
+    beneficiary_assets: [defensives, cash, treasuries]
+    risk_assets: [cyclicals, high beta, growth equities]
+    conflict_alphas:
+      - {alpha_id: A001, contradiction_weight: 0.85, source_note: "Recovered committed seed; pending product confirmation.", review_status: pending_product_review}
+      - {alpha_id: A003, contradiction_weight: 0.85, source_note: "Recovered committed seed; pending product confirmation.", review_status: pending_product_review}
+      - {alpha_id: A601, contradiction_weight: 0.80, source_note: "Recovered committed seed; pending product confirmation.", review_status: pending_product_review}
+    invalidation_conditions: [growth accelerates, spreads tighten, earnings improve]
+    agent_sources: [news, fundamentals]
+    causal_graph: []
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review
+
+  - alpha_id: A601
+    name_en: Narrative Momentum
+    name_cn: 叙事动量
+    layer: Behavioral
+    status: active
+    core_thesis: Reflexive narrative-driven flows reinforce attention and momentum.
+    keywords: [narrative, narrative momentum, investor attention, crowded trade, reflexive flows, momentum, AI stocks, sentiment, attention]
+    trigger_signals: [media attention rises, flows chase theme, price momentum strengthens]
+    confirmation_signals: [sentiment improves, breadth within theme expands]
+    beneficiary_assets: [theme leaders, high-momentum equities, NVDA]
+    risk_assets: [ignored assets, low-momentum names]
+    conflict_alphas:
+      - {alpha_id: A304, contradiction_weight: 0.80, source_note: "Recovered committed seed; pending product confirmation.", review_status: pending_product_review}
+      - {alpha_id: A501, contradiction_weight: 0.80, source_note: "Recovered committed seed; pending product confirmation.", review_status: pending_product_review}
+    invalidation_conditions: [narrative fatigue, flow reversal, positioning unwind]
+    agent_sources: [sentiment, news, market]
+    causal_graph: []
+    source_note: Development Plan MVP structure plus recovered engineering seed fields.
+    review_status: pending_product_review

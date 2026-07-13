@@ -9,6 +9,9 @@ description = "TradingAgents: Multi-Agents LLM Financial Trading Framework"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "pydantic>=2.7.4,<3",
+    "PyYAML>=6.0",
+    "networkx>=3.4,<4",
     "langchain-core>=0.3.81",
     "backtrader>=1.9.78.123",
     "langchain-anthropic>=0.3.15",
@@ -47,9 +50,10 @@ bedrock = [
 
 [project.scripts]
 tradingagents = "cli.main:app"
+comqutor-alpha = "comqutor_alpha.scripts.run_comqutor_research:main"
 
 [tool.setuptools.packages.find]
-include = ["tradingagents*", "cli*"]
+include = ["tradingagents*", "cli*", "comqutor_alpha*"]
 
 [tool.setuptools.package-data]
 cli = ["static/*"]
@@ -59,7 +63,10 @@ testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 markers = [
     "unit: fast isolated unit tests",
+    "contract: schema and interface contract tests",
     "integration: tests requiring external services",
+    "golden: deterministic fixture-based acceptance tests",
+    "provider: tests requiring a real external model or data provider",
     "smoke: quick sanity-check tests",
 ]
 filterwarnings = [
