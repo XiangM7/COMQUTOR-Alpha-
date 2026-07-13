@@ -61,7 +61,12 @@ v2 是 additive/versioned contract。旧 structured v1 artifacts 仍可作为 Ma
 
 ## 评估
 
-- Clean 20-case gate：`19/20`，`95.00%`，满足 `>=80%`。
+- 验收 HEAD：`652a6281495f852b8a25487db7b509eade4f812e`。
+- 完整离线 suite：`658 passed, 1 skipped, 2 deselected`。
+- FastAPI/API：`19 passed`。
+- Week 1→2 end-to-end：`16 passed`。
+- Week 2 LLM offline：`12 passed, 1 deselected`。
+- Clean 20-case gate：`20/20`，`100%`。
 - Clean labels 中八类代表性验收 claims：`8/8`。正式 clean gate 仍以完整 20 条为准。
 - NVDA 修改前：strict `18/30`，allowed `20/30`。
 - NVDA 当前：strict `23/30`，allowed `29/30`。
@@ -78,7 +83,7 @@ NVDA 结果是 robustness diagnostic，不是市场预测准确率，也未用�
 
 ## 当前风险
 
-1. 本次没有真实 provider 调用；当前 Python 环境也未安装 provider SDK，因此真实 smoke test 尚未执行。
+1. Provider SDK 已安装，但没有 provider/model/credential 配置，因此真实 smoke test 尚未执行。
 2. deterministic NLP 对复杂嵌套语义仍有覆盖边界。
 3. file-backed artifacts 适合 MVP 验收，但不替代并发、迁移和查询能力完整的数据库层。
-4. FastAPI 不在当前环境中，两个路由集成测试被跳过。
+4. Ruff check 有 `33` 项，Ruff format check 有 `109` 个文件需要格式化。

@@ -5,13 +5,13 @@
 ## 仓库与环境
 
 - 分支：`comqutor-structure-layer`
-- 审查基线 HEAD：`9435cf9853ae9558400f109794694218d611f2a5`
-- 本次 Week 1-2 alignment 修改尚未 commit
+- 审查基线 HEAD：`652a6281495f852b8a25487db7b509eade4f812e`
+- 验收开始时工作树干净；本文件仅更新验收结果，尚未 commit
 - Python：`3.13.5`
-- Python 路径：`/opt/miniconda3/bin/python`
+- Python 路径：`.venv/bin/python`
 - 项目要求：Python `>=3.10`
 
-当前审查环境可运行全部离线 COMQUTOR 测试，但未安装 `langchain-core` 和 provider SDK。真实 TradingAgents 或 Week 2 LLM 调用前，需要按 `pyproject.toml` 安装完整依赖。
+当前 `.venv` 已安装项目依赖、dev 依赖、FastAPI、httpx 和声明的 provider SDK；`pip check` 无依赖破损。
 
 ## 当前主链路
 
@@ -59,14 +59,19 @@ Week 2 LLM gateway 默认关闭。启用需要服务端设置 `COMQUTOR_WEEK2_LL
 - 失败后 deterministic fallback
 - 错误日志不保存 prompt、provider response、exception detail 或 credential
 
-`.env` 保持忽略，本次未读取其内容、未修改、未提交。
+`.env` 保持忽略，未修改、未提交。验收仅检查 provider/model/credential 是否存在，未输出配置值。
 
 ## 当前验证结果
 
-- Week 1-2 targeted baseline：`136 passed, 2 skipped`（编码前）
-- Week 1-2 targeted suite：`159 passed, 2 skipped`（完成后）
-- Clean labeled claims：`19/20`，strict accuracy `95.00%`
-- Clean labels 中八类代表性验收 claims：`8/8`
+- Compileall：通过
+- Ruff check：失败，`33` 项
+- Ruff format check：失败，`109` 个文件需要格式化
+- 完整离线 suite：`658 passed, 1 skipped, 2 deselected`，另有 `69` 个 subtests passed
+- FastAPI/API：`19 passed`
+- Week 1→2 end-to-end：`16 passed`
+- Week 2 LLM offline：`12 passed, 1 deselected`
+- Clean labeled claims：`20/20`，strict accuracy `100%`
+- Development Plan 八句验收：`8/8`
 - NVDA robustness：strict `23/30`，allowed `29/30`
 - NVDA 修改前基线：strict `18/30`，allowed `20/30`
 
@@ -75,8 +80,9 @@ NVDA 数据仅为 robustness diagnostic，不代表真实市场准确率，也�
 ## 已知限制
 
 1. 当前持久化是 file-backed MVP，不是 Development Plan 中的正式数据库实现。
-2. 当前环境未执行真实 provider smoke test；所有验收测试均离线。
+2. 当前没有 provider/model/credential 配置，真实 provider smoke test 未执行。
 3. Structured deterministic splitter 和规则型 semantic parser 仍可能遗漏复杂长句。
 4. Week 2 只输出 claim-level nodes/edges，不是 Week 3 run-level Structure Graph。
-5. FastAPI 未安装，因此两个路由集成测试在当前环境跳过；API helper 和安全边界测试已运行。
-6. Graph coherence、activation、dominance、正式 conflict detection、Alpha Memory 和 outcome feedback 均未实现。
+5. 可选 Bedrock SDK `langchain_aws` 未安装，对应测试跳过。
+6. 当前 Ruff check 与 format check 未通过。
+7. Graph coherence、activation、dominance、正式 conflict detection、Alpha Memory 和 outcome feedback 均未实现。
