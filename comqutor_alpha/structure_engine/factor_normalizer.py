@@ -42,6 +42,14 @@ FACTOR_ALIASES = {
         "power and cooling",
         "networking orders",
         "server demand",
+        "ai infrastructure spending",
+        "data center infrastructure",
+    ),
+    "AI Infrastructure": (
+        "ai infrastructure",
+        "sovereign ai",
+        "government ai infrastructure",
+        "defense ai infrastructure",
     ),
     "Revenue Growth": (
         "revenue growth",
@@ -50,6 +58,9 @@ FACTOR_ALIASES = {
         "guidance raised",
         "beat and raise",
         "eps revisions",
+        "addressable market",
+        "revenue runway",
+        "booked revenue",
     ),
     "Valuation Risk": (
         "valuation risk",
@@ -170,3 +181,17 @@ def factor_mention_start(factor: str, text: str) -> int | None:
         if match:
             starts.append(match.start())
     return min(starts) if starts else None
+
+
+def factor_mention_span(factor: str, text: str) -> tuple[int, int] | None:
+    """Return the earliest mention span for a canonical factor or alias."""
+    aliases = (factor, *FACTOR_ALIASES.get(factor, ()))
+    matches = []
+    for alias in aliases:
+        alias_norm = normalize_text(alias)
+        if not alias_norm:
+            continue
+        match = re.search(rf"(?<![a-z0-9]){re.escape(alias_norm)}(?![a-z0-9])", text)
+        if match:
+            matches.append((match.start(), match.end()))
+    return min(matches, key=lambda item: item[0]) if matches else None

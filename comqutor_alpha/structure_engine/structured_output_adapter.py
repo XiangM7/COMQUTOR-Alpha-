@@ -15,6 +15,7 @@ from comqutor_alpha.storage.file_store import (
     save_json_record,
     validate_run_id_for_path,
 )
+from comqutor_alpha.structure_engine.claim_semantics import analyze_claim_semantics
 from comqutor_alpha.structure_engine.factor_normalizer import extract_known_factors_from_text
 from comqutor_alpha.structure_engine.structure_schema import (
     VALID_DIRECTIONS,
@@ -26,6 +27,9 @@ from comqutor_alpha.structure_engine.structure_schema import (
 SCHEMA_VERSION = "week1a.structured_agent_outputs.v1"
 ERROR_LOG_ARTIFACT_PATH = "error_logs/structured_output_adapter_errors.jsonl"
 MAX_ERROR_PREVIEW_CHARS = 500
+MAX_CLAIMS_PER_RAW_OUTPUT = 64
+MAX_CLAIM_CHARS = 1200
+MIN_CLAIM_CHARS = 20
 ENTITY_TERMS = (
     "NVDA",
     "NVIDIA",
@@ -88,6 +92,12 @@ RISK_PORTFOLIO_AGENTS = {
     "neutral_risk_analyst",
     "portfolio_manager",
 }
+DISCLAIMER_MARKERS = (
+    "disclaimer",
+    "not investment advice",
+    "for informational purposes only",
+    "past performance is not indicative",
+)
 
 
 def _now():
@@ -190,16 +200,118 @@ def infer_output_type(agent):
         return "analyst"
     return "unknown"
 
+def _clean_markdown_inline(text):
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", str(text or ""))
+    text = re.sub(r"[`*_~]+", "", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _is_table_line(line):
+    stripped = line.strip()
+    if stripped.count("|") >= 2:
+        return True
+    return bool(re.fullmatch(r"[:|\-\s]+", stripped)) and "-" in stripped
+
+
+def _is_meaningful_claim(text):
+    normalized = _normalize_text(text)
+    lowered = normalized.lower()
+    if len(normalized) < MIN_CLAIM_CHARS or len(normalized.split()) < 4:
+        return False
+    if any(marker in lowered for marker in DISCLAIMER_MARKERS):
+        return False
+    if not re.search(r"[A-Za-z0-9]", normalized):
+        return False
+    return True
+
+
+def extract_claim_segments(raw_text):
+    """Split one raw Markdown report into bounded, traceable claim segments."""
+    if raw_text is None:
+        return []
+    if not isinstance(raw_text, str):
+        raw_text = json.dumps(raw_text, ensure_ascii=False, default=str)
+    raw_text = raw_text.replace("\r\n", "\n").replace("\r", "\n")
+    if not raw_text.strip():
+        return []
+
+    blocks = []
+    paragraph = []
+    section = None
+    in_fence = False
+
+    def flush_paragraph():
+        if paragraph:
+            blocks.append((section, " ".join(paragraph)))
+            paragraph.clear()
+
+    for raw_line in raw_text.split("\n"):
+        line = raw_line.strip()
+        if line.startswith("```"):
+            flush_paragraph()
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if not line:
+            flush_paragraph()
+            continue
+
+        heading = re.match(r"^#{1,6}\s+(.+)$", line)
+        if heading:
+            flush_paragraph()
+            section = _clean_markdown_inline(heading.group(1))[:200] or None
+            continue
+        if _is_table_line(line):
+            flush_paragraph()
+            continue
+        if any(marker in line.lower() for marker in DISCLAIMER_MARKERS):
+            flush_paragraph()
+            continue
+
+        bullet = re.match(r"^(?:[-*+]\s+|\d+[.)]\s+)(.+)$", line)
+        if bullet:
+            flush_paragraph()
+            blocks.append((section, bullet.group(1)))
+            continue
+        paragraph.append(line)
+
+    flush_paragraph()
+
+    segments = []
+    for block_section, block in blocks:
+        cleaned_block = _clean_markdown_inline(block)
+        sentences = re.split(r"(?<=[.!?。！？])\s+", cleaned_block)
+        for sentence in sentences:
+            claim = _clean_markdown_inline(sentence)
+            if not _is_meaningful_claim(claim):
+                continue
+            segments.append(
+                {
+                    "claim": claim[:MAX_CLAIM_CHARS],
+                    "evidence": claim[:MAX_CLAIM_CHARS],
+                    "source_section": block_section,
+                }
+            )
+            if len(segments) >= MAX_CLAIMS_PER_RAW_OUTPUT:
+                return segments
+
+    if not segments:
+        fallback = _clean_markdown_inline(raw_text)
+        if fallback and not any(marker in fallback.lower() for marker in DISCLAIMER_MARKERS):
+            segments.append(
+                {
+                    "claim": fallback[:MAX_CLAIM_CHARS],
+                    "evidence": fallback[:MAX_CLAIM_CHARS],
+                    "source_section": section,
+                }
+            )
+    return segments
+
+
 def extract_claim(raw_text):
-    text = _normalize_text(raw_text)
-    if not text:
-        return "unknown"
-    sentences = re.split(r"(?<=[.!?。！？])\s+", text)
-    for sentence in sentences:
-        sentence = sentence.strip()
-        if len(sentence) >= 20:
-            return sentence[:300]
-    return text[:300]
+    segments = extract_claim_segments(raw_text)
+    return segments[0]["claim"] if segments else "unknown"
 
 
 def extract_evidence(raw_text):
@@ -226,6 +338,13 @@ def infer_direction(raw_text):
     text = _normalize_text(raw_text).lower()
     if not text:
         return "unknown"
+    semantics = analyze_claim_semantics(text)
+    if semantics.semantic_polarity == "risk_relief":
+        return "positive"
+    if semantics.semantic_polarity == "invalidation":
+        return "negative"
+    if semantics.mixed or semantics.negated:
+        return "neutral"
     positive = sum(1 for word in POSITIVE_WORDS if word in text)
     negative = sum(1 for word in NEGATIVE_WORDS if word in text)
     neutral = sum(1 for word in NEUTRAL_WORDS if word in text)
@@ -318,6 +437,8 @@ def safe_default_record(
         "output_type": infer_output_type(agent),
         "source_agent_output_id": source_agent_output_id,
         "source_refs": [source_agent_output_id] if source_agent_output_id else [],
+        "assertion_status": "unknown",
+        "semantic_polarity": "unknown",
         "adapter_warning": reason,
         "adapter_error_code": error_code,
     }
@@ -341,17 +462,17 @@ def _error_payload(run_id, ticker, raw_record, structured_record):
         "created_at": _now(),
     }
 
-# Adapt a single raw agent output record into a structured claim record, handling validation and warnings
-def adapt_raw_agent_output(raw_record, run_id, ticker):
+# Adapt one raw agent output into one or more structured claim records.
+def adapt_raw_agent_outputs(raw_record, run_id, ticker):
     if not isinstance(raw_record, dict):
-        return safe_default_record(
+        return [safe_default_record(
             run_id,
             ticker,
             "unknown_agent",
             "",
             "raw row is not an object",
             error_code="INVALID_RAW_RECORD",
-        )
+        )]
     agent = normalize_agent_name(raw_record.get("agent") or raw_record.get("tradingagents_agent"))
     raw_text = raw_record.get("raw_output")
     # Preserve traceability: the raw writer stamps every record with a stable
@@ -359,7 +480,7 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
     # an unrelated identifier.
     source_agent_output_id = raw_record.get("agent_output_id")
     if not _normalize_text(raw_text):
-        return safe_default_record(
+        return [safe_default_record(
             run_id,
             ticker,
             agent,
@@ -367,36 +488,72 @@ def adapt_raw_agent_output(raw_record, run_id, ticker):
             "raw output is empty",
             source_agent_output_id=source_agent_output_id,
             error_code="EMPTY_RAW_OUTPUT",
-        )
-    record = {
-        "agent_output_id": source_agent_output_id
-        or f"{agent}_{hashlib.sha1(_normalize_text(raw_text).encode('utf-8')).hexdigest()[:10]}",
-        "run_id": run_id,
-        "ticker": ticker,
-        "agent": agent,
-        "timestamp": _now(),
-        "claim": extract_claim(raw_text),
-        "evidence": extract_evidence(raw_text),
-        "entities": extract_entities(raw_text, ticker),
-        "factors": extract_factors(raw_text),
-        "direction": normalize_direction(infer_direction(raw_text)),
-        "confidence": estimate_confidence(raw_text),
-        "source_type": infer_source_type(agent, raw_text),
-        "output_type": infer_output_type(agent),
-        "source_agent_output_id": source_agent_output_id,
-        "source_refs": _normalize_source_refs(raw_record.get("source_refs"), source_agent_output_id),
-    }
-    if validate_structured_output(record):
-        return record
-    return safe_default_record(
-        run_id,
-        ticker,
-        agent,
-        raw_text,
-        "structured record failed validation",
-        source_agent_output_id=source_agent_output_id,
-        error_code="STRUCTURED_VALIDATION_FAILED",
+        )]
+
+    segments = extract_claim_segments(raw_text)
+    if not segments:
+        return [safe_default_record(
+            run_id,
+            ticker,
+            agent,
+            raw_text,
+            "raw output contains no meaningful claims",
+            source_agent_output_id=source_agent_output_id,
+            error_code="NO_MEANINGFUL_CLAIMS",
+        )]
+
+    base_id = source_agent_output_id or (
+        f"{agent}_{hashlib.sha1(_normalize_text(raw_text).encode('utf-8')).hexdigest()[:10]}"
     )
+    records = []
+    for index, segment in enumerate(segments):
+        claim = segment["claim"]
+        semantics = analyze_claim_semantics(claim)
+        record_id = base_id if len(segments) == 1 else f"{base_id}:claim:{index + 1}"
+        record = {
+            "agent_output_id": record_id,
+            "run_id": run_id,
+            "ticker": ticker,
+            "agent": agent,
+            "timestamp": _now(),
+            "claim": claim,
+            "evidence": segment["evidence"],
+            "entities": extract_entities(claim, ticker),
+            "factors": extract_factors(claim),
+            "direction": normalize_direction(infer_direction(claim)),
+            "confidence": estimate_confidence(claim),
+            "source_type": infer_source_type(agent, claim),
+            "output_type": infer_output_type(agent),
+            "source_agent_output_id": source_agent_output_id,
+            "source_refs": _normalize_source_refs(
+                raw_record.get("source_refs"), source_agent_output_id
+            ),
+            "claim_index": index,
+            "source_section": segment.get("source_section"),
+            "assertion_status": semantics.assertion_status,
+            "semantic_polarity": semantics.semantic_polarity,
+        }
+        if validate_structured_output(record):
+            records.append(record)
+            continue
+        fallback = safe_default_record(
+            run_id,
+            ticker,
+            agent,
+            raw_text,
+            "structured record failed validation",
+            source_agent_output_id=source_agent_output_id,
+            error_code="STRUCTURED_VALIDATION_FAILED",
+        )
+        fallback["agent_output_id"] = record_id
+        fallback["claim_index"] = index
+        records.append(fallback)
+    return records
+
+
+# Preserve the original single-record helper for existing callers.
+def adapt_raw_agent_output(raw_record, run_id, ticker):
+    return adapt_raw_agent_outputs(raw_record, run_id, ticker)[0]
 
 # Adapt all raw agent output records in a run directory into structured claim records, logging any warnings
 def adapt_run_outputs(run_dir):
@@ -405,12 +562,18 @@ def adapt_run_outputs(run_dir):
     ticker = str(raw_payload.get("ticker") or "unknown").upper()
     records = []
     for raw_record in raw_payload.get("agent_outputs", []):
-        record = adapt_raw_agent_output(raw_record, run_id, ticker)
-        if record.get("adapter_warning"):
-            _log_error(run_id, output_root, _error_payload(run_id, ticker, raw_record, record))
-        records.append(record)
+        adapted_records = adapt_raw_agent_outputs(raw_record, run_id, ticker)
+        for record in adapted_records:
+            if record.get("adapter_warning"):
+                _log_error(
+                    run_id,
+                    output_root,
+                    _error_payload(run_id, ticker, raw_record, record),
+                )
+            records.append(record)
     return {
         "schema_version": SCHEMA_VERSION,
+        "adapter_version": "week1.claim_splitter.v2",
         "run_id": run_id,
         "ticker": ticker,
         "records": records,

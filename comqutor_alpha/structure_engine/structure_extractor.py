@@ -7,9 +7,10 @@ from collections.abc import Iterable, Mapping
 from typing import Any
 
 from comqutor_alpha.storage.file_store import load_json_record, save_json_record
+from comqutor_alpha.structure_engine.claim_semantics import analyze_claim_semantics
 from comqutor_alpha.structure_engine.factor_normalizer import (
     extract_known_factors_from_text,
-    factor_mention_start,
+    factor_mention_span,
     normalize_factor_label,
     normalize_text,
     term_in_text,
@@ -19,26 +20,6 @@ from comqutor_alpha.structure_engine.structure_schema import clamp_score
 
 SCHEMA_VERSION = "week2.extracted_structures.v1"
 
-CAUSAL_WORDS = (
-    "drive",
-    "drives",
-    "driven",
-    "increase",
-    "increases",
-    "raise",
-    "raises",
-    "boost",
-    "boosts",
-    "fuel",
-    "fuels",
-    "lead to",
-    "leads to",
-    "push",
-    "pushes",
-    "expand",
-    "expands",
-)
-SUPPORT_WORDS = ("support", "supports", "reinforce", "reinforces", "confirm", "confirms", "helps")
 CONFLICT_WORDS = (
     "but",
     "however",
@@ -50,12 +31,39 @@ CONFLICT_WORDS = (
     "conflict",
     "downside risk",
 )
-
-CAUSAL_FACTOR_RULES = (
-    ("AI Demand", "GPU Demand", "ai_demand_to_gpu_demand"),
-    ("AI CapEx", "GPU Demand", "ai_capex_to_gpu_demand"),
-    ("GPU Demand", "Revenue Growth", "gpu_demand_to_revenue_growth"),
+ACTIVE_CAUSAL_PATTERN = re.compile(
+    r"\b(drive|drives|raise|raises|boost|boosts|fuel|fuels|lead to|leads to|"
+    r"push|pushes|increase|increases|expand|expands)\b"
 )
+ACTIVE_SUPPORT_PATTERN = re.compile(
+    r"\b(support|supports|reinforce|reinforces|confirm|confirms|help|helps)\b"
+)
+PASSIVE_RELATION_PATTERN = re.compile(
+    r"\b(?:is|are|was|were|be|been|being)\s+"
+    r"(?P<verb>driven|raised|boosted|increased|supported|reinforced)\s+by\b"
+)
+NEGATED_RELATION_PATTERN = re.compile(
+    r"\b(no|not|never|does not|do not|did not|fails? to|failed to|without)\b"
+)
+CONDITIONAL_MODAL_PATTERN = re.compile(r"\b(could|may|might|would)\b")
+
+# Broad causal ordering avoids a brittle list of exact pairs while still
+# refusing economically reversed edges such as GPU Demand -> AI Demand.
+CAUSAL_RANK = {
+    "AI Demand": 1,
+    "AI CapEx": 1,
+    "Inference Demand": 1,
+    "Rate Cut Cycle": 1,
+    "Liquidity Expansion": 1,
+    "Semiconductor Cycle": 1,
+    "Datacenter CapEx": 2,
+    "AI Infrastructure": 2,
+    "GPU Demand": 2,
+    "Narrative Momentum": 2,
+    "Revenue Growth": 3,
+    "Valuation Risk": 3,
+    "Recession Risk": 3,
+}
 GROWTH_FACTORS = {
     "AI Demand",
     "AI CapEx",
@@ -138,6 +146,7 @@ def _edge(
     record: Mapping[str, Any],
     reason: str,
     confidence: float,
+    assertion_status: str = "asserted",
 ) -> dict[str, Any]:
     ticker = record.get("ticker")
     source_label = _display_label(source_factor, ticker)
@@ -153,27 +162,44 @@ def _edge(
         "confidence": clamp_score(confidence),
         "rule_name": rule_name,
         "reason": reason,
+        "assertion_status": assertion_status,
         "source_claim": claim,
         "source_record_id": record_id,
         "source_agent_output_id": record.get("source_agent_output_id"),
     }
 
 
-def _causal_order_confirmed(source: str, target: str, text: str) -> bool:
-    """Require the source factor to be mentioned before the target factor.
+def _plausible_causal_direction(source: str, target: str) -> bool:
+    source_rank = CAUSAL_RANK.get(source)
+    target_rank = CAUSAL_RANK.get(target)
+    return source_rank is not None and target_rank is not None and source_rank < target_rank
 
-    CAUSAL_FACTOR_RULES only encode one canonical direction (e.g. AI Demand ->
-    GPU Demand). Without an order check, a reversed sentence like "GPU demand
-    drives AI demand" would still match both factors plus causal language and
-    silently emit the wrong direction. Requiring the source mention to appear
-    first is a minimal, deterministic proxy for "who is doing the driving"
-    that avoids hallucinating a wrongly-directed edge without any NLP/LLM.
-    """
-    source_start = factor_mention_start(source, text)
-    target_start = factor_mention_start(target, text)
-    if source_start is None or target_start is None:
-        return False
-    return source_start < target_start
+
+def _assertion_status(text: str, bridge: str) -> str:
+    if NEGATED_RELATION_PATTERN.search(bridge):
+        return "negated"
+    semantics = analyze_claim_semantics(text)
+    if semantics.conditional:
+        return "conditional"
+    return "asserted"
+
+
+def _relation_confidence(edge_type: str, assertion_status: str) -> float:
+    if assertion_status == "negated":
+        return 0.35
+    if assertion_status == "conditional":
+        return 0.58
+    return 0.84 if edge_type == "causal" else 0.68
+
+
+def _relation_reason(edge_type: str, assertion_status: str, passive: bool = False) -> str:
+    voice = "passive" if passive else "active"
+    article = "an" if voice == "active" else "a"
+    if assertion_status == "negated":
+        return f"The claim explicitly negates {article} {voice} {edge_type} relation."
+    if assertion_status == "conditional":
+        return f"The claim states a conditional {voice} {edge_type} relation."
+    return f"The claim states an asserted {voice} {edge_type} relation."
 
 
 def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[str, Any]]:
@@ -182,48 +208,89 @@ def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[s
         return []
 
     edges = []
-    has_causal_language = _has_any(text, CAUSAL_WORDS)
-    for source, target, rule_name in CAUSAL_FACTOR_RULES:
-        if not (source in factors and target in factors and has_causal_language):
-            continue
-        if not _causal_order_confirmed(source, target, text):
-            # Reversed or indeterminate phrasing: skip rather than risk
-            # extracting a strong causal edge in the wrong direction.
-            continue
-        edges.append(
-            _edge(
-                source,
-                target,
-                "causal",
-                rule_name,
-                record,
-                f"{source} and {target} appear with causal language.",
-                0.82,
-            )
-        )
+    mentions = []
+    for factor in factors:
+        span = factor_mention_span(factor, text)
+        if span is not None:
+            mentions.append((factor, span[0], span[1]))
+    mentions.sort(key=lambda item: item[1])
 
-    if _has_any(text, SUPPORT_WORDS):
-        causal_pairs = {(edge["source_label"], edge["target_label"]) for edge in edges}
-        for index, source in enumerate(factors):
-            for target in factors[index + 1 :]:
-                source_label = _display_label(source, record.get("ticker"))
-                target_label = _display_label(target, record.get("ticker"))
-                if (source_label, target_label) in causal_pairs:
+    for left_index, (left_factor, _left_start, left_end) in enumerate(mentions):
+        for right_factor, right_start, _right_end in mentions[left_index + 1 :]:
+            bridge = text[left_end:right_start]
+            passive_match = PASSIVE_RELATION_PATTERN.search(bridge)
+            if passive_match:
+                source, target = right_factor, left_factor
+                verb = passive_match.group("verb")
+                edge_type = "supportive" if verb in {"supported", "reinforced"} else "causal"
+                if edge_type == "causal" and not _plausible_causal_direction(source, target):
                     continue
-                if source in RISK_FACTORS or target in RISK_FACTORS:
-                    continue
+                status = _assertion_status(text, bridge)
                 edges.append(
                     _edge(
                         source,
                         target,
-                        "supportive",
-                        "supportive_language_between_factors",
+                        edge_type,
+                        "passive_relation_between_factors",
                         record,
-                        "Factors appear with supportive language.",
-                        0.66,
+                        _relation_reason(edge_type, status, passive=True),
+                        _relation_confidence(edge_type, status),
+                        status,
                     )
                 )
-                break
+                continue
+
+            relation_matches = [
+                (match.start(), "causal") for match in ACTIVE_CAUSAL_PATTERN.finditer(bridge)
+            ]
+            relation_matches.extend(
+                (match.start(), "supportive")
+                for match in ACTIVE_SUPPORT_PATTERN.finditer(bridge)
+            )
+            if relation_matches:
+                _position, edge_type = max(relation_matches, key=lambda item: item[0])
+                if edge_type == "causal" and not _plausible_causal_direction(
+                    left_factor, right_factor
+                ):
+                    continue
+                if edge_type == "supportive" and (
+                    left_factor in RISK_FACTORS or right_factor in RISK_FACTORS
+                ):
+                    continue
+                status = _assertion_status(text, bridge)
+                edges.append(
+                    _edge(
+                        left_factor,
+                        right_factor,
+                        edge_type,
+                        f"active_{edge_type}_between_factors",
+                        record,
+                        _relation_reason(edge_type, status),
+                        _relation_confidence(edge_type, status),
+                        status,
+                    )
+                )
+                continue
+
+            semantics = analyze_claim_semantics(text)
+            if (
+                semantics.conditional
+                and text.startswith("if ")
+                and CONDITIONAL_MODAL_PATTERN.search(text[right_start:])
+                and _plausible_causal_direction(left_factor, right_factor)
+            ):
+                edges.append(
+                    _edge(
+                        left_factor,
+                        right_factor,
+                        "causal",
+                        "if_then_relation_between_factors",
+                        record,
+                        _relation_reason("causal", "conditional"),
+                        _relation_confidence("causal", "conditional"),
+                        "conditional",
+                    )
+                )
 
     if _has_any(text, CONFLICT_WORDS):
         for risk_factor in [factor for factor in factors if factor in RISK_FACTORS]:
@@ -237,6 +304,7 @@ def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[s
                         record,
                         "A risk factor is contrasted with a growth or demand factor.",
                         0.72,
+                        "mixed",
                     )
                 )
 
@@ -284,6 +352,7 @@ def extract_structures_from_records(records: Iterable[Mapping[str, Any]]) -> dic
             "node_count": len(nodes),
             "edge_count": len(edges),
             "extractor": "deterministic_week2_rules",
+            "extractor_version": "week2.relation_semantics.v2",
         },
     }
 

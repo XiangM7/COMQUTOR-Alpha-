@@ -40,6 +40,12 @@ def test_extract_known_factors_detects_valuation_risk_phrasing():
     )
 
 
+def test_extract_known_factors_detects_ai_infrastructure_alias():
+    assert "AI Infrastructure" in extract_known_factors_from_text(
+        "Sovereign AI creates a government infrastructure opportunity."
+    )
+
+
 def test_no_circular_import_between_mapper_and_extractor():
     """alpha_mapper.py and structure_extractor.py must both depend on
     factor_normalizer.py rather than on each other, so importing either

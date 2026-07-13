@@ -5,6 +5,7 @@ from comqutor_alpha.structure_engine.structured_output_adapter import (
     SCHEMA_VERSION,
     _error_payload,
     adapt_raw_agent_output,
+    adapt_raw_agent_outputs,
     safe_default_record,
     save_structured_agent_outputs,
 )
@@ -182,3 +183,48 @@ def test_malformed_raw_record_does_not_crash_full_run(tmp_path):
     assert len(payload["records"]) == 2
     assert payload["records"][0]["adapter_error_code"] == "INVALID_RAW_RECORD"
     assert payload["records"][1]["claim"] != "unknown"
+
+
+def test_long_markdown_report_splits_into_traceable_claims():
+    report = """# NVDA Outlook
+
+## Demand
+- AI training demand is accelerating and GPU demand is rising.
+- Datacenter power and cooling spending supports infrastructure growth.
+
+| Metric | Change |
+| --- | --- |
+| Revenue | +20% |
+
+Disclaimer: This report is not investment advice.
+
+## Risk
+Custom silicon could reduce NVIDIA dependency over time.
+"""
+    raw_record = _raw_record(report)
+
+    records = adapt_raw_agent_outputs(raw_record, "run1", "NVDA")
+
+    assert len(records) == 3
+    assert len({record["agent_output_id"] for record in records}) == 3
+    assert {record["source_section"] for record in records} == {"Demand", "Risk"}
+    assert all(record["source_agent_output_id"] == raw_record["agent_output_id"] for record in records)
+    assert all(record["source_refs"] == [raw_record["agent_output_id"]] for record in records)
+    serialized = json.dumps(records).lower()
+    assert "disclaimer" not in serialized
+    assert "metric" not in serialized
+
+
+def test_legacy_raw_record_without_agent_output_id_still_adapts():
+    records = adapt_raw_agent_outputs(
+        {
+            "agent": "news_agent",
+            "raw_output": "AI demand is increasing and GPU demand is rising.",
+        },
+        "run1",
+        "NVDA",
+    )
+
+    assert len(records) == 1
+    assert records[0]["agent_output_id"].startswith("news_agent_")
+    assert records[0]["source_agent_output_id"] is None

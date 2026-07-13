@@ -112,6 +112,37 @@ def test_reversed_causal_phrasing_does_not_emit_wrong_direction_edge():
     assert labels == {"AI Demand", "GPU Demand"}
 
 
+def test_extracts_passive_causal_relation_in_canonical_direction():
+    payload = extract_structures_from_records(
+        [_record("GPU demand is driven by AI capex.")]
+    )
+
+    edge = next(edge for edge in payload["edges"] if edge["edge_type"] == "causal")
+    assert edge["source_label"] == "AI CapEx"
+    assert edge["target_label"] == "GPU Demand"
+    assert edge["assertion_status"] == "asserted"
+
+
+def test_conditional_causal_relation_is_not_asserted():
+    payload = extract_structures_from_records(
+        [_record("If AI capex rises, GPU demand could increase.")]
+    )
+
+    edge = next(edge for edge in payload["edges"] if edge["edge_type"] == "causal")
+    assert edge["assertion_status"] == "conditional"
+    assert edge["confidence"] < 0.84
+
+
+def test_negated_causal_relation_is_marked_negated():
+    payload = extract_structures_from_records(
+        [_record("AI capex does not drive GPU demand.")]
+    )
+
+    edge = next(edge for edge in payload["edges"] if edge["edge_type"] == "causal")
+    assert edge["assertion_status"] == "negated"
+    assert edge["confidence"] < 0.5
+
+
 def test_vague_coexistence_does_not_hallucinate_causal_edge():
     payload = extract_structures_from_records(
         [_record("Both AI capex and GPU demand were mentioned in the same earnings call.")]

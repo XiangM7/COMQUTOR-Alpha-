@@ -1,0 +1,621 @@
+{
+  "schema_version": "week2.robust_labeled_claims.v1",
+  "source": {
+    "uploaded_file": "Pasted markdown(2).md",
+    "report_title": "Trading Analysis Report: NVDA",
+    "report_generated_at": "2026-06-30 14:28:03",
+    "ticker": "NVDA"
+  },
+  "labeling_policy": {
+    "expected_alpha": "Best single MVP-10 alpha if the claim clearly activates one; null when the claim is outside the current taxonomy or should not be force-matched.",
+    "allowed_alpha_ids": "Alternative acceptable alpha IDs when a real report sentence blends multiple alphas.",
+    "expected_match_status": "matched, ambiguous, or no_match. This intentionally tests no-match and ambiguity behavior, unlike the clean Week 2 gate set.",
+    "expected_direction": "Direction of the claim with respect to NVDA or the alpha activation context."
+  },
+  "summary": {
+    "case_count": 30,
+    "matched_expected_count": 19,
+    "no_match_expected_count": 10,
+    "ambiguous_expected_count": 1
+  },
+  "cases": [
+    {
+      "id": "nvda_real_001",
+      "source_section": "Market Analyst / Executive Summary",
+      "source_agent": "market_agent",
+      "text": "NVDA is in a corrective downtrend, trading below short-term moving averages except the 200-day SMA, while RSI and MACD suggest selling pressure may be decelerating.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [],
+      "expected_direction": "neutral",
+      "factors": [
+        "technical weakness",
+        "200-day SMA support",
+        "momentum deceleration"
+      ],
+      "difficulty": "hard",
+      "notes": "This is mostly technical trading-state information. The MVP-10 alpha taxonomy does not yet include a technical momentum or support/resistance alpha."
+    },
+    {
+      "id": "nvda_real_002",
+      "source_section": "Market Analyst / Moving Averages",
+      "source_agent": "market_agent",
+      "text": "The 200-day SMA near $190.63 is acting as long-term structural support, and the long-term trend remains intact as long as NVDA holds above it.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [],
+      "expected_direction": "positive",
+      "factors": [
+        "technical support",
+        "long-term trend"
+      ],
+      "difficulty": "hard",
+      "notes": "Important investment logic, but outside current MVP-10 alpha taxonomy."
+    },
+    {
+      "id": "nvda_real_003",
+      "source_section": "Market Analyst / VWMA",
+      "source_agent": "market_agent",
+      "text": "NVDA closing below VWMA confirms that volume-weighted activity points to overhead resistance and sellers have dominated higher-volume days.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [],
+      "expected_direction": "negative",
+      "factors": [
+        "volume resistance",
+        "technical weakness"
+      ],
+      "difficulty": "hard",
+      "notes": "No corresponding MVP alpha for VWMA/technical supply."
+    },
+    {
+      "id": "nvda_real_004",
+      "source_section": "News Analyst / Rubin Architecture Upgrade",
+      "source_agent": "news_agent",
+      "text": "The Rubin architecture upgrade forecasts stronger data center revenue ahead and suggests NVIDIA's AI infrastructure spending cycle has a multi-year runway.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A101",
+      "expected_alpha_name": "AI Expansion",
+      "allowed_alpha_ids": [
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "AI Demand",
+        "GPU Demand",
+        "Datacenter CapEx",
+        "Revenue Growth"
+      ],
+      "difficulty": "medium",
+      "notes": "Primary is A101 because the causal driver is AI/GPU product-cycle demand. A103 and A301 are acceptable secondary interpretations."
+    },
+    {
+      "id": "nvda_real_005",
+      "source_section": "News Analyst / Sovereign AI Partnership",
+      "source_agent": "news_agent",
+      "text": "NVIDIA and Palantir's sovereign AI partnership expands NVDA's addressable market into defense and government AI infrastructure, a large multi-year and less cyclical vertical.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A103",
+      "expected_alpha_name": "AI Infrastructure",
+      "allowed_alpha_ids": [
+        "A103",
+        "A301",
+        "A101"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "AI Infrastructure",
+        "Datacenter CapEx",
+        "Revenue Growth"
+      ],
+      "difficulty": "medium",
+      "notes": "Primary is infrastructure; it can also support revenue expansion and AI expansion."
+    },
+    {
+      "id": "nvda_real_006",
+      "source_section": "News Analyst / Competitive Pressure",
+      "source_agent": "news_agent",
+      "text": "Etched raising $800 million and disclosing $1 billion of sales contracts confirms the AI chip race is intensifying, but it is a watch item rather than an immediate threat to NVIDIA.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [],
+      "expected_direction": "neutral",
+      "factors": [
+        "competition risk",
+        "AI chip competition"
+      ],
+      "difficulty": "hard",
+      "notes": "Important real-world risk, but MVP-10 taxonomy lacks a competition/custom-silicon displacement alpha."
+    },
+    {
+      "id": "nvda_real_007",
+      "source_section": "News Analyst / Etched Inference Chip",
+      "source_agent": "news_agent",
+      "text": "Etched's chip is reportedly specialized for transformer inference, but the report frames this as niche competition rather than a broad displacement of NVIDIA's ecosystem.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [
+        "A102"
+      ],
+      "expected_direction": "neutral",
+      "factors": [
+        "Inference Demand",
+        "competition risk"
+      ],
+      "difficulty": "hard",
+      "notes": "A102 may appear as a surface keyword, but the claim's actual meaning is competitive risk, not inference-demand tailwind."
+    },
+    {
+      "id": "nvda_real_008",
+      "source_section": "News Analyst / Semiconductor AI Rally",
+      "source_agent": "news_agent",
+      "text": "Nvidia, AMD, and Intel led an AI chip stock rally as Wall Street rebounded, showing supportive semiconductor sector momentum.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A201",
+      "expected_alpha_name": "Semiconductor Supercycle",
+      "allowed_alpha_ids": [
+        "A201",
+        "A601"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "Semiconductor Cycle",
+        "Narrative Momentum"
+      ],
+      "difficulty": "medium",
+      "notes": "Could also be A601 if interpreted as investor momentum rather than industry cycle."
+    },
+    {
+      "id": "nvda_real_009",
+      "source_section": "News Analyst / Retail Participation Declining",
+      "source_agent": "news_agent",
+      "text": "Retail participation in Magnificent Seven stocks has fallen to a four-year low, which may reduce short-term retail-driven momentum spikes for NVDA.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A601",
+      "expected_alpha_name": "Narrative Momentum",
+      "allowed_alpha_ids": [
+        "A601"
+      ],
+      "expected_direction": "negative",
+      "factors": [
+        "Narrative Momentum",
+        "retail flows"
+      ],
+      "difficulty": "hard",
+      "notes": "This is an inverse/weakening narrative-momentum claim; current direction compatibility may struggle because A601 is generally treated as positive."
+    },
+    {
+      "id": "nvda_real_010",
+      "source_section": "News Analyst / NVDY Covered Call ETF Debate",
+      "source_agent": "news_agent",
+      "text": "Large covered-call ETF activity in NVDY may create near-term ceiling pressure on NVDA as systematic call-selling dampens upside momentum.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A601",
+      "expected_alpha_name": "Narrative Momentum",
+      "allowed_alpha_ids": [
+        "A601"
+      ],
+      "expected_direction": "negative",
+      "factors": [
+        "Narrative Momentum",
+        "positioning",
+        "upside pressure"
+      ],
+      "difficulty": "hard",
+      "notes": "This is positioning/flow pressure. MVP taxonomy only partially captures it through narrative momentum."
+    },
+    {
+      "id": "nvda_real_011",
+      "source_section": "News Analyst / Fed on Hold",
+      "source_agent": "news_agent",
+      "text": "A 78% probability of zero Fed rate cuts in 2026 is a dominant macro risk because higher-for-longer rates compress NVDA's growth multiple.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A304",
+      "expected_alpha_name": "Multiple Compression",
+      "allowed_alpha_ids": [
+        "A304",
+        "A001"
+      ],
+      "expected_direction": "negative",
+      "factors": [
+        "Valuation Risk",
+        "Rate Cut Cycle"
+      ],
+      "difficulty": "medium",
+      "notes": "Primary impact is valuation compression. A001 is secondary because it is the absent/inverted rate-cut cycle."
+    },
+    {
+      "id": "nvda_real_012",
+      "source_section": "News Analyst / Macro Swing Factor",
+      "source_agent": "news_agent",
+      "text": "If inflation softens and the Fed pivots, NVDA could re-rate sharply higher through multiple expansion.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A001",
+      "expected_alpha_name": "Rate Cut Cycle",
+      "allowed_alpha_ids": [
+        "A001",
+        "A304"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "Rate Cut Cycle",
+        "Valuation Risk"
+      ],
+      "difficulty": "medium",
+      "notes": "Rate cut/pivot is the driver; multiple expansion is the effect."
+    },
+    {
+      "id": "nvda_real_013",
+      "source_section": "News Analyst / Recession Risk",
+      "source_agent": "news_agent",
+      "text": "Low U.S. recession probability supports enterprise AI capex budgets and suggests hyperscalers will likely maintain GPU purchasing programs.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A501",
+      "expected_alpha_name": "Recession Risk",
+      "allowed_alpha_ids": [
+        "A501",
+        "A101"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "Recession Risk",
+        "AI CapEx",
+        "GPU Demand"
+      ],
+      "difficulty": "hard",
+      "notes": "This is an inverse recession-risk claim: the risk is low, which is positive for capex. Current rule-based direction may struggle."
+    },
+    {
+      "id": "nvda_real_014",
+      "source_section": "News Analyst / Equity Markets",
+      "source_agent": "news_agent",
+      "text": "Dow Jones all-time highs and broad risk-on market conditions support technology and growth exposure.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A003",
+      "expected_alpha_name": "Liquidity Expansion",
+      "allowed_alpha_ids": [
+        "A003",
+        "A601"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "Liquidity Expansion",
+        "Narrative Momentum",
+        "risk appetite"
+      ],
+      "difficulty": "medium",
+      "notes": "The text does not say liquidity directly, but risk-on participation is closest to A003 in MVP-10."
+    },
+    {
+      "id": "nvda_real_015",
+      "source_section": "News Analyst / Copper & Commodities",
+      "source_agent": "news_agent",
+      "text": "Rising copper prices are an indirect headwind for hyperscalers building AI infrastructure because copper is a critical data-center input cost.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A103",
+      "expected_alpha_name": "AI Infrastructure",
+      "allowed_alpha_ids": [
+        "A103"
+      ],
+      "expected_direction": "negative",
+      "factors": [
+        "AI Infrastructure",
+        "Datacenter CapEx"
+      ],
+      "difficulty": "hard",
+      "notes": "This is a negative infrastructure bottleneck/cost claim. Keyword rules may miss it because it does not say standard data-center capex phrases cleanly."
+    },
+    {
+      "id": "nvda_real_016",
+      "source_section": "News Analyst / Precious Metals",
+      "source_agent": "news_agent",
+      "text": "Weak precious metals suggest reduced safe-haven demand and confidence in risk assets, which is broadly constructive for equities including NVDA.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A003",
+      "expected_alpha_name": "Liquidity Expansion",
+      "allowed_alpha_ids": [
+        "A003",
+        "A601"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "Liquidity Expansion",
+        "risk appetite"
+      ],
+      "difficulty": "hard",
+      "notes": "Closest MVP alpha is A003, though the text is actually a risk-appetite/flow signal rather than liquidity itself."
+    },
+    {
+      "id": "nvda_real_017",
+      "source_section": "News Analyst / Synthesis",
+      "source_agent": "news_agent",
+      "text": "The Rubin architecture uplift, the Palantir sovereign AI partnership, and sector-wide AI chip momentum reinforce NVDA's dominant position in AI infrastructure.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A101",
+      "expected_alpha_name": "AI Expansion",
+      "allowed_alpha_ids": [
+        "A101",
+        "A103",
+        "A201",
+        "A601"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "AI Demand",
+        "AI Infrastructure",
+        "Semiconductor Cycle",
+        "Narrative Momentum"
+      ],
+      "difficulty": "medium",
+      "notes": "Compound claim. Primary is broad AI expansion; several secondary alphas are defensible."
+    },
+    {
+      "id": "nvda_real_018",
+      "source_section": "Bull Researcher / Pullback Setup",
+      "source_agent": "bull_researcher",
+      "text": "NVDA's pullback to the 200-day SMA with RSI recovering is a buying opportunity rather than a structural breakdown.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [],
+      "expected_direction": "positive",
+      "factors": [
+        "technical support",
+        "momentum recovery"
+      ],
+      "difficulty": "hard",
+      "notes": "Very important trading judgment, but outside current alpha taxonomy."
+    },
+    {
+      "id": "nvda_real_019",
+      "source_section": "Bull Researcher / Long-Term Revenue Engine",
+      "source_agent": "bull_researcher",
+      "text": "Hyperscalers are competing to build AI capacity, and NVIDIA's Rubin architecture signals that the AI infrastructure spending cycle has years of runway.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A101",
+      "expected_alpha_name": "AI Expansion",
+      "allowed_alpha_ids": [
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "AI Demand",
+        "AI CapEx",
+        "GPU Demand",
+        "Datacenter CapEx"
+      ],
+      "difficulty": "medium",
+      "notes": "Strong A101 signal with A103/A301 downstream effects."
+    },
+    {
+      "id": "nvda_real_020",
+      "source_section": "Bull Researcher / CUDA Moat",
+      "source_agent": "bull_researcher",
+      "text": "NVIDIA's CUDA ecosystem and full-stack GPUs make Etched a niche watch item rather than a broad threat to NVIDIA's AI workload position.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [
+        "A101"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "CUDA moat",
+        "AI workload",
+        "competition risk"
+      ],
+      "difficulty": "hard",
+      "notes": "This is moat/competitive positioning, not clean alpha activation. Surface AI keywords may cause false A101."
+    },
+    {
+      "id": "nvda_real_021",
+      "source_section": "Bull Researcher / Government AI",
+      "source_agent": "bull_researcher",
+      "text": "Government AI contracts are large, multi-year, and funded by defense budgets, making NVIDIA's sovereign AI opportunity a defensively positioned growth vertical.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A103",
+      "expected_alpha_name": "AI Infrastructure",
+      "allowed_alpha_ids": [
+        "A103",
+        "A301"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "AI Infrastructure",
+        "Revenue Growth"
+      ],
+      "difficulty": "medium",
+      "notes": "Infrastructure is primary; revenue expansion is secondary."
+    },
+    {
+      "id": "nvda_real_022",
+      "source_section": "Bull Researcher / Macro Risk",
+      "source_agent": "bull_researcher",
+      "text": "No rate cuts matter less if NVIDIA keeps delivering revenue beats from Blackwell demand, Rubin pre-orders, and government contracts.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A301",
+      "expected_alpha_name": "Revenue Expansion",
+      "allowed_alpha_ids": [
+        "A301",
+        "A101",
+        "A001"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "Revenue Growth",
+        "GPU Demand",
+        "Rate Cut Cycle"
+      ],
+      "difficulty": "hard",
+      "notes": "Compound rebuttal: revenue growth offsets rate headwind."
+    },
+    {
+      "id": "nvda_real_023",
+      "source_section": "Bear Researcher / Technical Breakdown",
+      "source_agent": "bear_researcher",
+      "text": "NVDA is below the 10 EMA, 50 SMA, Bollinger Middle, and VWMA with deeply negative MACD, suggesting a distribution phase and technical breakdown risk.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [],
+      "expected_direction": "negative",
+      "factors": [
+        "technical weakness",
+        "distribution phase"
+      ],
+      "difficulty": "hard",
+      "notes": "Technical breakdown risk is not represented by MVP-10 alphas."
+    },
+    {
+      "id": "nvda_real_024",
+      "source_section": "Bear Researcher / Rubin Timing Risk",
+      "source_agent": "bear_researcher",
+      "text": "Rubin revenue is still 12 to 24 months away, and a between-generation air pocket could pressure NVDA if Blackwell demand peaks first.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A101",
+      "expected_alpha_name": "AI Expansion",
+      "allowed_alpha_ids": [
+        "A101",
+        "A301"
+      ],
+      "expected_direction": "negative",
+      "factors": [
+        "AI Demand",
+        "GPU Demand",
+        "Revenue Growth"
+      ],
+      "difficulty": "hard",
+      "notes": "This is a negative/invalidation form of AI expansion/revenue growth. Keyword matching may misread it as positive."
+    },
+    {
+      "id": "nvda_real_025",
+      "source_section": "Bear Researcher / Hyperscaler Custom Silicon",
+      "source_agent": "bear_researcher",
+      "text": "Microsoft, Google, Amazon, and Meta are building custom silicon to reduce their dependency on NVIDIA over time.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [],
+      "expected_direction": "negative",
+      "factors": [
+        "custom silicon risk",
+        "competition risk",
+        "hyperscaler dependency"
+      ],
+      "difficulty": "hard",
+      "notes": "This is one of the strongest real bear claims, but MVP-10 lacks a custom-silicon displacement alpha."
+    },
+    {
+      "id": "nvda_real_026",
+      "source_section": "Bear Researcher / Rate Environment",
+      "source_agent": "bear_researcher",
+      "text": "Higher-for-longer rates compress what investors should pay for NVDA's future earnings and increase the penalty for any earnings disappointment.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A304",
+      "expected_alpha_name": "Multiple Compression",
+      "allowed_alpha_ids": [
+        "A304",
+        "A001"
+      ],
+      "expected_direction": "negative",
+      "factors": [
+        "Valuation Risk",
+        "Rate Cut Cycle"
+      ],
+      "difficulty": "medium",
+      "notes": "Clean multiple compression claim."
+    },
+    {
+      "id": "nvda_real_027",
+      "source_section": "Bear Researcher / Government Partnership Skepticism",
+      "source_agent": "bear_researcher",
+      "text": "The Palantir sovereign AI partnership is a press release, not a booked revenue line item, and government procurement can be slow or delayed.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A301",
+      "expected_alpha_name": "Revenue Expansion",
+      "allowed_alpha_ids": [
+        "A301",
+        "A103"
+      ],
+      "expected_direction": "negative",
+      "factors": [
+        "Revenue Growth",
+        "AI Infrastructure"
+      ],
+      "difficulty": "hard",
+      "notes": "This is negative revenue-conversion risk from an infrastructure catalyst."
+    },
+    {
+      "id": "nvda_real_028",
+      "source_section": "Research Manager / Final Judgment",
+      "source_agent": "research_manager",
+      "text": "The bull case wins because the 200-day SMA held on a closing basis, risk-reward is favorable, and fundamental growth drivers such as Rubin, sovereign AI, and CUDA ecosystem expansion remain intact.",
+      "expected_match_status": "matched",
+      "expected_alpha": "A101",
+      "expected_alpha_name": "AI Expansion",
+      "allowed_alpha_ids": [
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "expected_direction": "positive",
+      "factors": [
+        "AI Demand",
+        "AI Infrastructure",
+        "Revenue Growth"
+      ],
+      "difficulty": "medium",
+      "notes": "The sentence is partly technical/no-match, but the alpha-bearing part is A101/A103/A301."
+    },
+    {
+      "id": "nvda_real_029",
+      "source_section": "Portfolio Manager / Rate Risk",
+      "source_agent": "portfolio_manager",
+      "text": "Rate risk is real and zero Fed cuts in 2026 create a valuation ceiling, but it does not justify avoiding NVDA if earnings growth accelerates.",
+      "expected_match_status": "ambiguous",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [
+        "A304",
+        "A301",
+        "A001"
+      ],
+      "expected_direction": "neutral",
+      "factors": [
+        "Valuation Risk",
+        "Revenue Growth",
+        "Rate Cut Cycle"
+      ],
+      "difficulty": "hard",
+      "notes": "This is an explicit mixed/conflict claim: valuation compression versus revenue expansion."
+    },
+    {
+      "id": "nvda_real_030",
+      "source_section": "Portfolio Manager / Hyperscaler Custom Silicon",
+      "source_agent": "portfolio_manager",
+      "text": "Hyperscaler custom silicon is the strongest structural bear argument, but it is a four-to-six-year story against a rapidly expanding AI compute market.",
+      "expected_match_status": "no_match",
+      "expected_alpha": null,
+      "expected_alpha_name": null,
+      "allowed_alpha_ids": [
+        "A101"
+      ],
+      "expected_direction": "neutral",
+      "factors": [
+        "custom silicon risk",
+        "AI Demand"
+      ],
+      "difficulty": "hard",
+      "notes": "Real structural conflict not cleanly represented in MVP-10. It should not be forced into A101 just because the AI market is mentioned."
+    }
+  ]
+}

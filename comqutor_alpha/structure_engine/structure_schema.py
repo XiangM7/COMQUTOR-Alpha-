@@ -15,6 +15,7 @@ from typing import Any
 VALID_DIRECTIONS = {"positive", "negative", "neutral", "unknown"}
 VALID_EDGE_TYPES = {"causal", "supportive", "conflicting"}
 VALID_MATCH_STATUSES = {"matched", "no_match", "ambiguous"}
+VALID_ASSERTION_STATUSES = {"asserted", "conditional", "negated", "mixed", "unknown"}
 MAX_CANDIDATE_SCORES = 5
 
 
@@ -66,11 +67,19 @@ class StructuredAgentOutput:
     agent_output_id: str | None = None
     source_agent_output_id: str | None = None
     source_refs: list[str] = field(default_factory=list)
+    claim_index: int = 0
+    source_section: str | None = None
+    assertion_status: str = "unknown"
+    semantic_polarity: str = "unknown"
 
     def to_dict(self):
         data = asdict(self)
         data["direction"] = normalize_direction(data["direction"])
         data["confidence"] = clamp_score(data["confidence"])
+        assertion_status = str(data.get("assertion_status") or "unknown").strip().lower()
+        data["assertion_status"] = (
+            assertion_status if assertion_status in VALID_ASSERTION_STATUSES else "unknown"
+        )
         return data
 
 
@@ -84,10 +93,20 @@ class AlphaCandidateScore:
     keyword_score: float = 0.0
     factor_score: float = 0.0
     direction_score: float = 0.0
+    semantic_score: float = 0.0
+    relation: str = "unknown"
+    eligible: bool = False
+    rejection_reason: str | None = None
 
     def to_dict(self):
         data = asdict(self)
-        for key in ("score", "keyword_score", "factor_score", "direction_score"):
+        for key in (
+            "score",
+            "keyword_score",
+            "factor_score",
+            "direction_score",
+            "semantic_score",
+        ):
             data[key] = clamp_score(data[key])
         return data
 
@@ -111,6 +130,13 @@ class AlphaMatchRecord:
     candidate_scores: list[dict[str, Any]] = field(default_factory=list)
     match_status: str = "no_match"
     reason: str = ""
+    assertion_status: str = "unknown"
+    semantic_polarity: str = "unknown"
+    taxonomy_gap_context: str | None = None
+    eligible_candidates: list[dict[str, Any]] = field(default_factory=list)
+    plausible_alphas: list[str] = field(default_factory=list)
+    secondary_alphas: list[str] = field(default_factory=list)
+    classifier: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self):
         data = asdict(self)
@@ -139,6 +165,10 @@ class AlphaMatchRecord:
                         keyword_score=candidate.get("keyword_score", 0.0),
                         factor_score=candidate.get("factor_score", 0.0),
                         direction_score=candidate.get("direction_score", 0.0),
+                        semantic_score=candidate.get("semantic_score", 0.0),
+                        relation=str(candidate.get("relation", "unknown")),
+                        eligible=bool(candidate.get("eligible", False)),
+                        rejection_reason=candidate.get("rejection_reason"),
                     ).to_dict()
                 )
         data["candidate_scores"] = normalized_candidates[:MAX_CANDIDATE_SCORES]
@@ -180,6 +210,7 @@ class StructureEdge:
     source_claim: str = ""
     source_record_id: str | None = None
     source_agent_output_id: str | None = None
+    assertion_status: str = "asserted"
 
     def to_dict(self):
         data = asdict(self)
@@ -187,4 +218,8 @@ class StructureEdge:
         edge_type = str(data.get("edge_type") or "").strip().lower()
         if edge_type in VALID_EDGE_TYPES:
             data["edge_type"] = edge_type
+        assertion_status = str(data.get("assertion_status") or "unknown").strip().lower()
+        data["assertion_status"] = (
+            assertion_status if assertion_status in VALID_ASSERTION_STATUSES else "unknown"
+        )
         return data
