@@ -25,22 +25,33 @@ pytestmark = pytest.mark.integration
 
 @pytest.fixture(scope="module")
 def postgres_context():
+    """PostgreSQL Verification Test Gate (2026-07-14 Correctness Patch,
+    section 十六): an *unset* COMQUTOR_TEST_DATABASE_URL is the only normal
+    skip -- it means the operator simply did not opt into this profile. Any
+    other misconfiguration (non-PostgreSQL scheme, missing driver,
+    unreachable database) is a hard `pytest.fail`, not a skip: once the
+    operator has explicitly configured this DSN, they are asking to run the
+    PostgreSQL Gate, and a broken configuration must not be silently
+    reported as "the whole suite was skipped as usual." Failure messages
+    never include the DSN, host, username, password, or raw driver
+    exception text.
+    """
     url = os.environ.get("COMQUTOR_TEST_DATABASE_URL", "").strip()
     if not url:
         pytest.skip("COMQUTOR_TEST_DATABASE_URL not configured")
     if not url.startswith(("postgresql://", "postgresql+psycopg://")):
-        pytest.skip("COMQUTOR_TEST_DATABASE_URL must use PostgreSQL")
+        pytest.fail("COMQUTOR_TEST_DATABASE_URL is not a PostgreSQL DSN")
 
     try:
         engine = build_engine(url)
     except ImportError:
-        pytest.skip("PostgreSQL driver is unavailable")
+        pytest.fail("PostgreSQL verification was configured but the driver is unavailable")
     try:
         with engine.connect() as conn:
             conn.execute(sa.text("SELECT 1"))
     except SQLAlchemyError:
         engine.dispose()
-        pytest.skip("configured PostgreSQL database is unreachable")
+        pytest.fail("PostgreSQL verification was configured but the database is unreachable")
     apply_migrations(engine)
 
     context = {
@@ -83,6 +94,27 @@ def test_migration_0002_and_tables_exist(postgres_context):
     engine = postgres_context["engine"]
     inspector = sa.inspect(engine)
     assert {"alpha_activations", "alpha_conflicts"}.issubset(inspector.get_table_names())
+    with engine.connect() as conn:
+        count = conn.scalar(
+            sa.select(sa.func.count())
+            .select_from(schema_migrations)
+            .where(
+                schema_migrations.c.version
+                == "0002_create_week4_alpha_activations_and_alpha_conflicts"
+            )
+        )
+    assert count == 1
+
+
+def test_migration_reapply_is_idempotent_and_records_0002_exactly_once(postgres_context):
+    """PostgreSQL Migration Reapply Test (Correctness Patch, section 十七):
+    apply_migrations() against the already-migrated shared integration
+    database must be a safe no-op, and 0002 must never accumulate more than
+    one schema_migrations row. Never drops/truncates/resets anything."""
+    engine = postgres_context["engine"]
+    apply_migrations(engine)
+    second = apply_migrations(engine)
+    assert second == []
     with engine.connect() as conn:
         count = conn.scalar(
             sa.select(sa.func.count())

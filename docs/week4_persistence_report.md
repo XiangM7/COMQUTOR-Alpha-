@@ -33,8 +33,16 @@
 
 ## 6. Scope implemented
 
-新增 Week 4 两表、0002 migration、activation/conflict validation、递归 whitelist、
-原子 replace、确定性读取与重建、SQLite tests 和 PostgreSQL integration profile。
+新增 Week 4 两表、0002 migration、activation/conflict validation、原子 replace、
+确定性读取与重建、SQLite tests 和 PostgreSQL integration profile。
+
+**修正（2026-07-14 Correctness Patch）**：初始版本本节曾使用"递归 whitelist"
+描述 activation component 校验，但当时的实现只校验了 component 一级字段*名称*
+（所有五个 component 共享同一个扁平字段名集合），并未对每个 component 的字段
+*类型/取值范围*做验证，也没有验证 activation 与 conflict 两个 payload 之间的
+交叉一致性——即两者严格意义上都不是"递归"的。这一节的原始措辞是不准确的自我
+描述，不是事后才发现的新缺陷；本补丁（见文末 "W4.2 Correctness Patch" 一节）
+关闭了这个差距，现在才真正符合"per-component typed recursive whitelist"。
 
 ## 7. Scope deferred
 
@@ -241,3 +249,139 @@ New implementation/tests/report remain untracked and therefore are not included 
 
 Expected final worktree contains two modified DB files and four new W4.2 files. No staged files,
 commit or push.
+
+---
+
+## W4.2 Correctness Patch（2026-07-14）
+
+历史记录，不抹去问题：初始 W4.2 实现（第 1–44 节）为 activation 和 conflict
+两个 payload 分别做了内部自洽性校验，但从未验证两者属于*同一次*计算——一个
+admitted conflict row 内嵌的 activation 快照（`components.activation_a/b`、
+`bull_structure`/`bear_structure`）理论上可以和同一次调用里实际持久化的
+activation rows 互相矛盾而不被发现。同时，activation component 的 whitelist
+只校验了一级字段名（五个 component 共享一套字段名集合），未对字段值做类型/
+范围校验，且未按 component 区分允许字段——严格来说都不是"递归"的（见第 6
+节的修正）。本补丁关闭这两个缺口，并补充 candidate reason-code 完整性校验
+和 PostgreSQL 验证测试的 fail-loud gate。
+
+### 1. Cross-Payload Snapshot Validation
+
+新增纯函数 `_validate_week4_snapshot(activation_rows, conflict_rows)`，在
+`build_week4_rows()` 构造完两组 canonical rows 之后、返回之前调用（因此发生
+在 `persist_week4_results()` 打开数据库 transaction 之前）。不访问数据库，
+不修改传入的 rows。对每一个 `outcome == "admitted"` 的 conflict row 验证：
+
+- `alpha_a`/`alpha_b` 必须都存在于由 activation rows 构造的
+  `activation_by_alpha_id` 索引中；
+- `components.activation_a`/`activation_b` 必须等于对应 activation row 的
+  `activation_score`；`components.minimum_activation` 必须等于两者的 `min()`；
+- `bull_alpha_id`/`bear_alpha_id` 必须都能在 activation 索引中找到；
+- `bull_structure`/`bear_structure` 的 `alpha_id`/`alpha_name`/
+  `activation_score`/`status`/`direction` 必须与对应 activation row 逐字段
+  相等，且 `bull_structure.direction == "positive"`、
+  `bear_structure.direction == "negative"`；
+- `{bull_alpha_id, bear_alpha_id} == {alpha_a, alpha_b}`。
+
+任一条件不满足抛出 `Week4PersistenceDataError(WEEK4_CONFLICT_DATA_INCONSISTENT)`，
+经 repository 转换为 `GraphPersistenceError("WEEK4_CONFLICT_DATA_INCONSISTENT")`。
+不重新决定 `contradiction_weight`/`evidence_strength`/`conflict_score`/排序——
+这些继续完全信任 W4.1 Conflict Detector 的输出，本函数只做交叉一致性检查。
+
+### 2. Per-Component Typed Recursive Whitelist
+
+`_whitelist_activation_components()` 不再对五个 component 使用同一个扁平
+字段名集合；改为按 component 名称分派到五个独立的 `_whitelist_<name>()`
+函数（`matched_evidence`/`agent_agreement`/`graph_coherence`/`recency`/
+`direction_strength`），每个函数只接受该 component 官方定义的字段，并对每个
+字段值做类型/范围校验（复用/新增 `_number`/`_positive_number`/
+`_nonnegative_number`/`_integer`/`_positive_integer`/`_optional_integer`/
+`_bool`/`_text`/`_agents_list` 等强类型 helper）。`raw`/`weight`/`contribution`
+三个公共字段（`[0,100]`/`[0,1]`/`[0,100]`）对全部五个 component 一致。
+
+关键区别：数值字段拒绝 `bool`（Python 的 `True`/`False` 是 `int` 子类，之前
+的 `_integer`/`_number` 已经显式排除，本次未改变这一行为，只是现在更多字段
+真正被校验到）、拒绝 NaN/Infinity、拒绝嵌套 `dict`/`list`；`bool` 字段拒绝
+字符串 `"true"`；`agent_agreement.agents` 校验为 `list[非空 str]` 后按
+`sorted(set(...))` 归一化，不依赖原始输入顺序。未知 component 整体丢弃；
+已知 component 内未知字段逐一丢弃；已知字段类型错误使整个持久化请求失败
+（`WEEK4_ACTIVATION_PAYLOAD_INVALID`），不会"尽量保留能保留的部分"。
+
+### 3. Candidate Reason-Code Contract
+
+`_whitelist_candidate()` 新增：`admitted` 的 `reason_codes` 必须为空（已有）；
+`suppressed`/`rejected` 的 `reason_codes` 必须至少一项（新增）；同一 candidate
+的 `reason_codes` 不允许重复（新增）；每个 reason code 必须是非空字符串
+（新增）。`_whitelist_audit_side()` 新增：`qualifying_claim_ids` 每项必须
+非空字符串、且列表内不允许重复（新增；排序性校验已有）。
+
+### 4. PostgreSQL 验证测试不再对"已配置但错误"静默 skip
+
+`tests/test_week4_postgres_persistence.py::postgres_context`：只有
+`COMQUTOR_TEST_DATABASE_URL` 完全未设置时才 `pytest.skip`。一旦设置了值，
+以下任一情况改为 `pytest.fail`（不再是 skip）：DSN scheme 不是
+`postgresql://`/`postgresql+psycopg://`；驱动缺失（`ImportError`）；数据库
+不可连接。失败消息固定为不含 DSN/host/用户名/密码/原始 driver 异常文本的
+安全字符串。本次用三个合成场景直接验证了这三条 fail 路径（非法 scheme、
+`postgresql://`裸 scheme 因为本环境未装 `psycopg2`/`psycopg2-binary` 触发
+驱动缺失、`postgresql+psycopg://`指向不可达地址触发不可达），均正确
+`pytest.fail` 而非静默通过或 skip；未设置 DSN 时仍正确 `pytest.skip`。
+
+### 5. PostgreSQL Migration Reapply Test
+
+新增 `test_migration_reapply_is_idempotent_and_records_0002_exactly_once`：
+对已迁移的共享 integration 数据库再次调用 `apply_migrations(engine)`，断言
+返回空列表，且 `schema_migrations` 中 `0002` 版本行数恰好为 1。不删除
+migration 行、不 drop/truncate 任何表。
+
+### 6. 新增测试数量与结果
+
+`tests/test_week4_persistence.py`：新增 24 个（原 44 个全部保留、未削弱），
+分三个测试类：`TestCrossPayloadSnapshotIntegrity`（10 个，覆盖 activation
+score/name/status/direction 错配、bull/bear 方向错误、admitted conflict
+缺失一侧 activation、相同 identity 但快照不同、validation 保留旧状态、
+validation 发生在任何 SQL 执行之前）、`TestTypedRecursiveActivationWhitelist`
+（10 个，覆盖 `recency.reason`/`agents`/`graph_coherence.scope` 嵌套 dict、
+bool 字段传字符串、numeric 字段传嵌套对象、integer 字段传 bool、
+`age_days`传 NaN、`average_signed_strength`传 list、`saturation`必须为正、
+真实 Week 3 NVDA activation components 完整 round trip）、
+`TestCandidateReasonCodeContract`（4 个，覆盖 suppressed/rejected 空
+reason_codes、重复 reason code、重复 qualifying_claim_id）。
+`tests/test_week4_postgres_persistence.py`：新增 1 个（migration reapply）。
+
+全部新增测试首次运行即通过（未出现"写测试时预期失败但被迫放宽实现"的情况）。
+
+### 7. 重新运行的结果
+
+- W4.2 focused (`tests/test_week4_persistence.py`)：**68 passed**（原 44 +
+  新增 24）。
+- W4.1 regression（conflict detector + NVDA + QQQ）：**164 passed**，与补丁前
+  完全一致，无回归。
+- Week 3 persistence regression（graph persistence + graph API + Week 3
+  security hardening）：**78 passed**，与补丁前完全一致。
+- Key Week 1–3 regression（Week1A gate、alpha loader、graph builder、
+  activation scorer、research input validation）：**85 passed**，与补丁前
+  完全一致。
+- PostgreSQL profile（`-m integration`）：**10 skipped**（原 9 个 + 新增的
+  migration reapply 测试 1 个），`COMQUTOR_TEST_DATABASE_URL` 未配置，
+  誠实 skip，未伪造通过；额外用三个合成 DSN 场景手动验证了 fail-loud 路径
+  （见上）。
+- 完整 offline suite：**1035 passed, 1 skipped, 18 deselected**（补丁前
+  1011 passed, 1 skipped, 17 deselected；净增 24 个 offline 测试，
+  deselected 净增 1 个新的 integration-marked 测试，与预期完全对应）。
+
+### 8. 更新后的最终 verdict
+
+```
+W4.2 Snapshot Integrity: PASS
+W4.2 Recursive Whitelist: PASS
+W4.2 Candidate Contract: PASS
+W4.2 SQLite Persistence: PASS
+W4.2 PostgreSQL Integration: UNVERIFIED
+W4.2 Correctness Patch: PASS
+W4.2 Overall: BLOCKED_BY_POSTGRESQL_VERIFICATION
+W4.3 API Entry: NOT READY
+```
+
+PostgreSQL 依然只是"未验证"（无可达服务器、且本地环境未安装
+`psycopg2`/`psycopg2-binary`，只有 `psycopg` v3 可用），不是"已验证失败"，
+也不是伪造的"已验证通过"。

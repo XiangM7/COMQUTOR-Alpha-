@@ -78,6 +78,20 @@ def _persist(repo, run_id="w42_run", ticker="NVDA", *, score=90.0):
     return activation, conflict
 
 
+def _mutate_admitted_conflict(conflict_payload, mutator):
+    """Apply `mutator` (conflict dict -> conflict dict) identically to both
+    conflicts[0] and main_conflict, so the two stay equal to each other
+    (satisfying _whitelist_conflict's own pre-existing internal-consistency
+    check) while a mutated field can still disagree with the *separate*
+    activation_payload being persisted alongside it -- exercising the
+    Correctness Patch's new cross-payload snapshot check specifically,
+    rather than the older same-payload self-consistency checks."""
+    mutated = mutator(copy.deepcopy(conflict_payload["conflicts"][0]))
+    conflict_payload["conflicts"][0] = mutated
+    conflict_payload["main_conflict"] = copy.deepcopy(mutated)
+    return conflict_payload
+
+
 def _constraint_names(table):
     return {constraint.name for constraint in table.constraints if constraint.name}
 
@@ -600,3 +614,277 @@ def test_real_nvda_w41_to_w42_persistence_sanity(tmp_path):
     assert repo.get_week4_conflict_result(run_id) == conflict
     assert repo.get_week4_conflict_result(run_id)["main_conflict"]["conflict_id"] == "A101__A304"
     assert engine.dialect.name == "sqlite"
+
+
+# ---------------------------------------------------------------------------
+# 2026-07-14 W4.2 Correctness Patch: cross-payload snapshot integrity,
+# typed recursive component whitelist, and candidate reason-code contract.
+# _week4_payloads(score=90) always produces an admitted A101-A304 conflict
+# with A101 at index 2 of activation["alphas"] and A304 at index 4 -- both
+# used below to construct "stale conflict, fresh activation" mismatches.
+# ---------------------------------------------------------------------------
+
+
+class TestCrossPayloadSnapshotIntegrity:
+    def test_mismatch_activation_score_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        activation["alphas"][2]["activation_score"] = 12.0  # A101, was 90
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+        assert repo.get_alpha_activations("w42_run") == []
+        assert repo.get_alpha_conflicts("w42_run") == []
+
+    def test_mismatch_activation_name_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        activation["alphas"][2]["alpha_name"] = "Mutated Name"  # A101
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_mismatch_activation_status_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        activation["alphas"][2]["status"] = "watch"  # A101, was "active"
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_mismatch_activation_direction_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        activation["alphas"][4]["direction"] = "neutral"  # A304, was "negative"
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_bull_structure_wrong_direction_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        _mutate_admitted_conflict(
+            conflict,
+            lambda c: {**c, "bull_structure": {**c["bull_structure"], "direction": "negative"}},
+        )
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_bear_structure_wrong_direction_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        _mutate_admitted_conflict(
+            conflict,
+            lambda c: {**c, "bear_structure": {**c["bear_structure"], "direction": "positive"}},
+        )
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_admitted_conflict_missing_activation_side_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        activation["alphas"] = [a for a in activation["alphas"] if a["alpha_id"] != "A304"]
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+        assert repo.get_alpha_activations("w42_run") == []
+
+    def test_mixed_snapshot_with_matching_identity_fields_is_still_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        # run_id/ticker/version all agree between the two payloads -- only
+        # the underlying numeric snapshot disagrees.
+        assert conflict["run_id"] == "w42_run"
+        assert conflict["ticker"] == "NVDA"
+        assert activation["formula_version"] == ACTIVATION_FORMULA_VERSION
+        activation["alphas"][2]["activation_score"] = 5.0  # A101
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_mixed_snapshot_validation_preserves_prior_committed_state(self):
+        _, repo = _engine_and_repo()
+        _persist(repo, score=90)
+        before = repo.get_week4_conflict_result("w42_run")
+        activation, conflict = _week4_payloads(score=90)
+        activation["alphas"][2]["activation_score"] = 5.0  # A101
+        with pytest.raises(GraphPersistenceError):
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert repo.get_week4_conflict_result("w42_run") == before
+
+    def test_mixed_snapshot_validation_happens_before_any_sql_execution(self):
+        engine, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads(score=90)
+        activation["alphas"][2]["activation_score"] = 5.0  # A101
+
+        executed_statements: list[str] = []
+
+        def spy(_conn, _cursor, statement, _parameters, _context, _executemany):
+            executed_statements.append(statement)
+
+        sa.event.listen(engine, "before_cursor_execute", spy)
+        try:
+            with pytest.raises(GraphPersistenceError) as exc_info:
+                repo.persist_week4_results(
+                    run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+                )
+            assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+        finally:
+            sa.event.remove(engine, "before_cursor_execute", spy)
+        assert executed_statements == []  # validation failed before any SQL was issued
+
+
+class TestTypedRecursiveActivationWhitelist:
+    def _persist_with_components(self, components):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        activation["alphas"][2]["components"] = components  # A101
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_ACTIVATION_PAYLOAD_INVALID"
+        assert repo.get_alpha_activations("w42_run") == []
+        return repo
+
+    def test_recency_reason_nested_dict_is_rejected(self):
+        self._persist_with_components({"recency": {"reason": {"nested": "dict"}}})
+
+    def test_agent_agreement_agents_with_nested_dict_is_rejected(self):
+        self._persist_with_components({"agent_agreement": {"agents": [{"nested": "dict"}]}})
+
+    def test_graph_coherence_scope_nested_dict_is_rejected(self):
+        self._persist_with_components({"graph_coherence": {"scope": {"nested": "dict"}}})
+
+    def test_bool_field_as_string_is_rejected(self):
+        self._persist_with_components({"graph_coherence": {"evidence_gated": "true"}})
+
+    def test_numeric_field_as_nested_object_is_rejected(self):
+        self._persist_with_components({"matched_evidence": {"raw": {"nested": "object"}}})
+
+    def test_integer_field_as_bool_is_rejected(self):
+        self._persist_with_components({"agent_agreement": {"distinct_agents": True}})
+
+    def test_recency_age_days_as_nan_is_rejected(self):
+        self._persist_with_components({"recency": {"age_days": float("nan")}})
+
+    def test_direction_strength_average_signed_strength_as_list_is_rejected(self):
+        self._persist_with_components({"direction_strength": {"average_signed_strength": [0.5]}})
+
+    def test_matched_evidence_saturation_must_be_positive(self):
+        self._persist_with_components({"matched_evidence": {"saturation": 0.0}})
+
+    def test_real_week3_activation_components_round_trip(self, tmp_path):
+        _, repo = _engine_and_repo()
+        payload = {
+            "ticker": "NVDA",
+            "analysis_date": "2026-06-30",
+            "selected_analysts": ["market", "news", "fundamentals", "sentiment"],
+            "offline_raw_agent_outputs": _nvda_offline_outputs(),
+        }
+        response = run_research_request(payload, output_root=tmp_path, graph_repository=repo)
+        run_id = response["run_id"]
+        graph = get_persisted_structure_graph(run_id, output_root=tmp_path, graph_repository=repo)
+        matches = json.loads((tmp_path / run_id / "alpha_matches.json").read_text(encoding="utf-8"))
+        conflict = detect_alpha_conflicts(
+            run_id=run_id,
+            ticker="NVDA",
+            activation_payload=graph["activation"],
+            alpha_matches=matches["matches"],
+        )
+        repo.persist_week4_results(
+            run_id=run_id, ticker="NVDA", activation_payload=graph["activation"], conflict_payload=conflict
+        )
+        row = next(r for r in repo.get_alpha_activations(run_id) if r["alpha_id"] == "A101")
+        components = row["activation_json"]["components"]
+        assert components  # A101 has real evidence in this fixture
+        assert set(components) <= {
+            "matched_evidence",
+            "agent_agreement",
+            "graph_coherence",
+            "recency",
+            "direction_strength",
+        }
+        for component in components.values():
+            assert isinstance(component, dict)
+            for key in ("raw", "weight", "contribution"):
+                if key in component:
+                    assert isinstance(component[key], (int, float))
+                    assert not isinstance(component[key], bool)
+
+
+class TestCandidateReasonCodeContract:
+    def test_suppressed_candidate_with_empty_reason_codes_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        suppressed = next(
+            c for c in conflict["arbitration"]["candidate_evaluations"] if c["outcome"] == "suppressed"
+        )
+        suppressed["reason_codes"] = []
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_rejected_candidate_with_empty_reason_codes_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        rejected = next(
+            c for c in conflict["arbitration"]["candidate_evaluations"] if c["outcome"] == "rejected"
+        )
+        rejected["reason_codes"] = []
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_duplicate_reason_code_on_a_candidate_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        suppressed = next(
+            c for c in conflict["arbitration"]["candidate_evaluations"] if c["outcome"] == "suppressed"
+        )
+        suppressed["reason_codes"] = [suppressed["reason_codes"][0], suppressed["reason_codes"][0]]
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"
+
+    def test_duplicate_qualifying_claim_id_in_evidence_audit_is_rejected(self):
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        admitted = next(
+            c for c in conflict["arbitration"]["candidate_evaluations"] if c["outcome"] == "admitted"
+        )
+        side = admitted["evidence_audit"]["alpha_a"]
+        assert side["qualifying_claim_ids"]  # A101 has c101 as qualifying evidence
+        side["qualifying_claim_ids"] = side["qualifying_claim_ids"] * 2
+        side["qualifying_count"] = len(side["qualifying_claim_ids"])
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run", ticker="NVDA", activation_payload=activation, conflict_payload=conflict
+            )
+        assert exc_info.value.reason_code == "WEEK4_CONFLICT_DATA_INCONSISTENT"

@@ -1,11 +1,28 @@
-"""Pure validation, whitelisting, and reconstruction for Week 4 persistence."""
+"""Pure validation, whitelisting, and reconstruction for Week 4 persistence.
+
+2026-07-14 W4.2 Correctness Patch: closes two gaps in the initial
+implementation (see docs/week4_persistence_report.md's "W4.2 Correctness
+Patch" section for the full history) --
+
+1. ``build_activation_rows``/``build_conflict_rows`` were each internally
+   self-consistent but were never cross-checked against each other: nothing
+   stopped an admitted conflict row's embedded activation snapshot
+   (``components.activation_a/b``, ``bull_structure``/``bear_structure``)
+   from silently disagreeing with the activation rows built from a
+   *different* activation_payload in the same call. ``build_week4_rows``
+   now calls ``_validate_week4_snapshot`` after building both row sets and
+   before returning either.
+2. The activation component whitelist validated field *names* against one
+   shared set across all five components, without validating each field's
+   *type*/range per component. It is now a typed, per-component schema.
+"""
 
 from __future__ import annotations
 
 import json
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, NoReturn
 
 from comqutor_alpha.conflict_engine.conflict_schema import (
     CONFLICT_FORMULA_VERSION,
@@ -34,40 +51,6 @@ _ACTIVATION_FIELDS = (
     "claim_ids",
     "evidence",
     "reason_codes",
-)
-_ACTIVATION_COMPONENTS = frozenset(
-    {
-        "matched_evidence",
-        "agent_agreement",
-        "graph_coherence",
-        "recency",
-        "direction_strength",
-    }
-)
-_ACTIVATION_COMPONENT_FIELDS = frozenset(
-    {
-        "raw",
-        "weight",
-        "contribution",
-        "unique_committed_claims",
-        "unique_ambiguous_claims",
-        "weighted_evidence_sum",
-        "saturation",
-        "ambiguous_weight",
-        "distinct_agents",
-        "denominator",
-        "denominator_source",
-        "agents",
-        "scope",
-        "evidence_gated",
-        "age_days",
-        "fallback",
-        "reason",
-        "decay_window_days",
-        "qualifying_claim_count",
-        "average_signed_strength",
-        "mixed_direction_evidence",
-    }
 )
 _CANDIDATE_FIELDS = ("alpha_a", "alpha_b", "outcome", "reason_codes", "evidence_audit")
 _CONFLICT_FIELDS = (
@@ -118,7 +101,7 @@ class Week4PersistenceDataError(Exception):
         super().__init__(reason_code)
 
 
-def _fail(reason_code: str) -> None:
+def _fail(reason_code: str) -> NoReturn:
     raise Week4PersistenceDataError(reason_code)
 
 
@@ -140,8 +123,52 @@ def _number(value: Any, minimum: float, maximum: float, reason_code: str) -> flo
     return number
 
 
+def _positive_number(value: Any, reason_code: str) -> float:
+    """Finite, strictly > 0, no upper bound (e.g. evidence-strength saturation)."""
+    if isinstance(value, bool):
+        _fail(reason_code)
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        _fail(reason_code)
+    if not math.isfinite(number) or number <= 0:
+        _fail(reason_code)
+    return number
+
+
+def _nonnegative_number(value: Any, reason_code: str) -> float:
+    """Finite, >= 0, no upper bound (e.g. a multi-claim weighted evidence sum)."""
+    if isinstance(value, bool):
+        _fail(reason_code)
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        _fail(reason_code)
+    if not math.isfinite(number) or number < 0:
+        _fail(reason_code)
+    return number
+
+
 def _integer(value: Any, reason_code: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        _fail(reason_code)
+    return value
+
+
+def _positive_integer(value: Any, reason_code: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        _fail(reason_code)
+    return value
+
+
+def _optional_integer(value: Any, reason_code: str) -> int | None:
+    if value is None:
+        return None
+    return _integer(value, reason_code)
+
+
+def _bool(value: Any, reason_code: str) -> bool:
+    if not isinstance(value, bool):
         _fail(reason_code)
     return value
 
@@ -166,21 +193,131 @@ def _string_list(value: Any, reason_code: str) -> list[str]:
     return list(value)
 
 
+def _agents_list(value: Any, reason_code: str) -> list[str]:
+    """agent_agreement.agents: list[non-empty str], no nested dict/list,
+    normalized to a sorted/deduped form -- never dependent on raw input
+    order (2026-07-14 Correctness Patch, section 十)."""
+    if not isinstance(value, list):
+        _fail(reason_code)
+    cleaned: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            _fail(reason_code)
+        cleaned.append(item.strip())
+    return sorted(set(cleaned))
+
+
+# ---------------------------------------------------------------------------
+# Typed, per-component activation whitelist (2026-07-14 Correctness Patch,
+# sections 七-十四). Each of the five official components gets its own
+# schema -- allowed field *names* AND *types/ranges* -- rather than one
+# shared field-name set applied uniformly with no type enforcement. Unknown
+# components are dropped silently (not an error); unknown fields within a
+# known component are dropped silently; known fields with the wrong type
+# (nested dict/list where a scalar is expected, NaN/Infinity, a bool where
+# an int is expected, a string "true" where a bool is expected, ...) fail
+# the whole persist attempt with WEEK4_ACTIVATION_PAYLOAD_INVALID.
+# ---------------------------------------------------------------------------
+
+
+def _whitelist_common_component_fields(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    if "raw" in component:
+        result["raw"] = _number(component["raw"], 0.0, 100.0, reason)
+    if "weight" in component:
+        result["weight"] = _number(component["weight"], 0.0, 1.0, reason)
+    if "contribution" in component:
+        result["contribution"] = _number(component["contribution"], 0.0, 100.0, reason)
+    return result
+
+
+def _whitelist_matched_evidence(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "unique_committed_claims" in component:
+        result["unique_committed_claims"] = _integer(component["unique_committed_claims"], reason)
+    if "unique_ambiguous_claims" in component:
+        result["unique_ambiguous_claims"] = _integer(component["unique_ambiguous_claims"], reason)
+    if "weighted_evidence_sum" in component:
+        # Not bounded to 1: a multi-claim weighted sum can legitimately
+        # exceed 1 before the formula's own saturation division.
+        result["weighted_evidence_sum"] = _nonnegative_number(component["weighted_evidence_sum"], reason)
+    if "saturation" in component:
+        result["saturation"] = _positive_number(component["saturation"], reason)
+    if "ambiguous_weight" in component:
+        result["ambiguous_weight"] = _number(component["ambiguous_weight"], 0.0, 1.0, reason)
+    return result
+
+
+def _whitelist_agent_agreement(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "distinct_agents" in component:
+        result["distinct_agents"] = _integer(component["distinct_agents"], reason)
+    if "denominator" in component:
+        result["denominator"] = _integer(component["denominator"], reason)
+    if "denominator_source" in component:
+        result["denominator_source"] = _text(component["denominator_source"], reason)
+    if "agents" in component:
+        result["agents"] = _agents_list(component["agents"], reason)
+    return result
+
+
+def _whitelist_graph_coherence(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "scope" in component:
+        result["scope"] = _text(component["scope"], reason)
+    if "evidence_gated" in component:
+        result["evidence_gated"] = _bool(component["evidence_gated"], reason)
+    return result
+
+
+def _whitelist_recency(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "evidence_gated" in component:
+        result["evidence_gated"] = _bool(component["evidence_gated"], reason)
+    if "age_days" in component:
+        result["age_days"] = _optional_integer(component["age_days"], reason)
+    if "fallback" in component:
+        result["fallback"] = _bool(component["fallback"], reason)
+    if "reason" in component:
+        result["reason"] = _text(component["reason"], reason)
+    if "decay_window_days" in component:
+        result["decay_window_days"] = _positive_integer(component["decay_window_days"], reason)
+    return result
+
+
+def _whitelist_direction_strength(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "qualifying_claim_count" in component:
+        result["qualifying_claim_count"] = _integer(component["qualifying_claim_count"], reason)
+    if "average_signed_strength" in component:
+        result["average_signed_strength"] = _number(component["average_signed_strength"], -1.0, 1.0, reason)
+    if "mixed_direction_evidence" in component:
+        result["mixed_direction_evidence"] = _bool(component["mixed_direction_evidence"], reason)
+    return result
+
+
+_COMPONENT_WHITELISTERS = {
+    "matched_evidence": _whitelist_matched_evidence,
+    "agent_agreement": _whitelist_agent_agreement,
+    "graph_coherence": _whitelist_graph_coherence,
+    "recency": _whitelist_recency,
+    "direction_strength": _whitelist_direction_strength,
+}
+
+
 def _whitelist_activation_components(value: Any) -> dict[str, Any]:
     reason = WEEK4_ACTIVATION_PAYLOAD_INVALID
     if not isinstance(value, Mapping):
         _fail(reason)
     components: dict[str, Any] = {}
-    for name in sorted(_ACTIVATION_COMPONENTS):
+    for name in sorted(_COMPONENT_WHITELISTERS):
         if name not in value:
             continue
         component = value[name]
         if not isinstance(component, Mapping):
             _fail(reason)
-        components[name] = _json_copy(
-            {key: component[key] for key in sorted(_ACTIVATION_COMPONENT_FIELDS) if key in component},
-            reason,
-        )
+        whitelister = _COMPONENT_WHITELISTERS[name]
+        components[name] = _json_copy(whitelister(component, reason), reason)
     return components
 
 
@@ -260,6 +397,12 @@ def _whitelist_audit_side(value: Any, expected_alpha_id: str) -> dict[str, Any]:
     if alpha_id != expected_alpha_id:
         _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
     qualifying_ids = _string_list(value.get("qualifying_claim_ids"), reason)
+    # Candidate Reason-Code Contract (Correctness Patch, section 十五):
+    # qualifying_claim_ids must be sorted, unique, and every item non-empty.
+    if any(not item.strip() for item in qualifying_ids):
+        _fail(reason)
+    if len(qualifying_ids) != len(set(qualifying_ids)):
+        _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
     qualifying_count = _integer(value.get("qualifying_count"), reason)
     if qualifying_count != len(qualifying_ids) or qualifying_ids != sorted(qualifying_ids):
         _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
@@ -312,7 +455,19 @@ def _whitelist_candidate(candidate: Mapping[str, Any]) -> dict[str, Any]:
     if outcome not in _OUTCOMES:
         _fail(reason)
     reason_codes = _string_list(candidate.get("reason_codes"), reason)
+    # Candidate Reason-Code Contract (Correctness Patch, section 十五):
+    # admitted <-> empty reason_codes; suppressed/rejected <-> at least one;
+    # no duplicate reason codes on any candidate; every code non-empty
+    # (already enforced by _string_list's own emptiness check via _text
+    # semantics -- but _string_list itself does not require non-empty
+    # strings, so it is checked explicitly here).
+    if any(not code.strip() for code in reason_codes):
+        _fail(reason)
+    if len(reason_codes) != len(set(reason_codes)):
+        _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
     if outcome == "admitted" and reason_codes:
+        _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
+    if outcome in ("suppressed", "rejected") and not reason_codes:
         _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
     whitelisted = {
         key: candidate[key] for key in _CANDIDATE_FIELDS if key in candidate
@@ -403,6 +558,8 @@ def _whitelist_conflict(conflict: Mapping[str, Any]) -> dict[str, Any]:
     if (
         bull_structure["alpha_id"] != bull_id
         or bear_structure["alpha_id"] != bear_id
+        or bull_structure["direction"] != "positive"
+        or bear_structure["direction"] != "negative"
     ):
         _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
 
@@ -540,6 +697,84 @@ def build_conflict_rows(
     return rows
 
 
+def _validate_week4_snapshot(
+    activation_rows: Sequence[Mapping[str, Any]],
+    conflict_rows: Sequence[Mapping[str, Any]],
+) -> None:
+    """Cross-Payload Snapshot Validation (2026-07-14 Correctness Patch,
+    sections 三-六): every *admitted* conflict row's embedded activation
+    snapshot must actually match the activation rows built in the same
+    ``build_week4_rows`` call -- i.e. both payloads describe the same
+    underlying Week 3 activation computation, not two payloads that happen
+    to share a run_id/ticker/version but disagree on the numbers.
+
+    Pure function: reads ``activation_rows``/``conflict_rows`` (the
+    already-built, already-individually-validated canonical rows -- never
+    re-reads either raw payload), never touches the database, never
+    mutates its inputs. Called by ``build_week4_rows`` before it returns,
+    so a mismatch is caught before ``persist_week4_results`` ever opens a
+    transaction.
+
+    This does not re-decide contradiction_weight/evidence_strength/
+    conflict_score/ranking -- those are trusted as already-correct W4.1
+    Conflict Detector output; this only checks internal consistency between
+    the two payloads being persisted together.
+    """
+    reason = WEEK4_CONFLICT_DATA_INCONSISTENT
+    activation_by_alpha_id = {row["alpha_id"]: row for row in activation_rows}
+
+    for row in conflict_rows:
+        if row["outcome"] != "admitted":
+            continue
+        alpha_a, alpha_b = row["alpha_a"], row["alpha_b"]
+        activation_a = activation_by_alpha_id.get(alpha_a)
+        activation_b = activation_by_alpha_id.get(alpha_b)
+        if activation_a is None or activation_b is None:
+            _fail(reason)
+
+        conflict = row["conflict_json"]
+        components = conflict["components"]
+        if components["activation_a"] != activation_a["activation_score"]:
+            _fail(reason)
+        if components["activation_b"] != activation_b["activation_score"]:
+            _fail(reason)
+        if components["minimum_activation"] != min(
+            activation_a["activation_score"], activation_b["activation_score"]
+        ):
+            _fail(reason)
+
+        bull_id = conflict["bull_alpha_id"]
+        bear_id = conflict["bear_alpha_id"]
+        if {bull_id, bear_id} != {alpha_a, alpha_b}:
+            _fail(reason)
+        bull_activation = activation_by_alpha_id.get(bull_id)
+        bear_activation = activation_by_alpha_id.get(bear_id)
+        if bull_activation is None or bear_activation is None:
+            _fail(reason)
+
+        bull_structure = conflict["bull_structure"]
+        if (
+            bull_structure["alpha_id"] != bull_id
+            or bull_structure["alpha_name"] != bull_activation["alpha_name"]
+            or bull_structure["activation_score"] != bull_activation["activation_score"]
+            or bull_structure["status"] != bull_activation["status"]
+            or bull_structure["direction"] != bull_activation["direction"]
+            or bull_structure["direction"] != "positive"
+        ):
+            _fail(reason)
+
+        bear_structure = conflict["bear_structure"]
+        if (
+            bear_structure["alpha_id"] != bear_id
+            or bear_structure["alpha_name"] != bear_activation["alpha_name"]
+            or bear_structure["activation_score"] != bear_activation["activation_score"]
+            or bear_structure["status"] != bear_activation["status"]
+            or bear_structure["direction"] != bear_activation["direction"]
+            or bear_structure["direction"] != "negative"
+        ):
+            _fail(reason)
+
+
 def build_week4_rows(
     *,
     run_id: str,
@@ -547,10 +782,10 @@ def build_week4_rows(
     activation_payload: Mapping[str, Any],
     conflict_payload: Mapping[str, Any],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    return (
-        build_activation_rows(run_id, ticker, activation_payload),
-        build_conflict_rows(run_id, ticker, conflict_payload),
-    )
+    activation_rows = build_activation_rows(run_id, ticker, activation_payload)
+    conflict_rows = build_conflict_rows(run_id, ticker, conflict_payload)
+    _validate_week4_snapshot(activation_rows, conflict_rows)
+    return activation_rows, conflict_rows
 
 
 def _stored_candidate(value: Any) -> dict[str, Any]:
