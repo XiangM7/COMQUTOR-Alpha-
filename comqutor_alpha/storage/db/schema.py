@@ -1,4 +1,4 @@
-"""Explicit SQLAlchemy Core table definitions for Week 3 persistence.
+"""Explicit SQLAlchemy Core table definitions for Week 3/4 persistence.
 
 Hand-written column/type/constraint definitions (no ORM auto-mapping, no
 reflection) so the schema is fully auditable from this one file. JSON columns
@@ -89,9 +89,80 @@ structure_graphs = sa.Table(
 )
 
 
+alpha_activations = sa.Table(
+    "alpha_activations",
+    metadata,
+    sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+    sa.Column("run_id", sa.String(80), nullable=False),
+    sa.Column("ticker", sa.String(16), nullable=False),
+    sa.Column("alpha_id", sa.String(16), nullable=False),
+    sa.Column("alpha_name", sa.String(200), nullable=False),
+    sa.Column("activation_score", sa.Float, nullable=False),
+    sa.Column("status", sa.String(24), nullable=False),
+    sa.Column("direction", sa.String(24), nullable=False),
+    sa.Column("formula_version", sa.String(64), nullable=False),
+    sa.Column("activation_rank", sa.Integer, nullable=False),
+    sa.Column("activation_json", _json_type(), nullable=False),
+    sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    sa.Column(
+        "updated_at",
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
+        nullable=False,
+    ),
+    sa.UniqueConstraint("run_id", "alpha_id", name="uq_alpha_activations_run_alpha"),
+    sa.Index("ix_alpha_activations_run_id", "run_id"),
+    sa.Index("ix_alpha_activations_ticker", "ticker"),
+)
+
+
+alpha_conflicts = sa.Table(
+    "alpha_conflicts",
+    metadata,
+    sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+    sa.Column("run_id", sa.String(80), nullable=False),
+    sa.Column("ticker", sa.String(16), nullable=False),
+    sa.Column("alpha_a", sa.String(16), nullable=False),
+    sa.Column("alpha_b", sa.String(16), nullable=False),
+    sa.Column("outcome", sa.String(16), nullable=False),
+    sa.Column("bull_alpha_id", sa.String(16), nullable=True),
+    sa.Column("bear_alpha_id", sa.String(16), nullable=True),
+    sa.Column("conflict_score", sa.Float, nullable=True),
+    sa.Column("conflict_level", sa.String(24), nullable=True),
+    sa.Column("contradiction_weight", sa.Float, nullable=True),
+    sa.Column("evidence_strength", sa.Float, nullable=True),
+    sa.Column("minimum_activation", sa.Float, nullable=True),
+    sa.Column("is_main_conflict", sa.Boolean, nullable=False, server_default=sa.false()),
+    sa.Column("conflict_rank", sa.Integer, nullable=True),
+    sa.Column("reason_codes", _json_type(), nullable=False),
+    sa.Column("evidence_audit", _json_type(), nullable=False),
+    sa.Column("candidate_json", _json_type(), nullable=False),
+    sa.Column("conflict_json", _json_type(), nullable=True),
+    sa.Column("schema_version", sa.String(64), nullable=False),
+    sa.Column("formula_version", sa.String(64), nullable=False),
+    sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    sa.Column(
+        "updated_at",
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
+        nullable=False,
+    ),
+    sa.UniqueConstraint("run_id", "alpha_a", "alpha_b", name="uq_alpha_conflicts_run_pair"),
+    sa.Index("ix_alpha_conflicts_run_id", "run_id"),
+    sa.Index("ix_alpha_conflicts_ticker", "ticker"),
+    sa.Index("ix_alpha_conflicts_run_outcome", "run_id", "outcome"),
+)
+
+
 # Explicit, versioned migration path (see migrations.py for the runner).
 # Each entry is (version_id, tables_to_create) applied in order and recorded
 # in `schema_migrations` so re-running is a safe no-op.
 MIGRATIONS: tuple[tuple[str, tuple[sa.Table, ...]], ...] = (
     ("0001_create_week3_alpha_matches_and_structure_graphs", (alpha_matches, structure_graphs)),
+    (
+        "0002_create_week4_alpha_activations_and_alpha_conflicts",
+        (alpha_activations, alpha_conflicts),
+    ),
 )

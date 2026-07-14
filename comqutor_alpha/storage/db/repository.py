@@ -1,4 +1,4 @@
-"""Transactional, idempotent repository for Week 3 persistence.
+"""Transactional, idempotent repository for Week 3/4 persistence.
 
 Two related writes -- replacing a run's ``alpha_matches`` rows and
 upserting its ``structure_graphs`` row -- happen inside a single database
@@ -28,7 +28,18 @@ from comqutor_alpha.storage.db.engine import (
     sqlite_file_path,
 )
 from comqutor_alpha.storage.db.migrations import apply_migrations
-from comqutor_alpha.storage.db.schema import alpha_matches, structure_graphs
+from comqutor_alpha.storage.db.schema import (
+    alpha_activations,
+    alpha_conflicts,
+    alpha_matches,
+    structure_graphs,
+)
+from comqutor_alpha.storage.db.week4_persistence import (
+    WEEK4_CONFLICT_PAYLOAD_INVALID,
+    Week4PersistenceDataError,
+    build_week4_rows,
+    reconstruct_conflict_result,
+)
 
 
 class GraphPersistenceError(Exception):
@@ -145,6 +156,10 @@ class GraphPersistenceRepository:
         update_values["updated_at"] = sa.func.now()
         return stmt.on_conflict_do_update(index_elements=["run_id"], set_=update_values)
 
+    def _require_supported_dialect(self) -> None:
+        if self.dialect_name not in {"postgresql", "sqlite"}:
+            raise GraphPersistenceError("UNSUPPORTED_DATABASE_DIALECT")
+
     def persist_run(
         self,
         *,
@@ -206,6 +221,83 @@ class GraphPersistenceRepository:
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_READ_FAILED") from exc
         return [dict(row) for row in rows]
+
+    def persist_week4_results(
+        self,
+        *,
+        run_id: str,
+        ticker: str,
+        activation_payload: Mapping[str, Any],
+        conflict_payload: Mapping[str, Any],
+    ) -> None:
+        """Atomically replace one run's activation and conflict rows."""
+        self._require_supported_dialect()
+        try:
+            activation_rows, conflict_rows = build_week4_rows(
+                run_id=run_id,
+                ticker=ticker,
+                activation_payload=activation_payload,
+                conflict_payload=conflict_payload,
+            )
+        except Week4PersistenceDataError as exc:
+            raise GraphPersistenceError(exc.reason_code) from exc
+
+        try:
+            with self._engine.begin() as conn:
+                conn.execute(
+                    sa.delete(alpha_activations).where(alpha_activations.c.run_id == run_id)
+                )
+                conn.execute(sa.delete(alpha_conflicts).where(alpha_conflicts.c.run_id == run_id))
+                if activation_rows:
+                    conn.execute(sa.insert(alpha_activations), activation_rows)
+                if conflict_rows:
+                    conn.execute(sa.insert(alpha_conflicts), conflict_rows)
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+
+    def get_alpha_activations(self, run_id: str) -> list[dict[str, Any]]:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                rows = conn.execute(
+                    sa.select(alpha_activations)
+                    .where(alpha_activations.c.run_id == run_id)
+                    .order_by(alpha_activations.c.activation_rank, alpha_activations.c.alpha_id)
+                ).mappings().all()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return [dict(row) for row in rows]
+
+    def get_alpha_conflicts(
+        self,
+        run_id: str,
+        *,
+        outcome: str | None = None,
+    ) -> list[dict[str, Any]]:
+        if outcome is not None and outcome not in {"admitted", "suppressed", "rejected"}:
+            raise GraphPersistenceError(WEEK4_CONFLICT_PAYLOAD_INVALID)
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
+        self._require_supported_dialect()
+        statement = sa.select(alpha_conflicts).where(alpha_conflicts.c.run_id == run_id)
+        if outcome is not None:
+            statement = statement.where(alpha_conflicts.c.outcome == outcome)
+        statement = statement.order_by(alpha_conflicts.c.alpha_a, alpha_conflicts.c.alpha_b)
+        try:
+            with self._engine.connect() as conn:
+                rows = conn.execute(statement).mappings().all()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return [dict(row) for row in rows]
+
+    def get_week4_conflict_result(self, run_id: str) -> dict[str, Any] | None:
+        rows = self.get_alpha_conflicts(run_id)
+        try:
+            return reconstruct_conflict_result(run_id, rows)
+        except Week4PersistenceDataError as exc:
+            raise GraphPersistenceError(exc.reason_code) from exc
 
 
 def _resolve_engine_and_url(
