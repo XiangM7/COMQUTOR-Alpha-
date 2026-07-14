@@ -16,6 +16,7 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "structured_agent_outputs.json",
     "alpha_matches.json",
     "extracted_structures.json",
+    "structure_graph.json",
     "final_report.md",
     "research_response.json",
 }
@@ -24,6 +25,7 @@ ALLOWED_ARTIFACT_PATHS = {
     "error_logs/structured_output_adapter_errors.jsonl",
     "error_logs/week2_llm_errors.jsonl",
     "error_logs/week2_pipeline_errors.jsonl",
+    "error_logs/week3_pipeline_errors.jsonl",
 }
 
 # Validate and normalize a request run_id.

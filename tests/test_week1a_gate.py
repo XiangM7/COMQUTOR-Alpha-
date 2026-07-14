@@ -224,6 +224,10 @@ def test_build_research_response_reports_week2_artifacts_without_local_paths(tmp
         json.dumps({"run_id": run_id, "error_code": "EMPTY_RAW_OUTPUT"}) + "\n",
         encoding="utf-8",
     )
+    (run_dir / "structure_graph.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": "NVDA", "schema_version": "week3.structure_graph.v1"}),
+        encoding="utf-8",
+    )
 
     response = build_research_response(run_id, output_root=tmp_path)
     serialized = json.dumps(response, ensure_ascii=False)
@@ -232,7 +236,46 @@ def test_build_research_response_reports_week2_artifacts_without_local_paths(tmp
     assert response["artifacts"]["extracted_structures"] is True
     assert response["artifacts"]["structured_output_error_logs"] is True
     assert response["status"] == "completed"
+    assert response["structure_graph_status"] == "ready"
     assert str(tmp_path) not in serialized
+
+
+def test_build_research_response_is_partial_when_week3_graph_is_missing(tmp_path):
+    """Same Week 1-2 artifacts as above, but no structure_graph.json (Week 3
+    never produced one) -- status must not claim "completed" for a run
+    whose graph is not actually ready."""
+    run_id = "manual_week2_artifacts_no_graph"
+    run_dir = tmp_path / run_id
+    run_dir.mkdir(parents=True)
+
+    (run_dir / "metadata.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": "NVDA"}), encoding="utf-8"
+    )
+    (run_dir / "raw_agent_outputs.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": "NVDA", "agent_outputs": []}), encoding="utf-8"
+    )
+    (run_dir / "structured_agent_outputs.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": "NVDA", "records": []}), encoding="utf-8"
+    )
+    (run_dir / "alpha_matches.json").write_text(
+        json.dumps({"run_id": run_id, "matches": []}), encoding="utf-8"
+    )
+    (run_dir / "extracted_structures.json").write_text(
+        json.dumps({"run_id": run_id, "nodes": [], "edges": []}), encoding="utf-8"
+    )
+    error_dir = run_dir / "error_logs"
+    error_dir.mkdir(parents=True)
+    (error_dir / "week3_pipeline_errors.jsonl").write_text(
+        json.dumps({"run_id": run_id, "stage": "structure_graph_construction"}) + "\n",
+        encoding="utf-8",
+    )
+
+    response = build_research_response(run_id, output_root=tmp_path)
+
+    assert response["artifacts"]["alpha_matches"] is True  # Week 1-2 still complete
+    assert response["artifacts"]["extracted_structures"] is True
+    assert response["status"] == "partial"
+    assert response["structure_graph_status"] == "not_ready"
 
 
 def test_research_response_does_not_expose_raw_output_paths_or_config(tmp_path):

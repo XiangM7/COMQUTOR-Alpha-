@@ -31,6 +31,25 @@ services:
     profiles:
       - ollama
 
+  # Optional local PostgreSQL for Week 3 alpha_matches/structure_graphs
+  # persistence. Not started by default; opt in with:
+  #   docker compose --profile postgres up -d postgres
+  # Then point the server at it (never read from an HTTP request):
+  #   COMQUTOR_DATABASE_URL=postgresql+psycopg://comqutor:comqutor@localhost:5433/comqutor_alpha
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=comqutor
+      - POSTGRES_PASSWORD=comqutor
+      - POSTGRES_DB=comqutor_alpha
+    ports:
+      - "5433:5432"
+    volumes:
+      - comqutor_postgres_data:/var/lib/postgresql/data
+    profiles:
+      - postgres
+
 volumes:
   tradingagents_data:
   ollama_data:
+  comqutor_postgres_data:

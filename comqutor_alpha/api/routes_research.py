@@ -13,6 +13,15 @@ from comqutor_alpha.adapters.tradingagents_output_writer import (
     OUTPUT_VERSION,
     build_raw_agent_output_record,
 )
+from comqutor_alpha.graph_engine.graph_schema import GRAPH_SCHEMA_VERSION
+from comqutor_alpha.graph_engine.pipeline import (
+    build_structure_graph_stage,
+    score_and_assemble_structure_graph,
+)
+from comqutor_alpha.storage.db.repository import (
+    GraphPersistenceError,
+    build_repository_from_env,
+)
 from comqutor_alpha.storage.file_store import (
     append_jsonl_record,
     load_json_record,
@@ -32,11 +41,11 @@ from comqutor_alpha.structure_engine.week2_llm import (
     build_server_week2_llm_gateway,
 )
 
-
 logger = logging.getLogger(__name__)
 
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 PIPELINE_ERROR_LOG_ARTIFACT_PATH = "error_logs/week2_pipeline_errors.jsonl"
+WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH = "error_logs/week3_pipeline_errors.jsonl"
 REQUIRED_COMPLETION_ARTIFACTS = (
     "raw_agent_outputs",
     "structured_agent_outputs",
@@ -238,6 +247,14 @@ def build_research_response(run_id, output_root="outputs/runs"):
     error_log_path = run_dir / ERROR_LOG_ARTIFACT_PATH
     week2_llm_error_log_path = run_dir / WEEK2_LLM_ERROR_LOG_ARTIFACT_PATH
     pipeline_error_log_path = run_dir / PIPELINE_ERROR_LOG_ARTIFACT_PATH
+    # Week 3: same filesystem-only pattern as above. "Ready" means the graph
+    # artifact was written AND no Week 3 stage logged a failure for this
+    # run -- both conditions hold for every real run (this pipeline always
+    # attempts Week 3 once Week 1-2 succeed, and always either writes the
+    # artifact or logs a failure), so this is a reliable, DB-free signal
+    # that GET .../graph will actually have something to return.
+    structure_graph_path = run_dir / "structure_graph.json"
+    week3_error_log_path = run_dir / WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH
     metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
     raw_payload = load_json_record_if_exists(
         run_id,
@@ -264,13 +281,33 @@ def build_research_response(run_id, output_root="outputs/runs"):
     complete = all(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
     has_any = any(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
 
+    structure_graph_ready = structure_graph_path.exists() and not week3_error_log_path.exists()
+    # "completed" now requires Week 3 (graph build + activation scoring +
+    # persistence) to have actually succeeded, not just Week 1-2. A Week 3
+    # failure after a complete Week 1-2 run degrades status to "partial"
+    # (reusing the existing partial/degraded vocabulary) rather than
+    # silently reporting completed with a broken/missing graph.
+    if complete and structure_graph_ready:
+        status = "completed"
+    elif complete or has_any:
+        status = "partial"
+    else:
+        status = "failed"
+
     return {
         "run_id": run_id,
         "ticker": ticker,
-        "status": "completed" if complete else ("partial" if has_any else "failed"),
+        "status": status,
         "artifacts": artifacts,
         "agent_output_count": _count_raw_outputs(raw_payload),
         "structured_output_count": _count_structured_outputs(structured_payload),
+        # Stable, additive Week 3 status contract. "ready" means GET
+        # .../graph can return the persisted graph for this run_id right
+        # now; "not_ready" covers every degraded/failed Week 3 case (never
+        # attempted, construction/scoring/persistence failure) uniformly --
+        # callers needing the specific reason should query GET .../graph,
+        # which has its own richer, still-safe error_code contract.
+        "structure_graph_status": "ready" if structure_graph_ready else "not_ready",
     }
 
 # Run a research request with the given payload, optionally using a custom runner.
@@ -282,6 +319,20 @@ def _log_pipeline_error(run_id, output_root, stage):
             "run_id": run_id,
             "stage": stage,
             "error_code": "WEEK2_ARTIFACT_GENERATION_FAILED",
+            "created_at": _utc_timestamp(),
+        },
+        output_root=output_root,
+    )
+
+
+def _log_week3_pipeline_error(run_id, output_root, stage):
+    append_jsonl_record(
+        run_id,
+        WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH,
+        {
+            "run_id": run_id,
+            "stage": stage,
+            "error_code": "WEEK3_GRAPH_GENERATION_FAILED",
             "created_at": _utc_timestamp(),
         },
         output_root=output_root,
@@ -309,12 +360,72 @@ def _run_week1_week2_artifact_pipeline(run_dir, llm_gateway=None):
             _log_pipeline_error(run_id, output_root, stage)
 
 
+def _run_week3_graph_pipeline(run_dir, *, graph_repository=None):
+    """Build, persist (file + DB), and score the Week 3 Structure Graph.
+
+    Only runs after Week 1-2 artifacts exist; any failure at any step is
+    caught, logged with a stable safe reason code, and never propagates --
+    a Week 3 failure must never take down or alter the Week 1-2 response.
+    """
+    run_dir = Path(run_dir).expanduser().resolve()
+    run_id = validate_run_id_for_path(run_dir.name)
+    output_root = run_dir.parent
+
+    try:
+        alpha_matches_payload = load_json_record(run_id, "alpha_matches.json", output_root=output_root)
+        extracted_structures_payload = load_json_record(
+            run_id, "extracted_structures.json", output_root=output_root
+        )
+        metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
+        run_timestamp = metadata.get("analysis_date") or metadata.get("created_at")
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "structure_graph_inputs")
+        return
+
+    try:
+        graph = build_structure_graph_stage(alpha_matches_payload, extracted_structures_payload)
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "structure_graph_construction")
+        return
+
+    try:
+        graph_payload = score_and_assemble_structure_graph(
+            graph,
+            alpha_matches_payload,
+            extracted_structures_payload,
+            run_timestamp=run_timestamp,
+        )
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "activation_scoring")
+        return
+
+    try:
+        save_json_record(run_id, "structure_graph.json", graph_payload, output_root=output_root)
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "structure_graph_artifact_write")
+        return
+
+    ticker = graph_payload.get("ticker") or metadata.get("ticker")
+    try:
+        repository = graph_repository or build_repository_from_env(output_root)
+        repository.persist_run(
+            run_id=run_id,
+            ticker=ticker,
+            alpha_matches_payload=alpha_matches_payload,
+            graph_payload=graph_payload,
+        )
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "structure_graph_persistence")
+        return
+
+
 def run_research_request(
     payload,
     runner=None,
     output_root="outputs/runs",
     *,
     week2_llm_gateway=None,
+    graph_repository=None,
 ):
     payload = _normalize_payload(payload)
     try:
@@ -342,6 +453,10 @@ def run_research_request(
         if week2_llm_gateway is None:
             week2_llm_gateway = build_server_week2_llm_gateway(run_id, run_dir.parent)
         _run_week1_week2_artifact_pipeline(run_dir, week2_llm_gateway)
+        # Week 3 graph build/score/persist is a side effect of a successful
+        # POST; its own status is reported only via GET .../graph so the
+        # frozen Week 1-2 response contract above never changes shape.
+        _run_week3_graph_pipeline(run_dir, graph_repository=graph_repository)
         return build_research_response(run_id, output_root=output_root)
     except Exception as exc:
         error_response = _map_exception_to_error(payload, exc)
@@ -385,6 +500,86 @@ def get_research_run(run_id, output_root="outputs/runs"):
 # Retrieve the research response for a given run_id, loading from the stored JSON record.
 def get_research_response(run_id, output_root="outputs/runs"):
     return load_json_record(run_id, "research_response.json", output_root=output_root)
+
+
+_GRAPH_ERROR_MESSAGES = {
+    "INVALID_RUN_ID": "Invalid run_id.",
+    "RUN_NOT_FOUND": "Run not found.",
+    "GRAPH_NOT_READY": "Structure graph has not been generated for this run yet.",
+    "GRAPH_UNAVAILABLE": "Graph storage is temporarily unavailable.",
+    "GRAPH_CORRUPTED": "Persisted graph is missing required fields.",
+    "GRAPH_SCHEMA_MISMATCH": "Persisted graph schema is not supported by this server.",
+}
+
+
+def _graph_error_response(run_id, ticker, error_code):
+    return {
+        "run_id": run_id,
+        "ticker": ticker,
+        "status": "failed",
+        "error_code": error_code,
+        "message": _GRAPH_ERROR_MESSAGES[error_code],
+    }
+
+
+# Retrieve the exact persisted Structure Graph for a run_id. Pure read path:
+# validated run_id -> cheap filesystem existence check -> one DB SELECT. Never
+# invokes TradingAgents/LLM, never rebuilds the graph, never mutates storage.
+def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_repository=None):
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return _graph_error_response(str(run_id), None, "INVALID_RUN_ID")
+
+    run_dir = run_dir_for(safe_run_id, output_root)
+    if not run_dir.exists():
+        return _graph_error_response(safe_run_id, None, "RUN_NOT_FOUND")
+
+    try:
+        repository = graph_repository or build_repository_from_env(output_root)
+        row = repository.get_graph(safe_run_id)
+    except GraphPersistenceError as exc:
+        logger.warning(
+            "graph retrieval failed (run_id=%s, reason_code=%s)", safe_run_id, exc.reason_code
+        )
+        return _graph_error_response(safe_run_id, None, "GRAPH_UNAVAILABLE")
+    except Exception:
+        # Anything else (engine construction, filesystem, driver import) must
+        # still degrade safely rather than leak a traceback/DSN to the caller.
+        logger.exception("graph retrieval failed unexpectedly (run_id=%s)", safe_run_id)
+        return _graph_error_response(safe_run_id, None, "GRAPH_UNAVAILABLE")
+
+    if row is None:
+        return _graph_error_response(safe_run_id, None, "GRAPH_NOT_READY")
+
+    graph_json = row.get("graph_json")
+    required_keys = {"schema_version", "nodes", "edges", "activation", "dominant_alphas"}
+    if not isinstance(graph_json, dict) or not required_keys.issubset(graph_json):
+        logger.warning("persisted graph is corrupted (run_id=%s)", safe_run_id)
+        return _graph_error_response(safe_run_id, row.get("ticker"), "GRAPH_CORRUPTED")
+    if graph_json.get("schema_version") != GRAPH_SCHEMA_VERSION:
+        logger.warning(
+            "persisted graph schema mismatch (run_id=%s, found=%s)",
+            safe_run_id,
+            graph_json.get("schema_version"),
+        )
+        return _graph_error_response(safe_run_id, row.get("ticker"), "GRAPH_SCHEMA_MISMATCH")
+
+    return {
+        "run_id": safe_run_id,
+        "ticker": graph_json.get("ticker"),
+        "status": "ok",
+        "schema_version": graph_json.get("schema_version"),
+        "graph_builder_version": graph_json.get("graph_builder_version"),
+        "activation_scorer_version": graph_json.get("activation_scorer_version"),
+        "nodes": graph_json.get("nodes", []),
+        "edges": graph_json.get("edges", []),
+        "graph_metrics": graph_json.get("graph_metrics", {}),
+        "graph_coherence": graph_json.get("graph_coherence", {}),
+        "activation": graph_json.get("activation", {}),
+        "dominant_alphas": graph_json.get("dominant_alphas", []),
+        "provenance": graph_json.get("provenance", {}),
+    }
 
 
 try:
@@ -432,6 +627,10 @@ try:
     @router.get("/api/research/{run_id}")
     def get_research_run_route(run_id: str):
         return get_research_run(run_id)
+
+    @router.get("/api/research/{run_id}/graph")
+    def get_research_graph_route(run_id: str):
+        return get_persisted_structure_graph(run_id)
 
 except ImportError:
     router = None

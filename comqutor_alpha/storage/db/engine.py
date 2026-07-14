@@ -1,0 +1,88 @@
+"""Database engine construction.
+
+Reads ``COMQUTOR_DATABASE_URL`` from the server process environment only --
+never from an HTTP request payload or client-supplied configuration. When
+unset, falls back to a local SQLite file so default execution stays fully
+offline (no external service required for tests or local development) --
+*except* in production, where a silent SQLite fallback would mean the
+"real" persistence layer quietly never runs. See ``resolve_database_url``.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+from sqlalchemy.pool import StaticPool
+
+from comqutor_alpha.storage.file_store import resolve_output_root
+
+DEFAULT_SQLITE_FILENAME = "_comqutor_alpha_graph.db"
+
+
+class DatabaseConfigurationError(Exception):
+    """Safe database-configuration error: carries a stable reason code only.
+
+    Never carries a DSN, file path, or raw exception text.
+    """
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(reason_code)
+
+
+def _is_production() -> bool:
+    return os.environ.get("COMQUTOR_ENV", "").strip().lower() == "production"
+
+
+def resolve_database_url(output_root: str | None = None) -> str:
+    """Resolve the DSN to use: server env var, else a local SQLite fallback.
+
+    The SQLite fallback file is deliberately named with a ``.`` (not a valid
+    ``run_id`` character), placed alongside the run directories so it is
+    never mistaken for -- or collides with -- an actual run.
+
+    In production (``COMQUTOR_ENV=production``), there is no SQLite
+    fallback: a missing ``COMQUTOR_DATABASE_URL`` raises
+    ``DatabaseConfigurationError`` rather than silently persisting to a
+    local file that would never be backed up, shared across instances, or
+    inspected as "the real database". Development and tests are unaffected.
+    """
+    env_url = os.environ.get("COMQUTOR_DATABASE_URL", "").strip()
+    if env_url:
+        return env_url
+    if _is_production():
+        raise DatabaseConfigurationError("PRODUCTION_DATABASE_URL_REQUIRED")
+    root = resolve_output_root(output_root)
+    root.mkdir(parents=True, exist_ok=True)
+    return f"sqlite:///{root / DEFAULT_SQLITE_FILENAME}"
+
+
+def _is_sqlite_memory_url(url: str) -> bool:
+    return url.startswith("sqlite://") and (":memory:" in url or url.rstrip("/") == "sqlite:/")
+
+
+def build_engine(database_url: str) -> Engine:
+    """Build a SQLAlchemy engine for the given DSN.
+
+    In-memory SQLite needs a single pinned connection (``StaticPool``) or
+    every checkout would silently see a fresh, empty database -- a classic
+    footgun for tests using ``sqlite:///:memory:``.
+    """
+    if _is_sqlite_memory_url(database_url):
+        return create_engine(
+            database_url,
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+    if database_url.startswith("sqlite:///"):
+        path = Path(database_url.removeprefix("sqlite:///"))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return create_engine(database_url, connect_args={"check_same_thread": False})
+    return create_engine(database_url)
+
+
+def build_engine_from_env(output_root: str | None = None) -> Engine:
+    return build_engine(resolve_database_url(output_root))
