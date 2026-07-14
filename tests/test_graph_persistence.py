@@ -317,7 +317,11 @@ class TestReadWriteRepositoryConstruction:
     {run_id}/graph from ever running a migration or creating a local SQLite
     file -- see routes_research.get_persisted_structure_graph, which only
     ever calls the read-only factory."""
-
+    @pytest.fixture(autouse=True)
+    def _force_sqlite_fallback(self, monkeypatch):
+        monkeypatch.delenv("COMQUTOR_DATABASE_URL", raising=False)
+        monkeypatch.delenv("COMQUTOR_ENV", raising=False)
+        
     def test_write_repository_provisions_schema_and_can_persist_immediately(self, tmp_path):
         repo = build_write_repository_from_env(output_root=tmp_path)
 
