@@ -14,6 +14,7 @@ from comqutor_alpha.api.routes_research import (
     run_research_request,
 )
 from comqutor_alpha.storage.db.engine import build_engine
+from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
 
 RELEVANT_NVDA_ALPHA_IDS = {"A101", "A103", "A201", "A301", "A304", "A601"}
@@ -59,7 +60,9 @@ def _nvda_offline_outputs():
 
 
 def _run_nvda_fixture(tmp_path):
-    repo = GraphPersistenceRepository(build_engine("sqlite:///:memory:"))
+    engine = build_engine("sqlite:///:memory:")
+    apply_migrations(engine)
+    repo = GraphPersistenceRepository(engine)
     payload = {
         "ticker": "NVDA",
         "analysis_date": "2026-06-30",

@@ -34,16 +34,19 @@ services:
   # Optional local PostgreSQL for Week 3 alpha_matches/structure_graphs
   # persistence. Not started by default; opt in with:
   #   docker compose --profile postgres up -d postgres
-  # Then point the server at it (never read from an HTTP request):
-  #   COMQUTOR_DATABASE_URL=postgresql+psycopg://comqutor:comqutor@localhost:5433/comqutor_alpha
+  # POSTGRES_PASSWORD has no default: set it in your local .env (gitignored,
+  # never committed) before starting this profile, or Compose refuses to
+  # start it. Then point the server at your own DSN, built from the same
+  # values (never read from an HTTP request, never committed anywhere):
+  #   COMQUTOR_DATABASE_URL=postgresql+psycopg://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5433/<POSTGRES_DB>
   postgres:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=comqutor
-      - POSTGRES_PASSWORD=comqutor
-      - POSTGRES_DB=comqutor_alpha
+      - POSTGRES_USER=${POSTGRES_USER:-comqutor}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your local .env before starting the postgres profile}
+      - POSTGRES_DB=${POSTGRES_DB:-comqutor_alpha}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - comqutor_postgres_data:/var/lib/postgresql/data
     profiles:

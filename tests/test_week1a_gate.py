@@ -228,6 +228,14 @@ def test_build_research_response_reports_week2_artifacts_without_local_paths(tmp
         json.dumps({"run_id": run_id, "ticker": "NVDA", "schema_version": "week3.structure_graph.v1"}),
         encoding="utf-8",
     )
+    # A real successful Week 3 attempt also overwrites this status marker
+    # with outcome="success" (see routes_research._write_week3_pipeline_status);
+    # build_research_response's readiness check now looks at this marker's
+    # latest recorded outcome, not just structure_graph.json's existence.
+    (run_dir / "week3_pipeline_status.json").write_text(
+        json.dumps({"run_id": run_id, "outcome": "success", "stage": None, "updated_at": "2026-06-30T00:00:00Z"}),
+        encoding="utf-8",
+    )
 
     response = build_research_response(run_id, output_root=tmp_path)
     serialized = json.dumps(response, ensure_ascii=False)

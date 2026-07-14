@@ -5,9 +5,10 @@ PostgreSQL DSN is configured via ``COMQUTOR_TEST_DATABASE_URL``. These never
 run as part of the default offline suite (``pytest -m "not integration"``)
 and never fake a passing result when PostgreSQL is unavailable.
 
-To run locally:
+To run locally (POSTGRES_PASSWORD must be set in your local .env first --
+the postgres profile refuses to start without it; see .env.example):
     docker compose --profile postgres up -d postgres
-    COMQUTOR_TEST_DATABASE_URL=postgresql+psycopg://comqutor:comqutor@localhost:5433/comqutor_alpha \
+    COMQUTOR_TEST_DATABASE_URL=postgresql+psycopg://comqutor:<your-local-password>@localhost:5433/comqutor_alpha \
         python -m pytest tests/test_graph_persistence_postgres_integration.py -m integration -q
 """
 
@@ -17,6 +18,7 @@ import pytest
 import sqlalchemy as sa
 
 from comqutor_alpha.storage.db.engine import build_engine
+from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
 from comqutor_alpha.storage.db.schema import alpha_matches, structure_graphs
 
@@ -44,6 +46,7 @@ _REACHABLE = _postgres_reachable(TEST_DATABASE_URL)
 
 def _repo():
     engine = build_engine(TEST_DATABASE_URL)
+    apply_migrations(engine)
     repo = GraphPersistenceRepository(engine)
     # Start each test from a clean slate on the shared integration database.
     with engine.begin() as conn:

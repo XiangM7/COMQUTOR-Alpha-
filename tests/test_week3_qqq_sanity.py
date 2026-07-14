@@ -18,6 +18,7 @@ from comqutor_alpha.api.routes_research import (
     run_research_request,
 )
 from comqutor_alpha.storage.db.engine import build_engine
+from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
 
 # SYNTHETIC macro claims -- not a real market report for any ticker.
@@ -56,7 +57,9 @@ _SYNTHETIC_QQQ_OFFLINE_OUTPUTS = [
 
 
 def _run_qqq_fixture(tmp_path):
-    repo = GraphPersistenceRepository(build_engine("sqlite:///:memory:"))
+    engine = build_engine("sqlite:///:memory:")
+    apply_migrations(engine)
+    repo = GraphPersistenceRepository(engine)
     payload = {
         "ticker": "QQQ",
         "analysis_date": "2026-06-30",

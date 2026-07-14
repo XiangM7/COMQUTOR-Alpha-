@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import re
@@ -21,6 +22,7 @@ from comqutor_alpha.graph_engine.pipeline import (
 from comqutor_alpha.storage.db.repository import (
     GraphPersistenceError,
     build_repository_from_env,
+    build_write_repository_from_env,
 )
 from comqutor_alpha.storage.file_store import (
     append_jsonl_record,
@@ -46,6 +48,13 @@ logger = logging.getLogger(__name__)
 TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 PIPELINE_ERROR_LOG_ARTIFACT_PATH = "error_logs/week2_pipeline_errors.jsonl"
 WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH = "error_logs/week3_pipeline_errors.jsonl"
+# Overwritten (not appended) on every Week 3 attempt -- the authoritative
+# "did the *latest* attempt succeed" signal. WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH
+# stays a pure append-only audit trail of every failure that ever happened;
+# it is intentionally never consulted for readiness, so a stale failure from
+# an earlier attempt can never keep pinning a since-recovered run to
+# partial/not_ready.
+WEEK3_PIPELINE_STATUS_ARTIFACT_FILENAME = "week3_pipeline_status.json"
 REQUIRED_COMPLETION_ARTIFACTS = (
     "raw_agent_outputs",
     "structured_agent_outputs",
@@ -248,13 +257,16 @@ def build_research_response(run_id, output_root="outputs/runs"):
     week2_llm_error_log_path = run_dir / WEEK2_LLM_ERROR_LOG_ARTIFACT_PATH
     pipeline_error_log_path = run_dir / PIPELINE_ERROR_LOG_ARTIFACT_PATH
     # Week 3: same filesystem-only pattern as above. "Ready" means the graph
-    # artifact was written AND no Week 3 stage logged a failure for this
-    # run -- both conditions hold for every real run (this pipeline always
-    # attempts Week 3 once Week 1-2 succeed, and always either writes the
-    # artifact or logs a failure), so this is a reliable, DB-free signal
-    # that GET .../graph will actually have something to return.
+    # artifact was written AND the most recent Week 3 attempt for this run
+    # recorded success -- both conditions hold for every real run (this
+    # pipeline always attempts Week 3 once Week 1-2 succeed, and always ends
+    # every attempt by recording its own outcome), so this is a reliable,
+    # DB-free signal that GET .../graph will actually have something to
+    # return. The status marker is overwritten (never appended) each
+    # attempt, so a successful retry always supersedes an earlier failure;
+    # the separate WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH remains a pure
+    # append-only audit trail and is deliberately not consulted here.
     structure_graph_path = run_dir / "structure_graph.json"
-    week3_error_log_path = run_dir / WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH
     metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
     raw_payload = load_json_record_if_exists(
         run_id,
@@ -281,7 +293,10 @@ def build_research_response(run_id, output_root="outputs/runs"):
     complete = all(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
     has_any = any(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
 
-    structure_graph_ready = structure_graph_path.exists() and not week3_error_log_path.exists()
+    week3_status = load_json_record_if_exists(
+        run_id, WEEK3_PIPELINE_STATUS_ARTIFACT_FILENAME, output_root=output_root
+    )
+    structure_graph_ready = structure_graph_path.exists() and week3_status.get("outcome") == "success"
     # "completed" now requires Week 3 (graph build + activation scoring +
     # persistence) to have actually succeeded, not just Week 1-2. A Week 3
     # failure after a complete Week 1-2 run degrades status to "partial"
@@ -325,7 +340,31 @@ def _log_pipeline_error(run_id, output_root, stage):
     )
 
 
+def _write_week3_pipeline_status(run_id, output_root, *, outcome, stage=None):
+    """Overwrite this run's Week 3 status marker with the latest attempt's
+    outcome. Never appended -- a later successful attempt always supersedes
+    an earlier failure, which is what lets ``build_research_response``
+    recover to "completed"/"ready" after a retry without ever consulting
+    (or needing to clean up) the append-only failure log."""
+    save_json_record(
+        run_id,
+        WEEK3_PIPELINE_STATUS_ARTIFACT_FILENAME,
+        {
+            "run_id": run_id,
+            "outcome": outcome,
+            "stage": stage,
+            "updated_at": _utc_timestamp(),
+        },
+        output_root=output_root,
+    )
+
+
 def _log_week3_pipeline_error(run_id, output_root, stage):
+    # Safe audit fields only (run_id/stage/stable error_code/timestamp) --
+    # never the triggering exception's text, type, or traceback. This is the
+    # only thing recorded for a Week 3 stage failure; nothing about a Week 3
+    # failure is ever passed to `logging` at all, so there is no leakage
+    # surface to guard there.
     append_jsonl_record(
         run_id,
         WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH,
@@ -337,6 +376,8 @@ def _log_week3_pipeline_error(run_id, output_root, stage):
         },
         output_root=output_root,
     )
+    logger.warning("week3 pipeline stage failed (run_id=%s, stage=%s)", run_id, stage)
+    _write_week3_pipeline_status(run_id, output_root, outcome="failed", stage=stage)
 
 
 def _run_week1_week2_artifact_pipeline(run_dir, llm_gateway=None):
@@ -407,7 +448,11 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None):
 
     ticker = graph_payload.get("ticker") or metadata.get("ticker")
     try:
-        repository = graph_repository or build_repository_from_env(output_root)
+        # build_write_repository_from_env (not the read-only
+        # build_repository_from_env) is deliberate: only this write pipeline
+        # may provision the local SQLite file/directory or apply schema
+        # migrations. GET .../graph must never do either.
+        repository = graph_repository or build_write_repository_from_env(output_root)
         repository.persist_run(
             run_id=run_id,
             ticker=ticker,
@@ -417,6 +462,14 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None):
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_persistence")
         return
+
+    # Best-effort marker only: Week 1-2 succeeded and the graph is fully
+    # built/scored/persisted at this point, so a failure writing this last
+    # bookkeeping file must not be surfaced as a request failure -- worst
+    # case, a stale/missing marker just under-reports readiness until the
+    # next successful attempt overwrites it.
+    with contextlib.suppress(Exception):
+        _write_week3_pipeline_status(run_id, output_root, outcome="success")
 
 
 def run_research_request(
@@ -543,10 +596,25 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
             "graph retrieval failed (run_id=%s, reason_code=%s)", safe_run_id, exc.reason_code
         )
         return _graph_error_response(safe_run_id, None, "GRAPH_UNAVAILABLE")
-    except Exception:
+    except Exception as exc:
         # Anything else (engine construction, filesystem, driver import) must
-        # still degrade safely rather than leak a traceback/DSN to the caller.
-        logger.exception("graph retrieval failed unexpectedly (run_id=%s)", safe_run_id)
+        # still degrade safely rather than leak a traceback/DSN to the
+        # caller -- and, unlike the client response, the *server log* must
+        # stay safe by default too: a raw driver/SQLAlchemy exception's text
+        # routinely embeds the DSN, host, or username. The default (WARNING)
+        # log line below carries only run_id + the exception's type name.
+        # The full traceback is only ever emitted at DEBUG (see the
+        # `logger.debug` call), which is off unless an operator has
+        # explicitly configured their logging handler for it -- a
+        # deliberate, local action, never the production default.
+        logger.warning(
+            "graph retrieval failed unexpectedly (run_id=%s, exc_type=%s)",
+            safe_run_id,
+            type(exc).__name__,
+        )
+        logger.debug(
+            "graph retrieval failed unexpectedly (run_id=%s)", safe_run_id, exc_info=True
+        )
         return _graph_error_response(safe_run_id, None, "GRAPH_UNAVAILABLE")
 
     if row is None:

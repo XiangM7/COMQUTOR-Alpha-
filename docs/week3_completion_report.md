@@ -21,6 +21,18 @@ Week 3 阶段失败后 `status` 不再报告 `completed`；(3) 生产环境数�
 本地 SQLite；(4) 确认并锁定 `alpha_matches` 的行基数语义。四项均在下方对应
 小节中标注，不再单独维护变更日志。
 
+**2026-07-14 security hardening pass**：针对已确认的安全与状态一致性问题做了
+专项修订，不涉及新功能、不涉及 Week 4、不改动 Week 2 Mapper/Extractor/
+taxonomy/golden labels。四项：(1) GET 只读边界——默认 `GET .../graph` 路径不再
+执行 schema migration、不创建数据库表/文件，读写 repository 构造职责分离；
+(2) 服务端日志脱敏——Graph GET 的兜底异常处理默认只记录 `run_id`+异常类型名，
+完整 traceback 仅在本地显式开启 DEBUG 级别日志时才输出；(3) Week 3
+重试生命周期——引入独立、每次尝试覆盖写入的 `week3_pipeline_status.json`
+标记文件，修复"同一 run 重试成功后仍被旧失败记录永久钉死在 partial/
+not_ready"的问题；(4) Docker Compose 本地开发数据库安全默认值——移除硬编码
+密码与含明文密码的 DSN 注释，端口改为仅绑定 `127.0.0.1`。详见下方
+第二、十一、十五、十六节。
+
 ## 一、Graph JSON schema
 
 `structure_graph.json`（文件产物）与 `structure_graphs.graph_json`（数据库
@@ -79,10 +91,30 @@ provenance                    source_artifacts schema 版本、
 - `repository.py`：`GraphPersistenceRepository`，两个公开写入方法
   `persist_run()`/两个读取方法 `get_graph()`/`get_alpha_matches()`。
   所有失败都包装为 `GraphPersistenceError(reason_code)`，绝不携带 DSN、
-  路径或原始异常文本。
+  路径或原始异常文本。**读/写构造职责分离**（security hardening pass
+  新增）：`GraphPersistenceRepository.__init__` 本身不再执行任何 migration
+  ——构造实例不产生任何 schema 副作用。`build_repository_from_env()` 是
+  只读构造路径（不建目录、不建本地 SQLite 文件、不调用
+  `ensure_schema()`），唯一被 `GET .../graph` 使用；`build_write_repository_
+  from_env()` 是写入构造路径（按需建目录/文件、调用
+  `ensure_schema()` 应用 migration），只被 `POST /api/research` 内部的
+  Week 3 管线使用。对本地 SQLite 后端，读路径额外用
+  `engine.sqlite_file_path()` 判断目标文件是否存在：不存在时
+  `get_graph()`/`get_alpha_matches()` 直接返回“无记录”，绝不通过
+  `.connect()` 触发 SQLite 默认的“连接时自动建空文件”行为。schema 缺失时
+  读路径返回稳定的 `DB_READ_FAILED`→`GRAPH_UNAVAILABLE`，而不是静默建表。
+  见 `tests/test_week3_security_hardening.py::TestReadOnlyGetBoundary`。
 
 `docker-compose.yml` 新增 profile-gated `postgres` 服务
 （`docker compose --profile postgres up -d postgres`），默认不启动。
+**安全默认值**（security hardening pass 新增）：`POSTGRES_PASSWORD` 不再有
+硬编码值，改用 Compose 的 `${POSTGRES_PASSWORD:?...}` 必填语法——本地环境
+未显式提供时 `docker compose` 直接拒绝启动该 profile，而不是退化到一个
+可公开猜到的默认密码；`POSTGRES_USER`/`POSTGRES_DB` 保留安全的本地开发
+默认值。宿主端口从 `5433:5432`（绑定所有网卡）改为 `127.0.0.1:5433:5432`
+（仅本机可达）。注释中不再出现任何包含明文密码的完整 DSN 示例，改为
+`<POSTGRES_USER>`/`<POSTGRES_PASSWORD>` 占位符。`.env.example` 新增对应
+占位符条目。见 `tests/test_week3_security_hardening.py::TestDockerComposeSecurityDefaults`。
 
 ## 三、claim_id / source_agent_output_id 持久化映射
 
@@ -275,17 +307,42 @@ HTTP 4xx/5xx。安全错误码：`INVALID_RUN_ID`、`RUN_NOT_FOUND`、
 1-2 的 4 个必需 artifact，Week 3 失败与否完全不影响它——这会导致 Week 1-2
 成功但 Week 3（图构建/打分/持久化任一环节）失败的 run 仍然报告
 `status: "completed"`，具有误导性。现在 `build_research_response()` 额外
-检查 `structure_graph.json` 文件是否存在、且 `error_logs/
-week3_pipeline_errors.jsonl` 是否不存在（两者都是纯文件系统信号，不需要
-查数据库；这个管线保证 Week 1-2 一旦成功就无条件尝试 Week 3，且 Week 3
-要么成功写文件要么记错误日志，因此这两个信号在真实 run 里等价于"数据库
-是否真的写成功"）：
+检查 `structure_graph.json` 文件是否存在、且最近一次 Week 3 尝试的
+`week3_pipeline_status.json` 标记是否记录 `outcome: "success"`（纯文件系统
+信号，不需要查数据库；这个管线保证 Week 1-2 一旦成功就无条件尝试 Week 3，
+且每次尝试结束时都会写下自己的结果，因此这两个信号在真实 run 里等价于
+"数据库是否真的写成功"）：
 
 - `complete`（Week 1-2 四个 artifact 齐全）且 `structure_graph_ready`
-  （Week 3 图已写出且无错误日志）→ `status: "completed"`。
+  （Week 3 图已写出且最近一次尝试成功）→ `status: "completed"`。
 - `complete` 但 Week 3 未就绪，或 Week 1-2 本身只是部分完成 → 复用既有的
   `status: "partial"` 词汇，不引入新枚举值。
 - Week 1-2 连一个必需 artifact 都没有 → `status: "failed"`（不变）。
+
+**重试生命周期修复**（security hardening pass）：`error_logs/
+week3_pipeline_errors.jsonl` 是纯追加、从不清空的审计日志。早期版本直接用
+"这个文件是否存在"作为就绪判定，导致一个 run 只要失败过一次，即使后续重试
+成功写库，`status`/`structure_graph_status` 也会被那条旧记录永久钉死在
+`partial`/`not_ready`。现在改用独立的 `week3_pipeline_status.json`
+标记文件：每次 Week 3 尝试（无论成功或失败）结束时都会**整体覆盖**（而非
+追加）这个文件，记录 `{run_id, outcome, stage, updated_at}`；就绪判定只看
+这个文件的最新内容，不再看 JSONL 日志是否存在。效果：最近一次尝试成功
+→ 状态恢复为 `completed`/`ready`；最近一次尝试失败 → 诚实报告
+`partial`/`not_ready`（即使更早的尝试曾经成功过）；`week3_pipeline_errors.
+jsonl` 继续保留完整失败历史供审计，但不再参与就绪判定，因此不会污染当前
+状态。见 `tests/test_week3_security_hardening.py::TestRetryLifecycle`。
+
+**服务端日志脱敏**（security hardening pass）：`GET .../graph` 的兜底异常
+分支（非 `GraphPersistenceError` 的意外异常，例如驱动 `ImportError`、原始
+`OSError`）此前用 `logger.exception(...)` 无条件记录完整 traceback——
+SQLAlchemy/驱动异常的文本经常直接包含 DSN、主机名或用户名，这是服务端日志
+（不是客户端响应）的真实泄漏面。现在默认（`WARNING`）只记录
+`run_id`+异常类型名；完整 traceback 改为单独的 `logger.debug(..., exc_info=
+True)` 调用，只有当运维方显式把日志 handler 配置到 `DEBUG` 级别（一个本地、
+显式的动作，绝不是生产默认状态）时才会输出。Week 3 管线各阶段失败只写入
+安全字段（`run_id`/`stage`/稳定 `error_code`/时间戳）到 JSONL 和一条同样
+安全的 `logger.warning`，从不记录触发异常本身的文本或 traceback。见
+`tests/test_week3_security_hardening.py::TestLogAndResponseLeakage`。
 
 新增顶层字段 `structure_graph_status`：`"ready"` 或 `"not_ready"`，是一个
 稳定、可加字段（不影响 `artifacts` 的形状，也不影响任何既有逐字段断言）。
@@ -339,10 +396,44 @@ dashboard、Neo4j 均未实现。Week 2 遗留的 claim-level `conflicting` 边�
 3. PostgreSQL JSONB 与 SQLite JSON-over-TEXT 是仅有的两个受支持方言；其他
    方言会被 `UNSUPPORTED_DATABASE_DIALECT` 显式拒绝，而不是静默尝试。
 4. `structure_graph_status`/`status` 的"是否就绪"判定基于文件系统信号
-   （文件是否存在、错误日志是否存在），不直接查库；这在当前管线（Week 3
-   一旦启动就要么成功写库要么记错误日志）下等价于真实的数据库落库结果，
-   但如果未来出现"写文件成功后进程崩溃、来不及写错误日志"这类极端情形，
+   （`structure_graph.json` 是否存在、`week3_pipeline_status.json` 最近一次
+   记录的 `outcome` 是否为 `success`），不直接查库；这在当前管线（Week 3
+   一旦启动就要么成功走到底要么在失败时覆盖写状态标记）下等价于真实的
+   数据库落库结果，且重试后能正确恢复（见十一节"重试生命周期修复"），
+   但如果未来出现"持久化成功后进程崩溃、来不及写成功标记"这类极端情形，
    信号可能短暂滞后于数据库真实状态。GET `.../graph` 本身仍然直接查库，
    不受这个限制影响。
 5. 与 Week 2 相同：deterministic NLP 对复杂嵌套语义仍有覆盖边界；这不是
    Week 3 引入的新限制。
+6. `docker compose config`（以及任何完整解析 Compose 栈变量插值的命令）会把
+   `env_file`/`environment` 引用的真实本地密钥以明文形式打印出来——这是
+   Docker Compose 自身的既有行为，不是本次改动引入的问题，但意味着这类命令
+   绝不能在共享或被记录的终端环境中对着真实 `.env` 运行。仓库/文档层面无法
+   完全消除这个风险，只能提示：本地开发者需自行避免在日志会被留存的场景下
+   执行这类命令。
+
+## 十六、部署假设与已知安全边界（Security Hardening Pass, 2026-07-14）
+
+本节明确当前 Graph API 的部署假设，防止未来被误描述为已具备多租户授权：
+
+1. **Graph API 仅适用于本地或可信内网部署。** `POST /api/research`、
+   `GET /api/research/{run_id}`、`GET /api/research/{run_id}/graph` 均未实现
+   任何身份认证（authentication）或访问控制（authorization）中间件。
+2. **`run_id` 不是授权凭据。** 它只经过字符集/路径穿越安全性校验
+   （`validate_run_id_for_path`），从未被当作访问令牌或密钥设计；知道一个
+   `run_id` 字符串即可读取该 run 的完整 Graph/研究结果。
+3. **当前没有 owner_id/tenant_id 强制隔离。** `schema.py` 的
+   `alpha_matches`/`structure_graphs` 表没有归属者列；`GraphPersistenceRepository`
+   的所有查询只按 `run_id` 过滤，不存在、也不检查"这个调用方是否有权访问
+   这个 run_id"。
+4. **不应直接暴露到公网。** 当前实现假设部署环境本身（网络边界、反向代理、
+   VPN 等）已经限制了谁能连接到这个服务；服务自身不做这层防护。
+5. **公网或多用户部署前必须先实现 authentication 与 run ownership**
+   （例如 API key/session 认证 + `owner_id`/`tenant_id` 列与查询过滤），
+   本次 security hardening pass 明确不实现这套体系——仓库中没有可复用的正式
+   身份架构，临时拼凑一套（自制 header token、硬编码密码等）风险更高，
+   故只在此处记录限制，不引入临时方案。
+
+见 `tests/test_week3_security_hardening.py::TestAuthTenantDocumentationContract`
+（防止这一节的免责声明被未来的改动删除或弱化，而没有同时补上真正的
+authentication 实现）。

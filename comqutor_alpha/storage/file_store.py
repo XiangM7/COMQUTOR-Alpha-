@@ -17,6 +17,7 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "alpha_matches.json",
     "extracted_structures.json",
     "structure_graph.json",
+    "week3_pipeline_status.json",
     "final_report.md",
     "research_response.json",
 }

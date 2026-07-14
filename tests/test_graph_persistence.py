@@ -8,16 +8,24 @@ from comqutor_alpha.storage.db.engine import (
     build_engine,
     resolve_database_url,
 )
+from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import (
     GraphPersistenceError,
     GraphPersistenceRepository,
     build_repository_from_env,
+    build_write_repository_from_env,
 )
 from comqutor_alpha.storage.db.schema import alpha_matches, structure_graphs
 
 
 def _fresh_repository():
-    return GraphPersistenceRepository(build_engine("sqlite:///:memory:"))
+    # GraphPersistenceRepository's constructor no longer applies migrations
+    # itself (that is now write-path-only, via ensure_schema()/
+    # build_write_repository_from_env) -- tests that build a repo directly
+    # and expect a ready schema must apply it explicitly.
+    engine = build_engine("sqlite:///:memory:")
+    apply_migrations(engine)
+    return GraphPersistenceRepository(engine)
 
 
 def _alpha_matches_payload(claim_id="c1", alpha_id="A101", agent="news_agent"):
@@ -194,6 +202,43 @@ class TestPersistence:
         assert [row["claim_id"] for row in repo.get_alpha_matches("r1")] == ["c1"]
         assert [row["claim_id"] for row in repo.get_alpha_matches("r2")] == ["c9"]
 
+    def test_run_isolation_holds_even_when_two_runs_share_the_same_ticker(self):
+        """test_run_isolation_across_separate_run_ids uses two different
+        tickers, which leaves open whether isolation actually keys off
+        run_id or could be accidentally bypassed via ticker. This pins down
+        that ticker is never a substitute lookup key: two runs for the
+        *same* ticker must stay just as isolated as two runs for different
+        tickers."""
+        repo = _fresh_repository()
+        repo.persist_run(
+            run_id="r1",
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload("c1", alpha_id="A101"),
+            graph_payload=_graph_payload(run_id="r1", ticker="NVDA", score=10.0),
+        )
+        repo.persist_run(
+            run_id="r2",
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload("c9", alpha_id="A001"),
+            graph_payload=_graph_payload(run_id="r2", ticker="NVDA", score=90.0),
+        )
+
+        assert repo.get_graph("r1")["graph_coherence_score"] == 10.0
+        assert repo.get_graph("r2")["graph_coherence_score"] == 90.0
+        assert [row["claim_id"] for row in repo.get_alpha_matches("r1")] == ["c1"]
+        assert [row["claim_id"] for row in repo.get_alpha_matches("r2")] == ["c9"]
+
+        # retrying r1 must never touch r2's rows/graph just because they
+        # share a ticker
+        repo.persist_run(
+            run_id="r1",
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload("c1", alpha_id="A301"),
+            graph_payload=_graph_payload(run_id="r1", ticker="NVDA", score=15.0),
+        )
+        assert repo.get_graph("r2")["graph_coherence_score"] == 90.0
+        assert [row["claim_id"] for row in repo.get_alpha_matches("r2")] == ["c9"]
+
     def test_query_by_run_id_returns_none_for_unknown_run(self):
         repo = _fresh_repository()
         assert repo.get_graph("never_persisted") is None
@@ -264,6 +309,53 @@ class TestPersistence:
             assert str(exc) == exc.reason_code
             assert "sqlite" not in str(exc).lower()
             assert ":memory:" not in str(exc)
+
+
+class TestReadWriteRepositoryConstruction:
+    """build_repository_from_env (read-only) vs build_write_repository_from_env
+    (write, provisions schema) is the split that keeps GET /api/research/
+    {run_id}/graph from ever running a migration or creating a local SQLite
+    file -- see routes_research.get_persisted_structure_graph, which only
+    ever calls the read-only factory."""
+
+    def test_write_repository_provisions_schema_and_can_persist_immediately(self, tmp_path):
+        repo = build_write_repository_from_env(output_root=tmp_path)
+
+        repo.persist_run(
+            run_id="r1", ticker="NVDA", alpha_matches_payload=_alpha_matches_payload(), graph_payload=_graph_payload()
+        )
+
+        assert repo.get_graph("r1") is not None
+        assert (tmp_path / "_comqutor_alpha_graph.db").exists()
+
+    def test_read_only_repository_creates_no_file_and_no_schema_for_unwritten_root(self, tmp_path):
+        repo = build_repository_from_env(output_root=tmp_path)
+
+        assert repo.get_graph("never_persisted") is None
+        assert repo.get_alpha_matches("never_persisted") == []
+        assert not (tmp_path / "_comqutor_alpha_graph.db").exists()
+
+    def test_read_only_repository_sees_what_the_write_repository_persisted(self, tmp_path):
+        writer = build_write_repository_from_env(output_root=tmp_path)
+        writer.persist_run(
+            run_id="r1", ticker="NVDA", alpha_matches_payload=_alpha_matches_payload(), graph_payload=_graph_payload(score=55.0)
+        )
+
+        reader = build_repository_from_env(output_root=tmp_path)
+        row = reader.get_graph("r1")
+
+        assert row is not None
+        assert row["graph_coherence_score"] == 55.0
+
+    def test_read_only_repository_constructor_never_calls_apply_migrations(self, tmp_path, monkeypatch):
+        import comqutor_alpha.storage.db.repository as repository_module
+
+        calls = []
+        monkeypatch.setattr(repository_module, "apply_migrations", lambda engine: calls.append(engine))
+
+        build_repository_from_env(output_root=tmp_path).get_graph("anything")
+
+        assert calls == []
 
 
 class TestProductionDatabaseFallback:

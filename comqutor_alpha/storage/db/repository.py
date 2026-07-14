@@ -23,7 +23,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from comqutor_alpha.storage.db.engine import (
     DatabaseConfigurationError,
-    build_engine_from_env,
+    build_engine,
+    resolve_database_url,
+    sqlite_file_path,
 )
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.schema import alpha_matches, structure_graphs
@@ -50,10 +52,33 @@ def _coerce_optional_str(value: Any) -> str | None:
 
 
 class GraphPersistenceRepository:
-    def __init__(self, engine: Engine) -> None:
+    """Read/write executor over an assumed-provisioned schema.
+
+    Construction never mutates the database: it does not create tables, does
+    not create a ``schema_migrations`` row, and (for a local SQLite file that
+    does not exist yet) never even opens a connection that would auto-create
+    the file. Schema provisioning is a separate, explicit step -- see
+    :meth:`ensure_schema` -- so a read-only caller (the GET graph endpoint)
+    can hold a repository instance without ever acquiring DDL-equivalent
+    side effects. Only :func:`build_write_repository_from_env` (the
+    POST/write pipeline's construction path) calls it.
+    """
+
+    def __init__(self, engine: Engine, *, database_url: str | None = None) -> None:
         self._engine = engine
+        # Guards get_graph/get_alpha_matches against SQLite's default
+        # behavior of silently creating an empty file on first connection:
+        # if this is a local file DSN and the file does not exist, there is
+        # provably nothing to read yet, so reads short-circuit before ever
+        # calling .connect(). None for Postgres/in-memory SQLite, neither of
+        # which has this footgun.
+        self._missing_sqlite_guard = sqlite_file_path(database_url) if database_url else None
+
+    def ensure_schema(self) -> list[str]:
+        """Apply any pending migrations. Write-path only -- never called from
+        a read-only GET request."""
         try:
-            apply_migrations(engine)
+            return apply_migrations(self._engine)
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_MIGRATION_FAILED") from exc
 
@@ -157,6 +182,8 @@ class GraphPersistenceRepository:
             raise GraphPersistenceError("DB_WRITE_FAILED") from exc
 
     def get_graph(self, run_id: str) -> dict[str, Any] | None:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return None
         try:
             with self._engine.connect() as conn:
                 row = conn.execute(
@@ -167,6 +194,8 @@ class GraphPersistenceRepository:
         return dict(row) if row is not None else None
 
     def get_alpha_matches(self, run_id: str) -> list[dict[str, Any]]:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
         try:
             with self._engine.connect() as conn:
                 rows = conn.execute(
@@ -179,16 +208,42 @@ class GraphPersistenceRepository:
         return [dict(row) for row in rows]
 
 
+def _resolve_engine_and_url(
+    output_root: str | None, *, create_if_missing: bool
+) -> tuple[Engine, str]:
+    try:
+        database_url = resolve_database_url(output_root)
+    except DatabaseConfigurationError as exc:
+        raise GraphPersistenceError(exc.reason_code) from exc
+    engine = build_engine(database_url, create_if_missing=create_if_missing)
+    return engine, database_url
+
+
 def build_repository_from_env(output_root: str | None = None) -> GraphPersistenceRepository:
-    """Build the default repository from server environment configuration.
+    """Build a read-only repository from server environment configuration.
+
+    Never creates a directory, a local SQLite file, or database schema --
+    safe to call from a GET/read request. If the schema has never been
+    provisioned (or a local SQLite file has never been written), reads fail
+    safely (``DB_READ_FAILED`` / not-found) rather than silently creating it.
 
     Funnels ``DatabaseConfigurationError`` (e.g. production with no
     ``COMQUTOR_DATABASE_URL``) through the same ``GraphPersistenceError``
     contract as every other persistence-layer failure, so callers only ever
     need to handle one exception type with a stable ``reason_code``.
     """
-    try:
-        engine = build_engine_from_env(output_root)
-    except DatabaseConfigurationError as exc:
-        raise GraphPersistenceError(exc.reason_code) from exc
-    return GraphPersistenceRepository(engine)
+    engine, database_url = _resolve_engine_and_url(output_root, create_if_missing=False)
+    return GraphPersistenceRepository(engine, database_url=database_url)
+
+
+def build_write_repository_from_env(output_root: str | None = None) -> GraphPersistenceRepository:
+    """Build a write-ready repository from server environment configuration.
+
+    Creates the local SQLite directory/file if that is the resolved backend,
+    and ensures required schema exists (applying migrations if needed).
+    Only the POST/write pipeline may call this -- never a GET/read request.
+    """
+    engine, database_url = _resolve_engine_and_url(output_root, create_if_missing=True)
+    repository = GraphPersistenceRepository(engine, database_url=database_url)
+    repository.ensure_schema()
+    return repository

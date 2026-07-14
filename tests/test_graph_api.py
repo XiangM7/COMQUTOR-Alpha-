@@ -7,6 +7,7 @@ from comqutor_alpha.api.routes_research import (
     run_research_request,
 )
 from comqutor_alpha.storage.db.engine import build_engine
+from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceError, GraphPersistenceRepository
 
 
@@ -28,7 +29,11 @@ def _payload():
 
 
 def _repo():
-    return GraphPersistenceRepository(build_engine("sqlite:///:memory:"))
+    # GraphPersistenceRepository's constructor no longer applies migrations
+    # itself (write-path-only now); apply explicitly for direct construction.
+    engine = build_engine("sqlite:///:memory:")
+    apply_migrations(engine)
+    return GraphPersistenceRepository(engine)
 
 
 def test_post_research_returns_run_id(tmp_path):
