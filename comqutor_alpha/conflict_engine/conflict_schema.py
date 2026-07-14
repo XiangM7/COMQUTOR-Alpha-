@@ -4,7 +4,9 @@ Every rule here is either SOURCE-FROZEN (Development Plan v1.0) or
 APPROVED -- SPEC-FROZEN FOR W4.1 (docs/week4_spec_freeze_audit.md, 2026-07-14
 closure). Nothing in this module is a fresh W4.1 invention: nothing here
 picks new business thresholds -- it only encodes decisions already recorded
-in that document.
+in that document (plus the 2026-07-14 W4.1 Correctness Patch, which closes
+implementation gaps against those same frozen decisions -- see
+docs/week4_conflict_core_report.md's "W4.1 Correctness Patch" section).
 
 Numeric clamping/finiteness reuses ``graph_engine.graph_schema`` directly
 (the audit's explicit instruction: reuse, do not re-implement a second,
@@ -38,12 +40,14 @@ _DIRECTION_NEGATIVE = "negative"
 class ConflictInputError(Exception):
     """Safe input-contract violation: carries a stable reason code only.
 
-    Raised only for structural violations of the caller's contract (e.g. a
-    non-mapping activation payload, a duplicate alpha_id within it) -- never
-    for a candidate pair simply lacking evidence or falling below threshold,
-    which are graceful `suppressed`/`rejected` outcomes instead, not
-    exceptions. Never carries raw exception text, a traceback, or a local
-    path.
+    Raised only for structural violations of the caller's contract that
+    invalidate the whole call (e.g. a non-mapping activation payload, an
+    activation entry referencing an alpha_id absent from the taxonomy, two
+    raw alpha_matches records for the same claim_id that genuinely
+    disagree) -- never for a single candidate pair simply lacking evidence
+    or falling below threshold, which are graceful `suppressed`/`rejected`
+    outcomes instead, not exceptions. Never carries raw exception text, a
+    traceback, or a local path.
     """
 
     def __init__(self, reason_code: str) -> None:
@@ -53,7 +57,9 @@ class ConflictInputError(Exception):
 
 # ---------------------------------------------------------------------------
 # Candidate reason codes (docs/week4_spec_freeze_audit.md #9 / this task's
-# section 九). Defined as named constants so call sites can't typo a string
+# section 九, plus MISSING_RECIPROCAL_DECLARATION/ASYMMETRIC_CONTRADICTION_
+# WEIGHT added by the 2026-07-14 Correctness Patch's taxonomy-validation
+# rework). Defined as named constants so call sites can't typo a string
 # literal into an unrecognized code.
 # ---------------------------------------------------------------------------
 REASON_MISSING_LEFT_ACTIVATION = "MISSING_LEFT_ACTIVATION"
@@ -71,6 +77,8 @@ REASON_TICKER_MISMATCH = "TICKER_MISMATCH"
 REASON_SCHEMA_INVALID = "SCHEMA_INVALID"
 REASON_DIRECTION_ROLE_UNRESOLVED = "DIRECTION_ROLE_UNRESOLVED"
 REASON_DUPLICATE_PAIR = "DUPLICATE_PAIR"
+REASON_MISSING_RECIPROCAL_DECLARATION = "MISSING_RECIPROCAL_DECLARATION"
+REASON_ASYMMETRIC_CONTRADICTION_WEIGHT = "ASYMMETRIC_CONTRADICTION_WEIGHT"
 # Only reachable via an optional single-pair evaluation helper, never via the
 # main taxonomy-declared enumeration (which by construction never evaluates
 # an undeclared pair).
@@ -92,9 +100,25 @@ REJECTED_CLASS_REASONS = frozenset(
         REASON_SCHEMA_INVALID,
         REASON_DIRECTION_ROLE_UNRESOLVED,
         REASON_DUPLICATE_PAIR,
+        REASON_MISSING_RECIPROCAL_DECLARATION,
+        REASON_ASYMMETRIC_CONTRADICTION_WEIGHT,
         REASON_PAIR_NOT_DECLARED,
     }
 )
+
+# ---------------------------------------------------------------------------
+# Top-level input-integrity reason codes (Correctness Patch): raised via
+# ConflictInputError, never placed in a candidate's reason_codes list --
+# each one aborts the whole detect_alpha_conflicts() call rather than
+# degrading a single candidate, because the underlying problem (conflicting
+# duplicate claim records, an activation payload built against a different
+# Week 3 formula version, an activation entry for an alpha the taxonomy
+# doesn't even recognize) is a caller/data-integrity issue, not "this run's
+# evidence happens to be thin."
+# ---------------------------------------------------------------------------
+REASON_DUPLICATE_CLAIM_CONFLICT = "DUPLICATE_CLAIM_CONFLICT"
+REASON_ACTIVATION_VERSION_MISMATCH = "ACTIVATION_VERSION_MISMATCH"
+REASON_UNKNOWN_ACTIVATION_ALPHA = "UNKNOWN_ACTIVATION_ALPHA"
 
 # ---------------------------------------------------------------------------
 # Excluded-evidence reason codes (this task's section 七/十四): per-claim
@@ -203,7 +227,12 @@ __all__ = [
     "REASON_SCHEMA_INVALID",
     "REASON_DIRECTION_ROLE_UNRESOLVED",
     "REASON_DUPLICATE_PAIR",
+    "REASON_MISSING_RECIPROCAL_DECLARATION",
+    "REASON_ASYMMETRIC_CONTRADICTION_WEIGHT",
     "REASON_PAIR_NOT_DECLARED",
+    "REASON_DUPLICATE_CLAIM_CONFLICT",
+    "REASON_ACTIVATION_VERSION_MISMATCH",
+    "REASON_UNKNOWN_ACTIVATION_ALPHA",
     "REJECTED_CLASS_REASONS",
     "EXCLUDED_NON_COMMITTED_MATCH",
     "EXCLUDED_WRONG_ALPHA",

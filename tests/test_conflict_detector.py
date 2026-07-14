@@ -31,6 +31,7 @@ from comqutor_alpha.conflict_engine.conflict_schema import (
     conflict_level,
 )
 from comqutor_alpha.graph_engine.activation_scorer import _EVIDENCE_RELATION_WEIGHT
+from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
 from tests.fixtures.week4_conflict_cases import (
     activation_entry,
     activation_payload,
@@ -55,6 +56,14 @@ def _outcome_for(result, alpha_a, alpha_b):
         if (item["alpha_a"], item["alpha_b"]) == key:
             return item
     raise AssertionError(f"no candidate evaluation for {key}")
+
+
+def _audit_for_alpha(item, alpha_id):
+    for side in ("alpha_a", "alpha_b"):
+        audit = item["evidence_audit"][side]
+        if audit["alpha_id"] == alpha_id:
+            return audit
+    raise AssertionError(f"no evidence audit for {alpha_id}")
 
 
 class TestTaxonomyPairEnumeration:
@@ -137,6 +146,86 @@ class TestTaxonomyPairEnumeration:
         assert item["outcome"] == "rejected"
         assert "DUPLICATE_PAIR" in item["reason_codes"]
 
+    def test_explicit_empty_taxonomy_does_not_fall_back_to_default(self):
+        result = _detect(activation_payload(), [], taxonomy={})
+        assert result["arbitration"]["declared_pair_count"] == 0
+        assert result["arbitration"]["candidate_evaluations"] == []
+        assert result["conflicts"] == []
+        assert result["main_conflict"] is None
+
+    def test_missing_reciprocal_declaration_is_rejected(self):
+        taxonomy = {
+            "A101": fake_alpha(
+                "A101", [ConflictAlpha(alpha_id="A304", contradiction_weight=0.9)]
+            ),
+            "A304": fake_alpha("A304"),
+        }
+        result = _detect(activation_payload(), [], taxonomy=taxonomy)
+        item = _outcome_for(result, "A101", "A304")
+        assert item["outcome"] == "rejected"
+        assert "MISSING_RECIPROCAL_DECLARATION" in item["reason_codes"]
+
+    def test_asymmetric_weights_are_rejected_without_selecting_one(self):
+        taxonomy = two_alpha_taxonomy(
+            "A101", "A304", weight_a_to_b=0.9, weight_b_to_a=0.7
+        )
+        result = _detect(activation_payload(), [], taxonomy=taxonomy)
+        item = _outcome_for(result, "A101", "A304")
+        assert item["outcome"] == "rejected"
+        assert "ASYMMETRIC_CONTRADICTION_WEIGHT" in item["reason_codes"]
+
+    def test_dangling_alpha_reference_is_schema_invalid(self):
+        taxonomy = {
+            "A101": fake_alpha(
+                "A101", [ConflictAlpha(alpha_id="A999", contradiction_weight=0.9)]
+            )
+        }
+        with pytest.raises(ConflictInputError) as exc_info:
+            _detect(activation_payload(), [], taxonomy=taxonomy)
+        assert exc_info.value.reason_code == "SCHEMA_INVALID"
+
+    def test_self_conflict_is_schema_invalid(self):
+        taxonomy = {
+            "A101": fake_alpha(
+                "A101", [ConflictAlpha(alpha_id="A101", contradiction_weight=0.9)]
+            )
+        }
+        with pytest.raises(ConflictInputError) as exc_info:
+            _detect(activation_payload(), [], taxonomy=taxonomy)
+        assert exc_info.value.reason_code == "SCHEMA_INVALID"
+
+    def test_mapping_key_must_match_alpha_definition_id(self):
+        taxonomy = {"A101": fake_alpha("A304")}
+        with pytest.raises(ConflictInputError) as exc_info:
+            _detect(activation_payload(), [], taxonomy=taxonomy)
+        assert exc_info.value.reason_code == "SCHEMA_INVALID"
+
+    def test_nonnumeric_weight_is_safely_rejected(self):
+        taxonomy = {
+            "A101": fake_alpha(
+                "A101",
+                [ConflictAlpha(alpha_id="A304", contradiction_weight="not-a-number")],
+            ),
+            "A304": fake_alpha(
+                "A304",
+                [ConflictAlpha(alpha_id="A101", contradiction_weight="not-a-number")],
+            ),
+        }
+
+        result = _detect(activation_payload(), [], taxonomy=taxonomy)
+        item = _outcome_for(result, "A101", "A304")
+        assert item["outcome"] == "rejected"
+        assert "INVALID_CONTRADICTION_WEIGHT" in item["reason_codes"]
+        assert "not-a-number" not in json.dumps(item)
+
+    @pytest.mark.parametrize("bad_weight", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_weight_is_safely_rejected(self, bad_weight):
+        taxonomy = two_alpha_taxonomy("A101", "A304", weight_a_to_b=bad_weight)
+        result = _detect(activation_payload(), [], taxonomy=taxonomy)
+        item = _outcome_for(result, "A101", "A304")
+        assert item["outcome"] == "rejected"
+        assert "INVALID_CONTRADICTION_WEIGHT" in item["reason_codes"]
+
 
 class TestQualifyingEvidence:
     def _pair(self, score_a=1.0, score_b=1.0, relation_a="activation", relation_b="activation", **kw):
@@ -205,20 +294,24 @@ class TestQualifyingEvidence:
         assert result["main_conflict"]["alpha_a"] == "A101"
 
     def test_duplicate_claim_id_counted_once(self):
+        duplicate = match_record("cA", "A101", score=0.9)
         result = _detect(
             activation_payload(
                 activation_entry("A101", score=90, direction="positive"),
                 activation_entry("A304", score=90, direction="negative"),
             ),
             [
-                match_record("cA", "A101", score=0.9),
-                match_record("cA", "A101", score=0.1),  # duplicate claim_id, different score
+                duplicate,
+                dict(duplicate),
                 match_record("cB", "A304", score=0.9),
             ],
         )
         conflict = result["main_conflict"]
         assert conflict["bull_structure"]["claim_ids"] == ["cA"]
-        assert conflict["components"]["alpha_a_evidence_strength"] == 0.9  # not averaged with the duplicate
+        assert conflict["components"]["alpha_a_evidence_strength"] == 0.9
+        audit = _audit_for_alpha(_outcome_for(result, "A101", "A304"), "A101")
+        assert audit["qualifying_claim_ids"] == ["cA"]
+        assert audit["excluded"] == [{"claim_id": "cA", "reason_code": "DUPLICATE_CLAIM"}]
 
     def test_missing_claim_id_is_excluded(self):
         result = _detect(
@@ -268,6 +361,52 @@ class TestQualifyingEvidence:
         assert "AMBIGUOUS_ONLY" in item["reason_codes"]
         assert "MISSING_RIGHT_EVIDENCE" in item["reason_codes"]
 
+    def test_ambiguous_plus_no_match_uses_missing_evidence(self):
+        result = _detect(
+            activation_payload(
+                activation_entry("A101", score=90, direction="positive"),
+                activation_entry("A304", score=90, direction="negative"),
+            ),
+            [
+                match_record(
+                    "c1",
+                    None,
+                    match_status="ambiguous",
+                    plausible_alphas=["A101"],
+                    candidate_alpha_ids=["A101"],
+                ),
+                match_record(
+                    "c2", None, match_status="no_match", candidate_alpha_ids=["A101"]
+                ),
+                match_record("cB", "A304"),
+            ],
+        )
+        item = _outcome_for(result, "A101", "A304")
+        assert "MISSING_LEFT_EVIDENCE" in item["reason_codes"]
+        assert "AMBIGUOUS_ONLY" not in item["reason_codes"]
+
+    def test_ambiguous_plus_unsupported_committed_uses_missing_evidence(self):
+        result = _detect(
+            activation_payload(
+                activation_entry("A101", score=90, direction="positive"),
+                activation_entry("A304", score=90, direction="negative"),
+            ),
+            [
+                match_record(
+                    "c1",
+                    None,
+                    match_status="ambiguous",
+                    plausible_alphas=["A101"],
+                    candidate_alpha_ids=["A101"],
+                ),
+                match_record("c2", "A101", relation="mention"),
+                match_record("cB", "A304"),
+            ],
+        )
+        item = _outcome_for(result, "A101", "A304")
+        assert "MISSING_LEFT_EVIDENCE" in item["reason_codes"]
+        assert "AMBIGUOUS_ONLY" not in item["reason_codes"]
+
     def test_wrong_alpha_claim_is_excluded_but_still_audited(self):
         # cA is a candidate for A101 but actually committed to a different
         # alpha (still relevant because it appears in A101's candidate_scores).
@@ -289,6 +428,148 @@ class TestQualifyingEvidence:
         )
         item = _outcome_for(result, "A101", "A304")
         assert "MISSING_LEFT_EVIDENCE" in item["reason_codes"]
+
+
+class TestDuplicateClaimCorrectness:
+    def _activation(self):
+        return activation_payload(
+            activation_entry("A101", score=90, direction="positive"),
+            activation_entry("A304", score=90, direction="negative"),
+        )
+
+    def test_exact_duplicates_are_order_independent_and_audited_once(self):
+        original = match_record("cA", "A101", score=0.9)
+        duplicate_with_reordered_keys = dict(reversed(list(original.items())))
+        duplicate_with_reordered_keys["claim_id"] = "  cA  "
+        matches = [original, duplicate_with_reordered_keys, match_record("cB", "A304")]
+
+        forward = _detect(self._activation(), matches)
+        reverse = _detect(self._activation(), list(reversed(matches)))
+
+        assert json.dumps(forward, sort_keys=True) == json.dumps(reverse, sort_keys=True)
+        assert forward["main_conflict"]["bull_structure"]["claim_ids"] == ["cA"]
+        audit = _audit_for_alpha(_outcome_for(forward, "A101", "A304"), "A101")
+        assert audit == {
+            "alpha_id": "A101",
+            "qualifying_claim_ids": ["cA"],
+            "qualifying_count": 1,
+            "excluded": [{"claim_id": "cA", "reason_code": "DUPLICATE_CLAIM"}],
+            "excluded_count": 1,
+        }
+
+    @pytest.mark.parametrize(
+        "field,mutate",
+        [
+            ("score", lambda record: record.update(score=0.1)),
+            ("matched_alpha", lambda record: record.update(matched_alpha="A304")),
+            (
+                "relation",
+                lambda record: record.update(
+                    candidate_scores=[
+                        {"alpha_id": "A101", "score": 0.9, "relation": "conditional"}
+                    ]
+                ),
+            ),
+            (
+                "evidence",
+                lambda record: record.update(
+                    evidence="materially different evidence",
+                    claim="materially different evidence",
+                ),
+            ),
+        ],
+        ids=("score", "matched-alpha", "relation", "evidence"),
+    )
+    def test_conflicting_duplicate_is_a_safe_global_error(self, field, mutate):
+        del field  # pytest id documents which semantic field is changed.
+        first = match_record("cA", "A101", score=0.9)
+        second = dict(first)
+        mutate(second)
+
+        with pytest.raises(ConflictInputError) as exc_info:
+            _detect(self._activation(), [first, second, match_record("cB", "A304")])
+
+        assert exc_info.value.reason_code == "DUPLICATE_CLAIM_CONFLICT"
+        assert str(exc_info.value) == "DUPLICATE_CLAIM_CONFLICT"
+
+
+class TestEvidenceAuditContract:
+    def _item(self, left_record, *, right_record=None):
+        result = _detect(
+            activation_payload(
+                activation_entry("A101", score=90, direction="positive"),
+                activation_entry("A304", score=90, direction="negative"),
+            ),
+            [left_record, right_record or match_record("cB", "A304")],
+        )
+        return _outcome_for(result, "A101", "A304")
+
+    @pytest.mark.parametrize(
+        "record,expected_reason",
+        [
+            (
+                match_record("c1", None, match_status="ambiguous", plausible_alphas=["A101"]),
+                "NON_COMMITTED_MATCH",
+            ),
+            (match_record("", "A101"), "MISSING_CLAIM_ID"),
+            (match_record("c2", "A101", relation="mention"), "UNSUPPORTED_RELATION"),
+            (match_record("c3", "A101", evidence="   "), "EMPTY_EVIDENCE"),
+            (match_record("c4", "A101", score=float("nan")), "INVALID_MATCH_SCORE"),
+        ],
+        ids=("non-committed", "missing-id", "unsupported", "empty", "invalid-score"),
+    )
+    def test_exclusion_reason_is_visible(self, record, expected_reason):
+        audit = _audit_for_alpha(self._item(record), "A101")
+        assert expected_reason in {entry["reason_code"] for entry in audit["excluded"]}
+
+    def test_wrong_alpha_is_visible(self):
+        record = match_record("cA", "A201")
+        record["candidate_scores"].append(
+            {"alpha_id": "A101", "score": 0.5, "relation": "activation"}
+        )
+        audit = _audit_for_alpha(self._item(record), "A101")
+        assert audit["excluded"] == [{"claim_id": "cA", "reason_code": "WRONG_ALPHA"}]
+
+    def test_admitted_suppressed_and_rejected_candidates_all_include_audit(self):
+        admitted = self._item(match_record("cA", "A101"))
+        suppressed = self._item(match_record("cA", "A101", relation="mention"))
+        rejected_result = _detect(
+            activation_payload(activation_entry("A101", score=90, direction="positive")),
+            [match_record("cA", "A101")],
+        )
+        rejected = _outcome_for(rejected_result, "A101", "A304")
+
+        assert admitted["outcome"] == "admitted"
+        assert suppressed["outcome"] == "suppressed"
+        assert rejected["outcome"] == "rejected"
+        for item in (admitted, suppressed, rejected):
+            assert set(item["evidence_audit"]) == {"alpha_a", "alpha_b"}
+
+    def test_audit_is_sorted_and_input_order_independent(self):
+        records = [
+            match_record("z", "A101", relation="mention"),
+            match_record("a", "A101", evidence="   "),
+            match_record("cB", "A304"),
+        ]
+        activation = activation_payload(
+            activation_entry("A101", score=90, direction="positive"),
+            activation_entry("A304", score=90, direction="negative"),
+        )
+        forward = _outcome_for(_detect(activation, records), "A101", "A304")
+        reverse = _outcome_for(_detect(activation, list(reversed(records))), "A101", "A304")
+        assert forward["evidence_audit"] == reverse["evidence_audit"]
+        audit = _audit_for_alpha(forward, "A101")
+        assert audit["excluded"] == sorted(
+            audit["excluded"], key=lambda entry: (entry["claim_id"] or "", entry["reason_code"])
+        )
+
+    def test_audit_does_not_copy_evidence_or_sensitive_text(self):
+        sensitive = "/Users/private/project password=do-not-copy provider_response=secret"
+        item = self._item(match_record("cA", "A101", evidence=sensitive))
+        serialized_audit = json.dumps(item["evidence_audit"], sort_keys=True)
+        assert sensitive not in serialized_audit
+        for forbidden in ("/Users/", "password", "provider_response", "Traceback"):
+            assert forbidden not in serialized_audit
 
 
 class TestEvidenceStrengthCalculation:
@@ -705,7 +986,7 @@ class TestMainConflictArbitration:
         # Two candidates whose *rounded* scores tie but whose true
         # (unrounded) scores differ must still rank by the true value.
         taxonomy = {
-            **two_alpha_taxonomy("A101", "A304", weight_a_to_b=0.700001),
+            **two_alpha_taxonomy("A101", "A304", weight_a_to_b=0.7000005),
             **two_alpha_taxonomy("A301", "A601", weight_a_to_b=0.7),
         }
         activation = activation_payload(
@@ -723,7 +1004,16 @@ class TestMainConflictArbitration:
         result = _detect(activation, matches, taxonomy=taxonomy)
         # A101-A304's true score is fractionally higher even though both
         # round to the same displayed 4-decimal value at this magnitude.
-        assert result["main_conflict"]["conflict_id"] in ("A101__A304", "A301__A601")
+        assert result["conflicts"][0]["conflict_score"] == result["conflicts"][1]["conflict_score"]
+        assert result["main_conflict"]["conflict_id"] == "A101__A304"
+
+        reversed_result = _detect(
+            activation_payload(*reversed(activation["alphas"])),
+            list(reversed(matches)),
+            taxonomy=dict(reversed(list(taxonomy.items()))),
+        )
+        assert reversed_result["main_conflict"]["conflict_id"] == "A101__A304"
+        assert json.dumps(result, sort_keys=True) == json.dumps(reversed_result, sort_keys=True)
 
     def test_no_admitted_conflicts_yields_empty_list_and_null_main_conflict(self):
         result = _detect(activation_payload(), [])
@@ -844,7 +1134,44 @@ class TestInputValidation:
 
     def test_activation_without_alphas_list_raises_schema_invalid(self):
         with pytest.raises(ConflictInputError):
-            _detect({"alphas": "not-a-list"}, [])
+            _detect(
+                {
+                    "formula_version": ACTIVATION_FORMULA_VERSION,
+                    "alphas": "not-a-list",
+                },
+                [],
+            )
+
+    def test_official_activation_formula_version_is_accepted(self):
+        result = _detect(activation_payload(), [])
+        assert result["arbitration"]["declared_pair_count"] == 6
+
+    @pytest.mark.parametrize("payload", [{"alphas": []}, {"formula_version": "", "alphas": []}])
+    def test_missing_or_empty_activation_formula_version_is_rejected(self, payload):
+        with pytest.raises(ConflictInputError) as exc_info:
+            _detect(payload, [])
+        assert exc_info.value.reason_code == "ACTIVATION_VERSION_MISMATCH"
+
+    def test_wrong_activation_formula_version_is_rejected(self):
+        payload = {**activation_payload(), "formula_version": "week3.activation.wrong"}
+        with pytest.raises(ConflictInputError) as exc_info:
+            _detect(payload, [])
+        assert exc_info.value.reason_code == "ACTIVATION_VERSION_MISMATCH"
+
+    def test_unknown_activation_alpha_is_rejected(self):
+        payload = activation_payload(activation_entry("A999"))
+        with pytest.raises(ConflictInputError) as exc_info:
+            _detect(payload, [])
+        assert exc_info.value.reason_code == "UNKNOWN_ACTIVATION_ALPHA"
+
+    def test_partial_activation_payload_reaches_candidate_missing_side_logic(self):
+        result = _detect(
+            activation_payload(activation_entry("A101", score=90, direction="positive")),
+            [match_record("cA", "A101")],
+        )
+        item = _outcome_for(result, "A101", "A304")
+        assert item["outcome"] == "rejected"
+        assert "MISSING_RIGHT_ACTIVATION" in item["reason_codes"]
 
     def test_non_sequence_alpha_matches_raises_schema_invalid(self):
         with pytest.raises(ConflictInputError):

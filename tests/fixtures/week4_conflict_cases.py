@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition, ConflictAlpha
+from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
 
 
 def activation_entry(
@@ -37,7 +38,7 @@ def activation_entry(
 
 def activation_payload(*entries: dict[str, Any]) -> dict[str, Any]:
     return {
-        "formula_version": "test",
+        "formula_version": ACTIVATION_FORMULA_VERSION,
         "weights": {},
         "run_timestamp": None,
         "as_of": None,

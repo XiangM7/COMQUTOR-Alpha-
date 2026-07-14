@@ -28,7 +28,9 @@ docs/week4_spec_freeze_audit.md and this task both explicitly forbid
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
@@ -44,20 +46,25 @@ from comqutor_alpha.conflict_engine.conflict_schema import (
     EXCLUDED_UNSUPPORTED_RELATION,
     EXCLUDED_WRONG_ALPHA,
     QUALIFYING_RELATIONS,
+    REASON_ACTIVATION_VERSION_MISMATCH,
     REASON_AMBIGUOUS_ONLY,
+    REASON_ASYMMETRIC_CONTRADICTION_WEIGHT,
     REASON_BELOW_ACTIVATION_THRESHOLD,
     REASON_DIRECTION_ROLE_UNRESOLVED,
+    REASON_DUPLICATE_CLAIM_CONFLICT,
     REASON_DUPLICATE_PAIR,
     REASON_INVALID_ACTIVATION_SCORE,
     REASON_INVALID_CONTRADICTION_WEIGHT,
     REASON_MISSING_LEFT_ACTIVATION,
     REASON_MISSING_LEFT_EVIDENCE,
+    REASON_MISSING_RECIPROCAL_DECLARATION,
     REASON_MISSING_RIGHT_ACTIVATION,
     REASON_MISSING_RIGHT_EVIDENCE,
     REASON_NON_FINITE_SCORE_COMPONENT,
     REASON_PAIR_NOT_DECLARED,
     REASON_RUN_ID_MISMATCH,
     REASON_TICKER_MISMATCH,
+    REASON_UNKNOWN_ACTIVATION_ALPHA,
     REASON_ZERO_EVIDENCE_STRENGTH,
     REJECTED_CLASS_REASONS,
     ConflictInputError,
@@ -70,49 +77,99 @@ from comqutor_alpha.conflict_engine.conflict_schema import (
     resolve_bull_bear,
 )
 from comqutor_alpha.graph_engine.activation_scorer import _relation_for_match
+from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
 
 # ---------------------------------------------------------------------------
 # Taxonomy pair enumeration
 # ---------------------------------------------------------------------------
 
 
-def _enumerate_canonical_pairs(taxonomy: Mapping[str, Any]) -> list[tuple[str, str, float, bool]]:
-    """Fold every bidirectional taxonomy declaration into one canonical pair.
+@dataclass(frozen=True)
+class _DeclaredPair:
+    alpha_a: str
+    alpha_b: str
+    contradiction_weight: float | None
+    reason_codes: tuple[str, ...] = ()
 
-    Returns a list of ``(alpha_a, alpha_b, contradiction_weight,
-    duplicate_declared)`` sorted by ``(alpha_a, alpha_b)`` -- fully
-    independent of taxonomy dict/list iteration order, so re-ordering the
-    taxonomy input never changes this function's output. ``taxonomy`` is
-    read via its real loader shape (``alpha_id -> AlphaDefinition``,
-    ``AlphaDefinition.conflict_alphas: list[ConflictAlpha]``) -- weights are
-    never copied into a hardcoded table here.
 
-    ``duplicate_declared`` is True only if the *same* canonical pair was
-    declared by more than the expected two directed entries (one from each
-    side) -- e.g. a corrupted taxonomy listing the same target twice under
-    one alpha. The frozen, real taxonomy never triggers this; it exists so a
-    corrupted-taxonomy candidate can be deterministically rejected
-    (DUPLICATE_PAIR) instead of silently deduplicated away.
-    """
-    declared_weights: dict[tuple[str, str], list[float]] = {}
-    for alpha in taxonomy.values():
+def _safe_contradiction_weight(value: Any) -> float | None:
+    if not is_finite_number(value):
+        return None
+    weight = float(value)
+    return weight if 0.0 <= weight <= 1.0 else None
+
+
+def _enumerate_canonical_pairs(taxonomy: Mapping[str, Any]) -> list[_DeclaredPair]:
+    """Validate directed declarations and emit deterministic undirected pairs."""
+    if not isinstance(taxonomy, Mapping):
+        raise ConflictInputError("SCHEMA_INVALID")
+
+    alpha_ids: set[str] = set()
+    alphas_by_id: dict[str, Any] = {}
+    for raw_key, alpha in taxonomy.items():
+        if not isinstance(raw_key, str) or not raw_key.strip():
+            raise ConflictInputError("SCHEMA_INVALID")
+        alpha_id = getattr(alpha, "alpha_id", None)
+        if not isinstance(alpha_id, str) or not alpha_id.strip() or alpha_id != raw_key:
+            raise ConflictInputError("SCHEMA_INVALID")
+        conflicts = getattr(alpha, "conflict_alphas", None)
+        if not isinstance(conflicts, Sequence) or isinstance(conflicts, (str, bytes)):
+            raise ConflictInputError("SCHEMA_INVALID")
+        alpha_ids.add(alpha_id)
+        alphas_by_id[alpha_id] = alpha
+
+    directed: dict[tuple[str, str], list[float | None]] = {}
+    for source_id in sorted(alpha_ids):
+        alpha = alphas_by_id[source_id]
         for conflict in alpha.conflict_alphas:
-            pair = frozenset({str(alpha.alpha_id), str(conflict.alpha_id)})
-            if len(pair) != 2:
-                continue  # self-conflict; not a valid pair, ignore defensively
-            key = canonical_pair_key(alpha.alpha_id, conflict.alpha_id)
-            declared_weights.setdefault(key, []).append(float(conflict.contradiction_weight))
+            target_id = getattr(conflict, "alpha_id", None)
+            if not isinstance(target_id, str) or not target_id.strip():
+                raise ConflictInputError("SCHEMA_INVALID")
+            if target_id not in alpha_ids or target_id == source_id:
+                raise ConflictInputError("SCHEMA_INVALID")
+            weight = _safe_contradiction_weight(
+                getattr(conflict, "contradiction_weight", None)
+            )
+            directed.setdefault((source_id, target_id), []).append(weight)
 
-    pairs: list[tuple[str, str, float, bool]] = []
-    for (alpha_a, alpha_b), weights in declared_weights.items():
-        # Both directions should agree exactly (alpha_loader.validate_taxonomy
-        # already enforces this for the frozen six pairs); min() is used only
-        # as a deterministic, order-independent tie-break for a hypothetical
-        # disagreement, never as silent data repair.
-        duplicate_declared = len(weights) > 2
-        pairs.append((alpha_a, alpha_b, min(weights), duplicate_declared))
+    canonical_keys = sorted(
+        {canonical_pair_key(source_id, target_id) for source_id, target_id in directed}
+    )
+    pairs: list[_DeclaredPair] = []
+    for alpha_a, alpha_b in canonical_keys:
+        forward = directed.get((alpha_a, alpha_b), [])
+        reverse = directed.get((alpha_b, alpha_a), [])
+        reason_codes: list[str] = []
 
-    pairs.sort(key=lambda item: (item[0], item[1]))
+        if len(forward) > 1 or len(reverse) > 1:
+            reason_codes.append(REASON_DUPLICATE_PAIR)
+        if not forward or not reverse:
+            reason_codes.append(REASON_MISSING_RECIPROCAL_DECLARATION)
+
+        all_weights = [*forward, *reverse]
+        if any(weight is None for weight in all_weights):
+            reason_codes.append(REASON_INVALID_CONTRADICTION_WEIGHT)
+
+        contradiction_weight = None
+        if (
+            len(forward) == 1
+            and len(reverse) == 1
+            and forward[0] is not None
+            and reverse[0] is not None
+        ):
+            if forward[0] != reverse[0]:
+                reason_codes.append(REASON_ASYMMETRIC_CONTRADICTION_WEIGHT)
+            else:
+                contradiction_weight = forward[0]
+
+        pairs.append(
+            _DeclaredPair(
+                alpha_a=alpha_a,
+                alpha_b=alpha_b,
+                contradiction_weight=contradiction_weight,
+                reason_codes=tuple(dedupe_stable(reason_codes)),
+            )
+        )
     return pairs
 
 
@@ -121,7 +178,9 @@ def _enumerate_canonical_pairs(taxonomy: Mapping[str, Any]) -> list[tuple[str, s
 # ---------------------------------------------------------------------------
 
 
-def _index_activations(activation_payload: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
+def _index_activations(
+    activation_payload: Mapping[str, Any], taxonomy_ids: set[str]
+) -> dict[str, Mapping[str, Any]]:
     """Build alpha_id -> activation entry, or raise ConflictInputError.
 
     Raised (never gracefully degraded) only for a structural contract
@@ -133,6 +192,8 @@ def _index_activations(activation_payload: Mapping[str, Any]) -> dict[str, Mappi
     """
     if not isinstance(activation_payload, Mapping):
         raise ConflictInputError("SCHEMA_INVALID")
+    if activation_payload.get("formula_version") != ACTIVATION_FORMULA_VERSION:
+        raise ConflictInputError(REASON_ACTIVATION_VERSION_MISMATCH)
     alphas = activation_payload.get("alphas")
     if not isinstance(alphas, list):
         raise ConflictInputError("SCHEMA_INVALID")
@@ -145,6 +206,8 @@ def _index_activations(activation_payload: Mapping[str, Any]) -> dict[str, Mappi
         if not alpha_id or not str(alpha_id).strip():
             raise ConflictInputError("SCHEMA_INVALID")
         alpha_id = str(alpha_id)
+        if alpha_id not in taxonomy_ids:
+            raise ConflictInputError(REASON_UNKNOWN_ACTIVATION_ALPHA)
         if alpha_id in index:
             raise ConflictInputError("SCHEMA_INVALID")
         index[alpha_id] = entry
@@ -191,103 +254,242 @@ def _extract_activation_fields(entry: Mapping[str, Any], alpha_id: str) -> _Acti
 # ---------------------------------------------------------------------------
 
 
+def _normalized_text(value: Any) -> str:
+    return " ".join(str(value or "").split())
+
+
+def _stable_number(value: Any) -> tuple[str, float | str]:
+    if is_finite_number(value):
+        return "finite", float(value)
+    return "invalid", _normalized_text(value)
+
+
+def _normalized_alpha_list(value: Any) -> tuple[str, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        return ()
+    return tuple(sorted({_normalized_text(item) for item in value if _normalized_text(item)}))
+
+
+def _candidate_relation_semantics(record: Mapping[str, Any]) -> tuple[tuple[str, str, str], ...]:
+    semantics: list[tuple[str, str, str]] = []
+    for pool_key in ("eligible_candidates", "top_candidates", "candidate_scores"):
+        pool = record.get(pool_key)
+        if not isinstance(pool, Sequence) or isinstance(pool, (str, bytes)):
+            continue
+        for candidate in pool:
+            if not isinstance(candidate, Mapping):
+                continue
+            alpha_id = _normalized_text(candidate.get("alpha_id"))
+            relation = _normalized_text(candidate.get("relation")).lower() or "unknown"
+            if alpha_id:
+                semantics.append((pool_key, alpha_id, relation))
+    return tuple(sorted(semantics))
+
+
+def _resolved_relation_semantics(record: Mapping[str, Any]) -> tuple[tuple[str, str], ...]:
+    alpha_ids = set(_normalized_alpha_list(record.get("plausible_alphas")))
+    matched_alpha = _normalized_text(record.get("matched_alpha"))
+    if matched_alpha:
+        alpha_ids.add(matched_alpha)
+    alpha_ids.update(item[1] for item in _candidate_relation_semantics(record))
+    return tuple(
+        (alpha_id, _relation_for_match(record, alpha_id)) for alpha_id in sorted(alpha_ids)
+    )
+
+
+def _claim_semantic_fingerprint(record: Mapping[str, Any]) -> tuple[Any, ...]:
+    evidence = _normalized_text(record.get("evidence") or record.get("claim"))
+    return (
+        _normalized_text(record.get("match_status")).lower(),
+        _normalized_text(record.get("matched_alpha")),
+        _resolved_relation_semantics(record),
+        _stable_number(record.get("score")),
+        evidence,
+        _normalized_text(record.get("source_agent_output_id")),
+        _normalized_text(record.get("agent")),
+        _normalized_alpha_list(record.get("plausible_alphas")),
+        _candidate_relation_semantics(record),
+        _normalized_text(record.get("run_id")),
+        _normalized_text(record.get("ticker")),
+    )
+
+
+def _stable_json_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {
+            str(key): _stable_json_value(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return [_stable_json_value(item) for item in value]
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, float):
+        return value if is_finite_number(value) else _normalized_text(value)
+    return {"type": type(value).__name__}
+
+
+def _canonical_record_key(record: Mapping[str, Any]) -> str:
+    return json.dumps(
+        _stable_json_value(record),
+        ensure_ascii=True,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _canonicalize_alpha_matches(
+    alpha_matches: Sequence[Mapping[str, Any]],
+) -> tuple[list[Mapping[str, Any]], dict[str, int]]:
+    grouped: dict[str, list[Mapping[str, Any]]] = {}
+    missing_claim_id: list[Mapping[str, Any]] = []
+    for record in alpha_matches:
+        if not isinstance(record, Mapping):
+            continue
+        claim_id = _normalized_text(record.get("claim_id"))
+        if claim_id:
+            grouped.setdefault(claim_id, []).append(record)
+        else:
+            missing_claim_id.append(record)
+
+    canonical: list[Mapping[str, Any]] = []
+    duplicate_counts: dict[str, int] = {}
+    for claim_id in sorted(grouped):
+        records = grouped[claim_id]
+        fingerprints = {_claim_semantic_fingerprint(record) for record in records}
+        if len(fingerprints) != 1:
+            raise ConflictInputError(REASON_DUPLICATE_CLAIM_CONFLICT)
+        canonical.append(min(records, key=_canonical_record_key))
+        if len(records) > 1:
+            duplicate_counts[claim_id] = len(records) - 1
+
+    canonical.extend(sorted(missing_claim_id, key=_canonical_record_key))
+    canonical.sort(
+        key=lambda record: (
+            _normalized_text(record.get("claim_id")),
+            _canonical_record_key(record),
+        )
+    )
+    return canonical, duplicate_counts
+
+
 def _claim_is_relevant_to_alpha(record: Mapping[str, Any], alpha_id: str) -> bool:
-    if record.get("matched_alpha") == alpha_id:
+    if _normalized_text(record.get("matched_alpha")) == alpha_id:
         return True
     plausible = record.get("plausible_alphas")
-    if isinstance(plausible, list) and alpha_id in plausible:
+    if (
+        isinstance(plausible, Sequence)
+        and not isinstance(plausible, (str, bytes))
+        and alpha_id in {_normalized_text(item) for item in plausible}
+    ):
         return True
     candidates = record.get("candidate_scores")
-    if isinstance(candidates, list):
-        for candidate in candidates:
-            if isinstance(candidate, Mapping) and str(candidate.get("alpha_id")) == alpha_id:
-                return True
+    if not isinstance(candidates, Sequence) or isinstance(candidates, (str, bytes)):
+        return False
+    for candidate in candidates:
+        if (
+            isinstance(candidate, Mapping)
+            and _normalized_text(candidate.get("alpha_id")) == alpha_id
+        ):
+            return True
     return False
 
 
-def _gather_qualifying_evidence(
-    alpha_id: str, alpha_matches: Sequence[Mapping[str, Any]]
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], bool]:
-    """Return (qualifying_claims, excluded_claims, has_ambiguous) for one alpha.
+@dataclass(frozen=True)
+class _EvidenceResult:
+    qualifying: list[dict[str, Any]]
+    excluded: list[dict[str, Any]]
+    ambiguous_only: bool
 
-    ``qualifying_claims`` entries carry ``claim_id``/``match_score``/
-    ``evidence``/``source_agent_output_id``/``agent``. ``excluded_claims``
-    entries carry ``claim_id``/``reason_code`` -- an audit of every claim
-    that was at least plausibly about this alpha (appears as its committed
-    match, an ambiguous candidate, or a candidate_scores entry) but did not
-    qualify, and why. Claims entirely unrelated to this alpha are not
-    included in the audit at all (kept focused, not an exhaustive dump of
-    the whole run's evidence). ``has_ambiguous`` is True iff at least one
-    excluded claim was specifically ``match_status == "ambiguous"`` (as
-    opposed to ``no_match``) -- the distinction the candidate-level
-    AMBIGUOUS_ONLY reason code needs, mirroring Week 3's own
-    ``activation_scorer._reason_codes``' AMBIGUOUS_EVIDENCE_ONLY, which
-    likewise only fires for genuinely ambiguous claims, not no_match ones.
-    """
+
+def _gather_qualifying_evidence(
+    alpha_id: str,
+    alpha_matches: Sequence[Mapping[str, Any]],
+    duplicate_counts: Mapping[str, int],
+) -> _EvidenceResult:
+    """Gather one Alpha's committed evidence and stable exclusion audit."""
     qualifying: list[dict[str, Any]] = []
     excluded: list[dict[str, Any]] = []
-    has_ambiguous = False
-    seen_claim_ids: set[str] = set()
+    relevant_count = 0
+    only_ambiguous_exclusions = True
 
     for record in alpha_matches:
         if not isinstance(record, Mapping):
             continue
         if not _claim_is_relevant_to_alpha(record, alpha_id):
             continue
+        relevant_count += 1
 
-        raw_claim_id = record.get("claim_id")
-        claim_id = str(raw_claim_id).strip() if raw_claim_id not in (None, "") else ""
+        claim_id = _normalized_text(record.get("claim_id"))
         if not claim_id:
+            only_ambiguous_exclusions = False
             excluded.append({"claim_id": None, "reason_code": EXCLUDED_MISSING_CLAIM_ID})
             continue
 
-        match_status = record.get("match_status")
+        match_status = _normalized_text(record.get("match_status")).lower()
         if match_status != "matched":
-            if match_status == "ambiguous":
-                has_ambiguous = True
+            if match_status != "ambiguous":
+                only_ambiguous_exclusions = False
             excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_NON_COMMITTED_MATCH})
-            continue
-        if record.get("matched_alpha") != alpha_id:
+        elif _normalized_text(record.get("matched_alpha")) != alpha_id:
+            only_ambiguous_exclusions = False
             excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_WRONG_ALPHA})
-            continue
-        if claim_id in seen_claim_ids:
-            excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_DUPLICATE_CLAIM})
-            continue
+        else:
+            only_ambiguous_exclusions = False
+            evidence_text = str(
+                record.get("evidence") or record.get("claim") or ""
+            ).strip()
+            relation = _relation_for_match(record, alpha_id)
+            raw_score = record.get("score")
+            if not evidence_text:
+                excluded.append(
+                    {"claim_id": claim_id, "reason_code": EXCLUDED_EMPTY_EVIDENCE}
+                )
+            elif relation not in QUALIFYING_RELATIONS:
+                excluded.append(
+                    {
+                        "claim_id": claim_id,
+                        "reason_code": EXCLUDED_UNSUPPORTED_RELATION,
+                    }
+                )
+            elif not is_finite_number(raw_score):
+                excluded.append(
+                    {
+                        "claim_id": claim_id,
+                        "reason_code": EXCLUDED_INVALID_MATCH_SCORE,
+                    }
+                )
+            else:
+                qualifying.append(
+                    {
+                        "claim_id": claim_id,
+                        "match_score": clamp_percent(raw_score, 0.0, 1.0),
+                        "evidence": evidence_text,
+                        "source_agent_output_id": (
+                            str(record.get("source_agent_output_id"))
+                            if record.get("source_agent_output_id")
+                            else None
+                        ),
+                        "agent": (
+                            str(record.get("agent")) if record.get("agent") else None
+                        ),
+                    }
+                )
 
-        evidence_text = str(record.get("evidence") or record.get("claim") or "").strip()
-        if not evidence_text:
-            excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_EMPTY_EVIDENCE})
-            continue
-
-        relation = _relation_for_match(record, alpha_id)
-        if relation not in QUALIFYING_RELATIONS:
-            excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_UNSUPPORTED_RELATION})
-            continue
-
-        raw_score = record.get("score")
-        if not is_finite_number(raw_score):
-            excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_INVALID_MATCH_SCORE})
-            continue
-        match_score = clamp_percent(raw_score, 0.0, 1.0)
-
-        seen_claim_ids.add(claim_id)
-        qualifying.append(
-            {
-                "claim_id": claim_id,
-                "match_score": match_score,
-                "evidence": evidence_text,
-                "source_agent_output_id": (
-                    str(record.get("source_agent_output_id"))
-                    if record.get("source_agent_output_id")
-                    else None
-                ),
-                "agent": str(record.get("agent")) if record.get("agent") else None,
-            }
+        excluded.extend(
+            {"claim_id": claim_id, "reason_code": EXCLUDED_DUPLICATE_CLAIM}
+            for _ in range(duplicate_counts.get(claim_id, 0))
         )
 
     qualifying.sort(key=lambda c: c["claim_id"])
     excluded.sort(key=lambda c: (c["claim_id"] or "", c["reason_code"]))
-    return qualifying, excluded, has_ambiguous
+    return _EvidenceResult(
+        qualifying=qualifying,
+        excluded=excluded,
+        ambiguous_only=(
+            not qualifying and relevant_count > 0 and only_ambiguous_exclusions
+        ),
+    )
 
 
 def _mean_match_score(qualifying_claims: list[dict[str, Any]]) -> float:
@@ -346,14 +548,37 @@ def _classify_outcome(reason_codes: list[str]) -> str:
     return "suppressed"
 
 
+def _evidence_audit_side(alpha_id: str, evidence: _EvidenceResult) -> dict[str, Any]:
+    return {
+        "alpha_id": alpha_id,
+        "qualifying_claim_ids": [claim["claim_id"] for claim in evidence.qualifying],
+        "qualifying_count": len(evidence.qualifying),
+        "excluded": evidence.excluded,
+        "excluded_count": len(evidence.excluded),
+    }
+
+
+def _candidate_evidence_audit(
+    alpha_a: str,
+    alpha_b: str,
+    evidence_a: _EvidenceResult,
+    evidence_b: _EvidenceResult,
+) -> dict[str, Any]:
+    return {
+        "alpha_a": _evidence_audit_side(alpha_a, evidence_a),
+        "alpha_b": _evidence_audit_side(alpha_b, evidence_b),
+    }
+
+
 def _evaluate_candidate(
     alpha_a: str,
     alpha_b: str,
-    contradiction_weight: float,
-    duplicate_declared: bool,
+    contradiction_weight: float | None,
+    pair_reason_codes: Sequence[str],
     *,
     activations_by_id: Mapping[str, Mapping[str, Any]],
     alpha_matches: Sequence[Mapping[str, Any]],
+    duplicate_counts: Mapping[str, int],
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
     """Evaluate exactly one canonical candidate pair.
 
@@ -361,12 +586,13 @@ def _evaluate_candidate(
     full admitted-conflict dict (see ``detect_alpha_conflicts``'s output
     schema) when, and only when, ``audit_item["outcome"] == "admitted"``.
     """
-    reason_codes: list[str] = []
-    if duplicate_declared:
-        reason_codes.append(REASON_DUPLICATE_PAIR)
+    evidence_a = _gather_qualifying_evidence(alpha_a, alpha_matches, duplicate_counts)
+    evidence_b = _gather_qualifying_evidence(alpha_b, alpha_matches, duplicate_counts)
+    evidence_audit = _candidate_evidence_audit(alpha_a, alpha_b, evidence_a, evidence_b)
+    reason_codes = list(pair_reason_codes)
 
     weight_ok = is_finite_number(contradiction_weight) and 0.0 <= float(contradiction_weight) <= 1.0
-    if not weight_ok:
+    if not weight_ok and not reason_codes:
         reason_codes.append(REASON_INVALID_CONTRADICTION_WEIGHT)
 
     entry_a = activations_by_id.get(alpha_a)
@@ -376,9 +602,18 @@ def _evaluate_candidate(
     if entry_b is None:
         reason_codes.append(REASON_MISSING_RIGHT_ACTIVATION)
 
-    if entry_a is None or entry_b is None or not weight_ok:
+    if entry_a is None or entry_b is None or not weight_ok or pair_reason_codes:
         reason_codes = dedupe_stable(reason_codes)
-        return _audit_item(alpha_a, alpha_b, _classify_outcome(reason_codes), reason_codes), None
+        return (
+            _audit_item(
+                alpha_a,
+                alpha_b,
+                _classify_outcome(reason_codes),
+                reason_codes,
+                evidence_audit,
+            ),
+            None,
+        )
 
     fields_a = _extract_activation_fields(entry_a, alpha_a)
     fields_b = _extract_activation_fields(entry_b, alpha_b)
@@ -387,21 +622,34 @@ def _evaluate_candidate(
 
     if fields_a.score is None or fields_b.score is None:
         reason_codes = dedupe_stable(reason_codes)
-        return _audit_item(alpha_a, alpha_b, _classify_outcome(reason_codes), reason_codes), None
+        return (
+            _audit_item(
+                alpha_a,
+                alpha_b,
+                _classify_outcome(reason_codes),
+                reason_codes,
+                evidence_audit,
+            ),
+            None,
+        )
 
     if fields_a.status not in ADMISSIBLE_STATUSES or fields_b.status not in ADMISSIBLE_STATUSES:
         reason_codes.append(REASON_BELOW_ACTIVATION_THRESHOLD)
 
-    qualifying_a, _excluded_a, ambiguous_a = _gather_qualifying_evidence(alpha_a, alpha_matches)
-    qualifying_b, _excluded_b, ambiguous_b = _gather_qualifying_evidence(alpha_b, alpha_matches)
+    qualifying_a = evidence_a.qualifying
+    qualifying_b = evidence_b.qualifying
     if not qualifying_a:
-        # AMBIGUOUS_ONLY is the more specific diagnosis when this side's
-        # only relevant-but-uncommitted evidence was genuinely ambiguous
-        # (multiple plausible candidates); plain MISSING_LEFT_EVIDENCE
-        # covers both "nothing relevant at all" and "only no_match" claims.
-        reason_codes.append(REASON_AMBIGUOUS_ONLY if ambiguous_a else REASON_MISSING_LEFT_EVIDENCE)
+        reason_codes.append(
+            REASON_AMBIGUOUS_ONLY
+            if evidence_a.ambiguous_only
+            else REASON_MISSING_LEFT_EVIDENCE
+        )
     if not qualifying_b:
-        reason_codes.append(REASON_AMBIGUOUS_ONLY if ambiguous_b else REASON_MISSING_RIGHT_EVIDENCE)
+        reason_codes.append(
+            REASON_AMBIGUOUS_ONLY
+            if evidence_b.ambiguous_only
+            else REASON_MISSING_RIGHT_EVIDENCE
+        )
 
     strength_a_raw = _mean_match_score(qualifying_a)
     strength_b_raw = _mean_match_score(qualifying_b)
@@ -415,7 +663,16 @@ def _evaluate_candidate(
 
     reason_codes = dedupe_stable(reason_codes)
     if reason_codes:
-        return _audit_item(alpha_a, alpha_b, _classify_outcome(reason_codes), reason_codes), None
+        return (
+            _audit_item(
+                alpha_a,
+                alpha_b,
+                _classify_outcome(reason_codes),
+                reason_codes,
+                evidence_audit,
+            ),
+            None,
+        )
 
     # Fully admitted: every condition satisfied.
     bull_fields, bull_qualifying = (fields_a, qualifying_a) if bull_id == alpha_a else (fields_b, qualifying_b)
@@ -462,7 +719,7 @@ def _evaluate_candidate(
         "_sort_evidence_strength": evidence_strength_raw,
         "_sort_minimum_activation": minimum_activation,
     }
-    return _audit_item(alpha_a, alpha_b, "admitted", []), conflict
+    return _audit_item(alpha_a, alpha_b, "admitted", [], evidence_audit), conflict
 
 
 def _structure_block(alpha_id: str, fields: _ActivationFields, direction: str, qualifying: list[dict[str, Any]]):
@@ -490,13 +747,39 @@ def _build_explanation(bull_name: str, bear_name: str, level: str) -> str:
     )
 
 
-def _audit_item(alpha_a: str, alpha_b: str, outcome: str, reason_codes: list[str]) -> dict[str, Any]:
+def _audit_item(
+    alpha_a: str,
+    alpha_b: str,
+    outcome: str,
+    reason_codes: list[str],
+    evidence_audit: Mapping[str, Any],
+) -> dict[str, Any]:
     return {
         "alpha_a": alpha_a,
         "alpha_b": alpha_b,
         "outcome": outcome,
         "reason_codes": reason_codes,
+        "evidence_audit": dict(evidence_audit),
     }
+
+
+def _audit_without_evaluation(
+    alpha_a: str,
+    alpha_b: str,
+    outcome: str,
+    reason_codes: list[str],
+    alpha_matches: Sequence[Mapping[str, Any]],
+    duplicate_counts: Mapping[str, int],
+) -> dict[str, Any]:
+    evidence_a = _gather_qualifying_evidence(alpha_a, alpha_matches, duplicate_counts)
+    evidence_b = _gather_qualifying_evidence(alpha_b, alpha_matches, duplicate_counts)
+    return _audit_item(
+        alpha_a,
+        alpha_b,
+        outcome,
+        reason_codes,
+        _candidate_evidence_audit(alpha_a, alpha_b, evidence_a, evidence_b),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -553,32 +836,40 @@ def detect_alpha_conflicts(
     if not isinstance(alpha_matches, Sequence) or isinstance(alpha_matches, (str, bytes)):
         raise ConflictInputError("SCHEMA_INVALID")
 
-    activations_by_id = _index_activations(activation_payload)
-
-    taxonomy = taxonomy or load_alpha_taxonomy()
-    if not isinstance(taxonomy, Mapping):
-        raise ConflictInputError("SCHEMA_INVALID")
-
+    if taxonomy is None:
+        taxonomy = load_alpha_taxonomy()
     declared_pairs = _enumerate_canonical_pairs(taxonomy)
+    activations_by_id = _index_activations(activation_payload, set(taxonomy))
+    canonical_matches, duplicate_counts = _canonicalize_alpha_matches(alpha_matches)
 
-    mismatch_reason = _embedded_identity_mismatch(run_id, ticker, activation_payload, alpha_matches)
+    mismatch_reason = _embedded_identity_mismatch(
+        run_id, ticker, activation_payload, canonical_matches
+    )
     if mismatch_reason is not None:
         candidate_evaluations = [
-            _audit_item(alpha_a, alpha_b, "rejected", [mismatch_reason])
-            for alpha_a, alpha_b, _weight, _dup in declared_pairs
+            _audit_without_evaluation(
+                pair.alpha_a,
+                pair.alpha_b,
+                "rejected",
+                [mismatch_reason],
+                canonical_matches,
+                duplicate_counts,
+            )
+            for pair in declared_pairs
         ]
         return _assemble_result(run_id, ticker, declared_pairs, [], candidate_evaluations)
 
     candidate_evaluations: list[dict[str, Any]] = []
     admitted_conflicts: list[dict[str, Any]] = []
-    for alpha_a, alpha_b, weight, duplicate_declared in declared_pairs:
+    for pair in declared_pairs:
         audit_item, conflict = _evaluate_candidate(
-            alpha_a,
-            alpha_b,
-            weight,
-            duplicate_declared,
+            pair.alpha_a,
+            pair.alpha_b,
+            pair.contradiction_weight,
+            pair.reason_codes,
             activations_by_id=activations_by_id,
-            alpha_matches=alpha_matches,
+            alpha_matches=canonical_matches,
+            duplicate_counts=duplicate_counts,
         )
         candidate_evaluations.append(audit_item)
         if conflict is not None:
@@ -591,7 +882,7 @@ def detect_alpha_conflicts(
 def _assemble_result(
     run_id: str,
     ticker: str,
-    declared_pairs: list[tuple[str, str, float, bool]],
+    declared_pairs: list[_DeclaredPair],
     admitted_conflicts: list[dict[str, Any]],
     candidate_evaluations: list[dict[str, Any]],
 ) -> dict[str, Any]:
@@ -637,22 +928,34 @@ def evaluate_conflict_pair(
     that reason code exists for, since ``detect_alpha_conflicts`` itself
     never evaluates an undeclared pair in the first place.
     """
-    taxonomy = taxonomy or load_alpha_taxonomy()
-    declared_pairs = {(a, b): (weight, dup) for a, b, weight, dup in _enumerate_canonical_pairs(taxonomy)}
+    if taxonomy is None:
+        taxonomy = load_alpha_taxonomy()
+    declared_pairs = {
+        (pair.alpha_a, pair.alpha_b): pair for pair in _enumerate_canonical_pairs(taxonomy)
+    }
+    activations_by_id = _index_activations(activation_payload, set(taxonomy))
+    canonical_matches, duplicate_counts = _canonicalize_alpha_matches(alpha_matches)
     alpha_a, alpha_b = canonical_pair_key(alpha_id_1, alpha_id_2)
 
     if (alpha_a, alpha_b) not in declared_pairs:
-        return _audit_item(alpha_a, alpha_b, "rejected", [REASON_PAIR_NOT_DECLARED])
+        return _audit_without_evaluation(
+            alpha_a,
+            alpha_b,
+            "rejected",
+            [REASON_PAIR_NOT_DECLARED],
+            canonical_matches,
+            duplicate_counts,
+        )
 
-    weight, duplicate_declared = declared_pairs[(alpha_a, alpha_b)]
-    activations_by_id = _index_activations(activation_payload)
+    pair = declared_pairs[(alpha_a, alpha_b)]
     audit_item, conflict = _evaluate_candidate(
         alpha_a,
         alpha_b,
-        weight,
-        duplicate_declared,
+        pair.contradiction_weight,
+        pair.reason_codes,
         activations_by_id=activations_by_id,
-        alpha_matches=alpha_matches,
+        alpha_matches=canonical_matches,
+        duplicate_counts=duplicate_counts,
     )
     if conflict is not None:
         return {**audit_item, "conflict": _finalize_conflict(conflict)}

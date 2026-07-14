@@ -9,6 +9,9 @@ migration、新 API endpoint、Exposure Engine、Dashboard 或 Alpha Memory。
 **APPROVED — SPEC-FROZEN FOR W4.1** 的条目，本次实施未新增任何未经批准的
 业务规则。
 
+第 1–35 节保留初始 W4.1 实施时的历史快照；当前实现状态和最新验证结果
+以文末 `W4.1 Correctness Patch` 为准。历史问题不回写成“从未发生”。
+
 ---
 
 ## 1. Current branch / HEAD（只记录，未进行任何 branch 操作）
@@ -58,7 +61,7 @@ alpha taxonomy YAML、既有 golden label 文件、`docs/week4_spec_freeze_audit
 5. evidence-strength 计算（每侧均值再双方均值，0–1 尺度）
 6. conflict candidate admissibility（11 项条件全部实现）
 7. admitted / suppressed / rejected 分类（`_classify_outcome`）
-8. 稳定 reason codes（15 个候选级 + 7 个证据排除级）
+8. 稳定 reason codes（18 个候选级 + 3 个顶层输入完整性级 + 7 个证据排除级）
 9. bull/bear semantic role resolution（`resolve_bull_bear`，仅依据 direction）
 10. Conflict Score（官方公式，复用 `graph_schema.clamp_percent`）
 11. Conflict Level（`[0,25]`/`(25,50]`/`(50,75]`/`(75,100]`）
@@ -100,8 +103,9 @@ alpha_matches, taxonomy=None)`：
 test_no_wall_clock_or_random_dependence_in_source` 静态扫描源码验证）。
 
 **顶层结构性违规**（空 `run_id`/`ticker`、非 mapping 的
-`activation_payload`、`alphas` 不是 list、`alpha_matches` 不是
-Sequence、`activation_payload["alphas"]` 内有重复 `alpha_id`）抛出
+`activation_payload`、activation formula version 不匹配、`alphas` 不是
+list、`alpha_matches` 不是 Sequence、activation 中存在重复或 taxonomy
+未知 `alpha_id`、同一 `claim_id` 的记录存在语义冲突）抛出
 `ConflictInputError(reason_code)`——只携带稳定 reason_code，不携带原始
 异常文本。**单个候选或单条证据的问题**（缺失、不合格、非法数值）不抛异常，
 在返回结果中以 `suppressed`/`rejected` 优雅呈现。
@@ -110,9 +114,10 @@ Sequence、`activation_payload["alphas"]` 内有重复 `alpha_id`）抛出
 
 `_enumerate_canonical_pairs()` 直接从 `load_alpha_taxonomy()` 的真实返回
 （`alpha_id -> AlphaDefinition`，`AlphaDefinition.conflict_alphas: list[
-ConflictAlpha]`）读取，从不复制硬编码权重表。双向声明通过
-`frozenset({alpha_a, alpha_b})` + 排序折算为一个 canonical pair，
-`A→B`/`B→A` 只产生一条 candidate。当前六组 mandatory pairs：
+ConflictAlpha]`）读取，从不复制硬编码权重表。每组合法 pair 必须有且仅有
+一条 `A→B` 和一条 `B→A` 声明，且两侧 weight 完全相等。单向声明、双向
+weight 不一致和同向重复声明分别以稳定 reason code 拒绝，不使用 min、max、
+平均值或 first-seen 修复。当前六组 mandatory pairs：
 
 | Pair | contradiction_weight |
 |---|---:|
@@ -123,7 +128,8 @@ ConflictAlpha]`）读取，从不复制硬编码权重表。双向声明通过
 | A601 ↔ A304 | 0.80 |
 | A601 ↔ A501 | 0.80 |
 
-`declared_pair_count` 恒为 6；A102-A304 因 taxonomy 未声明而永不出现
+默认真实 taxonomy 的 `declared_pair_count` 为 6；显式 `taxonomy={}` 时为
+0，且不会回退到默认 taxonomy。A102-A304 因 taxonomy 未声明而永不出现
 （`TestMSFTBoundary` 系列测试专门锁定这一点）。额外新增
 `DUPLICATE_PAIR` 防御逻辑：如果一个 canonical pair 被超过两条有向声明
 （例如损坏的 taxonomy 数据）折算出来，该候选会被明确 `rejected`，而不是
@@ -160,7 +166,9 @@ artifact，只影响本次计算用的本地副本。最终尺度固定 0.0–1.
 排除审计（`excluded` 列表，未进入 committed 集合但曾与该 Alpha 相关的
 claim）区分 7 种 reason：`NON_COMMITTED_MATCH`、`WRONG_ALPHA`、
 `MISSING_CLAIM_ID`、`DUPLICATE_CLAIM`、`EMPTY_EVIDENCE`、
-`UNSUPPORTED_RELATION`、`INVALID_MATCH_SCORE`。
+`UNSUPPORTED_RELATION`、`INVALID_MATCH_SCORE`。初始实现只在内部计算这些
+记录，却没有放入 `candidate_evaluations`；Correctness Patch 已将其作为
+每个 admitted/suppressed/rejected candidate 的 `evidence_audit` 输出。
 
 ## 11. Admissibility rules
 
@@ -180,18 +188,21 @@ mismatch；(10) schema 合法；(11) bull/bear role 可稳定确定。全部十�
 ACTIVATION`、`INVALID_CONTRADICTION_WEIGHT`、`INVALID_ACTIVATION_SCORE`、
 `NON_FINITE_SCORE_COMPONENT`、`RUN_ID_MISMATCH`、`TICKER_MISMATCH`、
 `SCHEMA_INVALID`、`DIRECTION_ROLE_UNRESOLVED`、`DUPLICATE_PAIR`、
+`MISSING_RECIPROCAL_DECLARATION`、`ASYMMETRIC_CONTRADICTION_WEIGHT`、
 `PAIR_NOT_DECLARED`）中任一 reason 出现即为 `rejected`，其余非空
 reason 集合归为 `suppressed`，reason 集合为空则 `admitted`。
 
 ## 13. Reason codes
 
-候选级 15 个（含仅通过可选单 pair helper 触达的 `PAIR_NOT_DECLARED`）：
+候选级 18 个（含 Correctness Patch 新增的 reciprocal/asymmetric codes，
+以及仅通过可选 single-pair helper 触达的 `PAIR_NOT_DECLARED`）：
 `MISSING_LEFT_ACTIVATION`、`MISSING_RIGHT_ACTIVATION`、
 `BELOW_ACTIVATION_THRESHOLD`、`MISSING_LEFT_EVIDENCE`、
 `MISSING_RIGHT_EVIDENCE`、`AMBIGUOUS_ONLY`、`ZERO_EVIDENCE_STRENGTH`、
 `INVALID_CONTRADICTION_WEIGHT`、`INVALID_ACTIVATION_SCORE`、
 `NON_FINITE_SCORE_COMPONENT`、`RUN_ID_MISMATCH`、`TICKER_MISMATCH`、
 `SCHEMA_INVALID`、`DIRECTION_ROLE_UNRESOLVED`、`DUPLICATE_PAIR`、
+`MISSING_RECIPROCAL_DECLARATION`、`ASYMMETRIC_CONTRADICTION_WEIGHT`、
 `PAIR_NOT_DECLARED`。同一 candidate 多个 reason 时去重且保持稳定顺序
 （`dedupe_stable`，先出现先保留，不依赖发现顺序之外的任何排序，因为
 所有条件按固定代码顺序依次评估）。Reason code 输出经测试确认不包含
@@ -199,9 +210,10 @@ reason 集合归为 `suppressed`，reason 集合为空则 `admitted`。
 raw_exception_or_path_text`）。
 
 `AMBIGUOUS_ONLY` 与 `MISSING_LEFT/RIGHT_EVIDENCE` 的区分：前者要求该侧
-确实存在 `match_status == "ambiguous"` 的相关 claim（呼应 Week 3 自己的
-`AMBIGUOUS_EVIDENCE_ONLY` 语义）；纯 `no_match` 或完全没有相关 claim
-则归为后者。
+没有 qualifying evidence、至少有一条相关排除记录，且所有相关记录均为
+`match_status == "ambiguous"`。ambiguous 与 `no_match`、wrong-alpha、
+unsupported relation、empty evidence 或 invalid score 混合时，使用
+`MISSING_LEFT/RIGHT_EVIDENCE`，具体原因由 `evidence_audit` 展示。
 
 ## 14. Bull/Bear role resolution
 
@@ -251,8 +263,9 @@ Week 3 `activation_status_band` 的命名空间完全独立，不复用其状态
 `bull_structure`/`bear_structure`（各含 `claim_ids`/
 `source_agent_output_ids`/`agents`/`evidence`/`match_scores`，均已排序）、
 `components`、`conflict_score`、`conflict_level`、`reason_codes`（admitted
-恒为空列表）、`explanation`。非 admitted candidate 的 audit item 含
-`alpha_a`/`alpha_b`/`outcome`/`reason_codes`，不携带任何内部异常。
+恒为空列表）、`explanation`。每个 candidate audit item 均含
+`alpha_a`/`alpha_b`/`outcome`/`reason_codes`/`evidence_audit`；audit 只保存
+排序后的 claim ID 和稳定 exclusion reason，不复制 evidence 原文或内部异常。
 
 ## 18. Main-conflict arbitration
 
@@ -268,6 +281,9 @@ display rounding 影响。无 admitted 候选时 `conflicts=[]`/
 ## 19. Determinism guarantees
 
 - taxonomy A→B/B→A 折算为一个 candidate（第 8 节）。
+- `alpha_matches` 在 evidence qualification 前按规范化 `claim_id` 全局分组；
+  exact duplicate 选择稳定 canonical representative 并只计一次，语义冲突
+  duplicate 则安全抛出 `DUPLICATE_CLAIM_CONFLICT`。
 - `alpha_matches`/`activation_payload["alphas"]`/`taxonomy` 输入顺序
   变化不影响结果（三条独立测试，逐字节比较 `json.dumps(..., sort_keys=
   True)` 输出）。
@@ -472,3 +488,42 @@ changes)
 （`docs/week4_conflict_core_report.md` 本身在此次 `git status` 快照之后
 写入，会作为第六个 `??` 条目出现——见最终回复中的确认。）未 commit，
 未 push，未执行任何 branch 操作。
+
+## W4.1 Correctness Patch
+
+修复日期：2026-07-14。Patch 基于 `0f1edc917c0c09ed5d59ed191766a2d8d77113e4`
+执行，未进行 branch 操作、commit 或 push。
+
+1. 初始 duplicate claim 处理按输入先后选择 first-seen record，反转
+   `alpha_matches` 可能改变 evidence 和 conflict score。
+2. Patch 在 qualification 前按规范化 `claim_id` 全局分组。语义等价记录
+   使用稳定排序选择 canonical representative，只计分一次；其余副本以
+   `DUPLICATE_CLAIM` 进入 audit。
+3. 同一 `claim_id` 在 status、matched Alpha、resolved relation、score、
+   normalized evidence、source、agent 或候选关系语义上不一致时，安全抛出
+   `ConflictInputError("DUPLICATE_CLAIM_CONFLICT")`，异常不带原始记录。
+4. 初始实现 computed excluded records internally but did not expose them in
+   `candidate_evaluations`。Patch 已为 admitted、suppressed、rejected 全部
+   输出稳定的 `evidence_audit`，且不复制 evidence 原文。
+5. taxonomy 不再通过 `min(weights)` 静默处理异常声明。合法 pair 要求
+   双向各一次且 weight 完全一致。
+6. 单向声明返回 `MISSING_RECIPROCAL_DECLARATION`；不对称 weight 返回
+   `ASYMMETRIC_CONTRADICTION_WEIGHT`；同向重复返回 `DUPLICATE_PAIR`。
+   dangling reference、self-conflict 和 key/alpha_id mismatch 安全拒绝。
+7. `taxonomy is None` 才加载默认 taxonomy；显式空 mapping 返回 0 个 pair、
+   空 conflicts 和 null main conflict。
+8. activation payload 必须使用正式 `ACTIVATION_FORMULA_VERSION`；缺失或
+   不匹配返回 `ACTIVATION_VERSION_MISMATCH`，taxonomy 未知 Alpha 返回
+   `UNKNOWN_ACTIVATION_ALPHA`。partial activation 仍进入候选级缺侧判断。
+9. `AMBIGUOUS_ONLY` 仅用于纯 ambiguous exclusion；混入 no-match、
+   unsupported committed evidence 或其他排除原因时返回对应 `MISSING_*`。
+10. rounding arbitration 测试现在断言公开 rounded score 相同、内部未舍入
+    score 较高的唯一 pair 获胜，并验证 taxonomy、activation、matches
+    反序后完整 JSON 不变。
+11. 新增 32 个 correctness tests，覆盖 duplicate、全部七类 evidence
+    exclusion、taxonomy、activation、ambiguous-only 和 rounding 边界。
+12. 最新验证结果：`pip check` 通过；compileall 通过；Ruff 通过；focused
+    `164 passed`；Week 1–3 关键回归 `163 passed`；完整 offline
+    `967 passed, 1 skipped, 8 deselected`。NVDA 仍以 A101-A304 为 main
+    conflict；QQQ 的 A001-A501 与 A003-A501 均 admitted；MSFT 仍为
+    `BLOCKED_BY_SPEC_CONFLICT`。PostgreSQL Integration: UNVERIFIED。
