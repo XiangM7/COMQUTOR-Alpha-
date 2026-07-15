@@ -19,10 +19,13 @@ import json
 import math
 import pathlib
 
+import pytest
+
 from comqutor_alpha.api.agent_output_reader import (
     PUBLIC_STRUCTURED_OUTPUT_FIELDS,
     get_agent_outputs_response,
 )
+from comqutor_alpha.structure_engine.structure_schema import VALID_DIRECTIONS
 
 _SCHEMA_VERSION = "week1a.structured_agent_outputs.v2"
 
@@ -565,3 +568,117 @@ def test_all_response_fields_are_within_public_whitelist(tmp_path):
     assert set(record).issubset(PUBLIC_STRUCTURED_OUTPUT_FIELDS)
     assert "raw_output" not in record
     assert "debate_history" not in record
+
+
+# ---------------------------------------------------------------------------
+# Known-field type smuggling: a whitelisted field name carrying a
+# dict/list/bool/number value instead of the expected scalar str -- must be
+# fail-closed, not silently passed through as-is.
+# ---------------------------------------------------------------------------
+
+_LEAK_MARKER = {"raw_output": "must-never-leak"}
+
+
+def test_claim_id_dict_is_corrupted(tmp_path):
+    records = [_sample_record(_LEAK_MARKER, run_id="claim_id_dict_run")]
+    _seed_run(tmp_path, "claim_id_dict_run", structured_records=records)
+
+    result = get_agent_outputs_response("claim_id_dict_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+    assert "must-never-leak" not in json.dumps(result)
+
+
+def test_source_agent_output_id_dict_is_corrupted(tmp_path):
+    records = [
+        _sample_record("c1", run_id="source_id_dict_run", source_agent_output_id=_LEAK_MARKER)
+    ]
+    _seed_run(tmp_path, "source_id_dict_run", structured_records=records)
+
+    result = get_agent_outputs_response("source_id_dict_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+    assert "must-never-leak" not in json.dumps(result)
+
+
+def test_agent_dict_is_corrupted(tmp_path):
+    records = [_sample_record("c1", run_id="agent_dict_run", agent=_LEAK_MARKER)]
+    _seed_run(tmp_path, "agent_dict_run", structured_records=records)
+
+    result = get_agent_outputs_response("agent_dict_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+    assert "must-never-leak" not in json.dumps(result)
+
+
+def test_direction_dict_is_corrupted(tmp_path):
+    records = [_sample_record("c1", run_id="direction_dict_run", direction=_LEAK_MARKER)]
+    _seed_run(tmp_path, "direction_dict_run", structured_records=records)
+
+    result = get_agent_outputs_response("direction_dict_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+    assert "must-never-leak" not in json.dumps(result)
+
+
+def test_direction_list_is_corrupted(tmp_path):
+    records = [
+        _sample_record("c1", run_id="direction_list_run", direction=["positive", "negative"])
+    ]
+    _seed_run(tmp_path, "direction_list_run", structured_records=records)
+
+    result = get_agent_outputs_response("direction_list_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+
+
+def test_direction_invalid_string_is_corrupted_not_auto_corrected(tmp_path):
+    records = [
+        _sample_record("c1", run_id="direction_invalid_run", direction="definitely_not_a_direction")
+    ]
+    _seed_run(tmp_path, "direction_invalid_run", structured_records=records)
+
+    result = get_agent_outputs_response("direction_invalid_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+
+
+@pytest.mark.parametrize("blank_claim_id", ["", "   ", "\t\n"])
+def test_claim_id_empty_or_blank_is_corrupted(tmp_path, blank_claim_id):
+    records = [_sample_record(blank_claim_id, run_id="blank_claim_id_run")]
+    _seed_run(tmp_path, "blank_claim_id_run", structured_records=records)
+
+    result = get_agent_outputs_response("blank_claim_id_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+
+
+def test_agent_bool_is_corrupted(tmp_path):
+    records = [_sample_record("c1", run_id="agent_bool_run", agent=True)]
+    _seed_run(tmp_path, "agent_bool_run", structured_records=records)
+
+    result = get_agent_outputs_response("agent_bool_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+
+
+def test_agent_number_is_corrupted(tmp_path):
+    records = [_sample_record("c1", run_id="agent_number_run", agent=42)]
+    _seed_run(tmp_path, "agent_number_run", structured_records=records)
+
+    result = get_agent_outputs_response("agent_number_run", output_root=tmp_path)
+    assert result["status"] == "failed"
+    assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
+
+
+@pytest.mark.parametrize("direction", sorted(VALID_DIRECTIONS))
+def test_every_valid_direction_is_returned_unchanged(tmp_path, direction):
+    run_id = f"valid_direction_{direction}_run"
+    records = [_sample_record("c1", run_id=run_id, direction=direction)]
+    _seed_run(tmp_path, run_id, structured_records=records)
+
+    result = get_agent_outputs_response(run_id, output_root=tmp_path)
+    assert result["status"] == "ok"
+    record = result["structured_agent_outputs"][0]
+    assert record["direction"] == direction
+    assert set(record).issubset(PUBLIC_STRUCTURED_OUTPUT_FIELDS)

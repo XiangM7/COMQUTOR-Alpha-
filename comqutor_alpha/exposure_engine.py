@@ -30,7 +30,7 @@ import math
 from collections.abc import Mapping
 from typing import Any
 
-from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
+from comqutor_alpha.alpha_library.alpha_loader import EXPECTED_ALPHA_IDS
 
 EXPOSURE_FORMULA_VERSION = "week4.exposure_score.mvp_v1"
 
@@ -148,16 +148,21 @@ def compute_entity_alpha_exposures(
     exactly that same ``alpha_id`` set -- no missing component is ever
     defaulted to 0, and no Alpha absent from ``historical_mapping`` is ever
     auto-added just because it happens to appear in one of the other two
-    mappings. Every ``alpha_id`` must belong to the (real, unmodified)
-    Alpha taxonomy -- ``taxonomy=None`` loads the same default taxonomy
-    ``detect_alpha_conflicts`` uses; an explicit ``taxonomy`` mapping is
-    only ever a testing seam, never a hardcoded substitute weight table.
+    mappings. Every ``alpha_id`` must belong to the valid Alpha ID universe.
 
-    Pure function: no file/database/network/environment access beyond the
-    (already-frozen, already-loaded-elsewhere) Alpha taxonomy definitions;
-    does not read a formal exposure seed. Does not mutate any input
-    mapping. Output ``exposures`` is always sorted by ``alpha_id``, so
-    input iteration order never affects the result.
+    ``taxonomy=None`` (the default) validates against ``EXPECTED_ALPHA_IDS``
+    -- the static MVP-10 identifier constant, imported without ever calling
+    ``load_alpha_taxonomy()`` or otherwise touching
+    ``alpha_taxonomy_v1.yaml``. An explicit ``taxonomy`` mapping is a
+    testing seam only, never a hardcoded substitute weight table; it must
+    be a ``Mapping`` with non-empty string keys, validated the same way
+    ``historical_mapping``/``current_evidence``/``agent_confidence`` are.
+
+    Pure function: no filesystem, database, network, or environment access
+    of any kind -- not even to read the frozen Alpha taxonomy YAML. Does
+    not read a formal exposure seed. Does not mutate any input mapping.
+    Output ``exposures`` is always sorted by ``alpha_id``, so input
+    iteration order never affects the result.
     """
     safe_ticker = _require_ticker(ticker)
     historical = _require_alpha_mapping(historical_mapping)
@@ -165,8 +170,9 @@ def compute_entity_alpha_exposures(
     confidence = _require_alpha_mapping(agent_confidence)
 
     if taxonomy is None:
-        taxonomy = load_alpha_taxonomy()
-    valid_alpha_ids = set(taxonomy)
+        valid_alpha_ids = set(EXPECTED_ALPHA_IDS)
+    else:
+        valid_alpha_ids = set(_require_alpha_mapping(taxonomy))
 
     alpha_ids = set(historical)
     if set(evidence) != alpha_ids or set(confidence) != alpha_ids:

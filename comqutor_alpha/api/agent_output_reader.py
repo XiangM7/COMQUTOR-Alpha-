@@ -27,6 +27,7 @@ import math
 from typing import Any
 
 from comqutor_alpha.storage.file_store import run_dir_for, validate_run_id_for_path
+from comqutor_alpha.structure_engine.structure_schema import VALID_DIRECTIONS
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     MAX_CLAIM_CHARS,
     validate_structured_output,
@@ -178,6 +179,32 @@ def _validate_optional_text(value: Any) -> str | None:
     return value
 
 
+def _require_nonempty_text(value: Any) -> str:
+    """Strict, fail-closed text validator for the public identity fields
+    (claim_id/source_agent_output_id/run_id/ticker/agent): must be a raw
+    Python ``str`` -- dict/list/tuple/number/bool/None are all rejected
+    outright, never coerced. ``validate_structured_output()`` normalizes
+    some of these values internally for its own presence check, which does
+    NOT guarantee the original value was actually a string -- this is the
+    whitelist projection layer's own, independent type guarantee, not a
+    substitute for (or a duplicate of) that adapter check. Returns the
+    original string unchanged -- never ``str(value)`` forced, which would
+    silently accept a dict/list by stringifying it."""
+    _require(isinstance(value, str))
+    _require(value.strip() != "")
+    return value
+
+
+def _require_valid_direction(value: Any) -> str:
+    """direction: must be a raw ``str`` that is itself already a member of
+    ``VALID_DIRECTIONS`` -- never accepted via ``normalize_direction()``'s
+    lenient coercion (which a dict/list could indirectly slip through), and
+    never auto-corrected to a valid value."""
+    _require(isinstance(value, str))
+    _require(value in VALID_DIRECTIONS)
+    return value
+
+
 def _project_public_record(record: dict[str, Any], *, run_id: str, ticker: str) -> dict[str, Any]:
     """Validate one already-dict record, then project it onto exactly the
     public field whitelist. Never copies a field by iterating over the
@@ -187,7 +214,10 @@ def _project_public_record(record: dict[str, Any], *, run_id: str, ticker: str) 
     """
     # 1. Structural validity is delegated to the structured-output adapter's
     # own validator -- reused, not duplicated into a second, possibly
-    # out-of-sync required-field ruleset.
+    # out-of-sync required-field ruleset. This alone does not guarantee
+    # every field's *type* though (see _require_nonempty_text/
+    # _require_valid_direction below), so it is a first-pass gate, not the
+    # whitelist projection's own type boundary.
     _require(validate_structured_output(record))
 
     # 2. Record identity must agree with the top-level payload it lives in.
@@ -196,16 +226,13 @@ def _project_public_record(record: dict[str, Any], *, run_id: str, ticker: str) 
 
     projected: dict[str, Any] = {}
     for field in _ADAPTER_GUARANTEED_TEXT_FIELDS:
-        projected[field] = record[field]
+        projected[field] = _require_nonempty_text(record[field])
 
     projected["claim"] = _validate_bounded_nonempty_text(record["claim"])
     projected["evidence"] = _validate_bounded_nonempty_text(record["evidence"])
     projected["entities"] = _validate_flat_str_list(record["entities"])
     projected["factors"] = _validate_flat_str_list(record["factors"])
-    # direction/its VALID_DIRECTIONS membership was already confirmed by
-    # validate_structured_output() above -- passed through unchanged, never
-    # renormalized, so the public value matches what was actually stored.
-    projected["direction"] = record["direction"]
+    projected["direction"] = _require_valid_direction(record["direction"])
     projected["confidence"] = _validate_confidence(record["confidence"])
 
     for field in _OPTIONAL_SCALAR_TEXT_FIELDS:

@@ -240,11 +240,11 @@ def test_same_input_is_deterministic():
     assert first == second
 
 
-def test_real_mvp10_taxonomy_default_accepts_real_alpha_ids():
-    # taxonomy=None -> loads the real, unmodified default taxonomy (the
-    # same loader detect_alpha_conflicts uses). A101/A304 are real
-    # MVP-10 alpha_ids; the *values* here are synthetic unit-test inputs,
-    # never presented as a product seed.
+def test_default_path_accepts_real_mvp10_alpha_ids():
+    # taxonomy=None -> validates against the static EXPECTED_ALPHA_IDS
+    # constant only, never a loaded taxonomy. A101/A304 are real MVP-10
+    # alpha_ids; the *values* here are synthetic unit-test inputs, never
+    # presented as a product seed.
     result = compute_entity_alpha_exposures(
         ticker="SYNTH",
         historical_mapping={"A101": 0.5, "A304": 0.5},
@@ -252,6 +252,76 @@ def test_real_mvp10_taxonomy_default_accepts_real_alpha_ids():
         agent_confidence={"A101": 0.5, "A304": 0.5},
     )
     assert [item["alpha_id"] for item in result["exposures"]] == ["A101", "A304"]
+
+
+def test_default_path_rejects_unknown_alpha_id():
+    with pytest.raises(ExposureInputError) as exc_info:
+        compute_entity_alpha_exposures(
+            ticker="SYNTH",
+            historical_mapping={"NOT_A_REAL_MVP10_ID": 0.5},
+            current_evidence={"NOT_A_REAL_MVP10_ID": 0.5},
+            agent_confidence={"NOT_A_REAL_MVP10_ID": 0.5},
+        )
+    assert exc_info.value.reason_code == "UNKNOWN_ALPHA_ID"
+
+
+def test_default_path_never_reads_any_file(monkeypatch):
+    """Proves the pure/no-filesystem contract directly: with every file
+    open blocked, taxonomy=None (the default path) must still succeed for
+    real MVP-10 alpha_ids -- it can only be validating against the static
+    EXPECTED_ALPHA_IDS constant, never opening/parsing
+    alpha_taxonomy_v1.yaml or any other file."""
+    import pathlib
+
+    def _forbidden_open(self, *args, **kwargs):
+        raise AssertionError(f"unexpected filesystem read: {self}")
+
+    monkeypatch.setattr(pathlib.Path, "open", _forbidden_open)
+
+    result = compute_entity_alpha_exposures(
+        ticker="SYNTH",
+        historical_mapping={"A101": 0.4, "A304": 0.6},
+        current_evidence={"A101": 0.5, "A304": 0.5},
+        agent_confidence={"A101": 0.5, "A304": 0.5},
+    )
+
+    assert [item["alpha_id"] for item in result["exposures"]] == ["A101", "A304"]
+    assert result["formula_version"] == EXPOSURE_FORMULA_VERSION
+
+
+def test_explicit_taxonomy_mapping_seam_still_works():
+    result = compute_entity_alpha_exposures(
+        ticker="SYNTH",
+        historical_mapping={"FAKE_A": 0.5},
+        current_evidence={"FAKE_A": 0.5},
+        agent_confidence={"FAKE_A": 0.5},
+        taxonomy=_FAKE_TAXONOMY,
+    )
+    assert [item["alpha_id"] for item in result["exposures"]] == ["FAKE_A"]
+
+
+def test_explicit_taxonomy_non_mapping_rejected():
+    with pytest.raises(ExposureInputError) as exc_info:
+        compute_entity_alpha_exposures(
+            ticker="SYNTH",
+            historical_mapping={"FAKE_A": 0.5},
+            current_evidence={"FAKE_A": 0.5},
+            agent_confidence={"FAKE_A": 0.5},
+            taxonomy=["FAKE_A", "FAKE_B"],
+        )
+    assert exc_info.value.reason_code == "INVALID_EXPOSURE_INPUT"
+
+
+def test_explicit_taxonomy_key_must_be_nonempty_str():
+    with pytest.raises(ExposureInputError) as exc_info:
+        compute_entity_alpha_exposures(
+            ticker="SYNTH",
+            historical_mapping={"FAKE_A": 0.5},
+            current_evidence={"FAKE_A": 0.5},
+            agent_confidence={"FAKE_A": 0.5},
+            taxonomy={"": object()},
+        )
+    assert exc_info.value.reason_code == "INVALID_EXPOSURE_INPUT"
 
 
 # ---------------------------------------------------------------------------
