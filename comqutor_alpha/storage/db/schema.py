@@ -156,6 +156,50 @@ alpha_conflicts = sa.Table(
 )
 
 
+research_runs = sa.Table(
+    "research_runs",
+    metadata,
+    sa.Column("run_id", sa.String(80), primary_key=True),
+    # SHA-256 hex of the canonical request identity (see
+    # research_lifecycle.build_research_request_fingerprint). Many historical
+    # rows may share the same fingerprint -- every completed/partial/failed
+    # attempt of "the same logical request" keeps its own row.
+    sa.Column("request_fingerprint", sa.String(64), nullable=False),
+    # Mirrors request_fingerprint while status is queued/running, NULL once
+    # terminal. UNIQUE (not per-value -- SQLite/PostgreSQL both allow
+    # unlimited NULLs under a UNIQUE constraint) so at most one row can ever
+    # be "the" active run for a given fingerprint -- this is the concurrency
+    # arbitration primitive: a second concurrent claim's INSERT collides on
+    # this constraint rather than needing an external lock.
+    sa.Column("active_fingerprint", sa.String(64), nullable=True, unique=True),
+    sa.Column("ticker", sa.String(16), nullable=False),
+    sa.Column("analysis_date", sa.String(32), nullable=True),
+    sa.Column("selected_analysts", _json_type(), nullable=False),
+    sa.Column("execution_mode", sa.String(16), nullable=False),
+    sa.Column("provider_identity", sa.String(120), nullable=False),
+    sa.Column("model_identity", sa.String(120), nullable=False),
+    sa.Column("pipeline_identity", _json_type(), nullable=False),
+    sa.Column("status", sa.String(16), nullable=False),
+    sa.Column("stage", sa.String(64), nullable=True),
+    sa.Column("error_code", sa.String(64), nullable=True),
+    sa.Column("error_message", sa.String(300), nullable=True),
+    sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
+    sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
+    sa.Column(
+        "updated_at",
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
+        nullable=False,
+    ),
+    sa.Index("ix_research_runs_request_fingerprint", "request_fingerprint"),
+    sa.Index("ix_research_runs_status", "status"),
+    sa.Index("ix_research_runs_created_at", "created_at"),
+    sa.Index("ix_research_runs_ticker", "ticker"),
+)
+
+
 # Explicit, versioned migration path (see migrations.py for the runner).
 # Each entry is (version_id, tables_to_create) applied in order and recorded
 # in `schema_migrations` so re-running is a safe no-op.
@@ -165,4 +209,5 @@ MIGRATIONS: tuple[tuple[str, tuple[sa.Table, ...]], ...] = (
         "0002_create_week4_alpha_activations_and_alpha_conflicts",
         (alpha_activations, alpha_conflicts),
     ),
+    ("0003_create_research_runs", (research_runs,)),
 )

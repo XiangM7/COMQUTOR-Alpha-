@@ -197,6 +197,7 @@ def test_api_router_loads_with_installed_pydantic():
         "analysis_date",
         "selected_analysts",
         "offline_raw_agent_outputs",
+        "force_refresh",
         "run_id",
     }
     assert "allow_real_tradingagents_run" not in field_names

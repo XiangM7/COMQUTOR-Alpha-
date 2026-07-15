@@ -48,9 +48,19 @@ dev = [
 bedrock = [
     "langchain-aws>=1.5.0",
 ]
+# COMQUTOR Alpha local/internal API runtime (W5.1A). Optional so the core
+# install stays lean: pip install "tradingagents[api]". Not required for the
+# CLI, the offline pipeline, or any internal Python call -- only for
+# actually serving the FastAPI app over HTTP via `comqutor-api`.
+api = [
+    "fastapi>=0.110",
+    "pydantic>=2.0",
+    "uvicorn>=0.29",
+]
 
 [project.scripts]
 tradingagents = "cli.main:app"
+comqutor-api = "comqutor_alpha.api.server:main"
 
 [tool.setuptools.packages.find]
 include = ["tradingagents*", "cli*", "comqutor_alpha*"]

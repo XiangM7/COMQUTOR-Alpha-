@@ -21,6 +21,13 @@ from comqutor_alpha.graph_engine.pipeline import (
     build_structure_graph_stage,
     score_and_assemble_structure_graph,
 )
+from comqutor_alpha.research_lifecycle import (
+    RESEARCH_RUN_STATUSES,
+    ResearchLifecycleError,
+    decode_run_history_cursor,
+    encode_run_history_cursor,
+    submit_research_request,
+)
 from comqutor_alpha.storage.db.repository import (
     GraphPersistenceError,
     build_repository_from_env,
@@ -812,6 +819,177 @@ def get_persisted_conflicts(run_id, output_root="outputs/runs", *, graph_reposit
     return {**result, "status": "ok"}
 
 
+def _isoformat(value):
+    return value.isoformat() if hasattr(value, "isoformat") else value
+
+
+_RUN_STATUS_MESSAGES = {
+    "queued": "Research run is queued.",
+    "running": "Research run is in progress.",
+    "completed": "Research run completed.",
+    "partial": "Research run completed partially.",
+}
+
+
+def _public_run_record_fields(record):
+    """Project a research_runs row onto the safe public field set shared by
+    the status and history endpoints. Never includes request_fingerprint,
+    active_fingerprint, provider/model identity, pipeline identity, or any
+    offline payload content."""
+    status = record.get("status")
+    if status == "failed":
+        error_code = record.get("error_code")
+        message = record.get("error_message") or "Research run failed."
+    else:
+        error_code = None
+        message = _RUN_STATUS_MESSAGES.get(status, "")
+    return {
+        "run_id": record.get("run_id"),
+        "ticker": record.get("ticker"),
+        "analysis_date": record.get("analysis_date"),
+        "selected_analysts": record.get("selected_analysts") or [],
+        "status": status,
+        "stage": record.get("stage"),
+        "error_code": error_code,
+        "message": message,
+        "created_at": _isoformat(record.get("created_at")),
+        "started_at": _isoformat(record.get("started_at")),
+        "completed_at": _isoformat(record.get("completed_at")),
+        "updated_at": _isoformat(record.get("updated_at")),
+    }
+
+
+_RUN_STATUS_ERROR_MESSAGES = {
+    "INVALID_RUN_ID": "Invalid run_id.",
+    "RUN_STATUS_NOT_FOUND": "Run not found.",
+    "RUN_STATUS_UNAVAILABLE": "Run status storage is temporarily unavailable.",
+    "RUN_STATUS_CORRUPTED": "Persisted run status is missing required fields.",
+}
+
+
+def _run_status_error_response(run_id, error_code):
+    return {
+        "run_id": run_id,
+        "status": "failed",
+        "error_code": error_code,
+        "message": _RUN_STATUS_ERROR_MESSAGES[error_code],
+    }
+
+
+_RUN_STATUS_REQUIRED_FIELDS = {"run_id", "ticker", "status", "created_at", "updated_at"}
+
+
+# Retrieve one run's lifecycle status. Pure read path: validated run_id ->
+# one DB SELECT against research_runs only. Never reads raw/structured
+# agent output files, never reads a graph file, never invokes an LLM or the
+# network, never performs a migration or a write.
+def get_research_run_status(run_id, *, graph_repository=None):
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return _run_status_error_response(str(run_id), "INVALID_RUN_ID")
+
+    try:
+        repository = graph_repository or build_repository_from_env()
+        record = repository.get_research_run_record(safe_run_id)
+    except GraphPersistenceError as exc:
+        logger.warning(
+            "run status retrieval failed (run_id=%s, reason_code=%s)", safe_run_id, exc.reason_code
+        )
+        return _run_status_error_response(safe_run_id, "RUN_STATUS_UNAVAILABLE")
+    except Exception as exc:
+        logger.warning(
+            "run status retrieval failed unexpectedly (run_id=%s, exc_type=%s)",
+            safe_run_id,
+            type(exc).__name__,
+        )
+        logger.debug(
+            "run status retrieval failed unexpectedly (run_id=%s)", safe_run_id, exc_info=True
+        )
+        return _run_status_error_response(safe_run_id, "RUN_STATUS_UNAVAILABLE")
+
+    if record is None:
+        return _run_status_error_response(safe_run_id, "RUN_STATUS_NOT_FOUND")
+    if not _RUN_STATUS_REQUIRED_FIELDS.issubset(record) or record.get("status") not in RESEARCH_RUN_STATUSES:
+        logger.warning("persisted run status is corrupted (run_id=%s)", safe_run_id)
+        return _run_status_error_response(safe_run_id, "RUN_STATUS_CORRUPTED")
+
+    return _public_run_record_fields(record)
+
+
+_RUN_HISTORY_ERROR_MESSAGES = {
+    "INVALID_CURSOR": "Invalid cursor.",
+    "INVALID_STATUS_FILTER": "Invalid status filter.",
+    "INVALID_TICKER": "Invalid ticker.",
+    "RUN_HISTORY_UNAVAILABLE": "Run history storage is temporarily unavailable.",
+}
+
+
+def _run_history_error_response(error_code):
+    return {
+        "status": "failed",
+        "error_code": error_code,
+        "message": _RUN_HISTORY_ERROR_MESSAGES[error_code],
+    }
+
+
+# List research runs, newest first. Pure read path against research_runs
+# only -- never walks the local run directory tree, never touches
+# raw/structured artifacts, never migrates or writes. Source of truth is
+# exclusively the database.
+def get_research_run_history(*, limit=20, cursor=None, ticker=None, status=None, graph_repository=None):
+    try:
+        safe_limit = int(limit) if limit is not None else 20
+    except (TypeError, ValueError):
+        safe_limit = 20
+    safe_limit = max(1, min(100, safe_limit))
+
+    safe_ticker = None
+    if ticker is not None:
+        try:
+            safe_ticker = validate_ticker(ticker)
+        except ValueError:
+            return _run_history_error_response("INVALID_TICKER")
+
+    if status is not None and status not in RESEARCH_RUN_STATUSES:
+        return _run_history_error_response("INVALID_STATUS_FILTER")
+
+    decoded_cursor = None
+    if cursor is not None:
+        try:
+            decoded_cursor = decode_run_history_cursor(cursor)
+        except ResearchLifecycleError:
+            return _run_history_error_response("INVALID_CURSOR")
+
+    try:
+        repository = graph_repository or build_repository_from_env()
+        records = repository.list_research_run_records(
+            limit=safe_limit + 1, cursor=decoded_cursor, ticker=safe_ticker, status=status
+        )
+    except GraphPersistenceError as exc:
+        logger.warning("run history retrieval failed (reason_code=%s)", exc.reason_code)
+        return _run_history_error_response("RUN_HISTORY_UNAVAILABLE")
+    except Exception as exc:
+        logger.warning(
+            "run history retrieval failed unexpectedly (exc_type=%s)", type(exc).__name__
+        )
+        logger.debug("run history retrieval failed unexpectedly", exc_info=True)
+        return _run_history_error_response("RUN_HISTORY_UNAVAILABLE")
+
+    has_more = len(records) > safe_limit
+    page = records[:safe_limit]
+    next_cursor = None
+    if has_more and page:
+        last = page[-1]
+        next_cursor = encode_run_history_cursor(last["created_at"], last["run_id"])
+
+    return {
+        "status": "ok",
+        "items": [_public_run_record_fields(record) for record in page],
+        "next_cursor": next_cursor,
+    }
+
+
 try:
     from fastapi import APIRouter
     from pydantic import BaseModel
@@ -841,6 +1019,11 @@ try:
         selected_analysts: list[str] | None = None
         offline_raw_agent_outputs: list[dict] | None = None
         run_id: str | None = None
+        # force_refresh (W5.1A): a cache-operation switch only -- it bypasses
+        # completed-run reuse, never active-run (in-flight) de-duplication,
+        # and never changes the request fingerprint (see
+        # research_lifecycle.build_research_request_identity).
+        force_refresh: bool = False
         # NOTE: allow_real_tradingagents_run and config are intentionally NOT exposed here.
         # Real runs are server-controlled; clients cannot trigger paid LLM/data calls via HTTP.
 
@@ -852,7 +1035,7 @@ try:
 
     @router.post("/api/research")
     def post_research(request: ResearchRequest):
-        return run_research_request(_model_to_payload(request))
+        return submit_research_request(_model_to_payload(request))
 
     @router.get("/api/research/{run_id}")
     def get_research_run_route(run_id: str):
@@ -869,6 +1052,24 @@ try:
     @router.get("/api/research/{run_id}/agent-outputs")
     def get_research_agent_outputs_route(run_id: str):
         return get_agent_outputs_response(run_id)
+
+    @router.get("/api/research/{run_id}/status")
+    def get_research_status_route(run_id: str):
+        return get_research_run_status(run_id)
+
+    # Registered as a distinct exact path ("/api/research", no trailing
+    # segment) -- FastAPI/Starlette route matching is template-exact, so
+    # this can never be shadowed by, or shadow, "/api/research/{run_id}"
+    # regardless of declaration order (see
+    # tests/test_research_runs_api.py::test_history_route_not_swallowed_by_run_id_route).
+    @router.get("/api/research")
+    def get_research_history_route(
+        limit: int = 20,
+        cursor: str | None = None,
+        ticker: str | None = None,
+        status: str | None = None,
+    ):
+        return get_research_run_history(limit=limit, cursor=cursor, ticker=ticker, status=status)
 
 except ImportError:
     router = None

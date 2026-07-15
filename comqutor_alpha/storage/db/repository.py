@@ -14,13 +14,20 @@ rejected explicitly rather than silently mishandled.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 from typing import Any
+from uuid import uuid4
 
 import sqlalchemy as sa
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
+from comqutor_alpha.research_lifecycle import (
+    ACTIVE_RESEARCH_RUN_STATUSES,
+    TERMINAL_RESEARCH_RUN_STATUSES,
+    is_allowed_transition,
+)
 from comqutor_alpha.storage.db.engine import (
     DatabaseConfigurationError,
     build_engine,
@@ -32,6 +39,7 @@ from comqutor_alpha.storage.db.schema import (
     alpha_activations,
     alpha_conflicts,
     alpha_matches,
+    research_runs,
     structure_graphs,
 )
 from comqutor_alpha.storage.db.week4_persistence import (
@@ -40,6 +48,14 @@ from comqutor_alpha.storage.db.week4_persistence import (
     build_week4_rows,
     reconstruct_conflict_result,
 )
+
+
+class _ResearchRunClaimRace(Exception):
+    """Internal sentinel: the INSERT in claim_research_run hit either the
+    active_fingerprint UNIQUE constraint or a run_id primary-key collision
+    from a genuinely concurrent claim. Never surfaced to callers -- handled
+    by re-querying in a fresh transaction after this one cleanly rolls
+    back."""
 
 
 class GraphPersistenceError(Exception):
@@ -298,6 +314,301 @@ class GraphPersistenceRepository:
             return reconstruct_conflict_result(run_id, rows)
         except Week4PersistenceDataError as exc:
             raise GraphPersistenceError(exc.reason_code) from exc
+
+    # -----------------------------------------------------------------
+    # W5.1A: research_runs lifecycle / fingerprint bookkeeping.
+    # -----------------------------------------------------------------
+
+    def _active_fingerprint_statement(self, request_fingerprint: str):
+        return sa.select(research_runs).where(research_runs.c.active_fingerprint == request_fingerprint)
+
+    def _latest_completed_statement(self, request_fingerprint: str):
+        return (
+            sa.select(research_runs)
+            .where(research_runs.c.request_fingerprint == request_fingerprint)
+            .where(research_runs.c.status == "completed")
+            .order_by(research_runs.c.created_at.desc(), research_runs.c.run_id.desc())
+            .limit(1)
+        )
+
+    @staticmethod
+    def _existing_run_disposition(existing: Mapping[str, Any], request_fingerprint: str) -> tuple[str, dict[str, Any]]:
+        """Given a research_runs row already found by explicit run_id,
+        decide the disposition for *this* request. Raises
+        ``GraphPersistenceError("RUN_ID_CONFLICT")`` if the row belongs to a
+        genuinely different logical request."""
+        if existing["request_fingerprint"] != request_fingerprint:
+            raise GraphPersistenceError("RUN_ID_CONFLICT")
+        if existing["status"] in ACTIVE_RESEARCH_RUN_STATUSES:
+            return "reused_in_flight", dict(existing)
+        # Any terminal status (completed/partial/failed): never revived,
+        # never re-executed -- reported as-is via the same disposition value
+        # used for fingerprint-based completed-cache reuse. The caller
+        # (research_lifecycle.submit_research_request) reports the row's
+        # real status through ``run_status`` regardless of this value.
+        return "reused_completed", dict(existing)
+
+    def claim_research_run(
+        self,
+        *,
+        run_id: str | None,
+        request_fingerprint: str,
+        ticker: str,
+        analysis_date: str | None,
+        selected_analysts: Sequence[str],
+        execution_mode: str,
+        provider_identity: str,
+        model_identity: str,
+        pipeline_identity: Mapping[str, Any],
+        force_refresh: bool = False,
+    ) -> dict[str, Any]:
+        """Atomically decide the disposition of one research request and,
+        when nothing existing can be reused, claim a fresh ``queued`` row.
+
+        Returns ``{"run_id": ..., "disposition": ..., "record": {...}}``.
+        ``disposition`` is one of ``created``/``force_refreshed``/
+        ``reused_completed``/``reused_in_flight``. Concurrent callers
+        claiming the identical ``request_fingerprint`` are arbitrated by the
+        ``active_fingerprint`` UNIQUE constraint -- exactly one of them ever
+        gets ``created``/``force_refreshed``; the rest observe
+        ``reused_in_flight``, never an internal error.
+        """
+        self._require_supported_dialect()
+        try:
+            with self._engine.begin() as conn:
+                if run_id is not None:
+                    existing = conn.execute(
+                        sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                    ).mappings().first()
+                    if existing is not None:
+                        if force_refresh and existing["request_fingerprint"] == request_fingerprint:
+                            raise GraphPersistenceError("INVALID_FORCE_REFRESH")
+                        disposition, record = self._existing_run_disposition(existing, request_fingerprint)
+                        return {"run_id": record["run_id"], "disposition": disposition, "record": record}
+
+                active_row = conn.execute(self._active_fingerprint_statement(request_fingerprint)).mappings().first()
+                if active_row is not None:
+                    return {"run_id": active_row["run_id"], "disposition": "reused_in_flight", "record": dict(active_row)}
+
+                if not force_refresh:
+                    completed_row = conn.execute(self._latest_completed_statement(request_fingerprint)).mappings().first()
+                    if completed_row is not None:
+                        return {
+                            "run_id": completed_row["run_id"],
+                            "disposition": "reused_completed",
+                            "record": dict(completed_row),
+                        }
+
+                new_run_id = run_id or str(uuid4())
+                now = datetime.now(UTC)
+                values = {
+                    "run_id": new_run_id,
+                    "request_fingerprint": request_fingerprint,
+                    "active_fingerprint": request_fingerprint,
+                    "ticker": ticker,
+                    "analysis_date": analysis_date,
+                    "selected_analysts": list(selected_analysts),
+                    "execution_mode": execution_mode,
+                    "provider_identity": provider_identity,
+                    "model_identity": model_identity,
+                    "pipeline_identity": dict(pipeline_identity),
+                    "status": "queued",
+                    "stage": "accepted",
+                    "error_code": None,
+                    "error_message": None,
+                    "created_at": now,
+                    "updated_at": now,
+                }
+                try:
+                    conn.execute(sa.insert(research_runs).values(**values))
+                except IntegrityError as exc:
+                    raise _ResearchRunClaimRace() from exc
+                record = dict(values)
+                record["started_at"] = None
+                record["completed_at"] = None
+                return {
+                    "run_id": new_run_id,
+                    "disposition": "force_refreshed" if force_refresh else "created",
+                    "record": record,
+                }
+        except _ResearchRunClaimRace:
+            pass
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+
+        # A concurrent claim won the active_fingerprint (or run_id) race --
+        # this transaction was cleanly rolled back above. Re-query in a
+        # fresh transaction and report the winner, rather than surfacing a
+        # normal concurrency outcome as an internal error.
+        try:
+            with self._engine.begin() as conn:
+                active_row = conn.execute(self._active_fingerprint_statement(request_fingerprint)).mappings().first()
+                if active_row is not None:
+                    return {"run_id": active_row["run_id"], "disposition": "reused_in_flight", "record": dict(active_row)}
+                if run_id is not None:
+                    existing = conn.execute(
+                        sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                    ).mappings().first()
+                    if existing is not None:
+                        disposition, record = self._existing_run_disposition(existing, request_fingerprint)
+                        return {"run_id": record["run_id"], "disposition": disposition, "record": record}
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        raise GraphPersistenceError("RESEARCH_RUN_CLAIM_CONFLICT")
+
+    def mark_research_run_running(self, run_id: str) -> dict[str, Any]:
+        """queued -> running. Idempotent no-op if already running. Sets
+        ``started_at`` only on the first transition into running."""
+        self._require_supported_dialect()
+        now = datetime.now(UTC)
+        try:
+            with self._engine.begin() as conn:
+                row = conn.execute(
+                    sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                ).mappings().first()
+                if row is None:
+                    raise GraphPersistenceError("RESEARCH_RUN_NOT_FOUND")
+                if row["status"] == "running":
+                    return dict(row)
+                if not is_allowed_transition(row["status"], "running"):
+                    raise GraphPersistenceError("RESEARCH_RUN_TRANSITION_INVALID")
+                conn.execute(
+                    sa.update(research_runs)
+                    .where(research_runs.c.run_id == run_id)
+                    .values(status="running", stage="research_pipeline", started_at=now, updated_at=now)
+                )
+                updated = conn.execute(
+                    sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                ).mappings().first()
+                return dict(updated)
+        except GraphPersistenceError:
+            raise
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+
+    def mark_research_run_terminal(
+        self,
+        run_id: str,
+        *,
+        status: str,
+        error_code: str | None = None,
+        error_message: str | None = None,
+    ) -> dict[str, Any]:
+        """running/queued -> completed/partial/failed. Always clears
+        ``active_fingerprint`` so a terminal run never keeps blocking future
+        claims of the same logical request. Never accepts a transition out
+        of an already-terminal status -- a retry must claim a new run_id."""
+        if status not in TERMINAL_RESEARCH_RUN_STATUSES:
+            raise GraphPersistenceError("RESEARCH_RUN_TRANSITION_INVALID")
+        self._require_supported_dialect()
+        now = datetime.now(UTC)
+        try:
+            with self._engine.begin() as conn:
+                row = conn.execute(
+                    sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                ).mappings().first()
+                if row is None:
+                    raise GraphPersistenceError("RESEARCH_RUN_NOT_FOUND")
+                if not is_allowed_transition(row["status"], status):
+                    raise GraphPersistenceError("RESEARCH_RUN_TRANSITION_INVALID")
+                conn.execute(
+                    sa.update(research_runs)
+                    .where(research_runs.c.run_id == run_id)
+                    .values(
+                        status=status,
+                        stage=status,
+                        error_code=error_code,
+                        error_message=error_message,
+                        active_fingerprint=None,
+                        completed_at=now,
+                        updated_at=now,
+                    )
+                )
+                updated = conn.execute(
+                    sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                ).mappings().first()
+                return dict(updated)
+        except GraphPersistenceError:
+            raise
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+
+    def get_research_run_record(self, run_id: str) -> dict[str, Any] | None:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return None
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                row = conn.execute(
+                    sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                ).mappings().first()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return dict(row) if row is not None else None
+
+    def find_active_research_run(self, request_fingerprint: str) -> dict[str, Any] | None:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return None
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                row = conn.execute(self._active_fingerprint_statement(request_fingerprint)).mappings().first()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return dict(row) if row is not None else None
+
+    def find_latest_completed_research_run(self, request_fingerprint: str) -> dict[str, Any] | None:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return None
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                row = conn.execute(self._latest_completed_statement(request_fingerprint)).mappings().first()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return dict(row) if row is not None else None
+
+    def list_research_run_records(
+        self,
+        *,
+        limit: int = 20,
+        cursor: tuple[str, str] | None = None,
+        ticker: str | None = None,
+        status: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Keyset-paginated listing ordered by (created_at DESC, run_id DESC).
+
+        ``cursor``, when given, is ``(created_at_iso_text, run_id)`` of the
+        last row of the previous page -- rows are filtered to strictly
+        after that position in the same ordering, never an unstable
+        offset."""
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
+        self._require_supported_dialect()
+        stmt = sa.select(research_runs)
+        if ticker is not None:
+            stmt = stmt.where(research_runs.c.ticker == ticker)
+        if status is not None:
+            stmt = stmt.where(research_runs.c.status == status)
+        if cursor is not None:
+            cursor_created_at_text, cursor_run_id = cursor
+            cursor_created_at = datetime.fromisoformat(cursor_created_at_text)
+            stmt = stmt.where(
+                sa.or_(
+                    research_runs.c.created_at < cursor_created_at,
+                    sa.and_(
+                        research_runs.c.created_at == cursor_created_at,
+                        research_runs.c.run_id < cursor_run_id,
+                    ),
+                )
+            )
+        stmt = stmt.order_by(research_runs.c.created_at.desc(), research_runs.c.run_id.desc()).limit(limit)
+        try:
+            with self._engine.connect() as conn:
+                rows = conn.execute(stmt).mappings().all()
+        except (SQLAlchemyError, ValueError) as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return [dict(row) for row in rows]
 
 
 def _resolve_engine_and_url(
