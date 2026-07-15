@@ -278,14 +278,14 @@ class TestRetryLifecycle:
         )
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=repo)
 
-        response = build_research_response("retry_construction", output_root=tmp_path)
+        response = build_research_response("retry_construction", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "partial"
         assert response["structure_graph_status"] == "not_ready"
 
         monkeypatch.undo()
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=repo)
 
-        response = build_research_response("retry_construction", output_root=tmp_path)
+        response = build_research_response("retry_construction", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "completed"
         assert response["structure_graph_status"] == "ready"
 
@@ -311,14 +311,14 @@ class TestRetryLifecycle:
         )
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=repo)
 
-        response = build_research_response("retry_scoring", output_root=tmp_path)
+        response = build_research_response("retry_scoring", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "partial"
         assert response["structure_graph_status"] == "not_ready"
 
         monkeypatch.undo()
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=repo)
 
-        response = build_research_response("retry_scoring", output_root=tmp_path)
+        response = build_research_response("retry_scoring", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "completed"
         assert response["structure_graph_status"] == "ready"
 
@@ -342,18 +342,24 @@ class TestRetryLifecycle:
             def get_alpha_matches(self, run_id):
                 return self._inner.get_alpha_matches(run_id)
 
+            def persist_week4_results(self, **kwargs):
+                return self._inner.persist_week4_results(**kwargs)
+
+            def get_week4_conflict_result(self, run_id):
+                return self._inner.get_week4_conflict_result(run_id)
+
         run_dir = _seed_week1_2_artifacts(tmp_path, "retry_persistence")
         inner = _repo()
         flaky = _FirstCallFailsRepository(inner)
 
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=flaky)
-        response = build_research_response("retry_persistence", output_root=tmp_path)
+        response = build_research_response("retry_persistence", output_root=tmp_path, graph_repository=flaky)
         assert response["status"] == "partial"
         assert response["structure_graph_status"] == "not_ready"
         assert inner.get_graph("retry_persistence") is None
 
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=flaky)
-        response = build_research_response("retry_persistence", output_root=tmp_path)
+        response = build_research_response("retry_persistence", output_root=tmp_path, graph_repository=flaky)
         assert response["status"] == "completed"
         assert response["structure_graph_status"] == "ready"
         assert inner.get_graph("retry_persistence") is not None
@@ -371,7 +377,7 @@ class TestRetryLifecycle:
         repo = _repo()
 
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=repo)
-        response = build_research_response("success_then_failure", output_root=tmp_path)
+        response = build_research_response("success_then_failure", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "completed"
         assert response["structure_graph_status"] == "ready"
 
@@ -382,7 +388,7 @@ class TestRetryLifecycle:
         )
         routes_research._run_week3_graph_pipeline(run_dir, graph_repository=repo)
 
-        response = build_research_response("success_then_failure", output_root=tmp_path)
+        response = build_research_response("success_then_failure", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "partial"
         assert response["structure_graph_status"] == "not_ready"
 
@@ -420,7 +426,7 @@ class TestRetryLifecycle:
         for _ in range(3):
             routes_research._run_week3_graph_pipeline(run_dir, graph_repository=repo)
 
-        response = build_research_response("retry_idempotent", output_root=tmp_path)
+        response = build_research_response("retry_idempotent", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "completed"
         assert len(repo.get_alpha_matches("retry_idempotent")) == 1  # no duplicate rows
 
@@ -453,7 +459,7 @@ class TestRetryLifecycle:
         assert status["outcome"] == "failed"
         assert status["stage"] == "activation_scoring"  # latest attempt's own failure
 
-        response = build_research_response("retry_double_failure", output_root=tmp_path)
+        response = build_research_response("retry_double_failure", output_root=tmp_path, graph_repository=repo)
         assert response["status"] == "partial"
         assert response["structure_graph_status"] == "not_ready"
 

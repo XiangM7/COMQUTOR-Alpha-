@@ -243,8 +243,14 @@ def test_build_research_response_reports_week2_artifacts_without_local_paths(tmp
     assert response["artifacts"]["alpha_matches"] is True
     assert response["artifacts"]["extracted_structures"] is True
     assert response["artifacts"]["structured_output_error_logs"] is True
-    assert response["status"] == "completed"
+    # W4.3: this run's files are hand-crafted directly on disk -- no real
+    # Week 4 (conflict detection + persistence) ever ran against a database
+    # for it, so "completed" (which now also requires conflict_status ==
+    # "ready") is correctly out of reach here; the graph itself is still
+    # file-ready.
+    assert response["status"] == "partial"
     assert response["structure_graph_status"] == "ready"
+    assert response["conflict_status"] == "not_ready"
     assert str(tmp_path) not in serialized
 
 

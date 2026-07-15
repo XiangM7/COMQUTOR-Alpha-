@@ -14,6 +14,8 @@ from comqutor_alpha.adapters.tradingagents_output_writer import (
     OUTPUT_VERSION,
     build_raw_agent_output_record,
 )
+from comqutor_alpha.api.agent_output_reader import get_agent_outputs_response
+from comqutor_alpha.conflict_engine.pipeline import run_week4_conflict_pipeline
 from comqutor_alpha.graph_engine.graph_schema import GRAPH_SCHEMA_VERSION
 from comqutor_alpha.graph_engine.pipeline import (
     build_structure_graph_stage,
@@ -242,8 +244,64 @@ def _count_structured_outputs(structured_payload):
     records = structured_payload.get("records", [])
     return len(records) if isinstance(records, list) else 0
 
+# Deterministic, no-LLM, no-network summary text for the canonical research
+# response (W4.3). Exact wording is a frozen contract -- see
+# docs/w4_3_gate_contract.md section 3. Never generates a trade
+# recommendation (Buy/Sell/Hold, position sizing, price target).
+def _build_research_summary(conflict_status, main_conflict, dominant_alphas):
+    if conflict_status != "ready":
+        return "Conflict analysis is not ready for this research run."
+    if main_conflict is not None:
+        return main_conflict.get("explanation")
+    if dominant_alphas:
+        return (
+            "Dominant Alpha structures were identified, but no "
+            "taxonomy-declared conflict was admitted for this research run."
+        )
+    return (
+        "No dominant Alpha structure or admitted conflict was identified "
+        "for this research run."
+    )
+
+
+# Read this run's persisted dominant_alphas/main_conflict/conflict_status
+# straight from the database (W4.2's source of truth) -- never recomputed,
+# never read from a local conflicts.json (none is ever written). Guarded so
+# any storage failure degrades to "not_ready"/empty/null rather than
+# propagating -- the same safe-degrade contract as the rest of this module.
+def _load_week4_response_fields(run_id, output_root, graph_repository):
+    dominant_alphas = []
+    main_conflict = None
+    conflict_status = "not_ready"
+    try:
+        repository = graph_repository or build_repository_from_env(output_root)
+        graph_row = repository.get_graph(run_id)
+        if graph_row is not None:
+            graph_json = graph_row.get("graph_json")
+            if isinstance(graph_json, dict) and isinstance(graph_json.get("dominant_alphas"), list):
+                dominant_alphas = graph_json["dominant_alphas"]
+        conflict_result = repository.get_week4_conflict_result(run_id)
+        if conflict_result is not None:
+            conflict_status = "ready"
+            main_conflict = conflict_result.get("main_conflict")
+    except GraphPersistenceError as exc:
+        logger.warning(
+            "week4 response enrichment failed (run_id=%s, reason_code=%s)", run_id, exc.reason_code
+        )
+    except Exception as exc:
+        logger.warning(
+            "week4 response enrichment failed unexpectedly (run_id=%s, exc_type=%s)",
+            run_id,
+            type(exc).__name__,
+        )
+        logger.debug(
+            "week4 response enrichment failed unexpectedly (run_id=%s)", run_id, exc_info=True
+        )
+    return dominant_alphas, main_conflict, conflict_status
+
+
 # Build a research response payload summarizing the run status and artifacts.
-def build_research_response(run_id, output_root="outputs/runs"):
+def build_research_response(run_id, output_root="outputs/runs", *, graph_repository=None):
     run_dir = run_dir_for(run_id, output_root)
     metadata_path = run_dir / "metadata.json"
     raw_path = run_dir / "raw_agent_outputs.json"
@@ -297,17 +355,34 @@ def build_research_response(run_id, output_root="outputs/runs"):
         run_id, WEEK3_PIPELINE_STATUS_ARTIFACT_FILENAME, output_root=output_root
     )
     structure_graph_ready = structure_graph_path.exists() and week3_status.get("outcome") == "success"
+
+    # W4.3: Week 4 fields are read straight from the database (its source of
+    # truth) only when Week 3 actually succeeded -- a Week 3 failure means
+    # Week 4 was never even attempted (see _run_week3_graph_pipeline), so
+    # there is nothing to query and conflict_status stays "not_ready".
+    dominant_alphas, main_conflict, conflict_status = (
+        _load_week4_response_fields(run_id, output_root, graph_repository)
+        if structure_graph_ready
+        else ([], None, "not_ready")
+    )
+
     # "completed" now requires Week 3 (graph build + activation scoring +
-    # persistence) to have actually succeeded, not just Week 1-2. A Week 3
-    # failure after a complete Week 1-2 run degrades status to "partial"
+    # persistence) *and* Week 4 (conflict detection + persistence) to have
+    # actually succeeded, not just Week 1-2. A Week 3 failure, or a Week 3
+    # success followed by a Week 4 failure, both degrade status to "partial"
     # (reusing the existing partial/degraded vocabulary) rather than
-    # silently reporting completed with a broken/missing graph.
-    if complete and structure_graph_ready:
+    # silently reporting completed with a broken/missing graph or conflict
+    # result. A Week 4 run that legitimately found zero admitted conflicts
+    # is NOT a Week 4 failure -- conflict_status is "ready" either way, so
+    # it never blocks "completed" on its own.
+    if complete and structure_graph_ready and conflict_status == "ready":
         status = "completed"
     elif complete or has_any:
         status = "partial"
     else:
         status = "failed"
+
+    summary = _build_research_summary(conflict_status, main_conflict, dominant_alphas)
 
     return {
         "run_id": run_id,
@@ -323,6 +398,13 @@ def build_research_response(run_id, output_root="outputs/runs"):
         # callers needing the specific reason should query GET .../graph,
         # which has its own richer, still-safe error_code contract.
         "structure_graph_status": "ready" if structure_graph_ready else "not_ready",
+        # W4.3 additive fields (see docs/w4_3_gate_contract.md section 3).
+        # dominant_alphas comes straight from the persisted Structure Graph,
+        # never recomputed/re-sorted here.
+        "dominant_alphas": dominant_alphas,
+        "main_conflict": main_conflict,
+        "conflict_status": conflict_status,
+        "summary": summary,
     }
 
 # Run a research request with the given payload, optionally using a custom runner.
@@ -471,6 +553,25 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None):
     with contextlib.suppress(Exception):
         _write_week3_pipeline_status(run_id, output_root, outcome="success")
 
+    # Week 4 (W4.3): only ever reached after Week 3's graph has actually
+    # been built, scored, and persisted above -- reuses the exact same
+    # repository handle (no second repository abstraction, no duplicate
+    # connection) and the exact same graph_payload["activation"] this
+    # request just computed (no recomputation). Never allowed to affect the
+    # Week 1-3 outcome already established above: run_week4_conflict_pipeline
+    # itself never raises, and this call is additionally wrapped so a defect
+    # in the Week 4 seam can never take down an already-successful Week 3
+    # response.
+    with contextlib.suppress(Exception):
+        run_week4_conflict_pipeline(
+            run_id=run_id,
+            ticker=ticker,
+            graph_payload=graph_payload,
+            alpha_matches_payload=alpha_matches_payload,
+            repository=repository,
+            output_root=output_root,
+        )
+
 
 def run_research_request(
     payload,
@@ -510,7 +611,7 @@ def run_research_request(
         # POST; its own status is reported only via GET .../graph so the
         # frozen Week 1-2 response contract above never changes shape.
         _run_week3_graph_pipeline(run_dir, graph_repository=graph_repository)
-        return build_research_response(run_id, output_root=output_root)
+        return build_research_response(run_id, output_root=output_root, graph_repository=graph_repository)
     except Exception as exc:
         error_response = _map_exception_to_error(payload, exc)
         if error_response["error_code"] in _EXPECTED_CLIENT_ERROR_CODES:
@@ -529,7 +630,7 @@ def run_research_request(
         return error_response
 
 # Retrieve the research run status and artifacts for a given run_id.
-def get_research_run(run_id, output_root="outputs/runs"):
+def get_research_run(run_id, output_root="outputs/runs", *, graph_repository=None):
     try:
         run_dir = run_dir_for(run_id, output_root)
     except ValueError:
@@ -548,7 +649,7 @@ def get_research_run(run_id, output_root="outputs/runs"):
             "error_code": "RUN_NOT_FOUND",
             "message": "Run not found.",
         }
-    return build_research_response(str(run_id), output_root=output_root)
+    return build_research_response(str(run_id), output_root=output_root, graph_repository=graph_repository)
 
 # Retrieve the research response for a given run_id, loading from the stored JSON record.
 def get_research_response(run_id, output_root="outputs/runs"):
@@ -650,6 +751,67 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
     }
 
 
+_CONFLICTS_ERROR_MESSAGES = {
+    "INVALID_RUN_ID": "Invalid run_id.",
+    "CONFLICTS_NOT_READY": "Conflict analysis has not been generated for this research run yet.",
+    "CONFLICTS_UNAVAILABLE": "Conflict storage is temporarily unavailable.",
+    "CONFLICTS_CORRUPTED": "Persisted conflict result is missing required fields.",
+}
+
+
+def _conflicts_error_response(run_id, error_code):
+    return {
+        "run_id": run_id,
+        "ticker": None,
+        "status": "failed",
+        "error_code": error_code,
+        "message": _CONFLICTS_ERROR_MESSAGES[error_code],
+    }
+
+
+# Retrieve the exact persisted W4.2 conflict result for a run_id. Pure read
+# path: validated run_id -> one DB reconstruction. Deliberately does NOT
+# check whether the local run directory exists first -- unlike the graph and
+# agent-outputs endpoints, the database is this endpoint's only source of
+# truth, so a run whose local directory was deleted must still succeed here
+# as long as the database row is intact. Never re-runs the W4.1 detector,
+# never reads alpha_matches.json/structure_graph.json, never invokes
+# TradingAgents/LLM/network, never performs a migration/DDL/write.
+def get_persisted_conflicts(run_id, output_root="outputs/runs", *, graph_repository=None):
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return _conflicts_error_response(str(run_id), "INVALID_RUN_ID")
+
+    try:
+        repository = graph_repository or build_repository_from_env(output_root)
+        result = repository.get_week4_conflict_result(safe_run_id)
+    except GraphPersistenceError as exc:
+        logger.warning(
+            "conflicts retrieval failed (run_id=%s, reason_code=%s)", safe_run_id, exc.reason_code
+        )
+        error_code = "CONFLICTS_CORRUPTED" if exc.reason_code == "DB_DATA_CORRUPTED" else "CONFLICTS_UNAVAILABLE"
+        return _conflicts_error_response(safe_run_id, error_code)
+    except Exception as exc:
+        logger.warning(
+            "conflicts retrieval failed unexpectedly (run_id=%s, exc_type=%s)",
+            safe_run_id,
+            type(exc).__name__,
+        )
+        logger.debug(
+            "conflicts retrieval failed unexpectedly (run_id=%s)", safe_run_id, exc_info=True
+        )
+        return _conflicts_error_response(safe_run_id, "CONFLICTS_UNAVAILABLE")
+
+    if result is None:
+        return _conflicts_error_response(safe_run_id, "CONFLICTS_NOT_READY")
+
+    # Equal to the W4.2 deterministic reconstruction, with exactly one
+    # additive top-level field (status="ok") -- every other key/value comes
+    # straight from `result`, unmodified.
+    return {**result, "status": "ok"}
+
+
 try:
     from fastapi import APIRouter
     from pydantic import BaseModel
@@ -699,6 +861,14 @@ try:
     @router.get("/api/research/{run_id}/graph")
     def get_research_graph_route(run_id: str):
         return get_persisted_structure_graph(run_id)
+
+    @router.get("/api/research/{run_id}/conflicts")
+    def get_research_conflicts_route(run_id: str):
+        return get_persisted_conflicts(run_id)
+
+    @router.get("/api/research/{run_id}/agent-outputs")
+    def get_research_agent_outputs_route(run_id: str):
+        return get_agent_outputs_response(run_id)
 
 except ImportError:
     router = None
