@@ -7,19 +7,95 @@ spec-resolution decision recorded in ``docs/w4_3_gate_contract.md`` section
 7: ``GET /api/research/{run_id}/agent-outputs`` is structured-only by
 design, not by omission. Raw transcript authorization/redaction/audit is a
 deferred, separate decision, out of scope for this endpoint.
+
+W4.3 security patch: every record is additionally projected through a
+public-field whitelist (``PUBLIC_STRUCTURED_OUTPUT_FIELDS``) before it ever
+leaves this module. Structural validity of a record is still delegated to
+the structured-output adapter's own ``validate_structured_output`` (reused,
+not re-implemented) -- the whitelist projection only decides *which of the
+already-valid fields* are safe to expose publicly, so a structured record
+that was tampered with (or a future adapter change that starts embedding
+``raw_output``/``prompt``/``final_state``/etc. inside a "structured" record)
+can never smuggle that content through this endpoint.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import math
 from typing import Any
 
 from comqutor_alpha.storage.file_store import run_dir_for, validate_run_id_for_path
+from comqutor_alpha.structure_engine.structured_output_adapter import (
+    MAX_CLAIM_CHARS,
+    validate_structured_output,
+)
 
 logger = logging.getLogger(__name__)
 
 STRUCTURED_ARTIFACT_FILENAME = "structured_agent_outputs.json"
+
+# Public-field whitelist (W4.3 security patch): only these keys may ever
+# appear in a record returned by GET /api/research/{run_id}/agent-outputs.
+# Anything else present on a record -- raw_output, full_transcript, prompt,
+# system_prompt, provider_response, model_response, final_state,
+# debate_history, investment_plan, final_trade_decision, an adapter raw
+# preview, or any other field not listed here -- is silently dropped, never
+# copied into the response.
+PUBLIC_STRUCTURED_OUTPUT_FIELDS = frozenset(
+    {
+        "claim_id",
+        "agent_output_id",
+        "source_agent_output_id",
+        "run_id",
+        "ticker",
+        "agent",
+        "timestamp",
+        "claim",
+        "evidence",
+        "entities",
+        "factors",
+        "direction",
+        "confidence",
+        "source_type",
+        "output_type",
+        "source_refs",
+        "claim_index",
+        "source_section",
+        "assertion_status",
+        "semantic_polarity",
+        "extraction_method",
+    }
+)
+
+# Fields the structured-output adapter itself guarantees are present and
+# structurally valid (via validate_structured_output) once a record passes
+# that check. Copied through as-is -- the adapter validator already confirms
+# these are non-empty text (claim/evidence/entities/factors/direction get
+# their own, stricter, whitelist-specific checks below on top of that).
+_ADAPTER_GUARANTEED_TEXT_FIELDS = (
+    "claim_id",
+    "source_agent_output_id",
+    "run_id",
+    "ticker",
+    "agent",
+)
+
+# Optional whitelist fields with no adapter-level guarantee: included in the
+# response only when present on the source record, and only after passing a
+# type check here. Anything else on the record (known or unknown) is never
+# copied.
+_OPTIONAL_SCALAR_TEXT_FIELDS = (
+    "agent_output_id",
+    "timestamp",
+    "source_type",
+    "output_type",
+    "source_section",
+    "assertion_status",
+    "semantic_polarity",
+    "extraction_method",
+)
 
 _ERROR_MESSAGES = {
     "INVALID_RUN_ID": "Invalid run_id.",
@@ -29,10 +105,13 @@ _ERROR_MESSAGES = {
     "AGENT_OUTPUTS_UNAVAILABLE": "Agent output storage is temporarily unavailable.",
 }
 
+_CORRUPTED = "AGENT_OUTPUTS_CORRUPTED"
+
 
 class AgentOutputsReadError(Exception):
     """Safe read-path error: carries a stable reason code only. Never
-    carries a raw exception message, a traceback, or a local path."""
+    carries a raw exception message, a traceback, a local path, or the
+    content of a rejected/dropped field."""
 
     def __init__(self, reason_code: str) -> None:
         self.reason_code = reason_code
@@ -49,8 +128,100 @@ def _error_response(run_id: str | None, error_code: str) -> dict[str, Any]:
     }
 
 
+def _require(condition: bool) -> None:
+    if not condition:
+        raise AgentOutputsReadError(_CORRUPTED)
+
+
+def _validate_flat_str_list(value: Any) -> list[str]:
+    """entities/factors/source_refs: flat list[str] only -- no nested
+    dict/list smuggled in through a field whose public shape is "just a
+    list of strings"."""
+    _require(isinstance(value, list))
+    result: list[str] = []
+    for item in value:
+        _require(isinstance(item, str))
+        result.append(item)
+    return result
+
+
+def _validate_bounded_nonempty_text(value: Any) -> str:
+    """claim/evidence: non-empty string, within the adapter's own public
+    max length. An over-length value is never silently truncated -- it is
+    treated as corrupted, since a truncate-and-continue policy would let an
+    oversized (potentially smuggled) payload partially through."""
+    _require(isinstance(value, str) and value.strip() != "")
+    _require(len(value) <= MAX_CLAIM_CHARS)
+    return value
+
+
+def _validate_confidence(value: Any) -> float:
+    _require(not isinstance(value, bool))
+    _require(isinstance(value, (int, float)))
+    number = float(value)
+    _require(math.isfinite(number))
+    _require(0.0 <= number <= 1.0)
+    return number
+
+
+def _validate_claim_index(value: Any) -> int:
+    _require(not isinstance(value, bool))
+    _require(isinstance(value, int))
+    _require(value >= 0)
+    return value
+
+
+def _validate_optional_text(value: Any) -> str | None:
+    if value is None:
+        return None
+    _require(isinstance(value, str))
+    return value
+
+
+def _project_public_record(record: dict[str, Any], *, run_id: str, ticker: str) -> dict[str, Any]:
+    """Validate one already-dict record, then project it onto exactly the
+    public field whitelist. Never copies a field by iterating over the
+    record's own keys -- only ever reads out the specific whitelisted keys
+    it knows about, so an unknown field (including a nested object smuggled
+    under an unexpected name) can never reach the output by construction.
+    """
+    # 1. Structural validity is delegated to the structured-output adapter's
+    # own validator -- reused, not duplicated into a second, possibly
+    # out-of-sync required-field ruleset.
+    _require(validate_structured_output(record))
+
+    # 2. Record identity must agree with the top-level payload it lives in.
+    _require(record.get("run_id") == run_id)
+    _require(record.get("ticker") == ticker)
+
+    projected: dict[str, Any] = {}
+    for field in _ADAPTER_GUARANTEED_TEXT_FIELDS:
+        projected[field] = record[field]
+
+    projected["claim"] = _validate_bounded_nonempty_text(record["claim"])
+    projected["evidence"] = _validate_bounded_nonempty_text(record["evidence"])
+    projected["entities"] = _validate_flat_str_list(record["entities"])
+    projected["factors"] = _validate_flat_str_list(record["factors"])
+    # direction/its VALID_DIRECTIONS membership was already confirmed by
+    # validate_structured_output() above -- passed through unchanged, never
+    # renormalized, so the public value matches what was actually stored.
+    projected["direction"] = record["direction"]
+    projected["confidence"] = _validate_confidence(record["confidence"])
+
+    for field in _OPTIONAL_SCALAR_TEXT_FIELDS:
+        if field in record:
+            projected[field] = _validate_optional_text(record[field])
+    if "source_refs" in record:
+        projected["source_refs"] = _validate_flat_str_list(record["source_refs"])
+    if "claim_index" in record:
+        projected["claim_index"] = _validate_claim_index(record["claim_index"])
+
+    return projected
+
+
 def _read_structured_payload(run_id: str, output_root: Any) -> dict[str, Any]:
-    """Load and structurally validate ``structured_agent_outputs.json``.
+    """Load, structurally validate, and publicly project
+    ``structured_agent_outputs.json``.
 
     Never constructs a path to, checks for, or opens
     ``raw_agent_outputs.json`` -- structured-only by construction, not by a
@@ -66,33 +237,39 @@ def _read_structured_payload(run_id: str, output_root: Any) -> dict[str, Any]:
         with path.open(encoding="utf-8") as handle:
             payload = json.load(handle)
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-        raise AgentOutputsReadError("AGENT_OUTPUTS_CORRUPTED") from exc
+        raise AgentOutputsReadError(_CORRUPTED) from exc
     except OSError as exc:
         raise AgentOutputsReadError("AGENT_OUTPUTS_UNAVAILABLE") from exc
 
     if not isinstance(payload, dict):
-        raise AgentOutputsReadError("AGENT_OUTPUTS_CORRUPTED")
+        raise AgentOutputsReadError(_CORRUPTED)
     if payload.get("run_id") != run_id:
-        raise AgentOutputsReadError("AGENT_OUTPUTS_CORRUPTED")
+        raise AgentOutputsReadError(_CORRUPTED)
     ticker = payload.get("ticker")
     if not isinstance(ticker, str) or not ticker.strip():
-        raise AgentOutputsReadError("AGENT_OUTPUTS_CORRUPTED")
+        raise AgentOutputsReadError(_CORRUPTED)
     schema_version = payload.get("schema_version")
     if not isinstance(schema_version, str) or not schema_version.strip():
-        raise AgentOutputsReadError("AGENT_OUTPUTS_CORRUPTED")
-    records = payload.get("records")
-    if not isinstance(records, list) or any(not isinstance(item, dict) for item in records):
-        raise AgentOutputsReadError("AGENT_OUTPUTS_CORRUPTED")
+        raise AgentOutputsReadError(_CORRUPTED)
+    raw_records = payload.get("records")
+    if not isinstance(raw_records, list) or any(not isinstance(item, dict) for item in raw_records):
+        raise AgentOutputsReadError(_CORRUPTED)
 
-    return {"ticker": ticker, "schema_version": schema_version, "records": records}
+    # Order preserved: projected in the same sequence records were read.
+    public_records = [
+        _project_public_record(record, run_id=run_id, ticker=ticker) for record in raw_records
+    ]
+
+    return {"ticker": ticker, "schema_version": schema_version, "records": public_records}
 
 
 def get_agent_outputs_response(run_id: Any, output_root: str = "outputs/runs") -> dict[str, Any]:
     """Build the full ``GET /api/research/{run_id}/agent-outputs`` response.
 
-    Structured-only by design (see module docstring). Never invokes an LLM,
-    TradingAgents, or a network call; never performs a database write, table
-    creation, or migration; never returns a local filesystem path.
+    Structured-only, public-field-whitelisted by design (see module
+    docstring). Never invokes an LLM, TradingAgents, or a network call;
+    never performs a database write, table creation, or migration; never
+    returns a local filesystem path.
     """
     try:
         safe_run_id = validate_run_id_for_path(run_id)
@@ -129,4 +306,9 @@ def get_agent_outputs_response(run_id: Any, output_root: str = "outputs/runs") -
     }
 
 
-__all__ = ["get_agent_outputs_response", "AgentOutputsReadError", "STRUCTURED_ARTIFACT_FILENAME"]
+__all__ = [
+    "get_agent_outputs_response",
+    "AgentOutputsReadError",
+    "STRUCTURED_ARTIFACT_FILENAME",
+    "PUBLIC_STRUCTURED_OUTPUT_FIELDS",
+]
