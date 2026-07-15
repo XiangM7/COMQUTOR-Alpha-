@@ -1,88 +1,68 @@
 # 当前系统状态
 
-审查日期：2026-07-13
+审查日期：2026-07-14
 
-## 仓库与环境
+## 仓库基线
 
 - 分支：`comqutor-structure-layer`
-- 审查基线 HEAD：`652a6281495f852b8a25487db7b509eade4f812e`
-- 验收开始时工作树干净；本文件仅更新验收结果，尚未 commit
+- HEAD：`8578a07a979b0070b5321c1bc24adb78e8c7a183`
 - Python：`3.13.5`
 - Python 路径：`.venv/bin/python`
 - 项目要求：Python `>=3.10`
 
-当前 `.venv` 已安装项目依赖、dev 依赖、FastAPI、httpx 和声明的 provider SDK；`pip check` 无依赖破损。
+## 阶段状态
 
-## 当前主链路
+| 阶段 | 状态 |
+|---|---|
+| Week 0 baseline | PASS |
+| Week 1A output/research entry | PASS |
+| Week 2 Alpha mapping / structure extraction | PASS |
+| Week 3 graph / activation / persistence / graph API | PASS |
+| W4.0 specification freeze | PASS |
+| W4.1 deterministic conflict core | PASS |
+| W4.2 activation/conflict persistence | PASS |
+| W4.2 PostgreSQL verification | PASS |
+| W4.3 pipeline/API integration | NOT STARTED |
 
-`run_research_request()` 当前执行：
+这不表示 Week 4 全部完成，也不表示 COMQUTOR Alpha 已完成或已可用于公开生产部署。
 
-1. 捕获或接收 TradingAgents raw agent outputs。
-2. 生成 validated structured claims。
-3. 生成 Alpha matches。
-4. 生成 claim-level extracted structures。
-5. 根据实际 artifact 状态返回安全响应。
+## 验证结果
 
-一次完整 Week 1-2 run 必须包含：
+- `pip check`：PASS
+- SQLite fallback targeted tests：`4 passed`
+- Offline suite：`1035 passed, 1 skipped, 18 deselected, 0 failed`
+- PostgreSQL integration：`10 passed`
 
-- `raw_agent_outputs.json`
-- `structured_agent_outputs.json`
-- `alpha_matches.json`
-- `extracted_structures.json`
+## 数据库状态
 
-四项全部存在时状态才是 `completed`。部分生成时状态为 `partial`。
+- SQLite：离线和本地 fallback。
+- PostgreSQL：本地开发及 integration verification 数据库。
+- Migrations：`0001_create_week3_alpha_matches_and_structure_graphs`、
+  `0002_create_week4_alpha_activations_and_alpha_conflicts`。
+- 已实现表：`alpha_matches`、`structure_graphs`、`alpha_activations`、
+  `alpha_conflicts`。
+- PostgreSQL 已实际验证 JSONB、unique constraints、transaction rollback、
+  replace semantics、run isolation 和同 ticker 不同 run isolation。
 
-## Artifact 版本
+## 当前能力边界
 
-- Raw outputs：`week1a.raw_agent_outputs.v1`
-- Structured claims：`week1a.structured_agent_outputs.v2`
-- Alpha matches：`week2.alpha_matches.v2`
-- Extracted structures：`week2.extracted_structures.v2`
+- Week 1A 可安全保存 TradingAgents raw outputs，并通过 research entry 生成 run。
+- Week 2 可生成 structured claims、Alpha matches 和 claim-level extracted structures。
+- Week 3 可生成 Structure Graph、Alpha activation，并持久化及通过 graph API 读取。
+- W4.1 可确定性生成 admitted、suppressed、rejected conflict candidates、
+  evidence audit 和 main conflict。
+- W4.2 可原子持久化 activation/conflict rows，并确定性重建 W4.1 conflict payload。
+- Research pipeline 尚未自动调用 W4.1/W4.2 conflict persistence。
 
-Structured v2 为每条 claim 提供独立 `claim_id`，并用 `source_agent_output_id` 保留原始输出身份。Week 2 reader 仍可处理已有 v1 structured artifacts。
+## 未完成事项
 
-## Week 2 LLM 路径
+- W4.3 尚未接入 research pipeline。
+- Conflicts API：未实现。
+- Agent-outputs API：未实现。
+- Exposure Engine：`BLOCKED_BY_SEED`。
+- MSFT Golden Gate：`BLOCKED_BY_SPEC_CONFLICT`。
+- Authentication、authorization、tenant ownership：未实现。
+- Alpha Memory、跨 run feedback：未实现。
+- Public production deployment：`NOT READY`。
 
-Week 2 LLM gateway 默认关闭。启用需要服务端设置 `COMQUTOR_WEEK2_LLM_ENABLED=1`，并配置：
-
-- `COMQUTOR_WEEK2_LLM_PROVIDER`
-- `COMQUTOR_WEEK2_LLM_MODEL`
-
-也可复用 `TRADINGAGENTS_LLM_PROVIDER` 和 `TRADINGAGENTS_QUICK_THINK_LLM`。HTTP request 不能提交 provider、model、API key 或真实运行开关。
-
-调用边界：
-
-- 严格 JSON object
-- 默认一次 retry
-- provider timeout 和 caller-side timeout
-- 每个 run 默认最多 32 次调用，硬上限 100
-- 失败后 deterministic fallback
-- 错误日志不保存 prompt、provider response、exception detail 或 credential
-
-`.env` 保持忽略，未修改、未提交。验收仅检查 provider/model/credential 是否存在，未输出配置值。
-
-## 当前验证结果
-
-- Compileall：通过
-- Ruff check：失败，`33` 项
-- Ruff format check：失败，`109` 个文件需要格式化
-- 完整离线 suite：`658 passed, 1 skipped, 2 deselected`，另有 `69` 个 subtests passed
-- FastAPI/API：`19 passed`
-- Week 1→2 end-to-end：`16 passed`
-- Week 2 LLM offline：`12 passed, 1 deselected`
-- Clean labeled claims：`20/20`，strict accuracy `100%`
-- Development Plan 八句验收：`8/8`
-- NVDA robustness：strict `23/30`，allowed `29/30`
-- NVDA 修改前基线：strict `18/30`，allowed `20/30`
-
-NVDA 数据仅为 robustness diagnostic，不代表真实市场准确率，也不是 80% gate。
-
-## 已知限制
-
-1. 当前持久化是 file-backed MVP，不是 Development Plan 中的正式数据库实现。
-2. 当前没有 provider/model/credential 配置，真实 provider smoke test 未执行。
-3. Structured deterministic splitter 和规则型 semantic parser 仍可能遗漏复杂长句。
-4. Week 2 只输出 claim-level nodes/edges，不是 Week 3 run-level Structure Graph。
-5. 可选 Bedrock SDK `langchain_aws` 未安装，对应测试跳过。
-6. 当前 Ruff check 与 format check 未通过。
-7. Graph coherence、activation、dominance、正式 conflict detection、Alpha Memory 和 outcome feedback 均未实现。
+`.env` 保持忽略，未修改、未提交。当前系统不是 production-ready。

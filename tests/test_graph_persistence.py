@@ -321,7 +321,7 @@ class TestReadWriteRepositoryConstruction:
     def _force_sqlite_fallback(self, monkeypatch):
         monkeypatch.delenv("COMQUTOR_DATABASE_URL", raising=False)
         monkeypatch.delenv("COMQUTOR_ENV", raising=False)
-        
+
     def test_write_repository_provisions_schema_and_can_persist_immediately(self, tmp_path):
         repo = build_write_repository_from_env(output_root=tmp_path)
 
