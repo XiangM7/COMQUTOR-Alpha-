@@ -329,8 +329,29 @@ def test_history_ticker_filter(tmp_path):
 
 
 def test_history_status_filter(tmp_path):
+    # W5.1B: a real-mode request with real execution server-disabled is now
+    # gated (REAL_RUN_DISABLED) *before* any row is claimed -- no fake
+    # queued/failed row is created for it (see
+    # research_lifecycle.prepare_research_submission). A failed history row
+    # is instead arranged directly against the repository, exactly as any
+    # other terminal run would appear.
     repo = _repo()
-    submit_research_request({"ticker": "NVDA"}, output_root=tmp_path, graph_repository=repo)  # fails: REAL_RUN_DISABLED
+    failed_claim = repo.claim_research_run(
+        run_id=None,
+        request_fingerprint="fp-history-status-filter-failed",
+        ticker="NVDA",
+        analysis_date="2026-06-30",
+        selected_analysts=["market"],
+        execution_mode="offline",
+        provider_identity="server_unconfigured",
+        model_identity="server_unconfigured",
+        pipeline_identity={},
+        force_refresh=False,
+    )
+    repo.mark_research_run_running(failed_claim["run_id"])
+    repo.mark_research_run_terminal(
+        failed_claim["run_id"], status="failed", error_code="INTERNAL_ERROR", error_message="boom"
+    )
     submit_research_request(_offline_payload(), output_root=tmp_path, graph_repository=repo)  # completes
 
     failed_history = get_research_run_history(status="failed", graph_repository=repo)

@@ -26,7 +26,7 @@ from comqutor_alpha.research_lifecycle import (
     ResearchLifecycleError,
     decode_run_history_cursor,
     encode_run_history_cursor,
-    submit_research_request,
+    submit_research_request,  # noqa: F401 -- re-exported; POST route now uses research_jobs.enqueue_research_request
 )
 from comqutor_alpha.storage.db.repository import (
     GraphPersistenceError,
@@ -129,8 +129,8 @@ def _map_exception_to_error(payload, exc):
     if isinstance(exc, ValueError):
         if message.startswith("INVALID_RUN_ID"):
             return _error_response(
-                payload, 
-                "INVALID_RUN_ID", 
+                payload,
+                "INVALID_RUN_ID",
                 "Invalid run_id.",
             )
         if message.startswith("INVALID_ARTIFACT_FILENAME"):
@@ -147,14 +147,14 @@ def _map_exception_to_error(payload, exc):
             )
         if message.startswith("INVALID_TICKER"):
             return _error_response(
-                payload, 
+                payload,
                 "INVALID_TICKER",
                 "Invalid ticker.",
             )
     if isinstance(exc, FileNotFoundError) and "raw_agent_outputs.json" in message:
         return _error_response(
-            payload, 
-            "RAW_OUTPUT_NOT_FOUND", 
+            payload,
+            "RAW_OUTPUT_NOT_FOUND",
             "Raw agent outputs not found.",
         )
     if isinstance(exc, RuntimeError) and "Real TradingAgents execution is disabled" in message:
@@ -165,15 +165,15 @@ def _map_exception_to_error(payload, exc):
         )
     if isinstance(exc, RuntimeError) and message.startswith("OFFLINE_DISABLED"):
         return _error_response(
-            payload, 
-            "OFFLINE_DISABLED", 
+            payload,
+            "OFFLINE_DISABLED",
             "Offline outputs are disabled.",
         )
     return _error_response(
-        payload, 
-        "INTERNAL_ERROR", 
+        payload,
+        "INTERNAL_ERROR",
         "Research request failed.",
-        )
+    )
 
 # Create an offline research run with provided payload and save outputs.
 def _create_offline_run(payload, output_root):
@@ -883,14 +883,14 @@ _RUN_STATUS_REQUIRED_FIELDS = {"run_id", "ticker", "status", "created_at", "upda
 # one DB SELECT against research_runs only. Never reads raw/structured
 # agent output files, never reads a graph file, never invokes an LLM or the
 # network, never performs a migration or a write.
-def get_research_run_status(run_id, *, graph_repository=None):
+def get_research_run_status(run_id, output_root=None, *, graph_repository=None):
     try:
         safe_run_id = validate_run_id_for_path(run_id)
     except ValueError:
         return _run_status_error_response(str(run_id), "INVALID_RUN_ID")
 
     try:
-        repository = graph_repository or build_repository_from_env()
+        repository = graph_repository or build_repository_from_env(output_root)
         record = repository.get_research_run_record(safe_run_id)
     except GraphPersistenceError as exc:
         logger.warning(
@@ -937,7 +937,9 @@ def _run_history_error_response(error_code):
 # only -- never walks the local run directory tree, never touches
 # raw/structured artifacts, never migrates or writes. Source of truth is
 # exclusively the database.
-def get_research_run_history(*, limit=20, cursor=None, ticker=None, status=None, graph_repository=None):
+def get_research_run_history(
+    *, limit=20, cursor=None, ticker=None, status=None, output_root=None, graph_repository=None
+):
     try:
         safe_limit = int(limit) if limit is not None else 20
     except (TypeError, ValueError):
@@ -962,7 +964,7 @@ def get_research_run_history(*, limit=20, cursor=None, ticker=None, status=None,
             return _run_history_error_response("INVALID_CURSOR")
 
     try:
-        repository = graph_repository or build_repository_from_env()
+        repository = graph_repository or build_repository_from_env(output_root)
         records = repository.list_research_run_records(
             limit=safe_limit + 1, cursor=decoded_cursor, ticker=safe_ticker, status=status
         )
@@ -991,7 +993,8 @@ def get_research_run_history(*, limit=20, cursor=None, ticker=None, status=None,
 
 
 try:
-    from fastapi import APIRouter
+    from fastapi import APIRouter, Request
+    from fastapi.responses import JSONResponse
     from pydantic import BaseModel
 
     # Support both Pydantic v2 (field_validator) and v1 (validator) without
@@ -1012,7 +1015,7 @@ try:
         # Pydantic v2 uses model_dump(); v1 only has dict().
         dump = getattr(model, "model_dump", None)
         return dump(exclude_none=True) if dump is not None else model.dict(exclude_none=True)
-    
+
     class ResearchRequest(BaseModel):
         ticker: str
         analysis_date: str | None = None
@@ -1033,29 +1036,78 @@ try:
 
     router = APIRouter()
 
+    # Stable disposition/error_code -> HTTP status mapping for the async
+    # POST route only (GET routes keep their existing "always 200, error
+    # detail in body" contract). Every error_code not listed here (e.g.
+    # OFFLINE_DISABLED, INVALID_ANALYST_SELECTION, CACHED_RUN_UNAVAILABLE,
+    # INTERNAL_ERROR) is a safe, generic 500 -- never guessed at per-code.
+    _RESEARCH_SUBMISSION_ERROR_HTTP_STATUS = {
+        "RUN_ID_CONFLICT": 409,
+        "INVALID_FORCE_REFRESH": 409,
+        "REAL_FORCE_REFRESH_DISABLED": 403,
+        "REAL_RUN_DISABLED": 503,
+        "REAL_RUN_CONFIG_INVALID": 503,
+        "RESEARCH_QUEUE_FULL": 503,
+        "JOB_MANAGER_UNAVAILABLE": 503,
+    }
+
+    def _research_submission_http_status(result):
+        error_code = result.get("error_code")
+        if result.get("status") == "failed" and error_code:
+            return _RESEARCH_SUBMISSION_ERROR_HTTP_STATUS.get(error_code, 500)
+        if result.get("cache_disposition") == "reused_completed":
+            # Canonical result already exists (completed/partial/failed
+            # terminal reuse) -- served synchronously, HTTP 200.
+            return 200
+        # created / force_refreshed / reused_in_flight: accepted for
+        # background processing (or already running) -- HTTP 202.
+        return 202
+
     @router.post("/api/research")
-    def post_research(request: ResearchRequest):
-        return submit_research_request(_model_to_payload(request))
+    def post_research(request: ResearchRequest, http_request: Request):
+        # POST is asynchronous (W5.1B): the pipeline never runs on this
+        # request thread. enqueue_research_request claims/reuses exactly
+        # like submit_research_request, then hands actual execution off to
+        # the app-lifespan-managed background job manager.
+        from comqutor_alpha.research_jobs import enqueue_research_request
+
+        job_manager = getattr(http_request.app.state, "job_manager", None)
+        output_root = getattr(http_request.app.state, "output_root", None)
+        result = enqueue_research_request(
+            _model_to_payload(request), output_root=output_root, job_manager=job_manager
+        )
+        return JSONResponse(content=result, status_code=_research_submission_http_status(result))
+
+    def _request_output_root(http_request: Request):
+        # Every read route resolves the *same* output_root/database the
+        # background job manager and POST route were configured with (see
+        # create_app's ``app.state.output_root``) -- never the function's
+        # own literal "outputs/runs" default, which would silently diverge
+        # from a server configured with a custom output_root/
+        # COMQUTOR_OUTPUT_DIR and make a just-created run invisible to
+        # status polling.
+        return getattr(http_request.app.state, "output_root", None)
 
     @router.get("/api/research/{run_id}")
-    def get_research_run_route(run_id: str):
-        return get_research_run(run_id)
+    def get_research_run_route(run_id: str, http_request: Request):
+        return get_research_run(run_id, _request_output_root(http_request))
 
     @router.get("/api/research/{run_id}/graph")
-    def get_research_graph_route(run_id: str):
-        return get_persisted_structure_graph(run_id)
+    def get_research_graph_route(run_id: str, http_request: Request):
+        return get_persisted_structure_graph(run_id, _request_output_root(http_request))
 
     @router.get("/api/research/{run_id}/conflicts")
-    def get_research_conflicts_route(run_id: str):
-        return get_persisted_conflicts(run_id)
+    def get_research_conflicts_route(run_id: str, http_request: Request):
+        return get_persisted_conflicts(run_id, _request_output_root(http_request))
 
     @router.get("/api/research/{run_id}/agent-outputs")
-    def get_research_agent_outputs_route(run_id: str):
-        return get_agent_outputs_response(run_id)
+    def get_research_agent_outputs_route(run_id: str, http_request: Request):
+        output_root = _request_output_root(http_request)
+        return get_agent_outputs_response(run_id, output_root if output_root is not None else "outputs/runs")
 
     @router.get("/api/research/{run_id}/status")
-    def get_research_status_route(run_id: str):
-        return get_research_run_status(run_id)
+    def get_research_status_route(run_id: str, http_request: Request):
+        return get_research_run_status(run_id, _request_output_root(http_request))
 
     # Registered as a distinct exact path ("/api/research", no trailing
     # segment) -- FastAPI/Starlette route matching is template-exact, so
@@ -1064,12 +1116,15 @@ try:
     # tests/test_research_runs_api.py::test_history_route_not_swallowed_by_run_id_route).
     @router.get("/api/research")
     def get_research_history_route(
+        http_request: Request,
         limit: int = 20,
         cursor: str | None = None,
         ticker: str | None = None,
         status: str | None = None,
     ):
-        return get_research_run_history(limit=limit, cursor=cursor, ticker=ticker, status=status)
+        return get_research_run_history(
+            limit=limit, cursor=cursor, ticker=ticker, status=status, output_root=_request_output_root(http_request)
+        )
 
 except ImportError:
     router = None

@@ -348,6 +348,27 @@ class GraphPersistenceRepository:
         # real status through ``run_status`` regardless of this value.
         return "reused_completed", dict(existing)
 
+    # Bounded retry count for the race-recovery loop in claim_research_run.
+    # Not infinite: a run of genuinely pathological concurrency (far beyond
+    # what a LOCAL_SINGLE_INSTANCE_READY deployment ever sees) must still
+    # terminate in a stable, safe RESEARCH_RUN_CLAIM_CONFLICT rather than
+    # spin forever.
+    _MAX_CLAIM_ATTEMPTS = 3
+
+    def _insert_new_run(self, conn: sa.engine.Connection, values: Mapping[str, Any]) -> None:
+        """Isolated so tests can inject a one-shot ``IntegrityError`` here to
+        deterministically exercise the race-recovery loop without relying on
+        real thread timing."""
+        conn.execute(sa.insert(research_runs).values(**values))
+
+    def _on_claim_race(self, attempt: int, request_fingerprint: str) -> None:
+        """Test seam invoked immediately after a race is detected and the
+        losing transaction has cleanly rolled back, before the next
+        full-decision retry attempt. No-op in production; tests use it to
+        deterministically advance "the winner" (e.g. to completed) inside
+        the recovery window."""
+        return None
+
     def claim_research_run(
         self,
         *,
@@ -371,90 +392,115 @@ class GraphPersistenceRepository:
         claiming the identical ``request_fingerprint`` are arbitrated by the
         ``active_fingerprint`` UNIQUE constraint -- exactly one of them ever
         gets ``created``/``force_refreshed``; the rest observe
-        ``reused_in_flight``, never an internal error.
+        ``reused_in_flight`` (or, if the winner has already reached a
+        terminal status by the time a loser recovers, whatever that
+        terminal outcome actually is) -- never an internal error.
+
+        Each race re-runs the *entire* decision (explicit run_id -> active
+        fingerprint -> completed cache -> insert) from scratch in a fresh
+        transaction, bounded by ``_MAX_CLAIM_ATTEMPTS``. A loser is never
+        satisfied by a single ad-hoc re-query of just the active-fingerprint
+        row -- the winner may have already finished (completed/partial/
+        failed) before the loser's recovery runs.
         """
         self._require_supported_dialect()
-        try:
-            with self._engine.begin() as conn:
-                if run_id is not None:
-                    existing = conn.execute(
-                        sa.select(research_runs).where(research_runs.c.run_id == run_id)
-                    ).mappings().first()
-                    if existing is not None:
-                        if force_refresh and existing["request_fingerprint"] == request_fingerprint:
-                            raise GraphPersistenceError("INVALID_FORCE_REFRESH")
-                        disposition, record = self._existing_run_disposition(existing, request_fingerprint)
-                        return {"run_id": record["run_id"], "disposition": disposition, "record": record}
-
-                active_row = conn.execute(self._active_fingerprint_statement(request_fingerprint)).mappings().first()
-                if active_row is not None:
-                    return {"run_id": active_row["run_id"], "disposition": "reused_in_flight", "record": dict(active_row)}
-
-                if not force_refresh:
-                    completed_row = conn.execute(self._latest_completed_statement(request_fingerprint)).mappings().first()
-                    if completed_row is not None:
-                        return {
-                            "run_id": completed_row["run_id"],
-                            "disposition": "reused_completed",
-                            "record": dict(completed_row),
-                        }
-
-                new_run_id = run_id or str(uuid4())
-                now = datetime.now(UTC)
-                values = {
-                    "run_id": new_run_id,
-                    "request_fingerprint": request_fingerprint,
-                    "active_fingerprint": request_fingerprint,
-                    "ticker": ticker,
-                    "analysis_date": analysis_date,
-                    "selected_analysts": list(selected_analysts),
-                    "execution_mode": execution_mode,
-                    "provider_identity": provider_identity,
-                    "model_identity": model_identity,
-                    "pipeline_identity": dict(pipeline_identity),
-                    "status": "queued",
-                    "stage": "accepted",
-                    "error_code": None,
-                    "error_message": None,
-                    "created_at": now,
-                    "updated_at": now,
-                }
-                try:
-                    conn.execute(sa.insert(research_runs).values(**values))
-                except IntegrityError as exc:
-                    raise _ResearchRunClaimRace() from exc
-                record = dict(values)
-                record["started_at"] = None
-                record["completed_at"] = None
-                return {
-                    "run_id": new_run_id,
-                    "disposition": "force_refreshed" if force_refresh else "created",
-                    "record": record,
-                }
-        except _ResearchRunClaimRace:
-            pass
-        except SQLAlchemyError as exc:
-            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
-
-        # A concurrent claim won the active_fingerprint (or run_id) race --
-        # this transaction was cleanly rolled back above. Re-query in a
-        # fresh transaction and report the winner, rather than surfacing a
-        # normal concurrency outcome as an internal error.
-        try:
-            with self._engine.begin() as conn:
-                active_row = conn.execute(self._active_fingerprint_statement(request_fingerprint)).mappings().first()
-                if active_row is not None:
-                    return {"run_id": active_row["run_id"], "disposition": "reused_in_flight", "record": dict(active_row)}
-                if run_id is not None:
-                    existing = conn.execute(
-                        sa.select(research_runs).where(research_runs.c.run_id == run_id)
-                    ).mappings().first()
-                    if existing is not None:
-                        disposition, record = self._existing_run_disposition(existing, request_fingerprint)
-                        return {"run_id": record["run_id"], "disposition": disposition, "record": record}
-        except SQLAlchemyError as exc:
-            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        for attempt in range(self._MAX_CLAIM_ATTEMPTS):
+            try:
+                return self._claim_research_run_once(
+                    run_id=run_id,
+                    request_fingerprint=request_fingerprint,
+                    ticker=ticker,
+                    analysis_date=analysis_date,
+                    selected_analysts=selected_analysts,
+                    execution_mode=execution_mode,
+                    provider_identity=provider_identity,
+                    model_identity=model_identity,
+                    pipeline_identity=pipeline_identity,
+                    force_refresh=force_refresh,
+                )
+            except _ResearchRunClaimRace:
+                self._on_claim_race(attempt, request_fingerprint)
+                continue
+            except SQLAlchemyError as exc:
+                raise GraphPersistenceError("DB_WRITE_FAILED") from exc
         raise GraphPersistenceError("RESEARCH_RUN_CLAIM_CONFLICT")
+
+    def _claim_research_run_once(
+        self,
+        *,
+        run_id: str | None,
+        request_fingerprint: str,
+        ticker: str,
+        analysis_date: str | None,
+        selected_analysts: Sequence[str],
+        execution_mode: str,
+        provider_identity: str,
+        model_identity: str,
+        pipeline_identity: Mapping[str, Any],
+        force_refresh: bool,
+    ) -> dict[str, Any]:
+        """One full claim decision inside one fresh transaction. Raises
+        ``_ResearchRunClaimRace`` (transaction already rolled back by the
+        surrounding ``engine.begin()`` context) when a concurrent claim wins
+        the ``active_fingerprint``/``run_id`` race at INSERT time -- the
+        caller (``claim_research_run``) is responsible for retrying this
+        from scratch."""
+        with self._engine.begin() as conn:
+            if run_id is not None:
+                existing = conn.execute(
+                    sa.select(research_runs).where(research_runs.c.run_id == run_id)
+                ).mappings().first()
+                if existing is not None:
+                    if force_refresh and existing["request_fingerprint"] == request_fingerprint:
+                        raise GraphPersistenceError("INVALID_FORCE_REFRESH")
+                    disposition, record = self._existing_run_disposition(existing, request_fingerprint)
+                    return {"run_id": record["run_id"], "disposition": disposition, "record": record}
+
+            active_row = conn.execute(self._active_fingerprint_statement(request_fingerprint)).mappings().first()
+            if active_row is not None:
+                return {"run_id": active_row["run_id"], "disposition": "reused_in_flight", "record": dict(active_row)}
+
+            if not force_refresh:
+                completed_row = conn.execute(self._latest_completed_statement(request_fingerprint)).mappings().first()
+                if completed_row is not None:
+                    return {
+                        "run_id": completed_row["run_id"],
+                        "disposition": "reused_completed",
+                        "record": dict(completed_row),
+                    }
+
+            new_run_id = run_id or str(uuid4())
+            now = datetime.now(UTC)
+            values = {
+                "run_id": new_run_id,
+                "request_fingerprint": request_fingerprint,
+                "active_fingerprint": request_fingerprint,
+                "ticker": ticker,
+                "analysis_date": analysis_date,
+                "selected_analysts": list(selected_analysts),
+                "execution_mode": execution_mode,
+                "provider_identity": provider_identity,
+                "model_identity": model_identity,
+                "pipeline_identity": dict(pipeline_identity),
+                "status": "queued",
+                "stage": "accepted",
+                "error_code": None,
+                "error_message": None,
+                "created_at": now,
+                "updated_at": now,
+            }
+            try:
+                self._insert_new_run(conn, values)
+            except IntegrityError as exc:
+                raise _ResearchRunClaimRace() from exc
+            record = dict(values)
+            record["started_at"] = None
+            record["completed_at"] = None
+            return {
+                "run_id": new_run_id,
+                "disposition": "force_refreshed" if force_refresh else "created",
+                "record": record,
+            }
 
     def mark_research_run_running(self, run_id: str) -> dict[str, Any]:
         """queued -> running. Idempotent no-op if already running. Sets
@@ -533,6 +579,63 @@ class GraphPersistenceRepository:
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_WRITE_FAILED") from exc
 
+    def mark_research_run_failed_if_active(
+        self,
+        run_id: str,
+        *,
+        error_code: str,
+        error_message: str | None = None,
+    ) -> bool:
+        """Atomically fail a run only if it is currently queued/running.
+
+        A single conditional ``UPDATE ... WHERE status IN (queued, running)``
+        -- never a SELECT-then-overwrite -- so this is safe to call from a
+        supervisor racing against the worker process itself finishing
+        normally: whichever writes first wins, and the loser's update simply
+        matches zero rows (returns ``False``) instead of clobbering an
+        already-terminal outcome. Always clears ``active_fingerprint`` when
+        it does apply, exactly like :meth:`mark_research_run_terminal`.
+        """
+        self._require_supported_dialect()
+        now = datetime.now(UTC)
+        try:
+            with self._engine.begin() as conn:
+                result = conn.execute(
+                    sa.update(research_runs)
+                    .where(research_runs.c.run_id == run_id)
+                    .where(research_runs.c.status.in_(list(ACTIVE_RESEARCH_RUN_STATUSES)))
+                    .values(
+                        status="failed",
+                        stage="failed",
+                        error_code=error_code,
+                        error_message=error_message,
+                        active_fingerprint=None,
+                        completed_at=now,
+                        updated_at=now,
+                    )
+                )
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        return result.rowcount > 0
+
+    def list_active_research_run_records(self) -> list[dict[str, Any]]:
+        """All currently queued/running rows. Local single-instance startup
+        reconciliation only -- never paginated, since a healthy local
+        instance never accumulates more than a handful of these."""
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                rows = conn.execute(
+                    sa.select(research_runs).where(
+                        research_runs.c.status.in_(list(ACTIVE_RESEARCH_RUN_STATUSES))
+                    )
+                ).mappings().all()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return [dict(row) for row in rows]
+
     def get_research_run_record(self, run_id: str) -> dict[str, Any] | None:
         if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
             return None
@@ -606,7 +709,13 @@ class GraphPersistenceRepository:
         try:
             with self._engine.connect() as conn:
                 rows = conn.execute(stmt).mappings().all()
-        except (SQLAlchemyError, ValueError) as exc:
+        except SQLAlchemyError as exc:
+            # Deliberately does NOT also catch ValueError here: a cursor's
+            # semantic validity (JSON shape, parseable timestamp, safe
+            # run_id) is decode_run_history_cursor's job, called before this
+            # method ever runs. A ValueError reaching this far would be a
+            # caller bug, not a "storage is unavailable" condition, so it is
+            # never mapped into DB_READ_FAILED.
             raise GraphPersistenceError("DB_READ_FAILED") from exc
         return [dict(row) for row in rows]
 
