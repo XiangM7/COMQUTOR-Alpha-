@@ -130,7 +130,8 @@ def build_server_tradingagents_config() -> dict[str, Any]:
     propagate) is folded into the exact same stable
     ``REAL_RUN_CONFIG_INVALID`` reason code, so a native TradingAgents
     config error can never surface as an unhandled HTTP 500, a startup
-    crash, or a leaked exception message/traceback outside DEBUG logging.
+    crash, or a leaked exception message/traceback -- at *any* log level,
+    including DEBUG. Only the exception's type name is ever logged.
     """
     try:
         from tradingagents.default_config import DEFAULT_CONFIG
@@ -154,16 +155,17 @@ def build_server_tradingagents_config() -> dict[str, Any]:
     except ServerExecutionConfigError:
         raise
     except Exception as exc:
-        # Never the raw exception message/type in a normal log line (it may
-        # echo back an env var name/value) -- only a bare exc_type at
-        # WARNING, with the actual traceback gated behind DEBUG, and never
-        # the environment or the config dict itself at any level.
+        # Never the raw exception message/repr/traceback (it may echo back
+        # an env var name/value from TradingAgents' own config parsing) --
+        # at *any* log level, including DEBUG. Only a bare, stable static
+        # message plus the exception's type name, ever.
         logger.warning(
-            "server-side TradingAgents config construction failed unexpectedly (exc_type=%s)",
+            "server-side TradingAgents config construction failed (exc_type=%s)",
             type(exc).__name__,
         )
         logger.debug(
-            "server-side TradingAgents config construction failed unexpectedly", exc_info=True
+            "server-side TradingAgents config construction failed (exc_type=%s)",
+            type(exc).__name__,
         )
         raise ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID") from exc
 
@@ -231,9 +233,11 @@ def build_server_execution_context() -> dict[str, Any]:
         return {"enabled": True, "config": None, "execution_identity": None, "error": exc.reason_code}
     except Exception as exc:
         logger.warning(
-            "server execution context construction failed unexpectedly (exc_type=%s)", type(exc).__name__
+            "server execution context construction failed (exc_type=%s)", type(exc).__name__
         )
-        logger.debug("server execution context construction failed unexpectedly", exc_info=True)
+        logger.debug(
+            "server execution context construction failed (exc_type=%s)", type(exc).__name__
+        )
         return {"enabled": True, "config": None, "execution_identity": None, "error": "REAL_RUN_CONFIG_INVALID"}
 
     return {

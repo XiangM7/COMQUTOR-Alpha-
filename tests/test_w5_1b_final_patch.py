@@ -188,10 +188,23 @@ def _make_manager(repo, *, factory, **overrides):
 
 
 def test_shutdown_during_blocking_start_terminates_process_and_marks_failed(tmp_path):
+    """Proves the exact gap this patch closes: with the *previous*
+    implementation, ``shutdown()`` would return once its fixed
+    ``supervisor_thread.join(timeout=max(1.0, shutdown_grace_seconds))``
+    expired -- here that bound is ``max(1.0, 2) == 2.0`` seconds -- even
+    though the supervisor thread was still blocked inside
+    ``process.start()`` and ``_starting`` was still non-empty. This test
+    holds the block open well past that old timeout and asserts
+    ``shutdown()`` is *still* running (not returned, thread still alive,
+    ``starting_count() == 1``, nothing yet marked failed) before ever
+    releasing the gate -- something the previous implementation could not
+    have passed.
+    """
     repo = _file_repo(tmp_path)
     start_gate = threading.Event()
     started_signal = threading.Event()
     processes = []
+    old_join_timeout = max(1.0, 2)  # shutdown_grace_seconds=2 from _make_manager
 
     def factory(target, args):
         p = _BlockingStartProcess(target, args, start_gate=start_gate, started_signal=started_signal)
@@ -213,6 +226,15 @@ def test_shutdown_during_blocking_start_terminates_process_and_marks_failed(tmp_
     time.sleep(0.2)  # let shutdown() begin (accepting=False, stopped set)
     assert jm.is_accepting() is False
 
+    # Wait well past the OLD fixed join timeout while still holding the
+    # gate closed -- shutdown() must NOT have returned by now.
+    time.sleep(old_join_timeout + 1.0)
+    assert shutdown_thread.is_alive() is True
+    assert jm.starting_count() == 1
+    assert jm.is_accepting() is False
+    still_pending_record = repo.get_research_run_record(run_id)
+    assert still_pending_record["status"] == "queued"  # not yet touched
+
     # Now release the blocked start() call.
     start_gate.set()
     shutdown_thread.join(timeout=10.0)
@@ -228,6 +250,9 @@ def test_shutdown_during_blocking_start_terminates_process_and_marks_failed(tmp_
     assert record["error_code"] == "SERVER_SHUTDOWN"
     assert record["active_fingerprint"] is None
     assert jm.is_accepting() is False
+    # F. supervisor thread reference state: never alive after shutdown.
+    supervisor_thread = jm._supervisor_thread  # noqa: SLF001 -- test-only inspection
+    assert supervisor_thread is None or supervisor_thread.is_alive() is False
 
 
 def test_shutdown_before_any_start_fails_pending_job(tmp_path):
@@ -352,6 +377,113 @@ def test_no_new_process_escapes_after_shutdown_begins(tmp_path):
     time.sleep(0.05)
     assert jm.active_count() == 0
     assert jm.pending_count() == 0
+
+
+def test_shutdown_during_start_that_then_raises_marks_server_shutdown(tmp_path):
+    """process.start() itself raises (not merely blocks) while shutdown is
+    in progress -- must still be attributed to SERVER_SHUTDOWN, never
+    RESEARCH_WORKER_START_FAILED (which would misleadingly suggest a normal
+    operational failure rather than a deliberate shutdown)."""
+
+    class _BlockingThenRaisingStartProcess:
+        def __init__(self, target, args, *, start_gate, started_signal):
+            self.target = target
+            self.args = args
+            self._start_gate = start_gate
+            self._started_signal = started_signal
+            self._alive = False
+            self.exitcode = None
+
+        def start(self):
+            self._started_signal.set()
+            self._start_gate.wait(timeout=10.0)
+            raise OSError("could not fork/spawn (simulated, during shutdown)")
+
+        def is_alive(self):
+            return self._alive
+
+        def terminate(self):
+            self._alive = False
+
+        def kill(self):
+            self._alive = False
+
+        def join(self, timeout=None):
+            return None
+
+    repo = _file_repo(tmp_path)
+    start_gate = threading.Event()
+    started_signal = threading.Event()
+
+    def factory(target, args):
+        return _BlockingThenRaisingStartProcess(target, args, start_gate=start_gate, started_signal=started_signal)
+
+    jm = _make_manager(repo, factory=factory)
+    jm.start()
+    run_id = _claim(repo, "fp-blocking-start-then-raise")
+    assert jm.submit(run_id, {}, disposition="created", ticker="NVDA")
+
+    assert started_signal.wait(timeout=5.0)
+    assert jm.starting_count() == 1
+
+    shutdown_thread = threading.Thread(target=jm.shutdown)
+    shutdown_thread.start()
+    time.sleep(0.2)
+    assert jm.is_accepting() is False
+
+    start_gate.set()
+    shutdown_thread.join(timeout=10.0)
+    assert not shutdown_thread.is_alive()
+    assert jm.starting_count() == 0
+
+    record = repo.get_research_run_record(run_id)
+    assert record is not None
+    assert record["status"] == "failed"
+    assert record["error_code"] == "SERVER_SHUTDOWN"
+    assert record["error_code"] != "RESEARCH_WORKER_START_FAILED"
+    assert record["active_fingerprint"] is None
+
+
+def test_shutdown_then_restart_is_rejected(tmp_path):
+    repo = _file_repo(tmp_path)
+
+    def factory(target, args):
+        return _FakeProcess(target, args)
+
+    jm = _make_manager(repo, factory=factory)
+    jm.start()
+    jm.shutdown()
+    assert jm.is_accepting() is False
+
+    with pytest.raises(research_jobs.JobManagerConfigError) as exc_info:
+        jm.start()
+    assert exc_info.value.reason_code == "JOB_MANAGER_ALREADY_SHUT_DOWN"
+
+    # start() must not have partially resurrected anything before raising.
+    assert jm.is_accepting() is False
+    assert jm._stopped.is_set() is True  # noqa: SLF001 -- test-only inspection
+    supervisor_thread = jm._supervisor_thread  # noqa: SLF001
+    assert supervisor_thread is None or supervisor_thread.is_alive() is False
+
+
+def test_shutdown_after_start_failure_supervisor_thread_state(tmp_path):
+    """Belt-and-suspenders check of the supervisor-thread-reference
+    invariant on a plain (non-blocking) shutdown path, not just the
+    blocking-start scenario above."""
+    repo = _file_repo(tmp_path)
+
+    def factory(target, args):
+        return _FakeProcess(target, args)
+
+    jm = _make_manager(repo, factory=factory)
+    jm.start()
+    supervisor_thread = jm._supervisor_thread  # noqa: SLF001
+    assert supervisor_thread is not None
+    assert supervisor_thread.is_alive() is True
+
+    jm.shutdown()
+
+    assert supervisor_thread.is_alive() is False
 
 
 # ===========================================================================
@@ -771,6 +903,133 @@ def test_fresh_subprocess_native_env_error_maps_to_real_run_config_invalid():
     assert payload["error"] == "REAL_RUN_CONFIG_INVALID"
     assert payload["config_is_none"] is True
     assert payload["execution_identity_is_none"] is True
+
+
+# ===========================================================================
+# D2. Server config DEBUG non-leakage (this patch's Fix 2)
+# ===========================================================================
+
+
+def test_debug_log_does_not_leak_exception_content_from_config_builder(monkeypatch, caplog):
+    import logging as logging_module
+    from unittest.mock import patch
+
+    from comqutor_alpha import server_execution
+
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    secret_marker = "super-secret-config-marker"
+
+    def raising_deepcopy(_value):
+        raise ValueError(
+            f"Invalid value for TRADINGAGENTS_MAX_DEBATE_ROUNDS: invalid literal for int() "
+            f"with base 10: '{secret_marker}'"
+        )
+
+    caplog.set_level(logging_module.DEBUG, logger="comqutor_alpha.server_execution")
+    with (
+        patch("copy.deepcopy", raising_deepcopy),
+        pytest.raises(server_execution.ServerExecutionConfigError),
+    ):
+        server_execution.build_server_tradingagents_config()
+
+    assert "ValueError" in caplog.text
+    assert secret_marker not in caplog.text
+    assert "TRADINGAGENTS_MAX_DEBATE_ROUNDS" not in caplog.text
+    assert "Traceback" not in caplog.text
+    assert 'File "' not in caplog.text
+    assert "invalid literal for int" not in caplog.text
+
+
+def test_debug_log_does_not_leak_exception_content_from_execution_context(monkeypatch, caplog):
+    import logging as logging_module
+
+    from comqutor_alpha import server_execution
+
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    secret_marker = "second-secret-marker"
+
+    def raising_config_builder():
+        raise RuntimeError(f"native config failure mentioning {secret_marker}")
+
+    monkeypatch.setattr(server_execution, "build_server_tradingagents_config", raising_config_builder)
+
+    caplog.set_level(logging_module.DEBUG, logger="comqutor_alpha.server_execution")
+    ctx = server_execution.build_server_execution_context()
+
+    assert ctx["error"] == "REAL_RUN_CONFIG_INVALID"
+    assert ctx["config"] is None
+    assert secret_marker not in caplog.text
+    assert "Traceback" not in caplog.text
+    assert 'File "' not in caplog.text
+    assert "RuntimeError" in caplog.text
+
+
+def test_fresh_subprocess_debug_logging_does_not_leak_env_or_traceback():
+    """Same fresh-process rationale as the test above, but this time the
+    subprocess explicitly enables DEBUG logging (``logging.basicConfig
+    (level=logging.DEBUG)``) before calling
+    ``build_server_execution_context()`` -- proving the non-leakage holds
+    even when an operator has turned on the most verbose logging level this
+    module supports, not just at the WARNING default."""
+    script = (
+        "import json\n"
+        "import logging\n"
+        "logging.basicConfig(level=logging.DEBUG)\n"
+        "import comqutor_alpha.server_execution as se\n"
+        "ctx = se.build_server_execution_context()\n"
+        "print(json.dumps({'error': ctx['error'], 'config_is_none': ctx['config'] is None}))\n"
+    )
+    env = dict(os.environ)
+    env["COMQUTOR_REAL_TRADINGAGENTS_ENABLED"] = "true"
+    env["TRADINGAGENTS_MAX_DEBATE_ROUNDS"] = "debug-secret-marker"
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=str(REPO_ROOT),
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0
+    combined_output = result.stdout + result.stderr
+    assert "debug-secret-marker" not in combined_output
+    assert "TRADINGAGENTS_MAX_DEBATE_ROUNDS" not in combined_output
+    assert "Traceback" not in combined_output
+    # A bare exception type name is explicitly allowed to appear.
+    assert "ValueError" in combined_output
+
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["error"] == "REAL_RUN_CONFIG_INVALID"
+    assert payload["config_is_none"] is True
+
+
+def test_keyboard_interrupt_is_not_swallowed_by_config_builder_boundary(monkeypatch):
+    from unittest.mock import patch
+
+    from comqutor_alpha import server_execution
+
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+
+    def raising_deepcopy(_value):
+        raise KeyboardInterrupt()
+
+    with patch("copy.deepcopy", raising_deepcopy), pytest.raises(KeyboardInterrupt):
+        server_execution.build_server_tradingagents_config()
+
+
+def test_system_exit_is_not_swallowed_by_execution_context_boundary(monkeypatch):
+    from comqutor_alpha import server_execution
+
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+
+    def raising_config_builder():
+        raise SystemExit(1)
+
+    monkeypatch.setattr(server_execution, "build_server_tradingagents_config", raising_config_builder)
+    with pytest.raises(SystemExit):
+        server_execution.build_server_execution_context()
 
 
 # ===========================================================================

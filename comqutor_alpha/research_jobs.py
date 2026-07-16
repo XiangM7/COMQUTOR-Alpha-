@@ -222,6 +222,10 @@ class JobManager:
         self._wake = threading.Event()
         self._supervisor_thread: threading.Thread | None = None
         self._repository: Any = None
+        # One-way latch: once shutdown() has run (even if concurrent calls
+        # race to enter it), this JobManager instance is permanently done --
+        # start() must never resurrect it (see start()/shutdown()).
+        self._ever_shutdown = False
 
     # -- properties -----------------------------------------------------
 
@@ -269,10 +273,22 @@ class JobManager:
 
     def start(self) -> None:
         """Begins accepting jobs and starts the supervisor thread. Never
-        called at import time -- only by the API lifespan startup hook."""
-        self._stopped.clear()
+        called at import time -- only by the API lifespan startup hook.
+
+        Raises ``JobManagerConfigError("JOB_MANAGER_ALREADY_SHUT_DOWN")`` if
+        ``shutdown()`` has already run on this instance -- a JobManager is
+        one-shot for the lifetime of one API process run; it must never
+        silently ``self._stopped.clear()`` and resurrect a supervisor loop
+        that has already torn down every worker and released every
+        ``active_fingerprint``. Build a fresh ``JobManager`` instead (the
+        normal API lifespan already does exactly one ``start()``/one
+        ``shutdown()`` per process).
+        """
         with self._lock:
+            if self._ever_shutdown:
+                raise JobManagerConfigError("JOB_MANAGER_ALREADY_SHUT_DOWN")
             self._accepting = True
+        self._stopped.clear()
         self._supervisor_thread = threading.Thread(
             target=self._supervise_loop, name="comqutor-job-supervisor", daemon=True
         )
@@ -328,6 +344,14 @@ class JobManager:
         starting job with ``SERVER_SHUTDOWN`` -- never leaves a zombie
         process or a row permanently stuck holding ``active_fingerprint``.
 
+        Idempotent and a one-way latch: the *first* call does the full
+        teardown described above; every subsequent call (this instance has
+        already been shut down) returns immediately without touching
+        anything -- never re-terminates a process, never re-marks a
+        terminal row, never raises. ``start()`` on this same instance after
+        this point always raises ``JobManagerConfigError`` rather than
+        silently resurrecting a supervisor loop (see ``start()``).
+
         ``self._stopped`` is set *early* (before waiting out the grace
         period) so a concurrently in-flight ``_start_pending`` call --
         specifically one whose ``process.start()`` is still blocked when
@@ -339,8 +363,23 @@ class JobManager:
         thread itself resolves it to either ``_active`` or a terminal DB
         write -- there is no point at which ``shutdown()`` can observe a
         job in neither collection while its process is still running.
+
+        Critically, this method does **not** return until the supervisor
+        thread has actually exited: joining it uses no timeout at all
+        (an unbounded, polling ``while is_alive(): join(0.5)`` loop rather
+        than one fixed ``join(timeout=...)`` call whose expiry was
+        previously treated as "close enough"). A supervisor thread blocked
+        inside a job's ``process.start()`` call keeps this method waiting
+        for exactly as long as that call takes to return -- there is no
+        point at which ``shutdown()`` gives up and returns while
+        ``_starting``/the supervisor thread might still be live, which is
+        what previously let a `queued`/`running` row and its worker process
+        outlive a completed-looking ``shutdown()`` call.
         """
         with self._lock:
+            if self._ever_shutdown:
+                return
+            self._ever_shutdown = True
             self._accepting = False
         self._stopped.set()
         self._wake.set()
@@ -362,10 +401,9 @@ class JobManager:
             # remaining_starting deliberately NOT cleared/touched here --
             # only the supervisor thread may call .start()/.terminate() on
             # a process whose .start() it itself issued and may still be in
-            # flight (see _StartingJob's docstring). Waiting for the
-            # supervisor thread to join below is what guarantees these get
-            # resolved; the final sweep after the join catches whatever it
-            # leaves behind.
+            # flight (see _StartingJob's docstring). The unbounded join
+            # below is what guarantees these get fully resolved before this
+            # method returns.
 
         for run_id, active_job in remaining_active:
             self._terminate_process(active_job.process)
@@ -374,18 +412,31 @@ class JobManager:
             self._mark_failed_if_active(job.run_id, "SERVER_SHUTDOWN", "Server is shutting down.")
 
         self._wake.set()
-        if self._supervisor_thread is not None:
-            self._supervisor_thread.join(timeout=max(1.0, self._shutdown_grace_seconds))
 
-        # Final sweep: the supervisor thread's in-flight _start_pending call
-        # (if any) has, by now, either been joined (meaning it already fully
-        # resolved every starting/active job -- see _start_pending's
-        # post-start handling) or the join above timed out while it was
-        # still blocked. Either way, reap whatever the supervisor thread has
-        # since deposited into _active (it self-terminates anything it
-        # registered after observing self._stopped, but a final reap here
-        # is a harmless no-op if that already happened, and a necessary
-        # safety net if it has not yet).
+        # Unbounded wait for the supervisor thread to actually exit. No
+        # fixed timeout is ever "accepted" as good enough -- _supervise_loop
+        # only exits its `while not self._stopped.is_set()` loop after
+        # _start_pending() returns, and _start_pending() never returns
+        # mid-job: it always either resolves a popped job to _active or to
+        # a terminal DB write (see its post-start()/except-Exception
+        # handling) before its own `while True:` loop can advance again.
+        # Polling in short join() slices (rather than one blocking
+        # join()) keeps this responsive/interruptible without ever treating
+        # "still running" as a reason to give up and return.
+        if self._supervisor_thread is not None:
+            while self._supervisor_thread.is_alive():
+                self._supervisor_thread.join(timeout=0.5)
+
+        # Final sweep: the supervisor thread has, by now, fully exited --
+        # which (per _supervise_loop/_start_pending, see above) guarantees
+        # _starting is already empty and every job it was tracking has been
+        # resolved to either _active (if it raced shutdown and lost -- see
+        # _start_pending's post-start() handling, which self-terminates and
+        # self-marks-failed in that case, but may not have updated this
+        # manager's _active dict before the process was already stopped) or
+        # a terminal DB write. This sweep exists only to reap whatever the
+        # supervisor thread deposited into _active in that exact race
+        # window; it is a harmless no-op otherwise.
         self._reap_finished()
         with self._lock:
             leftover_active = list(self._active.items())
