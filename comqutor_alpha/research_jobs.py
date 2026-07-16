@@ -151,6 +151,25 @@ class _ActiveJob:
     started_at: float = field(default_factory=time.monotonic)
 
 
+@dataclass
+class _StartingJob:
+    """A job that has left ``_pending`` but has not yet been registered in
+    ``_active`` -- i.e. its process object may not exist yet, or exists but
+    ``process.start()`` has not returned. Registered in ``_starting`` under
+    the lock *before* ``process.start()`` is ever called, so a job is always
+    a member of exactly one of pending/starting/active/terminal -- there is
+    no window where ``shutdown()`` can observe neither. Only the supervisor
+    thread itself ever calls ``.start()``/``.terminate()`` on ``process``
+    (see ``_start_pending``) -- concurrently poking a ``multiprocessing.
+    Process`` whose ``.start()`` call is still in flight from a different
+    thread is not safe, so ``shutdown()`` never touches this object's
+    process directly; it only waits for the supervisor thread to resolve
+    it (bounded by joining that thread)."""
+
+    job: _Job
+    process: Any = None
+
+
 class JobManager:
     """Bounded local-process supervisor for background research runs.
 
@@ -191,6 +210,12 @@ class JobManager:
 
         self._lock = threading.RLock()
         self._pending: deque[_Job] = deque()
+        # Jobs that have left _pending but are not yet registered in
+        # _active -- see _StartingJob's docstring. Every job is always a
+        # member of exactly one of _pending/_starting/_active (or has
+        # already been resolved to a terminal DB status and removed from
+        # all three) -- there is no unmanaged in-between state.
+        self._starting: dict[str, _StartingJob] = {}
         self._active: dict[str, _ActiveJob] = {}
         self._accepting = False
         self._stopped = threading.Event()
@@ -216,6 +241,10 @@ class JobManager:
         with self._lock:
             return len(self._pending)
 
+    def starting_count(self) -> int:
+        with self._lock:
+            return len(self._starting)
+
     def active_count(self) -> int:
         with self._lock:
             return len(self._active)
@@ -226,6 +255,7 @@ class JobManager:
                 "max_workers": self._max_workers,
                 "queue_capacity": self._queue_capacity,
                 "active": len(self._active),
+                "starting": len(self._starting),
                 "pending": len(self._pending),
                 "accepting": self._accepting and not self._stopped.is_set(),
             }
@@ -284,7 +314,8 @@ class JobManager:
             if not self._accepting or self._stopped.is_set():
                 return False
             total_capacity = self._max_workers + self._queue_capacity
-            if len(self._active) + len(self._pending) >= total_capacity:
+            in_flight = len(self._active) + len(self._starting) + len(self._pending)
+            if in_flight >= total_capacity:
                 return False
             self._pending.append(job)
         self._wake.set()
@@ -293,16 +324,33 @@ class JobManager:
     def shutdown(self) -> None:
         """Stops accepting new jobs, waits up to ``shutdown_grace_seconds``
         for in-flight jobs to finish naturally, then forcibly terminates
-        anything still running and fails every remaining active/pending
-        job with ``SERVER_SHUTDOWN`` -- never leaves a zombie process or a
-        row permanently stuck holding ``active_fingerprint``."""
+        anything still running and fails every remaining active/pending/
+        starting job with ``SERVER_SHUTDOWN`` -- never leaves a zombie
+        process or a row permanently stuck holding ``active_fingerprint``.
+
+        ``self._stopped`` is set *early* (before waiting out the grace
+        period) so a concurrently in-flight ``_start_pending`` call --
+        specifically one whose ``process.start()`` is still blocked when
+        shutdown begins -- observes it the moment ``.start()`` returns (see
+        ``_start_pending``) and self-terminates/self-marks-failed rather
+        than ever registering the job as active after shutdown began. This
+        closes the escape window entirely: from the instant a job leaves
+        ``_pending``, it is tracked in ``_starting`` until the supervisor
+        thread itself resolves it to either ``_active`` or a terminal DB
+        write -- there is no point at which ``shutdown()`` can observe a
+        job in neither collection while its process is still running.
+        """
         with self._lock:
             self._accepting = False
+        self._stopped.set()
+        self._wake.set()
 
         deadline = time.monotonic() + self._shutdown_grace_seconds
         while time.monotonic() < deadline:
             self._reap_finished()
-            if self.active_count() == 0:
+            with self._lock:
+                quiescent = not self._active and not self._starting
+            if quiescent:
                 break
             time.sleep(min(0.05, max(0.0, deadline - time.monotonic())))
 
@@ -311,6 +359,13 @@ class JobManager:
             self._active.clear()
             remaining_pending = list(self._pending)
             self._pending.clear()
+            # remaining_starting deliberately NOT cleared/touched here --
+            # only the supervisor thread may call .start()/.terminate() on
+            # a process whose .start() it itself issued and may still be in
+            # flight (see _StartingJob's docstring). Waiting for the
+            # supervisor thread to join below is what guarantees these get
+            # resolved; the final sweep after the join catches whatever it
+            # leaves behind.
 
         for run_id, active_job in remaining_active:
             self._terminate_process(active_job.process)
@@ -318,10 +373,26 @@ class JobManager:
         for job in remaining_pending:
             self._mark_failed_if_active(job.run_id, "SERVER_SHUTDOWN", "Server is shutting down.")
 
-        self._stopped.set()
         self._wake.set()
         if self._supervisor_thread is not None:
             self._supervisor_thread.join(timeout=max(1.0, self._shutdown_grace_seconds))
+
+        # Final sweep: the supervisor thread's in-flight _start_pending call
+        # (if any) has, by now, either been joined (meaning it already fully
+        # resolved every starting/active job -- see _start_pending's
+        # post-start handling) or the join above timed out while it was
+        # still blocked. Either way, reap whatever the supervisor thread has
+        # since deposited into _active (it self-terminates anything it
+        # registered after observing self._stopped, but a final reap here
+        # is a harmless no-op if that already happened, and a necessary
+        # safety net if it has not yet).
+        self._reap_finished()
+        with self._lock:
+            leftover_active = list(self._active.items())
+            self._active.clear()
+        for run_id, active_job in leftover_active:
+            self._terminate_process(active_job.process)
+            self._mark_failed_if_active(run_id, "SERVER_SHUTDOWN", "Server is shutting down.")
 
     # -- supervisor loop --------------------------------------------------
 
@@ -351,9 +422,25 @@ class JobManager:
                 self._mark_failed_if_active(
                     run_id, "RESEARCH_WORKER_CRASHED", f"Worker process exited with code {exitcode}."
                 )
-            # exitcode == 0: the worker itself already wrote the terminal
-            # state via execute_claimed_research_run -- never overwritten
-            # here.
+            else:
+                # exitcode == 0 does NOT guarantee the worker's own terminal
+                # DB write (inside execute_claimed_research_run) actually
+                # landed -- e.g. a transient DB hiccup at the very end is
+                # suppressed there (_suppress_lifecycle_errors) precisely so
+                # the pipeline's real outcome is still returned/logged
+                # rather than crashing the worker, but that means a clean
+                # exit is never sufficient evidence the row reached a
+                # terminal status. This conditional update
+                # (WHERE status IN (queued, running)) is a safe no-op if the
+                # worker's write already landed, and a safe failure
+                # (fingerprint released) if it did not -- never a blind
+                # SELECT-then-overwrite, never a permanently stuck
+                # queued/running row.
+                self._mark_failed_if_active(
+                    run_id,
+                    "RESEARCH_WORKER_RESULT_NOT_PERSISTED",
+                    "Worker exited without persisting a terminal research status.",
+                )
 
     def _reap_timeouts(self) -> None:
         now = time.monotonic()
@@ -381,23 +468,58 @@ class JobManager:
             with self._lock:
                 if not self._accepting or self._stopped.is_set():
                     return
-                if len(self._active) >= self._max_workers or not self._pending:
+                if len(self._active) + len(self._starting) >= self._max_workers or not self._pending:
                     return
                 job = self._pending.popleft()
-            process = self._process_factory(
-                target=self._worker_entrypoint,
-                args=(job.run_id, job.execution_payload, job.output_root, job.disposition, job.ticker),
-            )
+                # Registered as "starting" immediately, still under the
+                # lock, before process construction/`.start()` is ever
+                # attempted -- from this instant the job is always
+                # findable (in _starting) even though it is not active yet,
+                # closing the pending-popped-but-nowhere-tracked window
+                # that previously let shutdown() race past it.
+                entry = _StartingJob(job=job)
+                self._starting[job.run_id] = entry
+
             try:
+                process = self._process_factory(
+                    target=self._worker_entrypoint,
+                    args=(job.run_id, job.execution_payload, job.output_root, job.disposition, job.ticker),
+                )
+                with self._lock:
+                    # Attach the process handle to the still-tracked entry
+                    # (if shutdown() has not already removed it -- it never
+                    # does concurrently, per the docstring above, but this
+                    # stays defensive/idempotent either way) so it is
+                    # visible for diagnostics even before .start() returns.
+                    if job.run_id in self._starting:
+                        self._starting[job.run_id].process = process
                 process.start()
             except Exception:
-                logger.warning("worker process failed to start (run_id=%s)", job.run_id)
-                self._mark_failed_if_active(
-                    job.run_id, "RESEARCH_WORKER_START_FAILED", "Worker process failed to start."
-                )
+                with self._lock:
+                    self._starting.pop(job.run_id, None)
+                    stopped = self._stopped.is_set()
+                if stopped:
+                    self._mark_failed_if_active(job.run_id, "SERVER_SHUTDOWN", "Server is shutting down.")
+                else:
+                    logger.warning("worker process failed to start (run_id=%s)", job.run_id)
+                    self._mark_failed_if_active(
+                        job.run_id, "RESEARCH_WORKER_START_FAILED", "Worker process failed to start."
+                    )
                 continue
+
             with self._lock:
-                self._active[job.run_id] = _ActiveJob(job=job, process=process, started_at=time.monotonic())
+                self._starting.pop(job.run_id, None)
+                stopped = self._stopped.is_set()
+                if not stopped:
+                    self._active[job.run_id] = _ActiveJob(job=job, process=process, started_at=time.monotonic())
+            if stopped:
+                # shutdown() began (and, per its own contract, is waiting
+                # for this thread to resolve every starting job) while this
+                # process.start() call was still in flight -- the process
+                # did start, so it must be terminated now rather than ever
+                # registered as active/left running unmanaged.
+                self._terminate_process(process)
+                self._mark_failed_if_active(job.run_id, "SERVER_SHUTDOWN", "Server is shutting down.")
 
     @staticmethod
     def _terminate_process(process: Any) -> None:

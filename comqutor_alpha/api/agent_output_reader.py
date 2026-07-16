@@ -290,13 +290,20 @@ def _read_structured_payload(run_id: str, output_root: Any) -> dict[str, Any]:
     return {"ticker": ticker, "schema_version": schema_version, "records": public_records}
 
 
-def get_agent_outputs_response(run_id: Any, output_root: str = "outputs/runs") -> dict[str, Any]:
+def get_agent_outputs_response(run_id: Any, output_root: str | None = "outputs/runs") -> dict[str, Any]:
     """Build the full ``GET /api/research/{run_id}/agent-outputs`` response.
 
     Structured-only, public-field-whitelisted by design (see module
     docstring). Never invokes an LLM, TradingAgents, or a network call;
     never performs a database write, table creation, or migration; never
     returns a local filesystem path.
+
+    ``output_root=None`` is a meaningful, distinct value from the literal
+    string default -- it must reach ``run_dir_for``/``resolve_output_root``
+    unchanged so ``COMQUTOR_OUTPUT_DIR`` is honored (see
+    ``routes_research.py``'s route handler, which forwards
+    ``app.state.output_root`` -- possibly ``None`` -- as-is rather than
+    substituting a literal path).
     """
     try:
         safe_run_id = validate_run_id_for_path(run_id)

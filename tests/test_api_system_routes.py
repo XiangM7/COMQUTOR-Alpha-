@@ -237,25 +237,101 @@ def test_unknown_origin_is_rejected(tmp_path, monkeypatch):
     assert "access-control-allow-origin" not in {k.lower() for k in response.headers}
 
 
-def test_wildcard_cors_origin_is_rejected(tmp_path, monkeypatch):
-    from comqutor_alpha.api.main import _resolve_cors_origins
+def test_wildcard_cors_origin_is_rejected(monkeypatch):
+    from comqutor_alpha.api.main import ApiConfigurationError, _resolve_cors_origins
 
     monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", "*")
-    assert _resolve_cors_origins() is None
+    with pytest.raises(ApiConfigurationError) as exc_info:
+        _resolve_cors_origins()
+    assert exc_info.value.reason_code == "INVALID_CORS_ORIGINS"
 
 
-def test_wildcard_mixed_with_real_origins_drops_only_wildcard(monkeypatch):
-    from comqutor_alpha.api.main import _resolve_cors_origins
+def test_wildcard_mixed_with_real_origins_rejects_entire_config(monkeypatch):
+    # A wildcard anywhere in the value -- even alongside otherwise-legal
+    # origins -- invalidates the whole configuration. It must NOT be
+    # interpreted as "drop the wildcard token, keep the rest".
+    from comqutor_alpha.api.main import ApiConfigurationError, _resolve_cors_origins
 
     monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", "http://a.example.com,*,http://b.example.com")
+    with pytest.raises(ApiConfigurationError) as exc_info:
+        _resolve_cors_origins()
+    assert exc_info.value.reason_code == "INVALID_CORS_ORIGINS"
+
+
+def test_cors_origins_deduplicated_preserving_order(monkeypatch):
+    from comqutor_alpha.api.main import _resolve_cors_origins
+
+    monkeypatch.setenv(
+        "COMQUTOR_CORS_ORIGINS", "http://a.example.com,http://b.example.com,http://a.example.com"
+    )
     assert _resolve_cors_origins() == ["http://a.example.com", "http://b.example.com"]
 
 
-def test_cors_origins_deduplicated_and_blank_dropped(monkeypatch):
+def test_cors_multiple_legal_origins(monkeypatch):
     from comqutor_alpha.api.main import _resolve_cors_origins
 
-    monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", "http://a.example.com, ,http://a.example.com,")
-    assert _resolve_cors_origins() == ["http://a.example.com"]
+    monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", "http://a.example.com,http://b.example.com")
+    assert _resolve_cors_origins() == ["http://a.example.com", "http://b.example.com"]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "http://a.example.com,",
+        ",http://a.example.com",
+        "http://a.example.com,,http://b.example.com",
+    ],
+)
+def test_cors_blank_token_rejects_entire_config(monkeypatch, value):
+    from comqutor_alpha.api.main import ApiConfigurationError, _resolve_cors_origins
+
+    monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", value)
+    with pytest.raises(ApiConfigurationError) as exc_info:
+        _resolve_cors_origins()
+    assert exc_info.value.reason_code == "INVALID_CORS_ORIGINS"
+
+
+def test_cors_whitespace_only_value_is_treated_as_unset(monkeypatch):
+    from comqutor_alpha.api.main import _resolve_cors_origins
+
+    monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", "   ")
+    assert _resolve_cors_origins() is None
+
+
+def test_invalid_cors_config_makes_create_app_raise_not_a_partial_app(tmp_path, monkeypatch):
+    from comqutor_alpha.api.main import ApiConfigurationError, create_app
+
+    monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", "*")
+    with pytest.raises(ApiConfigurationError):
+        create_app(output_root=str(tmp_path))
+
+
+def test_server_main_exits_safely_on_invalid_cors_without_traceback(monkeypatch):
+    import importlib
+    import sys
+    import types
+
+    import comqutor_alpha.api.main as main_module
+    import comqutor_alpha.api.server as server_module
+
+    # uvicorn is not part of this test environment's installed set (only
+    # fastapi/pydantic/starlette are) -- server.main() imports it before
+    # ever reaching the CORS check, so a minimal stand-in module lets this
+    # test reach (and verify) the actual code path under test without
+    # requiring uvicorn to be installed.
+    monkeypatch.setitem(sys.modules, "uvicorn", types.ModuleType("uvicorn"))
+    monkeypatch.setenv("COMQUTOR_CORS_ORIGINS", "*")
+    importlib.reload(main_module)
+    try:
+        with pytest.raises(SystemExit) as exc_info:
+            server_module.main()
+        message = str(exc_info.value)
+        assert message == "COMQUTOR_CORS_ORIGINS is invalid."
+        assert "Traceback" not in message
+        assert "*" not in message
+    finally:
+        monkeypatch.delenv("COMQUTOR_CORS_ORIGINS", raising=False)
+        importlib.reload(main_module)
 
 
 def test_cors_unset_installs_no_middleware(monkeypatch):

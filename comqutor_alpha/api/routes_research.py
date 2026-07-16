@@ -1102,8 +1102,12 @@ try:
 
     @router.get("/api/research/{run_id}/agent-outputs")
     def get_research_agent_outputs_route(run_id: str, http_request: Request):
-        output_root = _request_output_root(http_request)
-        return get_agent_outputs_response(run_id, output_root if output_root is not None else "outputs/runs")
+        # Pass the app's output_root through unchanged -- including when it
+        # is None. Substituting a literal "outputs/runs" here would bypass
+        # resolve_output_root(None)'s COMQUTOR_OUTPUT_DIR check, silently
+        # diverging this route from every other route/the job manager,
+        # which all resolve the same output_root consistently.
+        return get_agent_outputs_response(run_id, _request_output_root(http_request))
 
     @router.get("/api/research/{run_id}/status")
     def get_research_status_route(run_id: str, http_request: Request):

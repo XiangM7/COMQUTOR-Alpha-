@@ -58,13 +58,20 @@ def main() -> None:
             "Run: pip install \"tradingagents[api]\""
         ) from exc
 
-    from comqutor_alpha.api.main import app
+    from comqutor_alpha.api import main as api_main
 
-    if app is None:
+    if api_main.app is None:
+        if api_main.app_configuration_error is not None:
+            # Never the raw exception message/traceback or the offending
+            # COMQUTOR_CORS_ORIGINS value itself -- a stable, safe sentence
+            # naming only the variable at fault.
+            raise SystemExit("COMQUTOR_CORS_ORIGINS is invalid.") from None
         raise SystemExit(
             "The 'api' optional dependency group is not installed. "
             "Run: pip install \"tradingagents[api]\""
         )
+
+    app = api_main.app
 
     try:
         host = _resolve_host()

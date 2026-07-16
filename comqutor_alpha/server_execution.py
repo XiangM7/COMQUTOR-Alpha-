@@ -27,9 +27,12 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 # Every key here must already exist in tradingagents.default_config.DEFAULT_CONFIG
 # -- this module never invents a config key TradingAgentsGraph does not
@@ -111,25 +114,58 @@ def build_server_tradingagents_config() -> dict[str, Any]:
     keys from server environment variables. Never mutates ``DEFAULT_CONFIG``
     itself. Raises ``ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID")``
     if the provider/model triplet required to actually run TradingAgents is
-    missing or blank.
+    missing or blank -- **or** if anything else goes wrong constructing the
+    config at all.
+
+    That second case matters: importing ``tradingagents.default_config``
+    evaluates that module's *own* ``TRADINGAGENTS_*`` environment-variable
+    parsing (``_apply_env_overrides``), which is native TradingAgents
+    behavior this module does not control and raises a plain
+    ``ValueError``/``TypeError`` for a malformed operator override (e.g.
+    ``TRADINGAGENTS_MAX_DEBATE_ROUNDS=not-an-integer``) -- not a
+    ``ServerExecutionConfigError``. Every step here (the import, the deep
+    copy, the allowlisted overrides, the required-field check) therefore
+    runs inside one exception boundary: any ordinary exception (never
+    ``BaseException`` -- ``KeyboardInterrupt``/``SystemExit`` still
+    propagate) is folded into the exact same stable
+    ``REAL_RUN_CONFIG_INVALID`` reason code, so a native TradingAgents
+    config error can never surface as an unhandled HTTP 500, a startup
+    crash, or a leaked exception message/traceback outside DEBUG logging.
     """
-    from tradingagents.default_config import DEFAULT_CONFIG
+    try:
+        from tradingagents.default_config import DEFAULT_CONFIG
 
-    config = copy.deepcopy(DEFAULT_CONFIG)
+        config = copy.deepcopy(DEFAULT_CONFIG)
 
-    for env_var, config_key in _ENV_TO_CONFIG_KEY.items():
-        if config_key not in config:
-            # Defensive only: every entry in _ENV_TO_CONFIG_KEY is chosen to
-            # match an existing DEFAULT_CONFIG key; this never triggers in
-            # practice and never invents a new key if it somehow did.
-            continue
-        value = os.environ.get(env_var, "").strip()
-        if value:
-            config[config_key] = value
+        for env_var, config_key in _ENV_TO_CONFIG_KEY.items():
+            if config_key not in config:
+                # Defensive only: every entry in _ENV_TO_CONFIG_KEY is chosen
+                # to match an existing DEFAULT_CONFIG key; this never
+                # triggers in practice and never invents a new key if it
+                # somehow did.
+                continue
+            value = os.environ.get(env_var, "").strip()
+            if value:
+                config[config_key] = value
 
-    required = ("llm_provider", "deep_think_llm", "quick_think_llm")
-    if not all(str(config.get(key) or "").strip() for key in required):
-        raise ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID")
+        required = ("llm_provider", "deep_think_llm", "quick_think_llm")
+        if not all(str(config.get(key) or "").strip() for key in required):
+            raise ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID")
+    except ServerExecutionConfigError:
+        raise
+    except Exception as exc:
+        # Never the raw exception message/type in a normal log line (it may
+        # echo back an env var name/value) -- only a bare exc_type at
+        # WARNING, with the actual traceback gated behind DEBUG, and never
+        # the environment or the config dict itself at any level.
+        logger.warning(
+            "server-side TradingAgents config construction failed unexpectedly (exc_type=%s)",
+            type(exc).__name__,
+        )
+        logger.debug(
+            "server-side TradingAgents config construction failed unexpectedly", exc_info=True
+        )
+        raise ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID") from exc
 
     return config
 
@@ -178,7 +214,13 @@ def build_server_execution_context() -> dict[str, Any]:
       - ``error``: ``None``, ``"REAL_RUN_DISABLED"``, or
         ``"REAL_RUN_CONFIG_INVALID"``.
 
-    Never raises -- every failure mode is reported through ``error``.
+    Never raises -- every failure mode is reported through ``error``. This
+    function has its own exception boundary around the config-construction
+    call (in addition to ``build_server_tradingagents_config``'s own) so
+    this specific guarantee -- "never raise a plain configuration exception
+    to the caller" -- holds even if that inner boundary were ever bypassed
+    or weakened; both layers converge on the identical
+    ``REAL_RUN_CONFIG_INVALID`` outcome.
     """
     if not is_real_tradingagents_enabled():
         return {"enabled": False, "config": None, "execution_identity": None, "error": "REAL_RUN_DISABLED"}
@@ -187,6 +229,12 @@ def build_server_execution_context() -> dict[str, Any]:
         config = build_server_tradingagents_config()
     except ServerExecutionConfigError as exc:
         return {"enabled": True, "config": None, "execution_identity": None, "error": exc.reason_code}
+    except Exception as exc:
+        logger.warning(
+            "server execution context construction failed unexpectedly (exc_type=%s)", type(exc).__name__
+        )
+        logger.debug("server execution context construction failed unexpectedly", exc_info=True)
+        return {"enabled": True, "config": None, "execution_identity": None, "error": "REAL_RUN_CONFIG_INVALID"}
 
     return {
         "enabled": True,
