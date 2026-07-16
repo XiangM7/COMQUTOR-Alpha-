@@ -20,40 +20,10 @@ from comqutor_alpha.api.routes_research import (
 from comqutor_alpha.storage.db.engine import build_engine
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
+from scripts.w5_demo_fixtures import approved_demo_outputs
 
 # SYNTHETIC macro claims -- not a real market report for any ticker.
-_SYNTHETIC_QQQ_OFFLINE_OUTPUTS = [
-    {
-        "agent": "news_agent",
-        "raw_output": (
-            "Fed officials are preparing to cut rates as inflation cools, which should help "
-            "long-duration technology shares in QQQ. Liquidity conditions are improving as "
-            "reserves rise and cash rotates back into risk assets."
-        ),
-    },
-    {
-        "agent": "fundamental_agent",
-        "raw_output": (
-            "Treasury yields are falling and discount rates are easing, so growth multiples "
-            "have room to expand across the Nasdaq. Credit spreads are widening and PMIs are "
-            "weakening, raising recession risk for high beta equities."
-        ),
-    },
-    {
-        "agent": "sentiment_agent",
-        "raw_output": (
-            "Risk appetite is returning because monetary liquidity is less tight than last "
-            "quarter, supporting broad participation in QQQ constituents."
-        ),
-    },
-    {
-        "agent": "technical_agent",
-        "raw_output": (
-            "The easing cycle from the Fed is supporting duration sensitive growth names. "
-            "Liquidity expansion is broadening participation beyond mega cap tech."
-        ),
-    },
-]
+_SYNTHETIC_QQQ_OFFLINE_OUTPUTS = approved_demo_outputs("QQQ")
 
 
 def _run_qqq_fixture(tmp_path):

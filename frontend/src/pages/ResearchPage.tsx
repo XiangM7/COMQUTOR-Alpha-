@@ -36,7 +36,7 @@ function ServerCapabilityBanner() {
   if (errorMessage) {
     return (
       <p className="server-capability-banner server-capability-unknown">
-        API readiness unknown: {errorMessage}
+        {errorMessage}
       </p>
     );
   }

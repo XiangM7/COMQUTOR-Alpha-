@@ -107,6 +107,9 @@ async function performRequest(
   }
 
   if (!response.ok) {
+    if (response.status === 404 && path === "/api/research" && (init.method ?? "GET") === "GET") {
+      throw ApiError.contractMismatch();
+    }
     if (looksLikeErrorEnvelope(body)) {
       throw ApiError.http(
         response.status,
@@ -118,7 +121,7 @@ async function performRequest(
   }
 
   if (body === null) {
-    throw ApiError.invalidResponse("The server did not return a JSON response.");
+    throw ApiError.contractMismatch();
   }
 
   return body;
@@ -126,7 +129,7 @@ async function performRequest(
 
 function adaptOrThrow<T>(adapted: AdaptResult<T>): T {
   if (!adapted.ok) {
-    throw ApiError.invalidResponse("The server returned an unexpected response shape.");
+    throw ApiError.contractMismatch();
   }
   return adapted.value;
 }
@@ -274,11 +277,14 @@ export async function getReadiness(options: RequestOptions = {}): Promise<{
     }
     throw ApiError.network();
   }
+  if (response.status === 404) {
+    throw ApiError.contractMismatch();
+  }
   let body: unknown;
   try {
     body = await response.json();
   } catch {
-    throw ApiError.invalidResponse("The server's readiness response could not be parsed.");
+    throw ApiError.contractMismatch();
   }
   const result = adaptOrThrow(adaptReadinessResponse(body));
   return { status: response.status, result };

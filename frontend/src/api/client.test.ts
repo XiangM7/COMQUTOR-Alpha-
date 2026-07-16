@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getApiBaseUrl, getResearchRunStatus, submitResearch } from "./client";
-import { ApiError } from "./errors";
+import {
+  getApiBaseUrl,
+  getReadiness,
+  getResearchHistory,
+  getResearchRunStatus,
+  submitResearch,
+} from "./client";
+import { ApiError, describeApiError } from "./errors";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -147,8 +153,33 @@ describe("api client", () => {
 
     await expect(getResearchRunStatus("run-1")).rejects.toMatchObject({
       name: "ApiError",
-      kind: "invalid_response",
+      kind: "api_contract_mismatch",
     });
+  });
+
+  it("classifies a 404 readiness endpoint as an incompatible COMQUTOR API", async () => {
+    global.fetch = vi.fn().mockResolvedValue(htmlResponse(404));
+
+    await expect(getReadiness()).rejects.toMatchObject({
+      name: "ApiError",
+      kind: "api_contract_mismatch",
+    });
+  });
+
+  it("classifies a 404 research history endpoint as an incompatible COMQUTOR API", async () => {
+    global.fetch = vi.fn().mockResolvedValue(htmlResponse(404));
+
+    try {
+      await getResearchHistory();
+      throw new Error("expected rejection");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).kind).toBe("api_contract_mismatch");
+      expect(describeApiError(error as ApiError)).toBe(
+        "Connected service is not a compatible COMQUTOR API.\n" +
+          "Check VITE_COMQUTOR_API_BASE_URL and restart the frontend."
+      );
+    }
   });
 
   it("getResearchRunStatus returns a validated ResearchRunRecord for a well-formed response", async () => {

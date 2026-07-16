@@ -36,8 +36,7 @@ from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
 from comqutor_alpha.storage.db.engine import build_engine
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
-from tests.test_week3_nvda_sanity import _nvda_offline_outputs
-from tests.test_week3_qqq_sanity import _SYNTHETIC_QQQ_OFFLINE_OUTPUTS
+from scripts.w5_demo_fixtures import approved_demo_outputs
 
 _BARE_TRADING_TERMS = re.compile(r"\b(buy|sell|hold)\b", re.IGNORECASE)
 _FORBIDDEN_SUMMARY_PHRASES = (
@@ -69,7 +68,7 @@ def _nvda_payload():
         "ticker": "NVDA",
         "analysis_date": "2026-06-30",
         "selected_analysts": ["market", "news", "fundamentals", "sentiment"],
-        "offline_raw_agent_outputs": _nvda_offline_outputs(),
+        "offline_raw_agent_outputs": approved_demo_outputs("NVDA"),
     }
 
 
@@ -78,7 +77,7 @@ def _qqq_payload():
         "ticker": "QQQ",
         "analysis_date": "2026-06-30",
         "selected_analysts": ["market", "news", "fundamentals", "sentiment"],
-        "offline_raw_agent_outputs": _SYNTHETIC_QQQ_OFFLINE_OUTPUTS,
+        "offline_raw_agent_outputs": approved_demo_outputs("QQQ"),
     }
 
 

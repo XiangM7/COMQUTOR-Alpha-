@@ -10,7 +10,12 @@
  * error body, non-JSON response, network failure, or an aborted request).
  */
 
-export type ApiErrorKind = "http" | "network" | "aborted" | "invalid_response";
+export type ApiErrorKind =
+  | "http"
+  | "network"
+  | "aborted"
+  | "invalid_response"
+  | "api_contract_mismatch";
 
 export class ApiError extends Error {
   readonly kind: ApiErrorKind;
@@ -40,6 +45,15 @@ export class ApiError extends Error {
 
   static invalidResponse(message = "The server returned an unexpected response."): ApiError {
     return new ApiError({ kind: "invalid_response", message });
+  }
+
+  static contractMismatch(): ApiError {
+    return new ApiError({
+      kind: "api_contract_mismatch",
+      message:
+        "Connected service is not a compatible COMQUTOR API.\n" +
+        "Check VITE_COMQUTOR_API_BASE_URL and restart the frontend.",
+    });
   }
 
   static http(status: number, errorCode: string | null, message: string): ApiError {
@@ -110,6 +124,12 @@ export function describeApiError(error: ApiError): string {
   }
   if (error.kind === "aborted") {
     return "Request was cancelled.";
+  }
+  if (error.kind === "api_contract_mismatch") {
+    return (
+      "Connected service is not a compatible COMQUTOR API.\n" +
+      "Check VITE_COMQUTOR_API_BASE_URL and restart the frontend."
+    );
   }
   return "The server returned an unexpected response.";
 }

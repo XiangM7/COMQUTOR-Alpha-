@@ -16,47 +16,13 @@ from comqutor_alpha.api.routes_research import (
 from comqutor_alpha.storage.db.engine import build_engine
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
+from scripts.w5_demo_fixtures import approved_demo_outputs
 
 RELEVANT_NVDA_ALPHA_IDS = {"A101", "A103", "A201", "A301", "A304", "A601"}
 
 
 def _nvda_offline_outputs():
-    return [
-        {
-            "agent": "news_agent",
-            "raw_output": (
-                "AI training demand is accelerating and cloud providers are increasing AI capex, "
-                "which is driving GPU demand higher for NVIDIA. Enterprise AI applications and AI "
-                "agents are expanding inference workloads across cloud platforms. Media attention "
-                "and theme flows are chasing AI stocks, creating narrative momentum around NVIDIA."
-            ),
-        },
-        {
-            "agent": "fundamental_agent",
-            "raw_output": (
-                "AI training demand keeps accelerating as hyperscaler AI capex remains elevated, "
-                "reinforcing GPU demand for NVDA. Datacenter spending is expanding because AI "
-                "buildout requires more power, cooling, and networking capacity. Revenue guidance "
-                "was raised due to strong customer demand and bookings are strengthening."
-            ),
-        },
-        {
-            "agent": "sentiment_agent",
-            "raw_output": (
-                "NVIDIA should benefit as artificial intelligence demand keeps accelerator supply "
-                "tight. AI stocks are rising due to strong investor attention and narrative "
-                "momentum around the AI theme."
-            ),
-        },
-        {
-            "agent": "technical_agent",
-            "raw_output": (
-                "The semiconductor chip cycle is turning upward as inventories normalize and "
-                "orders recover. NVDA is priced for perfection and rich valuation creates "
-                "downside risk that could trigger multiple compression if growth decelerates."
-            ),
-        },
-    ]
+    return approved_demo_outputs("NVDA")
 
 
 def _run_nvda_fixture(tmp_path):

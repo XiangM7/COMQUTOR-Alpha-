@@ -12,7 +12,7 @@ From the repository root, with the project's Python virtual environment
 active:
 
 ```bash
-COMQUTOR_CORS_ORIGINS=http://127.0.0.1:5173 comqutor-api
+COMQUTOR_CORS_ORIGINS=http://127.0.0.1:5175 comqutor-api
 ```
 
 This starts the API on `http://127.0.0.1:8000` (the defaults for
@@ -33,8 +33,8 @@ npm install
 npm run dev
 ```
 
-The dev server runs at `http://127.0.0.1:5173` by default (Vite's standard
-port). Open that URL in a browser; it redirects to `/research`.
+The dev server runs at `http://127.0.0.1:5175` by default. Open that URL in a
+browser; it redirects to `/research`.
 
 ### API base URL
 
