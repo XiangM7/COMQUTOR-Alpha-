@@ -1,13 +1,17 @@
 import json
 
+import pytest
+
 from comqutor_alpha.adapters.tradingagents_output_writer import build_raw_agent_output_record
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     SCHEMA_VERSION,
     _error_payload,
+    _validated_llm_segments,
     adapt_raw_agent_output,
     adapt_raw_agent_outputs,
     safe_default_record,
     save_structured_agent_outputs,
+    validate_structured_output,
 )
 
 
@@ -25,6 +29,54 @@ def test_nvda_ai_text_extracts_factors_and_source_type():
     assert "GPU Demand" in record["factors"]
     assert "Datacenter CapEx" in record["factors"]
     assert record["source_type"] == "technical"
+
+
+@pytest.mark.parametrize(
+    "confidence",
+    [True, "0.8", float("nan"), float("inf"), -0.01, 1.01],
+)
+def test_structured_output_rejects_non_numeric_or_invalid_confidence(confidence):
+    record = adapt_raw_agent_output(
+        {"agent": "news_agent", "raw_output": "AI demand supports GPU demand."},
+        "run1",
+        "NVDA",
+    )
+    record["confidence"] = confidence
+
+    assert validate_structured_output(record) is False
+
+
+@pytest.mark.parametrize("confidence", [0, 0.5, 1])
+def test_structured_output_accepts_finite_numeric_confidence(confidence):
+    record = adapt_raw_agent_output(
+        {"agent": "news_agent", "raw_output": "AI demand supports GPU demand."},
+        "run1",
+        "NVDA",
+    )
+    record["confidence"] = confidence
+
+    assert validate_structured_output(record) is True
+
+
+@pytest.mark.parametrize("confidence", [True, "0.8", float("nan"), float("inf"), 1.01])
+def test_llm_segments_reject_invalid_confidence(confidence):
+    raw_text = "AI demand supports GPU demand."
+    payload = {
+        "claims": [
+            {
+                "claim": raw_text,
+                "evidence": raw_text,
+                "entities": ["NVDA"],
+                "factors": ["AI Demand", "GPU Demand"],
+                "direction": "bullish",
+                "confidence": confidence,
+                "source_section": None,
+            }
+        ]
+    }
+
+    with pytest.raises(ValueError, match="confidence"):
+        _validated_llm_segments(payload, raw_text)
 
 
 def _raw_record(raw_output, agent="news_agent"):

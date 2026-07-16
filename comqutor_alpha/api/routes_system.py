@@ -5,7 +5,7 @@ filesystem, a provider, or the network. It only proves the process is alive
 and able to answer HTTP requests.
 
 ``/ready`` checks the things an operator actually needs before routing
-traffic here: the database is reachable and migrated (0001-0003, read-only
+traffic here: the database is reachable and migrated (0001-0004, read-only
 -- this endpoint never applies a migration or writes a row), and the
 background job manager is initialized and currently accepting jobs. It also
 reports (never gates overall readiness on, when merely *disabled*) whether
@@ -38,6 +38,7 @@ _REQUIRED_MIGRATIONS = frozenset(
         "0001_create_week3_alpha_matches_and_structure_graphs",
         "0002_create_week4_alpha_activations_and_alpha_conflicts",
         "0003_create_research_runs",
+        "0004_create_agent_outputs",
     }
 )
 

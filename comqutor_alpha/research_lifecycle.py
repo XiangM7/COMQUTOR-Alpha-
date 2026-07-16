@@ -594,7 +594,6 @@ def prepare_research_submission(
             logger.warning(
                 "research repository unavailable unexpectedly (exc_type=%s)", type(exc).__name__
             )
-            logger.debug("research repository unavailable unexpectedly", exc_info=True)
             return {
                 "response": {
                     "run_id": explicit_run_id,
@@ -732,7 +731,6 @@ def execute_claimed_research_run(
             run_id,
             type(exc).__name__,
         )
-        logger.debug("research run execution failed unexpectedly (run_id=%s)", run_id, exc_info=True)
         with _suppress_lifecycle_errors():
             graph_repository.mark_research_run_terminal(
                 run_id, status="failed", error_code="INTERNAL_ERROR", error_message=_safe_message("INTERNAL_ERROR", "Research request failed.")

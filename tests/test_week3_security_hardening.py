@@ -214,7 +214,7 @@ class TestLogAndResponseLeakage:
             assert marker not in default_log_text
         assert all(r.exc_info is None for r in caplog.records)
 
-    def test_get_graph_unexpected_failure_traceback_only_at_explicit_debug_level(
+    def test_get_graph_unexpected_failure_has_no_traceback_at_debug_level(
         self, tmp_path, monkeypatch, caplog
     ):
         import comqutor_alpha.api.routes_research as routes_research
@@ -231,9 +231,10 @@ class TestLogAndResponseLeakage:
         with caplog.at_level(logging.DEBUG, logger="comqutor_alpha.api.routes_research"):
             routes_research.get_persisted_structure_graph("leak_run_debug", output_root=tmp_path)
 
-        debug_records = [r for r in caplog.records if r.levelname == "DEBUG"]
-        assert len(debug_records) == 1
-        assert debug_records[0].exc_info is not None  # explicit local opt-in only
+        log_text = "\n".join(r.getMessage() for r in caplog.records)
+        assert all(record.exc_info is None for record in caplog.records)
+        for marker in _FORBIDDEN_MARKERS:
+            assert marker not in log_text
 
     def test_week3_stage_failure_with_secret_bearing_exception_logs_and_writes_safely(
         self, tmp_path, monkeypatch, caplog

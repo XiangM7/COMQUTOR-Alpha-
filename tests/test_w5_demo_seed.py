@@ -90,6 +90,7 @@ def test_seed_is_complete_idempotent_and_reusable_without_provider(tmp_path, mon
         assert metadata["demo_fixture"] is True
         assert metadata["source"] == "approved_offline_golden_fixture"
         assert metadata["live_provider_used"] is False
+        assert repository.count_agent_outputs(run_id) > 0
 
 
 def test_only_nvda_and_qqq_are_seeded(tmp_path):

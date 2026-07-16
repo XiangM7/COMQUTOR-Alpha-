@@ -23,6 +23,7 @@ from comqutor_alpha.storage.db.repository import (
 )
 from comqutor_alpha.storage.db.schema import (
     MIGRATIONS,
+    agent_outputs,
     alpha_activations,
     alpha_conflicts,
     alpha_matches,
@@ -152,10 +153,12 @@ class TestWeek4Schema:
             "0001_create_week3_alpha_matches_and_structure_graphs",
             "0002_create_week4_alpha_activations_and_alpha_conflicts",
             "0003_create_research_runs",
+            "0004_create_agent_outputs",
         ]
         assert MIGRATIONS[0][1] == (alpha_matches, structure_graphs)
         assert MIGRATIONS[1][1] == (alpha_activations, alpha_conflicts)
         assert MIGRATIONS[2][1] == (research_runs,)
+        assert MIGRATIONS[3][1] == (agent_outputs,)
 
     def test_sqlite_json_columns_use_json_type(self):
         engine = build_engine("sqlite:///:memory:")
@@ -178,7 +181,7 @@ class TestMigration0002:
             versions = conn.execute(sa.select(schema_migrations.c.version)).scalars().all()
         assert sorted(versions) == sorted(set(versions))
 
-    def test_upgrade_from_0001_preserves_week3_rows_and_applies_0002_and_0003(self):
+    def test_upgrade_from_0001_preserves_week3_rows_and_applies_later_migrations(self):
         engine = build_engine("sqlite:///:memory:")
         schema_migrations.create(engine)
         alpha_matches.create(engine)
@@ -213,6 +216,7 @@ class TestMigration0002:
         assert apply_migrations(engine) == [
             "0002_create_week4_alpha_activations_and_alpha_conflicts",
             "0003_create_research_runs",
+            "0004_create_agent_outputs",
         ]
         with engine.connect() as conn:
             assert conn.scalar(sa.select(sa.func.count()).select_from(alpha_matches)) == 1
@@ -222,6 +226,7 @@ class TestMigration0002:
             "0001_create_week3_alpha_matches_and_structure_graphs",
             "0002_create_week4_alpha_activations_and_alpha_conflicts",
             "0003_create_research_runs",
+            "0004_create_agent_outputs",
         ]
 
 
@@ -257,7 +262,9 @@ class TestActivationPersistence:
         assert "unknown_component" not in stored["components"]
         assert "secret" not in serialized
 
-    @pytest.mark.parametrize("bad_score", [float("nan"), float("inf"), float("-inf")])
+    @pytest.mark.parametrize(
+        "bad_score", [float("nan"), float("inf"), float("-inf"), "90"]
+    )
     def test_nonfinite_activation_score_is_safely_rejected(self, bad_score):
         _, repo = _engine_and_repo()
         activation, conflict = _week4_payloads()

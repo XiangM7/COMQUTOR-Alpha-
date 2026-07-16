@@ -227,7 +227,9 @@ def verify_demo_case(
     conflicts = get_persisted_conflicts(
         run_id, output_root=output_root, graph_repository=repository
     )
-    agent_outputs = get_agent_outputs_response(run_id, output_root=output_root)
+    agent_outputs = get_agent_outputs_response(
+        run_id, output_root=output_root, graph_repository=repository
+    )
     history = get_research_run_history(
         ticker=ticker, output_root=output_root, graph_repository=repository
     )
@@ -242,6 +244,8 @@ def verify_demo_case(
         "structured_agent_outputs"
     ):
         raise DemoSeedError(f"{ticker}_AGENT_OUTPUTS_NOT_READY")
+    if repository.count_agent_outputs(run_id) != agent_outputs.get("count"):
+        raise DemoSeedError(f"{ticker}_AGENT_OUTPUTS_DB_INCOMPLETE")
     if history.get("status") != "ok":
         raise DemoSeedError(f"{ticker}_HISTORY_NOT_READY")
     matching_history = [item for item in history["items"] if item.get("run_id") == run_id]
@@ -290,6 +294,15 @@ def seed_demo_case(
     existing_record = repository.get_research_run_record(run_id)
     if existing_record is not None:
         try:
+            if repository.count_agent_outputs(run_id) == 0:
+                structured_payload = load_json_record(
+                    run_id, "structured_agent_outputs.json", output_root=output_root
+                )
+                repository.persist_agent_outputs(
+                    run_id=run_id,
+                    ticker=ticker,
+                    structured_payload=structured_payload,
+                )
             return verify_demo_case(repository, output_root, ticker)
         except (DemoSeedError, FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
             raise DemoSeedError(f"{ticker}_EXISTING_DEMO_RUN_INVALID") from exc

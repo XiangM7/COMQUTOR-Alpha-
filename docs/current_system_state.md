@@ -1,68 +1,82 @@
-# 当前系统状态
+# Current System State
 
-审查日期：2026-07-14
+Review date: 2026-07-16
 
-## 仓库基线
+## Baseline
 
-- 分支：`comqutor-structure-layer`
-- HEAD：`8578a07a979b0070b5321c1bc24adb78e8c7a183`
-- Python：`3.13.5`
-- Python 路径：`.venv/bin/python`
-- 项目要求：Python `>=3.10`
+- Branch: `comqutor-structure-layer`
+- Base HEAD: `d697c356458a7c70085f2874d6c537fa199c2161` (`d697c35 w5v6`)
+- Python: 3.13.5 from `.venv/bin/python`; project support is Python 3.10+
+- Worktree: expected uncommitted W6 changes; no commit, push or tag performed
 
-## 阶段状态
+## Gate Status
 
-| 阶段 | 状态 |
-|---|---|
+| Gate | Status |
+| --- | --- |
 | Week 0 baseline | PASS |
 | Week 1A output/research entry | PASS |
 | Week 2 Alpha mapping / structure extraction | PASS |
 | Week 3 graph / activation / persistence / graph API | PASS |
-| W4.0 specification freeze | PASS |
-| W4.1 deterministic conflict core | PASS |
-| W4.2 activation/conflict persistence | PASS |
-| W4.2 PostgreSQL verification | PASS |
-| W4.3 pipeline/API integration | NOT STARTED |
+| Week 4 deterministic conflict / persistence / API engineering | PASS |
+| Formal Week 4 Product Gate | BLOCKED_BY_EXTERNAL_INPUTS |
+| W5.1A / W5.1B lifecycle and API | PASS |
+| W5.2 frontend engineering | PASS |
+| W5.3 local Demo | PASS |
+| W6.0 final gap audit | PASS |
+| Formal Week 1 database gate | PASS |
+| Formal Week 2 labeled accuracy gate | PASS (20/20, 100%) |
+| W6.1 backend/persistence hardening | PASS |
+| W6.2 NVDA / QQQ Golden | PASS / PASS |
+| W6.2 approved Golden cases | 2/5 |
+| W6.2 five-ticker stable Demo | BLOCKED_BY_APPROVED_FIXTURES |
+| W6.3 frontend acceptance / regression | INHERITED_PASS / PASS |
+| W6.4 clean-machine installation | PASS |
+| W6.5 engineering delivery | PASS; narrated recording USER_ACTION_REQUIRED |
+| W6.6 release freeze | READY |
+| Week 6 engineering and delivery | PASS |
+| Formal Week 6 Product Gate | BLOCKED_BY_EXTERNAL_INPUTS |
 
-这不表示 Week 4 全部完成，也不表示 COMQUTOR Alpha 已完成或已可用于公开生产部署。
+## Verification
 
-## 验证结果
+- `pip check`: PASS
+- Formal Week 1: 111 passed
+- Formal Week 2: 62 passed; approved labeled set 20/20
+- Lifecycle/security: 173 passed
+- Week 3/4 persistence: 270 passed
+- Golden closure: 34 passed
+- PostgreSQL integration: 38 passed, 0 skipped
+- Offline suite, two consecutive runs: each 1479 passed, 1 skipped, 40 deselected,
+  69 subtests, 0 failed
+- Frontend: typecheck PASS; ESLint PASS; 53 Vitest passed; build PASS; 6 Playwright passed
+- Clean-machine rehearsal: fresh venv/install, npm install/build, Demo/API and cleanup PASS
+- Production npm audit: 0 vulnerabilities; full dev audit: 5 Vite/esbuild toolchain findings
+- Automated video: PASS, 1,228,725 bytes; narrated investor video not recorded
+- Changed Python Ruff check: PASS; compileall and CI YAML parse: PASS
+- Remote CI: NOT_YET_RUN; Live Provider smoke: NOT_RUN_BY_DESIGN
 
-- `pip check`：PASS
-- SQLite fallback targeted tests：`4 passed`
-- Offline suite：`1035 passed, 1 skipped, 18 deselected, 0 failed`
-- PostgreSQL integration：`10 passed`
+The one offline skip is the optional Bedrock extra, which is not installed. The development-only
+npm findings require a breaking Vite upgrade; production dependencies report zero vulnerabilities,
+and the local dev server remains loopback-only. Whole-repository Ruff has 19 pre-existing Week 1/2
+style findings; the W6 changed-file Gate passes and no broad style rewrite was performed.
 
-## 数据库状态
+## Persistence
 
-- SQLite：离线和本地 fallback。
-- PostgreSQL：本地开发及 integration verification 数据库。
-- Migrations：`0001_create_week3_alpha_matches_and_structure_graphs`、
-  `0002_create_week4_alpha_activations_and_alpha_conflicts`。
-- 已实现表：`alpha_matches`、`structure_graphs`、`alpha_activations`、
-  `alpha_conflicts`。
-- PostgreSQL 已实际验证 JSONB、unique constraints、transaction rollback、
-  replace semantics、run isolation 和同 ticker 不同 run isolation。
+- SQLite is the offline/local single-instance fallback.
+- PostgreSQL 16 is the local integration-verification database.
+- Migrations `0001`–`0004` implement `alpha_matches`, `structure_graphs`,
+  `alpha_activations`, `alpha_conflicts`, `research_runs` and `agent_outputs`.
+- PostgreSQL JSONB, constraints, idempotent replace, rollback and run isolation are verified.
+- New-run agent outputs, graph and conflicts are DB-first. Structured artifacts are legacy/audit
+  fallback only; raw Provider text is not exposed by the agent-output API.
 
-## 当前能力边界
+## Boundaries
 
-- Week 1A 可安全保存 TradingAgents raw outputs，并通过 research entry 生成 run。
-- Week 2 可生成 structured claims、Alpha matches 和 claim-level extracted structures。
-- Week 3 可生成 Structure Graph、Alpha activation，并持久化及通过 graph API 读取。
-- W4.1 可确定性生成 admitted、suppressed、rejected conflict candidates、
-  evidence audit 和 main conflict。
-- W4.2 可原子持久化 activation/conflict rows，并确定性重建 W4.1 conflict payload。
-- Research pipeline 尚未自动调用 W4.1/W4.2 conflict persistence。
-
-## 未完成事项
-
-- W4.3 尚未接入 research pipeline。
-- Conflicts API：未实现。
-- Agent-outputs API：未实现。
-- Exposure Engine：`BLOCKED_BY_SEED`。
-- MSFT Golden Gate：`BLOCKED_BY_SPEC_CONFLICT`。
-- Authentication、authorization、tenant ownership：未实现。
-- Alpha Memory、跨 run feedback：未实现。
-- Public production deployment：`NOT READY`。
-
-`.env` 保持忽略，未修改、未提交。当前系统不是 production-ready。
+- Local MVP release candidate: `READY_WITH_EXTERNAL_BLOCKERS`
+- Runtime persistence: `LOCAL_SINGLE_INSTANCE_READY`
+- Deployment: `LOCAL_INTERNAL_ONLY`
+- MSFT Golden: `BLOCKED_BY_SPEC_CONFLICT`
+- Authentication, authorization and tenant ownership: not implemented
+- Public production: `NOT_READY`
+- Exposure Engine: `BLOCKED_BY_SEED`
+- Alpha Memory, cross-run feedback and portfolio execution: deferred
+- `.env` remains ignored and was not modified

@@ -14,6 +14,8 @@ rejected explicitly rather than silently mishandled.
 
 from __future__ import annotations
 
+import hashlib
+import math
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from typing import Any
@@ -36,6 +38,7 @@ from comqutor_alpha.storage.db.engine import (
 )
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.schema import (
+    agent_outputs,
     alpha_activations,
     alpha_conflicts,
     alpha_matches,
@@ -47,6 +50,14 @@ from comqutor_alpha.storage.db.week4_persistence import (
     Week4PersistenceDataError,
     build_week4_rows,
     reconstruct_conflict_result,
+)
+from comqutor_alpha.structure_engine.structure_schema import (
+    VALID_ASSERTION_STATUSES,
+    VALID_DIRECTIONS,
+)
+from comqutor_alpha.structure_engine.structured_output_adapter import (
+    MAX_CLAIM_CHARS,
+    contains_sensitive_text,
 )
 
 
@@ -76,6 +87,123 @@ def _coerce_optional_str(value: Any) -> str | None:
         return None
     text = str(value)
     return text if text.strip() else None
+
+
+def _invalid_payload(reason_code: str) -> None:
+    raise GraphPersistenceError(reason_code)
+
+
+def _required_text(value: Any, *, maximum: int, reason_code: str) -> str:
+    if not isinstance(value, str) or not value.strip() or len(value) > maximum:
+        _invalid_payload(reason_code)
+    return value
+
+
+def _optional_text(value: Any, *, maximum: int, reason_code: str) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or len(value) > maximum:
+        _invalid_payload(reason_code)
+    return value
+
+
+def _strict_number(
+    value: Any,
+    *,
+    minimum: float,
+    maximum: float,
+    reason_code: str,
+) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        _invalid_payload(reason_code)
+    number = float(value)
+    if not math.isfinite(number) or not minimum <= number <= maximum:
+        _invalid_payload(reason_code)
+    return number
+
+
+def _string_list(value: Any, *, reason_code: str, maximum_items: int = 128) -> list[str]:
+    if not isinstance(value, list) or len(value) > maximum_items:
+        _invalid_payload(reason_code)
+    result: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or len(item) > MAX_CLAIM_CHARS:
+            _invalid_payload(reason_code)
+        result.append(item)
+    return result
+
+
+def _reject_sensitive_agent_output(value: Any, *, reason_code: str) -> None:
+    if isinstance(value, Mapping):
+        for child in value.values():
+            _reject_sensitive_agent_output(child, reason_code=reason_code)
+    elif isinstance(value, (list, tuple)):
+        for child in value:
+            _reject_sensitive_agent_output(child, reason_code=reason_code)
+    elif isinstance(value, str) and contains_sensitive_text(value):
+        _invalid_payload(reason_code)
+
+
+def _stable_agent_output_id(run_id: str, claim_id: str) -> str:
+    return hashlib.sha256(f"{run_id}\0{claim_id}".encode()).hexdigest()
+
+
+_NAMED_SCORE_RANGES = {
+    "confidence": (0.0, 1.0),
+    "match_score": (0.0, 1.0),
+    "activation_score": (0.0, 100.0),
+    "conflict_score": (0.0, 100.0),
+    "evidence_strength": (0.0, 1.0),
+    "exposure_score": (0.0, 1.0),
+}
+
+
+def _validate_persisted_score_fields(value: Any, *, reason_code: str) -> None:
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            if key in _NAMED_SCORE_RANGES:
+                minimum, maximum = _NAMED_SCORE_RANGES[key]
+                _strict_number(
+                    child,
+                    minimum=minimum,
+                    maximum=maximum,
+                    reason_code=reason_code,
+                )
+            else:
+                _validate_persisted_score_fields(child, reason_code=reason_code)
+        return
+    if isinstance(value, (list, tuple)):
+        for child in value:
+            _validate_persisted_score_fields(child, reason_code=reason_code)
+        return
+    if isinstance(value, float) and not math.isfinite(value):
+        _invalid_payload(reason_code)
+
+
+def _validated_candidate_scores(value: Any, *, reason_code: str) -> list[dict[str, Any]]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        _invalid_payload(reason_code)
+    result: list[dict[str, Any]] = []
+    for candidate in value:
+        if not isinstance(candidate, Mapping):
+            _invalid_payload(reason_code)
+        copied = dict(candidate)
+        for key in (
+            "score",
+            "keyword_score",
+            "factor_score",
+            "direction_score",
+            "semantic_score",
+        ):
+            if key in copied:
+                _strict_number(
+                    copied[key], minimum=0.0, maximum=1.0, reason_code=reason_code
+                )
+        _validate_persisted_score_fields(copied, reason_code=reason_code)
+        result.append(copied)
+    return result
 
 
 class GraphPersistenceRepository:
@@ -119,6 +247,7 @@ class GraphPersistenceRepository:
         ticker: str,
         alpha_matches_payload: Mapping[str, Any],
     ) -> list[dict[str, Any]]:
+        reason = "ALPHA_MATCHES_PAYLOAD_INVALID"
         records = alpha_matches_payload.get("matches") if isinstance(alpha_matches_payload, Mapping) else None
         rows: list[dict[str, Any]] = []
         if not isinstance(records, list):
@@ -136,6 +265,9 @@ class GraphPersistenceRepository:
                 continue
             seen_claim_ids.add(claim_id)
             match_status = str(record.get("match_status") or "no_match")
+            score_value = record.get("score")
+            if score_value is None:
+                score_value = 0.0
             rows.append(
                 {
                     "run_id": run_id,
@@ -145,7 +277,9 @@ class GraphPersistenceRepository:
                     "agent": _coerce_optional_str(record.get("agent")),
                     "alpha_id": record.get("matched_alpha") if match_status == "matched" else None,
                     "alpha_name": record.get("matched_alpha_name") if match_status == "matched" else None,
-                    "match_score": float(record.get("score") or 0.0),
+                    "match_score": _strict_number(
+                        score_value, minimum=0.0, maximum=1.0, reason_code=reason
+                    ),
                     "match_status": match_status,
                     "direction": _coerce_optional_str(record.get("direction")),
                     "assertion_status": _coerce_optional_str(record.get("assertion_status")),
@@ -153,7 +287,9 @@ class GraphPersistenceRepository:
                     "claim_text": record.get("claim"),
                     "evidence": record.get("evidence"),
                     "reason": record.get("reason"),
-                    "candidate_scores": list(record.get("candidate_scores") or []),
+                    "candidate_scores": _validated_candidate_scores(
+                        record.get("candidate_scores"), reason_code=reason
+                    ),
                 }
             )
         return rows
@@ -176,6 +312,219 @@ class GraphPersistenceRepository:
         if self.dialect_name not in {"postgresql", "sqlite"}:
             raise GraphPersistenceError("UNSUPPORTED_DATABASE_DIALECT")
 
+    @staticmethod
+    def _agent_output_rows(
+        run_id: str,
+        ticker: str,
+        structured_payload: Mapping[str, Any],
+        *,
+        reason_code: str = "AGENT_OUTPUTS_PAYLOAD_INVALID",
+    ) -> list[dict[str, Any]]:
+        reason = reason_code
+        _required_text(run_id, maximum=80, reason_code=reason)
+        _required_text(ticker, maximum=16, reason_code=reason)
+        if not isinstance(structured_payload, Mapping):
+            _invalid_payload(reason)
+        if structured_payload.get("run_id") != run_id or structured_payload.get("ticker") != ticker:
+            _invalid_payload(reason)
+        records = structured_payload.get("records")
+        if not isinstance(records, list):
+            _invalid_payload(reason)
+
+        rows: list[dict[str, Any]] = []
+        seen_claim_ids: set[str] = set()
+        now = datetime.now(UTC)
+        for record_index, record in enumerate(records):
+            if not isinstance(record, Mapping):
+                _invalid_payload(reason)
+            claim_id = _required_text(record.get("claim_id"), maximum=300, reason_code=reason)
+            if claim_id in seen_claim_ids:
+                _invalid_payload(reason)
+            seen_claim_ids.add(claim_id)
+            if record.get("run_id") != run_id or record.get("ticker") != ticker:
+                _invalid_payload(reason)
+
+            source_agent_output_id = _required_text(
+                record.get("source_agent_output_id"), maximum=300, reason_code=reason
+            )
+            direction = _required_text(record.get("direction"), maximum=16, reason_code=reason)
+            if direction not in VALID_DIRECTIONS:
+                _invalid_payload(reason)
+            confidence = _strict_number(
+                record.get("confidence"), minimum=0.0, maximum=1.0, reason_code=reason
+            )
+            claim_index = record.get("claim_index", 0)
+            if isinstance(claim_index, bool) or not isinstance(claim_index, int) or claim_index < 0:
+                _invalid_payload(reason)
+            assertion_status = _optional_text(
+                record.get("assertion_status"), maximum=24, reason_code=reason
+            )
+            if assertion_status is not None and assertion_status not in VALID_ASSERTION_STATUSES:
+                _invalid_payload(reason)
+
+            row = {
+                    "id": _stable_agent_output_id(run_id, claim_id),
+                    "run_id": run_id,
+                    "claim_id": claim_id,
+                    "source_agent_output_id": source_agent_output_id,
+                    "ticker": ticker,
+                    "agent": _required_text(record.get("agent"), maximum=100, reason_code=reason),
+                    "claim": _required_text(
+                        record.get("claim"), maximum=MAX_CLAIM_CHARS, reason_code=reason
+                    ),
+                    "evidence": _required_text(
+                        record.get("evidence"), maximum=MAX_CLAIM_CHARS, reason_code=reason
+                    ),
+                    "entities": _string_list(record.get("entities"), reason_code=reason),
+                    "factors": _string_list(record.get("factors"), reason_code=reason),
+                    "direction": direction,
+                    "confidence": confidence,
+                    "source_type": _required_text(
+                        record.get("source_type"), maximum=64, reason_code=reason
+                    ),
+                    "source_refs": _string_list(
+                        record.get("source_refs", [source_agent_output_id]), reason_code=reason
+                    ),
+                    "agent_output_id": _optional_text(
+                        record.get("agent_output_id"), maximum=300, reason_code=reason
+                    ),
+                    "timestamp": _optional_text(
+                        record.get("timestamp"), maximum=40, reason_code=reason
+                    ),
+                    "output_type": _optional_text(
+                        record.get("output_type"), maximum=64, reason_code=reason
+                    ),
+                    "claim_index": claim_index,
+                    "record_index": record_index,
+                    "source_section": _optional_text(
+                        record.get("source_section"), maximum=200, reason_code=reason
+                    ),
+                    "assertion_status": assertion_status,
+                    "semantic_polarity": _optional_text(
+                        record.get("semantic_polarity"), maximum=24, reason_code=reason
+                    ),
+                    "extraction_method": _optional_text(
+                        record.get("extraction_method"), maximum=64, reason_code=reason
+                    ),
+                    "created_at": now,
+                }
+            _reject_sensitive_agent_output(row, reason_code=reason)
+            rows.append(row)
+        return rows
+
+    def _agent_output_upsert_statement(self, values: Mapping[str, Any]):
+        if self.dialect_name == "postgresql":
+            from sqlalchemy.dialects.postgresql import insert as dialect_insert
+        elif self.dialect_name == "sqlite":
+            from sqlalchemy.dialects.sqlite import insert as dialect_insert
+        else:
+            raise GraphPersistenceError("UNSUPPORTED_DATABASE_DIALECT")
+
+        stmt = dialect_insert(agent_outputs).values(**values)
+        update_values = {
+            key: stmt.excluded[key] for key in values if key not in {"id", "created_at"}
+        }
+        return stmt.on_conflict_do_update(index_elements=["id"], set_=update_values)
+
+    def persist_agent_outputs(
+        self,
+        *,
+        run_id: str,
+        ticker: str,
+        structured_payload: Mapping[str, Any],
+    ) -> None:
+        """Transactionally replace one run's public structured claim rows."""
+        self._require_supported_dialect()
+        rows = self._agent_output_rows(run_id, ticker, structured_payload)
+        row_ids = [row["id"] for row in rows]
+        try:
+            with self._engine.begin() as conn:
+                stale = sa.delete(agent_outputs).where(agent_outputs.c.run_id == run_id)
+                if row_ids:
+                    stale = stale.where(agent_outputs.c.id.not_in(row_ids))
+                conn.execute(stale)
+                for row in rows:
+                    conn.execute(self._agent_output_upsert_statement(row))
+        except GraphPersistenceError:
+            raise
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+
+    @staticmethod
+    def _public_agent_output_row(row: Mapping[str, Any]) -> dict[str, Any]:
+        reason = "DB_DATA_CORRUPTED"
+        run_id = _required_text(row.get("run_id"), maximum=80, reason_code=reason)
+        ticker = _required_text(row.get("ticker"), maximum=16, reason_code=reason)
+        payload = {"run_id": run_id, "ticker": ticker, "records": [dict(row)]}
+        normalized = GraphPersistenceRepository._agent_output_rows(
+            run_id, ticker, payload, reason_code=reason
+        )[0]
+        public = {
+            key: normalized[key]
+            for key in (
+                "claim_id",
+                "source_agent_output_id",
+                "run_id",
+                "ticker",
+                "agent",
+                "claim",
+                "evidence",
+                "entities",
+                "factors",
+                "direction",
+                "confidence",
+                "source_type",
+                "source_refs",
+            )
+        }
+        for key in (
+            "agent_output_id",
+            "timestamp",
+            "output_type",
+            "source_section",
+            "assertion_status",
+            "semantic_polarity",
+            "extraction_method",
+        ):
+            if normalized[key] is not None:
+                public[key] = normalized[key]
+        public["claim_index"] = normalized["claim_index"]
+        return public
+
+    def list_agent_outputs(self, run_id: str) -> list[dict[str, Any]]:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                rows = conn.execute(
+                    sa.select(agent_outputs)
+                    .where(agent_outputs.c.run_id == run_id)
+                    .order_by(agent_outputs.c.record_index, agent_outputs.c.id)
+                ).mappings().all()
+            return [self._public_agent_output_row(row) for row in rows]
+        except GraphPersistenceError:
+            raise
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+
+    def count_agent_outputs(self, run_id: str) -> int:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return 0
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                return int(
+                    conn.scalar(
+                        sa.select(sa.func.count())
+                        .select_from(agent_outputs)
+                        .where(agent_outputs.c.run_id == run_id)
+                    )
+                    or 0
+                )
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+
     def persist_run(
         self,
         *,
@@ -194,21 +543,32 @@ class GraphPersistenceRepository:
         graph_coherence = (
             graph_payload.get("graph_coherence") if isinstance(graph_payload, Mapping) else None
         )
+        graph_score = (graph_coherence or {}).get("score", 0.0)
         graph_values = {
             "run_id": run_id,
             "ticker": ticker,
             "graph_json": dict(graph_payload),
-            "graph_coherence_score": float((graph_coherence or {}).get("score", 0.0)),
+            "graph_coherence_score": _strict_number(
+                graph_score,
+                minimum=0.0,
+                maximum=100.0,
+                reason_code="STRUCTURE_GRAPH_PAYLOAD_INVALID",
+            ),
             "schema_version": str(graph_payload.get("schema_version")),
             "graph_builder_version": str(graph_payload.get("graph_builder_version")),
             "activation_scorer_version": str(graph_payload.get("activation_scorer_version")),
         }
+        _validate_persisted_score_fields(
+            graph_values["graph_json"], reason_code="STRUCTURE_GRAPH_PAYLOAD_INVALID"
+        )
         try:
             with self._engine.begin() as conn:
                 conn.execute(sa.delete(alpha_matches).where(alpha_matches.c.run_id == run_id))
                 if rows:
                     conn.execute(sa.insert(alpha_matches), rows)
                 conn.execute(self._graph_upsert_statement(graph_values))
+        except GraphPersistenceError:
+            raise
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_WRITE_FAILED") from exc
 
@@ -222,7 +582,31 @@ class GraphPersistenceRepository:
                 ).mappings().first()
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_READ_FAILED") from exc
-        return dict(row) if row is not None else None
+        if row is None:
+            return None
+        result = dict(row)
+        graph_json = result.get("graph_json")
+        if not isinstance(graph_json, Mapping):
+            raise GraphPersistenceError("DB_DATA_CORRUPTED")
+        stored_score = _strict_number(
+            result.get("graph_coherence_score"),
+            minimum=0.0,
+            maximum=100.0,
+            reason_code="DB_DATA_CORRUPTED",
+        )
+        graph_coherence = graph_json.get("graph_coherence")
+        if not isinstance(graph_coherence, Mapping):
+            raise GraphPersistenceError("DB_DATA_CORRUPTED")
+        embedded_score = _strict_number(
+            graph_coherence.get("score"),
+            minimum=0.0,
+            maximum=100.0,
+            reason_code="DB_DATA_CORRUPTED",
+        )
+        if stored_score != embedded_score:
+            raise GraphPersistenceError("DB_DATA_CORRUPTED")
+        _validate_persisted_score_fields(graph_json, reason_code="DB_DATA_CORRUPTED")
+        return result
 
     def get_alpha_matches(self, run_id: str) -> list[dict[str, Any]]:
         if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
@@ -236,7 +620,18 @@ class GraphPersistenceRepository:
                 ).mappings().all()
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_READ_FAILED") from exc
-        return [dict(row) for row in rows]
+        result = [dict(row) for row in rows]
+        for row in result:
+            _strict_number(
+                row.get("match_score"),
+                minimum=0.0,
+                maximum=1.0,
+                reason_code="DB_DATA_CORRUPTED",
+            )
+            _validated_candidate_scores(
+                row.get("candidate_scores"), reason_code="DB_DATA_CORRUPTED"
+            )
+        return result
 
     def persist_week4_results(
         self,

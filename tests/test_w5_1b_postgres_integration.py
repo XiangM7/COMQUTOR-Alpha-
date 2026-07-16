@@ -245,26 +245,27 @@ def test_restart_reconciliation_on_postgres(postgres_context):
 
 
 # ---------------------------------------------------------------------------
-# No migration 0004
+# Migration 0004 compatibility
 # ---------------------------------------------------------------------------
 
 
-def test_no_migration_0004_exists(postgres_context):
+def test_migration_0004_exists(postgres_context):
     assert [version for version, _tables in MIGRATIONS] == [
         "0001_create_week3_alpha_matches_and_structure_graphs",
         "0002_create_week4_alpha_activations_and_alpha_conflicts",
         "0003_create_research_runs",
+        "0004_create_agent_outputs",
     ]
 
 
-def test_no_migration_0004_applied_on_postgres(postgres_context):
+def test_migration_0004_applied_on_postgres(postgres_context):
     from comqutor_alpha.storage.db.schema import schema_migrations
 
     with postgres_context["engine"].connect() as conn:
         versions = set(conn.execute(sa.select(schema_migrations.c.version)).scalars().all())
-    assert not any(v.startswith("0004") for v in versions)
+    assert "0004_create_agent_outputs" in versions
 
 
-def test_no_agent_outputs_table_on_postgres(postgres_context):
+def test_agent_outputs_table_exists_on_postgres(postgres_context):
     inspector = sa.inspect(postgres_context["engine"])
-    assert "agent_outputs" not in inspector.get_table_names()
+    assert "agent_outputs" in inspector.get_table_names()

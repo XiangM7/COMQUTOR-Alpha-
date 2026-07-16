@@ -103,7 +103,7 @@ def test_expected_validation_error_is_logged_without_traceback(tmp_path, caplog)
     assert records[0].exc_info is None
 
 
-def test_unexpected_internal_failure_is_logged_with_traceback(tmp_path, caplog):
+def test_unexpected_internal_failure_is_logged_safely_at_error_level(tmp_path, caplog):
     def broken_runner(payload, output_root):
         raise RuntimeError("boom - unexpected internal failure")
 
@@ -118,7 +118,7 @@ def test_unexpected_internal_failure_is_logged_with_traceback(tmp_path, caplog):
     records = [r for r in caplog.records if r.name == "comqutor_alpha.api.routes_research"]
     assert len(records) == 1
     assert records[0].levelname == "ERROR"
-    assert records[0].exc_info is not None
+    assert records[0].exc_info is None
 
 
 def test_missing_raw_outputs_is_logged_without_traceback(tmp_path, caplog):

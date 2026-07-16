@@ -278,6 +278,42 @@ class TestPersistence:
         assert repo.get_alpha_matches("r1") == rows_before
         assert repo.get_graph("r1") == graph_before
 
+    @pytest.mark.parametrize(
+        "bad_score", [float("nan"), float("inf"), -0.1, 1.1, "0.8", True]
+    )
+    def test_invalid_alpha_match_score_is_rejected(self, bad_score):
+        repo = _fresh_repository()
+        payload = _alpha_matches_payload()
+        payload["matches"][0]["score"] = bad_score
+
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_run(
+                run_id="r1",
+                ticker="NVDA",
+                alpha_matches_payload=payload,
+                graph_payload=_graph_payload(),
+            )
+
+        assert exc_info.value.reason_code == "ALPHA_MATCHES_PAYLOAD_INVALID"
+        assert repo.get_alpha_matches("r1") == []
+
+    @pytest.mark.parametrize(
+        "bad_score", [float("nan"), float("inf"), -0.1, 100.1, "42", True]
+    )
+    def test_invalid_graph_coherence_score_is_rejected(self, bad_score):
+        repo = _fresh_repository()
+
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_run(
+                run_id="r1",
+                ticker="NVDA",
+                alpha_matches_payload=_alpha_matches_payload(),
+                graph_payload=_graph_payload(score=bad_score),
+            )
+
+        assert exc_info.value.reason_code == "STRUCTURE_GRAPH_PAYLOAD_INVALID"
+        assert repo.get_graph("r1") is None
+
     def test_migrations_are_idempotent_to_reapply(self):
         from comqutor_alpha.storage.db.migrations import apply_migrations
 

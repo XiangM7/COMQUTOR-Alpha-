@@ -1,12 +1,10 @@
-"""File-backed reader for Week 1-2 structured agent outputs (W4.3).
+"""DB-first reader for public Week 1-2 structured agent outputs.
 
-Reads exactly one artifact -- ``structured_agent_outputs.json`` -- and never
-opens, stats, or otherwise references ``raw_agent_outputs.json``, even when
-that file exists on disk. This is the sole enforcement point for the W4.3
-spec-resolution decision recorded in ``docs/w4_3_gate_contract.md`` section
-7: ``GET /api/research/{run_id}/agent-outputs`` is structured-only by
-design, not by omission. Raw transcript authorization/redaction/audit is a
-deferred, separate decision, out of scope for this endpoint.
+New runs are served from ``agent_outputs`` database rows. Runs created before
+migration 0004 may fall back to exactly one artifact,
+``structured_agent_outputs.json``. Neither path opens, stats, or otherwise
+references ``raw_agent_outputs.json``. Raw transcript authorization,
+redaction, and audit remain deferred and out of scope for this endpoint.
 
 W4.3 security patch: every record is additionally projected through a
 public-field whitelist (``PUBLIC_STRUCTURED_OUTPUT_FIELDS``) before it ever
@@ -26,10 +24,15 @@ import logging
 import math
 from typing import Any
 
+from comqutor_alpha.storage.db.repository import (
+    GraphPersistenceError,
+    build_repository_from_env,
+)
 from comqutor_alpha.storage.file_store import run_dir_for, validate_run_id_for_path
 from comqutor_alpha.structure_engine.structure_schema import VALID_DIRECTIONS
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     MAX_CLAIM_CHARS,
+    SCHEMA_VERSION,
     validate_structured_output,
 )
 
@@ -290,7 +293,12 @@ def _read_structured_payload(run_id: str, output_root: Any) -> dict[str, Any]:
     return {"ticker": ticker, "schema_version": schema_version, "records": public_records}
 
 
-def get_agent_outputs_response(run_id: Any, output_root: str | None = "outputs/runs") -> dict[str, Any]:
+def get_agent_outputs_response(
+    run_id: Any,
+    output_root: str | None = "outputs/runs",
+    *,
+    graph_repository: Any = None,
+) -> dict[str, Any]:
     """Build the full ``GET /api/research/{run_id}/agent-outputs`` response.
 
     Structured-only, public-field-whitelisted by design (see module
@@ -310,6 +318,58 @@ def get_agent_outputs_response(run_id: Any, output_root: str | None = "outputs/r
     except ValueError:
         return _error_response(str(run_id) if run_id is not None else None, "INVALID_RUN_ID")
 
+    try:
+        repository = graph_repository or build_repository_from_env(output_root)
+        database_records = repository.list_agent_outputs(safe_run_id)
+    except GraphPersistenceError as exc:
+        if exc.reason_code == "DB_DATA_CORRUPTED":
+            logger.warning(
+                "agent outputs retrieval failed "
+                "(run_id=%s, stage=%s, reason_code=%s)",
+                safe_run_id,
+                "agent_outputs_read",
+                exc.reason_code,
+            )
+            return _error_response(safe_run_id, "AGENT_OUTPUTS_CORRUPTED")
+        logger.warning(
+            "agent outputs database read failed "
+            "(run_id=%s, stage=%s, reason_code=%s)",
+            safe_run_id,
+            "agent_outputs_read",
+            exc.reason_code,
+        )
+        return _error_response(safe_run_id, "AGENT_OUTPUTS_UNAVAILABLE")
+    except Exception as exc:
+        logger.warning(
+            "agent outputs database read failed "
+            "(run_id=%s, stage=%s, reason_code=%s, exc_type=%s)",
+            safe_run_id,
+            "agent_outputs_read",
+            "AGENT_OUTPUTS_UNAVAILABLE",
+            type(exc).__name__,
+        )
+        return _error_response(safe_run_id, "AGENT_OUTPUTS_UNAVAILABLE")
+
+    if database_records:
+        ticker = database_records[0]["ticker"]
+        try:
+            public_records = [
+                _project_public_record(record, run_id=safe_run_id, ticker=ticker)
+                for record in database_records
+            ]
+        except AgentOutputsReadError:
+            return _error_response(safe_run_id, "AGENT_OUTPUTS_CORRUPTED")
+        return {
+            "run_id": safe_run_id,
+            "ticker": ticker,
+            "status": "ok",
+            "schema_version": SCHEMA_VERSION,
+            "structured_agent_outputs": public_records,
+            "count": len(public_records),
+        }
+
+    # Compatibility-only path for runs created before migration 0004. New
+    # runs persist rows before Alpha mapping and are served above.
     run_dir = run_dir_for(safe_run_id, output_root)
     if not run_dir.exists():
         return _error_response(safe_run_id, "RUN_NOT_FOUND")
@@ -323,9 +383,6 @@ def get_agent_outputs_response(run_id: Any, output_root: str | None = "outputs/r
             "agent outputs read failed unexpectedly (run_id=%s, exc_type=%s)",
             safe_run_id,
             type(exc).__name__,
-        )
-        logger.debug(
-            "agent outputs read failed unexpectedly (run_id=%s)", safe_run_id, exc_info=True
         )
         return _error_response(safe_run_id, "AGENT_OUTPUTS_UNAVAILABLE")
 

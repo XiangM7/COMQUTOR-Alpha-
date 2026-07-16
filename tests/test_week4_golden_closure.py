@@ -63,6 +63,18 @@ def _repo():
     return GraphPersistenceRepository(engine)
 
 
+def _assert_agent_output_traceability(repo, run_id):
+    outputs = {row["claim_id"]: row for row in repo.list_agent_outputs(run_id)}
+    matches = repo.get_alpha_matches(run_id)
+    assert outputs
+    assert matches
+    assert repo.count_agent_outputs(run_id) == len(outputs)
+    for match in matches:
+        output = outputs[match["claim_id"]]
+        assert match["source_agent_output_id"] == output["source_agent_output_id"]
+        assert match["evidence"] == output["evidence"]
+
+
 def _nvda_payload():
     return {
         "ticker": "NVDA",
@@ -95,6 +107,7 @@ def test_nvda_golden_closure_full_week1_through_4_path(tmp_path):
     assert post_response["status"] == "completed"
     assert post_response["structure_graph_status"] == "ready"
     assert post_response["conflict_status"] == "ready"
+    _assert_agent_output_traceability(repo, run_id)
 
     main_conflict = post_response["main_conflict"]
     assert main_conflict is not None
@@ -146,6 +159,7 @@ def test_qqq_golden_closure_full_week1_through_4_path(tmp_path):
     assert post_response["status"] == "completed"
     assert post_response["structure_graph_status"] == "ready"
     assert post_response["conflict_status"] == "ready"
+    _assert_agent_output_traceability(repo, run_id)
 
     db_result = repo.get_week4_conflict_result(run_id)
     assert db_result is not None

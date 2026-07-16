@@ -112,12 +112,9 @@ def _text(value: Any, reason_code: str) -> str:
 
 
 def _number(value: Any, minimum: float, maximum: float, reason_code: str) -> float:
-    if isinstance(value, bool):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         _fail(reason_code)
-    try:
-        number = float(value)
-    except (TypeError, ValueError, OverflowError):
-        _fail(reason_code)
+    number = float(value)
     if not math.isfinite(number) or not minimum <= number <= maximum:
         _fail(reason_code)
     return number
@@ -125,12 +122,9 @@ def _number(value: Any, minimum: float, maximum: float, reason_code: str) -> flo
 
 def _positive_number(value: Any, reason_code: str) -> float:
     """Finite, strictly > 0, no upper bound (e.g. evidence-strength saturation)."""
-    if isinstance(value, bool):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         _fail(reason_code)
-    try:
-        number = float(value)
-    except (TypeError, ValueError, OverflowError):
-        _fail(reason_code)
+    number = float(value)
     if not math.isfinite(number) or number <= 0:
         _fail(reason_code)
     return number
@@ -138,12 +132,9 @@ def _positive_number(value: Any, reason_code: str) -> float:
 
 def _nonnegative_number(value: Any, reason_code: str) -> float:
     """Finite, >= 0, no upper bound (e.g. a multi-claim weighted evidence sum)."""
-    if isinstance(value, bool):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         _fail(reason_code)
-    try:
-        number = float(value)
-    except (TypeError, ValueError, OverflowError):
-        _fail(reason_code)
+    number = float(value)
     if not math.isfinite(number) or number < 0:
         _fail(reason_code)
     return number

@@ -200,6 +200,49 @@ research_runs = sa.Table(
 )
 
 
+agent_outputs = sa.Table(
+    "agent_outputs",
+    metadata,
+    # Deterministic SHA-256 of (run_id, claim_id). The primary key remains
+    # stable across an idempotent replace of the same run.
+    sa.Column("id", sa.String(64), primary_key=True),
+    sa.Column("run_id", sa.String(80), nullable=False),
+    sa.Column("claim_id", sa.String(300), nullable=False),
+    sa.Column("source_agent_output_id", sa.String(300), nullable=False),
+    sa.Column("ticker", sa.String(16), nullable=False),
+    sa.Column("agent", sa.String(100), nullable=False),
+    sa.Column("claim", sa.Text, nullable=False),
+    sa.Column("evidence", sa.Text, nullable=False),
+    sa.Column("entities", _json_type(), nullable=False),
+    sa.Column("factors", _json_type(), nullable=False),
+    sa.Column("direction", sa.String(16), nullable=False),
+    sa.Column("confidence", sa.Float, nullable=False),
+    sa.Column("source_type", sa.String(64), nullable=False),
+    sa.Column("source_refs", _json_type(), nullable=False),
+    sa.Column("agent_output_id", sa.String(300), nullable=True),
+    sa.Column("timestamp", sa.String(40), nullable=True),
+    sa.Column("output_type", sa.String(64), nullable=True),
+    sa.Column("claim_index", sa.Integer, nullable=False, server_default="0"),
+    sa.Column("record_index", sa.Integer, nullable=False),
+    sa.Column("source_section", sa.String(200), nullable=True),
+    sa.Column("assertion_status", sa.String(24), nullable=True),
+    sa.Column("semantic_polarity", sa.String(24), nullable=True),
+    sa.Column("extraction_method", sa.String(64), nullable=True),
+    sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+    sa.UniqueConstraint("run_id", "claim_id", name="uq_agent_outputs_run_claim"),
+    sa.CheckConstraint(
+        "confidence >= 0.0 AND confidence <= 1.0",
+        name="ck_agent_outputs_confidence_range",
+    ),
+    sa.CheckConstraint(
+        "direction IN ('positive', 'negative', 'neutral', 'unknown')",
+        name="ck_agent_outputs_direction",
+    ),
+    sa.Index("ix_agent_outputs_run_id", "run_id"),
+    sa.Index("ix_agent_outputs_run_agent", "run_id", "agent"),
+)
+
+
 # Explicit, versioned migration path (see migrations.py for the runner).
 # Each entry is (version_id, tables_to_create) applied in order and recorded
 # in `schema_migrations` so re-running is a safe no-op.
@@ -210,4 +253,5 @@ MIGRATIONS: tuple[tuple[str, tuple[sa.Table, ...]], ...] = (
         (alpha_activations, alpha_conflicts),
     ),
     ("0003_create_research_runs", (research_runs,)),
+    ("0004_create_agent_outputs", (agent_outputs,)),
 )

@@ -1,4 +1,5 @@
 import json
+import shutil
 
 import pytest
 
@@ -95,6 +96,20 @@ def test_get_graph_returns_the_exact_persisted_run(tmp_path):
     db_row = repo.get_graph(run_id)
     assert graph["nodes"] == db_row["graph_json"]["nodes"]
     assert graph["activation"] == db_row["graph_json"]["activation"]
+
+
+def test_get_graph_is_db_first_when_local_run_directory_is_missing(tmp_path):
+    repo = _repo()
+    response = run_research_request(_payload(), output_root=tmp_path, graph_repository=repo)
+    run_id = response["run_id"]
+    shutil.rmtree(tmp_path / run_id)
+
+    graph = get_persisted_structure_graph(
+        run_id, output_root=tmp_path, graph_repository=repo
+    )
+
+    assert graph["status"] == "ok"
+    assert graph["run_id"] == run_id
 
 
 def test_get_graph_invalid_run_id(tmp_path):
@@ -276,6 +291,9 @@ class _PersistenceFailingRepository:
 
     def persist_run(self, **_kwargs):
         raise RuntimeError("boom - db write failed")
+
+    def persist_agent_outputs(self, **kwargs):
+        return self._inner.persist_agent_outputs(**kwargs)
 
     def get_graph(self, run_id):
         return self._inner.get_graph(run_id)

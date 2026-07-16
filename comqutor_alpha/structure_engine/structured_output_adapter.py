@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 from collections.abc import Mapping
 from datetime import UTC, datetime
@@ -121,10 +122,7 @@ def _now():
 def _normalize_text(value):
     if value is None:
         return ""
-    if isinstance(value, str):
-        text = value
-    else:
-        text = json.dumps(value, ensure_ascii=False, default=str)
+    text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False, default=str)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -142,6 +140,9 @@ _SECRET_JSON_KV_PATTERN = re.compile(
 )
 _SECRET_BEARER_PATTERN = re.compile(r"(?i)\bbearer\s+(\S+)")
 _SECRET_SK_TOKEN_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{3,}")
+_LOCAL_ABSOLUTE_PATH_PATTERN = re.compile(
+    r"(?i)(?:^|\s)(?:/users/|/home/|/private/|file://|[a-z]:\\users\\)"
+)
 
 
 def _redact_secrets(text):
@@ -152,6 +153,12 @@ def _redact_secrets(text):
     redacted = _SECRET_BEARER_PATTERN.sub("Bearer [REDACTED]", redacted)
     redacted = _SECRET_SK_TOKEN_PATTERN.sub("[REDACTED]", redacted)
     return redacted
+
+
+def contains_sensitive_text(value):
+    """Detect obvious credentials or local absolute paths before persistence."""
+    text = _normalize_text(value)
+    return _redact_secrets(text) != text or bool(_LOCAL_ABSOLUTE_PATH_PATTERN.search(text))
 
 
 def _safe_preview(value, max_chars=MAX_ERROR_PREVIEW_CHARS):
@@ -234,9 +241,7 @@ def _is_meaningful_claim(text):
         return False
     if any(marker in lowered for marker in DISCLAIMER_MARKERS):
         return False
-    if not re.search(r"[A-Za-z0-9]", normalized):
-        return False
-    return True
+    return bool(re.search(r"[A-Za-z0-9]", normalized))
 
 
 def extract_claim_segments(raw_text):
@@ -423,13 +428,13 @@ def validate_structured_output(record):
         return False
     if normalize_direction(record.get("direction")) not in VALID_DIRECTIONS:
         return False
-    try:
-        float(record.get("confidence"))
-    except (TypeError, ValueError):
+    confidence = record.get("confidence")
+    if isinstance(confidence, bool) or not isinstance(confidence, (int, float)):
         return False
-    if record.get("source_refs") is not None and not isinstance(record.get("source_refs"), list):
+    confidence = float(confidence)
+    if not math.isfinite(confidence) or not 0.0 <= confidence <= 1.0:
         return False
-    return True
+    return record.get("source_refs") is None or isinstance(record.get("source_refs"), list)
 
 # Return a safe default structured record with a warning reason if the raw output is invalid or missing
 def safe_default_record(
@@ -538,11 +543,11 @@ def _validated_llm_segments(payload: Mapping[str, Any], raw_text: str) -> list[d
         direction = normalize_direction(raw_direction)
         if direction == "unknown" and raw_direction not in {"", "unknown"}:
             raise ValueError("invalid direction")
-        try:
-            confidence = float(item.get("confidence"))
-        except (TypeError, ValueError) as exc:
-            raise ValueError("invalid confidence") from exc
-        if not 0.0 <= confidence <= 1.0:
+        confidence = item.get("confidence")
+        if isinstance(confidence, bool) or not isinstance(confidence, (int, float)):
+            raise ValueError("invalid confidence")
+        confidence = float(confidence)
+        if not math.isfinite(confidence) or not 0.0 <= confidence <= 1.0:
             raise ValueError("confidence must be between zero and one")
 
         source_section = item.get("source_section")

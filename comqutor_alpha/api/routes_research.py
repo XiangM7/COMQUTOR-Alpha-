@@ -126,6 +126,12 @@ _EXPECTED_CLIENT_ERROR_CODES = frozenset(
 # Map known exceptions to standardized error responses.
 def _map_exception_to_error(payload, exc):
     message = str(exc)
+    if isinstance(exc, GraphPersistenceError) and exc.reason_code == "AGENT_OUTPUTS_DB_WRITE_FAILED":
+        return _error_response(
+            payload,
+            "AGENT_OUTPUTS_DB_WRITE_FAILED",
+            "Structured agent outputs could not be persisted.",
+        )
     if isinstance(exc, ValueError):
         if message.startswith("INVALID_RUN_ID"):
             return _error_response(
@@ -301,9 +307,6 @@ def _load_week4_response_fields(run_id, output_root, graph_repository):
             run_id,
             type(exc).__name__,
         )
-        logger.debug(
-            "week4 response enrichment failed unexpectedly (run_id=%s)", run_id, exc_info=True
-        )
     return dominant_alphas, main_conflict, conflict_status
 
 
@@ -415,14 +418,19 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     }
 
 # Run a research request with the given payload, optionally using a custom runner.
-def _log_pipeline_error(run_id, output_root, stage):
+def _log_pipeline_error(
+    run_id,
+    output_root,
+    stage,
+    error_code="WEEK2_ARTIFACT_GENERATION_FAILED",
+):
     append_jsonl_record(
         run_id,
         PIPELINE_ERROR_LOG_ARTIFACT_PATH,
         {
             "run_id": run_id,
             "stage": stage,
-            "error_code": "WEEK2_ARTIFACT_GENERATION_FAILED",
+            "error_code": error_code,
             "created_at": _utc_timestamp(),
         },
         output_root=output_root,
@@ -469,7 +477,12 @@ def _log_week3_pipeline_error(run_id, output_root, stage):
     _write_week3_pipeline_status(run_id, output_root, outcome="failed", stage=stage)
 
 
-def _run_week1_week2_artifact_pipeline(run_dir, llm_gateway=None):
+def _run_week1_week2_artifact_pipeline(
+    run_dir,
+    llm_gateway=None,
+    *,
+    graph_repository=None,
+):
     run_dir = Path(run_dir).expanduser().resolve()
     run_id = validate_run_id_for_path(run_dir.name)
     output_root = run_dir.parent
@@ -479,6 +492,33 @@ def _run_week1_week2_artifact_pipeline(run_dir, llm_gateway=None):
     except Exception:
         _log_pipeline_error(run_id, output_root, "structured_agent_outputs")
         return
+
+    try:
+        structured_payload = load_json_record(
+            run_id, "structured_agent_outputs.json", output_root=output_root
+        )
+        repository = graph_repository or build_write_repository_from_env(output_root)
+        repository.persist_agent_outputs(
+            run_id=run_id,
+            ticker=structured_payload.get("ticker"),
+            structured_payload=structured_payload,
+        )
+    except Exception as exc:
+        _log_pipeline_error(
+            run_id,
+            output_root,
+            "agent_outputs_persistence",
+            "AGENT_OUTPUTS_DB_WRITE_FAILED",
+        )
+        logger.warning(
+            "structured agent output persistence failed "
+            "(run_id=%s, stage=%s, reason_code=%s, exc_type=%s)",
+            run_id,
+            "agent_outputs_persistence",
+            "AGENT_OUTPUTS_DB_WRITE_FAILED",
+            type(exc).__name__,
+        )
+        raise GraphPersistenceError("AGENT_OUTPUTS_DB_WRITE_FAILED") from exc
 
     for stage, writer in (
         ("alpha_matches", save_alpha_matches),
@@ -608,12 +648,17 @@ def run_research_request(
             run_dir = Path(run_original_tradingagents_research(payload, output_root=output_root))
             run_id = validate_run_id_for_path(run_dir.name)
 
+        payload = {**payload, "run_id": run_id}
         raw_path = run_dir / "raw_agent_outputs.json"
         if not raw_path.exists():
             raise FileNotFoundError("raw_agent_outputs.json not found")
         if week2_llm_gateway is None:
             week2_llm_gateway = build_server_week2_llm_gateway(run_id, run_dir.parent)
-        _run_week1_week2_artifact_pipeline(run_dir, week2_llm_gateway)
+        _run_week1_week2_artifact_pipeline(
+            run_dir,
+            week2_llm_gateway,
+            graph_repository=graph_repository,
+        )
         # Week 3 graph build/score/persist is a side effect of a successful
         # POST; its own status is reported only via GET .../graph so the
         # frozen Week 1-2 response contract above never changes shape.
@@ -629,10 +674,14 @@ def run_research_request(
                 error_response["error_code"],
             )
         else:
-            logger.exception(
-                "research request failed (ticker=%s, run_id=%s)",
+            logger.error(
+                "research request failed "
+                "(ticker=%s, run_id=%s, stage=%s, reason_code=%s, exc_type=%s)",
                 payload.get("ticker"),
                 payload.get("run_id"),
+                "research_pipeline",
+                error_response["error_code"],
+                type(exc).__name__,
             )
         return error_response
 
@@ -684,17 +733,13 @@ def _graph_error_response(run_id, ticker, error_code):
 
 
 # Retrieve the exact persisted Structure Graph for a run_id. Pure read path:
-# validated run_id -> cheap filesystem existence check -> one DB SELECT. Never
+# validated run_id -> one DB SELECT -> legacy not-found classification. Never
 # invokes TradingAgents/LLM, never rebuilds the graph, never mutates storage.
 def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_repository=None):
     try:
         safe_run_id = validate_run_id_for_path(run_id)
     except ValueError:
         return _graph_error_response(str(run_id), None, "INVALID_RUN_ID")
-
-    run_dir = run_dir_for(safe_run_id, output_root)
-    if not run_dir.exists():
-        return _graph_error_response(safe_run_id, None, "RUN_NOT_FOUND")
 
     try:
         repository = graph_repository or build_repository_from_env(output_root)
@@ -703,7 +748,8 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
         logger.warning(
             "graph retrieval failed (run_id=%s, reason_code=%s)", safe_run_id, exc.reason_code
         )
-        return _graph_error_response(safe_run_id, None, "GRAPH_UNAVAILABLE")
+        error_code = "GRAPH_CORRUPTED" if exc.reason_code == "DB_DATA_CORRUPTED" else "GRAPH_UNAVAILABLE"
+        return _graph_error_response(safe_run_id, None, error_code)
     except Exception as exc:
         # Anything else (engine construction, filesystem, driver import) must
         # still degrade safely rather than leak a traceback/DSN to the
@@ -711,22 +757,17 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
         # stay safe by default too: a raw driver/SQLAlchemy exception's text
         # routinely embeds the DSN, host, or username. The default (WARNING)
         # log line below carries only run_id + the exception's type name.
-        # The full traceback is only ever emitted at DEBUG (see the
-        # `logger.debug` call), which is off unless an operator has
-        # explicitly configured their logging handler for it -- a
-        # deliberate, local action, never the production default.
         logger.warning(
             "graph retrieval failed unexpectedly (run_id=%s, exc_type=%s)",
             safe_run_id,
             type(exc).__name__,
         )
-        logger.debug(
-            "graph retrieval failed unexpectedly (run_id=%s)", safe_run_id, exc_info=True
-        )
         return _graph_error_response(safe_run_id, None, "GRAPH_UNAVAILABLE")
 
     if row is None:
-        return _graph_error_response(safe_run_id, None, "GRAPH_NOT_READY")
+        run_dir = run_dir_for(safe_run_id, output_root)
+        error_code = "GRAPH_NOT_READY" if run_dir.exists() else "RUN_NOT_FOUND"
+        return _graph_error_response(safe_run_id, None, error_code)
 
     graph_json = row.get("graph_json")
     required_keys = {"schema_version", "nodes", "edges", "activation", "dominant_alphas"}
@@ -804,9 +845,6 @@ def get_persisted_conflicts(run_id, output_root="outputs/runs", *, graph_reposit
             "conflicts retrieval failed unexpectedly (run_id=%s, exc_type=%s)",
             safe_run_id,
             type(exc).__name__,
-        )
-        logger.debug(
-            "conflicts retrieval failed unexpectedly (run_id=%s)", safe_run_id, exc_info=True
         )
         return _conflicts_error_response(safe_run_id, "CONFLICTS_UNAVAILABLE")
 
@@ -903,9 +941,6 @@ def get_research_run_status(run_id, output_root=None, *, graph_repository=None):
             safe_run_id,
             type(exc).__name__,
         )
-        logger.debug(
-            "run status retrieval failed unexpectedly (run_id=%s)", safe_run_id, exc_info=True
-        )
         return _run_status_error_response(safe_run_id, "RUN_STATUS_UNAVAILABLE")
 
     if record is None:
@@ -975,7 +1010,6 @@ def get_research_run_history(
         logger.warning(
             "run history retrieval failed unexpectedly (exc_type=%s)", type(exc).__name__
         )
-        logger.debug("run history retrieval failed unexpectedly", exc_info=True)
         return _run_history_error_response("RUN_HISTORY_UNAVAILABLE")
 
     has_more = len(records) > safe_limit
