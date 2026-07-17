@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import * as client from "./api/client";
+import { makeRunRecord } from "./tests/factories";
 
 function renderAt(path: string) {
   return render(
@@ -29,20 +30,14 @@ describe("App routing", () => {
   });
 
   it("renders each of the three run pages while preserving run_id in the URL", async () => {
-    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue({
-      run_id: "run-abc",
-      ticker: "NVDA",
-      analysis_date: null,
-      selected_analysts: [],
-      status: "completed",
-      stage: "completed",
-      error_code: null,
-      message: "",
-      created_at: null,
-      started_at: null,
-      completed_at: null,
-      updated_at: null,
-    });
+    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+      makeRunRecord({
+        run_id: "run-abc",
+        selected_analysts: [],
+        status: "completed",
+        stage: "completed",
+      })
+    );
     vi.spyOn(client, "getResearchRun").mockResolvedValue({
       run_id: "run-abc",
       ticker: "NVDA",
@@ -82,6 +77,28 @@ describe("App routing", () => {
       if (link.textContent === "Structure Graph") expect(link).toHaveAttribute("href", "/runs/run-abc/structure");
       if (link.textContent === "Conflict Radar") expect(link).toHaveAttribute("href", "/runs/run-abc/conflicts");
     }
+  });
+
+  it("renders the Processing page for /runs/:runId/processing (refresh restores from the URL)", async () => {
+    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+      makeRunRecord({
+        run_id: "run-abc",
+        status: "running",
+        stage: "research_pipeline",
+        progress_percent: 43,
+        current_stage: "news_analysis",
+        completed_units: 4,
+        total_units: 15,
+        progress_message: "Running the News Analyst.",
+        elapsed_seconds: 98,
+        eta_status: "estimating",
+        eta_sample_count: 0,
+      })
+    );
+
+    renderAt("/runs/run-abc/processing");
+    await waitFor(() => expect(screen.getByText(/analyzing nvda/i)).toBeInTheDocument());
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "43");
   });
 
   it("renders NotFoundPage for an unknown path", async () => {

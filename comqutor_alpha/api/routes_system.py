@@ -39,8 +39,16 @@ _REQUIRED_MIGRATIONS = frozenset(
         "0002_create_week4_alpha_activations_and_alpha_conflicts",
         "0003_create_research_runs",
         "0004_create_agent_outputs",
+        "0005_create_research_run_progress",
     }
 )
+
+# Safe, stable reason labels for a misconfigured real-execution capability.
+# Never an env var value, a config dict, or an exception message.
+_REAL_EXECUTION_REASONS = {
+    "REAL_RUN_CONFIG_INVALID": "profile_invalid",
+    "REAL_RUN_CREDENTIAL_MISSING": "credential_missing",
+}
 
 
 def health_response() -> dict[str, Any]:
@@ -71,26 +79,34 @@ def _database_ready(output_root: str | None) -> bool:
     return _REQUIRED_MIGRATIONS.issubset(applied)
 
 
-def _real_execution_status() -> str:
-    """``"disabled"`` | ``"configured"`` | ``"misconfigured"`` -- never
-    leaks the config dict, provider identity, or any env var value."""
+def _real_execution_status() -> tuple[str, str | None]:
+    """``("disabled"|"configured"|"misconfigured", safe_reason_or_None)``.
+
+    ``disabled`` is decided *before* any profile or credential check, so a
+    deliberately-disabled server is always reported as disabled -- never
+    misreported as an Anthropic-credential problem. When enabled, the fixed
+    Research Profile must build and the ``ANTHROPIC_API_KEY`` must be
+    *present* (presence only -- the value is never validated, read into
+    memory beyond the boolean check, logged, or returned). Never leaks the
+    config dict, provider identity, or any env var value."""
     ctx = server_execution.build_server_execution_context()
     if not ctx["enabled"]:
-        return "disabled"
+        return "disabled", None
     if ctx["error"] is not None:
-        return "misconfigured"
-    return "configured"
+        return "misconfigured", _REAL_EXECUTION_REASONS.get(ctx["error"], "profile_invalid")
+    return "configured", None
 
 
 def readiness_response(*, job_manager: Any, output_root: str | None = None) -> tuple[dict[str, Any], bool]:
     """Returns ``(body, overall_ready)``. Overall readiness requires the
-    database *and* job manager to both be usable; a merely *disabled* (not
-    misconfigured) real-execution capability never blocks overall
-    readiness -- only an enabled-but-invalid configuration does.
+    database (migrated through 0005) *and* job manager to both be usable; a
+    merely *disabled* (not misconfigured) real-execution capability never
+    blocks overall readiness -- only an enabled-but-invalid configuration
+    (broken profile, or missing Anthropic credential) does.
     """
     database_ready = _database_ready(output_root)
     job_manager_ready = job_manager is not None and bool(job_manager.is_accepting())
-    real_execution_status = _real_execution_status()
+    real_execution_status, real_execution_reason = _real_execution_status()
 
     overall_ready = database_ready and job_manager_ready and real_execution_status != "misconfigured"
 
@@ -99,6 +115,7 @@ def readiness_response(*, job_manager: Any, output_root: str | None = None) -> t
         "database": "ready" if database_ready else "unavailable",
         "job_manager": "ready" if job_manager_ready else "unavailable",
         "real_execution": real_execution_status,
+        "real_execution_reason": real_execution_reason,
     }
     return body, overall_ready
 

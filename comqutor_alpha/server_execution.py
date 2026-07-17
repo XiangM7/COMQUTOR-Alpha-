@@ -1,4 +1,4 @@
-"""W5.1B: Server-controlled TradingAgents execution configuration.
+"""W5.1B/W7: Server-controlled TradingAgents execution configuration.
 
 Real (non-offline) research runs must be fully controlled by the *server*
 process environment -- never by an HTTP request. This module is the only
@@ -7,51 +7,46 @@ place that:
 1. Decides whether real TradingAgents execution is enabled at all
    (``COMQUTOR_REAL_TRADINGAGENTS_ENABLED``).
 2. Builds the actual TradingAgents ``config`` dict a real run will use, by
-   deep-copying the existing, unmodified ``tradingagents.default_config.
-   DEFAULT_CONFIG`` and overriding only a small, explicit allowlist of
-   non-secret keys that already exist in that default config.
-3. Derives a safe, non-secret execution identity (provider/model labels
-   plus a config hash) that feeds into the request fingerprint so a change
-   to the server's model configuration invalidates stale completed-run
-   reuse automatically -- without ever storing the config itself in
-   ``research_runs``, a log line, or an HTTP response.
+   applying the fixed, versioned server Research Profile (see
+   ``comqutor_alpha.research_profiles``) on top of the existing, unmodified
+   ``tradingagents.default_config.DEFAULT_CONFIG``. No HTTP field and no
+   per-request input can influence this config.
+3. Derives a safe, non-secret execution identity (provider/model labels,
+   the profile id, and the full non-secret profile identity) that feeds
+   into the request fingerprint so a profile/model change invalidates stale
+   completed-run reuse automatically -- without ever storing the config
+   itself in ``research_runs``, a log line, or an HTTP response.
+4. Checks that the Anthropic credential is *present* in the server process
+   environment before a real run may start -- presence only; the value is
+   never read into a config dict, never logged, never returned.
 
-Nothing here reads an API key, a database URL, or any other secret --
-provider SDKs keep reading their own credentials from the standard process
-environment exactly as they do today; this module never touches those
-variables and never copies them into the config dict it builds.
+Nothing here reads an API key *value*, a database URL, or any other secret
+-- provider SDKs keep reading their own credentials from the standard
+process environment exactly as they do today; this module never copies
+those variables into the config dict it builds.
 """
 
 from __future__ import annotations
 
-import copy
-import hashlib
-import json
 import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
 
-logger = logging.getLogger(__name__)
-
-# Every key here must already exist in tradingagents.default_config.DEFAULT_CONFIG
-# -- this module never invents a config key TradingAgentsGraph does not
-# already read. Deliberately small: only the knobs a server operator needs
-# to point a real run at a specific provider/model/endpoint. No vendor
-# credentials, no filesystem paths, no debate/round tuning here.
-REAL_RUN_ALLOWLISTED_CONFIG_KEYS: tuple[str, ...] = (
-    "llm_provider",
-    "deep_think_llm",
-    "quick_think_llm",
-    "backend_url",
+from comqutor_alpha.research_profiles import (
+    ResearchProfileError,
+    build_profile_identity,
+    build_profile_tradingagents_config,
+    compute_profile_identity_sha256,
+    get_active_research_profile,
 )
 
-_ENV_TO_CONFIG_KEY: dict[str, str] = {
-    "COMQUTOR_TA_LLM_PROVIDER": "llm_provider",
-    "COMQUTOR_TA_DEEP_THINK_MODEL": "deep_think_llm",
-    "COMQUTOR_TA_QUICK_THINK_MODEL": "quick_think_llm",
-    "COMQUTOR_TA_BACKEND_URL": "backend_url",
-}
+logger = logging.getLogger(__name__)
+
+# Name of the environment variable holding the Anthropic credential. Only
+# its *presence* is ever checked here -- the value itself is read exclusively
+# by the provider SDK inside TradingAgents.
+ANTHROPIC_API_KEY_ENV = "ANTHROPIC_API_KEY"
 
 _BOOL_TRUE = frozenset({"true", "1", "yes", "on"})
 
@@ -109,56 +104,36 @@ def resolve_real_analysis_date(analysis_date: str | None) -> str:
     return datetime.now(UTC).date().isoformat()
 
 
-def build_server_tradingagents_config() -> dict[str, Any]:
-    """Deep-copies ``DEFAULT_CONFIG`` and overrides only the allowlisted
-    keys from server environment variables. Never mutates ``DEFAULT_CONFIG``
-    itself. Raises ``ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID")``
-    if the provider/model triplet required to actually run TradingAgents is
-    missing or blank -- **or** if anything else goes wrong constructing the
-    config at all.
+def is_anthropic_credential_present() -> bool:
+    """Presence-only check of ``ANTHROPIC_API_KEY`` in the server process
+    environment. The value is never returned, stored, logged, hashed, or
+    copied anywhere -- only whether a non-blank value exists."""
+    return bool(os.environ.get(ANTHROPIC_API_KEY_ENV, "").strip())
 
-    That second case matters: importing ``tradingagents.default_config``
-    evaluates that module's *own* ``TRADINGAGENTS_*`` environment-variable
-    parsing (``_apply_env_overrides``), which is native TradingAgents
-    behavior this module does not control and raises a plain
-    ``ValueError``/``TypeError`` for a malformed operator override (e.g.
-    ``TRADINGAGENTS_MAX_DEBATE_ROUNDS=not-an-integer``) -- not a
-    ``ServerExecutionConfigError``. Every step here (the import, the deep
-    copy, the allowlisted overrides, the required-field check) therefore
-    runs inside one exception boundary: any ordinary exception (never
-    ``BaseException`` -- ``KeyboardInterrupt``/``SystemExit`` still
-    propagate) is folded into the exact same stable
-    ``REAL_RUN_CONFIG_INVALID`` reason code, so a native TradingAgents
-    config error can never surface as an unhandled HTTP 500, a startup
-    crash, or a leaked exception message/traceback -- at *any* log level,
-    including DEBUG. Only the exception's type name is ever logged.
+
+def build_server_tradingagents_config() -> dict[str, Any]:
+    """The TradingAgents config for a real run: the fixed server Research
+    Profile applied on top of the unmodified ``DEFAULT_CONFIG`` (see
+    ``research_profiles.build_profile_tradingagents_config``). Never reads
+    an HTTP payload and never reads a credential.
+
+    Raises ``ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID")`` for
+    *any* construction failure -- including a native TradingAgents
+    config-import error (whose message could echo a ``TRADINGAGENTS_*`` env
+    var value) -- so callers only ever see one stable reason code. Only the
+    exception's type name is ever logged, at any log level.
     """
     try:
-        from tradingagents.default_config import DEFAULT_CONFIG
-
-        config = copy.deepcopy(DEFAULT_CONFIG)
-
-        for env_var, config_key in _ENV_TO_CONFIG_KEY.items():
-            if config_key not in config:
-                # Defensive only: every entry in _ENV_TO_CONFIG_KEY is chosen
-                # to match an existing DEFAULT_CONFIG key; this never
-                # triggers in practice and never invents a new key if it
-                # somehow did.
-                continue
-            value = os.environ.get(env_var, "").strip()
-            if value:
-                config[config_key] = value
-
-        required = ("llm_provider", "deep_think_llm", "quick_think_llm")
-        if not all(str(config.get(key) or "").strip() for key in required):
-            raise ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID")
-    except ServerExecutionConfigError:
-        raise
+        return build_profile_tradingagents_config(get_active_research_profile())
+    except (ResearchProfileError, ServerExecutionConfigError) as exc:
+        logger.warning(
+            "server-side TradingAgents config construction failed (exc_type=%s)",
+            type(exc).__name__,
+        )
+        raise ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID") from exc
     except Exception as exc:
-        # Never the raw exception message/repr/traceback (it may echo back
-        # an env var name/value from TradingAgents' own config parsing) --
-        # at *any* log level, including DEBUG. Only a bare, stable static
-        # message plus the exception's type name, ever.
+        # Never the raw exception message/repr/traceback -- at *any* log
+        # level, including DEBUG. Only the exception's type name, ever.
         logger.warning(
             "server-side TradingAgents config construction failed (exc_type=%s)",
             type(exc).__name__,
@@ -169,38 +144,25 @@ def build_server_tradingagents_config() -> dict[str, Any]:
         )
         raise ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID") from exc
 
-    return config
 
-
-def _config_identity_payload(config: dict[str, Any]) -> dict[str, Any]:
-    """Only the allowlisted, non-secret, result-affecting subset -- never
-    the full config dict (which could otherwise carry local filesystem
-    paths such as ``project_dir``/``results_dir``/``data_cache_dir``)."""
-    return {key: config.get(key) for key in REAL_RUN_ALLOWLISTED_CONFIG_KEYS}
-
-
-def compute_config_identity_sha256(config: dict[str, Any]) -> str:
-    payload = _config_identity_payload(config)
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-
-
-def build_execution_identity(config: dict[str, Any]) -> dict[str, str]:
-    """Safe, non-secret identity derived from an allowlisted config subset.
-
-    ``config_identity_sha256`` is folded into the request fingerprint (see
-    research_lifecycle.build_research_request_identity's
-    ``server_execution_identity`` parameter) so a server-side model/provider
-    change automatically invalidates stale completed-run reuse for real
-    requests, without a new database column.
-    """
+def build_execution_identity(config: dict[str, Any]) -> dict[str, Any]:
+    """Safe, non-secret identity for the fingerprint: provider/model labels,
+    the fixed profile's id, and the *full* non-secret profile identity
+    (models, rounds, language, endpoint mode). Folding the whole profile
+    identity in -- never just a hash of part of it -- means any
+    result-affecting profile change invalidates stale completed-run reuse
+    for real requests, without a new database column. Contains no
+    credential, no filesystem path, no environment value."""
+    profile = get_active_research_profile()
     provider = str(config.get("llm_provider") or "").strip()
     deep_model = str(config.get("deep_think_llm") or "").strip()
     quick_model = str(config.get("quick_think_llm") or "").strip()
     return {
         "provider_identity": provider,
         "model_identity": f"{deep_model}:{quick_model}",
-        "config_identity_sha256": compute_config_identity_sha256(config),
+        "config_identity_sha256": compute_profile_identity_sha256(profile),
+        "profile_id": profile.profile_id,
+        "profile_identity": build_profile_identity(profile),
     }
 
 
@@ -212,25 +174,38 @@ def build_server_execution_context() -> dict[str, Any]:
       - ``config``: the server-side TradingAgents config (``None`` unless
         enabled and valid).
       - ``execution_identity``: ``{provider_identity, model_identity,
-        config_identity_sha256}`` (``None`` unless enabled and valid).
-      - ``error``: ``None``, ``"REAL_RUN_DISABLED"``, or
-        ``"REAL_RUN_CONFIG_INVALID"``.
+        config_identity_sha256, profile_id, profile_identity}`` (``None``
+        unless enabled and valid).
+      - ``profile_id``: the fixed profile's id (``None`` unless enabled and
+        the profile itself is valid).
+      - ``error``: ``None``, ``"REAL_RUN_DISABLED"``,
+        ``"REAL_RUN_CONFIG_INVALID"``, or ``"REAL_RUN_CREDENTIAL_MISSING"``.
 
-    Never raises -- every failure mode is reported through ``error``. This
-    function has its own exception boundary around the config-construction
-    call (in addition to ``build_server_tradingagents_config``'s own) so
-    this specific guarantee -- "never raise a plain configuration exception
-    to the caller" -- holds even if that inner boundary were ever bypassed
-    or weakened; both layers converge on the identical
-    ``REAL_RUN_CONFIG_INVALID`` outcome.
+    Never raises -- every failure mode is reported through ``error``. When
+    real execution is merely *disabled*, the credential is never even
+    checked, so a disabled server is always reported as disabled -- never
+    misreported as a credential problem.
     """
     if not is_real_tradingagents_enabled():
-        return {"enabled": False, "config": None, "execution_identity": None, "error": "REAL_RUN_DISABLED"}
+        return {
+            "enabled": False,
+            "config": None,
+            "execution_identity": None,
+            "profile_id": None,
+            "error": "REAL_RUN_DISABLED",
+        }
 
     try:
         config = build_server_tradingagents_config()
+        execution_identity = build_execution_identity(config)
     except ServerExecutionConfigError as exc:
-        return {"enabled": True, "config": None, "execution_identity": None, "error": exc.reason_code}
+        return {
+            "enabled": True,
+            "config": None,
+            "execution_identity": None,
+            "profile_id": None,
+            "error": exc.reason_code,
+        }
     except Exception as exc:
         logger.warning(
             "server execution context construction failed (exc_type=%s)", type(exc).__name__
@@ -238,26 +213,49 @@ def build_server_execution_context() -> dict[str, Any]:
         logger.debug(
             "server execution context construction failed (exc_type=%s)", type(exc).__name__
         )
-        return {"enabled": True, "config": None, "execution_identity": None, "error": "REAL_RUN_CONFIG_INVALID"}
+        return {
+            "enabled": True,
+            "config": None,
+            "execution_identity": None,
+            "profile_id": None,
+            "error": "REAL_RUN_CONFIG_INVALID",
+        }
+
+    profile_id = str(execution_identity.get("profile_id") or "")
+
+    if not is_anthropic_credential_present():
+        # Enabled with a valid profile but no credential in the server
+        # environment: a real run could never start, so this must fail
+        # closed *before* any research_runs row is ever claimed. The
+        # identity is still returned so fingerprints stay stable -- a
+        # credential is never part of the fingerprint.
+        return {
+            "enabled": True,
+            "config": None,
+            "execution_identity": execution_identity,
+            "profile_id": profile_id,
+            "error": "REAL_RUN_CREDENTIAL_MISSING",
+        }
 
     return {
         "enabled": True,
         "config": config,
-        "execution_identity": build_execution_identity(config),
+        "execution_identity": execution_identity,
+        "profile_id": profile_id,
         "error": None,
     }
 
 
 __all__ = [
-    "REAL_RUN_ALLOWLISTED_CONFIG_KEYS",
+    "ANTHROPIC_API_KEY_ENV",
     "REAL_RUN_ALLOWED_ANALYSTS",
     "ServerExecutionConfigError",
     "is_real_tradingagents_enabled",
     "is_real_force_refresh_enabled",
+    "is_anthropic_credential_present",
     "validate_real_selected_analysts",
     "resolve_real_analysis_date",
     "build_server_tradingagents_config",
-    "compute_config_identity_sha256",
     "build_execution_identity",
     "build_server_execution_context",
 ]

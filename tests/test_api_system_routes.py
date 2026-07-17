@@ -86,16 +86,29 @@ def test_ready_all_green_disabled_real_execution_is_still_overall_ready(tmp_path
         "database": "ready",
         "job_manager": "ready",
         "real_execution": "disabled",
+        "real_execution_reason": None,
     }
 
 
-def test_ready_misconfigured_enabled_real_execution_returns_not_ready(tmp_path, monkeypatch):
-    import tradingagents.default_config as default_config_module
+def test_ready_disabled_never_reported_as_credential_problem(tmp_path, monkeypatch):
+    # Real execution deliberately disabled AND no Anthropic credential in
+    # the environment: readiness must say "disabled" -- never misreport the
+    # disabled state as a missing-key misconfiguration.
+    monkeypatch.delenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    db_path = tmp_path / "_comqutor_alpha_graph.db"
+    engine = build_engine(f"sqlite:///{db_path}")
+    apply_migrations(engine)
 
+    body, ok = readiness_response(job_manager=_FakeJobManager(True), output_root=str(tmp_path))
+    assert ok is True
+    assert body["real_execution"] == "disabled"
+    assert body["real_execution_reason"] is None
+
+
+def test_ready_misconfigured_when_credential_missing(tmp_path, monkeypatch):
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
-    blank_config = dict(default_config_module.DEFAULT_CONFIG)
-    blank_config["llm_provider"] = ""
-    monkeypatch.setattr(default_config_module, "DEFAULT_CONFIG", blank_config)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
     db_path = tmp_path / "_comqutor_alpha_graph.db"
     engine = build_engine(f"sqlite:///{db_path}")
@@ -104,6 +117,30 @@ def test_ready_misconfigured_enabled_real_execution_returns_not_ready(tmp_path, 
     body, ok = readiness_response(job_manager=_FakeJobManager(True), output_root=str(tmp_path))
     assert ok is False
     assert body["real_execution"] == "misconfigured"
+    assert body["real_execution_reason"] == "credential_missing"
+    assert body["status"] == "not_ready"
+
+
+def test_ready_misconfigured_enabled_real_execution_returns_not_ready(tmp_path, monkeypatch):
+    from comqutor_alpha import server_execution
+
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+
+    def raising_config_builder():
+        raise server_execution.ServerExecutionConfigError("REAL_RUN_CONFIG_INVALID")
+
+    monkeypatch.setattr(
+        server_execution, "build_server_tradingagents_config", raising_config_builder
+    )
+
+    db_path = tmp_path / "_comqutor_alpha_graph.db"
+    engine = build_engine(f"sqlite:///{db_path}")
+    apply_migrations(engine)
+
+    body, ok = readiness_response(job_manager=_FakeJobManager(True), output_root=str(tmp_path))
+    assert ok is False
+    assert body["real_execution"] == "misconfigured"
+    assert body["real_execution_reason"] == "profile_invalid"
     assert body["status"] == "not_ready"
 
 
@@ -193,19 +230,18 @@ def test_http_ready_route_is_ready_after_lifespan_startup(app_client):
 def test_http_ready_route_503_when_misconfigured(tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
 
-    import tradingagents.default_config as default_config_module
     from comqutor_alpha.api.main import create_app
 
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
-    blank_config = dict(default_config_module.DEFAULT_CONFIG)
-    blank_config["llm_provider"] = ""
-    monkeypatch.setattr(default_config_module, "DEFAULT_CONFIG", blank_config)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
     app = create_app(output_root=str(tmp_path))
     with TestClient(app) as client:
         response = client.get("/ready")
     assert response.status_code == 503
-    assert response.json()["real_execution"] == "misconfigured"
+    body = response.json()
+    assert body["real_execution"] == "misconfigured"
+    assert body["real_execution_reason"] == "credential_missing"
 
 
 def test_default_no_cors_headers(app_client):

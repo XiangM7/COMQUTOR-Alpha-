@@ -105,9 +105,15 @@ export interface ResearchSubmissionResult {
 // GET /api/research/{run_id}/status and GET /api/research (history)
 // ---------------------------------------------------------------------------
 
-/** _public_run_record_fields()'s exact projection of a research_runs row --
- * never request_fingerprint/active_fingerprint/provider identity/pipeline
- * identity/offline payload content. */
+export type EtaStatus = "estimating" | "available" | "complete" | "unavailable";
+
+/** _public_run_record_fields()'s exact projection of a research_runs row,
+ * plus the W7 additive progress/ETA telemetry from
+ * _build_progress_and_eta_fields -- never request_fingerprint/
+ * active_fingerprint/provider identity/pipeline identity/config hash/
+ * offline payload content. Progress fields are null for runs predating the
+ * progress table; the UI must render only what the backend reports and
+ * never grow progress on its own. */
 export interface ResearchRunRecord {
   run_id: string;
   ticker: string;
@@ -121,6 +127,18 @@ export interface ResearchRunRecord {
   started_at: string | null;
   completed_at: string | null;
   updated_at: string | null;
+  profile_id: string | null;
+  profile_display_name: string | null;
+  progress_percent: number | null;
+  current_stage: string | null;
+  completed_units: number | null;
+  total_units: number | null;
+  progress_message: string | null;
+  elapsed_seconds: number | null;
+  eta_status: EtaStatus | null;
+  estimated_remaining_seconds_min: number | null;
+  estimated_remaining_seconds_max: number | null;
+  eta_sample_count: number | null;
 }
 
 export interface RunStatusFailure {
@@ -422,4 +440,8 @@ export interface ReadinessResponse {
   database: "ready" | "unavailable";
   job_manager: "ready" | "unavailable";
   real_execution: RealExecutionState;
+  /** Safe misconfiguration reason label ("credential_missing" |
+   * "profile_invalid") -- never a config value or env var content. Null
+   * unless real_execution is misconfigured. */
+  real_execution_reason?: string | null;
 }

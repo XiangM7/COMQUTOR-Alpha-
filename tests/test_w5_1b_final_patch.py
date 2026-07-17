@@ -808,7 +808,13 @@ def test_build_server_execution_context_maps_arbitrary_exception_safely(monkeypa
 
     monkeypatch.setattr(server_execution, "build_server_tradingagents_config", raising_config_builder)
     ctx = server_execution.build_server_execution_context()
-    assert ctx == {"enabled": True, "config": None, "execution_identity": None, "error": "REAL_RUN_CONFIG_INVALID"}
+    assert ctx == {
+        "enabled": True,
+        "config": None,
+        "execution_identity": None,
+        "profile_id": None,
+        "error": "REAL_RUN_CONFIG_INVALID",
+    }
 
 
 def test_readiness_response_503_on_native_config_exception(monkeypatch):
@@ -932,7 +938,9 @@ def test_debug_log_does_not_leak_exception_content_from_config_builder(monkeypat
     ):
         server_execution.build_server_tradingagents_config()
 
-    assert "ValueError" in caplog.text
+    # The triggering ValueError is wrapped into ResearchProfileError before
+    # this module logs it -- only that bare wrapper type name may appear.
+    assert "ResearchProfileError" in caplog.text
     assert secret_marker not in caplog.text
     assert "TRADINGAGENTS_MAX_DEBATE_ROUNDS" not in caplog.text
     assert "Traceback" not in caplog.text
@@ -997,8 +1005,9 @@ def test_fresh_subprocess_debug_logging_does_not_leak_env_or_traceback():
     assert "debug-secret-marker" not in combined_output
     assert "TRADINGAGENTS_MAX_DEBATE_ROUNDS" not in combined_output
     assert "Traceback" not in combined_output
-    # A bare exception type name is explicitly allowed to appear.
-    assert "ValueError" in combined_output
+    # A bare exception type name is explicitly allowed to appear -- the
+    # import-time ValueError is wrapped into ResearchProfileError first.
+    assert "ResearchProfileError" in combined_output
 
     payload = json.loads(result.stdout.strip().splitlines()[-1])
     assert payload["error"] == "REAL_RUN_CONFIG_INVALID"

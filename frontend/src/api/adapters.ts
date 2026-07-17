@@ -72,6 +72,18 @@ function nullableString(value: unknown): string | null {
   return isString(value) ? value : null;
 }
 
+function nullableNumber(value: unknown): number | null {
+  return isNumber(value) ? value : null;
+}
+
+const ETA_STATUSES = ["estimating", "available", "complete", "unavailable"] as const;
+
+function nullableEtaStatus(value: unknown): (typeof ETA_STATUSES)[number] | null {
+  return typeof value === "string" && (ETA_STATUSES as readonly string[]).includes(value)
+    ? (value as (typeof ETA_STATUSES)[number])
+    : null;
+}
+
 /** Every "safe error envelope" response the backend can return (status,
  * error_code, message; run_id/ticker nullable) -- used as a fallback when a
  * success-shape adapter rejects a payload. */
@@ -177,6 +189,21 @@ export function adaptResearchRunRecord(payload: unknown): AdaptResult<ResearchRu
     started_at: nullableString(payload.started_at),
     completed_at: nullableString(payload.completed_at),
     updated_at: nullableString(payload.updated_at),
+    // W7 progress/ETA telemetry: strictly what the backend reports --
+    // anything missing or mis-typed degrades to null, never to a guessed
+    // or client-computed value.
+    profile_id: nullableString(payload.profile_id),
+    profile_display_name: nullableString(payload.profile_display_name),
+    progress_percent: nullableNumber(payload.progress_percent),
+    current_stage: nullableString(payload.current_stage),
+    completed_units: nullableNumber(payload.completed_units),
+    total_units: nullableNumber(payload.total_units),
+    progress_message: nullableString(payload.progress_message),
+    elapsed_seconds: nullableNumber(payload.elapsed_seconds),
+    eta_status: nullableEtaStatus(payload.eta_status),
+    estimated_remaining_seconds_min: nullableNumber(payload.estimated_remaining_seconds_min),
+    estimated_remaining_seconds_max: nullableNumber(payload.estimated_remaining_seconds_max),
+    eta_sample_count: nullableNumber(payload.eta_sample_count),
   });
 }
 
@@ -684,5 +711,11 @@ export function adaptReadinessResponse(payload: unknown): AdaptResult<ReadinessR
   ) {
     return fail("unexpected readiness payload shape");
   }
-  return ok({ status, database, job_manager, real_execution });
+  return ok({
+    status,
+    database,
+    job_manager,
+    real_execution,
+    real_execution_reason: nullableString(payload.real_execution_reason),
+  });
 }

@@ -1,19 +1,15 @@
 import { useId, useState } from "react";
-import { REAL_MODE_ANALYSTS, type ResearchSubmissionRequest } from "../api/types";
+import type { ResearchSubmissionRequest } from "../api/types";
 
-const ANALYST_LABELS: Record<(typeof REAL_MODE_ANALYSTS)[number], string> = {
-  market: "Market",
-  news: "News",
-  fundamentals: "Fundamentals",
-  sentiment: "Sentiment",
-};
-
-export interface ResearchFormValues {
-  ticker: string;
-  analysisDate: string;
-  selectedAnalysts: string[];
-  forceRefresh: boolean;
-}
+/** Display order is the frozen product order: Market, Sentiment, News,
+ * Fundamentals. The public API vocabulary is exactly these four names --
+ * TradingAgents' internal "social" key never appears in the UI. */
+const ANALYST_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
+  { value: "market", label: "Market" },
+  { value: "sentiment", label: "Sentiment" },
+  { value: "news", label: "News" },
+  { value: "fundamentals", label: "Fundamentals" },
+];
 
 interface ResearchFormProps {
   isSubmitting: boolean;
@@ -24,18 +20,28 @@ function normalizeTicker(raw: string): string {
   return raw.trim().toUpperCase();
 }
 
+/** Local calendar date as YYYY-MM-DD (matches the backend's date format). */
+function todayIsoDate(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
 /**
- * Research submission form. Client-side validation only normalizes/guides
- * input (ticker trim+uppercase, at least one analyst selected) -- it never
- * replaces server-side validation, and it never collects a provider, model,
- * config, API key, or offline payload field (those simply do not exist as
- * inputs here).
+ * Research submission form. The only user inputs are ticker, analysis date,
+ * and the analyst team -- there is no advanced-options section, no
+ * force_refresh switch, and no provider/model/config/API-key/offline field
+ * (those simply do not exist as inputs here; the server's fixed Research
+ * Profile controls all execution configuration). Client-side validation
+ * only normalizes/guides input; it never replaces server-side validation.
  */
 export function ResearchForm({ isSubmitting, onSubmit }: ResearchFormProps) {
   const [ticker, setTicker] = useState("");
-  const [analysisDate, setAnalysisDate] = useState("");
-  const [selectedAnalysts, setSelectedAnalysts] = useState<string[]>([...REAL_MODE_ANALYSTS]);
-  const [forceRefresh, setForceRefresh] = useState(false);
+  const [analysisDate, setAnalysisDate] = useState(todayIsoDate);
+  const [selectedAnalysts, setSelectedAnalysts] = useState<string[]>(
+    ANALYST_OPTIONS.map((option) => option.value)
+  );
   const [validationError, setValidationError] = useState<string | null>(null);
   const tickerId = useId();
   const dateId = useId();
@@ -55,18 +61,27 @@ export function ResearchForm({ isSubmitting, onSubmit }: ResearchFormProps) {
       setValidationError("Enter a ticker symbol.");
       return;
     }
+    const trimmedDate = analysisDate.trim();
+    if (trimmedDate && trimmedDate > todayIsoDate()) {
+      setValidationError("Analysis date cannot be later than today.");
+      return;
+    }
     if (selectedAnalysts.length === 0) {
       setValidationError("Select at least one analyst.");
       return;
     }
     setValidationError(null);
 
+    // Canonical order, deduplicated -- exactly the three user-controlled
+    // fields, nothing else, ever.
+    const orderedAnalysts = ANALYST_OPTIONS.map((option) => option.value).filter((value) =>
+      selectedAnalysts.includes(value)
+    );
     const request: ResearchSubmissionRequest = {
       ticker: normalizedTicker,
-      selected_analysts: selectedAnalysts,
+      selected_analysts: orderedAnalysts,
     };
-    if (analysisDate.trim()) request.analysis_date = analysisDate.trim();
-    if (forceRefresh) request.force_refresh = true;
+    if (trimmedDate) request.analysis_date = trimmedDate;
 
     onSubmit(request);
   }
@@ -89,46 +104,34 @@ export function ResearchForm({ isSubmitting, onSubmit }: ResearchFormProps) {
       </div>
 
       <div className="form-field">
-        <label htmlFor={dateId}>Analysis date (optional)</label>
+        <label htmlFor={dateId}>Analysis date</label>
         <input
           id={dateId}
           name="analysis_date"
           type="date"
           value={analysisDate}
+          max={todayIsoDate()}
           onChange={(event) => setAnalysisDate(event.target.value)}
           disabled={isSubmitting}
         />
       </div>
 
       <fieldset className="form-field">
-        <legend>Analysts</legend>
+        <legend>Analysts team</legend>
         <div className="analyst-options">
-          {REAL_MODE_ANALYSTS.map((analyst) => (
-            <label key={analyst} className="checkbox-option">
+          {ANALYST_OPTIONS.map(({ value, label }) => (
+            <label key={value} className="checkbox-option">
               <input
                 type="checkbox"
-                checked={selectedAnalysts.includes(analyst)}
-                onChange={() => toggleAnalyst(analyst)}
+                checked={selectedAnalysts.includes(value)}
+                onChange={() => toggleAnalyst(value)}
                 disabled={isSubmitting}
               />
-              {ANALYST_LABELS[analyst]}
+              {label}
             </label>
           ))}
         </div>
       </fieldset>
-
-      <details className="advanced-options">
-        <summary>Advanced options</summary>
-        <label className="checkbox-option">
-          <input
-            type="checkbox"
-            checked={forceRefresh}
-            onChange={(event) => setForceRefresh(event.target.checked)}
-            disabled={isSubmitting}
-          />
-          Force refresh (bypass a completed-run cache)
-        </label>
-      </details>
 
       {validationError ? (
         <p className="form-validation-error" role="alert">

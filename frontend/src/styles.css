@@ -631,3 +631,107 @@ a {
     padding: var(--space-4);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Processing page (live run progress)
+ * ------------------------------------------------------------------------- */
+
+.processing-panel h1 {
+  margin-bottom: var(--space-2);
+}
+
+.processing-profile {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.processing-progressbar {
+  width: 100%;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--color-border);
+  overflow: hidden;
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.processing-progressbar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 7px;
+  transition: width 400ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processing-progressbar-fill {
+    transition: none;
+  }
+}
+
+.processing-progress-summary {
+  font-weight: 600;
+}
+
+.processing-elapsed,
+.processing-eta,
+.processing-current-step {
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.processing-stage-list {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-4);
+  display: grid;
+  gap: var(--space-1);
+}
+
+.processing-stage {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 2px 0;
+}
+
+.processing-stage-marker {
+  width: 1.2em;
+  text-align: center;
+}
+
+.processing-stage-state {
+  margin-left: auto;
+  font-size: 0.85em;
+  color: var(--color-text-muted);
+}
+
+.processing-stage-done .processing-stage-label {
+  color: var(--color-text-muted);
+}
+
+.processing-stage-current .processing-stage-label {
+  font-weight: 700;
+}
+
+.processing-complete,
+.processing-partial {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  margin-top: var(--space-4);
+}
+
+.processing-failed {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.processing-failed-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.processing-error-code code {
+  font-family: monospace;
+}

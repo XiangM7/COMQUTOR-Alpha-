@@ -218,6 +218,16 @@ def build_research_request_identity(
     # no server execution identity was supplied (offline requests, or real
     # requests before W5.1B wiring).
     config_identity_sha256 = str(identity_overrides.get("config_identity_sha256") or "")
+    # W7: the fixed server Research Profile's id and its full non-secret
+    # result-affecting identity (provider, models, endpoint mode, output
+    # language, debate/risk rounds -- see research_profiles.
+    # build_profile_identity). Changing *any* profile field therefore
+    # changes every real request's fingerprint, so an old completed run can
+    # never be wrongly reused after a profile/model/research-depth change.
+    # Empty for offline requests. Never contains a credential.
+    profile_id = str(identity_overrides.get("profile_id") or "")
+    profile_identity_raw = identity_overrides.get("profile_identity")
+    profile_identity = dict(profile_identity_raw) if isinstance(profile_identity_raw, Mapping) else {}
 
     return {
         "ticker": ticker,
@@ -228,6 +238,8 @@ def build_research_request_identity(
         "provider_identity": provider_identity,
         "model_identity": model_identity,
         "config_identity_sha256": config_identity_sha256,
+        "profile_id": profile_id,
+        "profile_identity": profile_identity,
         "pipeline_identity": _pipeline_identity(),
     }
 
@@ -299,6 +311,9 @@ _SAFE_ERROR_MESSAGES = {
     "OFFLINE_DISABLED": "Offline outputs are disabled.",
     "REAL_RUN_DISABLED": "Real TradingAgents execution is disabled by default.",
     "REAL_RUN_CONFIG_INVALID": "Real TradingAgents execution is not configured correctly.",
+    "REAL_RUN_CREDENTIAL_MISSING": (
+        "Research could not start because the configured research service is unavailable."
+    ),
     "REAL_FORCE_REFRESH_DISABLED": "force_refresh is not enabled for real TradingAgents execution.",
     "INVALID_ANALYST_SELECTION": "selected_analysts contains an analyst not supported for real execution.",
 }
@@ -673,11 +688,26 @@ def prepare_research_submission(
     # disposition in {created, force_refreshed}: a fresh `queued` row was
     # just claimed. Never executed here -- caller's job.
     run_id = claim["run_id"]
+    if execution_mode == "offline":
+        from comqutor_alpha.research_progress import OFFLINE_PROFILE_ID
+
+        profile_id_for_run = OFFLINE_PROFILE_ID
+    else:
+        identity_source = (
+            resolved_server_execution_identity
+            if isinstance(resolved_server_execution_identity, Mapping)
+            else {}
+        )
+        profile_id_for_run = str(identity_source.get("profile_id") or SERVER_UNCONFIGURED_IDENTITY)
+
     execution_payload = {
         **working_payload,
         "run_id": run_id,
         "ticker": identity["ticker"],
         "selected_analysts": identity["selected_analysts"],
+        # Non-secret profile identity label only -- used for progress
+        # telemetry and ETA history matching, never for configuration.
+        "profile_id": profile_id_for_run,
     }
     if execution_mode == "real" and real_config is not None:
         # Never sourced from the client payload -- ResearchRequest cannot
@@ -690,6 +720,7 @@ def prepare_research_submission(
         "execution_payload": execution_payload,
         "graph_repository": graph_repository,
         "ticker": ticker,
+        "profile_id": profile_id_for_run,
     }
 
 
@@ -709,17 +740,42 @@ def execute_claimed_research_run(
     (``research_jobs.py`` -- a fresh ``graph_repository`` rebuilt from server
     env in the child process, never the parent's engine/connection object).
 
-    ``executor`` defaults to the existing, unmodified
-    ``routes_research.run_research_request`` -- this function never
-    reimplements Week 1-4 pipeline logic, it only records the outcome the
-    executor reports.
+    ``executor`` defaults to the existing
+    ``routes_research.run_research_request`` (with real progress reporting
+    wired in) -- this function never reimplements Week 1-4 pipeline logic,
+    it only records the outcome the executor reports. An injected
+    ``executor`` keeps its original ``(payload, output_root=...,
+    graph_repository=...)`` call shape and simply runs without stage-level
+    progress.
     """
     from comqutor_alpha.api.routes_research import run_research_request
+    from comqutor_alpha.research_progress import ResearchProgressReporter
 
-    executor = executor or run_research_request
+    # Progress telemetry is best-effort throughout: the reporter swallows
+    # (and safely logs) its own persistence failures, so a progress hiccup
+    # can never fail -- or fabricate the progress of -- the research run.
+    progress_reporter = ResearchProgressReporter(
+        graph_repository,
+        run_id,
+        profile_id=str(execution_payload.get("profile_id") or ""),
+        selected_analysts=execution_payload.get("selected_analysts"),
+    )
+    progress_reporter.initialize()
+
+    if executor is None:
+        def _default_executor(payload, *, output_root, graph_repository):
+            return run_research_request(
+                payload,
+                output_root=output_root,
+                graph_repository=graph_repository,
+                progress_reporter=progress_reporter,
+            )
+
+        executor = _default_executor
 
     try:
         graph_repository.mark_research_run_running(run_id)
+        progress_reporter.record_stage("initializing")
         result = executor(
             execution_payload,
             output_root=output_root,
@@ -731,16 +787,18 @@ def execute_claimed_research_run(
             run_id,
             type(exc).__name__,
         )
+        failure_message = _safe_message("INTERNAL_ERROR", "Research request failed.")
         with _suppress_lifecycle_errors():
             graph_repository.mark_research_run_terminal(
-                run_id, status="failed", error_code="INTERNAL_ERROR", error_message=_safe_message("INTERNAL_ERROR", "Research request failed.")
+                run_id, status="failed", error_code="INTERNAL_ERROR", error_message=failure_message
             )
+        progress_reporter.record_terminal("failed", message=failure_message)
         return {
             "run_id": run_id,
             "ticker": ticker,
             "status": "failed",
             "error_code": "INTERNAL_ERROR",
-            "message": _safe_message("INTERNAL_ERROR", "Research request failed."),
+            "message": failure_message,
             "run_status": "failed",
             "cache_disposition": disposition,
         }
@@ -749,6 +807,7 @@ def execute_claimed_research_run(
     if result_status in ("completed", "partial"):
         with _suppress_lifecycle_errors():
             graph_repository.mark_research_run_terminal(run_id, status=result_status)
+        progress_reporter.record_terminal(result_status)
     else:
         error_code = result.get("error_code") or "INTERNAL_ERROR"
         error_message = result.get("message") or _safe_message(error_code, "Research request failed.")
@@ -756,6 +815,7 @@ def execute_claimed_research_run(
             graph_repository.mark_research_run_terminal(
                 run_id, status="failed", error_code=str(error_code), error_message=str(error_message)
             )
+        progress_reporter.record_terminal("failed", message=str(error_message))
 
     result["run_status"] = result_status if result_status in ("completed", "partial") else "failed"
     result["cache_disposition"] = disposition

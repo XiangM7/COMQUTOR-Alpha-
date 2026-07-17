@@ -3,27 +3,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as client from "../api/client";
 import { ApiError } from "../api/errors";
 import type { ResearchRunRecord } from "../api/types";
+import { makeRunRecord } from "../tests/factories";
 import { useRunPolling } from "./useRunPolling";
 
 function statusRecord(
   status: ResearchRunRecord["status"],
   overrides: Partial<ResearchRunRecord> = {}
 ): ResearchRunRecord {
-  return {
-    run_id: "run-1",
-    ticker: "NVDA",
-    analysis_date: null,
-    selected_analysts: [],
-    status,
-    stage: null,
-    error_code: null,
-    message: "",
-    created_at: null,
-    started_at: null,
-    completed_at: null,
-    updated_at: null,
-    ...overrides,
-  };
+  return makeRunRecord({ status, selected_analysts: [], ...overrides });
 }
 
 /** Flushes pending microtasks (a mocked promise's resolution plus its

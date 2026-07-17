@@ -144,7 +144,13 @@ export function ResearchPage() {
       return;
     }
     if (result.run_id) {
-      navigate(`/runs/${encodeURIComponent(result.run_id)}/research`, {
+      // HTTP 200 completed reuse: the canonical result already exists, so
+      // go straight to it. Anything queued/running (HTTP 202, including an
+      // in-flight reuse) goes to the Processing page, which polls real
+      // progress and forwards to the results when the run finishes.
+      const target =
+        result.cache_disposition === "reused_completed" ? "research" : "processing";
+      navigate(`/runs/${encodeURIComponent(result.run_id)}/${target}`, {
         state: result.cache_disposition ? { cacheDisposition: result.cache_disposition } : undefined,
       });
     }

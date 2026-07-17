@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as client from "../api/client";
+import { makeRunRecord } from "../tests/factories";
 import { ResearchRunPage } from "./ResearchRunPage";
 
 function renderPage(runId = "run-1") {
@@ -32,20 +33,15 @@ describe("ResearchRunPage", () => {
   });
 
   it("renders a completed run's summary and structured analyst outputs", async () => {
-    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue({
-      run_id: "run-1",
-      ticker: "NVDA",
-      analysis_date: "2026-06-30",
-      selected_analysts: ["market"],
-      status: "completed",
-      stage: "completed",
-      error_code: null,
-      message: "Research run completed.",
-      created_at: null,
-      started_at: null,
-      completed_at: null,
-      updated_at: null,
-    });
+    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+      makeRunRecord({
+        analysis_date: "2026-06-30",
+        selected_analysts: ["market"],
+        status: "completed",
+        stage: "completed",
+        message: "Research run completed.",
+      })
+    );
     vi.spyOn(client, "getResearchRun").mockResolvedValue({
       run_id: "run-1",
       ticker: "NVDA",
@@ -91,20 +87,14 @@ describe("ResearchRunPage", () => {
   });
 
   it("renders a partial run without failing", async () => {
-    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue({
-      run_id: "run-1",
-      ticker: "NVDA",
-      analysis_date: null,
-      selected_analysts: [],
-      status: "partial",
-      stage: "partial",
-      error_code: null,
-      message: "Research run completed partially.",
-      created_at: null,
-      started_at: null,
-      completed_at: null,
-      updated_at: null,
-    });
+    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+      makeRunRecord({
+        selected_analysts: [],
+        status: "partial",
+        stage: "partial",
+        message: "Research run completed partially.",
+      })
+    );
     vi.spyOn(client, "getResearchRun").mockResolvedValue({
       run_id: "run-1",
       ticker: "NVDA",
@@ -153,20 +143,9 @@ describe("ResearchRunPage", () => {
   });
 
   it("never renders raw/private fields (raw_output, prompt, provider config, local paths)", async () => {
-    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue({
-      run_id: "run-1",
-      ticker: "NVDA",
-      analysis_date: null,
-      selected_analysts: [],
-      status: "completed",
-      stage: "completed",
-      error_code: null,
-      message: "",
-      created_at: null,
-      started_at: null,
-      completed_at: null,
-      updated_at: null,
-    });
+    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+      makeRunRecord({ selected_analysts: [], status: "completed", stage: "completed" })
+    );
     vi.spyOn(client, "getResearchRun").mockResolvedValue({
       run_id: "run-1",
       ticker: "NVDA",

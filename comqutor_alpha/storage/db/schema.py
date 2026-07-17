@@ -243,6 +243,48 @@ agent_outputs = sa.Table(
 )
 
 
+research_run_progress = sa.Table(
+    "research_run_progress",
+    metadata,
+    # One row per research run -- run_id is both the identity and the only
+    # join key back to research_runs. Deliberately no foreign key: the
+    # progress row is written from a separate worker process and must never
+    # be able to block or corrupt the lifecycle row's own transaction.
+    sa.Column("run_id", sa.String(80), primary_key=True),
+    sa.Column("profile_id", sa.String(120), nullable=False),
+    sa.Column("progress_percent", sa.Integer, nullable=False),
+    sa.Column("current_stage", sa.String(64), nullable=False),
+    sa.Column("completed_units", sa.Integer, nullable=False),
+    sa.Column("total_units", sa.Integer, nullable=False),
+    sa.Column("progress_message", sa.String(300), nullable=True),
+    sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
+    sa.Column(
+        "updated_at",
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
+        nullable=False,
+    ),
+    sa.CheckConstraint(
+        "progress_percent >= 0 AND progress_percent <= 100",
+        name="ck_research_run_progress_percent_range",
+    ),
+    sa.CheckConstraint(
+        "completed_units >= 0",
+        name="ck_research_run_progress_completed_nonnegative",
+    ),
+    sa.CheckConstraint(
+        "total_units > 0",
+        name="ck_research_run_progress_total_positive",
+    ),
+    sa.CheckConstraint(
+        "completed_units <= total_units",
+        name="ck_research_run_progress_completed_lte_total",
+    ),
+    sa.Index("ix_research_run_progress_profile_id", "profile_id"),
+)
+
+
 # Explicit, versioned migration path (see migrations.py for the runner).
 # Each entry is (version_id, tables_to_create) applied in order and recorded
 # in `schema_migrations` so re-running is a safe no-op.
@@ -254,4 +296,5 @@ MIGRATIONS: tuple[tuple[str, tuple[sa.Table, ...]], ...] = (
     ),
     ("0003_create_research_runs", (research_runs,)),
     ("0004_create_agent_outputs", (agent_outputs,)),
+    ("0005_create_research_run_progress", (research_run_progress,)),
 )

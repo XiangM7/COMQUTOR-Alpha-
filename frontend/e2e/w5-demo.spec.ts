@@ -14,8 +14,8 @@ async function assertNoHorizontalOverflow(page: Page) {
 async function submitDemoTicker(page: Page, ticker: "NVDA" | "QQQ") {
   await page.goto("/research");
   await page.getByLabel("Ticker").fill(ticker);
-  await page.getByLabel("Analysis date (optional)").fill("2026-06-30");
-  for (const analyst of ["Market", "News", "Fundamentals", "Sentiment"]) {
+  await page.getByLabel("Analysis date").fill("2026-06-30");
+  for (const analyst of ["Market", "Sentiment", "News", "Fundamentals"]) {
     await expect(page.getByLabel(analyst)).toBeChecked();
   }
 
@@ -134,6 +134,136 @@ test("direct URLs and refresh restore every NVDA run page", async ({ page }) => 
     await page.reload();
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
   }
+});
+
+test("a live 202 submission shows real processing progress and forwards to results", async ({ page }) => {
+  // The demo server keeps real execution disabled, so the live-submission
+  // flow is exercised through route interception: a 202 accepted response,
+  // a status sequence driven by (mock) backend telemetry, and the terminal
+  // completed status. The frontend must render exactly what the backend
+  // reports -- it never invents progress of its own.
+  const runId = "e2e_live_processing_run";
+  let statusCalls = 0;
+
+  await page.route("**/api/research", (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    return route.fulfill({
+      status: 202,
+      contentType: "application/json",
+      body: JSON.stringify({
+        run_id: runId,
+        ticker: "MSTR",
+        status: "queued",
+        run_status: "queued",
+        stage: "accepted",
+        cache_disposition: "created",
+      }),
+    });
+  });
+  await page.route(`**/api/research/${runId}`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        run_id: runId,
+        ticker: "MSTR",
+        status: "completed",
+        artifacts: {
+          metadata: true,
+          raw_agent_outputs: true,
+          structured_agent_outputs: true,
+          final_report: false,
+          alpha_matches: true,
+          extracted_structures: true,
+          structured_output_error_logs: false,
+          week2_llm_error_logs: false,
+          week2_pipeline_error_logs: false,
+        },
+        agent_output_count: 0,
+        structured_output_count: 0,
+        structure_graph_status: "ready",
+        dominant_alphas: [],
+        main_conflict: null,
+        conflict_status: "ready",
+        summary: "No dominant Alpha structure or admitted conflict was identified for this research run.",
+      }),
+    })
+  );
+  await page.route(`**/api/research/${runId}/agent-outputs`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        run_id: runId,
+        ticker: "MSTR",
+        status: "ok",
+        schema_version: "week1a.structured_agent_outputs.v2",
+        count: 0,
+        structured_agent_outputs: [],
+      }),
+    })
+  );
+  await page.route(`**/api/research/${runId}/status`, (route) => {
+    statusCalls += 1;
+    const base = {
+      run_id: runId,
+      ticker: "MSTR",
+      analysis_date: "2026-06-30",
+      selected_analysts: ["fundamentals", "market", "news", "sentiment"],
+      stage: "research_pipeline",
+      error_code: null,
+      message: "Research run is in progress.",
+      created_at: null,
+      started_at: null,
+      completed_at: null,
+      updated_at: null,
+      profile_id: "comqutor_anthropic_medium_sonnet46_v1",
+      profile_display_name: "COMQUTOR Anthropic Medium v1",
+      completed_units: 4,
+      total_units: 15,
+      progress_message: "Running the News Analyst.",
+      elapsed_seconds: 98,
+      eta_status: "estimating",
+      estimated_remaining_seconds_min: null,
+      estimated_remaining_seconds_max: null,
+      eta_sample_count: 0,
+    };
+    const body =
+      statusCalls < 3
+        ? { ...base, status: "running", progress_percent: 43, current_stage: "news_analysis" }
+        : {
+            ...base,
+            status: "completed",
+            stage: "completed",
+            progress_percent: 100,
+            current_stage: "completed",
+            eta_status: "complete",
+            progress_message: "Research run completed.",
+          };
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(body),
+    });
+  });
+
+  await page.goto("/research");
+  await page.getByLabel("Ticker").fill("MSTR");
+  await page.getByRole("button", { name: "Start research" }).click();
+
+  await expect(page).toHaveURL(`/runs/${runId}/processing`);
+  await expect(page.getByRole("heading", { name: "Analyzing MSTR" })).toBeVisible();
+  const bar = page.getByRole("progressbar");
+  await expect(bar).toHaveAttribute("aria-valuenow", "43");
+  await expect(page.getByText("Research profile: COMQUTOR Anthropic Medium v1")).toBeVisible();
+  await expect(page.getByText("Estimating completion time…")).toBeVisible();
+  await expect(page.getByText("Current step: Running the News Analyst.")).toBeVisible();
+  await assertNoHorizontalOverflow(page);
+
+  // Terminal status arrives via polling -> the page announces completion
+  // and forwards to the results automatically.
+  await expect(page).toHaveURL(`/runs/${runId}/research`, { timeout: 20_000 });
+  await expect(page.getByRole("heading", { name: "Research summary" })).toBeVisible();
 });
 
 test("a 404 readiness endpoint is reported as an incompatible API", async ({ page }) => {

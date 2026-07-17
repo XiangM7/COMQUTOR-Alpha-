@@ -477,11 +477,26 @@ def _log_week3_pipeline_error(run_id, output_root, stage):
     _write_week3_pipeline_status(run_id, output_root, outcome="failed", stage=stage)
 
 
+def _report_progress_stage(progress_reporter, stage):
+    """Best-effort progress advance -- a reporter's own persistence errors
+    are already swallowed inside it, but this guard also keeps a defective
+    injected reporter from ever failing the pipeline."""
+    if progress_reporter is None:
+        return
+    try:
+        progress_reporter.record_stage(stage)
+    except Exception as exc:
+        logger.warning(
+            "progress stage report failed (stage=%s, exc_type=%s)", stage, type(exc).__name__
+        )
+
+
 def _run_week1_week2_artifact_pipeline(
     run_dir,
     llm_gateway=None,
     *,
     graph_repository=None,
+    progress_reporter=None,
 ):
     run_dir = Path(run_dir).expanduser().resolve()
     run_id = validate_run_id_for_path(run_dir.name)
@@ -492,6 +507,7 @@ def _run_week1_week2_artifact_pipeline(
     except Exception:
         _log_pipeline_error(run_id, output_root, "structured_agent_outputs")
         return
+    _report_progress_stage(progress_reporter, "structured_claims")
 
     try:
         structured_payload = load_json_record(
@@ -528,14 +544,19 @@ def _run_week1_week2_artifact_pipeline(
             writer(run_id, output_root=output_root, llm_gateway=llm_gateway)
         except Exception:
             _log_pipeline_error(run_id, output_root, stage)
+        else:
+            if stage == "alpha_matches":
+                _report_progress_stage(progress_reporter, "alpha_mapping")
 
 
-def _run_week3_graph_pipeline(run_dir, *, graph_repository=None):
+def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_reporter=None):
     """Build, persist (file + DB), and score the Week 3 Structure Graph.
 
     Only runs after Week 1-2 artifacts exist; any failure at any step is
     caught, logged with a stable safe reason code, and never propagates --
     a Week 3 failure must never take down or alter the Week 1-2 response.
+    Progress stages are reported strictly *after* their real step succeeds,
+    so a Graph/Conflict failure can never show a fabricated 100%.
     """
     run_dir = Path(run_dir).expanduser().resolve()
     run_id = validate_run_id_for_path(run_dir.name)
@@ -574,6 +595,8 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None):
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_artifact_write")
         return
+    _report_progress_stage(progress_reporter, "structure_graph")
+    _report_progress_stage(progress_reporter, "activation_scoring")
 
     ticker = graph_payload.get("ticker") or metadata.get("ticker")
     try:
@@ -609,15 +632,24 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None):
     # itself never raises, and this call is additionally wrapped so a defect
     # in the Week 4 seam can never take down an already-successful Week 3
     # response.
+    week4_succeeded = False
     with contextlib.suppress(Exception):
-        run_week4_conflict_pipeline(
-            run_id=run_id,
-            ticker=ticker,
-            graph_payload=graph_payload,
-            alpha_matches_payload=alpha_matches_payload,
-            repository=repository,
-            output_root=output_root,
+        week4_succeeded = bool(
+            run_week4_conflict_pipeline(
+                run_id=run_id,
+                ticker=ticker,
+                graph_payload=graph_payload,
+                alpha_matches_payload=alpha_matches_payload,
+                repository=repository,
+                output_root=output_root,
+            )
         )
+    if week4_succeeded:
+        # Both progress milestones require the Week 4 detector AND its
+        # database persistence to have genuinely succeeded -- a conflict
+        # failure keeps progress pinned below 96 rather than faking it.
+        _report_progress_stage(progress_reporter, "conflict_analysis")
+        _report_progress_stage(progress_reporter, "result_persistence")
 
 
 def run_research_request(
@@ -627,6 +659,7 @@ def run_research_request(
     *,
     week2_llm_gateway=None,
     graph_repository=None,
+    progress_reporter=None,
 ):
     payload = _normalize_payload(payload)
     try:
@@ -640,6 +673,22 @@ def run_research_request(
                     "OFFLINE_DISABLED: offline_raw_agent_outputs is not allowed in production"
                 )
             run_id, run_dir = _create_offline_run(payload, output_root)
+        elif payload.get("allow_real_tradingagents_run") is True and payload.get("final_state") is None:
+            # W7: the API's real-execution path streams the TradingAgents
+            # graph so genuinely-completed agent milestones advance real
+            # progress. allow_real_tradingagents_run is set exclusively by
+            # the server-side submission gate (research_lifecycle) -- an
+            # HTTP request cannot carry it (see ResearchRequest below).
+            from comqutor_alpha.runners.tradingagents_runner import (
+                run_streaming_tradingagents_research,
+            )
+
+            run_dir = Path(
+                run_streaming_tradingagents_research(
+                    payload, output_root=output_root, progress_reporter=progress_reporter
+                )
+            )
+            run_id = validate_run_id_for_path(run_dir.name)
         else:
             from comqutor_alpha.runners.tradingagents_runner import (
                 run_original_tradingagents_research,
@@ -652,18 +701,26 @@ def run_research_request(
         raw_path = run_dir / "raw_agent_outputs.json"
         if not raw_path.exists():
             raise FileNotFoundError("raw_agent_outputs.json not found")
+        _report_progress_stage(progress_reporter, "raw_outputs_saved")
         if week2_llm_gateway is None:
             week2_llm_gateway = build_server_week2_llm_gateway(run_id, run_dir.parent)
         _run_week1_week2_artifact_pipeline(
             run_dir,
             week2_llm_gateway,
             graph_repository=graph_repository,
+            progress_reporter=progress_reporter,
         )
         # Week 3 graph build/score/persist is a side effect of a successful
         # POST; its own status is reported only via GET .../graph so the
         # frozen Week 1-2 response contract above never changes shape.
-        _run_week3_graph_pipeline(run_dir, graph_repository=graph_repository)
-        return build_research_response(run_id, output_root=output_root, graph_repository=graph_repository)
+        _run_week3_graph_pipeline(
+            run_dir, graph_repository=graph_repository, progress_reporter=progress_reporter
+        )
+        response = build_research_response(
+            run_id, output_root=output_root, graph_repository=graph_repository
+        )
+        _report_progress_stage(progress_reporter, "result_assembly")
+        return response
     except Exception as exc:
         error_response = _map_exception_to_error(payload, exc)
         if error_response["error_code"] in _EXPECTED_CLIENT_ERROR_CODES:
@@ -916,11 +973,140 @@ def _run_status_error_response(run_id, error_code):
 
 _RUN_STATUS_REQUIRED_FIELDS = {"run_id", "ticker", "status", "created_at", "updated_at"}
 
+# Minimum matching historical samples before an ETA range may be shown.
+# Below this the status endpoint reports eta_status="estimating" and never
+# fabricates a countdown.
+ETA_MINIMUM_SAMPLE_COUNT = 3
+
+
+def _as_utc_datetime(value):
+    if not hasattr(value, "tzinfo"):
+        return None
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value
+
+
+def _elapsed_seconds_for_record(record):
+    """Whole seconds from research_runs.started_at to now (running) or to
+    completed_at (terminal). None when started_at is missing (still queued)
+    or timestamps are unusable -- never a guessed value."""
+    started_at = _as_utc_datetime(record.get("started_at"))
+    if started_at is None:
+        return None
+    if record.get("status") in ("completed", "partial", "failed"):
+        end = _as_utc_datetime(record.get("completed_at"))
+        if end is None:
+            return None
+    else:
+        end = datetime.now(UTC)
+    try:
+        seconds = (end - started_at).total_seconds()
+    except TypeError:
+        return None
+    return max(0, int(seconds))
+
+
+def _percentile(sorted_values, fraction):
+    if not sorted_values:
+        return None
+    if len(sorted_values) == 1:
+        return sorted_values[0]
+    position = fraction * (len(sorted_values) - 1)
+    lower = int(position)
+    upper = min(lower + 1, len(sorted_values) - 1)
+    weight = position - lower
+    return sorted_values[lower] * (1 - weight) + sorted_values[upper] * weight
+
+
+def _build_progress_and_eta_fields(record, repository):
+    """Additive progress/ETA fields for the run status response. Every
+    value comes from persisted telemetry or arithmetic over persisted
+    timestamps -- nothing here fabricates progress, and ETA ranges only
+    appear once at least ETA_MINIMUM_SAMPLE_COUNT genuinely-completed real
+    runs with the identical profile and analyst selection exist."""
+    from comqutor_alpha.research_profiles import display_name_for_profile_id
+
+    fields = {
+        "profile_id": None,
+        "profile_display_name": None,
+        "progress_percent": None,
+        "current_stage": None,
+        "completed_units": None,
+        "total_units": None,
+        "progress_message": None,
+        "elapsed_seconds": _elapsed_seconds_for_record(record),
+        "eta_status": "unavailable",
+        "estimated_remaining_seconds_min": None,
+        "estimated_remaining_seconds_max": None,
+        "eta_sample_count": 0,
+    }
+
+    progress = None
+    try:
+        progress = repository.get_research_progress(record["run_id"])
+    except GraphPersistenceError as exc:
+        logger.warning(
+            "run progress retrieval failed (run_id=%s, reason_code=%s)",
+            record.get("run_id"),
+            exc.reason_code,
+        )
+    except Exception as exc:
+        logger.warning(
+            "run progress retrieval failed unexpectedly (run_id=%s, exc_type=%s)",
+            record.get("run_id"),
+            type(exc).__name__,
+        )
+
+    if progress is not None:
+        fields["profile_id"] = progress.get("profile_id")
+        fields["profile_display_name"] = display_name_for_profile_id(progress.get("profile_id"))
+        fields["progress_percent"] = progress.get("progress_percent")
+        fields["current_stage"] = progress.get("current_stage")
+        fields["completed_units"] = progress.get("completed_units")
+        fields["total_units"] = progress.get("total_units")
+        fields["progress_message"] = progress.get("progress_message")
+
+    status = record.get("status")
+    if status in ("completed", "partial"):
+        fields["eta_status"] = "complete"
+        return fields
+    if status == "failed":
+        fields["eta_status"] = "unavailable"
+        return fields
+
+    # queued/running: ETA history is restricted to normally-completed real
+    # runs with the identical profile_id and canonical analyst selection.
+    fields["eta_status"] = "estimating"
+    if progress is None or not progress.get("profile_id"):
+        return fields
+    durations = []
+    try:
+        durations = repository.list_real_completed_run_durations(
+            profile_id=progress["profile_id"],
+            selected_analysts=record.get("selected_analysts") or [],
+        )
+    except GraphPersistenceError as exc:
+        logger.warning("eta history retrieval failed (reason_code=%s)", exc.reason_code)
+    except Exception as exc:
+        logger.warning("eta history retrieval failed unexpectedly (exc_type=%s)", type(exc).__name__)
+
+    fields["eta_sample_count"] = len(durations)
+    if len(durations) >= ETA_MINIMUM_SAMPLE_COUNT:
+        ordered = sorted(durations)
+        p25 = _percentile(ordered, 0.25)
+        p75 = _percentile(ordered, 0.75)
+        elapsed = fields["elapsed_seconds"] or 0
+        # Estimated remaining time is clamped at zero -- an overdue run
+        # shows "approximately 0" rather than a negative countdown.
+        fields["eta_status"] = "available"
+        fields["estimated_remaining_seconds_min"] = max(0, int(round(p25 - elapsed)))
+        fields["estimated_remaining_seconds_max"] = max(0, int(round(p75 - elapsed)))
+    return fields
+
 
 # Retrieve one run's lifecycle status. Pure read path: validated run_id ->
-# one DB SELECT against research_runs only. Never reads raw/structured
-# agent output files, never reads a graph file, never invokes an LLM or the
-# network, never performs a migration or a write.
+# DB SELECTs against research_runs/research_run_progress only. Never reads
+# raw/structured agent output files, never reads a graph file, never invokes
+# an LLM or the network, never performs a migration or a write.
 def get_research_run_status(run_id, output_root=None, *, graph_repository=None):
     try:
         safe_run_id = validate_run_id_for_path(run_id)
@@ -949,7 +1135,9 @@ def get_research_run_status(run_id, output_root=None, *, graph_repository=None):
         logger.warning("persisted run status is corrupted (run_id=%s)", safe_run_id)
         return _run_status_error_response(safe_run_id, "RUN_STATUS_CORRUPTED")
 
-    return _public_run_record_fields(record)
+    response = _public_run_record_fields(record)
+    response.update(_build_progress_and_eta_fields(record, repository))
+    return response
 
 
 _RUN_HISTORY_ERROR_MESSAGES = {
@@ -1081,6 +1269,7 @@ try:
         "REAL_FORCE_REFRESH_DISABLED": 403,
         "REAL_RUN_DISABLED": 503,
         "REAL_RUN_CONFIG_INVALID": 503,
+        "REAL_RUN_CREDENTIAL_MISSING": 503,
         "RESEARCH_QUEUE_FULL": 503,
         "JOB_MANAGER_UNAVAILABLE": 503,
     }

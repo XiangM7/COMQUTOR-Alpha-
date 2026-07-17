@@ -593,6 +593,19 @@ class JobManager:
             logger.warning(
                 "failed to record job-manager outcome (run_id=%s, error_code=%s)", run_id, error_code
             )
+        # Progress telemetry mirrors the lifecycle outcome (stage=failed,
+        # last real percentage preserved) -- best-effort only; the lifecycle
+        # row above remains the terminal source of truth either way.
+        try:
+            self._get_repository().mark_research_progress_failed(
+                run_id, progress_message=error_message
+            )
+        except Exception:
+            logger.warning(
+                "failed to record job-manager progress outcome (run_id=%s, error_code=%s)",
+                run_id,
+                error_code,
+            )
 
 
 def build_job_manager_from_env(output_root: str | None = "outputs/runs") -> JobManager:
@@ -627,12 +640,21 @@ def reconcile_orphaned_runs_on_startup(graph_repository: Any) -> list[str]:
     """
     orphans = graph_repository.list_active_research_run_records()
     reconciled = []
+    restart_message = "The research run was interrupted by a server restart."
     for row in orphans:
         graph_repository.mark_research_run_failed_if_active(
             row["run_id"],
             error_code="SERVER_RESTARTED",
-            error_message="Server restarted; run could not be resumed.",
+            error_message=restart_message,
         )
+        try:
+            graph_repository.mark_research_progress_failed(
+                row["run_id"], progress_message=restart_message
+            )
+        except Exception:
+            logger.warning(
+                "startup reconciliation could not update progress (run_id=%s)", row["run_id"]
+            )
         reconciled.append(row["run_id"])
     return reconciled
 
@@ -673,6 +695,25 @@ def enqueue_research_request(
     disposition = claim["disposition"]
     ticker = prepared["ticker"]
     repository = prepared["graph_repository"]
+
+    # Create the progress row the moment the run is claimed, so the very
+    # first status poll after a 202 already has real telemetry (queued/8%).
+    # Best-effort: a telemetry failure never blocks the submission itself.
+    try:
+        from comqutor_alpha.research_progress import ResearchProgressReporter
+
+        ResearchProgressReporter(
+            repository,
+            run_id,
+            profile_id=str(prepared.get("profile_id") or ""),
+            selected_analysts=prepared["execution_payload"].get("selected_analysts"),
+        ).initialize()
+    except Exception as exc:
+        logger.warning(
+            "research progress initialization failed (run_id=%s, exc_type=%s)",
+            run_id,
+            type(exc).__name__,
+        )
 
     if job_manager is None or not job_manager.is_accepting():
         repository.mark_research_run_failed_if_active(

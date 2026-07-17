@@ -79,6 +79,7 @@ def test_migration_does_not_alter_0001_0002_semantics():
         "0002_create_week4_alpha_activations_and_alpha_conflicts",
         "0003_create_research_runs",
         "0004_create_agent_outputs",
+        "0005_create_research_run_progress",
     ]
 
 

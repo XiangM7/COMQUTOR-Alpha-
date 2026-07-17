@@ -42,6 +42,7 @@ from comqutor_alpha.storage.db.schema import (
     alpha_activations,
     alpha_conflicts,
     alpha_matches,
+    research_run_progress,
     research_runs,
     structure_graphs,
 )
@@ -1113,6 +1114,260 @@ class GraphPersistenceRepository:
             # never mapped into DB_READ_FAILED.
             raise GraphPersistenceError("DB_READ_FAILED") from exc
         return [dict(row) for row in rows]
+
+
+    # -----------------------------------------------------------------
+    # W7: research_run_progress -- real, monotonic run progress telemetry.
+    # -----------------------------------------------------------------
+
+    @staticmethod
+    def _strict_progress_int(value: Any, *, minimum: int, maximum: int, reason_code: str) -> int:
+        """Progress numbers are integers only: bool, float (including NaN/
+        Infinity), numeric strings, and out-of-range values are all rejected
+        with the same stable reason code -- a bad number must never be
+        silently clamped into fake progress."""
+        if isinstance(value, bool) or not isinstance(value, int):
+            _invalid_payload(reason_code)
+        if not (minimum <= value <= maximum):
+            _invalid_payload(reason_code)
+        return value
+
+    @staticmethod
+    def _validated_progress_stage(value: Any, *, reason_code: str) -> str:
+        if not isinstance(value, str) or not value.strip() or len(value) > 64:
+            _invalid_payload(reason_code)
+        return value
+
+    @staticmethod
+    def _validated_progress_message(value: Any, *, reason_code: str) -> str | None:
+        if value is None:
+            return None
+        if not isinstance(value, str) or len(value) > 300:
+            _invalid_payload(reason_code)
+        return value
+
+    def initialize_research_progress(
+        self,
+        run_id: str,
+        *,
+        profile_id: str,
+        total_units: int,
+        current_stage: str = "queued",
+        progress_percent: int = 8,
+        progress_message: str | None = None,
+    ) -> bool:
+        """Create this run's progress row if it does not exist yet.
+
+        Idempotent: a second call for the same run_id is a no-op (returns
+        ``False``) and never resets progress a worker has already made --
+        INSERT ... ON CONFLICT DO NOTHING, not an upsert.
+        """
+        reason = "RESEARCH_PROGRESS_INVALID"
+        self._require_supported_dialect()
+        _required_text(run_id, maximum=80, reason_code=reason)
+        _required_text(profile_id, maximum=120, reason_code=reason)
+        total = self._strict_progress_int(total_units, minimum=1, maximum=10_000, reason_code=reason)
+        percent = self._strict_progress_int(progress_percent, minimum=0, maximum=100, reason_code=reason)
+        stage = self._validated_progress_stage(current_stage, reason_code=reason)
+        message = self._validated_progress_message(progress_message, reason_code=reason)
+
+        if self.dialect_name == "postgresql":
+            from sqlalchemy.dialects.postgresql import insert as dialect_insert
+        else:
+            from sqlalchemy.dialects.sqlite import insert as dialect_insert
+
+        now = datetime.now(UTC)
+        stmt = dialect_insert(research_run_progress).values(
+            run_id=run_id,
+            profile_id=profile_id,
+            progress_percent=percent,
+            current_stage=stage,
+            completed_units=0,
+            total_units=total,
+            progress_message=message,
+            started_at=now,
+            updated_at=now,
+        ).on_conflict_do_nothing(index_elements=["run_id"])
+        try:
+            with self._engine.begin() as conn:
+                result = conn.execute(stmt)
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        return result.rowcount > 0
+
+    def update_research_progress(
+        self,
+        run_id: str,
+        *,
+        progress_percent: int,
+        current_stage: str,
+        completed_units: int,
+        progress_message: str | None = None,
+    ) -> bool:
+        """Monotonic, idempotent progress advance.
+
+        A single conditional ``UPDATE ... WHERE progress_percent <= :new AND
+        completed_units <= :new`` -- progress can therefore never move
+        backwards (72 -> 48 is impossible by construction), and repeating an
+        identical update is a harmless re-write of the same values. Returns
+        ``False`` (never raises) when the row does not exist or the update
+        would regress. ``total_units`` is never changed after initialization.
+        """
+        reason = "RESEARCH_PROGRESS_INVALID"
+        self._require_supported_dialect()
+        _required_text(run_id, maximum=80, reason_code=reason)
+        percent = self._strict_progress_int(progress_percent, minimum=0, maximum=100, reason_code=reason)
+        completed = self._strict_progress_int(completed_units, minimum=0, maximum=10_000, reason_code=reason)
+        stage = self._validated_progress_stage(current_stage, reason_code=reason)
+        message = self._validated_progress_message(progress_message, reason_code=reason)
+
+        try:
+            with self._engine.begin() as conn:
+                result = conn.execute(
+                    sa.update(research_run_progress)
+                    .where(research_run_progress.c.run_id == run_id)
+                    .where(research_run_progress.c.progress_percent <= percent)
+                    .where(research_run_progress.c.completed_units <= completed)
+                    .where(research_run_progress.c.total_units >= completed)
+                    .values(
+                        progress_percent=percent,
+                        current_stage=stage,
+                        completed_units=completed,
+                        progress_message=message,
+                        updated_at=datetime.now(UTC),
+                    )
+                )
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        return result.rowcount > 0
+
+    def get_research_progress(self, run_id: str) -> dict[str, Any] | None:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return None
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as conn:
+                row = conn.execute(
+                    sa.select(research_run_progress).where(research_run_progress.c.run_id == run_id)
+                ).mappings().first()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return dict(row) if row is not None else None
+
+    def mark_research_progress_completed(self, run_id: str, *, partial: bool = False) -> bool:
+        """Terminal success: 100% with every unit accounted for.
+        ``partial=True`` records ``completed_partial`` instead of
+        ``completed`` so a degraded run is never presented as a full one.
+        Idempotent."""
+        self._require_supported_dialect()
+        stage = "completed_partial" if partial else "completed"
+        message = (
+            "Research run completed with partial results."
+            if partial
+            else "Research run completed."
+        )
+        try:
+            with self._engine.begin() as conn:
+                result = conn.execute(
+                    sa.update(research_run_progress)
+                    .where(research_run_progress.c.run_id == run_id)
+                    .values(
+                        progress_percent=100,
+                        current_stage=stage,
+                        completed_units=research_run_progress.c.total_units,
+                        progress_message=message,
+                        updated_at=datetime.now(UTC),
+                    )
+                )
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        return result.rowcount > 0
+
+    def mark_research_progress_failed(
+        self, run_id: str, *, progress_message: str | None = None
+    ) -> bool:
+        """Terminal failure: the stage flips to ``failed`` but the last real
+        percentage is preserved -- a failed run must never fake 100%.
+        Idempotent."""
+        reason = "RESEARCH_PROGRESS_INVALID"
+        self._require_supported_dialect()
+        message = self._validated_progress_message(progress_message, reason_code=reason)
+        values: dict[str, Any] = {
+            "current_stage": "failed",
+            "updated_at": datetime.now(UTC),
+        }
+        if message is not None:
+            values["progress_message"] = message
+        try:
+            with self._engine.begin() as conn:
+                result = conn.execute(
+                    sa.update(research_run_progress)
+                    .where(research_run_progress.c.run_id == run_id)
+                    .values(**values)
+                )
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        return result.rowcount > 0
+
+    def list_real_completed_run_durations(
+        self,
+        *,
+        profile_id: str,
+        selected_analysts: Sequence[str],
+        limit: int = 50,
+    ) -> list[float]:
+        """Historical wall-clock durations (seconds) of normally-completed
+        real runs matching this exact profile and canonical analyst
+        selection -- the only samples the ETA estimate may use. Partial and
+        failed runs never qualify; neither does a run missing a valid
+        started_at/completed_at pair."""
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
+        self._require_supported_dialect()
+        wanted_analysts = list(selected_analysts)
+        stmt = (
+            sa.select(
+                research_runs.c.selected_analysts,
+                research_runs.c.started_at,
+                research_runs.c.completed_at,
+            )
+            .select_from(
+                research_runs.join(
+                    research_run_progress,
+                    research_runs.c.run_id == research_run_progress.c.run_id,
+                )
+            )
+            .where(research_runs.c.status == "completed")
+            .where(research_runs.c.execution_mode == "real")
+            .where(research_run_progress.c.profile_id == profile_id)
+            .where(research_runs.c.started_at.is_not(None))
+            .where(research_runs.c.completed_at.is_not(None))
+            .order_by(research_runs.c.completed_at.desc())
+            .limit(max(1, min(500, int(limit) * 5)))
+        )
+        try:
+            with self._engine.connect() as conn:
+                rows = conn.execute(stmt).mappings().all()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+
+        durations: list[float] = []
+        for row in rows:
+            # selected_analysts equality is checked in Python -- JSON-column
+            # equality is not portable across SQLite/PostgreSQL.
+            if list(row.get("selected_analysts") or []) != wanted_analysts:
+                continue
+            started_at = row.get("started_at")
+            completed_at = row.get("completed_at")
+            try:
+                duration = (completed_at - started_at).total_seconds()
+            except (TypeError, AttributeError):
+                continue
+            if duration > 0:
+                durations.append(float(duration))
+            if len(durations) >= limit:
+                break
+        return durations
 
 
 def _resolve_engine_and_url(

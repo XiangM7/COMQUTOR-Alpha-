@@ -272,9 +272,6 @@ def test_fake_real_execution_completes_with_server_side_config(tmp_path, monkeyp
     from comqutor_alpha.research_jobs import JobManager
 
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
-    monkeypatch.setenv("COMQUTOR_TA_LLM_PROVIDER", "openai")
-    monkeypatch.setenv("COMQUTOR_TA_DEEP_THINK_MODEL", "gpt-5.4-fake")
-    monkeypatch.setenv("COMQUTOR_TA_QUICK_THINK_MODEL", "gpt-5.4-mini-fake")
 
     app = create_app(output_root=str(tmp_path))
     with TestClient(app) as client:
@@ -312,9 +309,15 @@ def test_fake_real_execution_completes_with_server_side_config(tmp_path, monkeyp
         marker_path = tmp_path / f"{run_id}.fake_worker_marker.json"
         marker = json.loads(marker_path.read_text())
         assert marker["allow_real_tradingagents_run"] is True
-        assert marker["config"]["llm_provider"] == "openai"
-        assert marker["config"]["deep_think_llm"] == "gpt-5.4-fake"
-        assert marker["config"]["quick_think_llm"] == "gpt-5.4-mini-fake"
+        # W7: the fixed server Research Profile is the only source of the
+        # provider/model configuration -- never an env var, never a client
+        # payload field.
+        assert marker["config"]["llm_provider"] == "anthropic"
+        assert marker["config"]["deep_think_llm"] == "claude-sonnet-4-6"
+        assert marker["config"]["quick_think_llm"] == "claude-sonnet-4-6"
+        assert marker["config"]["output_language"] == "English"
+        assert marker["config"]["max_debate_rounds"] == 3
+        assert marker["config"]["max_risk_discuss_rounds"] == 3
         # Client's attempted "config" override never reached the worker.
         assert marker["config"]["llm_provider"] != "should-be-ignored"
         assert marker["config"]["deep_think_llm"] != "evil-model"
