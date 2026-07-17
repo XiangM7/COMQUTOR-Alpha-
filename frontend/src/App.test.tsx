@@ -1,9 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import * as client from "./api/client";
 import { makeRunRecord } from "./tests/factories";
+import { ResearchPage } from "./pages/ResearchPage";
 
 function renderAt(path: string) {
   return render(
@@ -104,5 +105,62 @@ describe("App routing", () => {
   it("renders NotFoundPage for an unknown path", async () => {
     renderAt("/this/does/not/exist");
     await waitFor(() => expect(screen.getByText(/page not found/i)).toBeInTheDocument());
+  });
+});
+
+describe("Recent runs routing", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const cases = [
+    ["queued", "processing"],
+    ["running", "processing"],
+    ["failed", "processing"],
+    ["completed", "research"],
+    ["partial", "research"],
+  ] as const;
+
+  function renderRecentRun(status: (typeof cases)[number][0]) {
+    vi.spyOn(client, "getReadiness").mockResolvedValue({
+      status: 200,
+      result: { status: "ready", database: "ready", job_manager: "ready", real_execution: "disabled" },
+    });
+    vi.spyOn(client, "getResearchHistory").mockResolvedValue({
+      status: "ok",
+      items: [makeRunRecord({ run_id: `run-${status}`, ticker: status.toUpperCase(), status })],
+      next_cursor: null,
+    });
+    return render(
+      <MemoryRouter initialEntries={["/research"]}>
+        <Routes>
+          <Route path="/research" element={<ResearchPage />} />
+          <Route path="/runs/:runId/processing" element={<p>processing destination</p>} />
+          <Route path="/runs/:runId/research" element={<p>research destination</p>} />
+        </Routes>
+      </MemoryRouter>
+    );
+  }
+
+  it.each(cases)("routes a %s run by mouse to %s", async (status, destination) => {
+    renderRecentRun(status);
+    const row = (await screen.findByText(status.toUpperCase())).closest("tr");
+    expect(row).not.toBeNull();
+    fireEvent.click(row!);
+    expect(await screen.findByText(`${destination} destination`)).toBeInTheDocument();
+  });
+
+  it.each(cases)("routes a %s run by Enter to %s", async (status, destination) => {
+    renderRecentRun(status);
+    const row = (await screen.findByText(status.toUpperCase())).closest("tr");
+    fireEvent.keyDown(row!, { key: "Enter" });
+    expect(await screen.findByText(`${destination} destination`)).toBeInTheDocument();
+  });
+
+  it.each(cases)("routes a %s run by Space to %s", async (status, destination) => {
+    renderRecentRun(status);
+    const row = (await screen.findByText(status.toUpperCase())).closest("tr");
+    fireEvent.keyDown(row!, { key: " " });
+    expect(await screen.findByText(`${destination} destination`)).toBeInTheDocument();
   });
 });

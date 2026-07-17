@@ -32,7 +32,7 @@ export const RESEARCH_RUN_STATUSES = [
 ] as const;
 export type ResearchRunStatus = (typeof RESEARCH_RUN_STATUSES)[number];
 
-export const REAL_MODE_ANALYSTS = ["market", "news", "fundamentals", "sentiment"] as const;
+export const REAL_MODE_ANALYSTS = ["market", "sentiment", "news", "fundamentals"] as const;
 export type RealModeAnalyst = (typeof REAL_MODE_ANALYSTS)[number];
 
 /** A safe error/status envelope shared by most endpoints: run_id/ticker may

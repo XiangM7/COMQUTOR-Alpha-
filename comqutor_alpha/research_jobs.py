@@ -33,6 +33,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
+from comqutor_alpha.research_lifecycle import mark_research_run_failed_consistently
 from comqutor_alpha.storage.db.repository import build_write_repository_from_env
 
 logger = logging.getLogger(__name__)
@@ -586,25 +587,15 @@ class JobManager:
 
     def _mark_failed_if_active(self, run_id: str, error_code: str, error_message: str) -> None:
         try:
-            self._get_repository().mark_research_run_failed_if_active(
-                run_id, error_code=error_code, error_message=error_message
+            mark_research_run_failed_consistently(
+                self._get_repository(),
+                run_id,
+                error_code=error_code,
+                error_message=error_message,
             )
         except Exception:
             logger.warning(
                 "failed to record job-manager outcome (run_id=%s, error_code=%s)", run_id, error_code
-            )
-        # Progress telemetry mirrors the lifecycle outcome (stage=failed,
-        # last real percentage preserved) -- best-effort only; the lifecycle
-        # row above remains the terminal source of truth either way.
-        try:
-            self._get_repository().mark_research_progress_failed(
-                run_id, progress_message=error_message
-            )
-        except Exception:
-            logger.warning(
-                "failed to record job-manager progress outcome (run_id=%s, error_code=%s)",
-                run_id,
-                error_code,
             )
 
 
@@ -642,20 +633,20 @@ def reconcile_orphaned_runs_on_startup(graph_repository: Any) -> list[str]:
     reconciled = []
     restart_message = "The research run was interrupted by a server restart."
     for row in orphans:
-        graph_repository.mark_research_run_failed_if_active(
-            row["run_id"],
-            error_code="SERVER_RESTARTED",
-            error_message=restart_message,
-        )
         try:
-            graph_repository.mark_research_progress_failed(
-                row["run_id"], progress_message=restart_message
+            updated = mark_research_run_failed_consistently(
+                graph_repository,
+                row["run_id"],
+                error_code="SERVER_RESTARTED",
+                error_message=restart_message,
             )
         except Exception:
             logger.warning(
-                "startup reconciliation could not update progress (run_id=%s)", row["run_id"]
+                "startup reconciliation could not update run (run_id=%s)", row["run_id"]
             )
-        reconciled.append(row["run_id"])
+        else:
+            if updated:
+                reconciled.append(row["run_id"])
     return reconciled
 
 
@@ -716,8 +707,11 @@ def enqueue_research_request(
         )
 
     if job_manager is None or not job_manager.is_accepting():
-        repository.mark_research_run_failed_if_active(
-            run_id, error_code="JOB_MANAGER_UNAVAILABLE", error_message="Background job manager is not available."
+        mark_research_run_failed_consistently(
+            repository,
+            run_id,
+            error_code="JOB_MANAGER_UNAVAILABLE",
+            error_message="Background job manager is not available.",
         )
         return {
             "run_id": run_id,
@@ -736,8 +730,11 @@ def enqueue_research_request(
         # Queue is at capacity (or the manager stopped accepting between the
         # is_accepting() check above and this call) -- the row must never
         # be left dangling as "queued forever" holding active_fingerprint.
-        repository.mark_research_run_failed_if_active(
-            run_id, error_code="RESEARCH_QUEUE_FULL", error_message="The research job queue is full."
+        mark_research_run_failed_consistently(
+            repository,
+            run_id,
+            error_code="RESEARCH_QUEUE_FULL",
+            error_message="The research job queue is full.",
         )
         return {
             "run_id": run_id,

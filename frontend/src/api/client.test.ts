@@ -203,4 +203,29 @@ describe("api client", () => {
     const result = await getResearchRunStatus("run-1");
     expect(result).toMatchObject({ run_id: "run-1", status: "completed" });
   });
+
+  it("preserves retry fields on a failed lifecycle record", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      jsonResponse({
+        run_id: "failed-run",
+        ticker: "NVDA",
+        analysis_date: "2026-07-16",
+        selected_analysts: ["market", "sentiment", "news", "fundamentals"],
+        status: "failed",
+        stage: "failed",
+        error_code: "RESEARCH_TIMEOUT",
+        message: "The research run exceeded the configured timeout.",
+      })
+    );
+
+    const result = await getResearchRunStatus("failed-run");
+
+    expect(result).toMatchObject({
+      run_id: "failed-run",
+      ticker: "NVDA",
+      analysis_date: "2026-07-16",
+      selected_analysts: ["market", "sentiment", "news", "fundamentals"],
+      status: "failed",
+    });
+  });
 });

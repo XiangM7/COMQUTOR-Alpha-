@@ -209,7 +209,7 @@ test("a live 202 submission shows real processing progress and forwards to resul
       run_id: runId,
       ticker: "MSTR",
       analysis_date: "2026-06-30",
-      selected_analysts: ["fundamentals", "market", "news", "sentiment"],
+      selected_analysts: ["market", "sentiment", "news", "fundamentals"],
       stage: "research_pipeline",
       error_code: null,
       message: "Research run is in progress.",

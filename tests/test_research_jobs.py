@@ -59,7 +59,15 @@ def _claim(repo, fingerprint, **overrides):
         "force_refresh": False,
     }
     kwargs.update(overrides)
-    return repo.claim_research_run(**kwargs)["run_id"]
+    run_id = repo.claim_research_run(**kwargs)["run_id"]
+    repo.initialize_research_progress(run_id, profile_id="offline_fixture_v1", total_units=12)
+    return run_id
+
+
+def _assert_failed_progress(repo, run_id):
+    progress = repo.get_research_progress(run_id)
+    assert progress["current_stage"] == "failed"
+    assert progress["progress_percent"] < 100
 
 
 class _FakeProcess:
@@ -320,6 +328,7 @@ def test_enqueue_research_request_queue_full_end_to_end():
     assert record["status"] == "failed"
     assert record["error_code"] == "RESEARCH_QUEUE_FULL"
     assert record["active_fingerprint"] is None
+    _assert_failed_progress(repo, result["run_id"])
 
 
 def test_enqueue_research_request_job_manager_unavailable():
@@ -333,6 +342,7 @@ def test_enqueue_research_request_job_manager_unavailable():
     record = repo.get_research_run_record(result["run_id"])
     assert record["status"] == "failed"
     assert record["active_fingerprint"] is None
+    _assert_failed_progress(repo, result["run_id"])
 
 
 # ---------------------------------------------------------------------------
@@ -423,6 +433,7 @@ def test_worker_start_failure_marks_run_failed():
         assert record["status"] == "failed"
         assert record["error_code"] == "RESEARCH_WORKER_START_FAILED"
         assert record["active_fingerprint"] is None
+        _assert_failed_progress(repo, run_id)
     finally:
         jm.shutdown()
 
@@ -459,6 +470,7 @@ def test_worker_crash_marks_run_failed():
         assert record["status"] == "failed"
         assert record["error_code"] == "RESEARCH_WORKER_CRASHED"
         assert record["active_fingerprint"] is None
+        _assert_failed_progress(repo, run_id)
     finally:
         jm.shutdown()
 
@@ -522,6 +534,7 @@ def test_timeout_terminates_worker_and_clears_active_fingerprint():
         assert record["error_code"] == "RESEARCH_TIMEOUT"
         assert record["active_fingerprint"] is None
         assert processes[0].terminate_called is True
+        _assert_failed_progress(repo, run_id)
     finally:
         jm.shutdown()
 
@@ -568,6 +581,7 @@ def test_shutdown_terminates_active_process_and_fails_it():
     assert record["error_code"] == "SERVER_SHUTDOWN"
     assert record["active_fingerprint"] is None
     assert processes[0].is_alive() is False
+    _assert_failed_progress(repo, run_id)
 
 
 def test_shutdown_fails_pending_jobs_too():
@@ -591,6 +605,7 @@ def test_shutdown_fails_pending_jobs_too():
         record = repo.get_research_run_record(run_id)
         assert record["status"] == "failed"
         assert record["error_code"] == "SERVER_SHUTDOWN"
+        _assert_failed_progress(repo, run_id)
 
 
 def test_no_zombie_process_after_shutdown():
@@ -628,6 +643,7 @@ def test_reconcile_orphaned_queued_run():
     assert record["status"] == "failed"
     assert record["error_code"] == "SERVER_RESTARTED"
     assert record["active_fingerprint"] is None
+    _assert_failed_progress(repo, run_id)
 
 
 def test_reconcile_orphaned_running_run():
@@ -639,6 +655,7 @@ def test_reconcile_orphaned_running_run():
     record = repo.get_research_run_record(run_id)
     assert record["status"] == "failed"
     assert record["error_code"] == "SERVER_RESTARTED"
+    _assert_failed_progress(repo, run_id)
 
 
 @pytest.mark.parametrize("terminal_status", ["completed", "partial", "failed"])

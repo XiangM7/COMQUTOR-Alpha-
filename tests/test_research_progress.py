@@ -11,7 +11,6 @@ from datetime import UTC, datetime, timedelta
 import pytest
 import sqlalchemy as sa
 
-from comqutor_alpha import research_progress
 from comqutor_alpha.api.routes_research import get_research_run_status
 from comqutor_alpha.research_progress import (
     ResearchProgressReporter,
@@ -28,7 +27,7 @@ from comqutor_alpha.storage.db.repository import (
 from comqutor_alpha.storage.db.schema import research_runs
 
 PROFILE = "comqutor_anthropic_medium_sonnet46_v1"
-ANALYSTS = ["fundamentals", "market", "news", "sentiment"]  # canonical sorted storage order
+ANALYSTS = ["market", "sentiment", "news", "fundamentals"]
 
 
 def _memory_repo() -> GraphPersistenceRepository:
@@ -181,6 +180,9 @@ def test_terminal_completed_and_partial_reach_100_with_distinct_stages():
     repo = _memory_repo()
     repo.initialize_research_progress("run-a", profile_id=PROFILE, total_units=15)
     repo.initialize_research_progress("run-b", profile_id=PROFILE, total_units=15)
+    repo.update_research_progress(
+        "run-b", progress_percent=64, current_stage="risk_review", completed_units=6
+    )
     assert repo.mark_research_progress_completed("run-a")
     assert repo.mark_research_progress_completed("run-b", partial=True)
     row_a = repo.get_research_progress("run-a")
@@ -188,6 +190,7 @@ def test_terminal_completed_and_partial_reach_100_with_distinct_stages():
     assert (row_a["progress_percent"], row_a["current_stage"]) == (100, "completed")
     assert row_a["completed_units"] == row_a["total_units"]
     assert (row_b["progress_percent"], row_b["current_stage"]) == (100, "completed_partial")
+    assert row_b["completed_units"] == 6
 
 
 def test_terminal_failed_preserves_last_real_percent():
@@ -269,6 +272,7 @@ def test_reporter_analyst_and_stage_flow():
     )
     reporter.initialize()
     reporter.record_stage("initializing")
+    reporter.record_analyst_started("market")
     reporter.record_analyst_completed("market")
     reporter.record_analyst_completed("market")  # duplicate: no double advance
     reporter.record_analyst_completed("sentiment")
@@ -278,10 +282,11 @@ def test_reporter_analyst_and_stage_flow():
 
     percents = [(u["current_stage"], u["progress_percent"], u["completed_units"]) for u in repo.updates]
     assert percents == [
-        ("initializing", 10, 0),
-        ("market_analysis", 30, 1),
-        ("sentiment_analysis", 50, 2),
-        ("research_debate", 58, 3),
+        ("initializing", 8, 0),
+        ("market_analysis", 10, 0),
+        ("sentiment_analysis", 30, 1),
+        ("research_debate", 50, 2),
+        ("trading_plan", 58, 3),
     ]
     assert repo.terminal == ["completed"]
 
@@ -294,6 +299,18 @@ def test_reporter_ignores_unselected_analyst_and_unknown_stage():
     reporter.record_analyst_completed("news")  # not selected
     reporter.record_stage("made_up_stage")
     assert repo.updates == []
+
+
+def test_reporter_points_to_first_unfinished_analyst_after_out_of_order_completion():
+    repo = _RecordingRepo()
+    reporter = ResearchProgressReporter(
+        repo, "run-a", profile_id=PROFILE, selected_analysts=["market", "sentiment", "news"]
+    )
+
+    reporter.record_analyst_completed("news")
+
+    assert repo.updates[-1]["current_stage"] == "market_analysis"
+    assert repo.updates[-1]["completed_units"] == 1
 
 
 def test_reporter_swallows_repository_failures():

@@ -158,6 +158,13 @@ export function adaptRunStatusResult(payload: unknown): AdaptResult<RunStatusRes
   if (!isRecord(payload)) return fail("response is not an object");
   if (!isString(payload.status)) return fail("missing status");
 
+  // A failed lifecycle record is still a full run record and carries the
+  // ticker/date/analysts needed for a legitimate retry. Only a failed shape
+  // without those record fields is an endpoint error envelope.
+  if (isString(payload.run_id) && isString(payload.ticker) && isStringArray(payload.selected_analysts)) {
+    return adaptResearchRunRecord(payload);
+  }
+
   if (payload.status === "failed" && isString(payload.error_code)) {
     return ok({
       run_id: nullableString(payload.run_id) ?? "",

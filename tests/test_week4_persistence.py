@@ -27,6 +27,7 @@ from comqutor_alpha.storage.db.schema import (
     alpha_activations,
     alpha_conflicts,
     alpha_matches,
+    research_run_progress,
     research_runs,
     schema_migrations,
     structure_graphs,
@@ -154,11 +155,13 @@ class TestWeek4Schema:
             "0002_create_week4_alpha_activations_and_alpha_conflicts",
             "0003_create_research_runs",
             "0004_create_agent_outputs",
+            "0005_create_research_run_progress",
         ]
         assert MIGRATIONS[0][1] == (alpha_matches, structure_graphs)
         assert MIGRATIONS[1][1] == (alpha_activations, alpha_conflicts)
         assert MIGRATIONS[2][1] == (research_runs,)
         assert MIGRATIONS[3][1] == (agent_outputs,)
+        assert MIGRATIONS[4][1] == (research_run_progress,)
 
     def test_sqlite_json_columns_use_json_type(self):
         engine = build_engine("sqlite:///:memory:")
@@ -217,6 +220,7 @@ class TestMigration0002:
             "0002_create_week4_alpha_activations_and_alpha_conflicts",
             "0003_create_research_runs",
             "0004_create_agent_outputs",
+            "0005_create_research_run_progress",
         ]
         with engine.connect() as conn:
             assert conn.scalar(sa.select(sa.func.count()).select_from(alpha_matches)) == 1
@@ -227,6 +231,7 @@ class TestMigration0002:
             "0002_create_week4_alpha_activations_and_alpha_conflicts",
             "0003_create_research_runs",
             "0004_create_agent_outputs",
+            "0005_create_research_run_progress",
         ]
 
 

@@ -106,6 +106,10 @@ const KNOWN_ERROR_CODE_MESSAGES: Record<string, string> = {
   INVALID_RUN_ID: "That run identifier is not valid.",
 };
 
+export function describeApiErrorCode(errorCode: string, fallback?: string): string {
+  return KNOWN_ERROR_CODE_MESSAGES[errorCode] ?? fallback ?? "The research request could not be submitted.";
+}
+
 /** Safe, user-facing text for any ApiError -- never a traceback, never a raw
  * JSON dump. Prefers a known error_code's reviewed copy; falls back to the
  * backend's own safe `message` (already a stable, safe string by contract);

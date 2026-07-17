@@ -5,7 +5,6 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
-import re
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -54,7 +53,6 @@ from comqutor_alpha.structure_engine.week2_llm import (
 
 logger = logging.getLogger(__name__)
 
-TICKER_PATTERN = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 PIPELINE_ERROR_LOG_ARTIFACT_PATH = "error_logs/week2_pipeline_errors.jsonl"
 WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH = "error_logs/week3_pipeline_errors.jsonl"
 # Overwritten (not appended) on every Week 3 attempt -- the authoritative
@@ -73,19 +71,25 @@ REQUIRED_COMPLETION_ARTIFACTS = (
 
 # Validate and normalize a request ticker.
 def validate_ticker(raw):
-    """Normalize and validate a request ticker. Uppercase, then whitelist-check.
-
-    Accepts 1-10 chars starting with a letter, using A-Z, 0-9, '.', '-'
-    (covers tickers like NVDA, BRK.B, RDS-A). Raises ValueError('INVALID_TICKER: ...').
-    """
-    ticker = str(raw or "").strip().upper()
-    if not ticker:
+    """Validate and normalize through TradingAgents' Yahoo-symbol contract."""
+    if not isinstance(raw, str) or not raw:
         raise ValueError("INVALID_TICKER: ticker is required")
-    if not TICKER_PATTERN.fullmatch(ticker):
-        raise ValueError(
-            "INVALID_TICKER: ticker must be 1-10 chars from A-Z, 0-9, '.', '-' "
-            "and start with a letter"
-        )
+    if raw != raw.strip() or any(char.isspace() or ord(char) < 32 for char in raw):
+        raise ValueError("INVALID_TICKER: ticker contains whitespace or control characters")
+    if ".." in raw:
+        raise ValueError("INVALID_TICKER: ticker contains a path traversal segment")
+
+    try:
+        from tradingagents.dataflows.symbol_utils import is_yahoo_safe, normalize_symbol
+        from tradingagents.dataflows.utils import safe_ticker_component
+
+        safe_ticker_component(raw, max_len=32)
+        ticker = normalize_symbol(raw)
+        if not isinstance(ticker, str) or not is_yahoo_safe(ticker):
+            raise ValueError("unsafe normalized ticker")
+        safe_ticker_component(ticker, max_len=32)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("INVALID_TICKER: ticker is not a safe Yahoo-style symbol") from exc
     return ticker
 
 # Get the current UTC timestamp as a string.
@@ -117,6 +121,7 @@ _EXPECTED_CLIENT_ERROR_CODES = frozenset(
         "INVALID_ARTIFACT_FILENAME",
         "INVALID_OFFLINE_OUTPUTS",
         "INVALID_TICKER",
+        "INVALID_ANALYST_SELECTION",
         "REAL_RUN_DISABLED",
         "OFFLINE_DISABLED",
         "RAW_OUTPUT_NOT_FOUND",
@@ -156,6 +161,12 @@ def _map_exception_to_error(payload, exc):
                 payload,
                 "INVALID_TICKER",
                 "Invalid ticker.",
+            )
+        if message.startswith("INVALID_ANALYST_SELECTION"):
+            return _error_response(
+                payload,
+                "INVALID_ANALYST_SELECTION",
+                "Invalid analyst selection.",
             )
     if isinstance(exc, FileNotFoundError) and "raw_agent_outputs.json" in message:
         return _error_response(
@@ -578,6 +589,7 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_construction")
         return
+    _report_progress_stage(progress_reporter, "structure_graph")
 
     try:
         graph_payload = score_and_assemble_structure_graph(
@@ -589,14 +601,13 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "activation_scoring")
         return
+    _report_progress_stage(progress_reporter, "activation_scoring")
 
     try:
         save_json_record(run_id, "structure_graph.json", graph_payload, output_root=output_root)
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_artifact_write")
         return
-    _report_progress_stage(progress_reporter, "structure_graph")
-    _report_progress_stage(progress_reporter, "activation_scoring")
 
     ticker = graph_payload.get("ticker") or metadata.get("ticker")
     try:
@@ -719,7 +730,6 @@ def run_research_request(
         response = build_research_response(
             run_id, output_root=output_root, graph_repository=graph_repository
         )
-        _report_progress_stage(progress_reporter, "result_assembly")
         return response
     except Exception as exc:
         error_response = _map_exception_to_error(payload, exc)
@@ -1261,8 +1271,8 @@ try:
     # Stable disposition/error_code -> HTTP status mapping for the async
     # POST route only (GET routes keep their existing "always 200, error
     # detail in body" contract). Every error_code not listed here (e.g.
-    # OFFLINE_DISABLED, INVALID_ANALYST_SELECTION, CACHED_RUN_UNAVAILABLE,
-    # INTERNAL_ERROR) is a safe, generic 500 -- never guessed at per-code.
+    # OFFLINE_DISABLED, CACHED_RUN_UNAVAILABLE, INTERNAL_ERROR) is a safe,
+    # generic 500 -- never guessed at per-code.
     _RESEARCH_SUBMISSION_ERROR_HTTP_STATUS = {
         "RUN_ID_CONFLICT": 409,
         "INVALID_FORCE_REFRESH": 409,
@@ -1272,6 +1282,8 @@ try:
         "REAL_RUN_CREDENTIAL_MISSING": 503,
         "RESEARCH_QUEUE_FULL": 503,
         "JOB_MANAGER_UNAVAILABLE": 503,
+        "INVALID_ANALYST_SELECTION": 400,
+        "INVALID_TICKER": 400,
     }
 
     def _research_submission_http_status(result):

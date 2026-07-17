@@ -221,8 +221,10 @@ def test_internal_social_is_not_a_valid_public_analyst():
         server_execution.validate_real_selected_analysts(["social"])
 
 
-def test_empty_real_analyst_selection_passes():
-    server_execution.validate_real_selected_analysts([])  # subset of empty set trivially holds
+def test_empty_real_analyst_selection_is_rejected():
+    with pytest.raises(server_execution.ServerExecutionConfigError) as exc_info:
+        server_execution.validate_real_selected_analysts([])
+    assert exc_info.value.reason_code == "INVALID_ANALYST_SELECTION"
 
 
 # ---------------------------------------------------------------------------

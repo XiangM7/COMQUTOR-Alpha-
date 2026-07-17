@@ -59,8 +59,8 @@ If a default port is occupied:
 
 Use these approved inputs:
 
-- NVDA: date `2026-06-30`; analysts `market, news, fundamentals, sentiment`
-- QQQ: date `2026-06-30`; analysts `market, news, fundamentals, sentiment`
+- NVDA: date `2026-06-30`; analysts `market, sentiment, news, fundamentals`
+- QQQ: date `2026-06-30`; analysts `market, sentiment, news, fundamentals`
 
 Press Ctrl+C in the Demo terminal to stop both API and frontend. The launcher handles TERM
 and removes its own pid files.
@@ -79,6 +79,30 @@ In another terminal, start the frontend:
 SQLite is the offline and local Demo fallback. PostgreSQL is the local development and
 integration-verification database; start it with `docker compose up -d postgres`. Do not use
 the Demo SQLite database as a production service database.
+
+## Live Research
+
+The browser accepts only ticker, analysis date and analysts. Provider, model, depth and language
+are server-controlled by the fixed profile:
+
+- Provider: Anthropic
+- Quick/deep model: Claude Sonnet 4.6
+- Research depth: Medium
+- Output language: English
+
+Real execution is disabled by default. An operator must set `ANTHROPIC_API_KEY` and
+`COMQUTOR_REAL_TRADINGAGENTS_ENABLED=true` in the ignored server `.env`, then restart the API.
+The credential is never sent to or stored by the frontend.
+
+Ticker normalization and asset detection use the TradingAgents CLI rules. `BTC-USD` runs as
+`crypto`, not `stock`; because the CLI does not offer Fundamentals for crypto, select Market,
+Sentiment and/or News for that ticker.
+
+The Processing page advances only when persisted backend milestones complete. ETA remains
+"estimating" until at least three completed real runs match the same profile and analyst set.
+Failed-run Retry creates or reuses a new run and never revives the failed row.
+
+Live Provider smoke testing is an explicit operator action and is not part of offline tests or CI.
 
 ## Verification
 
@@ -120,6 +144,7 @@ or run `git clean -fd` as a cleanup shortcut.
 ## Product Boundary
 
 - Local Demo: ready
-- Live Provider execution: not run
+- Technical live-research workflow: ready
+- Live Anthropic Provider smoke: user action required
 - Public production deployment: not ready
 - Authentication and tenant authorization: not implemented

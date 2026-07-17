@@ -23,10 +23,14 @@ import hashlib
 import json
 import logging
 import os
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from datetime import datetime
 from typing import Any
 
+from comqutor_alpha.research_progress import (
+    PUBLIC_ANALYST_ORDER,
+    normalize_public_analysts,
+)
 from comqutor_alpha.storage.file_store import validate_run_id_for_path
 
 logger = logging.getLogger(__name__)
@@ -75,7 +79,7 @@ DISPOSITION_FORCE_REFRESHED = "force_refreshed"
 # is out of scope for this task) rather than reverse-engineered from the
 # HTTP payload, so a request that omits selected_analysts fingerprints
 # identically to one that explicitly names this exact set.
-DEFAULT_SELECTED_ANALYSTS: tuple[str, ...] = ("market", "news", "fundamentals", "sentiment")
+DEFAULT_SELECTED_ANALYSTS: tuple[str, ...] = PUBLIC_ANALYST_ORDER
 
 # Used for provider_identity/model_identity when no real, server-controlled
 # execution identity has been configured yet (W5.1B scope). Never derived
@@ -107,12 +111,7 @@ def _sha256_hex(text: str) -> str:
 
 
 def _normalize_selected_analysts(raw: Any) -> list[str]:
-    if not raw:
-        raw = DEFAULT_SELECTED_ANALYSTS
-    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
-        raw = DEFAULT_SELECTED_ANALYSTS
-    cleaned = {str(item).strip() for item in raw if str(item or "").strip()}
-    return sorted(cleaned)
+    return normalize_public_analysts(raw, default_if_missing=True)
 
 
 def _normalize_analysis_date(raw: Any) -> str | None:
@@ -317,6 +316,48 @@ _SAFE_ERROR_MESSAGES = {
     "REAL_FORCE_REFRESH_DISABLED": "force_refresh is not enabled for real TradingAgents execution.",
     "INVALID_ANALYST_SELECTION": "selected_analysts contains an analyst not supported for real execution.",
 }
+
+
+def mark_research_run_failed_consistently(
+    graph_repository: Any,
+    run_id: str,
+    *,
+    error_code: str,
+    error_message: str,
+) -> bool:
+    """Conditionally fail lifecycle and progress without terminal overwrite.
+
+    Production repositories expose one atomic transaction for both rows. The
+    compatibility fallback keeps injected test repositories working while
+    preserving the same rule: progress changes only when the active lifecycle
+    row was actually won by this caller.
+    """
+    atomic = getattr(
+        graph_repository,
+        "mark_research_run_and_progress_failed_if_active",
+        None,
+    )
+    if callable(atomic):
+        return bool(
+            atomic(
+                run_id,
+                error_code=error_code,
+                error_message=error_message,
+            )
+        )
+
+    updated = bool(
+        graph_repository.mark_research_run_failed_if_active(
+            run_id,
+            error_code=error_code,
+            error_message=error_message,
+        )
+    )
+    if updated:
+        progress_failure = getattr(graph_repository, "mark_research_progress_failed", None)
+        if callable(progress_failure):
+            progress_failure(run_id, progress_message=error_message)
+    return updated
 
 
 def _is_production_env() -> bool:
@@ -564,6 +605,11 @@ def prepare_research_submission(
         return {"response": _gate_failure_response(explicit_run_id, ticker, "OFFLINE_DISABLED")}
 
     working_payload = dict(payload)
+    try:
+        normalized_analysts = _normalize_selected_analysts(payload.get("selected_analysts"))
+    except ValueError as exc:
+        return {"response": _map_exception_to_error(payload, exc)}
+    working_payload["selected_analysts"] = normalized_analysts
     real_config: dict[str, Any] | None = None
     resolved_server_execution_identity = server_execution_identity
     real_gate_error: str | None = None
@@ -575,6 +621,16 @@ def prepare_research_submission(
         working_payload["analysis_date"] = server_execution.resolve_real_analysis_date(
             payload.get("analysis_date")
         )
+        try:
+            asset_type = server_execution.resolve_asset_type(ticker)
+            server_execution.validate_real_selected_analysts(
+                normalized_analysts,
+                asset_type=asset_type,
+            )
+        except server_execution.ServerExecutionConfigError as exc:
+            real_gate_error = exc.reason_code
+        else:
+            working_payload["asset_type"] = asset_type
         if server_execution_identity is None:
             ctx = server_execution.build_server_execution_context()
             resolved_server_execution_identity = ctx["execution_identity"]
@@ -582,14 +638,8 @@ def prepare_research_submission(
                 real_gate_error = ctx["error"]
             elif force_refresh and not server_execution.is_real_force_refresh_enabled():
                 real_gate_error = "REAL_FORCE_REFRESH_DISABLED"
-            else:
-                normalized_analysts = _normalize_selected_analysts(payload.get("selected_analysts"))
-                try:
-                    server_execution.validate_real_selected_analysts(normalized_analysts)
-                except server_execution.ServerExecutionConfigError as exc:
-                    real_gate_error = exc.reason_code
-                else:
-                    real_config = ctx["config"]
+            elif real_gate_error is None:
+                real_config = ctx["config"]
 
     if graph_repository is None:
         try:
@@ -789,10 +839,12 @@ def execute_claimed_research_run(
         )
         failure_message = _safe_message("INTERNAL_ERROR", "Research request failed.")
         with _suppress_lifecycle_errors():
-            graph_repository.mark_research_run_terminal(
-                run_id, status="failed", error_code="INTERNAL_ERROR", error_message=failure_message
+            mark_research_run_failed_consistently(
+                graph_repository,
+                run_id,
+                error_code="INTERNAL_ERROR",
+                error_message=failure_message,
             )
-        progress_reporter.record_terminal("failed", message=failure_message)
         return {
             "run_id": run_id,
             "ticker": ticker,
@@ -812,10 +864,12 @@ def execute_claimed_research_run(
         error_code = result.get("error_code") or "INTERNAL_ERROR"
         error_message = result.get("message") or _safe_message(error_code, "Research request failed.")
         with _suppress_lifecycle_errors():
-            graph_repository.mark_research_run_terminal(
-                run_id, status="failed", error_code=str(error_code), error_message=str(error_message)
+            mark_research_run_failed_consistently(
+                graph_repository,
+                run_id,
+                error_code=str(error_code),
+                error_message=str(error_message),
             )
-        progress_reporter.record_terminal("failed", message=str(error_message))
 
     result["run_status"] = result_status if result_status in ("completed", "partial") else "failed"
     result["cache_disposition"] = disposition
@@ -892,6 +946,7 @@ __all__ = [
     "DISPOSITION_REUSED_IN_FLIGHT",
     "DISPOSITION_FORCE_REFRESHED",
     "DEFAULT_SELECTED_ANALYSTS",
+    "mark_research_run_failed_consistently",
     "SERVER_UNCONFIGURED_IDENTITY",
     "ResearchLifecycleError",
     "build_research_request_identity",

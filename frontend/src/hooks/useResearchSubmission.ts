@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { submitResearch } from "../api/client";
 import { ApiError, describeApiError } from "../api/errors";
 import type { ResearchSubmissionRequest, ResearchSubmissionResult } from "../api/types";
@@ -30,6 +30,16 @@ export function useResearchSubmission(): UseResearchSubmissionResult {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const submittingRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const submit = useCallback(
     async (request: ResearchSubmissionRequest): Promise<SubmissionOutcome | null> => {
@@ -37,16 +47,21 @@ export function useResearchSubmission(): UseResearchSubmissionResult {
       submittingRef.current = true;
       setIsSubmitting(true);
       setErrorMessage(null);
+      const controller = new AbortController();
+      abortRef.current = controller;
       try {
-        const { status, result } = await submitResearch(request);
+        const { status, result } = await submitResearch(request, { signal: controller.signal });
         return { httpStatus: status, result };
       } catch (cause) {
         const apiError = cause instanceof ApiError ? cause : ApiError.network();
-        setErrorMessage(describeApiError(apiError));
+        if (mountedRef.current && !apiError.isAborted) {
+          setErrorMessage(describeApiError(apiError));
+        }
         return null;
       } finally {
         submittingRef.current = false;
-        setIsSubmitting(false);
+        if (abortRef.current === controller) abortRef.current = null;
+        if (mountedRef.current) setIsSubmitting(false);
       }
     },
     []

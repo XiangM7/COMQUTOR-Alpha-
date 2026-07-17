@@ -1,19 +1,16 @@
 # COMQUTOR Alpha Frontend -- Local Development
 
-This is the W5.2 dashboard frontend: a React + TypeScript (Vite) single-page
+This is the COMQUTOR research frontend: a React + TypeScript (Vite) single-page
 app for the Research, Structure Graph, and Conflict Radar pages, talking to
-the existing COMQUTOR Alpha FastAPI backend. It has no backend of its own and
-never calls a real TradingAgents/LLM/market/news provider or any other paid
-external service.
+the COMQUTOR Alpha FastAPI backend. It has no backend of its own and never
+calls TradingAgents, market/news providers or an LLM directly.
 
 ## Running the backend
 
 From the repository root, with the project's Python virtual environment
 active:
 
-```bash
-COMQUTOR_CORS_ORIGINS=http://127.0.0.1:5175 comqutor-api
-```
+    COMQUTOR_CORS_ORIGINS=http://127.0.0.1:5175 comqutor-api
 
 This starts the API on `http://127.0.0.1:8000` (the defaults for
 `COMQUTOR_API_HOST` / `COMQUTOR_API_PORT`) and allows the Vite dev server's
@@ -25,13 +22,16 @@ input from the user. `GET /ready` reports whether real execution is
 `disabled`, `configured`, or `misconfigured`; the Research page surfaces this
 without ever leaking a database URL, filesystem path, or credential.
 
+When enabled by an operator, the server uses the fixed Anthropic, Claude
+Sonnet 4.6, Medium, English Research Profile. The operator must provide
+`ANTHROPIC_API_KEY` in the ignored server environment. Live Provider smoke is
+manual and is never run by frontend tests or CI.
+
 ## Running the frontend
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+    cd frontend
+    npm ci
+    npm run dev
 
 The dev server runs at `http://127.0.0.1:5175` by default. Open that URL in a
 browser; it redirects to `/research`.
@@ -48,11 +48,19 @@ client-side JavaScript.
 ## Viewing existing completed research runs
 
 The Research page's "Recent research runs" list (backed by
-`GET /api/research`) shows previously submitted runs. Click any row to open
-its Research / Structure Graph / Conflict Radar pages directly by `run_id`,
-without resubmitting a new request. Each of the three run pages restores its
-state purely from the `run_id` in the URL, so refreshing the page or sharing
-the URL works without depending on prior in-memory navigation state.
+`GET /api/research`) shows previously submitted runs. Queued, running and
+failed rows open Processing; completed and partial rows open Research. Mouse,
+Enter and Space use the same routing. Every page restores from `run_id` in the
+URL.
+
+The submission form sends only ticker, analysis date and analysts. Public
+analyst order is Market, Sentiment, News, Fundamentals. The server resolves
+the asset type; `BTC-USD` is crypto and does not support Fundamentals under
+the TradingAgents CLI contract.
+
+Processing displays persisted backend milestones only. It does not increase
+progress on a timer. Failed-run Retry performs a new POST with the original
+three public fields; Refresh status only polls the failed run.
 
 ## Scripts
 
@@ -63,5 +71,6 @@ the URL works without depending on prior in-memory navigation state.
 | `npm run test -- --run` | Run the Vitest suite once (non-watch) |
 | `npm run typecheck` | `tsc --noEmit` over the app and Vite config |
 | `npm run lint` | ESLint over the project |
+| `npm run test:e2e` | Run the isolated local Demo Playwright suite |
 
 No globally-installed tool is required beyond Node.js/npm.

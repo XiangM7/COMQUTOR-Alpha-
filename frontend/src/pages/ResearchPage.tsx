@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getReadiness, getResearchHistory } from "../api/client";
-import { ApiError, describeApiError } from "../api/errors";
+import { ApiError, describeApiError, describeApiErrorCode } from "../api/errors";
 import type { ReadinessResponse, ResearchRunRecord } from "../api/types";
 import { ResearchForm } from "../components/ResearchForm";
 import { ErrorPanel } from "../components/ErrorPanel";
@@ -85,6 +85,12 @@ function RecentRuns() {
     return <EmptyState title="No research runs yet" description="Submit a ticker above to get started." />;
   }
 
+  const pathForRun = (item: ResearchRunRecord) => {
+    const destination =
+      item.status === "completed" || item.status === "partial" ? "research" : "processing";
+    return `/runs/${encodeURIComponent(item.run_id)}/${destination}`;
+  };
+
   return (
     <table className="recent-runs-table">
       <caption className="visually-hidden">Recent research runs</caption>
@@ -104,11 +110,11 @@ function RecentRuns() {
             className="recent-runs-row"
             tabIndex={0}
             role="button"
-            onClick={() => navigate(`/runs/${encodeURIComponent(item.run_id)}/research`)}
+            onClick={() => navigate(pathForRun(item))}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                navigate(`/runs/${encodeURIComponent(item.run_id)}/research`);
+                navigate(pathForRun(item));
               }
             }}
           >
@@ -139,7 +145,7 @@ export function ResearchPage() {
     const { result } = outcome;
     if (result.status === "failed" && result.error_code) {
       setSubmissionError(
-        describeApiErrorCodeMessage(result.error_code, result.message ?? undefined)
+        describeApiErrorCode(result.error_code, result.message ?? undefined)
       );
       return;
     }
@@ -182,21 +188,4 @@ export function ResearchPage() {
       </section>
     </div>
   );
-}
-
-const ERROR_CODE_ACTIONS: Record<string, string> = {
-  REAL_RUN_DISABLED: "Real TradingAgents execution is disabled on this server.",
-  REAL_RUN_CONFIG_INVALID: "Real TradingAgents execution is misconfigured on this server.",
-  REAL_FORCE_REFRESH_DISABLED: "Force refresh is disabled for real research runs on this server.",
-  RUN_ID_CONFLICT: "That run_id already exists for a different request.",
-  INVALID_FORCE_REFRESH: "force_refresh cannot be combined with an existing run_id.",
-  RESEARCH_QUEUE_FULL: "The research queue is full. Try again shortly.",
-  JOB_MANAGER_UNAVAILABLE: "The background research service is unavailable right now.",
-  OFFLINE_DISABLED: "Offline research submissions are disabled on this server.",
-  INVALID_ANALYST_SELECTION: "One or more selected analysts are not supported.",
-  INTERNAL_ERROR: "The research request failed unexpectedly. Please try again.",
-};
-
-function describeApiErrorCodeMessage(errorCode: string, fallback?: string): string {
-  return ERROR_CODE_ACTIONS[errorCode] ?? fallback ?? "The research request could not be submitted.";
 }

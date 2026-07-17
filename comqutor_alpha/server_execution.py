@@ -84,10 +84,42 @@ def is_real_force_refresh_enabled() -> bool:
     return _parse_bool_env("COMQUTOR_REAL_FORCE_REFRESH_ENABLED", default=False)
 
 
-def validate_real_selected_analysts(selected_analysts: list[str]) -> None:
+def resolve_asset_type(ticker: str) -> str:
+    """Resolve one canonical ticker through TradingAgents' CLI classifier."""
+    try:
+        from cli.utils import detect_asset_type
+
+        return detect_asset_type(ticker).value
+    except Exception as exc:
+        raise ServerExecutionConfigError("INVALID_TICKER") from exc
+
+
+def validate_real_selected_analysts(
+    selected_analysts: list[str],
+    *,
+    asset_type: str = "stock",
+) -> None:
     """Raises ``ServerExecutionConfigError("INVALID_ANALYST_SELECTION")`` if
-    any requested analyst falls outside the formal real-mode set."""
-    if not set(selected_analysts).issubset(REAL_RUN_ALLOWED_ANALYSTS):
+    any requested analyst falls outside the formal real-mode set or the CLI's
+    analyst set for the resolved asset type."""
+    if not selected_analysts or not set(selected_analysts).issubset(REAL_RUN_ALLOWED_ANALYSTS):
+        raise ServerExecutionConfigError("INVALID_ANALYST_SELECTION")
+
+    try:
+        from cli.models import AnalystType, AssetType
+        from cli.utils import filter_analysts_for_asset_type
+
+        public_to_cli = {
+            "market": AnalystType.MARKET,
+            "sentiment": AnalystType.SOCIAL,
+            "news": AnalystType.NEWS,
+            "fundamentals": AnalystType.FUNDAMENTALS,
+        }
+        selected_cli = [public_to_cli[name] for name in selected_analysts]
+        allowed_cli = filter_analysts_for_asset_type(selected_cli, AssetType(asset_type))
+    except (KeyError, ValueError) as exc:
+        raise ServerExecutionConfigError("INVALID_ANALYST_SELECTION") from exc
+    if len(allowed_cli) != len(selected_cli):
         raise ServerExecutionConfigError("INVALID_ANALYST_SELECTION")
 
 
@@ -253,6 +285,7 @@ __all__ = [
     "is_real_tradingagents_enabled",
     "is_real_force_refresh_enabled",
     "is_anthropic_credential_present",
+    "resolve_asset_type",
     "validate_real_selected_analysts",
     "resolve_real_analysis_date",
     "build_server_tradingagents_config",

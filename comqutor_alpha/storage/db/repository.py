@@ -1014,6 +1014,63 @@ class GraphPersistenceRepository:
             raise GraphPersistenceError("DB_WRITE_FAILED") from exc
         return result.rowcount > 0
 
+    def mark_research_run_and_progress_failed_if_active(
+        self,
+        run_id: str,
+        *,
+        error_code: str,
+        error_message: str | None = None,
+    ) -> bool:
+        """Atomically fail an active lifecycle row and its progress row.
+
+        The lifecycle update remains conditional on queued/running. A losing
+        supervisor race therefore changes neither table, while a winning
+        update releases ``active_fingerprint`` and marks progress failed in
+        the same transaction without changing its last real percentage.
+        """
+        reason = "RESEARCH_PROGRESS_INVALID"
+        self._require_supported_dialect()
+        message = self._validated_progress_message(error_message, reason_code=reason)
+        now = datetime.now(UTC)
+        try:
+            with self._engine.begin() as conn:
+                lifecycle_result = conn.execute(
+                    sa.update(research_runs)
+                    .where(research_runs.c.run_id == run_id)
+                    .where(research_runs.c.status.in_(list(ACTIVE_RESEARCH_RUN_STATUSES)))
+                    .values(
+                        status="failed",
+                        stage="failed",
+                        error_code=error_code,
+                        error_message=error_message,
+                        active_fingerprint=None,
+                        completed_at=now,
+                        updated_at=now,
+                    )
+                )
+                if lifecycle_result.rowcount <= 0:
+                    return False
+
+                progress_values: dict[str, Any] = {
+                    "current_stage": "failed",
+                    "updated_at": now,
+                }
+                if message is not None:
+                    progress_values["progress_message"] = message
+                conn.execute(
+                    sa.update(research_run_progress)
+                    .where(research_run_progress.c.run_id == run_id)
+                    .where(
+                        research_run_progress.c.current_stage.not_in(
+                            ("completed", "completed_partial", "failed")
+                        )
+                    )
+                    .values(**progress_values)
+                )
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+        return True
+
     def list_active_research_run_records(self) -> list[dict[str, Any]]:
         """All currently queued/running rows. Local single-instance startup
         reconciliation only -- never paginated, since a healthy local
@@ -1188,9 +1245,13 @@ class GraphPersistenceRepository:
             started_at=now,
             updated_at=now,
         ).on_conflict_do_nothing(index_elements=["run_id"])
+        if self.dialect_name == "postgresql":
+            stmt = stmt.returning(research_run_progress.c.run_id)
         try:
             with self._engine.begin() as conn:
                 result = conn.execute(stmt)
+                if self.dialect_name == "postgresql":
+                    return result.scalar_one_or_none() is not None
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_WRITE_FAILED") from exc
         return result.rowcount > 0
@@ -1226,6 +1287,11 @@ class GraphPersistenceRepository:
                 result = conn.execute(
                     sa.update(research_run_progress)
                     .where(research_run_progress.c.run_id == run_id)
+                    .where(
+                        research_run_progress.c.current_stage.not_in(
+                            ("completed", "completed_partial", "failed")
+                        )
+                    )
                     .where(research_run_progress.c.progress_percent <= percent)
                     .where(research_run_progress.c.completed_units <= completed)
                     .where(research_run_progress.c.total_units >= completed)
@@ -1255,7 +1321,12 @@ class GraphPersistenceRepository:
         return dict(row) if row is not None else None
 
     def mark_research_progress_completed(self, run_id: str, *, partial: bool = False) -> bool:
-        """Terminal success: 100% with every unit accounted for.
+        """Terminal success at 100%.
+
+        A fully completed run accounts for every unit. A partial run keeps
+        its last real completed-unit count so the UI never presents skipped
+        work as successful.
+
         ``partial=True`` records ``completed_partial`` instead of
         ``completed`` so a degraded run is never presented as a full one.
         Idempotent."""
@@ -1268,16 +1339,23 @@ class GraphPersistenceRepository:
         )
         try:
             with self._engine.begin() as conn:
+                values: dict[str, Any] = {
+                    "progress_percent": 100,
+                    "current_stage": stage,
+                    "progress_message": message,
+                    "updated_at": datetime.now(UTC),
+                }
+                if not partial:
+                    values["completed_units"] = research_run_progress.c.total_units
                 result = conn.execute(
                     sa.update(research_run_progress)
                     .where(research_run_progress.c.run_id == run_id)
-                    .values(
-                        progress_percent=100,
-                        current_stage=stage,
-                        completed_units=research_run_progress.c.total_units,
-                        progress_message=message,
-                        updated_at=datetime.now(UTC),
+                    .where(
+                        research_run_progress.c.current_stage.not_in(
+                            ("completed", "completed_partial", "failed")
+                        )
                     )
+                    .values(**values)
                 )
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_WRITE_FAILED") from exc
@@ -1303,6 +1381,11 @@ class GraphPersistenceRepository:
                 result = conn.execute(
                     sa.update(research_run_progress)
                     .where(research_run_progress.c.run_id == run_id)
+                    .where(
+                        research_run_progress.c.current_stage.not_in(
+                            ("completed", "completed_partial", "failed")
+                        )
+                    )
                     .values(**values)
                 )
         except SQLAlchemyError as exc:

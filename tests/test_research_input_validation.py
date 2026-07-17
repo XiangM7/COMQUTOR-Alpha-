@@ -21,7 +21,7 @@ def _offline_outputs():
     "bad_ticker",
     [
         "'; DROP TABLE agent_outputs; --",
-        "TOO-LONG-TICKER-XYZ",
+        "TICKER-THAT-IS-DEFINITELY-LONGER-THAN-32-CHARS",
         "",
         "../etc/passwd",
     ],

@@ -18,7 +18,10 @@ import sqlalchemy as sa
 from sqlalchemy.exc import SQLAlchemyError
 
 from comqutor_alpha.storage.db.engine import build_engine
-from comqutor_alpha.storage.db.migrations import apply_migrations, applied_migration_versions
+from comqutor_alpha.storage.db.migrations import (
+    applied_migration_versions,
+    apply_migrations,
+)
 from comqutor_alpha.storage.db.repository import (
     GraphPersistenceError,
     GraphPersistenceRepository,
@@ -28,7 +31,7 @@ from comqutor_alpha.storage.db.schema import research_run_progress, research_run
 pytestmark = pytest.mark.integration
 
 PROFILE = "comqutor_anthropic_medium_sonnet46_v1"
-ANALYSTS = ["fundamentals", "market", "news", "sentiment"]
+ANALYSTS = ["market", "sentiment", "news", "fundamentals"]
 
 
 @pytest.fixture(scope="module")
@@ -130,19 +133,18 @@ def test_progress_round_trip_and_monotonicity(postgres_context):
 def test_progress_check_constraints_enforced_by_postgres(postgres_context):
     engine = postgres_context["engine"]
     run_id = _run_id(postgres_context, "constraint")
-    with pytest.raises(SQLAlchemyError):
-        with engine.begin() as conn:
-            conn.execute(
-                sa.insert(research_run_progress).values(
-                    run_id=run_id,
-                    profile_id=PROFILE,
-                    progress_percent=150,
-                    current_stage="queued",
-                    completed_units=0,
-                    total_units=15,
-                    updated_at=datetime.now(UTC),
-                )
+    with pytest.raises(SQLAlchemyError), engine.begin() as conn:
+        conn.execute(
+            sa.insert(research_run_progress).values(
+                run_id=run_id,
+                profile_id=PROFILE,
+                progress_percent=150,
+                current_stage="queued",
+                completed_units=0,
+                total_units=15,
+                updated_at=datetime.now(UTC),
             )
+        )
 
 
 def test_invalid_numeric_rejected_before_sql(postgres_context):

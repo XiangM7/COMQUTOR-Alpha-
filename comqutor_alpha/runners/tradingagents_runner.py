@@ -25,6 +25,12 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
+from comqutor_alpha.research_progress import (
+    PUBLIC_ANALYST_ORDER,
+    normalize_public_analysts,
+)
+from comqutor_alpha.storage.file_store import resolve_output_root
+
 # Public HTTP analyst name -> TradingAgents internal analyst key, in the
 # frozen canonical public order (market, sentiment, news, fundamentals).
 PUBLIC_TO_INTERNAL_ANALYSTS: dict[str, str] = {
@@ -33,8 +39,6 @@ PUBLIC_TO_INTERNAL_ANALYSTS: dict[str, str] = {
     "news": "news",
     "fundamentals": "fundamentals",
 }
-
-_CANONICAL_PUBLIC_ORDER: tuple[str, ...] = ("market", "sentiment", "news", "fundamentals")
 
 # TradingAgents internal analyst key -> the final_state report field whose
 # first non-empty appearance marks that analyst as genuinely complete.
@@ -55,23 +59,13 @@ def map_public_analysts_to_internal(selected_analysts) -> tuple[list[str], list[
     same TradingAgentsGraph because ``social`` is not a valid *public* name
     in the first place.
     """
-    requested = []
-    seen = set()
-    for item in selected_analysts or []:
-        name = str(item or "").strip()
-        if not name or name in seen:
-            continue
-        seen.add(name)
-        requested.append(name)
-
-    unknown = [name for name in requested if name not in PUBLIC_TO_INTERNAL_ANALYSTS]
-    if unknown:
-        raise RuntimeError(
-            "INVALID_ANALYST_SELECTION: selected_analysts contains an unsupported analyst"
+    try:
+        public_canonical = normalize_public_analysts(
+            selected_analysts,
+            default_if_missing=False,
         )
-    public_canonical = [name for name in _CANONICAL_PUBLIC_ORDER if name in seen]
-    if not public_canonical:
-        raise RuntimeError("INVALID_ANALYST_SELECTION: at least one analyst must be selected")
+    except ValueError as exc:
+        raise RuntimeError(str(exc)) from exc
     internal = [PUBLIC_TO_INTERNAL_ANALYSTS[name] for name in public_canonical]
     return public_canonical, internal
 
@@ -115,7 +109,10 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
 
     ticker = _require_payload_value(payload, "ticker")
     analysis_date = _require_payload_value(payload, "analysis_date")
-    selected_analysts = payload.get("selected_analysts") or ["market", "news", "fundamentals", "sentiment"]
+    public_analysts, selected_analysts = map_public_analysts_to_internal(
+        payload.get("selected_analysts") or list(PUBLIC_ANALYST_ORDER)
+    )
+    asset_type = str(payload.get("asset_type") or "stock")
     config = payload.get("config")
     if not isinstance(config, dict):
         raise RuntimeError(
@@ -132,12 +129,16 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
         raise RuntimeError(f"Unable to import TradingAgents graph entrypoint: {exc}") from exc
 
     graph = TradingAgentsGraph(selected_analysts, config=config, debug=False)
-    final_state, _processed_signal = graph.propagate(str(ticker), str(analysis_date))
+    final_state, _processed_signal = graph.propagate(
+        str(ticker),
+        str(analysis_date),
+        asset_type=asset_type,
+    )
     run_dir = save_comqutor_run_outputs(
         final_state=final_state,
         ticker=ticker,
         config=config,
-        selected_analysts=selected_analysts,
+        selected_analysts=public_analysts,
         analysis_date=analysis_date,
         output_root=Path(output_root),
     )
@@ -272,8 +273,9 @@ def run_streaming_tradingagents_research(
         )
 
     public_analysts, internal_analysts = map_public_analysts_to_internal(
-        payload.get("selected_analysts") or list(_CANONICAL_PUBLIC_ORDER)
+        payload.get("selected_analysts") or list(PUBLIC_ANALYST_ORDER)
     )
+    asset_type = str(_require_payload_value(payload, "asset_type"))
 
     try:
         from comqutor_alpha.adapters.tradingagents_output_writer import (
@@ -283,45 +285,112 @@ def run_streaming_tradingagents_research(
         raise RuntimeError(f"Unable to import COMQUTOR output writer: {exc}") from exc
 
     graph = (graph_factory or _default_streaming_graph_factory)(internal_analysts, config)
+    graph.ticker = str(ticker)
 
-    instrument_context = ""
-    resolve_context = getattr(graph, "resolve_instrument_context", None)
-    if callable(resolve_context):
-        try:
-            instrument_context = str(resolve_context(str(ticker)) or "")
-        except Exception:
-            # Deterministic identity resolution is fail-open in TradingAgents
-            # itself; a lookup failure degrades to ticker-only context.
-            instrument_context = ""
+    resolve_pending = getattr(graph, "_resolve_pending_entries", None)
+    if callable(resolve_pending):
+        resolve_pending(str(ticker))
 
-    init_state = graph.propagator.create_initial_state(
-        str(ticker), str(analysis_date), instrument_context=instrument_context
-    )
-    stream_args = graph.propagator.get_graph_args()
+    checkpointer_ctx = None
+    checkpointer_entered = False
+    checkpoint_enabled = bool(config.get("checkpoint_enabled"))
+    try:
+        if checkpoint_enabled:
+            from tradingagents.graph.checkpointer import get_checkpointer, thread_id
 
-    # stream_mode="values" chunks are cumulative state snapshots; merging
-    # with dict.update matches TradingAgentsGraph's own debug-path merge
-    # rule, so the final merged state equals what graph.invoke would return.
-    final_state: dict = {}
-    reached: set[str] = set()
-    for chunk in graph.graph.stream(init_state, **stream_args):
-        if isinstance(chunk, Mapping):
-            final_state.update(chunk)
-            _report_stream_milestones(final_state, public_analysts, progress_reporter, reached)
+            checkpointer_ctx = get_checkpointer(config["data_cache_dir"], str(ticker))
+            graph._checkpointer_ctx = checkpointer_ctx
+            saver = checkpointer_ctx.__enter__()
+            checkpointer_entered = True
+            graph.graph = graph.workflow.compile(checkpointer=saver)
 
-    if not final_state:
-        raise RuntimeError("TradingAgents stream produced no state.")
+        memory_log = getattr(graph, "memory_log", None)
+        get_past_context = getattr(memory_log, "get_past_context", None)
+        past_context = str(get_past_context(str(ticker)) or "") if callable(get_past_context) else ""
 
+        resolve_context = getattr(graph, "resolve_instrument_context", None)
+        instrument_context = (
+            str(resolve_context(str(ticker), asset_type) or "")
+            if callable(resolve_context)
+            else ""
+        )
+
+        init_state = graph.propagator.create_initial_state(
+            str(ticker),
+            str(analysis_date),
+            asset_type=asset_type,
+            past_context=past_context,
+            instrument_context=instrument_context,
+        )
+        stream_args = graph.propagator.get_graph_args()
+        if checkpoint_enabled:
+            stream_args.setdefault("config", {}).setdefault("configurable", {})[
+                "thread_id"
+            ] = thread_id(str(ticker), str(analysis_date))
+
+        if progress_reporter is not None:
+            progress_reporter.record_analyst_started(public_analysts[0])
+
+        # stream_mode="values" chunks are cumulative state snapshots;
+        # merging with dict.update preserves the same final state as invoke.
+        final_state: dict = {}
+        reached: set[str] = set()
+        for chunk in graph.graph.stream(init_state, **stream_args):
+            if isinstance(chunk, Mapping):
+                final_state.update(chunk)
+                _report_stream_milestones(
+                    final_state,
+                    public_analysts,
+                    progress_reporter,
+                    reached,
+                )
+
+        if not final_state:
+            raise RuntimeError("TradingAgents stream produced no state.")
+
+        graph.curr_state = final_state
+        log_state = getattr(graph, "_log_state", None)
+        if callable(log_state):
+            log_state(str(analysis_date), final_state)
+
+        store_decision = getattr(memory_log, "store_decision", None)
+        if callable(store_decision):
+            store_decision(
+                ticker=str(ticker),
+                trade_date=str(analysis_date),
+                final_trade_decision=final_state["final_trade_decision"],
+            )
+
+        if checkpoint_enabled:
+            from tradingagents.graph.checkpointer import clear_checkpoint
+
+            clear_checkpoint(
+                config["data_cache_dir"],
+                str(ticker),
+                str(analysis_date),
+            )
+
+        process_signal = getattr(graph, "process_signal", None)
+        if callable(process_signal):
+            process_signal(final_state["final_trade_decision"])
+    finally:
+        if checkpointer_ctx is not None:
+            if checkpointer_entered:
+                checkpointer_ctx.__exit__(None, None, None)
+            graph._checkpointer_ctx = None
+            graph.graph = graph.workflow.compile()
+
+    resolved_output_root = resolve_output_root(output_root)
     run_dir = save_comqutor_run_outputs(
         final_state=final_state,
         ticker=ticker,
         config=config,
         selected_analysts=public_analysts,
         analysis_date=analysis_date,
-        output_root=Path(output_root),
+        output_root=resolved_output_root,
     )
 
     claimed_run_id = payload.get("run_id")
     if claimed_run_id:
-        run_dir = _relocate_run_outputs(run_dir, claimed_run_id, output_root)
+        run_dir = _relocate_run_outputs(run_dir, claimed_run_id, resolved_output_root)
     return run_dir

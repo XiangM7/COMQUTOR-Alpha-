@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { describeApiError } from "../api/errors";
+import { describeApiError, describeApiErrorCode } from "../api/errors";
 import type { ResearchRunRecord } from "../api/types";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
+import { useResearchSubmission } from "../hooks/useResearchSubmission";
 import { useRunPolling } from "../hooks/useRunPolling";
 
 /** The frozen stage vocabulary in execution order (analyst stages are
@@ -84,15 +85,56 @@ function EtaLine({ record }: { record: ResearchRunRecord }) {
 function StageChecklist({ record }: { record: ResearchRunRecord }) {
   const plan = useMemo(() => buildStagePlan(record.selected_analysts), [record.selected_analysts]);
   const currentIndex = plan.findIndex((entry) => entry.stage === record.current_stage);
+  const completedUnits = Math.max(0, Math.floor(record.completed_units ?? 0));
+  const completedPlanCount = Math.min(plan.length, PRE_ANALYST_STAGES.length + completedUnits);
+
+  let inferredFailureIndex = -1;
+  if (record.status === "failed") {
+    if (currentIndex >= 0) {
+      inferredFailureIndex = currentIndex;
+    } else if (record.started_at === null) {
+      inferredFailureIndex = 0;
+    } else if (completedUnits === 0 && (record.progress_percent ?? 0) < 10) {
+      inferredFailureIndex = 1;
+    } else {
+      inferredFailureIndex = Math.min(completedPlanCount, plan.length - 1);
+    }
+  }
 
   return (
     <ol className="processing-stage-list" aria-label="Research stages">
       {plan.map((entry, index) => {
-        const state =
-          currentIndex < 0 ? "pending" : index < currentIndex ? "done" : index === currentIndex ? "current" : "pending";
-        const marker = state === "done" ? "✓" : state === "current" ? "●" : "○";
+        let state: "done" | "current" | "failed" | "pending" = "pending";
+        if (record.status === "completed") {
+          state = "done";
+        } else if (record.status === "partial") {
+          state = index < completedPlanCount ? "done" : "pending";
+        } else if (record.status === "failed") {
+          state =
+            index < inferredFailureIndex
+              ? "done"
+              : index === inferredFailureIndex
+                ? "failed"
+                : "pending";
+        } else if (currentIndex >= 0) {
+          state = index < currentIndex ? "done" : index === currentIndex ? "current" : "pending";
+        } else if (record.completed_units !== null) {
+          state =
+            index < completedPlanCount
+              ? "done"
+              : index === completedPlanCount
+                ? "current"
+                : "pending";
+        }
+        const marker = state === "done" ? "✓" : state === "current" || state === "failed" ? "●" : "○";
         const stateLabel =
-          state === "done" ? "completed" : state === "current" ? "in progress" : "pending";
+          state === "done"
+            ? "completed"
+            : state === "current"
+              ? "in progress"
+              : state === "failed"
+                ? "failed"
+                : "pending";
         return (
           <li key={entry.stage} className={`processing-stage processing-stage-${state}`}>
             <span aria-hidden="true" className="processing-stage-marker">
@@ -118,11 +160,47 @@ export function ProcessingPage() {
   const { runId } = useParams<{ runId: string }>();
   const navigate = useNavigate();
   const { status: pollStatus, error: pollError, refresh } = useRunPolling(runId);
+  const {
+    isSubmitting: isRetrying,
+    errorMessage: retryRequestError,
+    submit: retryResearch,
+  } = useResearchSubmission();
+  const [retryResponseError, setRetryResponseError] = useState<string | null>(null);
 
   const record: ResearchRunRecord | null =
     pollStatus && "ticker" in pollStatus ? pollStatus : null;
   const statusFailure = pollStatus && !("ticker" in pollStatus) ? pollStatus : null;
   const runStatus = record?.status;
+
+  async function handleRetry() {
+    if (!record || isRetrying) return;
+    setRetryResponseError(null);
+    const request = {
+      ticker: record.ticker,
+      selected_analysts: record.selected_analysts,
+      ...(record.analysis_date ? { analysis_date: record.analysis_date } : {}),
+    };
+    const outcome = await retryResearch(request);
+    if (!outcome) return;
+    const { result, httpStatus } = outcome;
+    if (result.status === "failed") {
+      setRetryResponseError(
+        result.error_code
+          ? describeApiErrorCode(result.error_code, result.message ?? undefined)
+          : result.message || "The research request could not be submitted."
+      );
+      return;
+    }
+    if (!result.run_id) {
+      setRetryResponseError("The research request did not return a run identifier.");
+      return;
+    }
+    const destination =
+      httpStatus === 200 && result.cache_disposition === "reused_completed"
+        ? "research"
+        : "processing";
+    navigate(`/runs/${encodeURIComponent(result.run_id)}/${destination}`);
+  }
 
   useEffect(() => {
     if (runStatus !== "completed" || !runId) return;
@@ -154,6 +232,7 @@ export function ProcessingPage() {
             title="Run status unavailable"
             message={statusFailure.message || "The run status could not be loaded."}
             onRetry={refresh}
+            retryLabel="Refresh status"
           />
         ) : null}
 
@@ -187,9 +266,10 @@ export function ProcessingPage() {
             {record.progress_message ? (
               <p className="processing-current-step">Current step: {record.progress_message}</p>
             ) : null}
-            <StageChecklist record={record} />
           </>
         ) : null}
+
+        {record ? <StageChecklist record={record} /> : null}
 
         {runStatus === "completed" ? (
           <div className="processing-complete" role="status">
@@ -224,13 +304,27 @@ export function ProcessingPage() {
               </p>
             ) : null}
             <div className="processing-failed-actions">
-              <button type="button" className="button button-secondary" onClick={refresh}>
-                Retry
+              <button
+                type="button"
+                className="button button-primary"
+                onClick={handleRetry}
+                disabled={isRetrying}
+              >
+                {isRetrying ? "Retrying…" : "Retry research"}
               </button>
-              <Link to="/research" className="button button-primary">
+              <button type="button" className="button button-secondary" onClick={refresh}>
+                Refresh status
+              </button>
+              <Link to="/research" className="button button-secondary">
                 Return to Research
               </Link>
             </div>
+            {retryRequestError || retryResponseError ? (
+              <ErrorPanel
+                title="Retry could not start"
+                message={retryResponseError ?? retryRequestError ?? "The retry could not be submitted."}
+              />
+            ) : null}
           </div>
         ) : null}
 
@@ -239,6 +333,7 @@ export function ProcessingPage() {
             title="Connection issue"
             message={describeApiError(pollError)}
             onRetry={refresh}
+            retryLabel="Refresh status"
           />
         ) : null}
       </section>

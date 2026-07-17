@@ -123,23 +123,54 @@ describe("ProcessingPage", () => {
     );
   });
 
+  it("marks every checklist stage completed for a completed run", async () => {
+    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+      makeRunRecord({
+        status: "completed",
+        stage: "completed",
+        progress_percent: 100,
+        current_stage: "completed",
+        completed_units: 15,
+        total_units: 15,
+      })
+    );
+    renderPage();
+    const items = await screen.findAllByRole("listitem");
+    expect(items).toHaveLength(17);
+    expect(items.every((item) => item.textContent?.includes("completed"))).toBe(true);
+  });
+
   it("shows a partial notice with a link to the partial results (no auto-navigation)", async () => {
     vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
-      makeRunRecord({ status: "partial", stage: "partial", progress_percent: 100 })
+      makeRunRecord({
+        status: "partial",
+        stage: "partial",
+        progress_percent: 100,
+        current_stage: "completed_partial",
+        completed_units: 6,
+        total_units: 15,
+      })
     );
     renderPage();
     await waitFor(() => expect(screen.getByText(/finished only partially/i)).toBeInTheDocument());
     expect(screen.getByRole("link", { name: /open partial results/i })).toBeInTheDocument();
+    const items = screen.getAllByRole("listitem");
+    expect(items.some((item) => item.textContent?.includes("completed"))).toBe(true);
+    expect(items.some((item) => item.textContent?.includes("pending"))).toBe(true);
+    expect(items.every((item) => item.textContent?.includes("completed"))).toBe(false);
   });
 
-  it("stays on the page for a failed run with Retry and Return to Research", async () => {
+  it("stays on the page for a failed run with retry, refresh, and return actions", async () => {
     vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
       makeRunRecord({
         status: "failed",
         stage: "failed",
         error_code: "RESEARCH_TIMEOUT",
         message: "The research run exceeded the configured execution time.",
+        started_at: "2026-07-16T12:00:00Z",
         progress_percent: 64,
+        completed_units: 6,
+        total_units: 15,
       })
     );
     renderPage();
@@ -148,18 +179,23 @@ describe("ProcessingPage", () => {
       screen.getByText("The research run exceeded the configured execution time.")
     ).toBeInTheDocument();
     expect(screen.getByText("RESEARCH_TIMEOUT")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry research" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh status" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /return to research/i })).toBeInTheDocument();
+    const items = screen.getAllByRole("listitem");
+    expect(items.some((item) => item.textContent?.includes("completed"))).toBe(true);
+    expect(items.some((item) => item.textContent?.includes("failed"))).toBe(true);
+    expect(items.some((item) => item.textContent?.includes("pending"))).toBe(true);
     // Never bounced away from the processing page.
     expect(screen.queryByText(/results page for/)).toBeNull();
   });
 
-  it("shows a connection issue with Retry on a network error without marking the run failed", async () => {
+  it("shows a connection issue with status refresh without marking the run failed", async () => {
     const { ApiError } = await import("../api/errors");
     vi.spyOn(client, "getResearchRunStatus").mockRejectedValue(ApiError.network());
     renderPage();
     await waitFor(() => expect(screen.getByText(/connection issue/i)).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /refresh status/i })).toBeInTheDocument();
     expect(screen.queryByText(/research run failed/i)).toBeNull();
   });
 

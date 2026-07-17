@@ -169,7 +169,7 @@ def test_server_execution_identity_is_never_read_from_http_payload():
 
 def test_omitted_selected_analysts_uses_default_set():
     identity = build_research_request_identity(_base_payload(selected_analysts=None))
-    assert identity["selected_analysts"] == sorted(DEFAULT_SELECTED_ANALYSTS)
+    assert identity["selected_analysts"] == list(DEFAULT_SELECTED_ANALYSTS)
 
 
 def test_invalid_ticker_raises_value_error():

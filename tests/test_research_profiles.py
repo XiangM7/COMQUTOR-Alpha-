@@ -74,7 +74,7 @@ def test_profile_config_never_mutates_default_config():
     config = research_profiles.build_profile_tradingagents_config()
     config["llm_provider"] = "mutated"
     config["data_vendors"]["core_stock_apis"] = "mutated"
-    assert DEFAULT_CONFIG == before
+    assert before == DEFAULT_CONFIG
 
 
 @pytest.mark.parametrize(

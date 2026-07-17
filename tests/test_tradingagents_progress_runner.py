@@ -89,8 +89,54 @@ class _FakeGraph:
         self.propagator = _FakePropagator()
         self.graph = _FakeCompiledGraph(chunks)
 
-    def resolve_instrument_context(self, ticker):
-        return f"instrument-context:{ticker}"
+    def resolve_instrument_context(self, ticker, asset_type):
+        return f"instrument-context:{ticker}:{asset_type}"
+
+
+class _FakeMemoryLog:
+    def __init__(self):
+        self.past_context_calls = []
+        self.decisions = []
+
+    def get_past_context(self, ticker):
+        self.past_context_calls.append(ticker)
+        return f"past-context:{ticker}"
+
+    def store_decision(self, **kwargs):
+        self.decisions.append(kwargs)
+
+
+class _FakeWorkflow:
+    def __init__(self, compiled_graph):
+        self.compiled_graph = compiled_graph
+        self.compile_calls = []
+
+    def compile(self, **kwargs):
+        self.compile_calls.append(kwargs)
+        return self.compiled_graph
+
+
+class _ParityGraph(_FakeGraph):
+    def __init__(self, chunks):
+        super().__init__(chunks)
+        self.memory_log = _FakeMemoryLog()
+        self.workflow = _FakeWorkflow(self.graph)
+        self.pending_calls = []
+        self.logged_states = []
+        self.processed_signals = []
+        self.curr_state = None
+        self.ticker = None
+        self._checkpointer_ctx = None
+
+    def _resolve_pending_entries(self, ticker):
+        self.pending_calls.append(ticker)
+
+    def _log_state(self, trade_date, final_state):
+        self.logged_states.append((trade_date, final_state))
+
+    def process_signal(self, signal):
+        self.processed_signals.append(signal)
+        return "BUY"
 
 
 class _RecordingProgressRepo:
@@ -142,6 +188,7 @@ def _payload(run_id=None, analysts=None):
         "allow_real_tradingagents_run": True,
         "ticker": "NVDA",
         "analysis_date": "2026-07-16",
+        "asset_type": "stock",
         "selected_analysts": analysts or ["market", "sentiment", "news", "fundamentals"],
         "config": {"llm_provider": "anthropic", "deep_think_llm": "claude-sonnet-4-6", "quick_think_llm": "claude-sonnet-4-6"},
         "profile_id": PROFILE,
@@ -179,13 +226,14 @@ def test_four_analysts_advance_stepwise_then_debate_trader_risk(tmp_path):
 
     flow = [(u["current_stage"], u["progress_percent"]) for u in repo.updates]
     assert flow == [
-        ("market_analysis", 20),
-        ("sentiment_analysis", 30),
-        ("news_analysis", 40),
-        ("fundamentals_analysis", 50),
-        ("research_debate", 58),
-        ("trading_plan", 64),
-        ("risk_review", 70),
+        ("market_analysis", 10),
+        ("sentiment_analysis", 20),
+        ("news_analysis", 30),
+        ("fundamentals_analysis", 40),
+        ("research_debate", 50),
+        ("trading_plan", 58),
+        ("risk_review", 64),
+        ("raw_outputs_saved", 70),
     ]
 
 
@@ -196,7 +244,7 @@ def test_duplicate_chunks_never_advance_twice(tmp_path):
     doubled = [chunk for chunk in chunks for _ in range(2)]
     _run(tmp_path, _payload(run_id="claimed-run-2"), doubled, repo)
     stages = [u["current_stage"] for u in repo.updates]
-    assert len(stages) == len(set(stages)) == 7
+    assert len(stages) == len(set(stages)) == 8
 
 
 def test_two_analyst_selection_splits_the_window(tmp_path):
@@ -213,7 +261,11 @@ def test_two_analyst_selection_splits_the_window(tmp_path):
     }
     _run(tmp_path, _payload(run_id="claimed-run-3", analysts=["market", "sentiment"]), [c1, c2, c3], repo)
     flow = [(u["current_stage"], u["progress_percent"]) for u in repo.updates]
-    assert flow[:2] == [("market_analysis", 30), ("sentiment_analysis", 50)]
+    assert flow[:3] == [
+        ("market_analysis", 10),
+        ("sentiment_analysis", 30),
+        ("research_debate", 50),
+    ]
 
 
 def test_single_analyst_selection(tmp_path):
@@ -230,6 +282,10 @@ def test_single_analyst_selection(tmp_path):
     _run(tmp_path, _payload(run_id="claimed-run-4", analysts=["news"]), [c1, c2], repo)
     assert (repo.updates[0]["current_stage"], repo.updates[0]["progress_percent"]) == (
         "news_analysis",
+        10,
+    )
+    assert (repo.updates[1]["current_stage"], repo.updates[1]["progress_percent"]) == (
+        "research_debate",
         50,
     )
 
@@ -271,6 +327,127 @@ def test_internal_analysts_passed_to_graph_factory(tmp_path):
     assert "social" not in metadata["selected_analysts"]
 
 
+def test_streaming_preserves_propagate_context_memory_and_postprocessing(tmp_path):
+    graph = _ParityGraph(_full_chunks())
+    payload = _payload(run_id="parity-run")
+    payload["asset_type"] = "crypto"
+    payload["selected_analysts"] = ["market", "sentiment", "news"]
+
+    run_streaming_tradingagents_research(
+        payload,
+        output_root=str(tmp_path),
+        graph_factory=lambda _internal, _config: graph,
+    )
+
+    assert graph.ticker == "NVDA"
+    assert graph.pending_calls == ["NVDA"]
+    assert graph.memory_log.past_context_calls == ["NVDA"]
+    assert graph.propagator.created_with == {
+        "ticker": "NVDA",
+        "trade_date": "2026-07-16",
+        "asset_type": "crypto",
+        "past_context": "past-context:NVDA",
+        "instrument_context": "instrument-context:NVDA:crypto",
+    }
+    assert graph.curr_state["final_trade_decision"] == "decision text"
+    assert graph.logged_states == [("2026-07-16", graph.curr_state)]
+    assert graph.memory_log.decisions == [
+        {
+            "ticker": "NVDA",
+            "trade_date": "2026-07-16",
+            "final_trade_decision": "decision text",
+        }
+    ]
+    assert graph.processed_signals == ["decision text"]
+
+
+def test_checkpoint_setup_thread_clear_and_context_cleanup(monkeypatch, tmp_path):
+    from tradingagents.graph import checkpointer
+
+    graph = _ParityGraph(_full_chunks())
+    events = []
+
+    class _Context:
+        def __enter__(self):
+            events.append("enter")
+            return "fake-saver"
+
+        def __exit__(self, *_args):
+            events.append("exit")
+
+    monkeypatch.setattr(checkpointer, "get_checkpointer", lambda *_args: _Context())
+    monkeypatch.setattr(checkpointer, "thread_id", lambda ticker, date: f"thread:{ticker}:{date}")
+    monkeypatch.setattr(
+        checkpointer,
+        "clear_checkpoint",
+        lambda *_args: events.append("clear"),
+    )
+    payload = _payload(run_id="checkpoint-run")
+    payload["config"] = {
+        **payload["config"],
+        "checkpoint_enabled": True,
+        "data_cache_dir": str(tmp_path / "cache"),
+    }
+
+    run_streaming_tradingagents_research(
+        payload,
+        output_root=str(tmp_path),
+        graph_factory=lambda _internal, _config: graph,
+    )
+
+    assert events == ["enter", "clear", "exit"]
+    assert graph.workflow.compile_calls == [{"checkpointer": "fake-saver"}, {}]
+    assert graph.graph.stream_calls[0]["kwargs"]["config"]["configurable"] == {
+        "thread_id": "thread:NVDA:2026-07-16"
+    }
+    assert graph._checkpointer_ctx is None
+
+
+def test_stream_failure_closes_checkpoint_without_clearing_it(monkeypatch, tmp_path):
+    from tradingagents.graph import checkpointer
+
+    graph = _ParityGraph(_full_chunks())
+    events = []
+
+    class _Context:
+        def __enter__(self):
+            events.append("enter")
+            return "fake-saver"
+
+        def __exit__(self, *_args):
+            events.append("exit")
+
+    def exploding_stream(*_args, **_kwargs):
+        raise RuntimeError("stream failed")
+        yield  # pragma: no cover
+
+    graph.graph.stream = exploding_stream
+    monkeypatch.setattr(checkpointer, "get_checkpointer", lambda *_args: _Context())
+    monkeypatch.setattr(checkpointer, "thread_id", lambda *_args: "thread-id")
+    monkeypatch.setattr(
+        checkpointer,
+        "clear_checkpoint",
+        lambda *_args: events.append("clear"),
+    )
+    payload = _payload(run_id="checkpoint-failure")
+    payload["config"] = {
+        **payload["config"],
+        "checkpoint_enabled": True,
+        "data_cache_dir": str(tmp_path / "cache"),
+    }
+
+    with pytest.raises(RuntimeError, match="stream failed"):
+        run_streaming_tradingagents_research(
+            payload,
+            output_root=str(tmp_path),
+            graph_factory=lambda _internal, _config: graph,
+        )
+
+    assert events == ["enter", "exit"]
+    assert graph._checkpointer_ctx is None
+    assert graph.memory_log.decisions == []
+
+
 # ---------------------------------------------------------------------------
 # Claimed-run_id relocation through the official writer
 # ---------------------------------------------------------------------------
@@ -290,6 +467,42 @@ def test_outputs_land_under_the_claimed_run_id(tmp_path):
     for record in raw["agent_outputs"]:
         assert record["run_id"] == "claimed-run-7"
         assert record["agent_output_id"].startswith("claimed-run-7:")
+
+
+def test_none_output_root_uses_default_root_and_relocates(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("COMQUTOR_OUTPUT_DIR", raising=False)
+
+    run_dir = run_streaming_tradingagents_research(
+        _payload(run_id="claimed-default-root"),
+        output_root=None,
+        graph_factory=lambda _internal, _config: _FakeGraph(_full_chunks()),
+    )
+
+    expected = tmp_path / "outputs" / "runs" / "claimed-default-root"
+    assert run_dir == expected
+    metadata = json.loads((run_dir / "metadata.json").read_text())
+    raw = json.loads((run_dir / "raw_agent_outputs.json").read_text())
+    assert metadata["run_id"] == "claimed-default-root"
+    assert raw["run_id"] == "claimed-default-root"
+
+
+def test_none_output_root_uses_environment_root_and_relocates(monkeypatch, tmp_path):
+    environment_root = tmp_path / "environment-runs"
+    monkeypatch.setenv("COMQUTOR_OUTPUT_DIR", str(environment_root))
+
+    run_dir = run_streaming_tradingagents_research(
+        _payload(run_id="claimed-environment-root"),
+        output_root=None,
+        graph_factory=lambda _internal, _config: _FakeGraph(_full_chunks()),
+    )
+
+    expected = environment_root / "claimed-environment-root"
+    assert run_dir == expected
+    metadata = json.loads((run_dir / "metadata.json").read_text())
+    raw = json.loads((run_dir / "raw_agent_outputs.json").read_text())
+    assert metadata["run_id"] == "claimed-environment-root"
+    assert raw["run_id"] == "claimed-environment-root"
 
 
 def test_without_claimed_run_id_the_writer_directory_is_kept(tmp_path):
