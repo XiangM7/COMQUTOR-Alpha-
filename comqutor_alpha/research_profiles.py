@@ -28,7 +28,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-
+## Research Profile
 class ResearchProfileError(Exception):
     """Safe profile error: carries a stable reason code only."""
 
@@ -117,7 +117,7 @@ def validate_research_profile(profile: ResearchProfile) -> None:
     if profile.backend_url is not None and not str(profile.backend_url).strip():
         raise ResearchProfileError("RESEARCH_PROFILE_INVALID")
 
-
+## Build TradingAgents Config from Profile
 def build_profile_tradingagents_config(profile: ResearchProfile | None = None) -> dict[str, Any]:
     """Deep-copies TradingAgents' unmodified ``DEFAULT_CONFIG`` and applies
     exactly the profile's ``PROFILE_CONFIG_KEYS`` on top. Never reads an
@@ -147,7 +147,7 @@ def build_profile_tradingagents_config(profile: ResearchProfile | None = None) -
         config[key] = getattr(profile, key)
     return config
 
-
+## Build Profile Identity
 def build_profile_identity(profile: ResearchProfile | None = None) -> dict[str, Any]:
     """The full non-secret, result-affecting identity of a profile --
     ``profile_id`` plus every ``PROFILE_CONFIG_KEYS`` value. This whole dict

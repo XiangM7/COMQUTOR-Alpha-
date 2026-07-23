@@ -49,7 +49,7 @@ INTERNAL_ANALYST_REPORT_KEYS: dict[str, str] = {
     "fundamentals": "fundamentals_report",
 }
 
-
+## Public -> Internal Analyst Mapping
 def map_public_analysts_to_internal(selected_analysts) -> tuple[list[str], list[str]]:
     """(public_canonical, internal) analyst lists for one run.
 
@@ -76,7 +76,7 @@ def _require_payload_value(payload, key):
         raise RuntimeError(f"Missing required payload field for real TradingAgents run: {key}")
     return value
 
-
+## Legacy One-Shot Research
 def run_original_tradingagents_research(payload, output_root="outputs/runs"):
     """Run original TradingAgents only when explicitly requested.
 
@@ -144,7 +144,7 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
     )
     return run_dir
 
-
+## Streaming Graph Factory
 def _default_streaming_graph_factory(internal_analysts, config):
     try:
         from tradingagents.graph.trading_graph import TradingAgentsGraph
@@ -152,7 +152,7 @@ def _default_streaming_graph_factory(internal_analysts, config):
         raise RuntimeError(f"Unable to import TradingAgents graph entrypoint: {exc}") from exc
     return TradingAgentsGraph(internal_analysts, config=config, debug=False)
 
-
+## Report Streaming Milestones
 def _report_stream_milestones(final_state, public_analysts, progress_reporter, reached):
     """Advance progress for every milestone whose content genuinely appeared
     for the first time in the merged state. ``reached`` deduplicates across
@@ -193,7 +193,7 @@ def _report_stream_milestones(final_state, public_analysts, progress_reporter, r
         reached.add("risk_review")
         progress_reporter.record_stage("risk_review")
 
-
+## Relocate run outputs to claimed run_id
 def _relocate_run_outputs(temp_run_dir, target_run_id, output_root):
     """Move the writer's freshly-created run directory to the lifecycle's
     already-claimed run_id and rewrite the embedded run_id references, so
@@ -235,7 +235,7 @@ def _relocate_run_outputs(temp_run_dir, target_run_id, output_root):
     save_json_record(safe_target, "raw_agent_outputs.json", raw_payload, output_root=output_root)
     return target_dir
 
-
+## Streaming Research
 def run_streaming_tradingagents_research(
     payload,
     output_root="outputs/runs",
