@@ -227,7 +227,7 @@ def test_mapper_llm_selects_only_from_admissible_candidates(tmp_path):
     )
     gateway = _gateway(tmp_path, model, max_retries=0)
     record = _record(
-        "AI demand is strong, but rich valuation creates downside risk.",
+        "AI training demand is rising, but rich valuation creates downside risk.",
         ["AI Demand", "Valuation Risk"],
     )
 
@@ -248,7 +248,7 @@ def test_mapper_invalid_llm_candidate_falls_back_without_response_leak(tmp_path)
     )
     gateway = _gateway(tmp_path, _SequenceModel([invalid, invalid]))
     record = _record(
-        "AI demand is strong, but rich valuation creates downside risk.",
+        "AI training demand is rising, but rich valuation creates downside risk.",
         ["AI Demand", "Valuation Risk"],
     )
 

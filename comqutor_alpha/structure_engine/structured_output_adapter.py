@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 import re
+import unicodedata
 from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
@@ -102,9 +103,81 @@ RISK_PORTFOLIO_AGENTS = {
 DISCLAIMER_MARKERS = (
     "disclaimer",
     "not investment advice",
+    "not financial advice",
     "for informational purposes only",
     "past performance is not indicative",
 )
+# Stable reason codes for claims filtered at the extraction boundary. The
+# filtered text never enters structured claims; only these codes (plus
+# counts) are recorded for audit.
+FILTER_REASON_BOILERPLATE = "BOILERPLATE_META_COMMENTARY"
+FILTER_REASON_DISCLAIMER = "DISCLAIMER_ONLY"
+FILTER_REASON_TRANSITION = "NON_ASSERTIVE_TRANSITION"
+
+# First-person report-generation narration ("I now have all the data needed
+# to compile a comprehensive report.", "Let me synthesize everything."). A
+# sentence is only ever dropped by these when it ALSO lacks every
+# substantive-signal marker below -- "Based on the data, revenue grew 20%"
+# must survive.
+_META_COMMENTARY_PATTERNS = (
+    re.compile(
+        r"(?i)\b(?:i|we)\s+(?:now\s+)?(?:have|will(?:\s+now)?|can(?:\s+now)?|am going to|"
+        r"'m going to)\s+"
+        r"(?:all\s+the\s+data|enough\s+(?:data|information)|the\s+(?:data|information)|"
+        r"now\s+)?[^.!?]*"
+        r"\b(?:compile|synthesize|synthesise|summarize|summarise|write|draft|produce|"
+        r"present|prepare|proceed|begin|gather)\b"
+    ),
+    re.compile(
+        r"(?i)^\s*(?:excellent|great|perfect|okay|ok|alright)?\s*[-—,.!]*\s*(?:now\s+)?"
+        r"(?:let\s+me|let's|i\s+will|i'll|i\s+can\s+now|i\s+now\s+have)\b"
+    ),
+    re.compile(r"(?i)^\s*here\s+is\s+(?:the|a|my)\s+(?:comprehensive|full|final|complete)\b"),
+    re.compile(r"(?i)\bi\s+now\s+have\s+(?:all\s+the|a\s+comprehensive|enough)\b"),
+)
+# Pure section-transition narration with no assertion of its own.
+_TRANSITION_PATTERNS = (
+    re.compile(r"(?i)^\s*(?:moving|turning)\s+(?:on\s+)?to\b"),
+    re.compile(r"(?i)^\s*(?:now\s+)?(?:for|onto)\s+the\s+next\s+(?:section|part|topic)\b"),
+    re.compile(r"(?i)^\s*(?:as|with)\s+(?:mentioned|noted|discussed)\s+(?:above|earlier|previously)\b[^a-z0-9]*$"),
+)
+# Substantive-signal markers: a sentence containing any of these is treated
+# as a potential real claim and is never dropped as meta commentary or
+# transition, no matter how it starts.
+_SUBSTANTIVE_SIGNAL_PATTERN = re.compile(
+    r"(?i)(?:\d|%|\$"
+    r"|\b(?:revenue|earnings|margin|guidance|demand|supply|price|prices|pricing|valuation"
+    r"|growth|decline|risk|rally|selloff|sell-off|upside|downside|bullish|bearish"
+    r"|buy|sell|hold|underweight|overweight|capex|debt|cash|inventory|volume"
+    r"|because|due to|driven by|leads to|supports|pressures|constrains|increases"
+    r"|reduces|despite|headwind|tailwind|if|unless|could|may|might|would)\b)"
+)
+
+
+def classify_filtered_claim(text):
+    """Return a stable filter reason code for a claim sentence, or None to keep it.
+
+    Conservative by design: only pure meta commentary, pure transitions, and
+    disclaimer sentences are filtered. Any sentence carrying a substantive
+    signal (entity/metric/number/direction/causal/risk/conditional language)
+    is kept even when it starts with narration like "Based on the data".
+    """
+    normalized = _normalize_text(text)
+    lowered = normalized.lower()
+    if not normalized:
+        return None
+    if any(marker in lowered for marker in DISCLAIMER_MARKERS):
+        return FILTER_REASON_DISCLAIMER
+    has_substance = bool(_SUBSTANTIVE_SIGNAL_PATTERN.search(normalized)) or bool(
+        extract_known_factors_from_text(normalized)
+    )
+    if has_substance:
+        return None
+    if any(pattern.search(normalized) for pattern in _META_COMMENTARY_PATTERNS):
+        return FILTER_REASON_BOILERPLATE
+    if any(pattern.search(normalized) for pattern in _TRANSITION_PATTERNS):
+        return FILTER_REASON_TRANSITION
+    return None
 LLM_STRUCTURED_AGENTS = {
     "market_agent",
     "technical_agent",
@@ -244,15 +317,23 @@ def _is_meaningful_claim(text):
     return bool(re.search(r"[A-Za-z0-9]", normalized))
 
 
-def extract_claim_segments(raw_text):
-    """Split one raw Markdown report into bounded, traceable claim segments."""
+def extract_claim_segments_with_audit(raw_text):
+    """Split one raw Markdown report into bounded, traceable claim segments.
+
+    Returns ``(segments, filtered)`` where ``filtered`` records one entry
+    (``{"reason_code": ...}``) per sentence removed at this boundary --
+    boilerplate meta commentary, disclaimers, and pure transitions. The
+    filtered text itself is never returned and never enters a structured
+    claim. Disclaimers are filtered per-sentence, so a paragraph mixing real
+    claims with a trailing disclaimer keeps the real claims.
+    """
     if raw_text is None:
-        return []
+        return [], []
     if not isinstance(raw_text, str):
         raw_text = json.dumps(raw_text, ensure_ascii=False, default=str)
     raw_text = raw_text.replace("\r\n", "\n").replace("\r", "\n")
     if not raw_text.strip():
-        return []
+        return [], []
 
     blocks = []
     paragraph = []
@@ -284,9 +365,6 @@ def extract_claim_segments(raw_text):
         if _is_table_line(line):
             flush_paragraph()
             continue
-        if any(marker in line.lower() for marker in DISCLAIMER_MARKERS):
-            flush_paragraph()
-            continue
 
         bullet = re.match(r"^(?:[-*+]\s+|\d+[.)]\s+)(.+)$", line)
         if bullet:
@@ -298,11 +376,16 @@ def extract_claim_segments(raw_text):
     flush_paragraph()
 
     segments = []
+    filtered = []
     for block_section, block in blocks:
         cleaned_block = _clean_markdown_inline(block)
         sentences = re.split(r"(?<=[.!?。！？])\s+", cleaned_block)
         for sentence in sentences:
             claim = _clean_markdown_inline(sentence)
+            reason_code = classify_filtered_claim(claim)
+            if reason_code is not None:
+                filtered.append({"reason_code": reason_code})
+                continue
             if not _is_meaningful_claim(claim):
                 continue
             segments.append(
@@ -313,11 +396,11 @@ def extract_claim_segments(raw_text):
                 }
             )
             if len(segments) >= MAX_CLAIMS_PER_RAW_OUTPUT:
-                return segments
+                return segments, filtered
 
     if not segments:
         fallback = _clean_markdown_inline(raw_text)
-        if fallback and not any(marker in fallback.lower() for marker in DISCLAIMER_MARKERS):
+        if fallback and classify_filtered_claim(fallback) is None:
             segments.append(
                 {
                     "claim": fallback[:MAX_CLAIM_CHARS],
@@ -325,12 +408,158 @@ def extract_claim_segments(raw_text):
                     "source_section": section,
                 }
             )
+    return segments, filtered
+
+
+def extract_claim_segments(raw_text):
+    """Split one raw Markdown report into bounded, traceable claim segments."""
+    segments, _filtered = extract_claim_segments_with_audit(raw_text)
     return segments
 
 
 def extract_claim(raw_text):
     segments = extract_claim_segments(raw_text)
     return segments[0]["claim"] if segments else "unknown"
+
+
+# ---------------------------------------------------------------------------
+# Claim dedupe (Week 1a data-quality boundary)
+# ---------------------------------------------------------------------------
+
+_QUOTE_TRANSLATION = str.maketrans(
+    {"‘": "'", "’": "'", "“": '"', "”": '"', "«": '"', "»": '"'}
+)
+_NUMBER_TOKEN_PATTERN = re.compile(r"\d+(?:[.,]\d+)*%?")
+
+
+def normalize_claim_for_dedupe(text):
+    """Deterministic claim normalization used only for duplicate grouping.
+
+    Unicode NFKC, lowercase, whitespace collapse, unified quotes, and outer
+    punctuation stripped. Numbers, percentages, tickers, and direction words
+    are all preserved -- "Revenue increased 10%." and "Revenue increased
+    20%." normalize to *different* keys.
+    """
+    normalized = unicodedata.normalize("NFKC", str(text or ""))
+    normalized = normalized.translate(_QUOTE_TRANSLATION).lower()
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return normalized.strip(" \t\"'.,;:!?()[]")
+
+
+def _claim_numeric_signature(normalized_claim):
+    return tuple(sorted(_NUMBER_TOKEN_PATTERN.findall(normalized_claim)))
+
+
+def _near_duplicate(record_a, record_b):
+    """Conservative near-duplicate check for two records of the same agent.
+
+    Never merges claims that differ in any numeric token, direction, or
+    assertion status; otherwise requires near-identical token content
+    (Jaccard >= 0.9 over word tokens). Never uses a lone global string
+    similarity on raw text.
+    """
+    norm_a = record_a["_dedupe_key"]
+    norm_b = record_b["_dedupe_key"]
+    if record_a.get("direction") != record_b.get("direction"):
+        return False
+    if record_a.get("assertion_status") != record_b.get("assertion_status"):
+        return False
+    if _claim_numeric_signature(norm_a) != _claim_numeric_signature(norm_b):
+        return False
+    tokens_a = set(norm_a.split())
+    tokens_b = set(norm_b.split())
+    if not tokens_a or not tokens_b:
+        return False
+    union = tokens_a | tokens_b
+    return len(tokens_a & tokens_b) / len(union) >= 0.9
+
+
+def _record_quality_key(record):
+    """Higher is better; deterministic tie-break by claim identity."""
+    return (
+        float(record.get("confidence") or 0.0),
+        len(str(record.get("claim") or "")),
+        # Negative index: earlier claims win ties, keeping output stable.
+        -int(record.get("claim_index") or 0),
+        str(record.get("claim_id") or ""),
+    )
+
+
+def dedupe_structured_records(records):
+    """Merge duplicate claims without erasing cross-agent agreement.
+
+    Boundaries (in order):
+    1. Same ``source_agent_output_id``: exact/near duplicates merge; only the
+       highest-quality record survives.
+    2. Same ``agent`` across the run: duplicates merge; the survivor's
+       ``merged_source_agent_output_ids`` records every merged source.
+    3. Different agents expressing the same claim: both records survive
+       (agent agreement is preserved) but share one ``duplicate_group_id``
+       with ``merged_agents`` listing every supporting agent.
+
+    Identity semantics are untouched: surviving records keep their original
+    ``claim_id`` and ``source_agent_output_id``. Returns
+    ``(deduped_records, removed_count)``.
+    """
+    annotated = []
+    for record in records:
+        entry = dict(record)
+        entry["_dedupe_key"] = normalize_claim_for_dedupe(entry.get("claim"))
+        annotated.append(entry)
+
+    # Boundary 1 + 2: within one agent, group exact-normalized duplicates,
+    # then fold conservative near-duplicates into those groups.
+    survivors_by_agent: dict[str, list[dict]] = {}
+    removed_count = 0
+    for entry in annotated:
+        agent = str(entry.get("agent") or "unknown_agent")
+        groups = survivors_by_agent.setdefault(agent, [])
+        merged_into = None
+        for survivor in groups:
+            if survivor["_dedupe_key"] == entry["_dedupe_key"] or _near_duplicate(survivor, entry):
+                merged_into = survivor
+                break
+        if merged_into is None:
+            entry["_merged_sources"] = {str(entry.get("source_agent_output_id") or "")}
+            entry["_duplicate_count"] = 1
+            groups.append(entry)
+            continue
+        removed_count += 1
+        merged_into["_duplicate_count"] += 1
+        source_id = str(entry.get("source_agent_output_id") or "")
+        if source_id:
+            merged_into["_merged_sources"].add(source_id)
+        if _record_quality_key(entry) > _record_quality_key(merged_into):
+            # Keep the higher-quality record's content/identity; carry the
+            # accumulated provenance over.
+            entry["_merged_sources"] = merged_into["_merged_sources"]
+            entry["_duplicate_count"] = merged_into["_duplicate_count"]
+            groups[groups.index(merged_into)] = entry
+
+    survivors = [entry for groups in survivors_by_agent.values() for entry in groups]
+    # Preserve original record order deterministically.
+    order = {id(entry): index for index, entry in enumerate(annotated)}
+    survivors.sort(key=lambda entry: order.get(id(entry), 0))
+
+    # Boundary 3: cross-agent duplicate groups share an auditable group id
+    # but every agent's own record is kept.
+    by_key: dict[str, list[dict]] = {}
+    for entry in survivors:
+        by_key.setdefault(entry["_dedupe_key"], []).append(entry)
+
+    deduped = []
+    for entry in survivors:
+        group = by_key[entry["_dedupe_key"]]
+        group_agents = sorted({str(item.get("agent") or "") for item in group if item.get("agent")})
+        record = {k: v for k, v in entry.items() if not k.startswith("_")}
+        record["duplicate_group_id"] = (
+            "dupgroup_" + hashlib.sha1(entry["_dedupe_key"].encode("utf-8")).hexdigest()[:12]
+        )
+        record["duplicate_count"] = entry["_duplicate_count"] + max(0, len(group) - 1)
+        record["merged_source_agent_output_ids"] = sorted(entry["_merged_sources"] - {""})
+        record["merged_agents"] = group_agents
+        deduped.append(record)
+    return deduped, removed_count
 
 
 def extract_evidence(raw_text):
@@ -590,7 +819,9 @@ def _normalized_values(values: Any) -> list[str]:
     return list(dict.fromkeys(str(value) for value in values if str(value).strip()))
 
 # Adapt one raw agent output into one or more structured claim records.
-def adapt_raw_agent_outputs(raw_record, run_id, ticker, *, llm_gateway=None):
+# ``filter_audit`` (optional list) collects one ``{"reason_code": ...}``
+# entry per sentence removed by the extraction-boundary quality filter.
+def adapt_raw_agent_outputs(raw_record, run_id, ticker, *, llm_gateway=None, filter_audit=None):
     if not isinstance(raw_record, dict):
         return [safe_default_record(
             run_id,
@@ -625,7 +856,9 @@ def adapt_raw_agent_outputs(raw_record, run_id, ticker, *, llm_gateway=None):
         raw_text=str(raw_text),
     )
     if segments is None:
-        segments = extract_claim_segments(raw_text)
+        segments, filtered = extract_claim_segments_with_audit(raw_text)
+        if filter_audit is not None:
+            filter_audit.extend(filtered)
         for segment in segments:
             segment["extraction_method"] = "deterministic_splitter"
     if not segments:
@@ -723,12 +956,14 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
     raw_payload = load_raw_agent_outputs(run_dir)
     ticker = str(raw_payload.get("ticker") or "unknown").upper()
     records = []
+    filter_audit: list[dict[str, Any]] = []
     for raw_record in raw_payload.get("agent_outputs", []):
         adapted_records = adapt_raw_agent_outputs(
             raw_record,
             run_id,
             ticker,
             llm_gateway=llm_gateway,
+            filter_audit=filter_audit,
         )
         for record in adapted_records:
             if record.get("adapter_warning"):
@@ -738,6 +973,12 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
                     _error_payload(run_id, ticker, raw_record, record),
                 )
             records.append(record)
+    raw_claim_count = len(records)
+    records, duplicate_removed_count = dedupe_structured_records(records)
+    filter_reason_counts: dict[str, int] = {}
+    for item in filter_audit:
+        code = str(item.get("reason_code") or "UNKNOWN")
+        filter_reason_counts[code] = filter_reason_counts.get(code, 0) + 1
     return {
         "schema_version": SCHEMA_VERSION,
         "adapter_version": ADAPTER_VERSION,
@@ -749,6 +990,14 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
             "llm_record_count": sum(
                 record.get("extraction_method") == "llm_strict_json" for record in records
             ),
+            "raw_claim_count": raw_claim_count,
+            "boilerplate_removed_count": filter_reason_counts.get(
+                FILTER_REASON_BOILERPLATE, 0
+            )
+            + filter_reason_counts.get(FILTER_REASON_TRANSITION, 0),
+            "disclaimer_removed_count": filter_reason_counts.get(FILTER_REASON_DISCLAIMER, 0),
+            "duplicate_removed_count": duplicate_removed_count,
+            "filter_reason_counts": filter_reason_counts,
         },
     }
 

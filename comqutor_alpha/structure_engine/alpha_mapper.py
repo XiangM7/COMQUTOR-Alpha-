@@ -8,6 +8,11 @@ from typing import Any
 from comqutor_alpha.alpha_library.alpha_loader import build_keyword_index, load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
 from comqutor_alpha.storage.file_store import load_json_record, save_json_record
+from comqutor_alpha.structure_engine.ai_alpha_discriminator import (
+    AI_ALPHA_IDS,
+    AiAlphaGateResult,
+    evaluate_ai_alpha_gates,
+)
 from comqutor_alpha.structure_engine.claim_semantics import (
     OPPORTUNITY_ALPHA_IDS,
     RISK_ALPHA_IDS,
@@ -23,7 +28,6 @@ from comqutor_alpha.structure_engine.factor_normalizer import (
 )
 from comqutor_alpha.structure_engine.structure_schema import clamp_score, normalize_direction
 from comqutor_alpha.structure_engine.week2_llm import call_with_timeout
-
 
 SCHEMA_VERSION = "week2.alpha_matches.v2"
 MAPPER_VERSION = "week2.alpha_mapper.v2"
@@ -175,6 +179,7 @@ def _candidate_score(
     record: Mapping[str, Any],
     alpha: AlphaDefinition,
     keyword_matches: Mapping[str, list[str]],
+    ai_gate_results: Mapping[str, AiAlphaGateResult] | None = None,
 ) -> dict[str, Any]:
     text = _record_text(record)
     keyword = keyword_score(text, alpha)
@@ -189,14 +194,39 @@ def _candidate_score(
         if alpha.alpha_id in FACTOR_ALPHA_WEIGHTS.get(factor_name, {})
     ]
     matched_keywords = keyword_matches.get(alpha.alpha_id, [])
-    eligible = bool(matched_keywords) or factor > 0
-    rejection_reason = None
-    if relation == "mention":
-        eligible = False
-        rejection_reason = "candidate is only mentioned or appears in an unmapped context"
-    elif semantics.taxonomy_gap_context == "technical_market_state" and factor == 0:
-        eligible = False
-        rejection_reason = "technical market state is outside the MVP-10 taxonomy"
+
+    # AI Alpha Mapper Discrimination Sprint: for A101/A102/A103, the
+    # independent hard gate (a dedicated anchor phrase plus a locally
+    # co-occurring change predicate) is the authoritative eligibility
+    # signal, replacing the generic keyword/factor recall check for these
+    # three Alphas only. Generic AI/cloud/capex/datacenter terms and the
+    # taxonomy's cross-weighted FACTOR_ALPHA_WEIGHTS credit still feed the
+    # *score* below exactly as before, but can never by themselves grant
+    # admission. Every other Alpha's eligibility logic is completely
+    # unchanged.
+    ai_gate_passed = None
+    if alpha.alpha_id in AI_ALPHA_IDS:
+        gate = (ai_gate_results or {}).get(alpha.alpha_id)
+        ai_gate_passed = bool(gate and gate.passed)
+        eligible = ai_gate_passed
+        rejection_reason = None
+        if relation == "mention":
+            eligible = False
+            rejection_reason = "candidate is only mentioned or appears in an unmapped context"
+        elif not ai_gate_passed:
+            rejection_reason = (
+                "AI alpha hard gate not satisfied: missing an alpha-specific "
+                "anchor phrase with a locally co-occurring change predicate"
+            )
+    else:
+        eligible = bool(matched_keywords) or factor > 0
+        rejection_reason = None
+        if relation == "mention":
+            eligible = False
+            rejection_reason = "candidate is only mentioned or appears in an unmapped context"
+        elif semantics.taxonomy_gap_context == "technical_market_state" and factor == 0:
+            eligible = False
+            rejection_reason = "technical market state is outside the MVP-10 taxonomy"
 
     score = clamp_score(
         (0.50 * keyword)
@@ -217,6 +247,9 @@ def _candidate_score(
         "rejection_reason": rejection_reason,
         "matched_keywords": matched_keywords,
         "matched_factors": matched_factors,
+        # Additive diagnostic only: null for every non-AI alpha, and for
+        # A101/A102/A103 records whether the independent hard gate passed.
+        "ai_gate_passed": ai_gate_passed,
     }
 
 # Sort candidate scores by descending score and ascending alpha_id for tie-breaking.
@@ -402,15 +435,30 @@ def map_claim_to_alpha(
     llm_gateway: Any = None,
 ) -> dict[str, Any]:
     taxonomy = taxonomy or load_alpha_taxonomy()
-    keyword_matches = _indexed_keyword_matches(
-        _record_text(record),
-        build_keyword_index(taxonomy),
-    )
+    text = _record_text(record)
+    keyword_matches = _indexed_keyword_matches(text, build_keyword_index(taxonomy))
+    # Computed once per claim (not once per alpha): the three AI Alpha hard
+    # gates are independent of each other and of every other alpha in the
+    # taxonomy, and never consult a taxonomy relation graph -- Alpha
+    # relations remain exclusively a Structure Graph concept, never a
+    # Mapper propagation mechanism.
+    ai_gate_results = evaluate_ai_alpha_gates(text)
     candidates = _sort_candidates(
-        [_candidate_score(record, alpha, keyword_matches) for alpha in taxonomy.values()]
+        [
+            _candidate_score(record, alpha, keyword_matches, ai_gate_results)
+            for alpha in taxonomy.values()
+        ]
     )
+    # For A101/A102/A103, the independent hard gate (boolean) is the
+    # complete admission decision -- min_score was calibrated for the old
+    # keyword/factor recall mechanism these three Alphas no longer use for
+    # eligibility, and re-applying it here would silently reopen exactly
+    # the weak-recall gap this Sprint closes. Every other Alpha keeps the
+    # unchanged `eligible and score >= min_score` requirement.
     eligible_candidates = [
-        item for item in candidates if item.get("eligible") and item["score"] >= min_score
+        item
+        for item in candidates
+        if item.get("eligible") and (item["alpha_id"] in AI_ALPHA_IDS or item["score"] >= min_score)
     ]
     top = eligible_candidates[0] if eligible_candidates else None
     second = eligible_candidates[1] if len(eligible_candidates) > 1 else None
@@ -489,6 +537,14 @@ def map_claim_to_alpha(
         "assertion_status": semantics.assertion_status,
         "semantic_polarity": semantics.semantic_polarity,
         "taxonomy_gap_context": semantics.taxonomy_gap_context,
+        # Additive diagnostic (Independent Multi-Match): every AI Alpha
+        # (A101/A102/A103) that independently passed its own hard gate AND
+        # cleared min_score, regardless of which one is the single top
+        # `matched_alpha`. Existing consumers reading `matched_alpha`/
+        # `secondary_alphas` are unaffected -- this is a new field only.
+        "ai_alpha_matches": sorted(
+            item["alpha_id"] for item in eligible_candidates if item["alpha_id"] in AI_ALPHA_IDS
+        ),
     }
     return _apply_optional_classifier(
         result,

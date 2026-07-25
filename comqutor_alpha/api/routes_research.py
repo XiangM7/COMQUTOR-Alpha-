@@ -15,7 +15,19 @@ from comqutor_alpha.adapters.tradingagents_output_writer import (
 )
 from comqutor_alpha.api.agent_output_reader import get_agent_outputs_response
 from comqutor_alpha.conflict_engine.pipeline import run_week4_conflict_pipeline
-from comqutor_alpha.graph_engine.graph_schema import GRAPH_SCHEMA_VERSION
+from comqutor_alpha.data_sanity.pipeline import (
+    DATA_SANITY_ARTIFACT_FILENAME,
+    MARKET_DATA_SNAPSHOT_ARTIFACT_FILENAME,
+    run_data_sanity_stage,
+)
+from comqutor_alpha.data_sanity.schema import (
+    STATUS_NOT_AVAILABLE as DATA_SANITY_STATUS_NOT_AVAILABLE,
+)
+from comqutor_alpha.graph_engine.graph_schema import (
+    GraphSchemaContractError,
+    primary_activation_version_for,
+    validate_structure_graph_contract,
+)
 from comqutor_alpha.graph_engine.pipeline import (
     build_structure_graph_stage,
     score_and_assemble_structure_graph,
@@ -321,6 +333,82 @@ def _load_week4_response_fields(run_id, output_root, graph_repository):
     return dominant_alphas, main_conflict, conflict_status
 
 
+_UNSAFE_DATA_SANITY_DETAIL_MARKERS = (
+    "/users/", "/home/", "/private/", "postgresql://", "traceback",
+    "api_key", "password", "secret", "bearer ", "cookie",
+)
+
+
+def _sanitize_data_sanity_detail_value(value):
+    """Defense in depth against a corrupted/foreign data_sanity.json: even
+    though this codebase's own warning builders never write a raw
+    exception/path/credential into ``details``, the public API additionally
+    strips any string value that looks like one before it can ever reach a
+    caller."""
+    if isinstance(value, str):
+        lowered = value.lower()
+        if any(marker in lowered for marker in _UNSAFE_DATA_SANITY_DETAIL_MARKERS):
+            return None
+        return value
+    if isinstance(value, dict):
+        cleaned = {}
+        for key, item in value.items():
+            safe_item = _sanitize_data_sanity_detail_value(item)
+            if safe_item is not None:
+                cleaned[key] = safe_item
+        return cleaned
+    if isinstance(value, list):
+        return [item for item in (_sanitize_data_sanity_detail_value(v) for v in value) if item is not None]
+    return value
+
+
+def _public_data_sanity_warning(warning):
+    """Only ever forwards the four safe fields -- never a provider
+    exception, stack trace, full market_data_snapshot, or local file path.
+    A malformed warning entry (from a corrupted/foreign artifact) is
+    dropped rather than partially trusted."""
+    if not isinstance(warning, dict):
+        return None
+    code = warning.get("code")
+    severity = warning.get("severity")
+    message = warning.get("message")
+    details = warning.get("details")
+    if not isinstance(code, str) or not isinstance(severity, str) or not isinstance(message, str):
+        return None
+    safe_details = _sanitize_data_sanity_detail_value(details) if isinstance(details, dict) else {}
+    return {
+        "code": code,
+        "severity": severity,
+        "message": message,
+        "details": safe_details,
+    }
+
+
+# Additive Data Sanity Cross-Check v1 fields for the canonical Research
+# response. A run with no data_sanity.json (historical, predates this
+# feature) reports "not_available" -- never guessed or backfilled.
+def _public_data_sanity_fields(run_id, output_root):
+    payload = load_json_record_if_exists(run_id, DATA_SANITY_ARTIFACT_FILENAME, output_root=output_root)
+    if not payload:
+        return {
+            "data_sanity_status": DATA_SANITY_STATUS_NOT_AVAILABLE,
+            "data_sanity_warning_count": 0,
+            "data_sanity_critical_count": 0,
+            "data_sanity_warnings": [],
+        }
+    summary = payload.get("summary")
+    summary = summary if isinstance(summary, dict) else {}
+    raw_warnings = payload.get("warnings")
+    raw_warnings = raw_warnings if isinstance(raw_warnings, list) else []
+    public_warnings = [w for w in (_public_data_sanity_warning(w) for w in raw_warnings) if w is not None]
+    return {
+        "data_sanity_status": payload.get("status") or DATA_SANITY_STATUS_NOT_AVAILABLE,
+        "data_sanity_warning_count": int(summary.get("warning_count") or 0),
+        "data_sanity_critical_count": int(summary.get("critical_count") or 0),
+        "data_sanity_warnings": public_warnings,
+    }
+
+
 # Build a research response payload summarizing the run status and artifacts.
 def build_research_response(run_id, output_root="outputs/runs", *, graph_repository=None):
     run_dir = run_dir_for(run_id, output_root)
@@ -426,6 +514,10 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         "main_conflict": main_conflict,
         "conflict_status": conflict_status,
         "summary": summary,
+        # Data Sanity Cross-Check v1 additive fields -- an independent
+        # cross-validation warning, never a change to claims/Activation/
+        # Graph/Conflict, and never blocks "completed".
+        **_public_data_sanity_fields(run_id, output_root),
     }
 
 # Run a research request with the given payload, optionally using a custom runner.
@@ -560,6 +652,181 @@ def _run_week1_week2_artifact_pipeline(
                 _report_progress_stage(progress_reporter, "alpha_mapping")
 
 
+RUN_AUDIT_SCHEMA_VERSION = "structure_correctness.run_audit.v1"
+RUN_AUDIT_ARTIFACT_FILENAME = "run_audit.json"
+
+
+def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
+    """Assemble the additive run-level data-quality audit (run_audit.json).
+
+    Every count is computed from this run's real artifacts -- never
+    hardcoded. Purely additive: no existing artifact schema is changed, and
+    a warning here never flips a genuinely completed run to failed.
+    """
+    metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
+    raw_payload = load_json_record_if_exists(run_id, "raw_agent_outputs.json", output_root=output_root)
+    structured_payload = load_json_record_if_exists(
+        run_id, "structured_agent_outputs.json", output_root=output_root
+    )
+    matches_payload = load_json_record_if_exists(run_id, "alpha_matches.json", output_root=output_root)
+    graph_payload = load_json_record_if_exists(run_id, "structure_graph.json", output_root=output_root)
+    data_sanity_payload = load_json_record_if_exists(
+        run_id, DATA_SANITY_ARTIFACT_FILENAME, output_root=output_root
+    )
+    market_data_snapshot_payload = load_json_record_if_exists(
+        run_id, MARKET_DATA_SNAPSHOT_ARTIFACT_FILENAME, output_root=output_root
+    )
+
+    raw_outputs = raw_payload.get("agent_outputs")
+    raw_agent_output_count = len(raw_outputs) if isinstance(raw_outputs, list) else 0
+
+    records = structured_payload.get("records")
+    valid_claim_count = len(records) if isinstance(records, list) else 0
+    structured_metadata = structured_payload.get("metadata")
+    structured_metadata = structured_metadata if isinstance(structured_metadata, dict) else {}
+    raw_claim_count = int(structured_metadata.get("raw_claim_count") or valid_claim_count)
+    boilerplate_removed_count = int(structured_metadata.get("boilerplate_removed_count") or 0)
+    disclaimer_removed_count = int(structured_metadata.get("disclaimer_removed_count") or 0)
+    duplicate_removed_count = int(structured_metadata.get("duplicate_removed_count") or 0)
+
+    matches = matches_payload.get("matches")
+    matches = matches if isinstance(matches, list) else []
+    matched_alpha_count = sum(1 for m in matches if isinstance(m, dict) and m.get("match_status") == "matched")
+    ambiguous_alpha_count = sum(
+        1 for m in matches if isinstance(m, dict) and m.get("match_status") == "ambiguous"
+    )
+    no_match_count = sum(1 for m in matches if isinstance(m, dict) and m.get("match_status") == "no_match")
+
+    graph_metrics = graph_payload.get("graph_metrics")
+    graph_metrics = graph_metrics if isinstance(graph_metrics, dict) else {}
+    graph_node_count = int(graph_metrics.get("node_count") or 0)
+    graph_edge_count = int(graph_metrics.get("edge_count") or 0)
+    rejected_edges = graph_metrics.get("rejected_edges")
+    rejected_edge_count = (
+        sum(int(v or 0) for v in rejected_edges.values()) if isinstance(rejected_edges, dict) else 0
+    )
+
+    activation = graph_payload.get("activation")
+    alphas = activation.get("alphas") if isinstance(activation, dict) else None
+    alphas = alphas if isinstance(alphas, list) else []
+    dominant_alpha_count = sum(1 for a in alphas if isinstance(a, dict) and a.get("status") == "dominant")
+    regime_level_alpha_count = sum(
+        1 for a in alphas if isinstance(a, dict) and a.get("status") == "regime_level"
+    )
+    high_activation_count = sum(
+        1
+        for a in alphas
+        if isinstance(a, dict)
+        and isinstance(a.get("activation_score"), (int, float))
+        and a["activation_score"] >= 85
+    )
+
+    # Versioned-activation audit counters (Activation v2 sprint). Computed
+    # from the persisted graph's activation_versions when present; a
+    # v1-only historical graph reports zeros for the v2-specific counters.
+    def _alphas_for_version(version_key):
+        versions = graph_payload.get("activation_versions")
+        if not isinstance(versions, dict):
+            return []
+        block = versions.get(version_key)
+        entries = block.get("alphas") if isinstance(block, dict) else None
+        return [a for a in entries if isinstance(a, dict)] if isinstance(entries, list) else []
+
+    primary_activation_version = (
+        primary_activation_version_for(graph_payload) if isinstance(graph_payload, dict) else None
+    )
+    v1_alphas = _alphas_for_version("v1")
+    v2_alphas = _alphas_for_version("v2")
+    activation_v1_regime_level_count = sum(
+        1 for a in v1_alphas if a.get("status") == "regime_level"
+    )
+    activation_v2_regime_level_count = sum(
+        1 for a in v2_alphas if a.get("status") == "regime_level"
+    )
+    # "Capped" means the score was actually reduced (cap_was_binding), not
+    # merely that some cap's condition was eligible/applicable -- an
+    # eligible ceiling above the uncapped score changed nothing.
+    activation_v2_capped_alpha_count = sum(
+        1 for a in v2_alphas if a.get("cap_was_binding") is True
+    )
+    activation_v2_regime_gate_failure_count = sum(
+        1 for a in v2_alphas if a.get("regime_gate_failures")
+    )
+
+    # Data Sanity Cross-Check v1 (additive, independent sidecar). A run that
+    # predates this feature or had it disabled simply has no data_sanity.json
+    # -- reported as "not_available" here too, never guessed/backfilled.
+    data_sanity_summary = data_sanity_payload.get("summary")
+    data_sanity_summary = data_sanity_summary if isinstance(data_sanity_summary, dict) else {}
+    data_sanity_status = data_sanity_payload.get("status") or DATA_SANITY_STATUS_NOT_AVAILABLE
+    data_sanity_warning_count = int(data_sanity_summary.get("warning_count") or 0)
+    data_sanity_critical_count = int(data_sanity_summary.get("critical_count") or 0)
+    reported_price_check_count = int(data_sanity_summary.get("reported_price_check_count") or 0)
+    market_data_rows = market_data_snapshot_payload.get("rows")
+    market_data_row_count = len(market_data_rows) if isinstance(market_data_rows, list) else 0
+
+    warnings = []
+    expected_agents = metadata.get("agents")
+    if isinstance(expected_agents, list) and expected_agents and raw_agent_output_count < len(expected_agents):
+        warnings.append("MISSING_EXPECTED_AGENT_OUTPUTS")
+    if boilerplate_removed_count > 0:
+        warnings.append("BOILERPLATE_REMOVED")
+    if duplicate_removed_count > 0:
+        warnings.append("DUPLICATES_REMOVED")
+    if graph_node_count > 0 and graph_edge_count == 0:
+        warnings.append("INSUFFICIENT_STRUCTURAL_RELATIONS")
+    if graph_edge_count == 0:
+        warnings.append("NO_GRAPH_EDGES")
+    if high_activation_count > 0 and graph_edge_count == 0:
+        warnings.append("HIGH_ACTIVATION_WITHOUT_GRAPH_SUPPORT")
+
+    return {
+        "schema_version": RUN_AUDIT_SCHEMA_VERSION,
+        "run_id": run_id,
+        "ticker": metadata.get("ticker")
+        or structured_payload.get("ticker")
+        or graph_payload.get("ticker"),
+        "raw_agent_output_count": raw_agent_output_count,
+        "raw_claim_count": raw_claim_count,
+        "boilerplate_removed_count": boilerplate_removed_count,
+        "disclaimer_removed_count": disclaimer_removed_count,
+        "duplicate_removed_count": duplicate_removed_count,
+        "valid_claim_count": valid_claim_count,
+        "matched_alpha_count": matched_alpha_count,
+        "ambiguous_alpha_count": ambiguous_alpha_count,
+        "no_match_count": no_match_count,
+        "graph_node_count": graph_node_count,
+        "graph_edge_count": graph_edge_count,
+        "rejected_edge_count": rejected_edge_count,
+        "dominant_alpha_count": dominant_alpha_count,
+        "regime_level_alpha_count": regime_level_alpha_count,
+        "conflict_count": int(conflict_count or 0),
+        "primary_activation_version": primary_activation_version,
+        "activation_v1_regime_level_count": activation_v1_regime_level_count,
+        "activation_v2_regime_level_count": activation_v2_regime_level_count,
+        "activation_v2_capped_alpha_count": activation_v2_capped_alpha_count,
+        "activation_v2_regime_gate_failure_count": activation_v2_regime_gate_failure_count,
+        "data_sanity_status": data_sanity_status,
+        "data_sanity_warning_count": data_sanity_warning_count,
+        "data_sanity_critical_count": data_sanity_critical_count,
+        "market_data_row_count": market_data_row_count,
+        "reported_price_check_count": reported_price_check_count,
+        "warnings": warnings,
+    }
+
+
+def write_run_audit_artifact(run_id, output_root, *, conflict_count=None):
+    """Write run_audit.json into the run directory.
+
+    Goes through the formal ``file_store`` boundary: ``run_audit.json`` is
+    on the artifact filename allowlist, and ``save_json_record`` provides
+    run_id validation, traversal protection, and the atomic write.
+    """
+    payload = build_run_audit_payload(run_id, output_root, conflict_count=conflict_count)
+    save_json_record(run_id, RUN_AUDIT_ARTIFACT_FILENAME, payload, output_root=output_root)
+    return payload
+
+
 def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_reporter=None):
     """Build, persist (file + DB), and score the Week 3 Structure Graph.
 
@@ -580,6 +847,16 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
         )
         metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
         run_timestamp = metadata.get("analysis_date") or metadata.get("created_at")
+        # Structured records feed Activation v2's semantic dedupe
+        # (duplicate_group_id) and ticker-specificity (entities). Optional:
+        # a missing artifact degrades to the scorer's own text-based
+        # fallbacks, never a failure.
+        structured_payload = load_json_record_if_exists(
+            run_id, "structured_agent_outputs.json", output_root=output_root
+        )
+        structured_records = structured_payload.get("records")
+        if not isinstance(structured_records, list):
+            structured_records = []
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_inputs")
         return
@@ -597,6 +874,7 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
             alpha_matches_payload,
             extracted_structures_payload,
             run_timestamp=run_timestamp,
+            structured_records=structured_records,
         )
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "activation_scoring")
@@ -662,6 +940,19 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
         _report_progress_stage(progress_reporter, "conflict_analysis")
         _report_progress_stage(progress_reporter, "result_persistence")
 
+    # Additive data-quality audit artifact. Best-effort like the status
+    # marker above: an audit write failure never affects the run outcome,
+    # and an audit warning never turns a genuinely completed run into a
+    # failed one.
+    with contextlib.suppress(Exception):
+        conflict_count = None
+        with contextlib.suppress(Exception):
+            conflict_result = repository.get_week4_conflict_result(run_id)
+            if isinstance(conflict_result, dict):
+                conflicts = conflict_result.get("conflicts")
+                conflict_count = len(conflicts) if isinstance(conflicts, list) else 0
+        write_run_audit_artifact(run_id, output_root, conflict_count=conflict_count)
+
 
 def run_research_request(
     payload,
@@ -721,6 +1012,17 @@ def run_research_request(
             graph_repository=graph_repository,
             progress_reporter=progress_reporter,
         )
+        # Data Sanity Cross-Check v1: an independent sidecar stage, run after
+        # structured claims exist (so reported-price cross-checks have
+        # something to check) and before Graph/Activation (so a Data Sanity
+        # defect or a yfinance failure can never affect Alpha Mapping, the
+        # Structure Graph, Activation, or Conflict detection, and never
+        # changes this request's completion status). run_data_sanity_stage
+        # never raises, but this call is additionally wrapped so a defect in
+        # the wiring itself can never take down an already-successful
+        # Week 1-2 response.
+        with contextlib.suppress(Exception):
+            run_data_sanity_stage(run_id, output_root)
         # Week 3 graph build/score/persist is a side effect of a successful
         # POST; its own status is reported only via GET .../graph so the
         # frozen Week 1-2 response contract above never changes shape.
@@ -788,6 +1090,19 @@ _GRAPH_ERROR_MESSAGES = {
     "GRAPH_SCHEMA_MISMATCH": "Persisted graph schema is not supported by this server.",
 }
 
+# Maps a GraphPersistenceError.reason_code (from either the repository's own
+# write/read-time contract check or this module's own re-validation below)
+# to the public-facing graph error code. An unknown reason_code is treated
+# as a transient/infra failure (GRAPH_UNAVAILABLE), never as corruption --
+# only the contract-specific reason codes below indicate corrupted data or
+# an unsupported schema version.
+_GRAPH_PERSISTENCE_REASON_TO_ERROR_CODE = {
+    "DB_DATA_CORRUPTED": "GRAPH_CORRUPTED",
+    "GRAPH_SCHEMA_INVALID": "GRAPH_CORRUPTED",
+    "GRAPH_SCHEMA_PRIMARY_MISMATCH": "GRAPH_CORRUPTED",
+    "GRAPH_SCHEMA_MISMATCH": "GRAPH_SCHEMA_MISMATCH",
+}
+
 
 def _graph_error_response(run_id, ticker, error_code):
     return {
@@ -815,7 +1130,7 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
         logger.warning(
             "graph retrieval failed (run_id=%s, reason_code=%s)", safe_run_id, exc.reason_code
         )
-        error_code = "GRAPH_CORRUPTED" if exc.reason_code == "DB_DATA_CORRUPTED" else "GRAPH_UNAVAILABLE"
+        error_code = _GRAPH_PERSISTENCE_REASON_TO_ERROR_CODE.get(exc.reason_code, "GRAPH_UNAVAILABLE")
         return _graph_error_response(safe_run_id, None, error_code)
     except Exception as exc:
         # Anything else (engine construction, filesystem, driver import) must
@@ -837,18 +1152,30 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
         return _graph_error_response(safe_run_id, None, error_code)
 
     graph_json = row.get("graph_json")
-    required_keys = {"schema_version", "nodes", "edges", "activation", "dominant_alphas"}
-    if not isinstance(graph_json, dict) or not required_keys.issubset(graph_json):
-        logger.warning("persisted graph is corrupted (run_id=%s)", safe_run_id)
-        return _graph_error_response(safe_run_id, row.get("ticker"), "GRAPH_CORRUPTED")
-    if graph_json.get("schema_version") != GRAPH_SCHEMA_VERSION:
+    # Single source of truth for graph-contract shape (graph_schema module):
+    # explicit per-schema_version required keys, never a startswith/union
+    # acceptance, never a guessed version. Re-validated here (in addition to
+    # the write-time and repository-read-time checks) so a stub repository
+    # (as used in tests) or any other caller that bypasses
+    # GraphPersistenceRepository.get_graph is still covered.
+    try:
+        validate_structure_graph_contract(graph_json)
+    except GraphSchemaContractError as exc:
         logger.warning(
-            "persisted graph schema mismatch (run_id=%s, found=%s)",
+            "persisted graph failed contract validation (run_id=%s, reason_code=%s, found=%s)",
             safe_run_id,
-            graph_json.get("schema_version"),
+            exc.reason_code,
+            graph_json.get("schema_version") if isinstance(graph_json, dict) else None,
         )
-        return _graph_error_response(safe_run_id, row.get("ticker"), "GRAPH_SCHEMA_MISMATCH")
+        error_code = _GRAPH_PERSISTENCE_REASON_TO_ERROR_CODE.get(exc.reason_code, "GRAPH_CORRUPTED")
+        return _graph_error_response(safe_run_id, row.get("ticker"), error_code)
 
+    # primary_activation_version is computed strictly per the payload's own
+    # schema_version (week3.structure_graph.v1 -> activation.formula_version;
+    # .v2 -> its own primary_activation_version field) -- never guessed,
+    # never backfilled from one version onto the other.
+    activation_block = graph_json.get("activation", {})
+    primary_activation_version = primary_activation_version_for(graph_json)
     return {
         "run_id": safe_run_id,
         "ticker": graph_json.get("ticker"),
@@ -860,7 +1187,9 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
         "edges": graph_json.get("edges", []),
         "graph_metrics": graph_json.get("graph_metrics", {}),
         "graph_coherence": graph_json.get("graph_coherence", {}),
-        "activation": graph_json.get("activation", {}),
+        "activation": activation_block,
+        "activation_versions": graph_json.get("activation_versions", {}),
+        "primary_activation_version": primary_activation_version,
         "dominant_alphas": graph_json.get("dominant_alphas", []),
         "provenance": graph_json.get("provenance", {}),
     }
@@ -918,10 +1247,91 @@ def get_persisted_conflicts(run_id, output_root="outputs/runs", *, graph_reposit
     if result is None:
         return _conflicts_error_response(safe_run_id, "CONFLICTS_NOT_READY")
 
-    # Equal to the W4.2 deterministic reconstruction, with exactly one
-    # additive top-level field (status="ok") -- every other key/value comes
-    # straight from `result`, unmodified.
+    # Additive per-conflict bull_evidence/bear_evidence (claim_id, claim
+    # text, agent, match score, relation), rebuilt deterministically from
+    # the run's persisted alpha_matches rows and the conflict's own
+    # bull/bear structures. Never invokes an LLM; a failure here degrades
+    # to the unenriched (still valid) payload.
+    with contextlib.suppress(Exception):
+        _attach_conflict_evidence(result, repository, safe_run_id)
+
+    # Equal to the W4.2 deterministic reconstruction, with additive fields
+    # only (status="ok" plus the bull_evidence/bear_evidence lists above) --
+    # every other key/value comes straight from `result`, unmodified.
     return {**result, "status": "ok"}
+
+
+def _match_relation_from_row(match_row, alpha_id):
+    candidates = match_row.get("candidate_scores") if isinstance(match_row, dict) else None
+    if isinstance(candidates, list):
+        for candidate in candidates:
+            if isinstance(candidate, dict) and str(candidate.get("alpha_id")) == str(alpha_id):
+                return str(candidate.get("relation") or "unknown")
+    return "unknown"
+
+
+def _conflict_side_evidence(structure, match_rows_by_claim, alpha_id):
+    """Build one side's evidence list from the conflict's own structure
+    (claim_ids/evidence/match_scores are parallel arrays) enriched with the
+    per-claim agent and relation from persisted alpha_matches rows. The
+    agent always comes from the claim's own match row -- never positionally
+    guessed from the structure's deduplicated agents list."""
+    claim_ids = structure.get("claim_ids") if isinstance(structure, dict) else None
+    if not isinstance(claim_ids, list):
+        return []
+    evidence_texts = structure.get("evidence") if isinstance(structure.get("evidence"), list) else []
+    match_scores = (
+        structure.get("match_scores") if isinstance(structure.get("match_scores"), list) else []
+    )
+    items = []
+    for index, claim_id in enumerate(claim_ids):
+        claim_id = str(claim_id)
+        match_row = match_rows_by_claim.get(claim_id, {})
+        claim_text = str(match_row.get("claim_text") or "")
+        if not claim_text and index < len(evidence_texts):
+            claim_text = str(evidence_texts[index] or "")
+        match_score = match_row.get("match_score")
+        if match_score is None and index < len(match_scores):
+            match_score = match_scores[index]
+        items.append(
+            {
+                "claim_id": claim_id,
+                "claim_text": claim_text,
+                "agent": str(match_row.get("agent") or ""),
+                "match_score": float(match_score or 0.0),
+                "relation": _match_relation_from_row(match_row, alpha_id),
+            }
+        )
+    return items
+
+
+def _attach_conflict_evidence(result, repository, run_id):
+    conflicts = result.get("conflicts")
+    conflicts = conflicts if isinstance(conflicts, list) else []
+    main_conflict = result.get("main_conflict")
+    targets = list(conflicts)
+    if isinstance(main_conflict, dict):
+        targets.append(main_conflict)
+    if not targets:
+        return
+
+    match_rows_by_claim = {}
+    with contextlib.suppress(Exception):
+        for row in repository.get_alpha_matches(run_id):
+            if isinstance(row, dict) and row.get("claim_id"):
+                match_rows_by_claim[str(row["claim_id"])] = row
+
+    for conflict in targets:
+        if not isinstance(conflict, dict):
+            continue
+        bull_structure = conflict.get("bull_structure")
+        bear_structure = conflict.get("bear_structure")
+        conflict["bull_evidence"] = _conflict_side_evidence(
+            bull_structure, match_rows_by_claim, conflict.get("bull_alpha_id")
+        )
+        conflict["bear_evidence"] = _conflict_side_evidence(
+            bear_structure, match_rows_by_claim, conflict.get("bear_alpha_id")
+        )
 
 
 def _isoformat(value):

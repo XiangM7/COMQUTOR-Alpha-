@@ -89,14 +89,25 @@ test("NVDA completed reuse exposes research, graph, conflict, and evidence", asy
   await expect(page.locator("body")).not.toContainText(/guaranteed returns?/i);
 });
 
-test("QQQ uses backend arbitration and retains both approved conflicts", async ({ page }) => {
+test("QQQ uses backend arbitration under primary Activation v2", async ({ page }) => {
+  // Under the primary Activation v2 formula the deliberately thin QQQ
+  // fixture legitimately admits zero conflicts: both approved pairs are
+  // still arbitrated (evaluated and rejected on activation threshold),
+  // and the UI must truthfully show the no-conflict state rather than a
+  // fabricated conflict.
   const submission = await submitDemoTicker(page, "QQQ");
   expect(submission.run_id).toBe(QQQ_RUN_ID);
   await expect(page).toHaveURL(`/runs/${QQQ_RUN_ID}/research`);
 
   await page.getByRole("link", { name: "Structure Graph" }).click();
   await expect(page.getByRole("heading", { name: /Structure graph — QQQ/ })).toBeVisible();
+  // No alpha reaches dominant/regime_level under Activation v2 for this
+  // thin fixture, so the "Dominant alphas" grid is legitimately empty --
+  // the underlying A003 (Liquidity Expansion) factor node is still present
+  // in the graph itself and selectable for node detail.
+  await page.getByLabel(/Liquidity Expansion \(liquidity_expansion\)/).click();
   await expect(page.getByText("A003", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Activation v1 (legacy)")).not.toBeVisible();
 
   const responsePromise = page.waitForResponse((response) =>
     response.url().endsWith(`/api/research/${QQQ_RUN_ID}/conflicts`)
@@ -104,21 +115,20 @@ test("QQQ uses backend arbitration and retains both approved conflicts", async (
   await page.getByRole("link", { name: "Conflict Radar" }).click();
   const response = await responsePromise;
   const payload = (await response.json()) as {
-    conflicts: Array<{ conflict_id: string; alpha_a: string; alpha_b: string }>;
-    main_conflict: { conflict_id: string; alpha_a: string; alpha_b: string };
+    conflicts: Array<{ conflict_id: string }>;
+    main_conflict: null;
+    activation_formula_version: string | null;
+    arbitration: { candidate_evaluations: Array<{ alpha_a: string; alpha_b: string }> };
   };
-  expect(payload.conflicts.map((item) => item.conflict_id)).toEqual(
-    expect.arrayContaining(["A001__A501", "A003__A501"])
+  expect(payload.conflicts).toEqual([]);
+  expect(payload.main_conflict).toBeNull();
+  expect(payload.activation_formula_version).toBe("activation.v2.evidence_local_structure.v1");
+  const evaluatedPairs = payload.arbitration.candidate_evaluations.map(
+    (item) => `${item.alpha_a}__${item.alpha_b}`
   );
-  expect(payload.main_conflict).toEqual(payload.conflicts[0]);
-  await expect(
-    page.getByRole("heading", {
-      name: `${payload.main_conflict.alpha_a} vs ${payload.main_conflict.alpha_b}`,
-    }).first()
-  ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "All admitted conflicts" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "A001 vs A501" }).first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "A003 vs A501" }).first()).toBeVisible();
+  expect(evaluatedPairs).toEqual(expect.arrayContaining(["A001__A501", "A003__A501"]));
+  await expect(page.getByText("No conflicts detected")).toBeVisible();
+  await expect(page.getByText(/Activation: activation\.v2\./)).toBeVisible();
 });
 
 test("direct URLs and refresh restore every NVDA run page", async ({ page }) => {

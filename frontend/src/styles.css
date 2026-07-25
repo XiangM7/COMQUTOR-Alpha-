@@ -622,6 +622,108 @@ a {
   color: var(--color-text);
 }
 
+/* -- Analyst findings (Research run page) -----------------------------------*/
+
+.analyst-output-meta-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+}
+
+.analyst-output-meta-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.analyst-output-meta-row dt {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.analyst-output-meta-row dd {
+  margin: 0;
+}
+
+.analyst-output-hidden-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-3);
+}
+
+/* -- Data Quality panel (Research run page) ---------------------------------*/
+
+.data-quality-ok-text,
+.data-quality-neutral-text {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.data-quality-body-warning,
+.data-quality-body-critical {
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.data-quality-body-warning {
+  background: var(--color-warning-bg);
+}
+
+.data-quality-body-critical {
+  background: var(--color-danger-bg);
+}
+
+.data-quality-warning-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.data-quality-warning-item {
+  border-left: 4px solid var(--color-border);
+  padding-left: var(--space-3);
+}
+
+.data-quality-severity-info {
+  border-left-color: var(--color-text-muted);
+}
+
+.data-quality-severity-warning {
+  border-left-color: var(--color-warning);
+}
+
+.data-quality-severity-critical {
+  border-left-color: var(--color-danger);
+}
+
+.data-quality-warning-message {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+
+.data-quality-warning-meta {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.data-quality-warning-meta-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.data-quality-warning-meta-row dt {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.data-quality-warning-meta-row dd {
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .app-main {
     padding: var(--space-4);

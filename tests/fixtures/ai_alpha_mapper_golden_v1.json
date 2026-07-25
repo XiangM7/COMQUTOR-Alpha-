@@ -1,0 +1,367 @@
+{
+  "schema_version": "ai_alpha_mapper_golden.v1",
+  "description": "AI Alpha Mapper Discrimination Sprint acceptance Golden Set for A101/A102/A103. This is the current implementation's acceptance fixture, not a permanent frozen contract -- it may be revised as the implementation improves, as long as revisions are not made merely to force a failing test to pass.",
+  "cases": [
+    {
+      "case_id": "a101_only_01",
+      "claim_text": "Hyperscalers raised AI capex for model training.",
+      "expected_alpha_ids": ["A101"],
+      "direction": "positive",
+      "description": "Mandatory case 1: AI investment anchor + training anchor, both with a positive predicate."
+    },
+    {
+      "case_id": "a101_only_02",
+      "claim_text": "GPU orders increased.",
+      "expected_alpha_ids": ["A101"],
+      "direction": "positive",
+      "description": "Mandatory case 2: accelerator anchor with an order/change predicate."
+    },
+    {
+      "case_id": "a101_only_03",
+      "claim_text": "AI training demand slowed.",
+      "expected_alpha_ids": ["A101"],
+      "direction": "negative",
+      "description": "Mandatory case 18: training anchor with a negative predicate."
+    },
+    {
+      "case_id": "a101_only_04",
+      "claim_text": "GPU demand increased.",
+      "expected_alpha_ids": ["A101"],
+      "expected_rejected_alpha_ids": ["A102", "A103"],
+      "direction": "positive",
+      "description": "A102 hard-gate explicit reject list: admits A101 via the accelerator anchor, never A102/A103."
+    },
+    {
+      "case_id": "a101_only_05",
+      "claim_text": "Cloud providers raised AI capex.",
+      "expected_alpha_ids": ["A101"],
+      "expected_rejected_alpha_ids": ["A102", "A103"],
+      "direction": "positive",
+      "description": "Disambiguation rule three (cloud): AI investment anchor admits A101 only; bare 'cloud' has no admission power of its own."
+    },
+    {
+      "case_id": "a101_only_06",
+      "claim_text": "AI training demand increased.",
+      "expected_alpha_ids": ["A101"],
+      "direction": "positive",
+      "description": "Disambiguation rule five (AI demand): training-qualified demand admits A101."
+    },
+    {
+      "case_id": "a101_only_07",
+      "claim_text": "AI capital spending increased for accelerator purchases.",
+      "expected_alpha_ids": ["A101"],
+      "direction": "positive",
+      "description": "Investment anchor group ('AI capital spending') co-located with a positive predicate."
+    },
+    {
+      "case_id": "a101_only_08",
+      "claim_text": "AI training demand declined amid weaker enterprise budgets.",
+      "expected_alpha_ids": ["A101"],
+      "direction": "negative",
+      "description": "Training anchor with a negative predicate; generic 'enterprise budgets' language does not add A102."
+    },
+    {
+      "case_id": "a102_only_01",
+      "claim_text": "Enterprise AI agents doubled token generation.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "positive",
+      "description": "Mandatory case 3: AI agent anchor and token generation anchor, both with a positive predicate."
+    },
+    {
+      "case_id": "a102_only_02",
+      "claim_text": "Inference workloads in data centers increased.",
+      "expected_alpha_ids": ["A102"],
+      "expected_rejected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "Mandatory case 4 (critical disambiguation): data centers are only the location the workload runs in, not a buildout/demand subject, so A103 must not admit."
+    },
+    {
+      "case_id": "a102_only_03",
+      "claim_text": "Cloud inference capacity was reduced.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "negative",
+      "description": "Mandatory case 16: inference capacity anchor with a negative predicate."
+    },
+    {
+      "case_id": "a102_only_04",
+      "claim_text": "Inference requests increased.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "positive",
+      "description": "A102 hard-gate explicit accept list."
+    },
+    {
+      "case_id": "a102_only_05",
+      "claim_text": "Token generation doubled.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "positive",
+      "description": "A102 hard-gate explicit accept list."
+    },
+    {
+      "case_id": "a102_only_06",
+      "claim_text": "AI agent workloads expanded.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "positive",
+      "description": "A102 hard-gate explicit accept list."
+    },
+    {
+      "case_id": "a102_only_07",
+      "claim_text": "Production model serving demand slowed.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "negative",
+      "description": "A102 hard-gate explicit accept list, negative predicate."
+    },
+    {
+      "case_id": "a102_only_08",
+      "claim_text": "Enterprise AI application usage rose.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "positive",
+      "description": "Qualified 'enterprise AI application' anchor (bare 'enterprise AI' alone would not qualify)."
+    },
+    {
+      "case_id": "a102_only_09",
+      "claim_text": "Inference demand increased.",
+      "expected_alpha_ids": ["A102"],
+      "direction": "positive",
+      "description": "Disambiguation rule five (AI demand): inference-qualified demand admits A102 only."
+    },
+    {
+      "case_id": "a103_only_01",
+      "claim_text": "New data-center campuses increased demand for power and cooling.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "Mandatory case 5: datacenter-facilities anchor with a positive predicate."
+    },
+    {
+      "case_id": "a103_only_02",
+      "claim_text": "Server and networking orders declined.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "negative",
+      "description": "Mandatory case 6: compute-hardware and networking anchors with a negative predicate."
+    },
+    {
+      "case_id": "a103_only_03",
+      "claim_text": "Power infrastructure expansion was delayed.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "negative",
+      "description": "Mandatory case 17: power anchor with a negative predicate."
+    },
+    {
+      "case_id": "a103_only_04",
+      "claim_text": "Data-center construction increased.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "A103 hard-gate explicit accept list."
+    },
+    {
+      "case_id": "a103_only_05",
+      "claim_text": "Server orders rose.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "A103 hard-gate explicit accept list."
+    },
+    {
+      "case_id": "a103_only_06",
+      "claim_text": "Networking demand weakened.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "negative",
+      "description": "A103 hard-gate explicit accept list, negative predicate."
+    },
+    {
+      "case_id": "a103_only_07",
+      "claim_text": "Liquid-cooling capacity increased.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "A103 hard-gate explicit accept list."
+    },
+    {
+      "case_id": "a103_only_08",
+      "claim_text": "AI data-center capex for servers and cooling was cut.",
+      "expected_alpha_ids": ["A103"],
+      "expected_rejected_alpha_ids": ["A101"],
+      "direction": "negative",
+      "description": "A103 hard-gate explicit accept list; 'AI data-center capex' is not the literal 'AI capex' A101 anchor phrase."
+    },
+    {
+      "case_id": "a103_only_09",
+      "claim_text": "Data-center construction accelerated.",
+      "expected_alpha_ids": ["A103"],
+      "expected_rejected_alpha_ids": ["A102"],
+      "direction": "positive",
+      "description": "A102 hard-gate explicit reject list sentence; independently verified to admit A103."
+    },
+    {
+      "case_id": "a103_only_10",
+      "claim_text": "AI data-center server demand increased.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "Disambiguation rule five (AI demand): datacenter/server-qualified demand admits A103 only."
+    },
+    {
+      "case_id": "a103_only_11",
+      "claim_text": "Cloud providers built new data-center capacity.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "Disambiguation rule three (cloud): buildout of data-center capacity admits A103."
+    },
+    {
+      "case_id": "a103_only_12",
+      "claim_text": "Data-center power and cooling demand increased.",
+      "expected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "Disambiguation rule four (data center): power/cooling demand at a datacenter admits A103."
+    },
+    {
+      "case_id": "a101_a102_01",
+      "claim_text": "AI training workloads and production inference requests both increased.",
+      "expected_alpha_ids": ["A101", "A102"],
+      "direction": "positive",
+      "description": "Mandatory case 13: compound subject sharing one trailing predicate; each Alpha independently passes via its own anchor."
+    },
+    {
+      "case_id": "a101_a102_02",
+      "claim_text": "AI training demand rose while enterprise inference requests also increased.",
+      "expected_alpha_ids": ["A101", "A102"],
+      "direction": "positive",
+      "description": "Two independent facts joined by 'while', each with its own local anchor+predicate."
+    },
+    {
+      "case_id": "a101_a102_03",
+      "claim_text": "GPU orders increased and inference traffic also surged.",
+      "expected_alpha_ids": ["A101", "A102"],
+      "direction": "positive",
+      "description": "Two independent facts joined by 'and', each with its own local anchor+predicate."
+    },
+    {
+      "case_id": "a101_a103_01",
+      "claim_text": "AI capex funded new servers and cooling capacity.",
+      "expected_alpha_ids": ["A101", "A103"],
+      "direction": "positive",
+      "description": "Mandatory case 11: investment anchor and compute-hardware/cooling anchors share one predicate."
+    },
+    {
+      "case_id": "a101_a103_02",
+      "claim_text": "AI training investment increased, and the company ordered new servers.",
+      "expected_alpha_ids": ["A101", "A103"],
+      "direction": "positive",
+      "description": "Two independent facts separated by a comma, each with its own local anchor+predicate."
+    },
+    {
+      "case_id": "a101_a103_03",
+      "claim_text": "AI capital expenditure rose while networking equipment orders increased.",
+      "expected_alpha_ids": ["A101", "A103"],
+      "direction": "positive",
+      "description": "Two independent facts joined by 'while', each with its own local anchor+predicate."
+    },
+    {
+      "case_id": "a102_a103_01",
+      "claim_text": "Inference traffic increased, requiring deployment of more servers.",
+      "expected_alpha_ids": ["A102", "A103"],
+      "direction": "positive",
+      "description": "Mandatory case 12: inference anchor before the comma, compute-hardware anchor with 'deployment' after it."
+    },
+    {
+      "case_id": "a102_a103_02",
+      "claim_text": "Inference workloads expanded while the company built new data-center capacity.",
+      "expected_alpha_ids": ["A102", "A103"],
+      "direction": "positive",
+      "description": "Two independent facts joined by 'while', each with its own local anchor+predicate."
+    },
+    {
+      "case_id": "a102_a103_03",
+      "claim_text": "Token generation surged, and cooling capacity was expanded to support it.",
+      "expected_alpha_ids": ["A102", "A103"],
+      "direction": "positive",
+      "description": "Two independent facts separated by a comma, each with its own local anchor+predicate."
+    },
+    {
+      "case_id": "a101_a102_a103_01",
+      "claim_text": "AI training and inference workloads increased while cloud providers deployed additional servers and cooling capacity.",
+      "expected_alpha_ids": ["A101", "A102", "A103"],
+      "direction": "positive",
+      "description": "Mandatory case 14: three independent facts, two sharing a compound-subject predicate and the third joined by 'while'."
+    },
+    {
+      "case_id": "a101_a102_a103_02",
+      "claim_text": "AI training demand grew, inference requests increased, and the company added new server capacity.",
+      "expected_alpha_ids": ["A101", "A102", "A103"],
+      "direction": "positive",
+      "description": "Three independent facts separated by commas, each with its own local anchor+predicate."
+    },
+    {
+      "case_id": "none_01",
+      "claim_text": "AI demand remains strong.",
+      "expected_alpha_ids": [],
+      "expected_rejected_alpha_ids": ["A101", "A102", "A103"],
+      "direction": "neutral",
+      "description": "Mandatory case 7: bare 'AI demand' is not a specific anchor for any of the three Alphas."
+    },
+    {
+      "case_id": "none_02",
+      "claim_text": "Cloud providers raised capex.",
+      "expected_alpha_ids": [],
+      "expected_rejected_alpha_ids": ["A101", "A102", "A103"],
+      "direction": "neutral",
+      "description": "Mandatory case 8: bare capex/cloud have no admission power of their own."
+    },
+    {
+      "case_id": "none_03",
+      "claim_text": "The company mentioned artificial intelligence in its presentation.",
+      "expected_alpha_ids": [],
+      "expected_rejected_alpha_ids": ["A101", "A102", "A103"],
+      "direction": "neutral",
+      "description": "Mandatory case 9: bare 'artificial intelligence' mention, no anchor or predicate."
+    },
+    {
+      "case_id": "none_04",
+      "claim_text": "Data-center stocks rallied.",
+      "expected_alpha_ids": [],
+      "expected_rejected_alpha_ids": ["A103"],
+      "direction": "positive",
+      "description": "Mandatory case 10: 'rallied' is a stock-price predicate, not a buildout/demand/order/capacity predicate."
+    },
+    {
+      "case_id": "none_05",
+      "claim_text": "Enterprise AI remains a strategic priority.",
+      "expected_alpha_ids": [],
+      "expected_rejected_alpha_ids": ["A102"],
+      "direction": "neutral",
+      "description": "Mandatory case 15: bare 'enterprise AI' (unqualified) is not a valid A102 anchor."
+    },
+    {
+      "case_id": "none_06",
+      "claim_text": "The technology sector broadly benefited from investor optimism.",
+      "expected_alpha_ids": [],
+      "direction": "positive",
+      "description": "No AI-specific anchor of any kind."
+    },
+    {
+      "case_id": "none_07",
+      "claim_text": "Semiconductor inventory improved and chip demand recovered.",
+      "expected_alpha_ids": [],
+      "direction": "positive",
+      "description": "Semiconductor-cycle language (A201 territory) carries no A101/A102/A103 anchor."
+    },
+    {
+      "case_id": "none_08",
+      "claim_text": "The company discussed its cloud strategy at the investor conference.",
+      "expected_alpha_ids": [],
+      "direction": "neutral",
+      "description": "Bare 'cloud' mention with no anchor phrase or change predicate."
+    },
+    {
+      "case_id": "none_09",
+      "claim_text": "Capex guidance was reaffirmed for the fiscal year.",
+      "expected_alpha_ids": [],
+      "direction": "neutral",
+      "description": "Bare capex, no qualifying AI/inference/infrastructure anchor."
+    },
+    {
+      "case_id": "none_10",
+      "claim_text": "The presentation highlighted broad AI industry trends.",
+      "expected_alpha_ids": [],
+      "expected_rejected_alpha_ids": ["A101", "A102", "A103"],
+      "direction": "neutral",
+      "description": "Generic AI industry commentary with no specific anchor or change predicate."
+    }
+  ]
+}

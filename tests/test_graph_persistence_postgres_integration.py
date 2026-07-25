@@ -162,7 +162,7 @@ def _graph_payload(run_id: str, ticker="NVDA", score=42.0):
         "edges": [],
         "graph_metrics": {},
         "graph_coherence": {"score": score, "valid_edges": 1, "alpha_covered_count": 1},
-        "activation": {"alphas": []},
+        "activation": {"formula_version": "week3.activation.mvp_v1", "alphas": []},
         "dominant_alphas": [],
         "provenance": {},
     }
@@ -199,6 +199,48 @@ class TestPostgresIntegration:
         matches = postgres_ctx.repo.get_alpha_matches(run_id)
         assert len(matches) == 1
         assert matches[0]["alpha_id"] == "A101"
+
+    def test_v1_and_v2_structure_graph_round_trip_on_real_postgres(self, postgres_ctx):
+        """Structure Graph Schema v1/v2 contract test #8: both a historical
+        v1-shaped payload and a new v2-shaped payload (with
+        activation_versions/primary_activation_version) persist and read
+        back byte-identical on real PostgreSQL."""
+        v1_run_id = postgres_ctx.new_run_id()
+        v1_payload = _graph_payload(v1_run_id)
+        postgres_ctx.repo.persist_run(
+            run_id=v1_run_id,
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload(v1_run_id),
+            graph_payload=v1_payload,
+        )
+        v1_row = postgres_ctx.repo.get_graph(v1_run_id)
+        assert v1_row["graph_json"]["schema_version"] == "week3.structure_graph.v1"
+        assert v1_row["graph_json"] == v1_payload
+
+        v2_run_id = postgres_ctx.new_run_id()
+        v2_block = {
+            "formula_version": "activation.v2.evidence_local_structure.v1",
+            "alphas": [],
+        }
+        v2_payload = {
+            **_graph_payload(v2_run_id),
+            "schema_version": "week3.structure_graph.v2",
+            "activation": v2_block,
+            "activation_versions": {
+                "v1": {"formula_version": "week3.activation.mvp_v1", "alphas": []},
+                "v2": v2_block,
+            },
+            "primary_activation_version": v2_block["formula_version"],
+        }
+        postgres_ctx.repo.persist_run(
+            run_id=v2_run_id,
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload(v2_run_id),
+            graph_payload=v2_payload,
+        )
+        v2_row = postgres_ctx.repo.get_graph(v2_run_id)
+        assert v2_row["graph_json"]["schema_version"] == "week3.structure_graph.v2"
+        assert v2_row["graph_json"] == v2_payload
 
     def test_idempotent_retry_on_real_postgres(self, postgres_ctx):
         run_id = postgres_ctx.new_run_id()

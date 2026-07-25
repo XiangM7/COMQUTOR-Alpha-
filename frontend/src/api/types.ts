@@ -187,6 +187,36 @@ export interface DominantAlpha {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Data Sanity Cross-Check v1 (comqutor_alpha/data_sanity) -- an independent
+// market-data cross-validation warning, never a change to claims/Activation/
+// Graph/Conflict. "not_available" is reserved for historical runs that
+// predate this feature and never had a data_sanity.json written.
+// ---------------------------------------------------------------------------
+
+export const DATA_SANITY_STATUSES = [
+  "ok",
+  "warning",
+  "critical",
+  "unavailable",
+  "disabled",
+  "not_available",
+] as const;
+export type DataSanityStatus = (typeof DATA_SANITY_STATUSES)[number];
+
+export const DATA_SANITY_SEVERITIES = ["info", "warning", "critical"] as const;
+export type DataSanitySeverity = (typeof DATA_SANITY_SEVERITIES)[number];
+
+/** Only the safe fields the backend ever forwards publicly -- never a
+ * provider exception, stack trace, full market_data_snapshot, or local file
+ * path. ``details`` holds only non-sensitive numbers/dates/claim_ids. */
+export interface DataSanityWarning {
+  code: string;
+  severity: DataSanitySeverity;
+  message: string;
+  details: Record<string, unknown>;
+}
+
 export interface CanonicalResearchResponse {
   run_id: string;
   ticker: string | null;
@@ -199,6 +229,10 @@ export interface CanonicalResearchResponse {
   main_conflict: AlphaConflict | null;
   conflict_status: "ready" | "not_ready";
   summary: string;
+  data_sanity_status: DataSanityStatus;
+  data_sanity_warning_count: number;
+  data_sanity_critical_count: number;
+  data_sanity_warnings: DataSanityWarning[];
 }
 
 export type CanonicalResearchResult = CanonicalResearchResponse | SafeErrorEnvelope;
@@ -251,6 +285,22 @@ export interface StructureGraphEdge {
   rule_names: string[];
 }
 
+/** Per-claim evidence provenance for one scored alpha -- additive
+ * `evidence_detail` entries built by the Week 3 pipeline from the run's own
+ * alpha_matches records. */
+export interface AlphaEvidenceDetail {
+  claim_id: string;
+  claim: string;
+  agent: string;
+  source_agent_output_id: string;
+  match_score: number;
+  relation: string;
+  matched_keywords: string[];
+  matched_factors: string[];
+  assertion_status: string;
+  direction: string;
+}
+
 /** One of the 10 MVP-10 alphas' full scored result -- see
  * activation_scorer.score_alpha. */
 export interface AlphaActivation {
@@ -265,6 +315,35 @@ export interface AlphaActivation {
   claim_ids: string[];
   evidence: string[];
   reason_codes: string[];
+  evidence_detail: AlphaEvidenceDetail[];
+  /** Activation v2 additive fields. Absent (null) on v1-legacy payloads --
+   * the UI must then present the alpha as "Activation v1 legacy", never
+   * pretend it was scored under v2. */
+  formula_version: string | null;
+  uncapped_score: number | null;
+  /** The minimum value among every score cap whose condition is met (the
+   * "qualification ceiling"). Null when no cap applies. This is NOT the
+   * same claim as "the score was reduced" -- see cap_was_binding. */
+  eligible_cap: number | null;
+  /** True only when eligible_cap is non-null AND uncapped_score exceeds it
+   * (the cap actually reduced activation_score). The frontend must read
+   * this field directly and never re-derive it from eligible_cap/
+   * uncapped_score/status itself. */
+  cap_was_binding: boolean | null;
+  /** Reason codes for every cap whose condition is met, regardless of
+   * whether it binds. */
+  cap_reason_codes: string[];
+  /** Reason codes for only the cap(s) whose value equals eligible_cap,
+   * populated only when cap_was_binding is true; otherwise empty. */
+  binding_cap_reason_codes: string[];
+  unique_evidence_count: number | null;
+  ticker_specific_evidence_count: number | null;
+  local_edge_count: number | null;
+  /** Backend's own regime-gate verdict -- the frontend must read this
+   * directly (and regime_gate_failures) rather than re-deriving pass/fail
+   * from activation_score/status itself. */
+  regime_gate_passed: boolean | null;
+  regime_gate_failures: string[];
 }
 
 export interface GraphActivation {
@@ -287,6 +366,11 @@ export interface StructureGraphResponse {
   graph_metrics: Record<string, unknown>;
   graph_coherence: Record<string, unknown>;
   activation: GraphActivation;
+  /** Versioned activation contract: full v1/v2 payloads when the run was
+   * scored under the versioned pipeline; empty for historical v1-only
+   * graphs. */
+  activation_versions: Partial<Record<"v1" | "v2", GraphActivation>>;
+  primary_activation_version: string | null;
   dominant_alphas: DominantAlpha[];
   provenance: Record<string, unknown>;
 }
@@ -341,6 +425,18 @@ export interface AlphaConflict {
   conflict_level: ConflictLevel;
   reason_codes: string[];
   explanation: string;
+  bull_evidence: ConflictEvidenceItem[];
+  bear_evidence: ConflictEvidenceItem[];
+}
+
+/** One bull/bear evidence entry for an admitted conflict -- additive fields
+ * rebuilt by the conflicts API from persisted alpha_matches rows. */
+export interface ConflictEvidenceItem {
+  claim_id: string;
+  claim_text: string;
+  agent: string;
+  match_score: number;
+  relation: string;
 }
 
 /** One evaluated candidate pair, admitted or not -- see
@@ -367,6 +463,9 @@ export interface ConflictsResponse {
   status: "ok";
   schema_version: string;
   formula_version: string;
+  /** Which activation formula this run's conflicts were computed against
+   * (v1 for historical runs, v2 for new runs); null when unavailable. */
+  activation_formula_version: string | null;
   run_id: string;
   ticker: string;
   conflicts: AlphaConflict[];

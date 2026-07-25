@@ -45,19 +45,32 @@ function useConflictsPageData(runId: string | undefined) {
   return { conflicts, research, error, isLoading, reload: () => setReloadToken((token) => token + 1) };
 }
 
-function structureEvidence(structure: {
-  claim_ids: string[];
-  evidence: string[];
-  match_scores: number[];
-  agents: string[];
-  alpha_id: string;
-}): EvidenceItem[] {
+function structureEvidence(
+  structure: {
+    claim_ids: string[];
+    evidence: string[];
+    match_scores: number[];
+    alpha_id: string;
+  },
+  evidenceItems: { claim_id: string; claim_text: string; agent: string; match_score: number }[]
+): EvidenceItem[] {
+  // Prefer the API's per-claim bull/bear evidence (each claim carries its
+  // own agent) over the structure's parallel arrays -- the structure's
+  // deduplicated agents list cannot be positionally mapped onto claims.
+  if (evidenceItems.length > 0) {
+    return evidenceItems.map((item) => ({
+      claimId: item.claim_id,
+      side: structure.alpha_id,
+      evidence: item.claim_text,
+      matchScore: item.match_score,
+      agent: item.agent || undefined,
+    }));
+  }
   return structure.claim_ids.map((claimId, index) => ({
     claimId,
     side: structure.alpha_id,
     evidence: structure.evidence[index],
     matchScore: structure.match_scores[index],
-    agent: structure.agents[index % structure.agents.length] ?? undefined,
   }));
 }
 
@@ -115,6 +128,12 @@ export function ConflictRadarPage() {
 
       <section className="panel main-conflict-panel">
         <h1>Conflict radar — {conflicts.ticker}</h1>
+        <p className="conflict-radar-formula-note">
+          Conflict formula: {conflicts.formula_version}
+          {conflicts.activation_formula_version
+            ? ` · Activation: ${conflicts.activation_formula_version}`
+            : null}
+        </p>
         {conflicts.main_conflict ? (
           <ConflictCard conflict={conflicts.main_conflict} isMain />
         ) : (
@@ -143,11 +162,17 @@ export function ConflictRadarPage() {
           <h2>Evidence traceability</h2>
           <EvidenceList
             title={`${conflicts.main_conflict.bull_structure.alpha_id} (bull side) evidence`}
-            items={structureEvidence(conflicts.main_conflict.bull_structure)}
+            items={structureEvidence(
+              conflicts.main_conflict.bull_structure,
+              conflicts.main_conflict.bull_evidence
+            )}
           />
           <EvidenceList
             title={`${conflicts.main_conflict.bear_structure.alpha_id} (bear side) evidence`}
-            items={structureEvidence(conflicts.main_conflict.bear_structure)}
+            items={structureEvidence(
+              conflicts.main_conflict.bear_structure,
+              conflicts.main_conflict.bear_evidence
+            )}
           />
         </section>
       ) : null}

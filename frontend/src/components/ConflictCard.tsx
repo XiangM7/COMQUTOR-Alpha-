@@ -1,4 +1,4 @@
-import type { AlphaConflict } from "../api/types";
+import type { AlphaConflict, ConflictEvidenceItem } from "../api/types";
 
 const LEVEL_LABELS: Record<string, string> = {
   low: "Low",
@@ -10,6 +10,34 @@ const LEVEL_LABELS: Record<string, string> = {
 interface ConflictCardProps {
   conflict: AlphaConflict;
   isMain?: boolean;
+}
+
+/** Actual bull/bear evidence claims backing one side of a conflict. Only
+ * ever renders backend-provided evidence text -- never a fixed template
+ * standing in for evidence. */
+function ConflictSideEvidence({ title, items }: { title: string; items: ConflictEvidenceItem[] }) {
+  if (!items || items.length === 0) {
+    return <p className="conflict-side-evidence-empty">{title}: not available.</p>;
+  }
+  return (
+    <div className="conflict-side-evidence">
+      <p className="conflict-side-evidence-title">{title}:</p>
+      <ul>
+        {items.map((item) => (
+          <li key={item.claim_id} className="conflict-side-evidence-item">
+            <p className="conflict-side-evidence-text">{item.claim_text}</p>
+            <p className="conflict-side-evidence-meta">
+              {item.agent ? <span>Agent: {item.agent}</span> : null}
+              {item.agent ? " · " : null}
+              <span>Match {item.match_score.toFixed(2)}</span>
+              {" · "}
+              <span>Relation: {item.relation}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 /** Score bar + level band -- deterministic, accessible, no polar/radar
@@ -48,6 +76,7 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
           <p className="conflict-side-activation">
             Activation: {conflict.bull_structure.activation_score.toFixed(1)} ({conflict.bull_structure.status})
           </p>
+          <ConflictSideEvidence title="Bull evidence" items={conflict.bull_evidence} />
         </div>
         <div className="conflict-side">
           <p className="conflict-side-role">Bear side</p>
@@ -57,6 +86,7 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
           <p className="conflict-side-activation">
             Activation: {conflict.bear_structure.activation_score.toFixed(1)} ({conflict.bear_structure.status})
           </p>
+          <ConflictSideEvidence title="Bear evidence" items={conflict.bear_evidence} />
         </div>
       </div>
       <div className="conflict-evidence-strength">

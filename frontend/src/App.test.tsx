@@ -61,6 +61,10 @@ describe("App routing", () => {
       main_conflict: null,
       conflict_status: "ready",
       summary: "No dominant Alpha structure or admitted conflict was identified for this research run.",
+      data_sanity_status: "not_available",
+      data_sanity_warning_count: 0,
+      data_sanity_critical_count: 0,
+      data_sanity_warnings: [],
     });
     vi.spyOn(client, "getAgentOutputs").mockResolvedValue({
       run_id: "run-abc",

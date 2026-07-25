@@ -61,6 +61,26 @@ export function StructureGraphPage() {
     return ids;
   }, [conflicts]);
 
+  // Reverse index: alpha_id -> human-readable labels of this run's admitted
+  // conflicts involving that alpha ("A101 vs A304"). null (no conflict data
+  // loaded) is distinct from an empty list (data loaded, no conflicts).
+  const relatedConflictsByAlpha = useMemo(() => {
+    if (!conflicts || !("conflicts" in conflicts)) return null;
+    const index = new Map<string, string[]>();
+    for (const conflict of conflicts.conflicts) {
+      const label = `${conflict.alpha_a} vs ${conflict.alpha_b}`;
+      for (const alphaId of [conflict.alpha_a, conflict.alpha_b]) {
+        const existing = index.get(alphaId) ?? [];
+        if (!existing.includes(label)) existing.push(label);
+        index.set(alphaId, existing);
+      }
+    }
+    return index;
+  }, [conflicts]);
+
+  const relatedConflictsFor = (alphaId: string): string[] | null =>
+    relatedConflictsByAlpha === null ? null : relatedConflictsByAlpha.get(alphaId) ?? [];
+
   const dominantAlphaIds = useMemo(() => {
     if (!graph || !("dominant_alphas" in graph)) return new Set<string>();
     return new Set(graph.dominant_alphas.map((alpha) => alpha.alpha_id));
@@ -115,15 +135,6 @@ export function StructureGraphPage() {
   const selectedNodeActivation = selectedNode
     ? graph.activation.alphas.find((alpha) => selectedNode.alpha_ids.includes(alpha.alpha_id))
     : null;
-  const selectedNodeConflictCount = selectedNode
-    ? selectedNode.alpha_ids.reduce((count, alphaId) => {
-        if (!conflicts || !("conflicts" in conflicts)) return count;
-        return (
-          count +
-          conflicts.conflicts.filter((conflict) => conflict.alpha_a === alphaId || conflict.alpha_b === alphaId).length
-        );
-      }, 0)
-    : null;
 
   return (
     <div className="structure-graph-page">
@@ -135,6 +146,14 @@ export function StructureGraphPage() {
           <div>
             <dt>Schema version</dt>
             <dd>{graph.schema_version}</dd>
+          </div>
+          <div>
+            <dt>Activation formula</dt>
+            <dd>
+              {graph.primary_activation_version ??
+                graph.activation.formula_version ??
+                "Not available"}
+            </dd>
           </div>
           <div>
             <dt>Dominant alphas</dt>
@@ -157,6 +176,14 @@ export function StructureGraphPage() {
         <div className="structure-graph-layout">
           <section className="panel structure-graph-panel">
             <h2>Graph</h2>
+            {graph.edges.length === 0 ? (
+              <p className="structure-graph-no-edges" role="note">
+                No admissible structural relationships were extracted. The
+                factors below were identified, but no evidence-backed causal,
+                supportive, or conflicting relationship between them was
+                admitted.
+              </p>
+            ) : null}
             <StructureGraphView
               nodes={selectableNodes}
               edges={graph.edges}
@@ -176,7 +203,9 @@ export function StructureGraphPage() {
                   direction={selectedNodeActivation.direction}
                   evidenceCount={selectedNodeActivation.evidence_count}
                   distinctSupportingAgents={selectedNodeActivation.distinct_supporting_agents}
-                  conflictCount={selectedNodeConflictCount}
+                  relatedConflicts={relatedConflictsFor(selectedNodeActivation.alpha_id)}
+                  evidenceDetail={selectedNodeActivation.evidence_detail}
+                  activation={selectedNodeActivation}
                   isDominant={selectedNode.isDominant}
                 />
               ) : (
@@ -194,6 +223,38 @@ export function StructureGraphPage() {
         </div>
       )}
 
+      <section className="panel structure-graph-edges-panel">
+        <h2>Structural relationships</h2>
+        {graph.edges.length === 0 ? (
+          <p className="structure-graph-no-edges">
+            No admissible structural relationships were extracted.
+          </p>
+        ) : (
+          <ul className="structure-graph-edge-list">
+            {graph.edges.map((edge) => (
+              <li key={`${edge.source}-${edge.target}-${edge.edge_type}`} className="structure-graph-edge-item">
+                <p className="structure-graph-edge-label">
+                  <strong>{edge.source}</strong> → <strong>{edge.target}</strong>{" "}
+                  <span className={`edge-type-label edge-type-${edge.edge_type}`}>{edge.edge_type}</span>{" "}
+                  <span className="edge-assertion-label">({edge.assertion_status})</span>
+                </p>
+                <p className="structure-graph-edge-meta">
+                  Weight {edge.weight.toFixed(2)}
+                  {edge.agents.length > 0 ? <> · Agents: {edge.agents.join(", ")}</> : null}
+                </p>
+                {edge.evidence.length > 0 ? (
+                  <ul className="structure-graph-edge-evidence">
+                    {edge.evidence.map((text, index) => (
+                      <li key={`${edge.claim_ids[index] ?? index}`}>{text}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       <section className="panel dominant-alphas-panel">
         <h2>Dominant alphas</h2>
         {graph.dominant_alphas.length === 0 ? (
@@ -210,6 +271,15 @@ export function StructureGraphPage() {
                 direction={alpha.direction}
                 evidenceCount={alpha.evidence_summary.evidence_count}
                 distinctSupportingAgents={alpha.evidence_summary.distinct_supporting_agents}
+                relatedConflicts={relatedConflictsFor(alpha.alpha_id)}
+                evidenceDetail={
+                  graph.activation.alphas.find((entry) => entry.alpha_id === alpha.alpha_id)
+                    ?.evidence_detail ?? null
+                }
+                activation={
+                  graph.activation.alphas.find((entry) => entry.alpha_id === alpha.alpha_id) ??
+                  null
+                }
                 isDominant
               />
             ))}

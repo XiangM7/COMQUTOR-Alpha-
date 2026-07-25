@@ -254,9 +254,13 @@ def verify_demo_case(
 
     conflict_ids = [item["conflict_id"] for item in conflicts["conflicts"]]
     main_conflict = conflicts.get("main_conflict")
-    if not main_conflict or main_conflict != conflicts["conflicts"][0]:
+    if main_conflict is not None and (
+        not conflicts["conflicts"] or main_conflict != conflicts["conflicts"][0]
+    ):
         raise DemoSeedError(f"{ticker}_MAIN_CONFLICT_NOT_ARBITRATED")
     if ticker == "NVDA":
+        if not main_conflict:
+            raise DemoSeedError("NVDA_MAIN_CONFLICT_NOT_ARBITRATED")
         if main_conflict.get("conflict_id") != "A101__A304":
             raise DemoSeedError("NVDA_MAIN_CONFLICT_INVALID")
         if (
@@ -268,8 +272,17 @@ def verify_demo_case(
             or not main_conflict["bear_structure"].get("evidence")
         ):
             raise DemoSeedError("NVDA_CONFLICT_TRACEABILITY_INVALID")
-    elif not {"A001__A501", "A003__A501"}.issubset(conflict_ids):
-        raise DemoSeedError("QQQ_APPROVED_CONFLICTS_MISSING")
+    else:
+        # Under the primary Activation v2 formula the deliberately thin QQQ
+        # fixture (one A501 claim from one agent) legitimately admits zero
+        # conflicts. Both approved pairs must still have been *arbitrated*
+        # (evaluated by the detector), never silently skipped.
+        evaluated_pairs = {
+            (item.get("alpha_a"), item.get("alpha_b"))
+            for item in conflicts.get("arbitration", {}).get("candidate_evaluations", [])
+        }
+        if not {("A001", "A501"), ("A003", "A501")}.issubset(evaluated_pairs):
+            raise DemoSeedError("QQQ_APPROVED_CONFLICTS_MISSING")
 
     return {
         "ticker": ticker,
@@ -277,7 +290,7 @@ def verify_demo_case(
         "status": response["status"],
         "structure_graph_status": response["structure_graph_status"],
         "conflict_status": response["conflict_status"],
-        "main_conflict": main_conflict["conflict_id"],
+        "main_conflict": main_conflict["conflict_id"] if main_conflict else None,
         "conflicts": conflict_ids,
         "structured_agent_output_count": agent_outputs["count"],
         "history_count": len(matching_history),

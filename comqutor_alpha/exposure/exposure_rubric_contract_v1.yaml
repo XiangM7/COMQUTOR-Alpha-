@@ -1,0 +1,337 @@
+schema_version: comqutor.entity_alpha_exposure_rubric_contract.v1
+contract_version: exposure-rubric-contract-v1
+taxonomy_version: alpha_taxonomy_v1
+
+# The five discrete scoring rungs every dimension score and every
+# structural_exposure result must land on exactly. No interpolation.
+score_scale: [0.00, 0.25, 0.50, 0.75, 1.00]
+
+score_semantics:
+  scale:
+    0.00: none_confirmed
+    0.25: peripheral
+    0.50: meaningful
+    0.75: major
+    1.00: core
+  interpretation: >-
+    A dimension score represents structural exposure supported by the
+    approved seed evidence. It is not current Activation, a probability,
+    a price forecast, or an investment recommendation.
+  structural_exposure_formula: >-
+    Structural exposure score is the deterministic weighted sum of the
+    four dimension scores using the rubric's fixed weights.
+  missing_exposure_semantics: >-
+    A missing Exposure value in a future Seed must be represented as
+    no_seed. It must never be silently interpreted as 0.00.
+
+# Every Alpha impact semantics value that alpha_assignments may reference,
+# each with its frozen meaning.
+allowed_impact_semantics:
+  supportive_sensitivity: >-
+    Higher exposure means the entity is more likely to participate
+    positively in the structural opportunity described by the Alpha
+    thesis.
+  adverse_sensitivity: >-
+    Higher exposure means the entity is more susceptible to the downside
+    risk described by the Alpha thesis.
+  reflexive_dependency: >-
+    Higher exposure means the entity's price and capital flows are more
+    dependent on the narrative and its self-reinforcing mechanics. This
+    is not equivalent to long-term fundamental benefit.
+
+rubrics:
+  rate_sensitivity_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's structural positive sensitivity to a
+      falling interest rate cycle.
+    dimensions:
+      - dimension_id: equity_duration_sensitivity
+        weight: 0.35
+        definition: >-
+          Whether the entity's valuation depends on longer-dated cash
+          flows, long-term growth expectations, and relatively high
+          duration; whether a decline in interest rates and discount
+          rates typically materially supports its valuation.
+      - dimension_id: financing_cost_sensitivity
+        weight: 0.25
+        definition: >-
+          Whether lower borrowing, refinancing, or cost-of-capital would
+          materially improve the entity's own economics. A high score
+          must not be assigned merely because the company carries debt --
+          the change in financing cost must have a material effect on
+          value or operating results.
+      - dimension_id: rate_sensitive_end_demand
+        weight: 0.25
+        definition: >-
+          Whether the entity's customer demand, investment, consumption,
+          or capital expenditure shows a clear positive response to
+          falling interest rates.
+      - dimension_id: transmission_persistence
+        weight: 0.15
+        definition: >-
+          Whether the benefit produced by falling interest rates reflects
+          a repeatable, structural transmission mechanism rather than a
+          one-off trade or short-term market reaction.
+
+  liquidity_sensitivity_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's structural positive sensitivity to
+      market liquidity expansion and improving risk appetite.
+    dimensions:
+      - dimension_id: risk_appetite_beta
+        weight: 0.30
+        definition: >-
+          Whether the entity's price and valuation are highly sensitive
+          to risk appetite, market beta, and easing financial conditions.
+      - dimension_id: external_financing_dependence
+        weight: 0.25
+        definition: >-
+          Whether the entity's growth depends on external equity, debt,
+          capital-markets financing, or an accommodative credit
+          environment. High financing dependence must not be assumed
+          automatically just because the company is small.
+      - dimension_id: flow_positioning_sensitivity
+        weight: 0.25
+        definition: >-
+          Whether the entity is easily affected by ETF flows, thematic
+          funds, institutional positioning, passive flows, or high-beta
+          flows.
+      - dimension_id: liquidity_to_business_transmission
+        weight: 0.20
+        definition: >-
+          Whether improving market liquidity actually transmits into
+          real business demand, orders, investment, or revenue, rather
+          than only a short-term rise in the stock price.
+
+  operating_theme_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's long-term operating exposure to a
+      specific industry or technology theme. Applies to A101 AI
+      Expansion, A102 Inference Explosion, and A103 AI Infrastructure.
+    dimensions:
+      - dimension_id: direct_product_service_exposure
+        weight: 0.35
+        definition: >-
+          Whether the entity directly supplies the products, services,
+          platforms, or critical capabilities required by the Alpha
+          thesis. Must distinguish direct supply, indirect supply,
+          generic products, and marketing narrative only.
+      - dimension_id: economic_materiality
+        weight: 0.30
+        definition: >-
+          How important the theme is to the entity's revenue, profit,
+          orders, capital expenditure, or growth. In the absence of
+          public quantified disclosure, the theme must not be
+          automatically assumed to be a core business.
+      - dimension_id: end_market_dependence
+        weight: 0.20
+        definition: >-
+          Whether the entity's operating results depend on genuine
+          end-market demand growth corresponding to the Alpha.
+      - dimension_id: exposure_persistence
+        weight: 0.15
+        definition: >-
+          Whether the exposure persists across multiple quarters or is a
+          stable component of the business model, rather than a one-off
+          contract, a short-term announcement, or a single-customer
+          project.
+
+  industry_cycle_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's structural benefit from an industry
+      cycle upturn.
+    dimensions:
+      - dimension_id: industry_revenue_concentration
+        weight: 0.30
+        definition: >-
+          Whether the entity's revenue and profit are highly
+          concentrated in this industry and its cycle.
+      - dimension_id: cycle_operating_leverage
+        weight: 0.30
+        definition: >-
+          Whether, when industry demand, capacity utilization, or
+          shipment volumes rise, the entity's profit exhibits
+          significant operating leverage.
+      - dimension_id: inventory_pricing_sensitivity
+        weight: 0.25
+        definition: >-
+          Whether inventory digestion, supply/demand balance, ASP, and
+          pricing changes materially affect the entity's results.
+      - dimension_id: capex_order_cycle_sensitivity
+        weight: 0.15
+        definition: >-
+          Whether the entity is significantly affected by customer
+          capital expenditure, equipment orders, capacity expansion, and
+          the order cycle.
+
+  fundamental_growth_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's structural ability to participate in
+      a revenue-expansion Alpha.
+    dimensions:
+      - dimension_id: demand_to_revenue_conversion
+        weight: 0.30
+        definition: >-
+          Whether demand growth reliably converts into the entity's
+          revenue growth, rather than being blocked by capacity, supply,
+          competition, or execution constraints.
+      - dimension_id: estimate_revision_sensitivity
+        weight: 0.25
+        definition: >-
+          Whether changes in demand, orders, and guidance typically
+          materially move revenue and EPS expectations.
+      - dimension_id: operating_leverage
+        weight: 0.25
+        definition: >-
+          Whether revenue growth effectively converts into profit and
+          cash-flow growth. High fixed costs alone must not be
+          automatically treated as positive operating leverage.
+      - dimension_id: growth_visibility_persistence
+        weight: 0.20
+        definition: >-
+          Whether revenue growth is supported by backlog, contracts,
+          subscriptions, repeat purchases, or sustained end demand,
+          rather than one-off revenue or a short-term price change.
+
+  valuation_risk_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's structural downside sensitivity to
+      valuation-multiple compression.
+    dimensions:
+      - dimension_id: valuation_premium
+        weight: 0.30
+        definition: >-
+          Whether the entity's valuation is significantly above its own
+          history, peers, or verifiable fundamental support. Must not be
+          scored based on absolute share price level alone.
+      - dimension_id: cash_flow_duration
+        weight: 0.25
+        definition: >-
+          Whether the entity's value depends mainly on longer-dated,
+          not-yet-realized cash flows and growth expectations.
+      - dimension_id: expectation_crowding
+        weight: 0.25
+        definition: >-
+          Whether current pricing requires sustained above-consensus
+          growth, and whether market positioning, consensus, or
+          narrative is excessively concentrated.
+      - dimension_id: discount_rate_sensitivity
+        weight: 0.20
+        definition: >-
+          Whether a rise in interest rates, cost of capital, or risk
+          premium would be likely to materially compress the entity's
+          valuation.
+
+  recession_sensitivity_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's structural downside sensitivity to a
+      recession Alpha.
+    dimensions:
+      - dimension_id: cyclical_demand_exposure
+        weight: 0.30
+        definition: >-
+          Whether the entity's demand is highly dependent on economic
+          growth, corporate investment, consumer discretionary spending,
+          or the industrial cycle.
+      - dimension_id: fixed_cost_operating_leverage
+        weight: 0.25
+        definition: >-
+          Whether, when revenue declines, fixed costs and the capacity
+          structure are likely to amplify the profit decline.
+      - dimension_id: balance_sheet_refinancing_risk
+        weight: 0.25
+        definition: >-
+          Whether the entity faces greater pressure during a recession
+          due to high leverage, short-term debt, refinancing needs,
+          insufficient cash flow, or credit risk.
+      - dimension_id: customer_credit_sensitivity
+        weight: 0.20
+        definition: >-
+          Whether customer defaults, credit tightening, order
+          cancellations, channel inventory, or declining payment ability
+          are likely to transmit to the entity.
+
+  narrative_reflexivity_rubric.v1:
+    purpose: >-
+      Used to evaluate an entity's dependence on narrative momentum and
+      reflexive capital flows.
+    dimensions:
+      - dimension_id: thematic_purity
+        weight: 0.30
+        definition: >-
+          Whether the entity is viewed by the market as a direct, pure,
+          or representative proxy for a given theme. A high score must
+          not be given merely because a theme keyword appears in the
+          news.
+      - dimension_id: attention_intensity
+        weight: 0.25
+        definition: >-
+          Whether media, analyst, social-platform, and investor
+          attention is persistently concentrated on the entity.
+      - dimension_id: flow_positioning_sensitivity
+        weight: 0.25
+        definition: >-
+          Whether the entity's price is easily affected by thematic
+          ETFs, momentum strategies, crowded positioning, and chasing
+          flows.
+      - dimension_id: price_reflexivity_dependence
+        weight: 0.20
+        definition: >-
+          Whether a rising price is likely to further reinforce
+          attention, financing, customer perception, or capital flows,
+          forming a self-reinforcing feedback loop.
+
+alpha_assignments:
+  A001:
+    name: Rate Cut Cycle
+    rubric_id: rate_sensitivity_rubric.v1
+    impact_semantics: supportive_sensitivity
+  A003:
+    name: Liquidity Expansion
+    rubric_id: liquidity_sensitivity_rubric.v1
+    impact_semantics: supportive_sensitivity
+  A101:
+    name: AI Expansion
+    rubric_id: operating_theme_rubric.v1
+    impact_semantics: supportive_sensitivity
+    scope_key: ai_expansion
+    scope_definition: >-
+      AI training, AI adoption, accelerators, GPU demand, cloud AI, and
+      AI capex.
+  A102:
+    name: Inference Explosion
+    rubric_id: operating_theme_rubric.v1
+    impact_semantics: supportive_sensitivity
+    scope_key: inference_explosion
+    scope_definition: >-
+      Enterprise AI applications, AI agents, inference workloads, token
+      generation, and cloud inference capacity. Generic AI, datacenter,
+      or semiconductor evidence alone must not be treated as A102
+      exposure.
+  A103:
+    name: AI Infrastructure
+    rubric_id: operating_theme_rubric.v1
+    impact_semantics: supportive_sensitivity
+    scope_key: ai_infrastructure
+    scope_definition: >-
+      Datacenter buildout, power, cooling, networking, and servers.
+  A201:
+    name: Semiconductor Supercycle
+    rubric_id: industry_cycle_rubric.v1
+    impact_semantics: supportive_sensitivity
+  A301:
+    name: Revenue Expansion
+    rubric_id: fundamental_growth_rubric.v1
+    impact_semantics: supportive_sensitivity
+  A304:
+    name: Multiple Compression
+    rubric_id: valuation_risk_rubric.v1
+    impact_semantics: adverse_sensitivity
+  A501:
+    name: Recession Risk
+    rubric_id: recession_sensitivity_rubric.v1
+    impact_semantics: adverse_sensitivity
+  A601:
+    name: Narrative Momentum
+    rubric_id: narrative_reflexivity_rubric.v1
+    impact_semantics: reflexive_dependency

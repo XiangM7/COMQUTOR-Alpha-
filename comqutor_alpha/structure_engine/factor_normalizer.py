@@ -44,6 +44,8 @@ FACTOR_ALIASES = {
         "server demand",
         "ai infrastructure spending",
         "data center infrastructure",
+        "data center buildout",
+        "datacenter buildout",
     ),
     "AI Infrastructure": (
         "ai infrastructure",
@@ -103,6 +105,12 @@ FACTOR_ALIASES = {
         "chip demand",
         "wafer orders",
         "asp stabilizes",
+        # Memory/storage demand-side vocabulary of the same commodity semis
+        # cycle (generic industry terms, not ticker-specific). Deliberately
+        # narrow: pricing-side phrasings are not aliased to avoid flooding
+        # the alpha mapper's factor scores.
+        "memory demand",
+        "storage demand",
     ),
     "Rate Cut Cycle": (
         "rate cut",

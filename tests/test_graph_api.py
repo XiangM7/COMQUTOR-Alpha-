@@ -98,6 +98,72 @@ def test_get_graph_returns_the_exact_persisted_run(tmp_path):
     assert graph["activation"] == db_row["graph_json"]["activation"]
 
 
+def test_new_run_uses_structure_graph_schema_v2(tmp_path):
+    """Structure Graph Schema v2 contract test #1/#4: a freshly-completed
+    run's persisted graph declares schema_version v2, carries both
+    activation_versions blocks, and its primary_activation_version is the
+    Activation v2 formula -- read back through the real GET .../graph API
+    path, not asserted from a hand-built fixture."""
+    repo = _repo()
+    response = run_research_request(_payload(), output_root=tmp_path, graph_repository=repo)
+    run_id = response["run_id"]
+
+    graph = get_persisted_structure_graph(run_id, output_root=tmp_path, graph_repository=repo)
+
+    assert graph["status"] == "ok"
+    assert graph["schema_version"] == "week3.structure_graph.v2"
+    assert graph["primary_activation_version"] == "activation.v2.evidence_local_structure.v1"
+    assert set(graph["activation_versions"]) == {"v1", "v2"}
+    assert graph["activation"] == graph["activation_versions"]["v2"]
+    assert graph["activation_versions"]["v1"]["formula_version"] == "week3.activation.mvp_v1"
+
+
+def test_historical_v1_only_run_is_still_readable_via_the_api(tmp_path):
+    """Structure Graph Schema v2 contract test #2/#3: a historical
+    v1-only graph (no activation_versions/primary_activation_version --
+    exactly what runs persisted before this closure existed look like)
+    remains fully readable, with primary_activation_version correctly
+    derived from activation.formula_version, never guessed or backfilled
+    with v2-shaped fields."""
+
+    class StubRepository:
+        def get_graph(self, run_id):
+            return {
+                "run_id": run_id,
+                "ticker": "NVDA",
+                "graph_json": {
+                    "schema_version": "week3.structure_graph.v1",
+                    "graph_builder_version": "week3.graph_builder.v1",
+                    "activation_scorer_version": "week3.activation_scorer.v1",
+                    "nodes": [],
+                    "edges": [],
+                    "graph_metrics": {},
+                    "graph_coherence": {"score": 0.0},
+                    "activation": {
+                        "formula_version": "week3.activation.mvp_v1",
+                        "alphas": [],
+                    },
+                    "dominant_alphas": [],
+                    "provenance": {},
+                },
+            }
+
+    run_dir = tmp_path / "legacy_v1_run"
+    run_dir.mkdir()
+    (run_dir / "metadata.json").write_text(json.dumps({"run_id": "legacy_v1_run"}), encoding="utf-8")
+
+    graph = get_persisted_structure_graph(
+        "legacy_v1_run", output_root=tmp_path, graph_repository=StubRepository()
+    )
+
+    assert graph["status"] == "ok"
+    assert graph["schema_version"] == "week3.structure_graph.v1"
+    assert graph["primary_activation_version"] == "week3.activation.mvp_v1"
+    # Never fabricated for a v1 payload -- these v2-only keys default to
+    # empty/None, never silently backfilled with v2 content.
+    assert graph["activation_versions"] == {}
+
+
 def test_get_graph_is_db_first_when_local_run_directory_is_missing(tmp_path):
     repo = _repo()
     response = run_research_request(_payload(), output_root=tmp_path, graph_repository=repo)

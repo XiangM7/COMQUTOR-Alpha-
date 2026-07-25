@@ -40,7 +40,8 @@ CONFLICT_WORDS = (
 ACTIVE_CAUSAL_PATTERN = re.compile(
     r"\b(drive|drives|driving|raise|raises|raising|boost|boosts|boosting|fuel|fuels|"
     r"fueling|lead to|leads to|leading to|push|pushes|pushing|increase|increases|"
-    r"increasing|expand|expands|expanding)\b"
+    r"increasing|expand|expands|expanding|reduce|reduces|reducing|"
+    r"feed(?:s|ing)?(?:\s+back)?\s+into)\b"
 )
 ACTIVE_SUPPORT_PATTERN = re.compile(
     r"\b(support|supports|supporting|reinforce|reinforces|reinforcing|confirm|confirms|"
@@ -49,6 +50,10 @@ ACTIVE_SUPPORT_PATTERN = re.compile(
 PASSIVE_RELATION_PATTERN = re.compile(
     r"\b(?:is|are|was|were|be|been|being)\s+"
     r"(?P<verb>driven|raised|boosted|increased|supported|reinforced)\s+by\b"
+    # Participial construction without an auxiliary ("..., driven by the
+    # NAND super-cycle recovery"). Restricted to verbs that are unambiguous
+    # without an auxiliary -- "increased by 20%" must never match.
+    r"|\b(?P<pverb>driven|supported|reinforced|fueled)\s+by\b"
 )
 NEGATED_RELATION_PATTERN = re.compile(
     r"\b(no|not|never|does not|do not|did not|fails? to|failed to|without)\b"
@@ -209,9 +214,14 @@ def _edge(
 
 
 def _plausible_causal_direction(source: str, target: str) -> bool:
+    """Refuse economically reversed causal edges (e.g. GPU Demand -> AI
+    Demand). Equal-rank pairs (e.g. Inference Demand -> AI CapEx feedback,
+    AI Infrastructure -> Datacenter CapEx) are admissible when the claim
+    itself asserts the relation explicitly -- only a strictly descending
+    rank is treated as reversed."""
     source_rank = CAUSAL_RANK.get(source)
     target_rank = CAUSAL_RANK.get(target)
-    return source_rank is not None and target_rank is not None and source_rank < target_rank
+    return source_rank is not None and target_rank is not None and source_rank <= target_rank
 
 
 def _assertion_status(text: str, bridge: str) -> str:
@@ -260,7 +270,7 @@ def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[s
             passive_match = PASSIVE_RELATION_PATTERN.search(bridge)
             if passive_match:
                 source, target = right_factor, left_factor
-                verb = passive_match.group("verb")
+                verb = passive_match.group("verb") or passive_match.group("pverb")
                 edge_type = "supportive" if verb in {"supported", "reinforced"} else "causal"
                 if edge_type == "causal" and not _plausible_causal_direction(source, target):
                     continue

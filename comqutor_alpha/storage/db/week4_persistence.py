@@ -28,7 +28,17 @@ from comqutor_alpha.conflict_engine.conflict_schema import (
     CONFLICT_FORMULA_VERSION,
     CONFLICT_SCHEMA_VERSION,
 )
+from comqutor_alpha.graph_engine.activation_scorer_v2 import (
+    ACTIVATION_V2_FORMULA_VERSION,
+)
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
+
+# Activation payloads accepted for persistence: the frozen v1 formula and
+# the versioned Activation v2 formula. The row's formula_version column
+# records whichever version the payload actually declared.
+SUPPORTED_ACTIVATION_FORMULA_VERSIONS = frozenset(
+    {ACTIVATION_FORMULA_VERSION, ACTIVATION_V2_FORMULA_VERSION}
+)
 
 WEEK4_ACTIVATION_PAYLOAD_INVALID = "WEEK4_ACTIVATION_PAYLOAD_INVALID"
 WEEK4_CONFLICT_PAYLOAD_INVALID = "WEEK4_CONFLICT_PAYLOAD_INVALID"
@@ -287,21 +297,160 @@ def _whitelist_direction_strength(component: Mapping[str, Any], reason: str) -> 
     return result
 
 
+# --- Activation v2 component whitelisters (additive; same typed style) ---
+
+
+def _whitelist_evidence_quality(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "unique_semantic_groups" in component:
+        result["unique_semantic_groups"] = _integer(component["unique_semantic_groups"], reason)
+    if "unique_contribution_sum" in component:
+        result["unique_contribution_sum"] = _nonnegative_number(
+            component["unique_contribution_sum"], reason
+        )
+    if "saturation" in component:
+        result["saturation"] = _positive_number(component["saturation"], reason)
+    return result
+
+
+def _whitelist_agent_independence(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "distinct_agents" in component:
+        result["distinct_agents"] = _integer(component["distinct_agents"], reason)
+    if "agents" in component:
+        result["agents"] = _agents_list(component["agents"], reason)
+    if "agent_coverage" in component:
+        result["agent_coverage"] = _number(component["agent_coverage"], 0.0, 100.0, reason)
+    if "cross_agent_confirmed_groups" in component:
+        result["cross_agent_confirmed_groups"] = _integer(
+            component["cross_agent_confirmed_groups"], reason
+        )
+    if "cross_agent_confirmation" in component:
+        result["cross_agent_confirmation"] = _number(
+            component["cross_agent_confirmation"], 0.0, 100.0, reason
+        )
+    if "coverage_denominator" in component:
+        result["coverage_denominator"] = _positive_integer(component["coverage_denominator"], reason)
+    if "confirmation_denominator" in component:
+        result["confirmation_denominator"] = _positive_integer(
+            component["confirmation_denominator"], reason
+        )
+    return result
+
+
+def _whitelist_local_structure_support(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    for field in (
+        "local_edge_count",
+        "asserted_local_edge_count",
+        "conditional_local_edge_count",
+    ):
+        if field in component:
+            result[field] = _integer(component[field], reason)
+    for field in ("local_edge_ids", "local_claim_ids"):
+        if field in component:
+            result[field] = _string_list(component[field], reason)
+    if "unique_edge_contribution_sum" in component:
+        result["unique_edge_contribution_sum"] = _nonnegative_number(
+            component["unique_edge_contribution_sum"], reason
+        )
+    if "saturation" in component:
+        result["saturation"] = _positive_number(component["saturation"], reason)
+    return result
+
+
+def _whitelist_ticker_specificity(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "ticker_specific_evidence_count" in component:
+        result["ticker_specific_evidence_count"] = _integer(
+            component["ticker_specific_evidence_count"], reason
+        )
+    if "total_unique_evidence_count" in component:
+        result["total_unique_evidence_count"] = _integer(
+            component["total_unique_evidence_count"], reason
+        )
+    return result
+
+
+def _whitelist_direction_consistency(component: Mapping[str, Any], reason: str) -> dict[str, Any]:
+    result = _whitelist_common_component_fields(component, reason)
+    if "qualifying_group_count" in component:
+        result["qualifying_group_count"] = _integer(component["qualifying_group_count"], reason)
+    if "weighted_signed_average" in component:
+        result["weighted_signed_average"] = _number(
+            component["weighted_signed_average"], -1.0, 1.0, reason
+        )
+    return result
+
+
 _COMPONENT_WHITELISTERS = {
     "matched_evidence": _whitelist_matched_evidence,
     "agent_agreement": _whitelist_agent_agreement,
     "graph_coherence": _whitelist_graph_coherence,
     "recency": _whitelist_recency,
     "direction_strength": _whitelist_direction_strength,
+    # Activation v2 components.
+    "evidence_quality": _whitelist_evidence_quality,
+    "agent_independence": _whitelist_agent_independence,
+    "local_structure_support": _whitelist_local_structure_support,
+    "ticker_specificity": _whitelist_ticker_specificity,
+    "direction_consistency": _whitelist_direction_consistency,
 }
 
 
-def _whitelist_activation_components(value: Any) -> dict[str, Any]:
+# Component names are version-specific, not a union: an entry's OWN
+# formula_version gates which component names it may contain, so a v1 entry
+# can never smuggle a v2-only component (or vice versa) even though both
+# whitelisters happen to be registered in the same dispatch table below.
+# "recency" is the one component whose shape is identical in both formulas
+# (Activation v2 reuses v1's deterministic recency logic verbatim), so it is
+# the only name allowed under either version.
+_V1_ONLY_COMPONENT_NAMES = frozenset(
+    {"matched_evidence", "agent_agreement", "graph_coherence", "direction_strength"}
+)
+_V2_ONLY_COMPONENT_NAMES = frozenset(
+    {
+        "evidence_quality",
+        "agent_independence",
+        "local_structure_support",
+        "ticker_specificity",
+        "direction_consistency",
+    }
+)
+_SHARED_COMPONENT_NAMES = frozenset({"recency"})
+_V1_ALLOWED_COMPONENT_NAMES = _V1_ONLY_COMPONENT_NAMES | _SHARED_COMPONENT_NAMES
+_V2_ALLOWED_COMPONENT_NAMES = _V2_ONLY_COMPONENT_NAMES | _SHARED_COMPONENT_NAMES
+
+# Per-alpha additive fields that only ever appear on an Activation v2 entry.
+# Present on a v1 (or formula_version-absent legacy) entry, they are
+# rejected outright -- a v1 entry smuggling v2-shaped fields is exactly the
+# "one union schema accepts either version's fields" defect this whitelist
+# must not have.
+_V2_ONLY_ACTIVATION_FIELDS = frozenset(
+    {
+        "uncapped_score",
+        "eligible_cap",
+        "cap_was_binding",
+        "cap_reason_codes",
+        "binding_cap_reason_codes",
+        "unique_evidence_count",
+        "ticker_specific_evidence_count",
+        "local_edge_count",
+        "regime_gate_passed",
+        "regime_gate_failures",
+        "evidence_integrity_warnings",
+    }
+)
+
+
+def _whitelist_activation_components(value: Any, allowed_names: frozenset[str]) -> dict[str, Any]:
     reason = WEEK4_ACTIVATION_PAYLOAD_INVALID
     if not isinstance(value, Mapping):
         _fail(reason)
+    if not set(value) <= allowed_names:
+        _fail(reason)
     components: dict[str, Any] = {}
-    for name in sorted(_COMPONENT_WHITELISTERS):
+    for name in sorted(allowed_names):
         if name not in value:
             continue
         component = value[name]
@@ -320,7 +469,22 @@ def _whitelist_activation(entry: Mapping[str, Any]) -> dict[str, Any]:
     activation["activation_score"] = _number(entry.get("activation_score"), 0.0, 100.0, reason)
     activation["status"] = _text(entry.get("status"), reason)
     activation["direction"] = _text(entry.get("direction"), reason)
-    activation["components"] = _whitelist_activation_components(entry.get("components"))
+
+    # formula_version gates everything else on this entry: absent means a
+    # legacy v1 row (no v2 fields ever existed for those); present must be
+    # one of the two supported formulas, never an arbitrary string.
+    formula_version = entry.get("formula_version")
+    if formula_version is None:
+        is_v2 = False
+    elif formula_version in SUPPORTED_ACTIVATION_FORMULA_VERSIONS:
+        is_v2 = formula_version == ACTIVATION_V2_FORMULA_VERSION
+    else:
+        _fail(reason)
+
+    allowed_component_names = _V2_ALLOWED_COMPONENT_NAMES if is_v2 else _V1_ALLOWED_COMPONENT_NAMES
+    activation["components"] = _whitelist_activation_components(
+        entry.get("components"), allowed_component_names
+    )
     activation["evidence_count"] = _integer(entry.get("evidence_count"), reason)
     activation["distinct_supporting_agents"] = _integer(
         entry.get("distinct_supporting_agents"), reason
@@ -328,6 +492,41 @@ def _whitelist_activation(entry: Mapping[str, Any]) -> dict[str, Any]:
     activation["claim_ids"] = _string_list(entry.get("claim_ids"), reason)
     activation["evidence"] = _string_list(entry.get("evidence"), reason)
     activation["reason_codes"] = _string_list(entry.get("reason_codes"), reason)
+
+    if not is_v2:
+        # A v1 (or formula_version-absent) entry must not carry any v2-only
+        # additive field -- reject rather than silently drop.
+        if any(field in entry for field in _V2_ONLY_ACTIVATION_FIELDS):
+            _fail(reason)
+        return _json_copy(activation, reason)
+
+    activation["formula_version"] = _text(entry["formula_version"], reason)
+    if "uncapped_score" in entry:
+        activation["uncapped_score"] = _number(entry["uncapped_score"], 0.0, 100.0, reason)
+    if "eligible_cap" in entry:
+        eligible_cap = entry["eligible_cap"]
+        activation["eligible_cap"] = (
+            None if eligible_cap is None else _number(eligible_cap, 0.0, 100.0, reason)
+        )
+    if "cap_was_binding" in entry:
+        activation["cap_was_binding"] = _bool(entry["cap_was_binding"], reason)
+    for field in (
+        "cap_reason_codes",
+        "binding_cap_reason_codes",
+        "regime_gate_failures",
+        "evidence_integrity_warnings",
+    ):
+        if field in entry:
+            activation[field] = _string_list(entry[field], reason)
+    for field in (
+        "unique_evidence_count",
+        "ticker_specific_evidence_count",
+        "local_edge_count",
+    ):
+        if field in entry:
+            activation[field] = _integer(entry[field], reason)
+    if "regime_gate_passed" in entry:
+        activation["regime_gate_passed"] = _bool(entry["regime_gate_passed"], reason)
     return _json_copy(activation, reason)
 
 
@@ -341,7 +540,8 @@ def build_activation_rows(
     ticker = _text(ticker, reason)
     if not isinstance(activation_payload, Mapping):
         _fail(reason)
-    if activation_payload.get("formula_version") != ACTIVATION_FORMULA_VERSION:
+    formula_version = activation_payload.get("formula_version")
+    if formula_version not in SUPPORTED_ACTIVATION_FORMULA_VERSIONS:
         _fail(reason)
     embedded_run_id = activation_payload.get("run_id")
     if embedded_run_id not in (None, "") and embedded_run_id != run_id:
@@ -372,7 +572,7 @@ def build_activation_rows(
                 "activation_score": activation["activation_score"],
                 "status": activation["status"],
                 "direction": activation["direction"],
-                "formula_version": ACTIVATION_FORMULA_VERSION,
+                "formula_version": formula_version,
                 "activation_rank": rank,
                 "activation_json": activation,
             }

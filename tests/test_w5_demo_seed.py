@@ -97,4 +97,9 @@ def test_only_nvda_and_qqq_are_seeded(tmp_path):
     results = seed_w5_demo(_targets(tmp_path))
     assert [item["ticker"] for item in results] == ["NVDA", "QQQ"]
     assert results[0]["main_conflict"] == "A101__A304"
-    assert {"A001__A501", "A003__A501"}.issubset(results[1]["conflicts"])
+    # Under primary Activation v2 the thin QQQ fixture legitimately admits
+    # zero conflicts (both approved pairs are still arbitrated -- the seed
+    # validator enforces that); a QQQ main conflict would be v1-legacy
+    # behavior.
+    assert results[1]["main_conflict"] is None
+    assert results[1]["conflicts"] == []

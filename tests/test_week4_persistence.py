@@ -253,7 +253,6 @@ class TestActivationPersistence:
         activation["alphas"][0]["provider_response"] = "must-not-persist"
         activation["alphas"][0]["components"] = {
             "recency": {"raw": 100, "contribution": 10, "secret": "must-not-persist"},
-            "unknown_component": {"prompt": "must-not-persist"},
         }
         repo.persist_week4_results(
             run_id="w42_run",
@@ -264,8 +263,71 @@ class TestActivationPersistence:
         stored = repo.get_alpha_activations("w42_run")[0]["activation_json"]
         serialized = json.dumps(stored)
         assert "provider_response" not in stored
-        assert "unknown_component" not in stored["components"]
         assert "secret" not in serialized
+
+    def test_unknown_component_name_is_rejected_not_silently_dropped(self):
+        """Structure Graph Closure Review: the component whitelist must
+        REJECT an unrecognized component name outright, never silently drop
+        it and persist the rest -- a version-specific, explicit whitelist,
+        not a permissive union that quietly tolerates anything unknown."""
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        activation["alphas"][0]["components"] = {
+            "recency": {"raw": 100, "contribution": 10},
+            "unknown_component": {"prompt": "must-not-persist"},
+        }
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run",
+                ticker="NVDA",
+                activation_payload=activation,
+                conflict_payload=conflict,
+            )
+        assert exc_info.value.reason_code == "WEEK4_ACTIVATION_PAYLOAD_INVALID"
+        assert repo.get_alpha_activations("w42_run") == []
+
+    def test_v1_entry_carrying_a_v2_only_component_name_is_rejected(self):
+        """A v1 (formula_version-absent) activation entry must never be
+        allowed to smuggle a v2-only component name (or vice versa) -- the
+        whitelist is version-specific, not a union of both formulas'
+        component names."""
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        assert "formula_version" not in activation["alphas"][0]
+        activation["alphas"][0]["components"] = {
+            "evidence_quality": {
+                "raw": 100.0,
+                "weight": 0.35,
+                "contribution": 35.0,
+                "unique_semantic_groups": 3,
+                "unique_contribution_sum": 3.0,
+                "saturation": 4.0,
+            }
+        }
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run",
+                ticker="NVDA",
+                activation_payload=activation,
+                conflict_payload=conflict,
+            )
+        assert exc_info.value.reason_code == "WEEK4_ACTIVATION_PAYLOAD_INVALID"
+
+    def test_v1_entry_carrying_a_v2_only_top_level_field_is_rejected(self):
+        """A v1 entry must never smuggle v2-only additive fields (e.g.
+        eligible_cap) -- those only ever exist on an Activation v2 entry."""
+        _, repo = _engine_and_repo()
+        activation, conflict = _week4_payloads()
+        assert "formula_version" not in activation["alphas"][0]
+        activation["alphas"][0]["eligible_cap"] = 70.0
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_week4_results(
+                run_id="w42_run",
+                ticker="NVDA",
+                activation_payload=activation,
+                conflict_payload=conflict,
+            )
+        assert exc_info.value.reason_code == "WEEK4_ACTIVATION_PAYLOAD_INVALID"
 
     @pytest.mark.parametrize(
         "bad_score", [float("nan"), float("inf"), float("-inf"), "90"]
@@ -461,7 +523,14 @@ class TestReconstruction:
             conflict_payload=conflict,
         )
         reconstructed = repo.get_week4_conflict_result("empty_run")
-        assert reconstructed == conflict
+        # activation_formula_version is additive and read from the run's
+        # persisted activation rows; this fixture persists zero alphas, so
+        # the reconstruction legitimately reports None while the fresh
+        # detector result carries the payload's own version string.
+        assert reconstructed["activation_formula_version"] is None
+        assert {k: v for k, v in reconstructed.items() if k != "activation_formula_version"} == {
+            k: v for k, v in conflict.items() if k != "activation_formula_version"
+        }
         assert reconstructed["conflicts"] == []
         assert reconstructed["main_conflict"] is None
         assert len(reconstructed["arbitration"]["candidate_evaluations"]) == 6
@@ -835,12 +904,17 @@ class TestTypedRecursiveActivationWhitelist:
         row = next(r for r in repo.get_alpha_activations(run_id) if r["alpha_id"] == "A101")
         components = row["activation_json"]["components"]
         assert components  # A101 has real evidence in this fixture
+        # The persisted payload is the run's *primary* activation (v2), so
+        # the typed whitelist must round-trip exactly the six v2 component
+        # names. The five v1 names remain whitelisted for v1 payloads
+        # (covered by the direct v1 whitelist tests above).
         assert set(components) <= {
-            "matched_evidence",
-            "agent_agreement",
-            "graph_coherence",
+            "evidence_quality",
+            "agent_independence",
+            "local_structure_support",
+            "ticker_specificity",
             "recency",
-            "direction_strength",
+            "direction_consistency",
         }
         for component in components.values():
             assert isinstance(component, dict)

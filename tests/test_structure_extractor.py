@@ -202,6 +202,139 @@ def test_legacy_v1_identity_remains_traceable():
     assert payload["edges"][0]["source_agent_output_id"] == "legacy_raw_output_id"
 
 
+def test_driven_by_compound_object_list_does_not_fabricate_edge_between_siblings():
+    """MU run 0ba23540-0623-4d05-a670-098fbbfec1d1, claim
+    fundamental_agent:fundamentals_report:claim:14 (Structure Extractor
+    Relation Coverage Sprint audit): "Micron has undergone a historic
+    earnings inflection, driven primarily by AI-related HBM (High
+    Bandwidth Memory) demand, DRAM pricing recovery, and data center
+    spending acceleration." Two known factors are present (Datacenter
+    CapEx, Semiconductor Cycle), but they are syntactic siblings -- both
+    are co-objects of one shared "driven by" predicate whose real target
+    ("earnings inflection") is not a taxonomy factor. Neither factor
+    causes or supports the other; asserting an edge between them would
+    fabricate a source/target relation the claim never states. Must stay
+    at 0 edges even though a relation predicate and 2 factors are both
+    present in the same claim.
+    """
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "Micron has undergone a historic earnings inflection, driven "
+                "primarily by AI-related HBM (High Bandwidth Memory) demand, "
+                "DRAM pricing recovery, and data center spending acceleration.",
+                factors=["Datacenter CapEx", "Semiconductor Cycle"],
+            )
+        ]
+    )
+
+    assert payload["edges"] == []
+
+
+def test_overlapping_factor_aliases_for_one_phrase_do_not_self_relate():
+    """AMD run 66794ad5-b3a9-4fcc-aa5f-7a6d7957b7c1, claim
+    news_agent:news_report:claim:17: "Investors are increasingly
+    scrutinizing the heavy AI infrastructure spending by hyperscalers...,
+    questioning whether returns on investment justify the capital
+    outlay." "AI CapEx", "Datacenter CapEx", and "AI Infrastructure" all
+    match the same "AI infrastructure spending" phrase span -- they are
+    three aliases of one mention, not two distinct related concepts, and
+    "scrutinizing"/"questioning" are not relation predicates. Must not
+    self-relate the overlapping aliases into an edge.
+    """
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "Investors are increasingly scrutinizing the heavy AI "
+                "infrastructure spending by hyperscalers, questioning whether "
+                "returns on investment justify the capital outlay.",
+                factors=["AI CapEx", "Datacenter CapEx", "AI Infrastructure"],
+            )
+        ]
+    )
+
+    assert payload["edges"] == []
+
+
+def test_conjunctive_condition_list_does_not_imply_causal_pair():
+    """MU run 0ba23540-0623-4d05-a670-098fbbfec1d1, claim
+    research_manager:investment_plan:claim:15: several distinct
+    conditions ("...hyperscaler capex pause, and rate-driven multiple
+    compression...") are listed as needing to "arrive simultaneously" --
+    a conjunctive list of co-occurring conditions, not one factor causing
+    another. Must not treat list-membership as a causal or supportive
+    relation between AI CapEx and Valuation Risk.
+    """
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "Samsung yield recovery, HBM oversupply, CXMT competition, "
+                "hyperscaler capex pause, and rate-driven multiple compression "
+                "all need to arrive simultaneously and severely to bring "
+                "forward EPS down.",
+                factors=["AI CapEx", "Valuation Risk"],
+            )
+        ]
+    )
+
+    assert payload["edges"] == []
+
+
+def test_low_risk_supportive_language_stays_blocked_by_existing_risk_factor_guard():
+    """AMD run 66794ad5-b3a9-4fcc-aa5f-7a6d7957b7c1, claim
+    news_agent:news_report:claim:55: "Recession Risk Remains Low: US
+    recession probability at just 10% means the macro backdrop remains
+    supportive for enterprise/cloud capex." Even though this expresses a
+    real supportive relationship in natural language, Recession Risk is a
+    RISK_FACTORS member and the existing (frozen, unmodified) guard in
+    _extract_edges deliberately refuses supportive edges touching a risk
+    factor, because the claim's true polarity is "LOW risk supports
+    capex", not "Recession Risk supports capex". This regression guard
+    documents that the existing risk-factor exclusion is doing its job
+    and must not be loosened by future relation-phrase additions.
+    """
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "US recession probability at just 10% means the macro backdrop "
+                "remains supportive for enterprise and cloud capex.",
+                factors=["AI CapEx", "Recession Risk"],
+            )
+        ]
+    )
+
+    assert payload["edges"] == []
+
+
+def test_single_factor_relation_claim_cannot_produce_an_edge():
+    """AMD run 66794ad5-b3a9-4fcc-aa5f-7a6d7957b7c1, claim
+    news_agent:news_report:claim:58: "...whether Lisa Su's AI demand
+    confidence translates into revenue beats that can justify the
+    elevated valuation." Only one known taxonomy factor (AI Demand) is
+    present in this claim -- "revenue beats" is not covered by any
+    Revenue Growth alias. _extract_edges requires >= 2 known factors in
+    the same claim; a relation phrase alone can never substitute for a
+    resolvable second factor. Documents that this claim's zero-edge
+    result is correctly driven by taxonomy/alias coverage, not a
+    relation-phrase gap, and is out of this Sprint's scope (fixing it
+    would require editing the factor_normalizer.py alias table shared
+    with the AI Alpha Mapper).
+    """
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "The key event to watch is AMD's upcoming earnings report, "
+                "which will be the definitive test of whether Lisa Su's AI "
+                "demand confidence translates into revenue beats that can "
+                "justify the elevated valuation.",
+                factors=["AI Demand"],
+            )
+        ]
+    )
+
+    assert payload["edges"] == []
+
+
 def test_save_extracted_structures_writes_week2_artifact(tmp_path):
     run_dir = tmp_path / "run1"
     run_dir.mkdir()

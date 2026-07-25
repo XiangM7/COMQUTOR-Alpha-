@@ -65,7 +65,11 @@ def _graph_payload(run_id="r1", ticker="NVDA", score=42.0):
         "edges": [],
         "graph_metrics": {},
         "graph_coherence": {"score": score, "valid_edges": 1, "alpha_covered_count": 1},
-        "activation": {"alphas": []},
+        # A minimal-but-contract-valid v1 activation block: these tests
+        # exercise persistence mechanics (round-tripping, isolation,
+        # idempotency), not activation content, so only the fields
+        # validate_structure_graph_contract requires are present.
+        "activation": {"formula_version": "week3.activation.mvp_v1", "alphas": []},
         "dominant_alphas": [],
         "provenance": {},
     }
@@ -345,6 +349,118 @@ class TestPersistence:
             assert str(exc) == exc.reason_code
             assert "sqlite" not in str(exc).lower()
             assert ":memory:" not in str(exc)
+
+
+def _v2_graph_payload(run_id="r1", ticker="NVDA", score=42.0):
+    v2_block = {"formula_version": "activation.v2.evidence_local_structure.v1", "alphas": []}
+    return {
+        "schema_version": "week3.structure_graph.v2",
+        "graph_builder_version": "week3.graph_builder.v1",
+        "activation_scorer_version": "week3.activation_scorer.v1",
+        "run_id": run_id,
+        "ticker": ticker,
+        "nodes": [],
+        "edges": [],
+        "graph_metrics": {},
+        "graph_coherence": {"score": score, "valid_edges": 1, "alpha_covered_count": 1},
+        "activation": v2_block,
+        "activation_versions": {
+            "v1": {"formula_version": "week3.activation.mvp_v1", "alphas": []},
+            "v2": v2_block,
+        },
+        "primary_activation_version": v2_block["formula_version"],
+        "dominant_alphas": [],
+        "provenance": {},
+    }
+
+
+class TestStructureGraphSchemaContract:
+    """Structure Graph Schema v1/v2 contract at the repository layer
+    (Activation v2 Closure Review, Phase 1): both persist_run (write) and
+    get_graph (read) call the single shared
+    graph_schema.validate_structure_graph_contract -- covers test
+    requirements #1-4 (v1/v2 round trip through the real repository)."""
+
+    def test_v1_payload_persists_and_round_trips(self):
+        repo = _fresh_repository()
+        repo.persist_run(
+            run_id="r1",
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload(),
+            graph_payload=_graph_payload(),
+        )
+        row = repo.get_graph("r1")
+        assert row["graph_json"]["schema_version"] == "week3.structure_graph.v1"
+        assert "activation_versions" not in row["graph_json"]
+
+    def test_v2_payload_persists_and_round_trips(self):
+        repo = _fresh_repository()
+        repo.persist_run(
+            run_id="r1",
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload(),
+            graph_payload=_v2_graph_payload(),
+        )
+        row = repo.get_graph("r1")
+        assert row["graph_json"]["schema_version"] == "week3.structure_graph.v2"
+        assert row["graph_json"]["primary_activation_version"] == (
+            "activation.v2.evidence_local_structure.v1"
+        )
+        assert set(row["graph_json"]["activation_versions"]) == {"v1", "v2"}
+
+    def test_v1_is_never_backfilled_with_v2_fields_on_persist(self):
+        repo = _fresh_repository()
+        repo.persist_run(
+            run_id="r1",
+            ticker="NVDA",
+            alpha_matches_payload=_alpha_matches_payload(),
+            graph_payload=_graph_payload(),
+        )
+        stored = repo.get_graph("r1")["graph_json"]
+        assert "activation_versions" not in stored
+        assert "primary_activation_version" not in stored
+
+    def test_v2_missing_activation_versions_is_rejected_at_persist_time(self):
+        repo = _fresh_repository()
+        malformed = _v2_graph_payload()
+        del malformed["activation_versions"]
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_run(
+                run_id="r1",
+                ticker="NVDA",
+                alpha_matches_payload=_alpha_matches_payload(),
+                graph_payload=malformed,
+            )
+        assert exc_info.value.reason_code == "GRAPH_SCHEMA_INVALID"
+        assert repo.get_graph("r1") is None
+
+    def test_v2_primary_formula_mismatch_is_rejected_at_persist_time(self):
+        repo = _fresh_repository()
+        malformed = _v2_graph_payload()
+        malformed["primary_activation_version"] = "activation.v2.wrong_formula"
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_run(
+                run_id="r1",
+                ticker="NVDA",
+                alpha_matches_payload=_alpha_matches_payload(),
+                graph_payload=malformed,
+            )
+        assert exc_info.value.reason_code == "GRAPH_SCHEMA_PRIMARY_MISMATCH"
+        assert repo.get_graph("r1") is None
+
+    def test_unknown_schema_version_is_rejected_at_persist_time(self):
+        repo = _fresh_repository()
+        malformed = _graph_payload()
+        malformed["schema_version"] = "week3.structure_graph.v3"
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.persist_run(
+                run_id="r1",
+                ticker="NVDA",
+                alpha_matches_payload=_alpha_matches_payload(),
+                graph_payload=malformed,
+            )
+        assert exc_info.value.reason_code == "GRAPH_SCHEMA_MISMATCH"
+        assert repo.get_graph("r1") is None
 
 
 class TestReadWriteRepositoryConstruction:

@@ -77,7 +77,19 @@ from comqutor_alpha.conflict_engine.conflict_schema import (
     resolve_bull_bear,
 )
 from comqutor_alpha.graph_engine.activation_scorer import _relation_for_match
+from comqutor_alpha.graph_engine.activation_scorer_v2 import (
+    ACTIVATION_V2_FORMULA_VERSION,
+)
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
+
+# The detector consumes the run's *primary* activation payload: the frozen
+# v1 formula (historical runs) or Activation v2 (new runs). The conflict
+# score formula itself -- min(activation_a, activation_b) x
+# contradiction_weight x evidence_strength -- is identical for both and is
+# never changed by the activation version.
+SUPPORTED_ACTIVATION_FORMULA_VERSIONS = frozenset(
+    {ACTIVATION_FORMULA_VERSION, ACTIVATION_V2_FORMULA_VERSION}
+)
 
 # ---------------------------------------------------------------------------
 # Taxonomy pair enumeration
@@ -192,7 +204,7 @@ def _index_activations(
     """
     if not isinstance(activation_payload, Mapping):
         raise ConflictInputError("SCHEMA_INVALID")
-    if activation_payload.get("formula_version") != ACTIVATION_FORMULA_VERSION:
+    if activation_payload.get("formula_version") not in SUPPORTED_ACTIVATION_FORMULA_VERSIONS:
         raise ConflictInputError(REASON_ACTIVATION_VERSION_MISMATCH)
     alphas = activation_payload.get("alphas")
     if not isinstance(alphas, list):
@@ -857,7 +869,14 @@ def detect_alpha_conflicts(
             )
             for pair in declared_pairs
         ]
-        return _assemble_result(run_id, ticker, declared_pairs, [], candidate_evaluations)
+        return _assemble_result(
+            run_id,
+            ticker,
+            declared_pairs,
+            [],
+            candidate_evaluations,
+            activation_formula_version=str(activation_payload.get("formula_version")),
+        )
 
     candidate_evaluations: list[dict[str, Any]] = []
     admitted_conflicts: list[dict[str, Any]] = []
@@ -876,7 +895,14 @@ def detect_alpha_conflicts(
             admitted_conflicts.append(conflict)
 
     admitted_conflicts.sort(key=_conflict_sort_key)
-    return _assemble_result(run_id, ticker, declared_pairs, admitted_conflicts, candidate_evaluations)
+    return _assemble_result(
+        run_id,
+        ticker,
+        declared_pairs,
+        admitted_conflicts,
+        candidate_evaluations,
+        activation_formula_version=str(activation_payload.get("formula_version")),
+    )
 
 
 def _assemble_result(
@@ -885,6 +911,7 @@ def _assemble_result(
     declared_pairs: list[_DeclaredPair],
     admitted_conflicts: list[dict[str, Any]],
     candidate_evaluations: list[dict[str, Any]],
+    activation_formula_version: str | None = None,
 ) -> dict[str, Any]:
     conflicts = [_finalize_conflict(c) for c in admitted_conflicts]
     main_conflict = conflicts[0] if conflicts else None
@@ -898,6 +925,7 @@ def _assemble_result(
     return {
         "schema_version": CONFLICT_SCHEMA_VERSION,
         "formula_version": CONFLICT_FORMULA_VERSION,
+        "activation_formula_version": activation_formula_version,
         "run_id": run_id,
         "ticker": ticker,
         "conflicts": conflicts,

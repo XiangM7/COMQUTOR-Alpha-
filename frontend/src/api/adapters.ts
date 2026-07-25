@@ -13,10 +13,15 @@
 import type {
   AgentOutputsResponse,
   AlphaConflict,
+  AlphaEvidenceDetail,
   ConflictAuditSide,
   ConflictCandidateEvaluation,
+  ConflictEvidenceItem,
   ConflictSideStructure,
   ConflictsResponse,
+  DataSanitySeverity,
+  DataSanityStatus,
+  DataSanityWarning,
   DominantAlpha,
   GraphActivation,
   AlphaActivation,
@@ -33,6 +38,7 @@ import type {
   StructureGraphResponse,
   StructuredAgentOutputRecord,
 } from "./types";
+import { DATA_SANITY_SEVERITIES, DATA_SANITY_STATUSES } from "./types";
 
 export type AdaptResult<T> = { ok: true; value: T } | { ok: false; reason: string };
 
@@ -331,6 +337,20 @@ export function adaptAlphaConflict(payload: unknown): AdaptResult<AlphaConflict>
   const components = isRecord(payload.components) ? payload.components : {};
   const numericComponent = (key: string): number => (isNumber(components[key]) ? (components[key] as number) : 0);
 
+  const adaptEvidenceItems = (value: unknown): ConflictEvidenceItem[] =>
+    Array.isArray(value)
+      ? value
+          .filter(isRecord)
+          .filter((item) => isString(item.claim_id))
+          .map((item) => ({
+            claim_id: item.claim_id as string,
+            claim_text: isString(item.claim_text) ? item.claim_text : "",
+            agent: isString(item.agent) ? item.agent : "",
+            match_score: isNumber(item.match_score) ? item.match_score : 0,
+            relation: isString(item.relation) ? item.relation : "unknown",
+          }))
+      : [];
+
   return ok({
     conflict_id,
     alpha_a,
@@ -339,6 +359,8 @@ export function adaptAlphaConflict(payload: unknown): AdaptResult<AlphaConflict>
     bear_alpha_id,
     bull_structure: bullStructure.value,
     bear_structure: bearStructure.value,
+    bull_evidence: adaptEvidenceItems(payload.bull_evidence),
+    bear_evidence: adaptEvidenceItems(payload.bear_evidence),
     components: {
       activation_a: numericComponent("activation_a"),
       activation_b: numericComponent("activation_b"),
@@ -355,6 +377,31 @@ export function adaptAlphaConflict(payload: unknown): AdaptResult<AlphaConflict>
     conflict_level: conflict_level as AlphaConflict["conflict_level"],
     reason_codes: isStringArray(payload.reason_codes) ? payload.reason_codes : [],
     explanation,
+  });
+}
+
+const DATA_SANITY_STATUS_SET: ReadonlySet<string> = new Set(DATA_SANITY_STATUSES);
+const DATA_SANITY_SEVERITY_SET: ReadonlySet<string> = new Set(DATA_SANITY_SEVERITIES);
+
+/** Strict, not lenient: an unrecognized severity/code type is a contract
+ * mismatch (dropped), never silently coerced to a guessed default. */
+function adaptDataSanityWarning(payload: unknown): AdaptResult<DataSanityWarning> {
+  if (!isRecord(payload)) return fail("data sanity warning is not an object");
+  const { code, severity, message, details } = payload;
+  if (!isString(code) || !isString(severity) || !isString(message)) {
+    return fail("data sanity warning missing code/severity/message");
+  }
+  if (!DATA_SANITY_SEVERITY_SET.has(severity)) {
+    return fail(`unknown data sanity warning severity: ${severity}`);
+  }
+  if (details !== undefined && !isRecord(details)) {
+    return fail("data sanity warning details must be an object");
+  }
+  return ok({
+    code,
+    severity: severity as DataSanitySeverity,
+    message,
+    details: isRecord(details) ? details : {},
   });
 }
 
@@ -381,6 +428,26 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
         .map((item) => item.value)
     : [];
 
+  // Data Sanity Cross-Check v1 additive fields -- strict, not lenient: an
+  // unrecognized status/severity/field type is a contract mismatch that
+  // rejects the whole response, never a silently-coerced fallback.
+  const dataSanityStatus = payload.data_sanity_status;
+  if (!isString(dataSanityStatus) || !DATA_SANITY_STATUS_SET.has(dataSanityStatus)) {
+    return fail("unknown or missing data_sanity_status value");
+  }
+  if (!isNumber(payload.data_sanity_warning_count) || !isNumber(payload.data_sanity_critical_count)) {
+    return fail("missing data_sanity_warning_count/data_sanity_critical_count");
+  }
+  if (!Array.isArray(payload.data_sanity_warnings)) {
+    return fail("missing data_sanity_warnings array");
+  }
+  const dataSanityWarnings: DataSanityWarning[] = [];
+  for (const raw of payload.data_sanity_warnings) {
+    const adapted = adaptDataSanityWarning(raw);
+    if (!adapted.ok) return fail(`invalid data sanity warning: ${adapted.reason}`);
+    dataSanityWarnings.push(adapted.value);
+  }
+
   return ok({
     run_id,
     ticker: nullableString(payload.ticker),
@@ -395,6 +462,10 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
     main_conflict: mainConflict,
     conflict_status: payload.conflict_status === "ready" ? "ready" : "not_ready",
     summary: isString(payload.summary) ? payload.summary : "",
+    data_sanity_status: dataSanityStatus as DataSanityStatus,
+    data_sanity_warning_count: payload.data_sanity_warning_count,
+    data_sanity_critical_count: payload.data_sanity_critical_count,
+    data_sanity_warnings: dataSanityWarnings,
   });
 }
 
@@ -448,6 +519,27 @@ function adaptStructureGraphEdge(payload: unknown): AdaptResult<StructureGraphEd
   });
 }
 
+function adaptAlphaEvidenceDetail(value: unknown): AlphaEvidenceDetail[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(isRecord)
+    .filter((item) => isString(item.claim_id))
+    .map((item) => ({
+      claim_id: item.claim_id as string,
+      claim: isString(item.claim) ? item.claim : "",
+      agent: isString(item.agent) ? item.agent : "",
+      source_agent_output_id: isString(item.source_agent_output_id)
+        ? item.source_agent_output_id
+        : "",
+      match_score: isNumber(item.match_score) ? item.match_score : 0,
+      relation: isString(item.relation) ? item.relation : "unknown",
+      matched_keywords: isStringArray(item.matched_keywords) ? item.matched_keywords : [],
+      matched_factors: isStringArray(item.matched_factors) ? item.matched_factors : [],
+      assertion_status: isString(item.assertion_status) ? item.assertion_status : "unknown",
+      direction: isString(item.direction) ? item.direction : "unknown",
+    }));
+}
+
 function adaptAlphaActivation(payload: unknown): AdaptResult<AlphaActivation> {
   if (!isRecord(payload)) return fail("activation is not an object");
   const { alpha_id, alpha_name, activation_score, status, direction } = payload;
@@ -468,6 +560,25 @@ function adaptAlphaActivation(payload: unknown): AdaptResult<AlphaActivation> {
     claim_ids: isStringArray(payload.claim_ids) ? payload.claim_ids : [],
     evidence: isStringArray(payload.evidence) ? payload.evidence : [],
     reason_codes: isStringArray(payload.reason_codes) ? payload.reason_codes : [],
+    evidence_detail: adaptAlphaEvidenceDetail(payload.evidence_detail),
+    // Activation v2 additive fields: null/empty on v1-legacy payloads.
+    formula_version: nullableString(payload.formula_version),
+    uncapped_score: nullableNumber(payload.uncapped_score),
+    eligible_cap: nullableNumber(payload.eligible_cap),
+    cap_was_binding:
+      typeof payload.cap_was_binding === "boolean" ? payload.cap_was_binding : null,
+    cap_reason_codes: isStringArray(payload.cap_reason_codes) ? payload.cap_reason_codes : [],
+    binding_cap_reason_codes: isStringArray(payload.binding_cap_reason_codes)
+      ? payload.binding_cap_reason_codes
+      : [],
+    unique_evidence_count: nullableNumber(payload.unique_evidence_count),
+    ticker_specific_evidence_count: nullableNumber(payload.ticker_specific_evidence_count),
+    local_edge_count: nullableNumber(payload.local_edge_count),
+    regime_gate_passed:
+      typeof payload.regime_gate_passed === "boolean" ? payload.regime_gate_passed : null,
+    regime_gate_failures: isStringArray(payload.regime_gate_failures)
+      ? payload.regime_gate_failures
+      : [],
   });
 }
 
@@ -512,6 +623,19 @@ export function adaptStructureGraphResponse(payload: unknown): AdaptResult<Struc
   const activation = adaptGraphActivation(payload.activation);
   if (!activation.ok) return fail(`invalid activation: ${activation.reason}`);
 
+  // Versioned activation blocks are additive: absent on historical v1-only
+  // graphs. A block that fails to adapt is dropped rather than failing the
+  // whole response.
+  const activationVersions: Partial<Record<"v1" | "v2", GraphActivation>> = {};
+  if (isRecord(payload.activation_versions)) {
+    for (const key of ["v1", "v2"] as const) {
+      const raw = payload.activation_versions[key];
+      if (raw === undefined) continue;
+      const adapted = adaptGraphActivation(raw);
+      if (adapted.ok) activationVersions[key] = adapted.value;
+    }
+  }
+
   const dominantAlphas = Array.isArray(payload.dominant_alphas)
     ? payload.dominant_alphas
         .map(adaptDominantAlpha)
@@ -531,6 +655,8 @@ export function adaptStructureGraphResponse(payload: unknown): AdaptResult<Struc
     graph_metrics: isRecord(payload.graph_metrics) ? payload.graph_metrics : {},
     graph_coherence: isRecord(payload.graph_coherence) ? payload.graph_coherence : {},
     activation: activation.value,
+    activation_versions: activationVersions,
+    primary_activation_version: nullableString(payload.primary_activation_version),
     dominant_alphas: dominantAlphas,
     provenance: isRecord(payload.provenance) ? payload.provenance : {},
   });
@@ -612,6 +738,7 @@ export function adaptConflictsResponse(payload: unknown): AdaptResult<ConflictsR
     status: "ok",
     schema_version,
     formula_version,
+    activation_formula_version: nullableString(payload.activation_formula_version),
     run_id,
     ticker,
     conflicts,

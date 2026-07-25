@@ -62,6 +62,24 @@ function makeConflict(overrides: Partial<AlphaConflict> = {}): AlphaConflict {
     conflict_level: "medium_high",
     reason_codes: [],
     explanation: "Demand Growth and Valuation Risk present a bull-vs-bear structural tension.",
+    bull_evidence: [
+      {
+        claim_id: "c1",
+        claim_text: "Strong demand evidence.",
+        agent: "news_agent",
+        match_score: 0.9,
+        relation: "activation",
+      },
+    ],
+    bear_evidence: [
+      {
+        claim_id: "c2",
+        claim_text: "Valuation concern evidence.",
+        agent: "risk_agent",
+        match_score: 0.8,
+        relation: "activation",
+      },
+    ],
     ...overrides,
   };
 }
@@ -77,6 +95,7 @@ describe("ConflictRadarPage", () => {
       status: "ok",
       schema_version: "week4.alpha_conflicts.v1",
       formula_version: "week4.conflict_score.mvp_v1",
+      activation_formula_version: "activation.v2.evidence_local_structure.v1",
       run_id: "run-1",
       ticker: "NVDA",
       conflicts: [mainConflict],
@@ -111,6 +130,10 @@ describe("ConflictRadarPage", () => {
       main_conflict: mainConflict,
       conflict_status: "ready",
       summary: mainConflict.explanation,
+      data_sanity_status: "not_available",
+      data_sanity_warning_count: 0,
+      data_sanity_critical_count: 0,
+      data_sanity_warnings: [],
     });
 
     renderPage();
@@ -127,6 +150,7 @@ describe("ConflictRadarPage", () => {
       status: "ok",
       schema_version: "week4.alpha_conflicts.v1",
       formula_version: "week4.conflict_score.mvp_v1",
+      activation_formula_version: "activation.v2.evidence_local_structure.v1",
       run_id: "run-1",
       ticker: "NVDA",
       conflicts: [first, second], // backend order: lower score first -- must not be re-sorted by score
@@ -161,6 +185,7 @@ describe("ConflictRadarPage", () => {
       status: "ok",
       schema_version: "week4.alpha_conflicts.v1",
       formula_version: "week4.conflict_score.mvp_v1",
+      activation_formula_version: "activation.v2.evidence_local_structure.v1",
       run_id: "run-1",
       ticker: "NVDA",
       conflicts: [mainConflict],
@@ -187,6 +212,7 @@ describe("ConflictRadarPage", () => {
       status: "ok",
       schema_version: "week4.alpha_conflicts.v1",
       formula_version: "week4.conflict_score.mvp_v1",
+      activation_formula_version: "activation.v2.evidence_local_structure.v1",
       run_id: "run-1",
       ticker: "NVDA",
       conflicts: [],
@@ -242,6 +268,10 @@ describe("ConflictRadarPage", () => {
       main_conflict: null,
       conflict_status: "not_ready",
       summary: "Conflict analysis is not ready for this research run.",
+      data_sanity_status: "not_available",
+      data_sanity_warning_count: 0,
+      data_sanity_critical_count: 0,
+      data_sanity_warnings: [],
     });
 
     renderPage();

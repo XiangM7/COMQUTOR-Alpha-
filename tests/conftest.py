@@ -5,6 +5,47 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# ---------------------------------------------------------------------------
+# Database environment isolation (Gate 0, Activation v2 sprint).
+#
+# ``import tradingagents`` runs load_dotenv() as an import side effect, which
+# injects COMQUTOR_DATABASE_URL / COMQUTOR_TEST_DATABASE_URL / COMQUTOR_ENV
+# from a developer's local .env into the test process -- silently defeating
+# ``env -u ...`` shell isolation and pointing "offline" tests at a real
+# database. Force that side effect to happen exactly once, right now, and
+# then restore these three variables to their pre-import (shell-provided)
+# state: a value the shell explicitly exported survives; a value injected
+# only by .env is removed. Because tradingagents is now cached in
+# sys.modules, no later import can re-inject them mid-suite.
+# ---------------------------------------------------------------------------
+
+_DB_ISOLATION_ENV_VARS = ("COMQUTOR_DATABASE_URL", "COMQUTOR_TEST_DATABASE_URL", "COMQUTOR_ENV")
+_SHELL_PROVIDED_DB_ENV = {
+    name: os.environ[name] for name in _DB_ISOLATION_ENV_VARS if name in os.environ
+}
+
+import tradingagents  # noqa: E402,F401  -- deliberate: trigger load_dotenv now
+
+for _name in _DB_ISOLATION_ENV_VARS:
+    if _name in _SHELL_PROVIDED_DB_ENV:
+        os.environ[_name] = _SHELL_PROVIDED_DB_ENV[_name]
+    else:
+        os.environ.pop(_name, None)
+
+
+@pytest.fixture(autouse=True)
+def _isolate_database_env(request, monkeypatch):
+    """Non-integration tests must never see a database environment variable.
+
+    Integration tests keep COMQUTOR_TEST_DATABASE_URL (which they are
+    required to read explicitly) but still never see COMQUTOR_DATABASE_URL
+    or COMQUTOR_ENV.
+    """
+    monkeypatch.delenv("COMQUTOR_DATABASE_URL", raising=False)
+    monkeypatch.delenv("COMQUTOR_ENV", raising=False)
+    if request.node.get_closest_marker("integration") is None:
+        monkeypatch.delenv("COMQUTOR_TEST_DATABASE_URL", raising=False)
+
 
 def pytest_configure(config):
     for marker in ("unit", "integration", "smoke"):

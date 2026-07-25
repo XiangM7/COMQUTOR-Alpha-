@@ -311,7 +311,26 @@ def test_conflicts_api_success_equals_repository_reconstruction(tmp_path):
     result = get_persisted_conflicts(run_id, output_root=tmp_path, graph_repository=repo)
 
     assert result["status"] == "ok"
-    assert {k: v for k, v in result.items() if k != "status"} == expected
+
+    # The Structure Correctness Sprint adds per-conflict
+    # bull_evidence/bear_evidence as documented additive fields; everything
+    # else must still equal the W4.2 repository reconstruction exactly.
+    def _strip_additive(conflict):
+        if not isinstance(conflict, dict):
+            return conflict
+        return {k: v for k, v in conflict.items() if k not in {"bull_evidence", "bear_evidence"}}
+
+    stripped = {k: v for k, v in result.items() if k != "status"}
+    stripped["conflicts"] = [_strip_additive(c) for c in stripped.get("conflicts", [])]
+    stripped["main_conflict"] = _strip_additive(stripped.get("main_conflict"))
+    assert stripped == expected
+
+    # And the additive evidence itself is present and claim-backed.
+    for conflict in result["conflicts"]:
+        assert conflict["bull_evidence"]
+        assert conflict["bear_evidence"]
+        for item in (*conflict["bull_evidence"], *conflict["bear_evidence"]):
+            assert item["claim_id"] and item["claim_text"] and item["agent"]
 
 
 def test_conflicts_api_zero_admitted_conflict_still_status_ok(tmp_path):

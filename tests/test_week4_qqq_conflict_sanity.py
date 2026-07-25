@@ -42,10 +42,17 @@ def _run_qqq_conflict_fixture(tmp_path):
 
     matches_payload = json.loads((tmp_path / run_id / "alpha_matches.json").read_text(encoding="utf-8"))
 
+    # These oracles lock W4.1 detector semantics (arbitration, bull/bear
+    # roles, traceability) against the Activation *v1* payload the fixture
+    # was calibrated for -- which also exercises the historical-run
+    # compatibility path: a v1 activation payload must remain accepted by
+    # the detector unchanged. The run's primary (v2) payload legitimately
+    # admits zero QQQ conflicts and is covered by the QQQ golden closure.
+    activation_v1 = graph["activation_versions"]["v1"]
     result = detect_alpha_conflicts(
         run_id=run_id,
         ticker="QQQ",
-        activation_payload=graph["activation"],
+        activation_payload=activation_v1,
         alpha_matches=matches_payload["matches"],
     )
     return run_id, result

@@ -25,6 +25,10 @@ import sqlalchemy as sa
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
+from comqutor_alpha.graph_engine.graph_schema import (
+    GraphSchemaContractError,
+    validate_structure_graph_contract,
+)
 from comqutor_alpha.research_lifecycle import (
     ACTIVE_RESEARCH_RUN_STATUSES,
     TERMINAL_RESEARCH_RUN_STATUSES,
@@ -563,6 +567,10 @@ class GraphPersistenceRepository:
             graph_values["graph_json"], reason_code="STRUCTURE_GRAPH_PAYLOAD_INVALID"
         )
         try:
+            validate_structure_graph_contract(graph_values["graph_json"])
+        except GraphSchemaContractError as exc:
+            raise GraphPersistenceError(exc.reason_code) from exc
+        try:
             with self._engine.begin() as conn:
                 conn.execute(sa.delete(alpha_matches).where(alpha_matches.c.run_id == run_id))
                 if rows:
@@ -707,9 +715,27 @@ class GraphPersistenceRepository:
     def get_week4_conflict_result(self, run_id: str) -> dict[str, Any] | None:
         rows = self.get_alpha_conflicts(run_id)
         try:
-            return reconstruct_conflict_result(run_id, rows)
+            result = reconstruct_conflict_result(run_id, rows)
         except Week4PersistenceDataError as exc:
             raise GraphPersistenceError(exc.reason_code) from exc
+        if result is None:
+            return None
+        # Additive: report which activation formula this run's conflicts
+        # were computed against, read from the run's own persisted
+        # activation rows (v1 for historical runs, v2 for new runs). Never
+        # required -- a run with no activation rows simply omits a value.
+        try:
+            with self._engine.connect() as conn:
+                formula_version = conn.scalar(
+                    sa.select(alpha_activations.c.formula_version)
+                    .where(alpha_activations.c.run_id == run_id)
+                    .order_by(alpha_activations.c.alpha_id)
+                    .limit(1)
+                )
+        except SQLAlchemyError:
+            formula_version = None
+        result["activation_formula_version"] = formula_version
+        return result
 
     # -----------------------------------------------------------------
     # W5.1A: research_runs lifecycle / fingerprint bookkeeping.

@@ -7,6 +7,7 @@ import { EmptyState } from "../components/EmptyState";
 import { useRunPolling } from "../hooks/useRunPolling";
 import { useResearchRun } from "../hooks/useResearchRun";
 import { describeApiError } from "../api/errors";
+import type { CanonicalResearchResponse, DataSanityWarning } from "../api/types";
 
 function shortenRunId(runId: string): string {
   return runId.length > 12 ? `${runId.slice(0, 8)}…${runId.slice(-4)}` : runId;
@@ -14,6 +15,115 @@ function shortenRunId(runId: string): string {
 
 function isTerminalStatus(status: string | undefined): boolean {
   return status === "completed" || status === "partial" || status === "failed";
+}
+
+// The Research page's main list only ever shows a clear directional call --
+// "unknown"/"mixed"/missing findings are still valid claims (kept in
+// artifacts/API/DB unchanged) but are a presentation-layer distraction here.
+// This is display-only filtering; it must never mutate the API response.
+function isDirectionalFinding(direction: string): boolean {
+  return direction === "positive" || direction === "negative";
+}
+
+function detailString(details: Record<string, unknown>, key: string): string | null {
+  const value = details[key];
+  return typeof value === "string" ? value : null;
+}
+
+function detailNumber(details: Record<string, unknown>, key: string): number | null {
+  const value = details[key];
+  return typeof value === "number" ? value : null;
+}
+
+function warningDate(details: Record<string, unknown>): string | null {
+  return (
+    detailString(details, "date") ??
+    detailString(details, "reported_date") ??
+    detailString(details, "analysis_date") ??
+    detailString(details, "last_available_session")
+  );
+}
+
+// A single warning's own severity always drives its presentation -- an
+// info-level corporate-action signal (a stock split/dividend) is never
+// rendered as critical just because the overall run status is.
+function DataQualityWarningItem({ warning }: { warning: DataSanityWarning }) {
+  const date = warningDate(warning.details);
+  const reportedPrice = detailNumber(warning.details, "reported_price");
+  const externalReference = detailNumber(warning.details, "external_reference");
+  const splitRatio = detailNumber(warning.details, "stock_split") ?? detailNumber(warning.details, "split_ratio");
+
+  return (
+    <li className={`data-quality-warning-item data-quality-severity-${warning.severity}`}>
+      <p className="data-quality-warning-message">{warning.message}</p>
+      <dl className="data-quality-warning-meta">
+        <div className="data-quality-warning-meta-row">
+          <dt>Code</dt>
+          <dd>{warning.code}</dd>
+        </div>
+        <div className="data-quality-warning-meta-row">
+          <dt>Severity</dt>
+          <dd>{warning.severity}</dd>
+        </div>
+        {date ? (
+          <div className="data-quality-warning-meta-row">
+            <dt>Date</dt>
+            <dd>{date}</dd>
+          </div>
+        ) : null}
+        {reportedPrice !== null ? (
+          <div className="data-quality-warning-meta-row">
+            <dt>Reported price</dt>
+            <dd>${reportedPrice.toFixed(2)}</dd>
+          </div>
+        ) : null}
+        {externalReference !== null ? (
+          <div className="data-quality-warning-meta-row">
+            <dt>External reference</dt>
+            <dd>${externalReference.toFixed(2)}</dd>
+          </div>
+        ) : null}
+        {splitRatio !== null ? (
+          <div className="data-quality-warning-meta-row">
+            <dt>Split ratio</dt>
+            <dd>{splitRatio}</dd>
+          </div>
+        ) : null}
+      </dl>
+    </li>
+  );
+}
+
+// Yahoo Finance/yfinance is one independent cross-check input, never
+// treated as absolute market truth -- this panel only ever surfaces the
+// backend's own status/warnings verbatim, never recomputes or upgrades
+// severity, and never hides/alters Analyst findings, claims, or Activation.
+function DataQualityPanel({ response }: { response: CanonicalResearchResponse }) {
+  const status = response.data_sanity_status;
+
+  if (status === "ok") {
+    return <p className="data-quality-ok-text">External market-data cross-check completed with no warnings.</p>;
+  }
+  if (status === "unavailable") {
+    return <p className="data-quality-neutral-text">External market-data cross-check is unavailable for this run.</p>;
+  }
+  if (status === "disabled") {
+    return <p className="data-quality-neutral-text">External market-data cross-check was disabled for this run.</p>;
+  }
+  if (status === "not_available") {
+    return <p className="data-quality-neutral-text">No data-quality artifact is available for this historical run.</p>;
+  }
+
+  const panelClassName = status === "critical" ? "data-quality-body-critical" : "data-quality-body-warning";
+  return (
+    <div className={panelClassName}>
+      <ul className="data-quality-warning-list">
+        {response.data_sanity_warnings.map((warning, index) => (
+          <DataQualityWarningItem key={`${warning.code}-${index}`} warning={warning} />
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 export function ResearchRunPage() {
@@ -37,6 +147,13 @@ export function ResearchRunPage() {
   if (!runId) {
     return <EmptyState title="Missing run_id" description="No research run was specified." />;
   }
+
+  const allRecords =
+    agentOutputs && "structured_agent_outputs" in agentOutputs ? agentOutputs.structured_agent_outputs : [];
+  // A new array, never a mutation of the API response -- direction filtering
+  // is presentation-only, nothing is deleted from artifacts/API/DB.
+  const visibleRecords = allRecords.filter((record) => isDirectionalFinding(record.direction));
+  const hiddenCount = allRecords.length - visibleRecords.length;
 
   return (
     <div className="research-run-page">
@@ -114,29 +231,55 @@ export function ResearchRunPage() {
             </section>
           ) : null}
 
+          {research && "data_sanity_status" in research ? (
+            <section className="panel data-quality-panel">
+              <h2>Data Quality</h2>
+              <DataQualityPanel response={research} />
+            </section>
+          ) : null}
+
           <section className="panel analyst-outputs-panel">
             <h2>Analyst findings</h2>
             {agentOutputs && "structured_agent_outputs" in agentOutputs ? (
-              agentOutputs.structured_agent_outputs.length > 0 ? (
-                <ul className="analyst-output-list">
-                  {agentOutputs.structured_agent_outputs.map((record) => (
-                    <li key={record.claim_id} className="analyst-output-card">
-                      <header>
-                        <span className="analyst-output-agent">{record.agent}</span>
-                        <span className={`analyst-output-direction analyst-output-direction-${record.direction}`}>
-                          {record.direction}
-                        </span>
-                      </header>
-                      <p className="analyst-output-claim">{record.claim}</p>
-                      <p className="analyst-output-evidence">{record.evidence}</p>
-                      <p className="analyst-output-meta">
-                        Confidence {(record.confidence * 100).toFixed(0)}% · <code>{record.claim_id}</code>
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
+              allRecords.length === 0 ? (
                 <EmptyState title="No structured analyst outputs yet" />
+              ) : (
+                <>
+                  {visibleRecords.length > 0 ? (
+                    <ul className="analyst-output-list">
+                      {visibleRecords.map((record) => (
+                        <li key={record.claim_id} className="analyst-output-card">
+                          <dl className="analyst-output-meta-list">
+                            <div className="analyst-output-meta-row">
+                              <dt>Agent</dt>
+                              <dd>{record.agent}</dd>
+                            </div>
+                            <div className="analyst-output-meta-row">
+                              <dt>Direction</dt>
+                              <dd className={`analyst-output-direction-${record.direction}`}>
+                                {record.direction}
+                              </dd>
+                            </div>
+                          </dl>
+                          <p className="analyst-output-claim">{record.claim}</p>
+                          {record.evidence && record.evidence !== record.claim ? (
+                            <p className="analyst-output-evidence">{record.evidence}</p>
+                          ) : null}
+                          <p className="analyst-output-confidence">
+                            Confidence {(record.confidence * 100).toFixed(0)}% · <code>{record.claim_id}</code>
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <EmptyState title="No directional analyst findings are available for this run." />
+                  )}
+                  {hiddenCount > 0 ? (
+                    <p className="analyst-output-hidden-note">
+                      {hiddenCount} neutral or unclassified findings are hidden from this view.
+                    </p>
+                  ) : null}
+                </>
               )
             ) : null}
           </section>

@@ -18,8 +18,11 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "extracted_structures.json",
     "structure_graph.json",
     "week3_pipeline_status.json",
+    "run_audit.json",
     "final_report.md",
     "research_response.json",
+    "market_data_snapshot.json",
+    "data_sanity.json",
 }
 ALLOWED_ARTIFACT_PATHS = {
     *ALLOWED_ARTIFACT_FILENAMES,

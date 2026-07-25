@@ -212,7 +212,7 @@ def test_legacy_v1_identity_remains_traceable():
 def test_ambiguous_match_is_explicit():
     result = map_claim_to_alpha(
         _record(
-            "AI demand is strong, but rich valuation creates downside risk for NVDA.",
+            "AI training demand is rising, but rich valuation creates downside risk for NVDA.",
             direction="neutral",
             factors=["AI Demand", "Valuation Risk"],
         )

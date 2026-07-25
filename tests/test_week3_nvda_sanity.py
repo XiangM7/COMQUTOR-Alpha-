@@ -87,10 +87,24 @@ def test_scores_are_explainable_from_component_breakdowns(tmp_path):
         assert abs(total - alpha["activation_score"]) < 1e-6
 
 
-def test_dominant_alphas_is_non_empty_for_this_fixture(tmp_path):
+def test_dominant_alphas_are_well_formed_when_present(tmp_path):
+    """AI Alpha Mapper Discrimination Sprint: this fixture's A101 score
+    dropped from regime_level (evidence_count=3) to active
+    (evidence_count=2) once the Mapper's new A101 hard gate correctly
+    stopped counting "NVIDIA should benefit as artificial intelligence
+    demand keeps accelerator supply tight." as A101 evidence -- a bare
+    "artificial intelligence demand"/"accelerator supply" mention with no
+    genuine training/accelerator/investment anchor and no co-located change
+    predicate, exactly the over-triggering this Sprint closes (see
+    tests/test_ai_alpha_mapper_discrimination.py). dominant_alphas can
+    legitimately be empty for this fixture now -- Activation/the Structure
+    Graph are otherwise unchanged, so this test now only asserts the shape
+    invariants that must hold whenever an entry is present, matching this
+    file's own "shape and differentiation, not brittle exact scores"
+    philosophy.
+    """
     _, graph, _ = _run_nvda_fixture(tmp_path)
 
-    assert graph["dominant_alphas"]
     for entry in graph["dominant_alphas"]:
         assert entry["status"] in ("dominant", "regime_level")
     scores = [entry["activation_score"] for entry in graph["dominant_alphas"]]

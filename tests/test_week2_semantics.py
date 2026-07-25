@@ -92,7 +92,7 @@ def test_conditional_claim_preserves_conditional_status():
 def test_mixed_claim_is_ambiguous_and_retains_bounded_candidates():
     result = map_claim_to_alpha(
         _record(
-            "AI demand is strong, but rich valuation creates downside risk.",
+            "AI training demand is rising, but rich valuation creates downside risk.",
             factors=["AI Demand", "Valuation Risk"],
         )
     )
@@ -128,7 +128,7 @@ def test_technical_taxonomy_gap_remains_no_match():
 
 def _ambiguous_record():
     return _record(
-        "AI demand is strong, but rich valuation creates downside risk.",
+        "AI training demand is rising, but rich valuation creates downside risk.",
         factors=["AI Demand", "Valuation Risk"],
     )
 
