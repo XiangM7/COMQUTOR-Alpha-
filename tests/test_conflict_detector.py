@@ -429,6 +429,27 @@ class TestQualifyingEvidence:
         item = _outcome_for(result, "A101", "A304")
         assert "MISSING_LEFT_EVIDENCE" in item["reason_codes"]
 
+    def test_context_only_claim_is_excluded_from_either_side(self):
+        """Unified Claim Admissibility Sprint, spec test #3: a context_only
+        claim -- even one fully matched with a qualifying 'activation'
+        relation -- must never become admissible Conflict evidence on
+        either side of a pair."""
+        result = _detect(
+            activation_payload(
+                activation_entry("A101", score=90, direction="positive"),
+                activation_entry("A304", score=90, direction="negative"),
+            ),
+            [
+                match_record("cA", "A101", relation="activation", claim_quality="context_only"),
+                match_record("cB", "A304", relation="activation"),
+            ],
+        )
+        item = _outcome_for(result, "A101", "A304")
+        assert item["outcome"] != "admitted"
+        assert item["evidence_audit"]["alpha_a"]["qualifying_count"] == 0
+        excluded_reasons = {e["reason_code"] for e in item["evidence_audit"]["alpha_a"]["excluded"]}
+        assert "NON_ANALYTICAL_QUALITY" in excluded_reasons
+
 
 class TestDuplicateClaimCorrectness:
     def _activation(self):

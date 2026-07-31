@@ -58,10 +58,18 @@ def match_record(
     source_agent_output_id: str | None = None,
     plausible_alphas: list[str] | None = None,
     candidate_alpha_ids: list[str] | None = None,
+    direction: str = "positive",
+    claim_quality: str = "analytical",
 ) -> dict[str, Any]:
     """Build one raw alpha_matches.json record (the exact JSON artifact
     shape, not the DB-row shape) -- the same shape
-    activation_scorer._gather_alpha_evidence already consumes."""
+    activation_scorer._gather_alpha_evidence already consumes.
+
+    ``claim_quality`` defaults to ``"analytical"``: these fixtures test the
+    Conflict Detector's own admission/formula logic in isolation (Unified
+    Claim Admissibility Sprint's quality gate is a separate, upstream
+    concern), so every synthetic claim is already-quality-gated unless a
+    test explicitly overrides it to exercise routing behavior."""
     evidence_text = evidence if evidence is not None else f"evidence for {claim_id}"
     candidate_ids = candidate_alpha_ids or ([matched_alpha] if matched_alpha else [])
     candidate_scores = [
@@ -75,7 +83,7 @@ def match_record(
         "matched_alpha": matched_alpha if match_status == "matched" else None,
         "matched_alpha_name": matched_alpha if match_status == "matched" else None,
         "score": score,
-        "direction": "positive",
+        "direction": direction,
         "assertion_status": "asserted",
         "semantic_polarity": relation,
         "claim": evidence_text,
@@ -83,6 +91,7 @@ def match_record(
         "reason": "test fixture",
         "plausible_alphas": plausible_alphas or [],
         "candidate_scores": candidate_scores,
+        "claim_quality": claim_quality,
     }
 
 

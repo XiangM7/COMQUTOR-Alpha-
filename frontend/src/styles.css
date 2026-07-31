@@ -338,6 +338,63 @@ a {
   background: var(--color-neutral-bg);
 }
 
+/* -- Replay all -------------------------------------------------------------*/
+
+.replay-all-description {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.status-badge-blocked { background: var(--color-warning-bg); color: var(--color-warning); border-color: var(--color-warning); }
+
+.replay-all-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.replay-all-dialog {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.replay-all-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.replay-all-summary {
+  margin-top: var(--space-4);
+}
+
+.replay-all-summary-headline {
+  font-weight: 600;
+}
+
+.replay-all-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-3);
+}
+
+.replay-all-results-table th,
+.replay-all-results-table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
 /* -- Alpha cards ------------------------------------------------------------*/
 
 .alpha-card-grid {
@@ -649,6 +706,29 @@ a {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   margin-top: var(--space-3);
+}
+
+/* Positive/Negative findings panels: side-by-side on desktop, stacked on
+   narrow screens (media query below). */
+.directional-findings-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.directional-findings-panel {
+  flex: 1 1 320px;
+  min-width: 280px;
+}
+
+.directional-findings-toggle {
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .directional-findings-columns {
+    flex-direction: column;
+  }
 }
 
 /* -- Data Quality panel (Research run page) ---------------------------------*/

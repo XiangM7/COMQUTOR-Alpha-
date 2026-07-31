@@ -159,22 +159,26 @@ def test_gateway_call_budget_prevents_unbounded_retries(tmp_path):
 
 
 def test_structured_adapter_uses_valid_llm_claims(tmp_path):
+    # Complete Claim Coverage Sprint: the LLM only *enriches* an already-
+    # segmented claim -- it must echo the deterministic segment's own
+    # claim/evidence/source_section back verbatim, keyed by segment_id.
     raw_text = "AI demand is rising because GPU orders increased 20%."
+    raw_id = "run1:news_agent:news_report"
     response = {
         "claims": [
             {
-                "claim": "AI demand is rising.",
+                "segment_id": f"{raw_id}:segment:0",
+                "claim": raw_text,
                 "evidence": raw_text,
                 "entities": ["AI", "GPU"],
                 "factors": ["AI Demand", "GPU Demand"],
                 "direction": "positive",
                 "confidence": 0.9,
-                "source_section": "Demand",
+                "source_section": None,
             }
         ]
     }
     gateway = _gateway(tmp_path, _SequenceModel([json.dumps(response)]), max_retries=0)
-    raw_id = "run1:news_agent:news_report"
 
     records = adapt_raw_agent_outputs(
         {"agent_output_id": raw_id, "agent": "news_agent", "raw_output": raw_text},
@@ -187,6 +191,7 @@ def test_structured_adapter_uses_valid_llm_claims(tmp_path):
     assert records[0]["claim_id"] == f"{raw_id}:claim:1"
     assert records[0]["source_agent_output_id"] == raw_id
     assert records[0]["evidence"] == raw_text
+    assert records[0]["direction"] == "positive"
 
 
 def test_structured_adapter_falls_back_after_invalid_llm_fields(tmp_path):
@@ -195,7 +200,8 @@ def test_structured_adapter_falls_back_after_invalid_llm_fields(tmp_path):
         {
             "claims": [
                 {
-                    "claim": "AI demand drives GPU demand.",
+                    "segment_id": "whatever:segment:0",
+                    "claim": raw_text,
                     "evidence": raw_text,
                     "entities": [],
                     "factors": ["AI Demand", "GPU Demand"],

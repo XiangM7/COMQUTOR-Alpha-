@@ -1,0 +1,47 @@
+{
+  "status": "NO_RULE_PROMOTED",
+  "summary": "Audited 12,875 full-coverage claims across 6 historical runs (MSFT, SNDK x2, MU, NVDA, AMD, replayed through the current architecture via comqutor_alpha.replay). 3,050 claims contained relation-like language from the required phrase families; of those, only 20 resolved 2+ canonical factors yet produced zero relation candidates. Manual review labeled 18/20 CORRECTLY_REJECTED and 2/20 AMBIGUOUS_REQUIRES_REVIEW. Zero claims met the TRUE_RELATION_MISSED bar. No candidate rule reached the promotion threshold (>=3 independent TRUE_RELATION_MISSED claims across >=2 agents/runs/tickers, OR a standard-syntax pattern with 2 positive + 3 hard-negative fixtures and 0 new false positives). Per the task's own explicit instruction, no relation/factor production code was modified in response to this finding.",
+  "discovery_set": "SNDK (both the latest 2026-07-27 run and the 2026-07-17 run) -- 2 of the 20 flagged candidates originate from SNDK runs.",
+  "validation_set": "MSFT, MU, NVDA, AMD (4 independent historical runs) -- 18 of the 20 flagged candidates originate here.",
+  "candidates_considered": [
+    {
+      "candidate_id": "missed-018 (CONDITIONAL_ONLY)",
+      "pattern": "Intro clause + colon + 'If X, Y' conditional, where the conditional marker is not clauses[0] of the whole claim",
+      "occurrences": 1,
+      "distinct_agents": 1,
+      "distinct_runs": 1,
+      "distinct_tickers": 1,
+      "supporting_claim_ids": ["4ca7dafa-6ac1-4d94-add0-f6f93b1af150:news_agent:news_report:claim:86"],
+      "negative_control_claim_ids": [],
+      "why_not_promoted": "Below the >=3-independent-claims-across->=2-sources bar (only 1 occurrence, 1 agent, 1 run, 1 ticker); no hard-negative fixtures have been written or tested for this pattern; promoting on a single example risks widening the CONDITIONAL rule family's clause-anchoring in a way that has not been checked against any negative case.",
+      "reason_promoted": null,
+      "files_changed": [],
+      "tests_added": [],
+      "before_results": null,
+      "after_results": null,
+      "known_limitations": "This is a real, plausible rule-family gap (colon-prefixed intro clause before a conditional) worth revisiting once more examples accumulate across future runs."
+    },
+    {
+      "candidate_id": "missed-019 (RELATION_RULE_GAP)",
+      "pattern": "'reduce'-family verb with its two factor mentions split across a relative-clause boundary ('X, which could reduce Y')",
+      "occurrences": 1,
+      "distinct_agents": 1,
+      "distinct_runs": 1,
+      "distinct_tickers": 1,
+      "supporting_claim_ids": ["8d21c047-fc0a-4d94-957d-3787f353a544:news_agent:news_report:claim:48"],
+      "negative_control_claim_ids": [],
+      "why_not_promoted": "Only 1 occurrence in the entire 12,875-claim, 6-run corpus. The audit script's own endpoint identification for this row is a naive heuristic (first two distinct factors mentioned in the claim), not a confirmed grammatical parse -- the true source/target pairing has not been manually confirmed as correct. Promoting a cross-clause-reach widening from one unverified example would risk exactly the kind of generalization-beyond-evidence the task explicitly prohibits.",
+      "reason_promoted": null,
+      "files_changed": [],
+      "tests_added": [],
+      "before_results": null,
+      "after_results": null,
+      "known_limitations": "Needs a second, independently-sourced example (different agent/run/ticker) with a manually-confirmed source/target pairing before this is even a well-formed rule proposal."
+    }
+  ],
+  "rules_promoted": [],
+  "rules_rejected_count": 2,
+  "production_taxonomy_changed": false,
+  "production_relation_grammar_changed": false,
+  "production_factor_aliases_changed": false
+}

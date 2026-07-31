@@ -22,6 +22,7 @@ HTTP responses, run history, and the web UI keep saying ``sentiment``, and
 
 from __future__ import annotations
 
+import contextlib
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -30,6 +31,38 @@ from comqutor_alpha.research_progress import (
     normalize_public_analysts,
 )
 from comqutor_alpha.storage.file_store import resolve_output_root
+
+
+def _deepseek_thinking_scope_for_config(config):
+    """Scope DeepSeek's thinking-mode request injection (see
+    ``comqutor_alpha.llm.deepseek_smoke``) around ``TradingAgentsGraph``
+    construction -- a no-op context manager for every other provider.
+
+    Only the *construction* moment matters: ``OpenAIClient.get_llm()``
+    reads the provider registry's current ``chat_class`` once, at
+    construction time, to decide which client class to instantiate: the
+    constructed LLM client instance's class (and therefore its
+    ``_get_request_payload`` override) is then fixed for that instance's
+    whole lifetime regardless of the registry's state afterward. So the
+    scope only needs to wrap the ``TradingAgentsGraph(...)`` call itself,
+    not the run's entire propagate/stream duration.
+
+    Raises ``ValueError`` immediately (never silently swallowed) if
+    ``TRADINGAGENTS_DEEPSEEK_THINKING`` is set to anything other than
+    "enabled"/"disabled" -- a bad thinking-mode value must fail the run
+    loudly, exactly like every other real-run configuration error here.
+    """
+    provider = str((config or {}).get("llm_provider") or "").strip().lower()
+    if provider != "deepseek":
+        return contextlib.nullcontext()
+
+    from comqutor_alpha.llm.deepseek_smoke import (
+        deepseek_thinking_scope,
+        resolve_deepseek_thinking_value,
+    )
+
+    mode = resolve_deepseek_thinking_value(config.get("deepseek_thinking"))
+    return deepseek_thinking_scope(mode)
 
 # Public HTTP analyst name -> TradingAgents internal analyst key, in the
 # frozen canonical public order (market, sentiment, news, fundamentals).
@@ -128,7 +161,8 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
     except Exception as exc:
         raise RuntimeError(f"Unable to import TradingAgents graph entrypoint: {exc}") from exc
 
-    graph = TradingAgentsGraph(selected_analysts, config=config, debug=False)
+    with _deepseek_thinking_scope_for_config(config):
+        graph = TradingAgentsGraph(selected_analysts, config=config, debug=False)
     final_state, _processed_signal = graph.propagate(
         str(ticker),
         str(analysis_date),
@@ -150,7 +184,8 @@ def _default_streaming_graph_factory(internal_analysts, config):
         from tradingagents.graph.trading_graph import TradingAgentsGraph
     except Exception as exc:
         raise RuntimeError(f"Unable to import TradingAgents graph entrypoint: {exc}") from exc
-    return TradingAgentsGraph(internal_analysts, config=config, debug=False)
+    with _deepseek_thinking_scope_for_config(config):
+        return TradingAgentsGraph(internal_analysts, config=config, debug=False)
 
 ## Report Streaming Milestones
 def _report_stream_milestones(final_state, public_analysts, progress_reporter, reached):

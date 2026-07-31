@@ -12,6 +12,12 @@ from __future__ import annotations
 import re
 from typing import Any
 
+# Bump whenever FACTOR_ALIASES (or its matching semantics) changes in a way
+# that could alter which factor an alias phrase resolves to -- consumed by
+# the architecture-replay lineage metadata (comqutor_alpha/replay/pipeline.py)
+# so a replay can tell whether alias resolution differs from a prior run.
+ALIAS_VERSION = "structure_engine.factor_aliases.v1"
+
 # Mapping of canonical factor labels to known aliases (case-insensitive, whitespace-insensitive).
 FACTOR_ALIASES = {
     "AI Demand": (

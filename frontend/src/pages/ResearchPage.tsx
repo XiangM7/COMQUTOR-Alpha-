@@ -7,6 +7,7 @@ import { ResearchForm } from "../components/ResearchForm";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
 import { EmptyState } from "../components/EmptyState";
+import { ReplayAllPanel } from "../components/ReplayAllPanel";
 import { useResearchSubmission } from "../hooks/useResearchSubmission";
 
 const REAL_EXECUTION_LABELS: Record<string, string> = {
@@ -176,6 +177,8 @@ export function ResearchPage() {
         <h2>Recent research runs</h2>
         <RecentRuns />
       </section>
+
+      <ReplayAllPanel />
 
       <section className="panel comqutor-explainer-panel">
         <h2>What makes COMQUTOR different</h2>

@@ -10,9 +10,9 @@ from comqutor_alpha.structure_engine.alpha_mapper import (
     factor_score,
     keyword_score,
     map_claim_to_alpha,
+    map_structured_records,
     save_alpha_matches,
 )
-
 
 GOLDEN_PATH = Path(__file__).parent / "golden_cases" / "labeled_claims_v1.json"
 
@@ -193,6 +193,38 @@ def test_no_match_does_not_force_bad_alpha():
 
     assert result["match_status"] == "no_match"
     assert result["matched_alpha"] is None
+
+
+# ---------------------------------------------------------------------------
+# Unified Claim Admissibility and Context-Only Routing Sprint
+# ---------------------------------------------------------------------------
+
+
+def test_non_substantive_claim_never_reaches_the_mapper():
+    """Spec test #4: a non_substantive record (e.g. an adapter-error
+    placeholder, or a claim the shared quality gate rejected) must never be
+    scored by map_claim_to_alpha at all, even if its stray text would
+    otherwise contain matchable keywords."""
+    record = _record("AI demand supports GPU demand for NVDA.", factors=["AI Demand", "GPU Demand"])
+    record["claim_quality"] = "non_substantive"
+
+    results = map_structured_records([record])
+
+    assert results == []
+
+
+def test_context_only_claim_is_still_eligible_for_mapping():
+    """CONTEXT_ONLY claims remain eligible for the Mapper (spec: "mapping:
+    Yes, can serve as factor/Alpha context") -- only Activation/Conflict
+    exclude them."""
+    record = _record(
+        "The company reported quarterly revenue of $2.3 billion.", factors=["Revenue Growth"]
+    )
+    record["claim_quality"] = "context_only"
+
+    results = map_structured_records([record])
+
+    assert len(results) == 1
 
 
 def test_legacy_v1_identity_remains_traceable():

@@ -10,7 +10,25 @@ from comqutor_alpha.graph_engine.graph_schema import MVP_ALPHA_IDS, activation_s
 TAXONOMY = load_alpha_taxonomy()
 
 
-def _match(claim_id, agent, alpha_id, relation, *, status="matched", score=0.8, plausible=None, evidence=None):
+def _match(
+    claim_id,
+    agent,
+    alpha_id,
+    relation,
+    *,
+    status="matched",
+    score=0.8,
+    plausible=None,
+    evidence=None,
+    claim_quality="analytical",
+    direction="positive",
+):
+    # These fixtures test the Activation *formula* (relation weighting,
+    # agent agreement, recency, direction strength) in isolation, so every
+    # synthetic claim is tagged as an already-quality-gated "analytical"
+    # claim by default (Unified Claim Admissibility Sprint) -- tests that
+    # specifically exercise context_only/non_substantive routing pass their
+    # own claim_quality/direction override instead.
     record = {
         "claim_id": claim_id,
         "agent": agent,
@@ -22,6 +40,8 @@ def _match(claim_id, agent, alpha_id, relation, *, status="matched", score=0.8, 
         "claim": evidence or f"evidence for {claim_id}",
         "plausible_alphas": plausible if plausible is not None else ([alpha_id] if alpha_id else []),
         "eligible_candidates": [{"alpha_id": alpha_id, "relation": relation}] if alpha_id else [],
+        "claim_quality": claim_quality,
+        "direction": direction,
     }
     return record
 

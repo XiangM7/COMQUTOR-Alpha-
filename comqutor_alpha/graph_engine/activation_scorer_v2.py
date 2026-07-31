@@ -46,6 +46,10 @@ from comqutor_alpha.graph_engine.graph_schema import (
     clamp_percent,
     is_finite_number,
 )
+from comqutor_alpha.structure_engine.claim_quality import (
+    CONSUMER_ACTIVATION,
+    is_claim_eligible,
+)
 from comqutor_alpha.structure_engine.claim_semantics import RISK_ALPHA_IDS
 
 ACTIVATION_V2_FORMULA_VERSION = "activation.v2.evidence_local_structure.v1"
@@ -276,6 +280,10 @@ def _gather_qualifying_evidence(
         if record.get("match_status") != "matched":
             continue
         if str(record.get("matched_alpha") or "") != alpha_id:
+            continue
+        # Unified Claim Admissibility Sprint: context_only/non_substantive
+        # claims must never contribute Activation evidence.
+        if not is_claim_eligible(record, CONSUMER_ACTIVATION):
             continue
         claim_id = str(record.get("claim_id") or "").strip()
         evidence_text = str(record.get("evidence") or record.get("claim") or "").strip()
@@ -509,6 +517,8 @@ def _gather_direction_evidence(
         if record.get("match_status") != "matched":
             continue
         if str(record.get("matched_alpha") or "") != alpha_id:
+            continue
+        if not is_claim_eligible(record, CONSUMER_ACTIVATION):
             continue
         score = record.get("score", None)
         if not is_finite_number(score) or not 0.0 <= float(score) <= 1.0:

@@ -23,6 +23,10 @@ from comqutor_alpha.data_sanity.pipeline import (
 from comqutor_alpha.data_sanity.schema import (
     STATUS_NOT_AVAILABLE as DATA_SANITY_STATUS_NOT_AVAILABLE,
 )
+from comqutor_alpha.graph_engine.evidence_integrity import (
+    EVIDENCE_INTEGRITY_SCHEMA_VERSION,
+    build_alpha_evidence_integrity_payload,
+)
 from comqutor_alpha.graph_engine.graph_schema import (
     GraphSchemaContractError,
     primary_activation_version_for,
@@ -689,6 +693,22 @@ def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
     disclaimer_removed_count = int(structured_metadata.get("disclaimer_removed_count") or 0)
     duplicate_removed_count = int(structured_metadata.get("duplicate_removed_count") or 0)
 
+    # Unified Claim Admissibility and Context-Only Routing Sprint: additive
+    # claim-quality counters, read back from structured_agent_outputs.json's
+    # own metadata (computed once by the adapter's shared quality gate --
+    # never re-derived here).
+    analytical_claim_count = int(structured_metadata.get("analytical_claim_count") or 0)
+    context_only_claim_count = int(structured_metadata.get("context_only_claim_count") or 0)
+    non_substantive_removed_count = int(structured_metadata.get("non_substantive_removed_count") or 0)
+    llm_claims_proposed_count = int(structured_metadata.get("llm_claims_proposed_count") or 0)
+    llm_claims_removed_count = int(structured_metadata.get("llm_claims_removed_count") or 0)
+    deterministic_claims_removed_count = int(
+        structured_metadata.get("deterministic_claims_removed_count") or 0
+    )
+    llm_quality_fallback_count = int(structured_metadata.get("llm_quality_fallback_count") or 0)
+    quality_reason_counts = structured_metadata.get("quality_reason_counts")
+    quality_reason_counts = quality_reason_counts if isinstance(quality_reason_counts, dict) else {}
+
     matches = matches_payload.get("matches")
     matches = matches if isinstance(matches, list) else []
     matched_alpha_count = sum(1 for m in matches if isinstance(m, dict) and m.get("match_status") == "matched")
@@ -780,12 +800,50 @@ def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
     if high_activation_count > 0 and graph_edge_count == 0:
         warnings.append("HIGH_ACTIVATION_WITHOUT_GRAPH_SUPPORT")
 
+    ticker = metadata.get("ticker") or structured_payload.get("ticker") or graph_payload.get("ticker")
+
+    # Regime Evidence Integrity Shadow Layer (Product Findings Closure and
+    # Regime Evidence Integrity Sprint, Track B): an additive, internal-only
+    # diagnostic block -- never surfaced through any public Research API or
+    # Agent Findings projector (this function's own output, run_audit.json,
+    # has no GET route). Computed from exactly the artifacts already loaded
+    # above; never a second read, never a database write, never a change to
+    # John's production Activation score/status/regime gate
+    # (activation_scorer_v2.py is not imported here and is never called by
+    # this block). A defect in this shadow analysis must never take down
+    # the rest of this already-valuable audit payload.
+    alpha_evidence_integrity = None
+    try:
+        if isinstance(records, list) and v2_alphas and isinstance(matches_payload, dict):
+            graph_edges = graph_payload.get("edges")
+            graph_edges = graph_edges if isinstance(graph_edges, list) else []
+            alpha_evidence_integrity = build_alpha_evidence_integrity_payload(
+                run_id=run_id,
+                ticker=str(ticker or ""),
+                alpha_matches_payload=matches_payload,
+                activation_v2_alphas=v2_alphas,
+                graph_edges=graph_edges,
+                structured_records=records,
+            )
+    except Exception as exc:
+        logger.warning(
+            "evidence integrity shadow analysis failed "
+            "(run_id=%s, stage=%s, exc_type=%s)",
+            run_id,
+            "alpha_evidence_integrity",
+            type(exc).__name__,
+        )
+        alpha_evidence_integrity = {
+            "schema_version": EVIDENCE_INTEGRITY_SCHEMA_VERSION,
+            "run_id": run_id,
+            "ticker": ticker,
+            "status": "unavailable",
+        }
+
     return {
         "schema_version": RUN_AUDIT_SCHEMA_VERSION,
         "run_id": run_id,
-        "ticker": metadata.get("ticker")
-        or structured_payload.get("ticker")
-        or graph_payload.get("ticker"),
+        "ticker": ticker,
         "raw_agent_output_count": raw_agent_output_count,
         "raw_claim_count": raw_claim_count,
         "boilerplate_removed_count": boilerplate_removed_count,
@@ -811,7 +869,22 @@ def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
         "data_sanity_critical_count": data_sanity_critical_count,
         "market_data_row_count": market_data_row_count,
         "reported_price_check_count": reported_price_check_count,
+        # Unified Claim Admissibility and Context-Only Routing Sprint:
+        # additive claim-quality audit counters (see
+        # structured_output_adapter.adapt_run_outputs's own metadata).
+        "analytical_claim_count": analytical_claim_count,
+        "context_only_claim_count": context_only_claim_count,
+        "non_substantive_removed_count": non_substantive_removed_count,
+        "llm_claims_proposed_count": llm_claims_proposed_count,
+        "llm_claims_removed_count": llm_claims_removed_count,
+        "deterministic_claims_removed_count": deterministic_claims_removed_count,
+        "llm_quality_fallback_count": llm_quality_fallback_count,
+        "quality_reason_counts": quality_reason_counts,
         "warnings": warnings,
+        # Regime Evidence Integrity Shadow Layer (Track B): additive,
+        # internal-only. None when the graph/activation v2 artifacts are not
+        # yet available for this run (e.g. Week 3 has not completed).
+        "alpha_evidence_integrity": alpha_evidence_integrity,
     }
 
 

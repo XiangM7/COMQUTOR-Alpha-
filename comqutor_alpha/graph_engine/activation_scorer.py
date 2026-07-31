@@ -33,6 +33,10 @@ from comqutor_alpha.graph_engine.graph_schema import (
     activation_status_band,
     clamp_percent,
 )
+from comqutor_alpha.structure_engine.claim_quality import (
+    CONSUMER_ACTIVATION,
+    is_claim_eligible,
+)
 from comqutor_alpha.structure_engine.claim_semantics import (
     OPPORTUNITY_ALPHA_IDS,
     RISK_ALPHA_IDS,
@@ -103,6 +107,13 @@ def _gather_alpha_evidence(
         status = record.get("match_status")
         agent = str(record.get("agent") or "").strip() or None
         evidence_text = str(record.get("evidence") or record.get("claim") or "").strip()
+
+        # Unified Claim Admissibility Sprint: context_only/non_substantive
+        # claims must never contribute Activation evidence -- checked here,
+        # alongside the pre-existing match_status/matched_alpha admission,
+        # rather than by changing the formula below.
+        if not is_claim_eligible(record, CONSUMER_ACTIVATION):
+            continue
 
         if status == "matched" and record.get("matched_alpha") == alpha_id:
             if claim_id in committed:

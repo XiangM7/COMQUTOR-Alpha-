@@ -13,6 +13,10 @@ from comqutor_alpha.structure_engine.ai_alpha_discriminator import (
     AiAlphaGateResult,
     evaluate_ai_alpha_gates,
 )
+from comqutor_alpha.structure_engine.claim_quality import (
+    CONSUMER_MAPPING,
+    is_claim_eligible,
+)
 from comqutor_alpha.structure_engine.claim_semantics import (
     OPPORTUNITY_ALPHA_IDS,
     RISK_ALPHA_IDS,
@@ -545,6 +549,12 @@ def map_claim_to_alpha(
         "ai_alpha_matches": sorted(
             item["alpha_id"] for item in eligible_candidates if item["alpha_id"] in AI_ALPHA_IDS
         ),
+        # Unified Claim Admissibility Sprint: carried through unchanged from
+        # the structured record so Activation/Conflict can read the
+        # adapter's own authoritative classification via
+        # claim_quality.is_claim_eligible() without recomputing it from a
+        # possibly-narrower (Mapper-filtered) factor list.
+        "claim_quality": record.get("claim_quality"),
     }
     return _apply_optional_classifier(
         result,
@@ -569,7 +579,12 @@ def map_structured_records(
     taxonomy = taxonomy or load_alpha_taxonomy()
     results = []
     for record in records:
-        if not isinstance(record, Mapping) or str(record.get("claim") or "").lower() == "unknown":
+        # Unified Claim Admissibility Sprint: the shared quality gate
+        # replaces the old bare "claim == 'unknown'" placeholder check --
+        # every quality class (analytical, context_only-as-Alpha-context,
+        # non_substantive) is now judged the same way every other consumer
+        # judges it, via claim_quality.is_claim_eligible().
+        if not isinstance(record, Mapping) or not is_claim_eligible(record, CONSUMER_MAPPING):
             continue
         results.append(
             map_claim_to_alpha(

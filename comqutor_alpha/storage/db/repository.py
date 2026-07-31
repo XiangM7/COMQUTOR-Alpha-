@@ -56,6 +56,10 @@ from comqutor_alpha.storage.db.week4_persistence import (
     build_week4_rows,
     reconstruct_conflict_result,
 )
+from comqutor_alpha.structure_engine.claim_quality import (
+    CONSUMER_ANALYTICAL_PERSISTENCE,
+    is_claim_eligible,
+)
 from comqutor_alpha.structure_engine.structure_schema import (
     VALID_ASSERTION_STATUSES,
     VALID_DIRECTIONS,
@@ -438,9 +442,27 @@ class GraphPersistenceRepository:
         ticker: str,
         structured_payload: Mapping[str, Any],
     ) -> None:
-        """Transactionally replace one run's public structured claim rows."""
+        """Transactionally replace one run's public structured claim rows.
+
+        Unified Claim Admissibility Sprint: this is the persistence
+        admission boundary -- a non_substantive record (an adapter-error
+        placeholder, or any claim the shared quality gate rejected) is
+        never inserted here, so filtering never depends solely on the UI or
+        a downstream reader remembering to skip it.
+        """
         self._require_supported_dialect()
-        rows = self._agent_output_rows(run_id, ticker, structured_payload)
+        eligible_payload = structured_payload
+        if isinstance(structured_payload, Mapping):
+            records = structured_payload.get("records")
+            if isinstance(records, list):
+                eligible_records = [
+                    record
+                    for record in records
+                    if not isinstance(record, Mapping)
+                    or is_claim_eligible(record, CONSUMER_ANALYTICAL_PERSISTENCE)
+                ]
+                eligible_payload = {**structured_payload, "records": eligible_records}
+        rows = self._agent_output_rows(run_id, ticker, eligible_payload)
         row_ids = [row["id"] for row in rows]
         try:
             with self._engine.begin() as conn:

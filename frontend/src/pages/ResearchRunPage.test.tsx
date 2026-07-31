@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as client from "../api/client";
@@ -156,7 +157,21 @@ describe("ResearchRunPage", () => {
     };
   }
 
-  it("renders agent and direction as two separate DOM elements, never concatenated", async () => {
+  it("splits findings into independent Positive and Negative panels", async () => {
+    mockAgentOutputs([
+      findingRecord({ claim_id: "c1", agent: "market_agent", direction: "positive", claim: "Positive claim about SNDK." }),
+      findingRecord({ claim_id: "c2", agent: "market_agent", direction: "negative", claim: "Negative claim about SNDK." }),
+    ]);
+
+    renderPage();
+
+    await waitFor(() => expect(screen.getByText("Positive findings")).toBeInTheDocument());
+    expect(screen.getByText("Negative findings")).toBeInTheDocument();
+    expect(screen.getByText(/positive claim about sndk/i)).toBeInTheDocument();
+    expect(screen.getByText(/negative claim about sndk/i)).toBeInTheDocument();
+  });
+
+  it("never renders a per-card Direction field -- direction is expressed once by the panel heading", async () => {
     mockAgentOutputs([
       findingRecord({ claim_id: "c1", agent: "market_agent", direction: "negative" }),
     ]);
@@ -164,35 +179,24 @@ describe("ResearchRunPage", () => {
     const { container } = renderPage();
 
     await waitFor(() => expect(screen.getByText("market_agent")).toBeInTheDocument());
-    // Agent and Direction are two independently labeled dt/dd pairs...
     expect(screen.getByText("Agent")).toBeInTheDocument();
-    expect(screen.getByText("Direction")).toBeInTheDocument();
-    const agentValue = screen.getByText("market_agent");
-    const directionValue = screen.getByText("negative");
-    expect(agentValue).not.toBe(directionValue);
-    expect(agentValue.parentElement).not.toBe(directionValue.parentElement);
-    // ...never rendered as one concatenated string/text node, in either order.
-    expect(container.textContent).not.toContain("market_agentnegative");
-    expect(container.textContent).not.toContain("Agent: market_agentDirection:");
+    expect(screen.queryByText("Direction")).not.toBeInTheDocument();
+    expect(container.textContent).not.toContain("Direction");
     // Evidence identical to the claim is not rendered a second time.
     expect(screen.getAllByText(/From a May 1st open/)).toHaveLength(1);
   });
 
-  it("displays a positive-direction finding in the main list", async () => {
-    mockAgentOutputs([findingRecord({ claim_id: "c1", direction: "positive" })]);
+  it("shows Agent, claim, and confidence on a finding card", async () => {
+    mockAgentOutputs([
+      findingRecord({ claim_id: "c1", agent: "market_agent", direction: "positive", confidence: 0.85 }),
+    ]);
     renderPage();
-    await waitFor(() => expect(screen.getByText("positive")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("market_agent")).toBeInTheDocument());
     expect(screen.getByText(/From a May 1st open/)).toBeInTheDocument();
+    expect(screen.getByText(/Confidence 85%/)).toBeInTheDocument();
   });
 
-  it("displays a negative-direction finding in the main list", async () => {
-    mockAgentOutputs([findingRecord({ claim_id: "c1", direction: "negative" })]);
-    renderPage();
-    await waitFor(() => expect(screen.getByText("negative")).toBeInTheDocument());
-    expect(screen.getByText(/From a May 1st open/)).toBeInTheDocument();
-  });
-
-  it("hides an unknown-direction finding from the main list but reports it as hidden", async () => {
+  it("hides an unknown-direction finding from both panels but reports it as not shown", async () => {
     mockAgentOutputs([
       findingRecord({ claim_id: "c1", direction: "positive", claim: "Visible positive claim about SNDK." }),
       findingRecord({ claim_id: "c2", direction: "unknown", claim: "Hidden unknown claim about SNDK." }),
@@ -200,10 +204,12 @@ describe("ResearchRunPage", () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
     expect(screen.queryByText(/hidden unknown claim/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/1 neutral or unclassified findings are hidden from this view/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 neutral or unclassified findings are not shown in this directional view/)
+    ).toBeInTheDocument();
   });
 
-  it("hides a mixed-direction finding from the main list", async () => {
+  it("hides a mixed-direction finding from both panels", async () => {
     mockAgentOutputs([
       findingRecord({ claim_id: "c1", direction: "positive", claim: "Visible positive claim about SNDK." }),
       findingRecord({ claim_id: "c2", direction: "mixed", claim: "Hidden mixed claim about SNDK." }),
@@ -211,26 +217,29 @@ describe("ResearchRunPage", () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
     expect(screen.queryByText(/hidden mixed claim/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/1 neutral or unclassified findings are hidden from this view/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 neutral or unclassified findings are not shown in this directional view/)
+    ).toBeInTheDocument();
   });
 
   it("does not show the hidden-findings note when every finding is directional", async () => {
     mockAgentOutputs([findingRecord({ claim_id: "c1", direction: "positive" })]);
     renderPage();
-    await waitFor(() => expect(screen.getByText("positive")).toBeInTheDocument());
-    expect(screen.queryByText(/hidden from this view/)).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Positive findings")).toBeInTheDocument());
+    expect(screen.queryByText(/not shown in this directional view/)).not.toBeInTheDocument();
   });
 
-  it("shows a directional-empty state plus hidden count when only unknown/mixed findings exist", async () => {
+  it("shows an independent empty state for each panel when only unknown/mixed findings exist", async () => {
     mockAgentOutputs([
       findingRecord({ claim_id: "c1", direction: "unknown" }),
       findingRecord({ claim_id: "c2", direction: "mixed" }),
     ]);
     renderPage();
     await waitFor(() =>
-      expect(screen.getByText(/no directional analyst findings are available for this run/i)).toBeInTheDocument()
+      expect(screen.getByText(/no eligible positive findings were identified/i)).toBeInTheDocument()
     );
-    expect(screen.getByText(/2 neutral or unclassified findings are hidden from this view/)).toBeInTheDocument();
+    expect(screen.getByText(/no eligible negative findings were identified/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 neutral or unclassified findings are not shown in this directional view/)).toBeInTheDocument();
   });
 
   it("does not mutate the original agent-outputs API response object while filtering by direction", async () => {
@@ -240,9 +249,120 @@ describe("ResearchRunPage", () => {
     ]);
     const originalRecords = [...response.structured_agent_outputs];
     renderPage();
-    await waitFor(() => expect(screen.getByText("positive")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Positive findings")).toBeInTheDocument());
     expect(response.structured_agent_outputs).toEqual(originalRecords);
     expect(response.structured_agent_outputs).toHaveLength(2);
+  });
+
+  describe("More/Less expand and collapse", () => {
+    it("shows only the top-ranked (highest confidence) finding by default", async () => {
+      mockAgentOutputs([
+        findingRecord({ claim_id: "c1", direction: "positive", claim: "Lower confidence claim.", confidence: 0.4 }),
+        findingRecord({ claim_id: "c2", direction: "positive", claim: "Highest confidence claim.", confidence: 0.9 }),
+      ]);
+      renderPage();
+      await waitFor(() => expect(screen.getByText(/highest confidence claim/i)).toBeInTheDocument());
+      expect(screen.queryByText(/lower confidence claim/i)).not.toBeInTheDocument();
+      expect(screen.getByText("More (1)")).toBeInTheDocument();
+    });
+
+    it("expands to show every eligible finding (up to 20) when More is clicked", async () => {
+      const user = userEvent.setup();
+      mockAgentOutputs([
+        findingRecord({ claim_id: "c1", direction: "positive", claim: "Highest confidence claim.", confidence: 0.9 }),
+        findingRecord({ claim_id: "c2", direction: "positive", claim: "Lower confidence claim.", confidence: 0.4 }),
+      ]);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("More (1)")).toBeInTheDocument());
+      await user.click(screen.getByText("More (1)"));
+      expect(screen.getByText(/lower confidence claim/i)).toBeInTheDocument();
+      expect(screen.getByText("Less")).toBeInTheDocument();
+    });
+
+    it("caps a direction at 20 displayed findings even when more are eligible", async () => {
+      const user = userEvent.setup();
+      const records = Array.from({ length: 25 }, (_, i) =>
+        findingRecord({
+          claim_id: `c${i}`,
+          direction: "positive",
+          claim: `Positive claim number ${i}.`,
+          confidence: 0.5,
+          claim_index: i,
+        })
+      );
+      mockAgentOutputs(records);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("More (19)")).toBeInTheDocument());
+      await user.click(screen.getByText("More (19)"));
+      expect(screen.getAllByText(/positive claim number/i)).toHaveLength(20);
+    });
+
+    it("collapses back to the first finding when Less is clicked", async () => {
+      const user = userEvent.setup();
+      mockAgentOutputs([
+        findingRecord({ claim_id: "c1", direction: "positive", claim: "Highest confidence claim.", confidence: 0.9 }),
+        findingRecord({ claim_id: "c2", direction: "positive", claim: "Lower confidence claim.", confidence: 0.4 }),
+      ]);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("More (1)")).toBeInTheDocument());
+      await user.click(screen.getByText("More (1)"));
+      await waitFor(() => expect(screen.getByText("Less")).toBeInTheDocument());
+      await user.click(screen.getByText("Less"));
+      expect(screen.queryByText(/lower confidence claim/i)).not.toBeInTheDocument();
+      expect(screen.getByText("More (1)")).toBeInTheDocument();
+    });
+
+    it("never shows More when only one eligible finding exists", async () => {
+      mockAgentOutputs([findingRecord({ claim_id: "c1", direction: "positive" })]);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Positive findings")).toBeInTheDocument());
+      expect(screen.queryByText(/^More/)).not.toBeInTheDocument();
+    });
+
+    it("expands and collapses Positive and Negative panels independently", async () => {
+      const user = userEvent.setup();
+      mockAgentOutputs([
+        findingRecord({ claim_id: "p1", direction: "positive", claim: "Top positive claim.", confidence: 0.9 }),
+        findingRecord({ claim_id: "p2", direction: "positive", claim: "Second positive claim.", confidence: 0.4 }),
+        findingRecord({ claim_id: "n1", direction: "negative", claim: "Top negative claim.", confidence: 0.9 }),
+        findingRecord({ claim_id: "n2", direction: "negative", claim: "Second negative claim.", confidence: 0.4 }),
+      ]);
+      renderPage();
+      await waitFor(() => expect(screen.getAllByText("More (1)")).toHaveLength(2));
+      const positivePanel = screen.getByText("Positive findings").closest("section") as HTMLElement;
+      const moreButtonInPositive = within(positivePanel).getByText("More (1)");
+      await user.click(moreButtonInPositive);
+      expect(screen.getByText(/second positive claim/i)).toBeInTheDocument();
+      expect(screen.queryByText(/second negative claim/i)).not.toBeInTheDocument();
+      const negativePanel = screen.getByText("Negative findings").closest("section") as HTMLElement;
+      expect(within(negativePanel).getByText("More (1)")).toBeInTheDocument();
+    });
+  });
+
+  it("keeps sorting stable and deterministic when confidence ties (evidence, then claim_index, then claim_id)", async () => {
+    mockAgentOutputs([
+      findingRecord({
+        claim_id: "z-claim",
+        direction: "positive",
+        claim: "Tied confidence claim with no separate evidence.",
+        evidence: "Tied confidence claim with no separate evidence.",
+        confidence: 0.5,
+        claim_index: 5,
+      }),
+      findingRecord({
+        claim_id: "a-claim",
+        direction: "positive",
+        claim: "Tied confidence claim with distinct evidence.",
+        evidence: "This is separate supporting evidence text.",
+        confidence: 0.5,
+        claim_index: 3,
+      }),
+    ]);
+    renderPage();
+    // The tied-confidence record with non-empty distinct evidence outranks
+    // the one whose evidence is identical to its own claim text.
+    await waitFor(() => expect(screen.getByText(/tied confidence claim with distinct evidence/i)).toBeInTheDocument());
+    expect(screen.queryByText(/tied confidence claim with no separate evidence/i)).not.toBeInTheDocument();
   });
 
   it("renders a partial run without failing", async () => {

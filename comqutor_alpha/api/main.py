@@ -71,6 +71,7 @@ try:
     from fastapi import FastAPI
 
     from comqutor_alpha.api.routes_alpha_library import router as alpha_library_router
+    from comqutor_alpha.api.routes_replay_all import router as replay_all_router
     from comqutor_alpha.api.routes_research import router as research_router
     from comqutor_alpha.api.routes_system import router as system_router
     from comqutor_alpha.research_jobs import (
@@ -83,7 +84,7 @@ try:
         build_write_repository_from_env,
     )
 
-    def create_app(*, output_root: str | None = None) -> FastAPI:
+    def create_app(*, output_root: str | None = None, replay_output_root: str | None = None) -> FastAPI:
         # Resolved -- and validated -- before anything else. An invalid
         # COMQUTOR_CORS_ORIGINS must never produce a partially-built app
         # (routers registered, lifespan wired, but CORS silently skipped or
@@ -94,6 +95,10 @@ try:
         @asynccontextmanager
         async def lifespan(app: FastAPI):
             app.state.output_root = output_root
+            # Consumed only by POST /api/replay-all (routes_replay_all.py);
+            # None means "use comqutor_alpha.replay.pipeline's own default
+            # (outputs/replays)" -- no other route reads this.
+            app.state.replay_output_root = replay_output_root
             app.state.job_manager = None
 
             # Startup reconciliation: local single-instance semantics --
@@ -128,7 +133,7 @@ try:
 
         app = FastAPI(title="COMQUTOR Alpha API", lifespan=lifespan)
 
-        for router in (alpha_library_router, research_router, system_router):
+        for router in (alpha_library_router, research_router, system_router, replay_all_router):
             if router is not None:
                 app.include_router(router)
 

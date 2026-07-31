@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from comqutor_alpha.structure_engine.structure_extractor import (
     extract_structures_from_records,
     normalize_factor_label,
@@ -333,6 +335,170 @@ def test_single_factor_relation_claim_cannot_produce_an_edge():
     )
 
     assert payload["edges"] == []
+
+
+def test_full_stop_causal_acceptance_sentence():
+    payload = extract_structures_from_records([_record("AI Demand drives Revenue Growth.")])
+    assert _has_edge(payload, "AI Demand", "NVDA Revenue Growth", "causal")
+
+
+def test_reverse_passive_with_adverb_acceptance_sentence():
+    payload = extract_structures_from_records(
+        [_record("Revenue Growth is driven primarily by AI Demand.")]
+    )
+    assert _has_edge(payload, "AI Demand", "NVDA Revenue Growth", "causal")
+
+
+def test_forward_multiword_acceptance_sentence():
+    payload = extract_structures_from_records(
+        [_record("AI CapEx translates into Datacenter CapEx.")]
+    )
+    assert _has_edge(payload, "AI CapEx", "Datacenter CapEx", "causal")
+
+
+def test_reverse_multiword_benefits_from_acceptance_sentence():
+    payload = extract_structures_from_records(
+        [_record("Revenue Growth benefits from AI Demand.")]
+    )
+    assert _has_edge(payload, "AI Demand", "NVDA Revenue Growth", "causal")
+
+
+def test_forward_multiword_pressure_acceptance_sentence():
+    payload = extract_structures_from_records(
+        [_record("Recession Risk puts pressure on Revenue Growth.")]
+    )
+    assert _has_edge(payload, "Recession Risk", "NVDA Revenue Growth", "causal")
+
+
+def test_conditional_acceptance_sentence():
+    payload = extract_structures_from_records(
+        [_record("If AI Demand remains strong, Revenue Growth could accelerate.")]
+    )
+    edge = next(e for e in payload["edges"] if e["edge_type"] == "causal")
+    assert edge["source_label"] == "AI Demand"
+    assert edge["target_label"] == "NVDA Revenue Growth"
+    assert edge["assertion_status"] == "conditional"
+
+
+def test_with_embedded_supportive_acceptance_sentence():
+    payload = extract_structures_from_records(
+        [_record("With AI Demand supporting Revenue Growth, the outlook improves.")]
+    )
+    assert _has_edge(payload, "AI Demand", "NVDA Revenue Growth", "supportive")
+
+
+@pytest.mark.parametrize(
+    "sentence",
+    [
+        "AI Demand discusses Revenue Growth.",
+        "AI Demand includes Revenue Growth.",
+        "AI Demand follows Revenue Growth.",
+        "AI Demand compares Revenue Growth.",
+        "AI Demand mentions Revenue Growth.",
+        "AI Demand and Revenue Growth remain important.",
+        "Revenue Growth increased by 20 percent.",
+        "AI Demand compared to Revenue Growth.",
+        "AI Demand correlated with Revenue Growth.",
+        "AI Demand moved with Revenue Growth.",
+        "If AI Demand and Revenue Growth remain strong, the outlook is uncertain.",
+        "Could AI Demand drive Revenue Growth?",
+    ],
+)
+def test_negative_grammar_variants_produce_no_edge(sentence):
+    payload = extract_structures_from_records([_record(sentence)])
+    assert payload["edges"] == []
+
+
+def test_common_object_of_unresolvable_subject_does_not_relate_two_factors():
+    """"Higher rates" is not a resolvable factor; the claim must stay at 0
+    edges rather than fabricating a Revenue Growth <-> Valuation Risk edge
+    out of the two objects of a shared predicate."""
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "Higher rates pressure Revenue Growth and Valuation Risk.",
+                factors=["Revenue Growth", "Valuation Risk"],
+            )
+        ]
+    )
+    assert payload["edges"] == []
+
+
+def test_new_relation_families_preserve_full_provenance():
+    raw_id = "run1:news_agent:news_report"
+    payload = extract_structures_from_records(
+        [
+            _record(
+                "AI CapEx translates into Datacenter CapEx.",
+                claim_id=f"{raw_id}:claim:1",
+                raw_id=raw_id,
+            )
+        ]
+    )
+    edge = next(e for e in payload["edges"] if e["edge_type"] == "causal")
+    assert edge["source_record_id"] == f"{raw_id}:claim:1"
+    assert edge["source_agent_output_id"] == raw_id
+    assert edge["evidence"]
+    assert edge["source_claim"]
+
+
+# ---------------------------------------------------------------------------
+# Unified Claim Admissibility and Context-Only Routing Sprint
+# ---------------------------------------------------------------------------
+
+
+def test_direction_unknown_analytical_relation_claim_still_enters_structure_graph():
+    """Spec test #1: a claim tagged analytical whose direction is unknown
+    (an unresolved stock direction, not the same thing as "no relation")
+    must still produce nodes and edges -- claim_quality is a separate
+    concern from direction, and structure eligibility never depends on it
+    for ANALYTICAL claims."""
+    record = _record("AI infrastructure demand drives storage demand.")
+    record["direction"] = "unknown"
+    record["claim_quality"] = "analytical"
+
+    payload = extract_structures_from_records([record])
+
+    assert _has_edge(payload, "AI Infrastructure", "Semiconductor Cycle", "causal")
+
+
+def test_non_substantive_claim_contributes_no_node_or_edge():
+    """Spec test #5 (negative side): a non_substantive claim -- even one
+    whose text superficially mentions two factors -- must never seed a
+    Structure Graph node or edge."""
+    record = _record("AI demand drives GPU demand as model training expands.")
+    record["claim_quality"] = "non_substantive"
+
+    payload = extract_structures_from_records([record])
+
+    assert payload["nodes"] == []
+    assert payload["edges"] == []
+
+
+def test_context_only_claim_without_a_relation_contributes_nothing():
+    """CONTEXT_ONLY is only eligible for Structure when relation extraction
+    finds a legal relation for this specific claim -- a bare factual mention
+    of a single factor must not seed a node on its own."""
+    record = _record("The company reported quarterly revenue of $2.3 billion.")
+    record["factors"] = ["Revenue Growth"]
+    record["claim_quality"] = "context_only"
+
+    payload = extract_structures_from_records([record])
+
+    assert payload["nodes"] == []
+    assert payload["edges"] == []
+
+
+def test_context_only_claim_with_a_legal_relation_still_contributes():
+    """The converse: a CONTEXT_ONLY claim whose evidence *does* contain a
+    legal, resolvable relation is still admitted -- context_only routing
+    must never throw away real structural signal."""
+    record = _record("AI CapEx translates into Datacenter CapEx.")
+    record["claim_quality"] = "context_only"
+
+    payload = extract_structures_from_records([record])
+
+    assert _has_edge(payload, "AI CapEx", "Datacenter CapEx", "causal")
 
 
 def test_save_extracted_structures_writes_week2_artifact(tmp_path):

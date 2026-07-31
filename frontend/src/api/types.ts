@@ -544,3 +544,32 @@ export interface ReadinessResponse {
    * unless real_execution is misconfigured. */
   real_execution_reason?: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// POST /api/replay-all -- one-click batch replay of every saved
+// TradingAgents raw output under outputs/runs/ through the current
+// COMQUTOR architecture. Synchronous: the response already contains every
+// run's final outcome, never a queued/polling shape.
+// ---------------------------------------------------------------------------
+
+export type ReplayAllRunStatus = "completed" | "blocked" | "failed";
+
+export interface ReplayAllRunResult {
+  source_run_id: string;
+  ticker: string | null;
+  replay_run_id: string | null;
+  status: ReplayAllRunStatus;
+  output_dir: string | null;
+  error_code: string | null;
+}
+
+export interface ReplayAllResult {
+  status: "completed";
+  total_runs_found: number;
+  completed_count: number;
+  blocked_count: number;
+  failed_count: number;
+  results: ReplayAllRunResult[];
+  provider_calls: number;
+  tradingagents_calls: number;
+}

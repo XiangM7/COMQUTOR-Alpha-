@@ -81,12 +81,22 @@ def test_ready_all_green_disabled_real_execution_is_still_overall_ready(tmp_path
 
     body, ok = readiness_response(job_manager=_FakeJobManager(True), output_root=str(tmp_path))
     assert ok is True
-    assert body == {
-        "status": "ready",
-        "database": "ready",
-        "job_manager": "ready",
-        "real_execution": "disabled",
-        "real_execution_reason": None,
+    assert body["status"] == "ready"
+    assert body["database"] == "ready"
+    assert body["job_manager"] == "ready"
+    assert body["real_execution"] == "disabled"
+    assert body["real_execution_reason"] is None
+    # Requirement 8: readiness must show the real, current default profile
+    # -- never a hardcoded/stale Anthropic label.
+    assert body["profile"] == {
+        "profile_id": "comqutor_deepseek_default_v1",
+        "profile_display_name": "DeepSeek Default Research",
+        "provider": "deepseek",
+        "quick_model": "deepseek-v4-flash",
+        "deep_model": "deepseek-v4-flash",
+        "thinking": "disabled",
+        "max_debate_rounds": 1,
+        "max_risk_discuss_rounds": 1,
     }
 
 
@@ -107,8 +117,11 @@ def test_ready_disabled_never_reported_as_credential_problem(tmp_path, monkeypat
 
 
 def test_ready_misconfigured_when_credential_missing(tmp_path, monkeypatch):
+    # The default profile is DeepSeek -- the gate must check
+    # DEEPSEEK_API_KEY, not ANTHROPIC_API_KEY (which the autouse fixture
+    # always leaves present).
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
 
     db_path = tmp_path / "_comqutor_alpha_graph.db"
     engine = build_engine(f"sqlite:///{db_path}")
@@ -233,7 +246,7 @@ def test_http_ready_route_503_when_misconfigured(tmp_path, monkeypatch):
     from comqutor_alpha.api.main import create_app
 
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
 
     app = create_app(output_root=str(tmp_path))
     with TestClient(app) as client:

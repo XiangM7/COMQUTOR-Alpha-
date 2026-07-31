@@ -129,6 +129,33 @@ def test_replace_is_transactional_idempotent_and_preserves_stable_ids():
     assert repo.count_agent_outputs("run-1") == 2
 
 
+def test_non_substantive_record_is_never_inserted():
+    """Unified Claim Admissibility Sprint, spec test #6 / persistence
+    admission boundary: an adapter-error placeholder (or any record the
+    shared quality gate rejects) must never reach the agent_outputs table,
+    even though it is a structurally valid row on its own."""
+    _, repo = _repo()
+    placeholder = _record(
+        "run-1",
+        "c-placeholder",
+        claim="unknown",
+        evidence="unknown",
+        direction="unknown",
+        confidence=0.0,
+        factors=[],
+        claim_quality="non_substantive",
+        analysis_eligible=False,
+    )
+    real = _record("run-1", "c-real")
+    payload = _payload("run-1", placeholder, real)
+
+    repo.persist_agent_outputs(run_id="run-1", ticker="NVDA", structured_payload=payload)
+
+    stored_ids = {row["claim_id"] for row in repo.list_agent_outputs("run-1")}
+    assert stored_ids == {"c-real"}
+    assert repo.count_agent_outputs("run-1") == 1
+
+
 @pytest.mark.parametrize("bad_confidence", [float("nan"), float("inf"), -0.1, 1.1, "0.8", True])
 def test_invalid_confidence_rejected_without_deleting_prior_rows(bad_confidence):
     _, repo = _repo()

@@ -311,13 +311,13 @@ def test_fake_real_execution_completes_with_server_side_config(tmp_path, monkeyp
         assert marker["allow_real_tradingagents_run"] is True
         # W7: the fixed server Research Profile is the only source of the
         # provider/model configuration -- never an env var, never a client
-        # payload field.
-        assert marker["config"]["llm_provider"] == "anthropic"
-        assert marker["config"]["deep_think_llm"] == "claude-sonnet-4-6"
-        assert marker["config"]["quick_think_llm"] == "claude-sonnet-4-6"
+        # payload field. Default profile is now DeepSeek.
+        assert marker["config"]["llm_provider"] == "deepseek"
+        assert marker["config"]["deep_think_llm"] == "deepseek-v4-flash"
+        assert marker["config"]["quick_think_llm"] == "deepseek-v4-flash"
         assert marker["config"]["output_language"] == "English"
-        assert marker["config"]["max_debate_rounds"] == 3
-        assert marker["config"]["max_risk_discuss_rounds"] == 3
+        assert marker["config"]["max_debate_rounds"] == 1
+        assert marker["config"]["max_risk_discuss_rounds"] == 1
         # Client's attempted "config" override never reached the worker.
         assert marker["config"]["llm_provider"] != "should-be-ignored"
         assert marker["config"]["deep_think_llm"] != "evil-model"

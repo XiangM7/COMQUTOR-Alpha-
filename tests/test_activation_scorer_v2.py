@@ -40,6 +40,8 @@ def _record(
     factor_score=1.0,
     keyword_score=1.0,
     semantic_score=None,
+    claim_quality="analytical",
+    direction="positive",
 ):
     candidate = {
         "alpha_id": alpha_id,
@@ -65,6 +67,12 @@ def _record(
         "factor_score": factor_score,
         "keyword_score": keyword_score,
         "eligible_candidates": [candidate],
+        # These oracles/mutation tests exercise the Activation v2 *formula*
+        # in isolation (Unified Claim Admissibility Sprint's quality gate is
+        # a separate, upstream concern), so every synthetic claim defaults
+        # to an already-quality-gated "analytical" claim.
+        "claim_quality": claim_quality,
+        "direction": direction,
     }
 
 
@@ -1013,6 +1021,8 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
             "score": 0.9,
             "assertion_status": "asserted",
             "eligible_candidates": [{"alpha_id": "A101", "relation": "activation"}],
+            "claim_quality": "analytical",
+            "direction": "positive",
         },
         {
             "claim_id": "c2",
@@ -1024,6 +1034,8 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
             "score": 0.9,
             "assertion_status": "asserted",
             "eligible_candidates": [{"alpha_id": "A304", "relation": "activation"}],
+            "claim_quality": "analytical",
+            "direction": "negative",
         },
     ]
     result = detect_alpha_conflicts(
@@ -1046,3 +1058,41 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
     simulated_max_variant_minimum_activation = max(90.0, 40.0)
     with pytest.raises(AssertionError):
         assert conflict["components"]["minimum_activation"] == simulated_max_variant_minimum_activation
+
+
+# ---------------------------------------------------------------------------
+# Unified Claim Admissibility and Context-Only Routing Sprint
+# ---------------------------------------------------------------------------
+
+
+def test_context_only_claim_contributes_no_activation_evidence():
+    """Spec test #2: a context_only claim -- even one fully matched to an
+    alpha with an 'activation' relation -- must not count as Activation
+    evidence."""
+    record = _record(
+        "c1", "agent_x", "The company reported quarterly revenue of $2.3 billion.", alpha_id="A101"
+    )
+    record["claim_quality"] = "context_only"
+    payload = _payload(record)
+
+    result = _score("A101", payload)
+
+    assert result["unique_evidence_count"] == 0
+    assert result["activation_score"] == 0.0
+    assert result["cap_reason_codes"] == ["NO_QUALIFYING_EVIDENCE"]
+
+
+def test_analytical_claim_with_the_same_relation_does_contribute():
+    """Control: the identical record shape, tagged analytical instead,
+    behaves exactly as it always did -- proving the exclusion above is
+    caused by claim_quality, not by some other change."""
+    record = _record(
+        "c1", "agent_x", "The company reported quarterly revenue of $2.3 billion.", alpha_id="A101"
+    )
+    record["claim_quality"] = "analytical"
+    payload = _payload(record)
+
+    result = _score("A101", payload)
+
+    assert result["unique_evidence_count"] == 1
+    assert result["activation_score"] > 0.0

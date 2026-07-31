@@ -42,6 +42,7 @@ from comqutor_alpha.conflict_engine.conflict_schema import (
     EXCLUDED_EMPTY_EVIDENCE,
     EXCLUDED_INVALID_MATCH_SCORE,
     EXCLUDED_MISSING_CLAIM_ID,
+    EXCLUDED_NON_ANALYTICAL_QUALITY,
     EXCLUDED_NON_COMMITTED_MATCH,
     EXCLUDED_UNSUPPORTED_RELATION,
     EXCLUDED_WRONG_ALPHA,
@@ -81,6 +82,10 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     ACTIVATION_V2_FORMULA_VERSION,
 )
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
+from comqutor_alpha.structure_engine.claim_quality import (
+    CONSUMER_CONFLICT,
+    is_claim_eligible,
+)
 
 # The detector consumes the run's *primary* activation payload: the frozen
 # v1 formula (historical runs) or Activation v2 (new runs). The conflict
@@ -446,6 +451,12 @@ def _gather_qualifying_evidence(
         elif _normalized_text(record.get("matched_alpha")) != alpha_id:
             only_ambiguous_exclusions = False
             excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_WRONG_ALPHA})
+        elif not is_claim_eligible(record, CONSUMER_CONFLICT):
+            # Unified Claim Admissibility Sprint: context_only/non_substantive
+            # claims, and analytical claims without a positive/negative
+            # direction, are never admissible Conflict evidence.
+            only_ambiguous_exclusions = False
+            excluded.append({"claim_id": claim_id, "reason_code": EXCLUDED_NON_ANALYTICAL_QUALITY})
         else:
             only_ambiguous_exclusions = False
             evidence_text = str(

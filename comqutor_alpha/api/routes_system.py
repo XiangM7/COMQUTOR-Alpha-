@@ -84,11 +84,12 @@ def _real_execution_status() -> tuple[str, str | None]:
 
     ``disabled`` is decided *before* any profile or credential check, so a
     deliberately-disabled server is always reported as disabled -- never
-    misreported as an Anthropic-credential problem. When enabled, the fixed
-    Research Profile must build and the ``ANTHROPIC_API_KEY`` must be
-    *present* (presence only -- the value is never validated, read into
-    memory beyond the boolean check, logged, or returned). Never leaks the
-    config dict, provider identity, or any env var value."""
+    misreported as a credential problem. When enabled, the fixed Research
+    Profile must build and its provider's own API key (whichever provider
+    that profile actually names -- DeepSeek by default) must be *present*
+    (presence only -- the value is never validated, read into memory beyond
+    the boolean check, logged, or returned). Never leaks the config dict,
+    provider identity, or any env var value."""
     ctx = server_execution.build_server_execution_context()
     if not ctx["enabled"]:
         return "disabled", None
@@ -97,12 +98,37 @@ def _real_execution_status() -> tuple[str, str | None]:
     return "configured", None
 
 
+def _active_profile_fields() -> dict[str, Any] | None:
+    """Safe, non-secret snapshot of the profile a real request would
+    resolve to right now -- never a credential, never a config value beyond
+    what the profile itself already exposes via ``build_profile_identity``.
+    ``None`` if the profile itself fails to build (reported instead via
+    ``real_execution``/``real_execution_reason``)."""
+    try:
+        from comqutor_alpha.research_profiles import get_active_research_profile
+
+        profile = get_active_research_profile()
+    except Exception:
+        return None
+    return {
+        "profile_id": profile.profile_id,
+        "profile_display_name": profile.display_name,
+        "provider": profile.llm_provider,
+        "quick_model": profile.quick_think_llm,
+        "deep_model": profile.deep_think_llm,
+        "thinking": profile.deepseek_thinking,
+        "max_debate_rounds": profile.max_debate_rounds,
+        "max_risk_discuss_rounds": profile.max_risk_discuss_rounds,
+    }
+
+
 def readiness_response(*, job_manager: Any, output_root: str | None = None) -> tuple[dict[str, Any], bool]:
     """Returns ``(body, overall_ready)``. Overall readiness requires the
     database (migrated through 0005) *and* job manager to both be usable; a
     merely *disabled* (not misconfigured) real-execution capability never
     blocks overall readiness -- only an enabled-but-invalid configuration
-    (broken profile, or missing Anthropic credential) does.
+    (broken profile, or missing credential for the active profile's
+    provider) does.
     """
     database_ready = _database_ready(output_root)
     job_manager_ready = job_manager is not None and bool(job_manager.is_accepting())
@@ -116,6 +142,10 @@ def readiness_response(*, job_manager: Any, output_root: str | None = None) -> t
         "job_manager": "ready" if job_manager_ready else "unavailable",
         "real_execution": real_execution_status,
         "real_execution_reason": real_execution_reason,
+        # Always the real, current default profile -- never a stale/
+        # hardcoded provider label. None only if the profile itself fails
+        # to build (see real_execution_reason for why).
+        "profile": _active_profile_fields(),
     }
     return body, overall_ready
 

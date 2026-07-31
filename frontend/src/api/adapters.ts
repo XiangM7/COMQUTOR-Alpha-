@@ -28,6 +28,8 @@ import type {
   HealthResponse,
   CanonicalResearchResponse,
   ReadinessResponse,
+  ReplayAllResult,
+  ReplayAllRunResult,
   ResearchArtifacts,
   ResearchRunRecord,
   ResearchSubmissionResult,
@@ -828,6 +830,47 @@ export function adaptAgentOutputsResponse(payload: unknown): AdaptResult<AgentOu
 // ---------------------------------------------------------------------------
 // Health / readiness
 // ---------------------------------------------------------------------------
+
+function adaptReplayAllRunResult(value: unknown): AdaptResult<ReplayAllRunResult> {
+  if (!isRecord(value)) return fail("run result is not an object");
+  if (!isString(value.source_run_id)) return fail("missing source_run_id");
+  if (value.status !== "completed" && value.status !== "blocked" && value.status !== "failed") {
+    return fail("unexpected run status");
+  }
+  return ok({
+    source_run_id: value.source_run_id,
+    ticker: nullableString(value.ticker),
+    replay_run_id: nullableString(value.replay_run_id),
+    status: value.status,
+    output_dir: nullableString(value.output_dir),
+    error_code: nullableString(value.error_code),
+  });
+}
+
+export function adaptReplayAllResult(payload: unknown): AdaptResult<ReplayAllResult> {
+  if (!isRecord(payload)) return fail("response is not an object");
+  if (payload.status !== "completed") return fail("unexpected batch status");
+  if (!isNumber(payload.total_runs_found)) return fail("missing total_runs_found");
+  if (!Array.isArray(payload.results)) return fail("missing results array");
+
+  const results: ReplayAllRunResult[] = [];
+  for (const item of payload.results) {
+    const adapted = adaptReplayAllRunResult(item);
+    if (!adapted.ok) return fail(adapted.reason);
+    results.push(adapted.value);
+  }
+
+  return ok({
+    status: "completed",
+    total_runs_found: payload.total_runs_found,
+    completed_count: isNumber(payload.completed_count) ? payload.completed_count : 0,
+    blocked_count: isNumber(payload.blocked_count) ? payload.blocked_count : 0,
+    failed_count: isNumber(payload.failed_count) ? payload.failed_count : 0,
+    results,
+    provider_calls: isNumber(payload.provider_calls) ? payload.provider_calls : 0,
+    tradingagents_calls: isNumber(payload.tradingagents_calls) ? payload.tradingagents_calls : 0,
+  });
+}
 
 export function adaptHealthResponse(payload: unknown): AdaptResult<HealthResponse> {
   if (!isRecord(payload) || payload.status !== "ok") return fail("unexpected health payload");

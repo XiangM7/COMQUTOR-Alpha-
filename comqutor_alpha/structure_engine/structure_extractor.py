@@ -7,6 +7,10 @@ from collections.abc import Iterable, Mapping
 from typing import Any
 
 from comqutor_alpha.storage.file_store import load_json_record, save_json_record
+from comqutor_alpha.structure_engine.claim_quality import (
+    CONSUMER_STRUCTURE,
+    is_claim_eligible,
+)
 from comqutor_alpha.structure_engine.claim_semantics import analyze_claim_semantics
 from comqutor_alpha.structure_engine.factor_normalizer import (
     extract_known_factors_from_text,
@@ -15,79 +19,36 @@ from comqutor_alpha.structure_engine.factor_normalizer import (
     normalize_text,
     term_in_text,
 )
+from comqutor_alpha.structure_engine.relation_grammar import (
+    CONFLICT_WORDS,
+    FORWARD_MULTIWORD_PATTERN,
+    FORWARD_TRANSITIVE_CAUSAL_PATTERN,
+    FORWARD_TRANSITIVE_SUPPORTIVE_PATTERN,
+    REVERSE_MULTIWORD_PATTERN,
+    REVERSE_PASSIVE_PATTERN,
+    RelationCandidate,
+    assertion_status_for,
+    extract_relation_candidates,
+    match_conflicting,
+    plausible_causal_direction,
+    relation_confidence,
+    relation_reason,
+)
 from comqutor_alpha.structure_engine.structure_schema import (
     VALID_ASSERTION_STATUSES,
     VALID_EDGE_TYPES,
     clamp_score,
 )
 
-
 SCHEMA_VERSION = "week2.extracted_structures.v2"
 EXTRACTOR_VERSION = "week2.structure_extractor.v2"
 MAX_LLM_EDGES_PER_CLAIM = 32
 
-CONFLICT_WORDS = (
-    "but",
-    "however",
-    "despite",
-    "although",
-    "while",
-    "yet",
-    "offset",
-    "conflict",
-    "downside risk",
-)
-ACTIVE_CAUSAL_PATTERN = re.compile(
-    r"\b(drive|drives|driving|raise|raises|raising|boost|boosts|boosting|fuel|fuels|"
-    r"fueling|lead to|leads to|leading to|push|pushes|pushing|increase|increases|"
-    r"increasing|expand|expands|expanding|reduce|reduces|reducing|"
-    r"feed(?:s|ing)?(?:\s+back)?\s+into)\b"
-)
-ACTIVE_SUPPORT_PATTERN = re.compile(
-    r"\b(support|supports|supporting|reinforce|reinforces|reinforcing|confirm|confirms|"
-    r"confirming|help|helps|helping)\b"
-)
-PASSIVE_RELATION_PATTERN = re.compile(
-    r"\b(?:is|are|was|were|be|been|being)\s+"
-    r"(?P<verb>driven|raised|boosted|increased|supported|reinforced)\s+by\b"
-    # Participial construction without an auxiliary ("..., driven by the
-    # NAND super-cycle recovery"). Restricted to verbs that are unambiguous
-    # without an auxiliary -- "increased by 20%" must never match.
-    r"|\b(?P<pverb>driven|supported|reinforced|fueled)\s+by\b"
-)
-NEGATED_RELATION_PATTERN = re.compile(
-    r"\b(no|not|never|does not|do not|did not|fails? to|failed to|without)\b"
-)
-CONDITIONAL_MODAL_PATTERN = re.compile(r"\b(could|may|might|would)\b")
-
-# Broad causal ordering avoids a brittle list of exact pairs while still
-# refusing economically reversed edges such as GPU Demand -> AI Demand.
-CAUSAL_RANK = {
-    "AI Demand": 1,
-    "AI CapEx": 1,
-    "Inference Demand": 1,
-    "Rate Cut Cycle": 1,
-    "Liquidity Expansion": 1,
-    "Semiconductor Cycle": 1,
-    "Datacenter CapEx": 2,
-    "AI Infrastructure": 2,
-    "GPU Demand": 2,
-    "Narrative Momentum": 2,
-    "Revenue Growth": 3,
-    "Valuation Risk": 3,
-    "Recession Risk": 3,
-}
-GROWTH_FACTORS = {
-    "AI Demand",
-    "AI CapEx",
-    "GPU Demand",
-    "Revenue Growth",
-    "Liquidity Expansion",
-    "Narrative Momentum",
-    "Semiconductor Cycle",
-    "Inference Demand",
-}
-RISK_FACTORS = {"Valuation Risk", "Recession Risk"}
+# NOTE: CAUSAL_RANK, GROWTH_FACTORS, RISK_FACTORS, CONFLICT_WORDS, and the
+# relation pattern/rule definitions now live in relation_grammar.py (the
+# Structure Graph Deterministic Relation Grammar Sprint's dedicated,
+# priority-ordered rule module); this module imports only what it directly
+# uses (see relation_grammar.py for the full rule catalogue and CAUSAL_RANK).
 
 
 def _slug(value: str) -> str:
@@ -213,149 +174,49 @@ def _edge(
     }
 
 
-def _plausible_causal_direction(source: str, target: str) -> bool:
-    """Refuse economically reversed causal edges (e.g. GPU Demand -> AI
-    Demand). Equal-rank pairs (e.g. Inference Demand -> AI CapEx feedback,
-    AI Infrastructure -> Datacenter CapEx) are admissible when the claim
-    itself asserts the relation explicitly -- only a strictly descending
-    rank is treated as reversed."""
-    source_rank = CAUSAL_RANK.get(source)
-    target_rank = CAUSAL_RANK.get(target)
-    return source_rank is not None and target_rank is not None and source_rank <= target_rank
-
-
-def _assertion_status(text: str, bridge: str) -> str:
-    semantics = analyze_claim_semantics(text)
-    if NEGATED_RELATION_PATTERN.search(bridge) or semantics.negated:
-        return "negated"
-    if semantics.conditional:
-        return "conditional"
-    return "asserted"
-
-
-def _relation_confidence(edge_type: str, assertion_status: str) -> float:
-    if assertion_status == "negated":
-        return 0.35
-    if assertion_status == "conditional":
-        return 0.58
-    return 0.84 if edge_type == "causal" else 0.68
-
-
-def _relation_reason(edge_type: str, assertion_status: str, passive: bool = False) -> str:
-    voice = "passive" if passive else "active"
-    article = "an" if voice == "active" else "a"
-    if assertion_status == "negated":
-        return f"The claim explicitly negates {article} {voice} {edge_type} relation."
-    if assertion_status == "conditional":
-        return f"The claim states a conditional {voice} {edge_type} relation."
-    return f"The claim states an asserted {voice} {edge_type} relation."
+def _candidate_to_edge(
+    candidate: RelationCandidate, text: str, record: Mapping[str, Any]
+) -> dict[str, Any]:
+    # self-loop / causal-rank / risk-factor-supportive guards are already
+    # applied uniformly inside extract_relation_candidates -- every
+    # RelationCandidate reaching this point is already admissible.
+    status = assertion_status_for(text, candidate.bridge)
+    return _edge(
+        candidate.source,
+        candidate.target,
+        candidate.edge_type,
+        candidate.rule_name,
+        record,
+        relation_reason(candidate.edge_type, status, passive=candidate.passive),
+        relation_confidence(candidate.edge_type, status),
+        status,
+    )
 
 
 def _extract_edges(record: Mapping[str, Any], factors: list[str]) -> list[dict[str, Any]]:
-    text = normalize_text(_evidence_text(record))
-    if len(factors) < 2 or not text:
+    evidence_text = _evidence_text(record)
+    if len(factors) < 2 or not evidence_text:
         return []
 
-    edges = []
-    mentions = []
-    for factor in factors:
-        span = factor_mention_span(factor, text)
-        if span is not None:
-            mentions.append((factor, span[0], span[1]))
-    mentions.sort(key=lambda item: item[1])
+    edges = [
+        _candidate_to_edge(candidate, evidence_text, record)
+        for candidate in extract_relation_candidates(evidence_text, factors)
+    ]
 
-    for left_index, (left_factor, _left_start, left_end) in enumerate(mentions):
-        for right_factor, right_start, _right_end in mentions[left_index + 1 :]:
-            bridge = text[left_end:right_start]
-            passive_match = PASSIVE_RELATION_PATTERN.search(bridge)
-            if passive_match:
-                source, target = right_factor, left_factor
-                verb = passive_match.group("verb") or passive_match.group("pverb")
-                edge_type = "supportive" if verb in {"supported", "reinforced"} else "causal"
-                if edge_type == "causal" and not _plausible_causal_direction(source, target):
-                    continue
-                status = _assertion_status(text, bridge)
-                edges.append(
-                    _edge(
-                        source,
-                        target,
-                        edge_type,
-                        "passive_relation_between_factors",
-                        record,
-                        _relation_reason(edge_type, status, passive=True),
-                        _relation_confidence(edge_type, status),
-                        status,
-                    )
-                )
-                continue
-
-            relation_matches = [
-                (match.start(), "causal") for match in ACTIVE_CAUSAL_PATTERN.finditer(bridge)
-            ]
-            relation_matches.extend(
-                (match.start(), "supportive")
-                for match in ACTIVE_SUPPORT_PATTERN.finditer(bridge)
+    text = normalize_text(evidence_text)
+    for risk_factor, growth_factor in match_conflicting(text, factors):
+        edges.append(
+            _edge(
+                risk_factor,
+                growth_factor,
+                "conflicting",
+                "risk_factor_conflicts_with_growth_factor",
+                record,
+                "A risk factor is contrasted with a growth or demand factor.",
+                0.72,
+                "mixed",
             )
-            if relation_matches:
-                _position, edge_type = max(relation_matches, key=lambda item: item[0])
-                if edge_type == "causal" and not _plausible_causal_direction(
-                    left_factor, right_factor
-                ):
-                    continue
-                if edge_type == "supportive" and (
-                    left_factor in RISK_FACTORS or right_factor in RISK_FACTORS
-                ):
-                    continue
-                status = _assertion_status(text, bridge)
-                edges.append(
-                    _edge(
-                        left_factor,
-                        right_factor,
-                        edge_type,
-                        f"active_{edge_type}_between_factors",
-                        record,
-                        _relation_reason(edge_type, status),
-                        _relation_confidence(edge_type, status),
-                        status,
-                    )
-                )
-                continue
-
-            semantics = analyze_claim_semantics(text)
-            if (
-                semantics.conditional
-                and text.startswith("if ")
-                and CONDITIONAL_MODAL_PATTERN.search(text[right_start:])
-                and _plausible_causal_direction(left_factor, right_factor)
-            ):
-                edges.append(
-                    _edge(
-                        left_factor,
-                        right_factor,
-                        "causal",
-                        "if_then_relation_between_factors",
-                        record,
-                        _relation_reason("causal", "conditional"),
-                        _relation_confidence("causal", "conditional"),
-                        "conditional",
-                    )
-                )
-
-    if _has_any(text, CONFLICT_WORDS):
-        for risk_factor in [factor for factor in factors if factor in RISK_FACTORS]:
-            for growth_factor in [factor for factor in factors if factor in GROWTH_FACTORS]:
-                edges.append(
-                    _edge(
-                        risk_factor,
-                        growth_factor,
-                        "conflicting",
-                        "risk_factor_conflicts_with_growth_factor",
-                        record,
-                        "A risk factor is contrasted with a growth or demand factor.",
-                        0.72,
-                        "mixed",
-                    )
-                )
+        )
 
     return edges
 
@@ -371,9 +232,14 @@ def _llm_relation_is_evidence_backed(
     if factor_mention_span(target_factor, text) is None:
         return False
     if edge_type == "causal":
-        return bool(ACTIVE_CAUSAL_PATTERN.search(text) or PASSIVE_RELATION_PATTERN.search(text))
+        return bool(
+            FORWARD_TRANSITIVE_CAUSAL_PATTERN.search(text)
+            or FORWARD_MULTIWORD_PATTERN.search(text)
+            or REVERSE_MULTIWORD_PATTERN.search(text)
+            or REVERSE_PASSIVE_PATTERN.search(text)
+        )
     if edge_type == "supportive":
-        return bool(ACTIVE_SUPPORT_PATTERN.search(text) or "supported by" in text)
+        return bool(FORWARD_TRANSITIVE_SUPPORTIVE_PATTERN.search(text) or "supported by" in text)
     return _has_any(text, CONFLICT_WORDS)
 
 
@@ -427,7 +293,7 @@ def _validated_llm_edges(
             text,
         ):
             raise ValueError("edge is not supported by relation evidence")
-        if edge_type == "causal" and not _plausible_causal_direction(
+        if edge_type == "causal" and not plausible_causal_direction(
             source_factor,
             target_factor,
         ):
@@ -486,19 +352,33 @@ def extract_structures_from_records(
         run_id = run_id or record.get("run_id")
         ticker = ticker or record.get("ticker")
         factors = _extract_factors(record)
+
+        extracted_edges = _llm_edges(llm_gateway, record, factors)
+        if extracted_edges:
+            edges_are_llm_sourced = True
+        else:
+            extracted_edges = _extract_edges(record, factors)
+            edges_are_llm_sourced = False
+
+        # Unified Claim Admissibility Sprint: non_substantive claims never
+        # contribute a node or edge; a context_only claim contributes only
+        # when relation extraction (just computed above) actually found a
+        # legal relation for THIS claim's own evidence and factors -- a bare
+        # factual mention alone must not seed a Structure Graph node.
+        if not is_claim_eligible(record, CONSUMER_STRUCTURE, has_relation_candidate=bool(extracted_edges)):
+            continue
+
+        if edges_are_llm_sourced:
+            llm_edge_count += len(extracted_edges)
+        else:
+            deterministic_edge_count += len(extracted_edges)
+
         for factor in factors:
             node = _make_node(factor, record)
             if node["id"] in nodes:
                 _merge_node(nodes[node["id"]], node)
             else:
                 nodes[node["id"]] = node
-
-        extracted_edges = _llm_edges(llm_gateway, record, factors)
-        if extracted_edges:
-            llm_edge_count += len(extracted_edges)
-        else:
-            extracted_edges = _extract_edges(record, factors)
-            deterministic_edge_count += len(extracted_edges)
 
         for edge in extracted_edges:
             key = (

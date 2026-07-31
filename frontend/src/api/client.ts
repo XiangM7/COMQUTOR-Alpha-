@@ -21,6 +21,7 @@ import {
   adaptConflictsResponse,
   adaptHealthResponse,
   adaptReadinessResponse,
+  adaptReplayAllResult,
   adaptResearchSubmissionResult,
   adaptRunHistoryResponse,
   adaptRunStatusResult,
@@ -35,6 +36,7 @@ import type {
   ConflictsResult,
   HealthResponse,
   ReadinessResponse,
+  ReplayAllResult,
   ResearchSubmissionRequest,
   ResearchSubmissionResult,
   RunHistoryResult,
@@ -251,6 +253,11 @@ export async function getResearchHistory(
     return body;
   }
   return adaptOrThrow(adaptRunHistoryResponse(body));
+}
+
+export async function replayAllSavedOutputs(options: RequestOptions = {}): Promise<ReplayAllResult> {
+  const body = await performRequest("/api/replay-all", { method: "POST", signal: options.signal });
+  return adaptOrThrow(adaptReplayAllResult(body));
 }
 
 export async function getHealth(options: RequestOptions = {}): Promise<HealthResponse> {

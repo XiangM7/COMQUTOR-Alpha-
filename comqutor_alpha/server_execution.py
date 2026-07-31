@@ -16,9 +16,14 @@ place that:
    into the request fingerprint so a profile/model change invalidates stale
    completed-run reuse automatically -- without ever storing the config
    itself in ``research_runs``, a log line, or an HTTP response.
-4. Checks that the Anthropic credential is *present* in the server process
-   environment before a real run may start -- presence only; the value is
-   never read into a config dict, never logged, never returned.
+4. Checks that the *active profile's own provider* credential is *present*
+   in the server process environment before a real run may start --
+   presence only; the value is never read into a config dict, never logged,
+   never returned. This is provider-aware (``is_provider_credential_present``),
+   not hardcoded to any one provider: whichever provider the resolved
+   profile actually names (DeepSeek by default) is the one gated on. There
+   is no automatic fallback to a different provider if that credential is
+   missing -- the run fails closed with ``REAL_RUN_CREDENTIAL_MISSING``.
 
 Nothing here reads an API key *value*, a database URL, or any other secret
 -- provider SDKs keep reading their own credentials from the standard
@@ -43,9 +48,12 @@ from comqutor_alpha.research_profiles import (
 
 logger = logging.getLogger(__name__)
 
-# Name of the environment variable holding the Anthropic credential. Only
-# its *presence* is ever checked here -- the value itself is read exclusively
-# by the provider SDK inside TradingAgents.
+# Name of the environment variable holding the Anthropic credential
+# specifically -- used only by is_anthropic_credential_present() (kept for
+# callers that need the Anthropic credential by name, e.g. when the
+# Anthropic profile is explicitly resolved). Only its *presence* is ever
+# checked here -- the value itself is read exclusively by the provider SDK
+# inside TradingAgents.
 ANTHROPIC_API_KEY_ENV = "ANTHROPIC_API_KEY"
 
 _BOOL_TRUE = frozenset({"true", "1", "yes", "on"})
@@ -136,11 +144,35 @@ def resolve_real_analysis_date(analysis_date: str | None) -> str:
     return datetime.now(UTC).date().isoformat()
 
 
+def is_provider_credential_present(provider: str) -> bool:
+    """Presence-only check of the given provider's API-key environment
+    variable, resolved through ``tradingagents.llm_clients.api_key_env.
+    PROVIDER_API_KEY_ENV`` -- the single existing source of truth for which
+    env var each provider's key lives in (never duplicated here). The value
+    is never returned, stored, logged, hashed, or copied anywhere -- only
+    whether a non-blank value exists. A provider with no key env var at all
+    (a keyless local provider) is reported as present -- there is nothing
+    to gate on.
+
+    This is the provider-aware replacement for a single hardcoded provider
+    check: the real-run gate must always check *the active profile's own
+    provider*, whichever one that resolves to, never one fixed provider."""
+    from tradingagents.llm_clients.api_key_env import get_api_key_env
+
+    env_var = get_api_key_env(provider)
+    if env_var is None:
+        return True
+    return bool(os.environ.get(env_var, "").strip())
+
+
 def is_anthropic_credential_present() -> bool:
-    """Presence-only check of ``ANTHROPIC_API_KEY`` in the server process
-    environment. The value is never returned, stored, logged, hashed, or
-    copied anywhere -- only whether a non-blank value exists."""
-    return bool(os.environ.get(ANTHROPIC_API_KEY_ENV, "").strip())
+    """Presence-only check of ``ANTHROPIC_API_KEY`` specifically -- kept for
+    callers that explicitly need the Anthropic credential (e.g. when the
+    Anthropic profile is manually/explicitly resolved). Never used to gate
+    the default real-run profile, which may name a different provider; see
+    ``is_provider_credential_present`` for the provider-aware check that
+    gate actually uses."""
+    return is_provider_credential_present("anthropic")
 
 
 def build_server_tradingagents_config() -> dict[str, Any]:
@@ -156,7 +188,15 @@ def build_server_tradingagents_config() -> dict[str, Any]:
     exception's type name is ever logged, at any log level.
     """
     try:
-        return build_profile_tradingagents_config(get_active_research_profile())
+        profile = get_active_research_profile()
+        config = build_profile_tradingagents_config(profile)
+        if profile.llm_provider == "deepseek":
+            # Not a tradingagents config key (DEFAULT_CONFIG has none such);
+            # carried on the dict purely so comqutor_alpha.runners.
+            # tradingagents_runner can scope the real request's thinking
+            # mode without needing the ResearchProfile object itself.
+            config["deepseek_thinking"] = profile.deepseek_thinking
+        return config
     except (ResearchProfileError, ServerExecutionConfigError) as exc:
         logger.warning(
             "server-side TradingAgents config construction failed (exc_type=%s)",
@@ -254,13 +294,15 @@ def build_server_execution_context() -> dict[str, Any]:
         }
 
     profile_id = str(execution_identity.get("profile_id") or "")
+    provider = str(execution_identity.get("provider_identity") or "")
 
-    if not is_anthropic_credential_present():
+    if not is_provider_credential_present(provider):
         # Enabled with a valid profile but no credential in the server
         # environment: a real run could never start, so this must fail
         # closed *before* any research_runs row is ever claimed. The
         # identity is still returned so fingerprints stay stable -- a
-        # credential is never part of the fingerprint.
+        # credential is never part of the fingerprint. There is no fallback
+        # to a different provider here -- only this exact failure.
         return {
             "enabled": True,
             "config": None,
@@ -284,6 +326,7 @@ __all__ = [
     "ServerExecutionConfigError",
     "is_real_tradingagents_enabled",
     "is_real_force_refresh_enabled",
+    "is_provider_credential_present",
     "is_anthropic_credential_present",
     "resolve_asset_type",
     "validate_real_selected_analysts",

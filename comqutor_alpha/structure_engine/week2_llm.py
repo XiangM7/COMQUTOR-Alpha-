@@ -24,11 +24,14 @@ MAX_PROMPT_PAYLOAD_CHARS = 60_000
 T = TypeVar("T")
 
 _TASK_INSTRUCTIONS = {
-    "structured_claims": (
-        "Extract independent investment claims from the supplied agent report. Return one JSON "
-        "object with a claims array. Each item must contain claim, evidence, entities, factors, "
-        "direction, confidence, and source_section. Evidence must be a verbatim excerpt from the "
-        "report. Omit headings, tables, disclaimers, and decorative text."
+    "claim_batch_enrichment": (
+        "Enrich each already-segmented claim in the supplied segments array. Return one JSON "
+        "object with a claims array containing exactly one item per input segment, matched by "
+        "segment_id. Each item must contain segment_id, claim, evidence, source_section, "
+        "entities, factors, direction, and confidence. claim, evidence, and source_section must "
+        "be returned byte-for-byte identical to the input segment with that segment_id -- never "
+        "rewritten, merged with another segment, or split. Never omit a segment_id and never "
+        "invent one that was not supplied."
     ),
     "alpha_classifier": (
         "Select at most one alpha from allowed_alpha_ids, or defer when the supplied admissible "

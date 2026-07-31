@@ -2,7 +2,9 @@
 
 Covers: real execution disabled by default, the fixed-profile config path
 (never from a client payload, never from a per-request env override), the
-Anthropic credential *presence* gate (value never read/logged/returned),
+provider-aware credential *presence* gate (value never read/logged/
+returned; always the active profile's own provider -- DeepSeek by default,
+never a hardcoded one, and never falls back to a different provider),
 execution-identity hashing (no secrets), analyst allowlist validation, and
 real force_refresh gating.
 """
@@ -79,16 +81,30 @@ def test_enabled_context_uses_fixed_profile_config(monkeypatch):
     ctx = server_execution.build_server_execution_context()
     assert ctx["enabled"] is True
     assert ctx["error"] is None
-    assert ctx["config"]["llm_provider"] == "anthropic"
-    assert ctx["config"]["deep_think_llm"] == "claude-sonnet-4-6"
-    assert ctx["config"]["quick_think_llm"] == "claude-sonnet-4-6"
+    assert ctx["config"]["llm_provider"] == "deepseek"
+    assert ctx["config"]["deep_think_llm"] == "deepseek-v4-flash"
+    assert ctx["config"]["quick_think_llm"] == "deepseek-v4-flash"
     assert ctx["config"]["output_language"] == "English"
-    assert ctx["config"]["max_debate_rounds"] == 3
-    assert ctx["config"]["max_risk_discuss_rounds"] == 3
+    assert ctx["config"]["max_debate_rounds"] == 1
+    assert ctx["config"]["max_risk_discuss_rounds"] == 1
+    assert ctx["config"]["temperature"] == 0.0
+    assert ctx["config"]["deepseek_thinking"] == "disabled"
     assert ctx["profile_id"] == research_profiles.ACTIVE_PROFILE_ID
-    assert ctx["execution_identity"]["provider_identity"] == "anthropic"
-    assert ctx["execution_identity"]["model_identity"] == "claude-sonnet-4-6:claude-sonnet-4-6"
+    assert ctx["execution_identity"]["provider_identity"] == "deepseek"
+    assert ctx["execution_identity"]["model_identity"] == "deepseek-v4-flash:deepseek-v4-flash"
     assert ctx["execution_identity"]["profile_id"] == research_profiles.ACTIVE_PROFILE_ID
+
+
+def test_anthropic_profile_config_still_builds_when_explicitly_resolved(monkeypatch):
+    """Requirement 6: Anthropic remains usable, just not the default."""
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    anthropic = research_profiles.get_research_profile(research_profiles.ANTHROPIC_PROFILE_ID)
+    config = research_profiles.build_profile_tradingagents_config(anthropic)
+    identity = server_execution.build_execution_identity(config)
+    assert config["llm_provider"] == "anthropic"
+    assert "deepseek_thinking" not in config
+    assert identity["provider_identity"] == "anthropic"
+    assert identity["model_identity"] == "claude-sonnet-4-6:claude-sonnet-4-6"
 
 
 def test_backend_url_uses_provider_default_endpoint_resolution():
@@ -118,21 +134,28 @@ def test_only_profile_keys_are_ever_overridden():
     for key, value in config.items():
         if key in research_profiles.PROFILE_CONFIG_KEYS:
             continue
+        if key == "deepseek_thinking":
+            # Additive, non-tradingagents key -- only present for a
+            # DeepSeek-provider profile; deliberately not in DEFAULT_CONFIG.
+            continue
         assert value == DEFAULT_CONFIG[key]
 
 
 # ---------------------------------------------------------------------------
-# Anthropic credential presence gate (presence only -- never the value)
+# Provider-aware credential presence gate (presence only -- never the value)
 # ---------------------------------------------------------------------------
 
 
 def test_credential_present_with_placeholder():
     assert server_execution.is_anthropic_credential_present() is True
+    assert server_execution.is_provider_credential_present("deepseek") is True
+    assert server_execution.is_provider_credential_present("anthropic") is True
 
 
 def test_credential_missing_when_unset(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     assert server_execution.is_anthropic_credential_present() is False
+    assert server_execution.is_provider_credential_present("anthropic") is False
 
 
 def test_credential_blank_counts_as_missing(monkeypatch):
@@ -140,9 +163,26 @@ def test_credential_blank_counts_as_missing(monkeypatch):
     assert server_execution.is_anthropic_credential_present() is False
 
 
+def test_deepseek_credential_missing_when_unset(monkeypatch):
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    assert server_execution.is_provider_credential_present("deepseek") is False
+
+
+def test_deepseek_credential_blank_counts_as_missing(monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "   ")
+    assert server_execution.is_provider_credential_present("deepseek") is False
+
+
+def test_keyless_provider_is_never_gated():
+    assert server_execution.is_provider_credential_present("ollama") is True
+
+
 def test_enabled_without_credential_fails_closed_before_any_claim(monkeypatch):
+    """The default profile is DeepSeek -- the gate must check
+    DEEPSEEK_API_KEY, never ANTHROPIC_API_KEY (which the autouse fixture
+    always leaves present), and must never fall back to Anthropic."""
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     ctx = server_execution.build_server_execution_context()
     assert ctx["enabled"] is True
     assert ctx["config"] is None
@@ -150,6 +190,17 @@ def test_enabled_without_credential_fails_closed_before_any_claim(monkeypatch):
     # Fingerprint identity stays available (a credential is never part of
     # the fingerprint), so cached completed runs remain servable.
     assert ctx["execution_identity"] is not None
+    assert ctx["execution_identity"]["provider_identity"] == "deepseek"
+
+
+def test_missing_anthropic_credential_does_not_block_the_deepseek_default(monkeypatch):
+    """Deleting ANTHROPIC_API_KEY must never affect the (DeepSeek) default
+    profile's gate -- proves there is no cross-provider coupling."""
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    ctx = server_execution.build_server_execution_context()
+    assert ctx["error"] is None
+    assert ctx["config"]["llm_provider"] == "deepseek"
 
 
 def test_credential_value_never_appears_in_context(monkeypatch):

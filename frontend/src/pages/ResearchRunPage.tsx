@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { RunNavigation } from "../components/RunNavigation";
 import { RunStatusBanner } from "../components/RunStatusBanner";
@@ -7,7 +8,7 @@ import { EmptyState } from "../components/EmptyState";
 import { useRunPolling } from "../hooks/useRunPolling";
 import { useResearchRun } from "../hooks/useResearchRun";
 import { describeApiError } from "../api/errors";
-import type { CanonicalResearchResponse, DataSanityWarning } from "../api/types";
+import type { CanonicalResearchResponse, DataSanityWarning, StructuredAgentOutputRecord } from "../api/types";
 
 function shortenRunId(runId: string): string {
   return runId.length > 12 ? `${runId.slice(0, 8)}…${runId.slice(-4)}` : runId;
@@ -17,12 +18,108 @@ function isTerminalStatus(status: string | undefined): boolean {
   return status === "completed" || status === "partial" || status === "failed";
 }
 
-// The Research page's main list only ever shows a clear directional call --
-// "unknown"/"mixed"/missing findings are still valid claims (kept in
-// artifacts/API/DB unchanged) but are a presentation-layer distraction here.
-// This is display-only filtering; it must never mutate the API response.
+// The Research page's directional panels only ever show a clear positive or
+// negative call -- "unknown"/"mixed"/missing findings are still valid claims
+// (kept in artifacts/API/DB unchanged) but are a presentation-layer
+// distraction here. This is display-only filtering; it must never mutate the
+// API response.
 function isDirectionalFinding(direction: string): boolean {
   return direction === "positive" || direction === "negative";
+}
+
+// Section G1: deterministic, reproducible sort -- no importance score, no
+// LLM, no new semantic dedupe. Applied independently within each direction.
+function compareFindings(a: StructuredAgentOutputRecord, b: StructuredAgentOutputRecord): number {
+  if (b.confidence !== a.confidence) {
+    return b.confidence - a.confidence;
+  }
+  const aHasEvidence = Boolean(a.evidence && a.evidence.trim().length > 0);
+  const bHasEvidence = Boolean(b.evidence && b.evidence.trim().length > 0);
+  if (aHasEvidence !== bHasEvidence) {
+    return aHasEvidence ? -1 : 1;
+  }
+  const aIndex = typeof a.claim_index === "number" ? a.claim_index : Number.POSITIVE_INFINITY;
+  const bIndex = typeof b.claim_index === "number" ? b.claim_index : Number.POSITIVE_INFINITY;
+  if (aIndex !== bIndex) {
+    return aIndex - bIndex;
+  }
+  if (a.claim_id < b.claim_id) return -1;
+  if (a.claim_id > b.claim_id) return 1;
+  return 0;
+}
+
+const MAX_FINDINGS_PER_DIRECTION = 20;
+const DEFAULT_FINDINGS_SHOWN = 1;
+
+// One finding card. Direction is never repeated here -- it is already
+// expressed once by the enclosing panel's own heading (Section G3).
+function FindingCard({ record }: { record: StructuredAgentOutputRecord }) {
+  return (
+    <li className="analyst-output-card">
+      <dl className="analyst-output-meta-list">
+        <div className="analyst-output-meta-row">
+          <dt>Agent</dt>
+          <dd>{record.agent}</dd>
+        </div>
+      </dl>
+      <p className="analyst-output-claim">{record.claim}</p>
+      {record.evidence && record.evidence !== record.claim ? (
+        <p className="analyst-output-evidence">{record.evidence}</p>
+      ) : null}
+      <p className="analyst-output-confidence">
+        Confidence {(record.confidence * 100).toFixed(0)}% · <code>{record.claim_id}</code>
+      </p>
+    </li>
+  );
+}
+
+// One direction's panel (Positive or Negative): independent sort, independent
+// default/expand state, capped at MAX_FINDINGS_PER_DIRECTION regardless of
+// how many eligible records exist upstream. This limit is presentation-only
+// -- it never returns to the backend, and never affects the API/artifact/DB.
+function DirectionalFindingsPanel({
+  direction,
+  title,
+  emptyMessage,
+  records,
+}: {
+  direction: "positive" | "negative";
+  title: string;
+  emptyMessage: string;
+  records: StructuredAgentOutputRecord[];
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const directionRecords = records.filter((record) => record.direction === direction);
+  const sorted = [...directionRecords].sort(compareFindings);
+  const eligible = sorted.slice(0, MAX_FINDINGS_PER_DIRECTION);
+  const shown = expanded ? eligible : eligible.slice(0, DEFAULT_FINDINGS_SHOWN);
+  const moreCount = eligible.length - DEFAULT_FINDINGS_SHOWN;
+
+  return (
+    <section className={`panel directional-findings-panel directional-findings-panel-${direction}`}>
+      <h3>{title}</h3>
+      {eligible.length === 0 ? (
+        <EmptyState title={emptyMessage} />
+      ) : (
+        <>
+          <ul className="analyst-output-list">
+            {shown.map((record) => (
+              <FindingCard key={record.claim_id} record={record} />
+            ))}
+          </ul>
+          {moreCount > 0 ? (
+            <button
+              type="button"
+              className="button button-secondary directional-findings-toggle"
+              onClick={() => setExpanded((value) => !value)}
+            >
+              {expanded ? "Less" : `More (${moreCount})`}
+            </button>
+          ) : null}
+        </>
+      )}
+    </section>
+  );
 }
 
 function detailString(details: Record<string, unknown>, key: string): string | null {
@@ -245,38 +342,23 @@ export function ResearchRunPage() {
                 <EmptyState title="No structured analyst outputs yet" />
               ) : (
                 <>
-                  {visibleRecords.length > 0 ? (
-                    <ul className="analyst-output-list">
-                      {visibleRecords.map((record) => (
-                        <li key={record.claim_id} className="analyst-output-card">
-                          <dl className="analyst-output-meta-list">
-                            <div className="analyst-output-meta-row">
-                              <dt>Agent</dt>
-                              <dd>{record.agent}</dd>
-                            </div>
-                            <div className="analyst-output-meta-row">
-                              <dt>Direction</dt>
-                              <dd className={`analyst-output-direction-${record.direction}`}>
-                                {record.direction}
-                              </dd>
-                            </div>
-                          </dl>
-                          <p className="analyst-output-claim">{record.claim}</p>
-                          {record.evidence && record.evidence !== record.claim ? (
-                            <p className="analyst-output-evidence">{record.evidence}</p>
-                          ) : null}
-                          <p className="analyst-output-confidence">
-                            Confidence {(record.confidence * 100).toFixed(0)}% · <code>{record.claim_id}</code>
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <EmptyState title="No directional analyst findings are available for this run." />
-                  )}
+                  <div className="directional-findings-columns">
+                    <DirectionalFindingsPanel
+                      direction="positive"
+                      title="Positive findings"
+                      emptyMessage="No eligible positive findings were identified."
+                      records={allRecords}
+                    />
+                    <DirectionalFindingsPanel
+                      direction="negative"
+                      title="Negative findings"
+                      emptyMessage="No eligible negative findings were identified."
+                      records={allRecords}
+                    />
+                  </div>
                   {hiddenCount > 0 ? (
                     <p className="analyst-output-hidden-note">
-                      {hiddenCount} neutral or unclassified findings are hidden from this view.
+                      {hiddenCount} neutral or unclassified findings are not shown in this directional view.
                     </p>
                   ) : null}
                 </>

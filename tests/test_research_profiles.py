@@ -32,15 +32,49 @@ def _clean_env(monkeypatch):
 
 def test_active_profile_fields_are_frozen():
     profile = research_profiles.get_active_research_profile()
+    assert profile.profile_id == "comqutor_deepseek_default_v1"
+    assert profile.display_name == "DeepSeek Default Research"
+    assert profile.llm_provider == "deepseek"
+    assert profile.quick_think_llm == "deepseek-v4-flash"
+    assert profile.deep_think_llm == "deepseek-v4-flash"
+    assert profile.backend_url is None
+    assert profile.output_language == "English"
+    assert profile.max_debate_rounds == 1
+    assert profile.max_risk_discuss_rounds == 1
+    assert profile.temperature == 0.0
+    assert profile.deepseek_thinking == "disabled"
+
+
+def test_anthropic_profile_still_resolvable_explicitly():
+    """Requirement 6: Anthropic remains a manually-selectable profile, just
+    no longer the default -- get_research_profile(profile_id) resolves it
+    on request."""
+    profile = research_profiles.get_research_profile(research_profiles.ANTHROPIC_PROFILE_ID)
     assert profile.profile_id == "comqutor_anthropic_medium_sonnet46_v1"
     assert profile.display_name == "COMQUTOR Anthropic Medium v1"
     assert profile.llm_provider == "anthropic"
     assert profile.quick_think_llm == "claude-sonnet-4-6"
     assert profile.deep_think_llm == "claude-sonnet-4-6"
-    assert profile.backend_url is None
-    assert profile.output_language == "English"
     assert profile.max_debate_rounds == 3
     assert profile.max_risk_discuss_rounds == 3
+    assert profile.temperature is None
+    assert profile.deepseek_thinking is None
+
+
+def test_no_profile_id_resolves_to_deepseek_default_not_anthropic():
+    """Requirement 3: an unspecified profile_id must resolve to the DeepSeek
+    default, never fall through to the (still-registered) Anthropic profile."""
+    assert research_profiles.get_research_profile(None) == research_profiles.get_active_research_profile()
+    assert research_profiles.get_research_profile("") == research_profiles.get_active_research_profile()
+    resolved = research_profiles.get_research_profile(None)
+    assert resolved.llm_provider == "deepseek"
+    assert resolved.profile_id != research_profiles.ANTHROPIC_PROFILE_ID
+
+
+def test_unknown_profile_id_is_rejected_not_silently_defaulted():
+    with pytest.raises(research_profiles.ResearchProfileError) as exc_info:
+        research_profiles.get_research_profile("not_a_real_profile")
+    assert exc_info.value.reason_code == "RESEARCH_PROFILE_UNKNOWN"
 
 
 def test_profile_dataclass_is_immutable():
@@ -53,16 +87,32 @@ def test_profile_config_applies_exactly_the_profile_keys():
     from tradingagents.default_config import DEFAULT_CONFIG
 
     config = research_profiles.build_profile_tradingagents_config()
+    assert config["llm_provider"] == "deepseek"
+    assert config["quick_think_llm"] == "deepseek-v4-flash"
+    assert config["deep_think_llm"] == "deepseek-v4-flash"
+    assert config["backend_url"] is None
+    assert config["output_language"] == "English"
+    assert config["max_debate_rounds"] == 1
+    assert config["max_risk_discuss_rounds"] == 1
+    assert config["temperature"] == 0.0
+    for key, value in config.items():
+        if key not in research_profiles.PROFILE_CONFIG_KEYS:
+            # deepseek_thinking is carried on the config additively by
+            # server_execution.build_server_tradingagents_config, not by
+            # build_profile_tradingagents_config itself -- never present here.
+            assert key != "deepseek_thinking"
+            assert value == DEFAULT_CONFIG[key]
+
+
+def test_explicit_anthropic_profile_config_still_applies_its_own_keys():
+    anthropic = research_profiles.get_research_profile(research_profiles.ANTHROPIC_PROFILE_ID)
+    config = research_profiles.build_profile_tradingagents_config(anthropic)
     assert config["llm_provider"] == "anthropic"
     assert config["quick_think_llm"] == "claude-sonnet-4-6"
     assert config["deep_think_llm"] == "claude-sonnet-4-6"
-    assert config["backend_url"] is None
-    assert config["output_language"] == "English"
     assert config["max_debate_rounds"] == 3
     assert config["max_risk_discuss_rounds"] == 3
-    for key, value in config.items():
-        if key not in research_profiles.PROFILE_CONFIG_KEYS:
-            assert value == DEFAULT_CONFIG[key]
+    assert config["temperature"] is None
 
 
 def test_profile_config_never_mutates_default_config():
@@ -102,6 +152,13 @@ def test_invalid_profile_variants_are_rejected(overrides):
 def test_display_name_lookup():
     assert (
         research_profiles.display_name_for_profile_id(research_profiles.ACTIVE_PROFILE_ID)
+        == "DeepSeek Default Research"
+    )
+    # The registry looks up ANY registered profile, not just the current
+    # default -- a historical run recorded under the (still valid,
+    # manually-selectable) Anthropic profile must still display correctly.
+    assert (
+        research_profiles.display_name_for_profile_id(research_profiles.ANTHROPIC_PROFILE_ID)
         == "COMQUTOR Anthropic Medium v1"
     )
     assert research_profiles.display_name_for_profile_id("unknown_profile") is None
@@ -217,18 +274,21 @@ def test_http_model_and_config_fields_cannot_override_the_profile(tmp_path, monk
     records = repo.list_research_run_records(limit=10)
     assert len(records) == 1
     # The claimed row records only the server-fixed identity labels.
-    assert records[0]["provider_identity"] == "anthropic"
-    assert records[0]["model_identity"] == "claude-sonnet-4-6:claude-sonnet-4-6"
+    assert records[0]["provider_identity"] == "deepseek"
+    assert records[0]["model_identity"] == "deepseek-v4-flash:deepseek-v4-flash"
 
 
 def test_post_returns_503_before_claim_when_credential_missing(tmp_path, monkeypatch):
+    """Requirement 6: DEEPSEEK_API_KEY missing must fail closed -- and must
+    never silently fall back to Anthropic even though ANTHROPIC_API_KEY is
+    present (the autouse _dummy_api_keys fixture always sets it)."""
     from fastapi.testclient import TestClient
 
     from comqutor_alpha.api.main import create_app
     from comqutor_alpha.storage.db.repository import build_write_repository_from_env
 
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
 
     app = create_app(output_root=str(tmp_path))
     with TestClient(app) as client:
@@ -237,6 +297,7 @@ def test_post_returns_503_before_claim_when_credential_missing(tmp_path, monkeyp
     assert response.status_code == 503
     body = response.json()
     assert body["error_code"] == "REAL_RUN_CREDENTIAL_MISSING"
+    assert "DEEPSEEK" not in str(body)
     assert "ANTHROPIC" not in str(body)
     # No queued row was ever created.
     repo = build_write_repository_from_env(str(tmp_path))

@@ -132,6 +132,11 @@ EXCLUDED_DUPLICATE_CLAIM = "DUPLICATE_CLAIM"
 EXCLUDED_EMPTY_EVIDENCE = "EMPTY_EVIDENCE"
 EXCLUDED_UNSUPPORTED_RELATION = "UNSUPPORTED_RELATION"
 EXCLUDED_INVALID_MATCH_SCORE = "INVALID_MATCH_SCORE"
+# Unified Claim Admissibility Sprint: a context_only or non_substantive
+# claim (or an analytical claim whose direction is not positive/negative)
+# is never admissible Conflict evidence -- see
+# structure_engine.claim_quality.is_claim_eligible(consumer="conflict").
+EXCLUDED_NON_ANALYTICAL_QUALITY = "NON_ANALYTICAL_QUALITY"
 
 
 # (upper_bound_inclusive, level) evaluated in order; the first band whose
@@ -241,6 +246,7 @@ __all__ = [
     "EXCLUDED_EMPTY_EVIDENCE",
     "EXCLUDED_UNSUPPORTED_RELATION",
     "EXCLUDED_INVALID_MATCH_SCORE",
+    "EXCLUDED_NON_ANALYTICAL_QUALITY",
     "is_finite_number",
     "clamp_percent",
     "conflict_level",

@@ -671,10 +671,241 @@ def test_agent_number_is_corrupted(tmp_path):
     assert result["error_code"] == "AGENT_OUTPUTS_CORRUPTED"
 
 
+def test_stamped_non_substantive_record_never_shown(tmp_path):
+    records = [_sample_record("c1", run_id="pf_non_substantive_run", claim_quality="non_substantive")]
+    _seed_run(tmp_path, "pf_non_substantive_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_non_substantive_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert result["structured_agent_outputs"] == []
+    assert result["count"] == 0
+
+
+def test_stamped_context_only_record_hidden_by_default(tmp_path):
+    records = [_sample_record("c1", run_id="pf_context_only_run", claim_quality="context_only")]
+    _seed_run(tmp_path, "pf_context_only_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_context_only_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert result["structured_agent_outputs"] == []
+    assert result["count"] == 0
+
+
+def test_stamped_analytical_record_is_shown(tmp_path):
+    records = [_sample_record("c1", run_id="pf_analytical_run", claim_quality="analytical")]
+    _seed_run(tmp_path, "pf_analytical_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_analytical_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert [r["claim_id"] for r in result["structured_agent_outputs"]] == ["c1"]
+    assert result["count"] == 1
+
+
+def test_historical_record_missing_claim_quality_meta_commentary_hidden(tmp_path):
+    """Spec worked example: claim="Let me synthesize everything." with no
+    claim_quality field must be ephemerally classified NON_SUBSTANTIVE and
+    hidden -- computed fresh at read time, never written back to the
+    artifact on disk."""
+    records = [
+        _sample_record(
+            "c1",
+            run_id="pf_legacy_meta_run",
+            claim="Let me synthesize everything.",
+            evidence="Let me synthesize everything.",
+            direction="unknown",
+        )
+    ]
+    records[0].pop("claim_quality", None)
+    run_dir = _seed_run(tmp_path, "pf_legacy_meta_run", structured_records=records)
+    artifact_path = run_dir / "structured_agent_outputs.json"
+    before_bytes = artifact_path.read_bytes()
+
+    result = get_agent_outputs_response("pf_legacy_meta_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert result["structured_agent_outputs"] == []
+    assert result["count"] == 0
+    assert artifact_path.read_bytes() == before_bytes
+
+
+def test_historical_record_missing_claim_quality_analytical_fact_shown(tmp_path):
+    """Spec worked example: claim="Revenue declined 12% year over year."
+    with no claim_quality field must be ephemerally classified ANALYTICAL
+    and returned."""
+    records = [
+        _sample_record(
+            "c1",
+            run_id="pf_legacy_analytical_run",
+            claim="Revenue declined 12% year over year.",
+            evidence="Revenue declined 12% year over year.",
+            direction="negative",
+        )
+    ]
+    records[0].pop("claim_quality", None)
+    _seed_run(tmp_path, "pf_legacy_analytical_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_legacy_analytical_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert [r["claim_id"] for r in result["structured_agent_outputs"]] == ["c1"]
+
+
+def test_historical_record_missing_claim_quality_context_fact_hidden_by_default(tmp_path):
+    """Spec worked example: claim="The company operates three fabrication
+    facilities." with no claim_quality field must be ephemerally classified
+    CONTEXT_ONLY and hidden by default."""
+    records = [
+        _sample_record(
+            "c1",
+            run_id="pf_legacy_context_run",
+            claim="The company operates three fabrication facilities.",
+            evidence="The company operates three fabrication facilities.",
+            direction="unknown",
+        )
+    ]
+    records[0].pop("claim_quality", None)
+    _seed_run(tmp_path, "pf_legacy_context_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_legacy_context_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert result["structured_agent_outputs"] == []
+
+
+def test_safe_default_unknown_placeholder_hidden_regardless_of_auto_injected_entity(tmp_path):
+    """claim="unknown"/confidence=0 must never reach Agent Findings even
+    though `entities` still carries the run's own auto-injected ticker."""
+    records = [
+        _sample_record(
+            "c1",
+            run_id="pf_safe_default_run",
+            claim="unknown",
+            evidence="unknown",
+            direction="unknown",
+            confidence=0.0,
+            entities=["NVDA"],
+        )
+    ]
+    records[0].pop("claim_quality", None)
+    _seed_run(tmp_path, "pf_safe_default_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_safe_default_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert result["structured_agent_outputs"] == []
+
+
+def test_total_count_reflects_only_displayable_findings(tmp_path):
+    records = [
+        _sample_record("c-hidden-1", run_id="pf_mixed_run", claim_quality="non_substantive"),
+        _sample_record("c-shown-1", run_id="pf_mixed_run", claim_quality="analytical"),
+        _sample_record("c-hidden-2", run_id="pf_mixed_run", claim_quality="context_only"),
+        _sample_record("c-shown-2", run_id="pf_mixed_run", claim_quality="analytical"),
+        _sample_record("c-hidden-3", run_id="pf_mixed_run", claim_quality="non_substantive"),
+    ]
+    _seed_run(tmp_path, "pf_mixed_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_mixed_run", output_root=tmp_path)
+
+    assert result["count"] == 2
+    assert len(result["structured_agent_outputs"]) == 2
+    assert {r["claim_id"] for r in result["structured_agent_outputs"]} == {"c-shown-1", "c-shown-2"}
+
+
+def test_ordering_preserved_after_filtering(tmp_path):
+    """Filtering must never reorder -- the shown records must keep their
+    original relative order even with hidden records sitting between,
+    before, and after them."""
+    records = [
+        _sample_record("c-shown-1", run_id="pf_order_run", claim_quality="analytical"),
+        _sample_record("c-hidden-1", run_id="pf_order_run", claim_quality="non_substantive"),
+        _sample_record("c-hidden-2", run_id="pf_order_run", claim_quality="context_only"),
+        _sample_record("c-shown-2", run_id="pf_order_run", claim_quality="analytical"),
+        _sample_record("c-hidden-3", run_id="pf_order_run", claim_quality="non_substantive"),
+        _sample_record("c-shown-3", run_id="pf_order_run", claim_quality="analytical"),
+    ]
+    _seed_run(tmp_path, "pf_order_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_order_run", output_root=tmp_path)
+
+    assert [r["claim_id"] for r in result["structured_agent_outputs"]] == [
+        "c-shown-1",
+        "c-shown-2",
+        "c-shown-3",
+    ]
+
+
+def test_filtered_response_is_deterministic_across_repeated_calls(tmp_path):
+    records = [
+        _sample_record("c-hidden", run_id="pf_determinism_run", claim_quality="context_only"),
+        _sample_record("c-shown", run_id="pf_determinism_run", claim_quality="analytical"),
+    ]
+    _seed_run(tmp_path, "pf_determinism_run", structured_records=records)
+
+    first = get_agent_outputs_response("pf_determinism_run", output_root=tmp_path)
+    second = get_agent_outputs_response("pf_determinism_run", output_root=tmp_path)
+
+    assert first == second
+
+
+def test_security_whitelist_still_enforced_alongside_quality_filtering(tmp_path):
+    """The product_findings gate is an *additional* filter layered on top
+    of the W4.3 whitelist projector -- it must never weaken it. An
+    ANALYTICAL record smuggling raw_output/full_transcript must still have
+    those fields stripped even though it passes the quality gate."""
+    records = [
+        _sample_record(
+            "c1",
+            run_id="pf_whitelist_run",
+            claim_quality="analytical",
+            raw_output="full free-text analyst report that must never leak " * 5,
+            full_transcript="entire bull/bear debate transcript " * 5,
+        )
+    ]
+    _seed_run(tmp_path, "pf_whitelist_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_whitelist_run", output_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert len(result["structured_agent_outputs"]) == 1
+    serialized = json.dumps(result)
+    assert "raw_output" not in serialized
+    assert "full_transcript" not in serialized
+    assert "must never leak" not in serialized
+    assert set(result["structured_agent_outputs"][0]).issubset(PUBLIC_STRUCTURED_OUTPUT_FIELDS)
+
+
+def test_no_internal_quality_metadata_leaks_into_response(tmp_path):
+    records = [
+        _sample_record("c1", run_id="pf_no_leak_run", claim_quality="analytical"),
+        _sample_record("c2", run_id="pf_no_leak_run", claim_quality="context_only"),
+    ]
+    _seed_run(tmp_path, "pf_no_leak_run", structured_records=records)
+
+    result = get_agent_outputs_response("pf_no_leak_run", output_root=tmp_path)
+
+    serialized = json.dumps(result)
+    assert "claim_quality" not in serialized
+    assert "feature_flags" not in serialized
+    assert "reason_code" not in serialized
+
+
 @pytest.mark.parametrize("direction", sorted(VALID_DIRECTIONS))
 def test_every_valid_direction_is_returned_unchanged(tmp_path, direction):
+    # This test is about the whitelist projection passing `direction`
+    # through unchanged, not about claim-quality classification -- the
+    # sample claim text carries no text-level analytical signal, so for
+    # direction="neutral"/"unknown" it would otherwise classify as
+    # CONTEXT_ONLY and be hidden by the Product Findings Closure Sprint's
+    # default-hidden rule. Stamping claim_quality="analytical" directly
+    # decouples this test's actual concern from that gate.
     run_id = f"valid_direction_{direction}_run"
-    records = [_sample_record("c1", run_id=run_id, direction=direction)]
+    records = [
+        _sample_record("c1", run_id=run_id, direction=direction, claim_quality="analytical")
+    ]
     _seed_run(tmp_path, run_id, structured_records=records)
 
     result = get_agent_outputs_response(run_id, output_root=tmp_path)

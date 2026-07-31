@@ -15,6 +15,28 @@ already-valid fields* are safe to expose publicly, so a structured record
 that was tampered with (or a future adapter change that starts embedding
 ``raw_output``/``prompt``/``final_state``/etc. inside a "structured" record)
 can never smuggle that content through this endpoint.
+
+Product Findings Closure Sprint: every candidate record (DB row or legacy
+artifact record) is additionally required to pass
+``claim_quality.is_claim_eligible(record, "product_findings")`` before it is
+kept -- reusing the same shared quality gate every other consumer (Mapper,
+Structure Extractor, Activation, Conflict, persistence) already calls,
+never a second, locally-invented classification. A record with no stamped
+``claim_quality`` (any DB row, since ``claim_quality`` is not a persisted
+column, or a legacy pre-Sprint artifact) is classified ephemerally, at read
+time, from its own already-persisted fields (claim/evidence/direction/
+entities/factors/assertion_status) -- this never mutates the record, the
+database, or the source artifact. The eligibility check runs on the raw
+record, before whitelist projection (``claim_quality`` itself is not, and
+never becomes, a public field); ``NON_SUBSTANTIVE`` records are always
+dropped and ``CONTEXT_ONLY`` records are dropped by this consumer's default
+(hidden), so only ``ANALYTICAL`` claims -- the same ones every other
+downstream consumer treats as real evidence -- reach the response. This
+runs for every candidate record independent of pagination (this endpoint
+returns one run's full eligible set in a single response, so ``count``
+always equals the number of items actually present in
+``structured_agent_outputs``, i.e. the number of *displayable* findings,
+never the raw pre-filter row count).
 """
 
 from __future__ import annotations
@@ -29,6 +51,10 @@ from comqutor_alpha.storage.db.repository import (
     build_repository_from_env,
 )
 from comqutor_alpha.storage.file_store import run_dir_for, validate_run_id_for_path
+from comqutor_alpha.structure_engine.claim_quality import (
+    CONSUMER_PRODUCT_FINDINGS,
+    is_claim_eligible,
+)
 from comqutor_alpha.structure_engine.structure_schema import VALID_DIRECTIONS
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     MAX_CLAIM_CHARS,
@@ -285,10 +311,20 @@ def _read_structured_payload(run_id: str, output_root: Any) -> dict[str, Any]:
     if not isinstance(raw_records, list) or any(not isinstance(item, dict) for item in raw_records):
         raise AgentOutputsReadError(_CORRUPTED)
 
-    # Order preserved: projected in the same sequence records were read.
-    public_records = [
-        _project_public_record(record, run_id=run_id, ticker=ticker) for record in raw_records
-    ]
+    # Order preserved: appended in the same sequence records were read.
+    # Every record is still structurally validated and whitelist-projected
+    # (same as before this Sprint) -- a corrupt record anywhere in the
+    # artifact still fails the whole response closed. The product_findings
+    # eligibility check runs on the *raw* record (the only place
+    # ``claim_quality`` -- stamped or ephemerally recomputed -- is still
+    # visible) and only decides whether the already-projected result is
+    # kept, so it can never weaken the corruption check above or the
+    # whitelist projection below.
+    public_records = []
+    for record in raw_records:
+        projected = _project_public_record(record, run_id=run_id, ticker=ticker)
+        if is_claim_eligible(record, CONSUMER_PRODUCT_FINDINGS):
+            public_records.append(projected)
 
     return {"ticker": ticker, "schema_version": schema_version, "records": public_records}
 
@@ -353,10 +389,19 @@ def get_agent_outputs_response(
     if database_records:
         ticker = database_records[0]["ticker"]
         try:
-            public_records = [
-                _project_public_record(record, run_id=safe_run_id, ticker=ticker)
-                for record in database_records
-            ]
+            # Same pattern as the legacy-artifact path below: every DB row
+            # is still structurally validated and whitelist-projected
+            # unconditionally (no regression to the corruption check), then
+            # kept only if the shared quality gate admits it for
+            # product_findings. ``claim_quality`` is never a persisted DB
+            # column, so this always runs the ephemeral (read-time-only,
+            # never written back) classification path for every row --
+            # including rows inserted before this Sprint existed.
+            public_records = []
+            for record in database_records:
+                projected = _project_public_record(record, run_id=safe_run_id, ticker=ticker)
+                if is_claim_eligible(record, CONSUMER_PRODUCT_FINDINGS):
+                    public_records.append(projected)
         except AgentOutputsReadError:
             return _error_response(safe_run_id, "AGENT_OUTPUTS_CORRUPTED")
         return {
