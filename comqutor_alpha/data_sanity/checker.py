@@ -402,6 +402,14 @@ def check_reported_prices(reported_prices: list[dict], rows: list[dict]) -> list
         date_resolution = extraction.get("date_resolution")
         if not reported_date or reported_price is None:
             continue
+        # Structure Integrity Repair Sprint, Track 3: a numeric candidate the
+        # extractor has already classified as ineligible (a technical
+        # indicator such as a moving average, or an unresolved role) is never
+        # compared against a trading session's OHLC range -- absence of the
+        # field (older artifacts/callers predating this field) defaults to
+        # eligible so historical behavior is unchanged.
+        if extraction.get("daily_range_check_eligible") is False:
+            continue
 
         matched_session = _nearest_prior_session(rows_by_date, reported_date)
         if matched_session is None:
@@ -530,11 +538,29 @@ def run_checks(
     reported_price_warnings: list[dict] = []
     if reported_price_checks_available:
         reported_price_warnings = check_reported_prices(reported_prices, rows)
+        semantic_role_counts: dict[str, int] = {}
+        daily_range_eligible_count = 0
+        skipped_by_role_count = 0
+        for extraction in reported_prices:
+            role = extraction.get("semantic_role")
+            if role:
+                semantic_role_counts[role] = semantic_role_counts.get(role, 0) + 1
+            if extraction.get("daily_range_check_eligible") is False:
+                skipped_by_role_count += 1
+            elif extraction.get("daily_range_check_eligible") is not None:
+                daily_range_eligible_count += 1
         checks.append(
             {
                 "name": "reported_price_cross_check",
                 "status": "ok",
                 "evaluated_count": len(reported_prices),
+                # Structure Integrity Repair Sprint, Track 3 (additive):
+                # numeric-semantics breakdown -- never overwrites
+                # evaluated_count, only explains how much of it was actually
+                # eligible for a daily-OHLC-range comparison.
+                "semantic_role_counts": semantic_role_counts,
+                "daily_range_eligible_count": daily_range_eligible_count,
+                "skipped_by_role_count": skipped_by_role_count,
             }
         )
     else:

@@ -1,0 +1,61 @@
+# MVP Cross-run Evaluation Case Manifest.
+#
+# Lists every candidate ticker from the MVP scope. Only entries whose
+# `case_dir` actually exists on disk with a valid bundle are runnable --
+# every other entry is reported by the harness as `pending_fixture`, never
+# silently treated as passing (see the sprint boundary: "不得用 ticker
+# 名字创建假的空 Golden Case 并判通过").
+#
+# The 6 cases below with a real case_dir wrap a genuine, previously
+# completed research run via `historical_replay_case` (0 Provider calls,
+# re-runs the current pipeline against that run's frozen
+# raw_agent_outputs.json). Their expected.yaml intentionally asserts only
+# structural/hygiene invariants -- see each case's own case.yaml `notes`
+# for why activation/conflict domain correctness is left to manual review.
+
+cases:
+  - case_id: nvda_historical_v1
+    ticker: NVDA
+    case_dir: evaluation/golden_cases/nvda_historical_v1
+
+  - case_id: msft_historical_v1
+    ticker: MSFT
+    case_dir: evaluation/golden_cases/msft_historical_v1
+
+  - case_id: sndk_historical_v1
+    ticker: SNDK
+    case_dir: evaluation/golden_cases/sndk_historical_v1
+
+  - case_id: amd_historical_v1
+    ticker: AMD
+    case_dir: evaluation/golden_cases/amd_historical_v1
+
+  - case_id: googl_historical_v1
+    ticker: GOOGL
+    case_dir: evaluation/golden_cases/googl_historical_v1
+
+  - case_id: qqq_historical_v1
+    ticker: QQQ
+    case_dir: evaluation/golden_cases/qqq_historical_v1
+
+  # Candidate tickers with no frozen bundle yet -- reported pending_fixture,
+  # never fabricated.
+  - case_id: avgo_pending_v1
+    ticker: AVGO
+    case_dir: evaluation/golden_cases/avgo_pending_v1
+
+  - case_id: spy_pending_v1
+    ticker: SPY
+    case_dir: evaluation/golden_cases/spy_pending_v1
+
+  - case_id: tsm_pending_v1
+    ticker: TSM
+    case_dir: evaluation/golden_cases/tsm_pending_v1
+
+  - case_id: smci_pending_v1
+    ticker: SMCI
+    case_dir: evaluation/golden_cases/smci_pending_v1
+
+  - case_id: amzn_pending_v1
+    ticker: AMZN
+    case_dir: evaluation/golden_cases/amzn_pending_v1

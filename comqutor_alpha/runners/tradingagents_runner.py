@@ -163,11 +163,17 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
 
     with _deepseek_thinking_scope_for_config(config):
         graph = TradingAgentsGraph(selected_analysts, config=config, debug=False)
-    final_state, _processed_signal = graph.propagate(
-        str(ticker),
-        str(analysis_date),
-        asset_type=asset_type,
+
+    from comqutor_alpha.llm.canonical_prompt_injection import (
+        comqutor_structure_output_contract_scope,
     )
+
+    with comqutor_structure_output_contract_scope():
+        final_state, _processed_signal = graph.propagate(
+            str(ticker),
+            str(analysis_date),
+            asset_type=asset_type,
+        )
     run_dir = save_comqutor_run_outputs(
         final_state=final_state,
         ticker=ticker,
@@ -368,17 +374,22 @@ def run_streaming_tradingagents_research(
 
         # stream_mode="values" chunks are cumulative state snapshots;
         # merging with dict.update preserves the same final state as invoke.
+        from comqutor_alpha.llm.canonical_prompt_injection import (
+            comqutor_structure_output_contract_scope,
+        )
+
         final_state: dict = {}
         reached: set[str] = set()
-        for chunk in graph.graph.stream(init_state, **stream_args):
-            if isinstance(chunk, Mapping):
-                final_state.update(chunk)
-                _report_stream_milestones(
-                    final_state,
-                    public_analysts,
-                    progress_reporter,
-                    reached,
-                )
+        with comqutor_structure_output_contract_scope():
+            for chunk in graph.graph.stream(init_state, **stream_args):
+                if isinstance(chunk, Mapping):
+                    final_state.update(chunk)
+                    _report_stream_milestones(
+                        final_state,
+                        public_analysts,
+                        progress_reporter,
+                        reached,
+                    )
 
         if not final_state:
             raise RuntimeError("TradingAgents stream produced no state.")

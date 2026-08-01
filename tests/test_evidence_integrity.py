@@ -53,6 +53,14 @@ def _match(
         "source_agent_output_id": source_agent_output_id or f"{run_id}:{agent}:report",
         "run_id": run_id,
         "ticker": ticker,
+        # Evidence Integrity Completion Sprint, Track A: the shared
+        # canonical eligibility selector requires a resolved relation in
+        # {activation, conditional, mixed} (the same "supporting evidence"
+        # definition Activation production scoring already enforces) --
+        # default to a qualifying relation so this module's own tests
+        # continue to exercise grouping/attribution, not eligibility, unless
+        # a test explicitly overrides ``eligible_candidates``.
+        "eligible_candidates": [{"alpha_id": matched_alpha, "relation": "activation"}],
     }
     record.update(extra)
     return record
@@ -196,6 +204,12 @@ def test_positive_and_negative_polarity_never_merge():
 
 
 def test_asserted_and_negated_never_merge():
+    """Evidence Integrity Completion Sprint, Track A: the shared canonical
+    eligibility selector (shared with Activation production scoring) now
+    excludes negated claims from evidence candidacy entirely -- a negated
+    claim is counter-evidence, not a second independent supporting fact, so
+    it contributes no group of its own (never merges with the asserted
+    claim, and never appears as a rival singleton group either)."""
     records = [
         _match(
             "c1", "A304", claim="Valuation risk is real and creates downside.",
@@ -207,7 +221,8 @@ def test_asserted_and_negated_never_merge():
         ),
     ]
     groups = build_evidence_groups(_matches_payload(records), run_id="run1", ticker="NVDA")
-    assert len(groups) == 2
+    assert len(groups) == 1
+    assert set(groups[0].claim_ids) == {"c1"}
 
 
 def test_conditional_and_asserted_never_merge():

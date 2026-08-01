@@ -42,9 +42,6 @@ itself iterating in a stable, sorted order).
 
 from __future__ import annotations
 
-import hashlib
-import json
-import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from typing import Any
@@ -57,12 +54,19 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     REGIME_GATE_MIN_TICKER_SPECIFIC,
     REGIME_GATE_MIN_UNIQUE_EVIDENCE,
 )
-from comqutor_alpha.structure_engine.claim_quality import (
-    CONSUMER_ACTIVATION,
-    EVENT_PREDICATE_TERMS,
-    is_claim_eligible,
+from comqutor_alpha.graph_engine.evidence_fact_index import (
+    ALPHA_ACTIVATION_EVIDENCE_V1,
+    EvidenceFactCandidate,
+    date_signature as _date_signature,
+    event_signature as _event_signature,
+    evidence_fact_group_id,
+    factor_signature as _factor_signature,
+    group_evidence_candidates,
+    numeric_signature as _numeric_signature,
+    relation_triple_index as _relation_triple_index,
+    select_supporting_alpha_claims,
+    token_set as _token_set,
 )
-from comqutor_alpha.structure_engine.factor_normalizer import normalize_factor_label
 
 EVIDENCE_INTEGRITY_SCHEMA_VERSION = "week_regime_evidence_integrity.v1"
 
@@ -88,61 +92,12 @@ VALID_INTEGRITY_STATUSES = frozenset(
 _REGIME_LEVEL_STATUS = "regime_level"
 
 # ---------------------------------------------------------------------------
-# Signature helpers (text-only, deterministic, no ML/embeddings).
+# Signature helpers and grouping algorithm now live in the shared
+# ``evidence_fact_index`` module (Structure Integrity Repair Sprint, Track
+# 2) -- imported above, never redefined here, so this shadow layer and
+# production Activation scoring can never again silently diverge on "what
+# counts as one independent fact."
 # ---------------------------------------------------------------------------
-
-_NUMBER_TOKEN_PATTERN = re.compile(r"-?\d+(?:[.,]\d+)*%?")
-_MONTH_TOKEN_PATTERN = re.compile(
-    r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december"
-    r"|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\b",
-    re.IGNORECASE,
-)
-_FISCAL_PERIOD_PATTERN = re.compile(r"\bfy ?20\d\d\b|\bq[1-4] ?(?:fy ?)?20\d\d\b", re.IGNORECASE)
-_WORD_TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
-# Reuses claim_quality's own EVENT_PREDICATE_TERMS vocabulary (imported, not
-# re-derived) so "which event predicate is present" can never drift from
-# the Claim Quality Gate's own definition.
-_EVENT_TERM_PATTERN = re.compile(
-    "|".join(
-        r"\b" + r"\s+".join(re.escape(word) for word in term.split()) + r"\b"
-        for term in sorted(EVENT_PREDICATE_TERMS, key=len, reverse=True)
-    ),
-    re.IGNORECASE,
-)
-
-
-def _numeric_signature(text: str) -> str:
-    return "|".join(sorted(_NUMBER_TOKEN_PATTERN.findall(text)))
-
-
-def _date_signature(text: str) -> str:
-    lowered = text.lower()
-    months = sorted({m.lower()[:3] for m in _MONTH_TOKEN_PATTERN.findall(lowered)})
-    fiscal = sorted({f.lower().replace(" ", "") for f in _FISCAL_PERIOD_PATTERN.findall(lowered)})
-    return "|".join(months + fiscal)
-
-
-def _event_signature(text: str) -> str:
-    return "|".join(sorted({m.lower() for m in _EVENT_TERM_PATTERN.findall(text)}))
-
-
-def _factor_signature(factors: Sequence[Any]) -> str:
-    canonical = sorted({normalize_factor_label(f) for f in factors if str(f or "").strip()})
-    return "|".join(c for c in canonical if c)
-
-
-def _token_set(text: str) -> frozenset[str]:
-    return frozenset(_WORD_TOKEN_PATTERN.findall(text.lower()))
-
-
-def _jaccard(a: frozenset[str], b: frozenset[str]) -> float:
-    if not a and not b:
-        return 1.0
-    union = a | b
-    if not union:
-        return 0.0
-    return len(a & b) / len(union)
-
 
 # ---------------------------------------------------------------------------
 # Candidate assembly.
@@ -167,6 +122,11 @@ class _Candidate:
     date_signature: str
     event_signature: str
     token_set: frozenset[str]
+    # claim+evidence combined text used for signature derivation (matches
+    # the shared Evidence Fact Index's own single signature-computation
+    # pass) -- kept as its own field since ``claim_text`` above is used
+    # for display/output, not only for grouping.
+    signature_text: str
 
 
 def _duplicate_group_index(
@@ -183,37 +143,22 @@ def _duplicate_group_index(
     return index
 
 
-def _relation_triple_index(
-    graph_edges: Sequence[Mapping[str, Any]] | None,
-) -> dict[str, tuple[str, str, str, str]]:
-    """One relation triple per claim_id: (source, edge_type, target,
-    assertion_status) for the first admitted structure-graph edge that
-    claim contributed to. Uses the *graph's own* edges (post
-    ``build_structure_graph``, which carries ``claim_ids``) -- never the
-    raw ``extracted_structures.json`` edges, which key claims under a
-    different field name."""
-    index: dict[str, tuple[str, str, str, str]] = {}
-    for edge in graph_edges or ():
-        if not isinstance(edge, Mapping):
-            continue
-        source = str(edge.get("source") or "")
-        target = str(edge.get("target") or "")
-        edge_type = str(edge.get("edge_type") or "")
-        assertion_status = str(edge.get("assertion_status") or "unknown")
-        triple = (source, edge_type, target, assertion_status)
-        for claim_id in edge.get("claim_ids") or ():
-            claim_id = str(claim_id or "").strip()
-            if claim_id and claim_id not in index:
-                index[claim_id] = triple
-    return index
-
-
 def _build_candidates(
     alpha_matches_payload: Mapping[str, Any],
     *,
     graph_edges: Sequence[Mapping[str, Any]] | None,
     structured_records: Iterable[Mapping[str, Any]] | None,
 ) -> list[_Candidate]:
+    """Build one candidate per (alpha, eligible claim) pair.
+
+    Eligibility Evidence Integrity Completion Sprint, Track A: delegates
+    entirely to the shared canonical selector
+    (``evidence_fact_index.select_supporting_alpha_claims``), called once
+    per distinct matched alpha in this run's matches -- never a separately
+    re-derived filter. This is what makes production Activation and this
+    shadow layer agree on which raw claims are even eligible in the first
+    place, not merely on how eligible claims are grouped.
+    """
     matches = alpha_matches_payload.get("matches") if isinstance(alpha_matches_payload, Mapping) else None
     if not isinstance(matches, list):
         return []
@@ -221,33 +166,36 @@ def _build_candidates(
     duplicate_group_ids = _duplicate_group_index(structured_records)
     relation_triples = _relation_triple_index(graph_edges)
 
+    alpha_ids = sorted(
+        {
+            str(record.get("matched_alpha") or "").strip()
+            for record in matches
+            if isinstance(record, Mapping)
+            and record.get("match_status") == "matched"
+            and str(record.get("matched_alpha") or "").strip()
+        }
+    )
+
     candidates: list[_Candidate] = []
     seen_claim_ids: set[str] = set()
-    for record in matches:
-        if not isinstance(record, Mapping):
-            continue
-        if record.get("match_status") != "matched":
-            continue
-        matched_alpha = str(record.get("matched_alpha") or "").strip()
-        if not matched_alpha:
-            continue
-        # Same quality gate every other Activation consumer uses -- never a
-        # separately-invented eligibility check.
-        if not is_claim_eligible(record, CONSUMER_ACTIVATION):
-            continue
-        claim_id = str(record.get("claim_id") or "").strip()
-        if not claim_id or claim_id in seen_claim_ids:
-            continue
-        seen_claim_ids.add(claim_id)
+    for matched_alpha in alpha_ids:
+        eligible_records, _excluded, _warnings = select_supporting_alpha_claims(
+            matches, matched_alpha, policy_version=ALPHA_ACTIVATION_EVIDENCE_V1
+        )
+        for record in eligible_records:
+            claim_id = str(record.get("claim_id") or "").strip()
+            if not claim_id or claim_id in seen_claim_ids:
+                continue
+            seen_claim_ids.add(claim_id)
 
-        claim_text = str(record.get("claim") or record.get("evidence") or "")
-        factors = tuple(str(f) for f in (record.get("factors") or []) if str(f or "").strip())
-        assertion_status = str(record.get("assertion_status") or "unknown").strip().lower()
-        semantic_polarity = str(record.get("semantic_polarity") or "unknown").strip().lower()
-        combined_text = f"{claim_text} {record.get('evidence') or ''}"
+            claim_text = str(record.get("claim") or record.get("evidence") or "")
+            factors = tuple(str(f) for f in (record.get("factors") or []) if str(f or "").strip())
+            assertion_status = str(record.get("assertion_status") or "unknown").strip().lower()
+            semantic_polarity = str(record.get("semantic_polarity") or "unknown").strip().lower()
+            combined_text = f"{claim_text} {record.get('evidence') or ''}"
 
-        candidates.append(
-            _Candidate(
+            candidates.append(
+                _Candidate(
                 claim_id=claim_id,
                 agent=str(record.get("agent") or "").strip(),
                 source_agent_output_id=str(record.get("source_agent_output_id") or "").strip(),
@@ -264,136 +212,42 @@ def _build_candidates(
                 date_signature=_date_signature(combined_text),
                 event_signature=_event_signature(combined_text),
                 token_set=_token_set(claim_text),
+                signature_text=combined_text,
             )
         )
     return sorted(candidates, key=lambda c: c.claim_id)
 
 
 # ---------------------------------------------------------------------------
-# Deterministic grouping (union-find over a priority-ordered set of merge
-# passes; blocking keys bound the O(n^2)-shaped lexical-near-match pass to
-# small buckets).
+# Deterministic grouping -- delegates entirely to the shared, canonical
+# Evidence Fact Index (``evidence_fact_index.group_evidence_candidates``).
+# This module contributes no grouping logic of its own; it only adapts its
+# own ``_Candidate`` shape to/from the shared ``EvidenceFactCandidate``
+# shape, so this shadow layer and production Activation scoring can never
+# again silently apply two different grouping algorithms to the same claims.
 # ---------------------------------------------------------------------------
-
-
-class _UnionFind:
-    def __init__(self, items: Iterable[str]) -> None:
-        self._parent = {item: item for item in items}
-
-    def find(self, item: str) -> str:
-        root = item
-        while self._parent[root] != root:
-            root = self._parent[root]
-        while self._parent[item] != root:
-            self._parent[item], item = root, self._parent[item]
-        return root
-
-    def union(self, a: str, b: str) -> None:
-        ra, rb = self.find(a), self.find(b)
-        if ra == rb:
-            return
-        # Stable, deterministic tie-break: the lexicographically smaller
-        # claim_id always becomes the root, independent of call order.
-        if rb < ra:
-            ra, rb = rb, ra
-        self._parent[rb] = ra
-
-
-def _blocking_key(candidate: _Candidate, ticker: str) -> tuple[str, str, str, str, str]:
-    return (
-        ticker,
-        candidate.factor_signature,
-        candidate.assertion_status,
-        candidate.numeric_signature,
-        candidate.date_signature,
-    )
 
 
 def _group_candidates(candidates: Sequence[_Candidate], ticker: str) -> list[list[_Candidate]]:
     if not candidates:
         return []
-    uf = _UnionFind(c.claim_id for c in candidates)
     by_claim_id = {c.claim_id: c for c in candidates}
-
-    # Priority 1: explicit duplicate_group_id (stable, authoritative).
-    by_dup_group: dict[str, list[str]] = {}
-    for c in candidates:
-        if c.duplicate_group_id:
-            by_dup_group.setdefault(c.duplicate_group_id, []).append(c.claim_id)
-    for claim_ids in by_dup_group.values():
-        ordered = sorted(claim_ids)
-        for other in ordered[1:]:
-            uf.union(ordered[0], other)
-
-    # Priority 2: identical legal relation triple (source, edge_type,
-    # target, assertion_status) -- claims backing the exact same admitted
-    # structure-graph edge are, by that edge's own definition, the same
-    # structural fact.
-    by_relation: dict[tuple[str, str, str, str], list[str]] = {}
-    for c in candidates:
-        if c.relation_triple:
-            by_relation.setdefault(c.relation_triple, []).append(c.claim_id)
-    for claim_ids in by_relation.values():
-        ordered = sorted(claim_ids)
-        for other in ordered[1:]:
-            uf.union(ordered[0], other)
-
-    # Blocking buckets for priorities 3 and 4 -- ticker + factor signature +
-    # assertion status + numeric/date signature. Comparisons below never
-    # cross a bucket boundary.
-    buckets: dict[tuple[str, str, str, str, str], list[str]] = {}
-    for c in candidates:
-        buckets.setdefault(_blocking_key(c, ticker), []).append(c.claim_id)
-
-    # Priority 3: exact canonical factor/event signature match within a
-    # bucket (semantic polarity and event signature must also agree exactly
-    # -- the blocking key alone already pins ticker/factor/assertion/
-    # numeric/date). Pairwise (not a plain dict-group-by) specifically so
-    # the same relation-endpoint safety check priority 4 uses also applies
-    # here: two candidates each backing a *different* established
-    # structure-graph relation triple must never merge merely because their
-    # factor/polarity/event signature happens to coincide.
-    for bucket_claim_ids in sorted(buckets.values(), key=lambda ids: sorted(ids)):
-        ordered = sorted(bucket_claim_ids)
-        for i in range(len(ordered)):
-            for j in range(i + 1, len(ordered)):
-                a = by_claim_id[ordered[i]]
-                b = by_claim_id[ordered[j]]
-                if uf.find(a.claim_id) == uf.find(b.claim_id):
-                    continue
-                if a.semantic_polarity != b.semantic_polarity:
-                    continue
-                if a.event_signature != b.event_signature:
-                    continue
-                if a.relation_triple and b.relation_triple and a.relation_triple != b.relation_triple:
-                    continue
-                uf.union(a.claim_id, b.claim_id)
-
-    # Priority 4: conservative lexical near-match within a bucket. Every
-    # pairwise comparison additionally requires exact semantic-polarity
-    # agreement and, when either candidate has an established relation
-    # triple, that the triples agree too (never lexical-merge across a
-    # claim with a different, explicit structural relation).
-    for bucket_claim_ids in sorted(buckets.values(), key=lambda ids: sorted(ids)):
-        ordered = sorted(bucket_claim_ids)
-        for i in range(len(ordered)):
-            for j in range(i + 1, len(ordered)):
-                a = by_claim_id[ordered[i]]
-                b = by_claim_id[ordered[j]]
-                if uf.find(a.claim_id) == uf.find(b.claim_id):
-                    continue
-                if a.semantic_polarity != b.semantic_polarity:
-                    continue
-                if a.relation_triple and b.relation_triple and a.relation_triple != b.relation_triple:
-                    continue
-                if _jaccard(a.token_set, b.token_set) >= 0.85:
-                    uf.union(a.claim_id, b.claim_id)
-
-    groups: dict[str, list[_Candidate]] = {}
-    for c in candidates:
-        root = uf.find(c.claim_id)
-        groups.setdefault(root, []).append(c)
-    return [sorted(members, key=lambda c: c.claim_id) for members in groups.values()]
+    shared_candidates = [
+        EvidenceFactCandidate(
+            claim_id=c.claim_id,
+            claim_text=c.signature_text,
+            factors=c.factors,
+            assertion_status=c.assertion_status,
+            semantic_polarity=c.semantic_polarity,
+            duplicate_group_id=c.duplicate_group_id,
+            relation_triple=c.relation_triple,
+        )
+        for c in candidates
+    ]
+    grouped = group_evidence_candidates(shared_candidates, ticker)
+    return [
+        [by_claim_id[member.claim_id] for member in members] for members in grouped
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -423,16 +277,6 @@ class EvidenceGroup:
         return asdict(self)
 
 
-def _evidence_group_id(run_id: str, ticker: str, claim_ids: Sequence[str]) -> str:
-    """Stable canonical-payload hash -- never a random UUID. A pure
-    function of (run_id, ticker, the group's own member claim_ids), so
-    re-running this module over the same inputs always reproduces the same
-    ids, and the id is independent of input processing order."""
-    payload = json.dumps(
-        {"run_id": run_id, "ticker": ticker, "claim_ids": sorted(claim_ids)},
-        sort_keys=True,
-    )
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:24]
 
 
 def _attribute_primary_secondary(members: Sequence[_Candidate]) -> tuple[str | None, tuple[str, ...]]:
@@ -516,7 +360,7 @@ def build_evidence_groups(
 
         results.append(
             EvidenceGroup(
-                evidence_group_id=_evidence_group_id(run_id, ticker, claim_ids),
+                evidence_group_id=evidence_fact_group_id(run_id, ticker, claim_ids),
                 run_id=run_id,
                 ticker=ticker,
                 claim_ids=claim_ids,

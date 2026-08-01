@@ -23,6 +23,7 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "research_response.json",
     "market_data_snapshot.json",
     "data_sanity.json",
+    "tradingagents_comqutor_vocabulary_snapshot.json",
 }
 ALLOWED_ARTIFACT_PATHS = {
     *ALLOWED_ARTIFACT_FILENAMES,

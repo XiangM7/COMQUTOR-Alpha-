@@ -8,6 +8,7 @@ import datetime as dt
 
 from comqutor_alpha.data_sanity.reported_price_extractor import extract_reported_prices
 from comqutor_alpha.data_sanity.schema import (
+    DAILY_RANGE_SKIP_REASON_TECHNICAL_INDICATOR,
     DATE_RESOLUTION_ANALYSIS_YEAR_INFERRED,
     DATE_RESOLUTION_EXPLICIT_YEAR,
     DATE_RESOLUTION_PREVIOUS_YEAR_INFERRED,
@@ -15,6 +16,10 @@ from comqutor_alpha.data_sanity.schema import (
     PRICE_SEMANTICS_GENERIC,
     PRICE_SEMANTICS_OPEN,
     PRICE_SEMANTICS_REACHED,
+    SEMANTIC_ROLE_CLOSE_PRICE,
+    SEMANTIC_ROLE_MOVING_AVERAGE,
+    SEMANTIC_ROLE_OPEN_PRICE,
+    SEMANTIC_ROLE_TECHNICAL_LEVEL,
 )
 
 ANALYSIS_DATE = dt.date(2026, 7, 24)
@@ -165,3 +170,71 @@ class TestOutputContract:
 
     def test_malformed_record_is_skipped_not_raised(self):
         assert extract_reported_prices([None, "not a dict", 42], ANALYSIS_DATE) == []
+
+
+class TestNumericSemanticRole:
+    """Structure Integrity Repair Sprint, Track 3: a technical indicator
+    figure is classified as such and never treated as an observed market
+    price eligible for a daily-OHLC-range comparison -- this is the fix for
+    the real NVDA false positive (200 SMA misread as a market price)."""
+
+    def test_sma_moving_average_not_daily_range_eligible(self):
+        result = _extract_one(
+            "The 200 SMA has been rising steadily (from $187.6 on June 1 to "
+            "$192.86 today), indicating the longer-term trend is still up."
+        )
+        assert result["semantic_role"] == SEMANTIC_ROLE_MOVING_AVERAGE
+        assert result["daily_range_check_eligible"] is False
+        assert result["daily_range_skip_reason"] == DAILY_RANGE_SKIP_REASON_TECHNICAL_INDICATOR
+
+    def test_fifty_day_moving_average_is_moving_average(self):
+        result = _extract_one("The 50-day moving average is $95.20 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_MOVING_AVERAGE
+        assert result["daily_range_check_eligible"] is False
+
+    def test_ema_not_daily_range_eligible(self):
+        result = _extract_one("The EMA reached $103.00 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_MOVING_AVERAGE
+        assert result["daily_range_check_eligible"] is False
+
+    def test_vwap_not_daily_range_eligible(self):
+        result = _extract_one("VWAP fell to $88.00 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_MOVING_AVERAGE
+        assert result["daily_range_check_eligible"] is False
+
+    def test_bollinger_band_not_daily_range_eligible(self):
+        result = _extract_one("The upper Bollinger Band reached $112.00 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_MOVING_AVERAGE
+        assert result["daily_range_check_eligible"] is False
+
+    def test_atr_not_daily_range_eligible(self):
+        result = _extract_one("The ATR peaked at $12.00 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_MOVING_AVERAGE
+        assert result["daily_range_check_eligible"] is False
+
+    def test_rsi_not_daily_range_eligible(self):
+        result = _extract_one("The RSI reached $70.00 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_MOVING_AVERAGE
+        assert result["daily_range_check_eligible"] is False
+
+    def test_support_level_not_daily_range_eligible(self):
+        result = _extract_one("Key support reached $88.00 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_TECHNICAL_LEVEL
+        assert result["daily_range_check_eligible"] is False
+
+    def test_resistance_level_not_daily_range_eligible(self):
+        result = _extract_one("The resistance level reached $112.00 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_TECHNICAL_LEVEL
+        assert result["daily_range_check_eligible"] is False
+
+    def test_closed_at_is_close_price_and_eligible(self):
+        result = _extract_one("MU closed at $100 on 2026-07-20.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_CLOSE_PRICE
+        assert result["daily_range_check_eligible"] is True
+        assert result["daily_range_skip_reason"] is None
+
+    def test_opened_at_is_open_price_and_eligible(self):
+        result = _extract_one("MU opened at $95.20 on May 1.")
+        assert result["semantic_role"] == SEMANTIC_ROLE_OPEN_PRICE
+        assert result["daily_range_check_eligible"] is True
+        assert result["daily_range_skip_reason"] is None

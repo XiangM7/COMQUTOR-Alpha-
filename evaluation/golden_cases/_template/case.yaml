@@ -1,0 +1,36 @@
+# Golden Case bundle template -- copy this directory to
+# evaluation/golden_cases/<your_case_id>/ and fill in every field below.
+# This template itself is never referenced by any manifest and is not a
+# runnable case (case_type is left as a placeholder value that no code
+# path executes).
+
+case_id: TEMPLATE_REPLACE_ME
+ticker: TEMPLATE_REPLACE_ME
+description: >
+  One or two sentences describing what this case exercises and why it was
+  frozen.
+# One of: frozen_golden_case | historical_replay_case | live_smoke_result
+case_type: TEMPLATE_REPLACE_ME
+analysis_date: null
+created_by: TEMPLATE_REPLACE_ME
+approved_by: null
+# One of: draft | reviewed | approved | deprecated
+approval_status: draft
+
+# --- frozen_golden_case only ---
+# Place raw_agent_outputs.json (and optionally metadata.json,
+# market_data_snapshot.json) directly in this bundle directory; this
+# directory itself becomes the "source run" the pipeline replays against.
+input_artifacts: []
+artifact_hashes: {}
+
+# --- historical_replay_case only ---
+# Points at an EXISTING run directory under source_output_root; nothing is
+# copied into this bundle.
+source_run_id: null
+source_output_root: outputs/runs
+
+expected_file: expected.yaml
+taxonomy_version: null
+prompt_contract_version: null
+notes: ""

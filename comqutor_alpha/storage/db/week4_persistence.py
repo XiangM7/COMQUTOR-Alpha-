@@ -344,10 +344,16 @@ def _whitelist_local_structure_support(component: Mapping[str, Any], reason: str
         "local_edge_count",
         "asserted_local_edge_count",
         "conditional_local_edge_count",
+        # Structure Integrity Repair Sprint, Track 1 (additive): "how many
+        # graph edges touch this alpha" vs "how many the frozen formula
+        # actually counted" -- two honest, separate numbers.
+        "incident_graph_edge_count",
+        "qualifying_local_edge_count",
+        "nonqualifying_local_edge_count",
     ):
         if field in component:
             result[field] = _integer(component[field], reason)
-    for field in ("local_edge_ids", "local_claim_ids"):
+    for field in ("local_edge_ids", "local_claim_ids", "local_edge_exclusion_reasons"):
         if field in component:
             result[field] = _string_list(component[field], reason)
     if "unique_edge_contribution_sum" in component:
@@ -439,6 +445,13 @@ _V2_ONLY_ACTIVATION_FIELDS = frozenset(
         "regime_gate_passed",
         "regime_gate_failures",
         "evidence_integrity_warnings",
+        # Evidence Integrity Completion Sprint, Track C: additive raw/
+        # unique-fact/agent/overlap transparency fields.
+        "raw_supporting_claim_count",
+        "unique_evidence_fact_count",
+        "distinct_supporting_agent_count",
+        "evidence_overlap_ratio",
+        "high_overlap_warning",
     }
 )
 
@@ -522,9 +535,16 @@ def _whitelist_activation(entry: Mapping[str, Any]) -> dict[str, Any]:
         "unique_evidence_count",
         "ticker_specific_evidence_count",
         "local_edge_count",
+        "raw_supporting_claim_count",
+        "unique_evidence_fact_count",
+        "distinct_supporting_agent_count",
     ):
         if field in entry:
             activation[field] = _integer(entry[field], reason)
+    if "evidence_overlap_ratio" in entry:
+        activation["evidence_overlap_ratio"] = _number(entry["evidence_overlap_ratio"], 0.0, 1.0, reason)
+    if "high_overlap_warning" in entry:
+        activation["high_overlap_warning"] = _bool(entry["high_overlap_warning"], reason)
     if "regime_gate_passed" in entry:
         activation["regime_gate_passed"] = _bool(entry["regime_gate_passed"], reason)
     return _json_copy(activation, reason)
@@ -695,6 +715,26 @@ def _whitelist_structure(value: Any) -> dict[str, Any]:
     structure["match_scores"] = [
         _number(score, 0.0, 1.0, reason) for score in raw_scores
     ]
+    # Evidence Integrity Completion Sprint, Track B (additive, optional --
+    # a legacy conflict payload predating this field simply has none).
+    if "evidence_facts" in value:
+        raw_facts = value.get("evidence_facts")
+        if not isinstance(raw_facts, list):
+            _fail(reason)
+        facts = []
+        for item in raw_facts:
+            if not isinstance(item, Mapping):
+                _fail(reason)
+            facts.append(
+                {
+                    "evidence_fact_group_id": _text(item.get("evidence_fact_group_id"), reason),
+                    "representative_claim_id": _text(item.get("representative_claim_id"), reason),
+                    "member_claim_ids": _string_list(item.get("member_claim_ids"), reason),
+                    "supporting_agents": _string_list(item.get("supporting_agents"), reason),
+                    "grouping_method": _text(item.get("grouping_method"), reason),
+                }
+            )
+        structure["evidence_facts"] = facts
     return _json_copy(structure, reason)
 
 
@@ -772,6 +812,22 @@ def _whitelist_conflict(conflict: Mapping[str, Any]) -> dict[str, Any]:
             "conflict_level": level,
             "reason_codes": reason_codes,
             "explanation": _text(conflict.get("explanation"), reason),
+            # Evidence Integrity Completion Sprint, Track B: additive
+            # fact-level evidence statistics for each side, plus the
+            # dual-side integrity check outcome.
+            "bull_raw_claim_count": _integer(conflict.get("bull_raw_claim_count"), reason),
+            "bull_unique_fact_count": _integer(conflict.get("bull_unique_fact_count"), reason),
+            "bull_distinct_agent_count": _integer(conflict.get("bull_distinct_agent_count"), reason),
+            "bull_overlap_ratio": _number(conflict.get("bull_overlap_ratio"), 0.0, 1.0, reason),
+            "bull_fact_group_ids": _string_list(conflict.get("bull_fact_group_ids"), reason),
+            "bear_raw_claim_count": _integer(conflict.get("bear_raw_claim_count"), reason),
+            "bear_unique_fact_count": _integer(conflict.get("bear_unique_fact_count"), reason),
+            "bear_distinct_agent_count": _integer(conflict.get("bear_distinct_agent_count"), reason),
+            "bear_overlap_ratio": _number(conflict.get("bear_overlap_ratio"), 0.0, 1.0, reason),
+            "bear_fact_group_ids": _string_list(conflict.get("bear_fact_group_ids"), reason),
+            "shared_fact_group_ids": _string_list(conflict.get("shared_fact_group_ids"), reason),
+            "shared_fact_group_count": _integer(conflict.get("shared_fact_group_count"), reason),
+            "shared_fact_resolution": _text(conflict.get("shared_fact_resolution"), reason),
         }
     )
     return _json_copy(whitelisted, reason)

@@ -1,0 +1,105 @@
+{
+  "raw_claim_count": {
+    "reported": 652,
+    "recomputed": 652,
+    "match": true,
+    "source": "structured_agent_outputs.json:records (raw_claim_count == retained here since duplicate_removed_count=0)"
+  },
+  "valid_claim_count": {
+    "reported": 652,
+    "recomputed": 652,
+    "match": true,
+    "source": "structured_agent_outputs.json:records length"
+  },
+  "candidate_segment_count_conservation": {
+    "naive_formula_retained_plus_filtered": {
+      "reported_candidate_segment_count": 654,
+      "retained_plus_filtered": 665,
+      "match": false
+    },
+    "correct_formula_verified_from_code": {
+      "formula_1": "candidate_segment_count == retained_claim_count + non_substantive_removed_count",
+      "formula_1_check": "654 == 652 + 2",
+      "formula_1_match": true,
+      "formula_2": "filtered_claim_count == boilerplate_removed_count + disclaimer_removed_count + non_substantive_removed_count",
+      "formula_2_check": "13 == 11 + 0 + 2",
+      "formula_2_match": true
+    },
+    "explanation": "filtered_claim_count is NOT a third disjoint bucket alongside retained_claim_count -- it deliberately re-includes non_substantive_removed_count as one of its 3 summed components (see comqutor_alpha/structure_engine/structured_output_adapter.py adapt_run_outputs: retained_claim_count = candidate_segment_count - non_substantive_removed_count; filtered_claim_count = boilerplate_removed_count + disclaimer_removed_count + non_substantive_removed_count). The naive retained+filtered formula double-counts non_substantive_removed_count and is therefore NOT the correct conservation law; the two formulas above are, and both hold exactly for this run. This is a documentation/API-shape subtlety, not a computation defect."
+  },
+  "matched_alpha_count": {
+    "reported": 59,
+    "recomputed": 59,
+    "match": true,
+    "source": "alpha_matches.json:matches where match_status==matched"
+  },
+  "ambiguous_alpha_count": {
+    "reported": 0,
+    "recomputed": 0,
+    "match": true,
+    "source": "alpha_matches.json:matches where match_status==ambiguous"
+  },
+  "no_match_count": {
+    "reported": 593,
+    "recomputed": 593,
+    "match": true,
+    "source": "alpha_matches.json:matches where match_status==no_match"
+  },
+  "matched_plus_ambiguous_plus_nomatch_equals_total": {
+    "reported_total_matches": 652,
+    "sum": 652,
+    "match": true
+  },
+  "graph_node_count": {
+    "reported": 12,
+    "recomputed": 12,
+    "match": true,
+    "source": "structure_graph.json:nodes"
+  },
+  "graph_edge_count": {
+    "reported": 9,
+    "recomputed": 9,
+    "match": true,
+    "source": "structure_graph.json:edges"
+  },
+  "candidate_edges_vs_admitted_plus_rejected": {
+    "candidate_edge_count": 21,
+    "admitted_edge_count": 9,
+    "note": "candidate_edges != admitted_edges + rejected_edges is EXPECTED here: candidate_edges is claim-level (21, keyed per-claim), admitted_edges is run-level POST-MERGE (9, keyed by (source,target,edge_type) with duplicates from multiple claims collapsed into one edge) -- graph_builder's own rejected_edges counter (self_loop/dangling/invalid_type/invalid_weight) is a THIRD, separate axis (malformed-input rejections, not duplicate-merge). See graph_metrics.rejected_edges below for the real rejection breakdown.",
+    "graph_metrics_rejected_edges": {
+      "self_loop": 0,
+      "dangling_reference": 0,
+      "invalid_edge_type": 0,
+      "invalid_weight": 0,
+      "malformed": 0
+    },
+    "run_audit_rejected_edge_count_field": 0,
+    "reconciliation": "candidate_edge_count (21) - distinct (source,target,edge_type) keys after per-claim dedup = admitted_edge_count (9); the arithmetic gap (12) is claim-level duplicate MERGES at graph_builder's run-level (source,target,edge_type) key, not rejections -- run_audit_rejected_edge_count_field correctly reports 0 true structural rejections, matching graph_metrics.rejected_edges all-zero."
+  },
+  "canonical_relations_validated_plus_rejected_equals_total": {
+    "total_canonical_relations": 28,
+    "validated": 24,
+    "rejected": 4,
+    "sum_matches_total": true,
+    "structured_metadata_validated_count": 24,
+    "structured_metadata_rejected_count": 4,
+    "match": true
+  },
+  "raw_agent_output_count": {
+    "reported": 12,
+    "recomputed": 12,
+    "match": true,
+    "note": "all 12 raw agent outputs were successfully processed (0 explicit failures) -- structured_output_adapter never emits a NO_MEANINGFUL_CLAIMS placeholder for any of the 12 agents this run."
+  },
+  "conflict_count_field_semantics": {
+    "run_audit_conflict_count": 3,
+    "db_admitted_count": 3,
+    "db_total_declared_pairs_evaluated": 6,
+    "match_admitted_only": true,
+    "note": "run_audit.json's conflict_count counts ADMITTED conflicts only (3); it does NOT surface declared_pair_count(6)/suppressed_count(1)/rejected_count(2) as explicit top-level fields -- that full arbitration detail exists only in the alpha_conflicts DB table's outcome column, not in run_audit.json itself. This is a completeness gap in run_audit's own schema, not a correctness error."
+  },
+  "versions_present_in_run_audit": {
+    "primary_activation_version": "activation.v2.evidence_local_structure.v1",
+    "note_missing_fields": "run_audit.json does NOT include: git_head, dirty_status, claim_adapter_version, taxonomy_version/hash, alias_version/hash, relation_registry_version, graph_schema_version, conflict_registry/formula_version, prompt_contract_version. These versions ARE recorded elsewhere (replay lineage metadata carries several of them; the new tradingagents_comqutor_vocabulary_snapshot.json carries taxonomy/relation-registry/prompt-contract versions) but are not consolidated into run_audit.json's own schema."
+  }
+}

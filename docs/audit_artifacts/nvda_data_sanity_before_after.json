@@ -1,0 +1,135 @@
+{
+  "before": {
+    "warnings": [
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2025-09-11",
+          "dividend": 0.01
+        }
+      },
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2025-12-04",
+          "dividend": 0.01
+        }
+      },
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2026-03-11",
+          "dividend": 0.01
+        }
+      },
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2026-06-04",
+          "dividend": 0.25
+        }
+      },
+      {
+        "code": "REPORTED_PRICE_OUTSIDE_DAILY_RANGE",
+        "severity": "warning",
+        "message": "A price mentioned in a structured analyst claim does not match the external market reference.",
+        "details": {
+          "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:market_agent:market_report:claim:20",
+          "reported_date": "2026-06-01",
+          "matched_session": "2026-06-01",
+          "price_semantics": "generic",
+          "reported_price": 187.6,
+          "external_reference": 204.91499710083008,
+          "relative_difference_percent": 8.4498,
+          "date_resolution": "analysis_year_inferred"
+        }
+      }
+    ],
+    "summary": {
+      "warning_count": 1,
+      "critical_count": 0,
+      "ohlcv_row_count": 276,
+      "reported_price_check_count": 3,
+      "split_event_count": 0,
+      "reverse_split_event_count": 0,
+      "dividend_event_count": 4,
+      "capital_gain_event_count": 0,
+      "extreme_return_count": 0
+    }
+  },
+  "after": {
+    "warnings": [
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2025-09-11",
+          "dividend": 0.01
+        }
+      },
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2025-12-04",
+          "dividend": 0.01
+        }
+      },
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2026-03-11",
+          "dividend": 0.01
+        }
+      },
+      {
+        "code": "DIVIDEND_IN_ANALYSIS_WINDOW",
+        "severity": "info",
+        "message": "Yahoo Finance reports a dividend in the analysis window. This is not a data anomaly.",
+        "details": {
+          "date": "2026-06-04",
+          "dividend": 0.25
+        }
+      }
+    ],
+    "summary": {
+      "warning_count": 0,
+      "critical_count": 0,
+      "ohlcv_row_count": 276,
+      "reported_price_check_count": 3,
+      "split_event_count": 0,
+      "reverse_split_event_count": 0,
+      "dividend_event_count": 4,
+      "capital_gain_event_count": 0,
+      "extreme_return_count": 0
+    },
+    "reported_price_cross_check": {
+      "name": "reported_price_cross_check",
+      "status": "ok",
+      "evaluated_count": 3,
+      "semantic_role_counts": {
+        "MOVING_AVERAGE": 1,
+        "OBSERVED_MARKET_PRICE": 2
+      },
+      "daily_range_eligible_count": 2,
+      "skipped_by_role_count": 1
+    }
+  },
+  "187.60_case": {
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:market_agent:market_report:claim:20",
+    "before_warning": "REPORTED_PRICE_OUTSIDE_DAILY_RANGE (relative_difference_percent=8.4498)",
+    "after_warning": "none -- classified MOVING_AVERAGE, daily_range_check_eligible=False"
+  }
+}

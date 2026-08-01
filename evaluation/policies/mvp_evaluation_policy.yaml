@@ -1,0 +1,23 @@
+# MVP Cross-run Evaluation Policy
+#
+# Central home for evaluation gating thresholds -- see
+# comqutor_alpha/evaluation/policy.py. Never hardcode a threshold inside
+# the harness code itself; add or change it here instead.
+#
+# Every gate below is only evaluated when the harness actually has the
+# input metric available for a given run -- an unavailable metric is a
+# reported gap, never treated as a violation.
+#
+# Deliberately absent from this file: any global "every run must have at
+# least N graph edges" threshold. Graph-edge expectations are a per-Golden-
+# Case concern declared in that case's own expected.yaml
+# (graph.edge_count.minimum / zero_edges_allowed), never a blanket policy
+# default -- a legitimately sparse (or edge-free) run must never be judged
+# a harness failure just because it produced fewer edges than some other
+# run.
+
+max_schema_failure_rate: 0.0
+max_parse_failure_rate: 0.0
+min_lineage_resolution_rate: 0.0
+min_production_shadow_consistency_rate: 1.0
+max_shared_conflict_fact_violations: 0

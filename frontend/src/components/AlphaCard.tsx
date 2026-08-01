@@ -1,4 +1,4 @@
-import type { AlphaActivation, AlphaEvidenceDetail } from "../api/types";
+import type { AlphaActivation, AlphaEvidenceDetail, LocalStructureSupportComponent } from "../api/types";
 
 const LEVEL_ICONS: Record<string, string> = {
   inactive: "○", // hollow circle
@@ -60,6 +60,22 @@ export function AlphaCard({
       ? "Activation v2"
       : "Activation v1 (legacy)"
     : null;
+  // Evidence Integrity Completion Sprint, Track C: prefer the additive,
+  // unambiguous fields when the API provided them; fall back to nothing
+  // (never fabricate) on an older payload.
+  const localStructure = (activation?.components?.local_structure_support ?? null) as
+    | LocalStructureSupportComponent
+    | null;
+  const hasEvidenceFactFields =
+    isV2 &&
+    activation != null &&
+    activation.raw_supporting_claim_count != null &&
+    activation.unique_evidence_fact_count != null;
+  const hasEdgeQualificationFields =
+    isV2 &&
+    localStructure != null &&
+    localStructure.incident_graph_edge_count != null &&
+    localStructure.qualifying_local_edge_count != null;
   return (
     <article className={`alpha-card alpha-card-${status}${isDominant ? " alpha-card-dominant" : ""}`} tabIndex={0}>
       <header className="alpha-card-header">
@@ -129,6 +145,34 @@ export function AlphaCard({
           <dt>Distinct supporting agents</dt>
           <dd>{distinctSupportingAgents != null ? distinctSupportingAgents : "Not available"}</dd>
         </div>
+        {hasEvidenceFactFields && activation ? (
+          <>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Raw supporting claims</dt>
+              <dd>{activation.raw_supporting_claim_count}</dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Independent evidence facts</dt>
+              <dd>{activation.unique_evidence_fact_count}</dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Evidence overlap</dt>
+              <dd>
+                {activation.evidence_overlap_ratio != null
+                  ? `${(activation.evidence_overlap_ratio * 100).toFixed(1)}%`
+                  : "Not available"}
+              </dd>
+            </div>
+            {activation.high_overlap_warning ? (
+              <div className="alpha-card-row alpha-card-row-warning">
+                <dt>Evidence overlap warning</dt>
+                <dd>
+                  Several supporting claims appear to restate the same underlying facts.
+                </dd>
+              </div>
+            ) : null}
+          </>
+        ) : null}
         <div className="alpha-card-row">
           <dt>Related conflicts</dt>
           <dd className="alpha-card-related-conflicts">
@@ -163,6 +207,33 @@ export function AlphaCard({
                   : "Not available"}
               </dd>
             </div>
+            {hasEdgeQualificationFields && localStructure ? (
+              <>
+                <div className="alpha-card-row alpha-card-row-detail">
+                  <dt>Incident graph edges</dt>
+                  <dd>{localStructure.incident_graph_edge_count}</dd>
+                </div>
+                <div className="alpha-card-row alpha-card-row-detail">
+                  <dt>Qualifying activation-support edges</dt>
+                  <dd>{localStructure.qualifying_local_edge_count}</dd>
+                </div>
+                <div className="alpha-card-row alpha-card-row-detail">
+                  <dt>Excluded local edges</dt>
+                  <dd>{localStructure.nonqualifying_local_edge_count ?? 0}</dd>
+                </div>
+                {localStructure.local_edge_exclusion_reasons &&
+                localStructure.local_edge_exclusion_reasons.length > 0 ? (
+                  <details className="alpha-card-exclusion-reasons">
+                    <summary>Why edges did not qualify</summary>
+                    <ul>
+                      {localStructure.local_edge_exclusion_reasons.map((reason) => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+              </>
+            ) : null}
             <div className="alpha-card-row">
               <dt>Regime qualification</dt>
               <dd className="alpha-card-regime-gate">

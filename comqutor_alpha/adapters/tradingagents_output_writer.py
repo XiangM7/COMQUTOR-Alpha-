@@ -333,6 +333,23 @@ def save_comqutor_run_outputs(
     save_json_record(run_id, "metadata.json", metadata, output_root=output_root)
     save_json_record(run_id, "raw_agent_outputs.json", raw_payload, output_root=output_root)
 
+    # Additive, deterministic-only artifact: exactly which COMQUTOR canonical
+    # factors/relations every agent's prompt received this run (see
+    # comqutor_alpha.llm.canonical_prompt_injection). Never itself an LLM
+    # call -- pure introspection of the same production vocabulary registry
+    # every run already resolves claims against.
+    try:
+        from comqutor_alpha.llm.canonical_prompt_injection import build_vocabulary_snapshot
+
+        save_json_record(
+            run_id,
+            "tradingagents_comqutor_vocabulary_snapshot.json",
+            build_vocabulary_snapshot(),
+            output_root=output_root,
+        )
+    except Exception:
+        pass
+
     if write_final_report:
         final_report_filename = validate_artifact_filename("final_report.md")
         atomic_write_text(

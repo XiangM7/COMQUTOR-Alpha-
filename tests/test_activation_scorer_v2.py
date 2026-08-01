@@ -151,18 +151,34 @@ def _scenario_a_fixture():
 
 
 def test_scenario_a_high_quality_multi_agent_local_structure():
-    """Also covers cap-contract test #10 (no eligible cap)."""
+    """Also covers cap-contract test #10 (no eligible cap).
+
+    Structure Integrity Repair Sprint, Track 2: EvidenceQuality/
+    AgentIndependence now group evidence via the canonical Evidence Fact
+    Index (shared with the Evidence Integrity shadow layer), which also
+    merges two claims that back the exact same admitted structure-graph
+    edge (priority 2 of the shared grouping algorithm -- see
+    ``test_identical_relation_triple_does_merge`` in
+    test_evidence_integrity.py for the validated, spec'd behavior this
+    mirrors). This fixture's edge covers a:claim:1 and a:claim:2, so those
+    two now form ONE Evidence Fact (2 groups total, not 3) -- a genuine,
+    intentional behavior change, not a regression: two agents backing the
+    identical graph relation are, by that edge's own definition, describing
+    the same structural fact.
+    """
     payload, edges = _scenario_a_fixture()
     result = _score("A101", payload, graph_edges=edges)
 
     eq = result["components"]["evidence_quality"]
-    assert eq["raw"] == pytest.approx(75.0, abs=0.01)
-    assert eq["contribution"] == pytest.approx(26.25, abs=0.01)
+    assert eq["unique_semantic_groups"] == 2
+    assert eq["raw"] == pytest.approx(50.0, abs=0.01)
+    assert eq["contribution"] == pytest.approx(17.5, abs=0.01)
 
     ai = result["components"]["agent_independence"]
-    assert ai["raw"] == pytest.approx(70.0, abs=0.01)
-    assert ai["contribution"] == pytest.approx(14.0, abs=0.01)
+    assert ai["raw"] == pytest.approx(85.0, abs=0.01)
+    assert ai["contribution"] == pytest.approx(17.0, abs=0.01)
     assert ai["distinct_agents"] == 3
+    assert ai["cross_agent_confirmed_groups"] == 1
 
     lss = result["components"]["local_structure_support"]
     assert lss["raw"] == pytest.approx(50.0, abs=0.01)
@@ -172,13 +188,13 @@ def test_scenario_a_high_quality_multi_agent_local_structure():
     ts = result["components"]["ticker_specificity"]
     assert ts["contribution"] == pytest.approx(10.0, abs=0.01)
 
-    assert result["uncapped_score"] == pytest.approx(75.25, abs=0.01)
+    assert result["uncapped_score"] == pytest.approx(69.5, abs=0.01)
     assert result["eligible_cap"] is None
     assert result["cap_was_binding"] is False
     assert result["cap_reason_codes"] == []
     assert result["binding_cap_reason_codes"] == []
-    assert result["activation_score"] == pytest.approx(75.25, abs=0.01)
-    assert result["status"] == "dominant"
+    assert result["activation_score"] == pytest.approx(69.5, abs=0.01)
+    assert result["status"] == "active"
 
 
 # ---------------------------------------------------------------------------
@@ -881,10 +897,10 @@ def test_mutation_evidence_quality_saturation_change_breaks_oracle(monkeypatch):
 def test_mutation_local_structure_using_global_edges_breaks_oracle(monkeypatch):
     original = activation_scorer_v2._local_structure_component
 
-    def _all_edges_count(qualifying, graph_edges):
+    def _all_edges_count(qualifying, graph_edges, alpha_id):
         # Deliberately ignores claim_id intersection -- every global edge
         # counts toward this alpha's local_edge_count, not just its own.
-        raw, meta = original(qualifying, graph_edges)
+        raw, meta = original(qualifying, graph_edges, alpha_id)
         meta = dict(meta)
         meta["local_edge_count"] = len(list(graph_edges))
         return raw, meta
@@ -897,12 +913,16 @@ def test_mutation_local_structure_using_global_edges_breaks_oracle(monkeypatch):
 
 
 def test_mutation_semantic_group_double_counting_breaks_oracle(monkeypatch):
-    # Disable semantic grouping: every claim_id becomes its own group, so
-    # the 4 duplicate claims in Scenario B are no longer deduplicated.
+    # Disable Evidence Fact Index grouping (Structure Integrity Repair
+    # Sprint, Track 2): every claim_id becomes its own singleton group, so
+    # the 4 duplicate claims in Scenario B are no longer deduplicated --
+    # this reproduces the exact production/shadow "double truth" defect the
+    # sprint fixed (production counting near-paraphrases as independent
+    # facts).
     monkeypatch.setattr(
         activation_scorer_v2,
-        "_semantic_group_key",
-        lambda record, duplicate_group_ids: f"forced_unique:{record.get('claim_id')}",
+        "group_evidence_candidates",
+        lambda candidates, ticker="": [[c] for c in candidates],
     )
     payload = _scenario_b_fixture()
     result = _score("A102", payload)
@@ -954,13 +974,13 @@ def test_mutation_unrelated_edge_changing_score_breaks_oracle(monkeypatch):
     # per-alpha score" exactly, so an unrelated edge now changes the score.
     original = activation_scorer_v2._local_structure_component
 
-    def _leak_all_edges(qualifying, graph_edges):
+    def _leak_all_edges(qualifying, graph_edges, alpha_id):
         alpha_claim_ids = [item["claim_id"] for item in qualifying]
         patched_edges = [
             {**edge, "claim_ids": list(edge.get("claim_ids") or []) + alpha_claim_ids[:1]}
             for edge in graph_edges
         ]
-        return original(qualifying, patched_edges)
+        return original(qualifying, patched_edges, alpha_id)
 
     monkeypatch.setattr(activation_scorer_v2, "_local_structure_component", _leak_all_edges)
 

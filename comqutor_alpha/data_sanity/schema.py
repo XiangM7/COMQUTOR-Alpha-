@@ -144,6 +144,39 @@ RANGE_COMPARISON_SEMANTICS = frozenset(
 MAX_SOURCE_TEXT_CHARS = 500
 
 # ---------------------------------------------------------------------------
+# Numeric semantic role (Structure Integrity Repair Sprint, Track 3).
+#
+# A ``price_semantics`` value (open/close/traded/reached/peaked/fell_to/
+# generic) describes *how* a dollar figure was phrased; ``semantic_role``
+# additionally answers *what kind of number it actually is* -- a technical
+# indicator (moving average, oscillator, support/resistance level) is never
+# a market price, no matter how price-like its surrounding verb reads, and
+# must never be compared against a day's OHLC range.
+# ---------------------------------------------------------------------------
+
+SEMANTIC_ROLE_OBSERVED_MARKET_PRICE = "OBSERVED_MARKET_PRICE"
+SEMANTIC_ROLE_OPEN_PRICE = "OPEN_PRICE"
+SEMANTIC_ROLE_CLOSE_PRICE = "CLOSE_PRICE"
+SEMANTIC_ROLE_HISTORICAL_TRADE_PRICE = "HISTORICAL_TRADE_PRICE"
+SEMANTIC_ROLE_MOVING_AVERAGE = "MOVING_AVERAGE"
+SEMANTIC_ROLE_TECHNICAL_LEVEL = "TECHNICAL_LEVEL"
+SEMANTIC_ROLE_UNKNOWN = "UNKNOWN"
+
+# Only a role that genuinely denotes an actual traded market price is ever
+# eligible for a daily-OHLC-range comparison.
+DAILY_RANGE_ELIGIBLE_SEMANTIC_ROLES = frozenset(
+    {
+        SEMANTIC_ROLE_OBSERVED_MARKET_PRICE,
+        SEMANTIC_ROLE_OPEN_PRICE,
+        SEMANTIC_ROLE_CLOSE_PRICE,
+        SEMANTIC_ROLE_HISTORICAL_TRADE_PRICE,
+    }
+)
+
+DAILY_RANGE_SKIP_REASON_TECHNICAL_INDICATOR = "TECHNICAL_INDICATOR"
+DAILY_RANGE_SKIP_REASON_NUMERIC_ROLE_UNRESOLVED = "NUMERIC_ROLE_UNRESOLVED"
+
+# ---------------------------------------------------------------------------
 # Reason codes -- provider failure (non-blocking contract)
 # ---------------------------------------------------------------------------
 

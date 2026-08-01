@@ -1,4 +1,4 @@
-import type { AlphaConflict, ConflictEvidenceItem } from "../api/types";
+import type { AlphaConflict, ConflictEvidenceFactGroup, ConflictEvidenceItem } from "../api/types";
 
 const LEVEL_LABELS: Record<string, string> = {
   low: "Low",
@@ -12,13 +12,111 @@ interface ConflictCardProps {
   isMain?: boolean;
 }
 
+/** Evidence Integrity Completion Sprint, Track C: per-side evidence-fact
+ * transparency (raw vs. independent facts vs. distinct agents vs. overlap)
+ * -- absent (undefined) on a payload predating these fields, in which case
+ * this row renders nothing rather than "Not available" noise. */
+function ConflictSideFactStats({
+  rawCount,
+  uniqueCount,
+  agentCount,
+  overlapRatio,
+}: {
+  rawCount?: number;
+  uniqueCount?: number;
+  agentCount?: number;
+  overlapRatio?: number;
+}) {
+  if (rawCount == null || uniqueCount == null) return null;
+  return (
+    <p className="conflict-side-fact-stats">
+      <span>Independent evidence facts: {uniqueCount}</span>
+      {agentCount != null ? (
+        <>
+          {" · "}
+          <span>Distinct agents: {agentCount}</span>
+        </>
+      ) : null}
+      {overlapRatio != null ? (
+        <>
+          {" · "}
+          <span>Evidence overlap: {(overlapRatio * 100).toFixed(1)}%</span>
+        </>
+      ) : null}
+      {" "}
+      <span className="conflict-side-fact-stats-raw">(from {rawCount} raw supporting claims)</span>
+    </p>
+  );
+}
+
 /** Actual bull/bear evidence claims backing one side of a conflict. Only
  * ever renders backend-provided evidence text -- never a fixed template
- * standing in for evidence. */
-function ConflictSideEvidence({ title, items }: { title: string; items: ConflictEvidenceItem[] }) {
+ * standing in for evidence.
+ *
+ * When the backend provides ``factGroups`` (Evidence Integrity Completion
+ * Sprint, Track B), renders ONE card per independent Evidence Fact (the
+ * group's representative claim) with the rest of that fact's paraphrases
+ * available in an expandable "merged claims" detail -- never one card per
+ * raw, possibly-repeated claim. Falls back to the old one-card-per-claim
+ * rendering when factGroups is unavailable (older API payload). */
+function ConflictSideEvidence({
+  title,
+  items,
+  factGroups,
+}: {
+  title: string;
+  items: ConflictEvidenceItem[];
+  factGroups?: ConflictEvidenceFactGroup[];
+}) {
   if (!items || items.length === 0) {
     return <p className="conflict-side-evidence-empty">{title}: not available.</p>;
   }
+  const itemsByClaimId = new Map(items.map((item) => [item.claim_id, item]));
+
+  if (factGroups && factGroups.length > 0) {
+    return (
+      <div className="conflict-side-evidence">
+        <p className="conflict-side-evidence-title">{title}:</p>
+        <ul>
+          {factGroups.map((group) => {
+            const representative = itemsByClaimId.get(group.representative_claim_id);
+            const otherMembers = group.member_claim_ids.filter(
+              (claimId) => claimId !== group.representative_claim_id
+            );
+            return (
+              <li key={group.evidence_fact_group_id} className="conflict-side-evidence-item">
+                <p className="conflict-side-evidence-text">
+                  {representative?.claim_text ?? "(evidence text not available)"}
+                </p>
+                <p className="conflict-side-evidence-meta">
+                  <span>Agents: {group.supporting_agents.join(", ") || "unknown"}</span>
+                  {representative ? (
+                    <>
+                      {" · "}
+                      <span>Match {representative.match_score.toFixed(2)}</span>
+                      {" · "}
+                      <span>Relation: {representative.relation}</span>
+                    </>
+                  ) : null}
+                </p>
+                {otherMembers.length > 0 ? (
+                  <details className="conflict-side-evidence-merged">
+                    <summary>{otherMembers.length} merged paraphrase(s)</summary>
+                    <ul>
+                      {otherMembers.map((claimId) => (
+                        <li key={claimId}>{itemsByClaimId.get(claimId)?.claim_text ?? claimId}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
+
   return (
     <div className="conflict-side-evidence">
       <p className="conflict-side-evidence-title">{title}:</p>
@@ -76,7 +174,17 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
           <p className="conflict-side-activation">
             Activation: {conflict.bull_structure.activation_score.toFixed(1)} ({conflict.bull_structure.status})
           </p>
-          <ConflictSideEvidence title="Bull evidence" items={conflict.bull_evidence} />
+          <ConflictSideFactStats
+            rawCount={conflict.bull_raw_claim_count}
+            uniqueCount={conflict.bull_unique_fact_count}
+            agentCount={conflict.bull_distinct_agent_count}
+            overlapRatio={conflict.bull_overlap_ratio}
+          />
+          <ConflictSideEvidence
+            title="Bull evidence"
+            items={conflict.bull_evidence}
+            factGroups={conflict.bull_structure.evidence_facts}
+          />
         </div>
         <div className="conflict-side">
           <p className="conflict-side-role">Bear side</p>
@@ -86,7 +194,17 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
           <p className="conflict-side-activation">
             Activation: {conflict.bear_structure.activation_score.toFixed(1)} ({conflict.bear_structure.status})
           </p>
-          <ConflictSideEvidence title="Bear evidence" items={conflict.bear_evidence} />
+          <ConflictSideFactStats
+            rawCount={conflict.bear_raw_claim_count}
+            uniqueCount={conflict.bear_unique_fact_count}
+            agentCount={conflict.bear_distinct_agent_count}
+            overlapRatio={conflict.bear_overlap_ratio}
+          />
+          <ConflictSideEvidence
+            title="Bear evidence"
+            items={conflict.bear_evidence}
+            factGroups={conflict.bear_structure.evidence_facts}
+          />
         </div>
       </div>
       <div className="conflict-evidence-strength">

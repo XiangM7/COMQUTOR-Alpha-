@@ -19,6 +19,13 @@ from comqutor_alpha.storage.file_store import (
     save_json_record,
     validate_run_id_for_path,
 )
+from comqutor_alpha.structure_engine.canonical_relation_block import (
+    resolve_relation_source_claims,
+    split_human_text_and_canonical_block,
+    validate_canonical_relations,
+)
+from comqutor_alpha.structure_engine.canonical_relation_prompt import RELATION_BLOCK_MARKER
+from comqutor_alpha.structure_engine.canonical_vocabulary import build_canonical_relation_vocabulary
 from comqutor_alpha.structure_engine.claim_quality import (
     QUALITY_NON_SUBSTANTIVE,
     classify_claim_quality,
@@ -1099,7 +1106,8 @@ def _tally_rejections(rejected_records, quality_audit):
 # eligible agents (or a disabled gateway) use the deterministic path for
 # every segment directly.
 def adapt_raw_agent_outputs(
-    raw_record, run_id, ticker, *, llm_gateway=None, filter_audit=None, quality_audit=None
+    raw_record, run_id, ticker, *, llm_gateway=None, filter_audit=None, quality_audit=None,
+    canonical_relations_audit=None,
 ):
     if not isinstance(raw_record, dict):
         return [safe_default_record(
@@ -1129,7 +1137,31 @@ def adapt_raw_agent_outputs(
     )
     source_agent_output_id = str(base_id)
 
-    segments, filtered = extract_claim_segments_with_audit(raw_text)
+    # TradingAgents' own, single existing LLM call for this agent may have
+    # appended a COMQUTOR_CANONICAL_RELATIONS machine-readable block after
+    # its normal report text (see canonical_relation_prompt.py /
+    # canonical_prompt_injection.py -- never a second LLM call). Split it
+    # out here, deterministically, *before* claim segmentation, so the
+    # block's JSON syntax/field names can never become a claim segment, and
+    # validate any relations it proposed against the real production
+    # vocabulary. A raw output with no such marker is completely unaffected
+    # (parsed_block.human_text == raw_text unchanged) -- this is exactly
+    # what every historical run without this feature already looks like.
+    parsed_block = split_human_text_and_canonical_block(raw_text)
+    human_text = parsed_block.human_text
+    local_canonical_relations: list[dict[str, Any]] = []
+    if parsed_block.found:
+        local_canonical_relations = validate_canonical_relations(
+            parsed_block,
+            vocabulary=build_canonical_relation_vocabulary(),
+            agent_report_text=human_text,
+            agent=agent,
+            run_id=run_id,
+            ticker=ticker,
+            source_agent_output_id=source_agent_output_id,
+        )
+
+    segments, filtered = extract_claim_segments_with_audit(human_text)
     if filter_audit is not None:
         filter_audit.extend(filtered)
     for segment in segments:
@@ -1186,6 +1218,18 @@ def adapt_raw_agent_outputs(
         quality_audit["llm_claims_removed_count"] += len(llm_rejected)
         quality_audit["deterministic_claims_removed_count"] += len(det_rejected)
     _tally_rejections(rejected_records, quality_audit)
+
+    if canonical_relations_audit is not None and local_canonical_relations:
+        # Lineage Repair (Structure Integrity Repair Sprint, Track 1):
+        # resolve each canonical relation's evidence_quote against THIS same
+        # raw agent output's own real, quality-gate-eligible structured
+        # claims -- never the relation's own synthetic relation_id, and
+        # never a claim from a different agent/run. This must happen after
+        # eligible_records exists (the real claim_id/claim/claim_index pool
+        # to match against), not at validation time.
+        canonical_relations_audit.extend(
+            resolve_relation_source_claims(local_canonical_relations, eligible_records)
+        )
 
     if not eligible_records:
         return [safe_default_record(
@@ -1248,6 +1292,7 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
     ticker = str(raw_payload.get("ticker") or "unknown").upper()
     records = []
     filter_audit: list[dict[str, Any]] = []
+    canonical_relations: list[dict[str, Any]] = []
     global_audit = _new_quality_audit()
     # Section E: per-agent coverage breakdown. Keyed by normalized agent
     # name; multiple raw outputs for the same agent are aggregated (their
@@ -1271,6 +1316,7 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
             llm_gateway=llm_gateway,
             filter_audit=filter_audit,
             quality_audit=call_audit,
+            canonical_relations_audit=canonical_relations,
         )
         call_filtered = filter_audit[filter_start:]
 
@@ -1370,12 +1416,30 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
             }
         )
 
+    canonical_relation_block_count = sum(
+        1
+        for raw_record in raw_agent_outputs
+        if isinstance(raw_record, dict) and RELATION_BLOCK_MARKER in str(raw_record.get("raw_output") or "")
+    )
+    canonical_relations_validated_count = sum(
+        1 for relation in canonical_relations if relation.get("validation_status") == "accepted"
+    )
+    canonical_relations_rejected_count = sum(
+        1 for relation in canonical_relations if relation.get("validation_status") == "rejected"
+    )
+
     return {
         "schema_version": SCHEMA_VERSION,
         "adapter_version": ADAPTER_VERSION,
         "run_id": run_id,
         "ticker": ticker,
         "records": records,
+        # TradingAgents' own existing LLM call may append a
+        # COMQUTOR_CANONICAL_RELATIONS block to its normal report text (see
+        # canonical_relation_prompt.py). Kept as a top-level sibling to
+        # ``records`` -- these are report-level relations, not tied to any
+        # one segmented claim -- and never mixed into claim segmentation.
+        "canonical_relations": canonical_relations,
         "metadata": {
             "llm_enabled": llm_gateway is not None,
             "llm_record_count": sum(
@@ -1405,6 +1469,12 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
             "llm_batch_fallback_count": global_audit["llm_batch_fallback_count"],
             "quality_reason_counts": global_audit["reason_counts"],
             "agent_coverage": agent_coverage,
+            # Inject COMQUTOR Canonical Vocabulary into Existing TradingAgents
+            # Prompts: additive counters only, never breaking an existing
+            # consumer's expectations about the metadata shape.
+            "canonical_relation_block_count": canonical_relation_block_count,
+            "canonical_relations_validated_count": canonical_relations_validated_count,
+            "canonical_relations_rejected_count": canonical_relations_rejected_count,
         },
     }
 

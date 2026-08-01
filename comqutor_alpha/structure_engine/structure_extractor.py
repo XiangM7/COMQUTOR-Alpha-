@@ -100,6 +100,23 @@ def _source_agent_output_id(record: Mapping[str, Any]) -> str | None:
     return str(value) if value else None
 
 
+def _record_source_claim_ids(record: Mapping[str, Any]) -> list[str]:
+    """The real, segmented claim_id(s) this record's evidence traces back to.
+
+    For an ordinary structured-claim record this is exactly its own
+    claim_id (identical to ``_source_record_id``). A canonical-relation
+    record instead carries pre-resolved lineage claim_ids (see
+    ``canonical_relation_block.resolve_relation_source_claims``) -- its own
+    synthetic ``relation_id`` (used as ``claim_id`` for legacy provenance
+    display only) is never substituted here.
+    """
+    explicit = record.get("source_claim_ids")
+    if explicit is not None:
+        return [str(v) for v in explicit if str(v or "").strip()]
+    record_id = _source_record_id(record)
+    return [record_id] if record_id else []
+
+
 def _record_text(record: Mapping[str, Any]) -> str:
     claim = str(record.get("claim") or "").strip()
     evidence = str(record.get("evidence") or "").strip()
@@ -121,6 +138,7 @@ def _make_node(factor: str, record: Mapping[str, Any]) -> dict[str, Any]:
         "canonical_factor": factor,
         "node_type": "factor",
         "source_records": [_source_record_id(record)] if _source_record_id(record) else [],
+        "source_claim_ids": _record_source_claim_ids(record),
         "source_agent_output_ids": (
             [_source_agent_output_id(record)]
             if _source_agent_output_id(record)
@@ -133,7 +151,7 @@ def _make_node(factor: str, record: Mapping[str, Any]) -> dict[str, Any]:
 
 def _merge_node(existing: dict[str, Any], node: dict[str, Any]) -> dict[str, Any]:
     existing["score"] = clamp_score(max(existing.get("score", 0.0), node.get("score", 0.0)))
-    for key in ("source_records", "source_agent_output_ids", "evidence"):
+    for key in ("source_records", "source_claim_ids", "source_agent_output_ids", "evidence"):
         for value in node.get(key, []):
             if value and value not in existing[key]:
                 existing[key].append(value)
@@ -168,6 +186,11 @@ def _edge(
         "assertion_status": assertion_status,
         "source_claim": claim,
         "source_record_id": record_id,
+        "source_claim_ids": _record_source_claim_ids(record),
+        "relation_id": record.get("relation_id"),
+        "lineage_status": record.get("lineage_status"),
+        "lineage_method": record.get("lineage_method"),
+        "lineage_reasons": list(record.get("lineage_reasons") or []),
         "source_agent_output_id": _source_agent_output_id(record),
         "evidence": str(record.get("evidence") or claim),
         "extraction_method": extraction_method,
@@ -319,6 +342,76 @@ def _validated_llm_edges(
     return edges
 
 
+def _canonical_relation_record(relation: Mapping[str, Any]) -> dict[str, Any]:
+    """Adapt one validated TradingAgents-canonical-output relation (see
+    canonical_relation_block.validate_canonical_relations) into the same
+    lightweight ``record`` mapping shape ``_edge()``/``_make_node()`` already
+    expect, so this function never re-implements edge/node construction --
+    it only supplies a synthetic, report-level "claim" for it."""
+    return {
+        "ticker": relation.get("ticker"),
+        "claim": relation.get("canonical_sentence") or "",
+        "evidence": relation.get("evidence_quote") or "",
+        "confidence": relation.get("confidence", 0.0),
+        # Kept as ``claim_id`` for legacy provenance/audit display only
+        # (``source_record_id`` on the resulting edge/node) -- never treated
+        # as a real segmented claim. Real Alpha-Mapper-linkable lineage
+        # lives in ``source_claim_ids`` below (see
+        # ``canonical_relation_block.resolve_relation_source_claims``).
+        "claim_id": relation.get("relation_id"),
+        "relation_id": relation.get("relation_id"),
+        "source_claim_ids": relation.get("source_claim_ids") or [],
+        "lineage_status": relation.get("lineage_status"),
+        "lineage_method": relation.get("lineage_method"),
+        "lineage_reasons": relation.get("lineage_reasons") or [],
+        "source_agent_output_id": relation.get("source_agent_output_id"),
+    }
+
+
+def _canonical_relation_edges_and_nodes(
+    canonical_relations: list[Mapping[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Validated canonical relations become candidate edges directly from
+    their already-validated (source_factor_id, relation_type,
+    target_factor_id) triple -- never re-parsed from the deterministic
+    ``canonical_sentence``, never re-guessed by relation_grammar. Only
+    ``candidate_edge_created`` (asserted, never hedged/conditional/
+    hypothetical) relations reach this point; every one of them still goes
+    through the exact same run-level Graph admission guards as every other
+    candidate edge (self-loop/dangling/invalid-type/invalid-weight/
+    duplicate-merge in graph_builder.py) -- this function only builds the
+    candidate, it never itself decides admission.
+    """
+    edges: list[dict[str, Any]] = []
+    nodes: list[dict[str, Any]] = []
+    for relation in canonical_relations:
+        if not isinstance(relation, Mapping) or not relation.get("candidate_edge_created"):
+            continue
+        source_factor = relation.get("source_factor_id")
+        target_factor = relation.get("target_factor_id")
+        edge_type = relation.get("relation_type")
+        if not source_factor or not target_factor or edge_type not in VALID_EDGE_TYPES:
+            continue
+        record = _canonical_relation_record(relation)
+        edges.append(
+            _edge(
+                str(source_factor),
+                str(target_factor),
+                str(edge_type),
+                "tradingagents_canonical_relation",
+                record,
+                "TradingAgents' own existing LLM call reported this relation via the "
+                "COMQUTOR Structure Output Contract.",
+                relation.get("confidence", 0.0),
+                str(relation.get("assertion_status") or "asserted"),
+                "tradingagents_canonical_output",
+            )
+        )
+        nodes.append(_make_node(str(source_factor), record))
+        nodes.append(_make_node(str(target_factor), record))
+    return edges, nodes
+
+
 def _llm_edges(llm_gateway: Any, record: Mapping[str, Any], factors: list[str]):
     if llm_gateway is None or len(factors) < 2:
         return None
@@ -338,6 +431,7 @@ def extract_structures_from_records(
     records: Iterable[Mapping[str, Any]],
     *,
     llm_gateway: Any = None,
+    canonical_relations: list[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     nodes: dict[str, dict[str, Any]] = {}
     edges: dict[tuple[str, str, str, str | None], dict[str, Any]] = {}
@@ -345,6 +439,7 @@ def extract_structures_from_records(
     ticker = None
     llm_edge_count = 0
     deterministic_edge_count = 0
+    canonical_relation_edge_count = 0
 
     for record in records:
         if not isinstance(record, Mapping):
@@ -389,6 +484,29 @@ def extract_structures_from_records(
             )
             edges.setdefault(key, edge)
 
+    if canonical_relations:
+        canonical_edges, canonical_nodes = _canonical_relation_edges_and_nodes(canonical_relations)
+        canonical_relation_edge_count = len(canonical_edges)
+        if run_id is None:
+            run_id = next((r.get("run_id") for r in canonical_relations if isinstance(r, Mapping) and r.get("run_id")), None)
+        if ticker is None:
+            ticker = next((r.get("ticker") for r in canonical_relations if isinstance(r, Mapping) and r.get("ticker")), None)
+
+        for node in canonical_nodes:
+            if node["id"] in nodes:
+                _merge_node(nodes[node["id"]], node)
+            else:
+                nodes[node["id"]] = node
+
+        for edge in canonical_edges:
+            key = (
+                edge["source"],
+                edge["target"],
+                edge["edge_type"],
+                edge.get("source_record_id"),
+            )
+            edges.setdefault(key, edge)
+
     return {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
@@ -411,6 +529,7 @@ def extract_structures_from_records(
             "llm_enabled": llm_gateway is not None,
             "llm_edge_count": llm_edge_count,
             "deterministic_edge_count": deterministic_edge_count,
+            "canonical_relation_edge_count": canonical_relation_edge_count,
         },
     }
 
@@ -423,7 +542,12 @@ def build_extracted_structures_payload(
     records = structured_payload.get("records", [])
     if not isinstance(records, list):
         records = []
-    payload = extract_structures_from_records(records, llm_gateway=llm_gateway)
+    canonical_relations = structured_payload.get("canonical_relations")
+    if not isinstance(canonical_relations, list):
+        canonical_relations = None
+    payload = extract_structures_from_records(
+        records, llm_gateway=llm_gateway, canonical_relations=canonical_relations
+    )
     payload["run_id"] = structured_payload.get("run_id") or payload.get("run_id")
     payload["ticker"] = structured_payload.get("ticker") or payload.get("ticker")
     return payload

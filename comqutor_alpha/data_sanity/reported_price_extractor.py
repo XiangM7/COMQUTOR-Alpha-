@@ -12,6 +12,9 @@ import datetime as dt
 import re
 
 from comqutor_alpha.data_sanity.schema import (
+    DAILY_RANGE_ELIGIBLE_SEMANTIC_ROLES,
+    DAILY_RANGE_SKIP_REASON_NUMERIC_ROLE_UNRESOLVED,
+    DAILY_RANGE_SKIP_REASON_TECHNICAL_INDICATOR,
     DATE_RESOLUTION_ANALYSIS_YEAR_INFERRED,
     DATE_RESOLUTION_EXPLICIT_YEAR,
     DATE_RESOLUTION_PREVIOUS_YEAR_INFERRED,
@@ -23,6 +26,13 @@ from comqutor_alpha.data_sanity.schema import (
     PRICE_SEMANTICS_PEAKED,
     PRICE_SEMANTICS_REACHED,
     PRICE_SEMANTICS_TRADED,
+    SEMANTIC_ROLE_CLOSE_PRICE,
+    SEMANTIC_ROLE_HISTORICAL_TRADE_PRICE,
+    SEMANTIC_ROLE_MOVING_AVERAGE,
+    SEMANTIC_ROLE_OBSERVED_MARKET_PRICE,
+    SEMANTIC_ROLE_OPEN_PRICE,
+    SEMANTIC_ROLE_TECHNICAL_LEVEL,
+    SEMANTIC_ROLE_UNKNOWN,
 )
 
 # Sentences carrying any of these are never treated as a historical stock
@@ -87,6 +97,96 @@ _BARE_PRICE_DATE_PATTERN = re.compile(
 def _is_disqualified(sentence: str) -> bool:
     lowered = sentence.lower()
     return any(term in lowered for term in _DISQUALIFYING_TERMS)
+
+
+# Technical-indicator / non-market-price vocabulary (Structure Integrity
+# Repair Sprint, Track 3). A dollar figure sitting next to any of these terms
+# in the *same sentence* is a technical indicator or a forward-looking
+# target, never an observed traded price -- classified accordingly and never
+# range-checked, regardless of how price-like its surrounding verb reads
+# (e.g. "the 200 SMA ... rose to $187.60").
+_MOVING_AVERAGE_TERMS = (
+    "sma",
+    "simple moving average",
+    "moving average",
+    "ema",
+    "exponential moving average",
+    "vwap",
+    "bollinger",
+    "atr",
+    "average true range",
+    "rsi",
+)
+_TECHNICAL_LEVEL_TERMS = (
+    "support",
+    "resistance",
+    "pivot",
+    "fibonacci",
+    "technical level",
+    "trend line",
+    "channel",
+)
+_MOVING_AVERAGE_PATTERN = re.compile(
+    r"(?i)\b(?:\d{1,3}[\s-]*(?:day|d)?[\s-]*)?("
+    + "|".join(re.escape(term) for term in _MOVING_AVERAGE_TERMS)
+    + r")\b"
+)
+_TECHNICAL_LEVEL_PATTERN = re.compile(
+    r"(?i)\b(" + "|".join(re.escape(term) for term in _TECHNICAL_LEVEL_TERMS) + r")\b"
+)
+
+
+def _classify_technical_indicator(sentence: str) -> tuple[str, str] | None:
+    """Returns ``(semantic_role, semantic_role_reason)`` when ``sentence``
+    carries technical-indicator/level vocabulary, else ``None``. Sentence-
+    scoped (never cross-sentence), so a moving-average mention in one
+    sentence can never disqualify an unrelated price mention elsewhere in
+    the same report."""
+    match = _MOVING_AVERAGE_PATTERN.search(sentence)
+    if match:
+        return (
+            SEMANTIC_ROLE_MOVING_AVERAGE,
+            f"Matched {match.group(1)!r} in local context",
+        )
+    match = _TECHNICAL_LEVEL_PATTERN.search(sentence)
+    if match:
+        return (
+            SEMANTIC_ROLE_TECHNICAL_LEVEL,
+            f"Matched {match.group(1)!r} in local context",
+        )
+    return None
+
+
+_PRICE_SEMANTICS_TO_ROLE = {
+    PRICE_SEMANTICS_OPEN: SEMANTIC_ROLE_OPEN_PRICE,
+    PRICE_SEMANTICS_CLOSE: SEMANTIC_ROLE_CLOSE_PRICE,
+    PRICE_SEMANTICS_TRADED: SEMANTIC_ROLE_HISTORICAL_TRADE_PRICE,
+    PRICE_SEMANTICS_REACHED: SEMANTIC_ROLE_OBSERVED_MARKET_PRICE,
+    PRICE_SEMANTICS_PEAKED: SEMANTIC_ROLE_OBSERVED_MARKET_PRICE,
+    PRICE_SEMANTICS_FELL_TO: SEMANTIC_ROLE_OBSERVED_MARKET_PRICE,
+    PRICE_SEMANTICS_GENERIC: SEMANTIC_ROLE_OBSERVED_MARKET_PRICE,
+}
+
+
+def _classify_semantic_role(sentence: str, price_semantics: str) -> tuple[str, str, bool, str | None]:
+    """Returns ``(semantic_role, semantic_role_reason, daily_range_check_eligible,
+    daily_range_skip_reason)`` for one already-date/price-matched sentence."""
+    technical = _classify_technical_indicator(sentence)
+    if technical is not None:
+        role, reason = technical
+        return role, reason, False, DAILY_RANGE_SKIP_REASON_TECHNICAL_INDICATOR
+
+    role = _PRICE_SEMANTICS_TO_ROLE.get(price_semantics, SEMANTIC_ROLE_UNKNOWN)
+    if role == SEMANTIC_ROLE_UNKNOWN:
+        return (
+            role,
+            "No technical-indicator vocabulary matched, but price semantics were unresolved.",
+            False,
+            DAILY_RANGE_SKIP_REASON_NUMERIC_ROLE_UNRESOLVED,
+        )
+    eligible = role in DAILY_RANGE_ELIGIBLE_SEMANTIC_ROLES
+    reason = f"Price semantics {price_semantics!r} maps to an observed market price."
+    return role, reason, eligible, None
 
 
 def _split_sentences(text: str) -> list[str]:
@@ -190,6 +290,12 @@ def extract_reported_prices(structured_records, analysis_date: dt.date) -> list[
             if resolved is None:
                 continue
             reported_date, date_resolution = resolved
+            (
+                semantic_role,
+                semantic_role_reason,
+                daily_range_check_eligible,
+                daily_range_skip_reason,
+            ) = _classify_semantic_role(sentence, semantics)
             results.append(
                 {
                     "claim_id": claim_id,
@@ -199,6 +305,13 @@ def extract_reported_prices(structured_records, analysis_date: dt.date) -> list[
                     "reported_price": price,
                     "price_semantics": semantics,
                     "source_text": sentence[:MAX_SOURCE_TEXT_CHARS],
+                    # Structure Integrity Repair Sprint, Track 3 (additive):
+                    # what kind of number this actually is, and whether it is
+                    # legitimate to compare against a day's OHLC range at all.
+                    "semantic_role": semantic_role,
+                    "semantic_role_reason": semantic_role_reason,
+                    "daily_range_check_eligible": daily_range_check_eligible,
+                    "daily_range_skip_reason": daily_range_skip_reason,
                 }
             )
     return results

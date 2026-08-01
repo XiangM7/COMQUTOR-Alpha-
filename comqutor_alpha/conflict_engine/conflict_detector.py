@@ -81,6 +81,11 @@ from comqutor_alpha.graph_engine.activation_scorer import _relation_for_match
 from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     ACTIVATION_V2_FORMULA_VERSION,
 )
+from comqutor_alpha.graph_engine.evidence_fact_index import (
+    EvidenceFactCandidate,
+    evidence_fact_group_id,
+    group_evidence_candidates,
+)
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
 from comqutor_alpha.structure_engine.claim_quality import (
     CONSUMER_CONFLICT,
@@ -496,6 +501,20 @@ def _gather_qualifying_evidence(
                         "agent": (
                             str(record.get("agent")) if record.get("agent") else None
                         ),
+                        # Evidence Integrity Completion Sprint, Track B:
+                        # additive facts the shared canonical Evidence Fact
+                        # Index needs to detect a cross-agent near-paraphrase
+                        # -- never used to change admission/exclusion, only
+                        # to group already-qualifying evidence into facts.
+                        "factors": tuple(
+                            str(f) for f in (record.get("factors") or []) if str(f or "").strip()
+                        ),
+                        "assertion_status": str(
+                            record.get("assertion_status") or "unknown"
+                        ).strip().lower(),
+                        "semantic_polarity": str(
+                            record.get("semantic_polarity") or "unknown"
+                        ).strip().lower(),
                     }
                 )
 
@@ -519,6 +538,92 @@ def _mean_match_score(qualifying_claims: list[dict[str, Any]]) -> float:
     if not qualifying_claims:
         return 0.0
     return sum(c["match_score"] for c in qualifying_claims) / len(qualifying_claims)
+
+
+# ---------------------------------------------------------------------------
+# Evidence Fact grouping (Evidence Integrity Completion Sprint, Track B).
+#
+# Conflict Detector never re-implements its own dedup: the SAME canonical
+# Evidence Fact Index grouping algorithm Activation production scoring and
+# the Evidence Integrity shadow layer use
+# (``evidence_fact_index.group_evidence_candidates``) is applied here, over
+# the SAME already-admitted qualifying claims this module's own frozen
+# eligibility/exclusion pipeline above selects (never re-derived, never
+# widened/narrowed). Only the evidence-STRENGTH formula input changes (mean
+# over unique fact groups, not raw paraphrase claims); the conflict score
+# formula itself, the canonical pair registry, and admission/rejection
+# reason codes are all untouched.
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class _FactSummary:
+    fact_groups: list[list[dict[str, Any]]]
+    fact_group_ids: list[str]
+    raw_claim_count: int
+    unique_fact_count: int
+    distinct_agent_count: int
+    overlap_ratio: float
+    representative_scores: list[float]
+
+
+def _group_qualifying_claims_into_facts(
+    qualifying_claims: list[dict[str, Any]],
+    *,
+    run_id: str,
+    ticker: str,
+) -> _FactSummary:
+    if not qualifying_claims:
+        return _FactSummary([], [], 0, 0, 0, 0.0, [])
+
+    candidates = [
+        EvidenceFactCandidate(
+            claim_id=c["claim_id"],
+            claim_text=str(c.get("evidence") or ""),
+            factors=tuple(c.get("factors") or ()),
+            assertion_status=str(c.get("assertion_status") or "unknown"),
+            semantic_polarity=str(c.get("semantic_polarity") or "unknown"),
+        )
+        for c in qualifying_claims
+    ]
+    grouped = group_evidence_candidates(candidates, ticker)
+    by_claim_id = {c["claim_id"]: c for c in qualifying_claims}
+
+    entries: list[tuple[str, list[dict[str, Any]]]] = []
+    for members in grouped:
+        claim_ids = sorted(m.claim_id for m in members)
+        group_claims = [by_claim_id[cid] for cid in claim_ids]
+        entries.append((evidence_fact_group_id(run_id, ticker, claim_ids), group_claims))
+    entries.sort(key=lambda entry: entry[0])
+
+    fact_group_ids = [group_id for group_id, _ in entries]
+    fact_groups = [group_claims for _, group_claims in entries]
+    representative_scores = [max(c["match_score"] for c in group_claims) for group_claims in fact_groups]
+
+    distinct_agents = len({c.get("agent") for c in qualifying_claims if c.get("agent")})
+    raw_count = len(qualifying_claims)
+    unique_count = len(fact_groups)
+    overlap_ratio = round(1.0 - unique_count / raw_count, 4) if raw_count > 0 else 0.0
+
+    return _FactSummary(
+        fact_groups=fact_groups,
+        fact_group_ids=fact_group_ids,
+        raw_claim_count=raw_count,
+        unique_fact_count=unique_count,
+        distinct_agent_count=distinct_agents,
+        overlap_ratio=overlap_ratio,
+        representative_scores=representative_scores,
+    )
+
+
+def _fact_grouped_strength(summary: _FactSummary) -> float:
+    """Mean match score across unique Evidence Facts (their best member's
+    score), not across raw paraphrase claims -- the same fact repeated by
+    many agents contributes once, exactly like EvidenceQuality/
+    AgentIndependence already do in Activation v2."""
+    if not summary.representative_scores:
+        return 0.0
+    return sum(summary.representative_scores) / len(summary.representative_scores)
 
 
 # ---------------------------------------------------------------------------
@@ -602,6 +707,8 @@ def _evaluate_candidate(
     activations_by_id: Mapping[str, Mapping[str, Any]],
     alpha_matches: Sequence[Mapping[str, Any]],
     duplicate_counts: Mapping[str, int],
+    run_id: str = "",
+    ticker: str = "",
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
     """Evaluate exactly one canonical candidate pair.
 
@@ -674,8 +781,15 @@ def _evaluate_candidate(
             else REASON_MISSING_RIGHT_EVIDENCE
         )
 
-    strength_a_raw = _mean_match_score(qualifying_a)
-    strength_b_raw = _mean_match_score(qualifying_b)
+    # Evidence Integrity Completion Sprint, Track B: evidence-strength is
+    # computed over unique Evidence Facts (the shared canonical grouping),
+    # never over raw paraphrase claims -- the conflict score formula itself
+    # (min(activation) x contradiction_weight x evidence_strength) is
+    # byte-identical; only this input's semantics changed.
+    fact_summary_a = _group_qualifying_claims_into_facts(qualifying_a, run_id=run_id, ticker=ticker)
+    fact_summary_b = _group_qualifying_claims_into_facts(qualifying_b, run_id=run_id, ticker=ticker)
+    strength_a_raw = _fact_grouped_strength(fact_summary_a)
+    strength_b_raw = _fact_grouped_strength(fact_summary_b)
     evidence_strength_raw = (strength_a_raw + strength_b_raw) / 2.0
     if evidence_strength_raw <= 0.0:
         reason_codes.append(REASON_ZERO_EVIDENCE_STRENGTH)
@@ -698,8 +812,12 @@ def _evaluate_candidate(
         )
 
     # Fully admitted: every condition satisfied.
-    bull_fields, bull_qualifying = (fields_a, qualifying_a) if bull_id == alpha_a else (fields_b, qualifying_b)
-    bear_fields, bear_qualifying = (fields_b, qualifying_b) if bull_id == alpha_a else (fields_a, qualifying_a)
+    bull_fields, bull_qualifying, bull_facts = (
+        (fields_a, qualifying_a, fact_summary_a) if bull_id == alpha_a else (fields_b, qualifying_b, fact_summary_b)
+    )
+    bear_fields, bear_qualifying, bear_facts = (
+        (fields_b, qualifying_b, fact_summary_b) if bull_id == alpha_a else (fields_a, qualifying_a, fact_summary_a)
+    )
 
     minimum_activation = min(fields_a.score, fields_b.score)
     conflict_score_raw = minimum_activation * float(contradiction_weight) * evidence_strength_raw
@@ -718,14 +836,27 @@ def _evaluate_candidate(
 
     explanation = _build_explanation(bull_fields.name, bear_fields.name, level)
 
+    # Evidence Integrity Completion Sprint, Track B, section 10: a fact
+    # group is never silently allowed to support both sides. Since bull and
+    # bear are always two DIFFERENT alphas and a claim's matched_alpha is
+    # singular, the two sides' qualifying claim pools are already disjoint
+    # by construction -- shared_fact_group_ids is computed honestly (never
+    # assumed empty) as a structural integrity check, not a no-op.
+    shared_fact_group_ids = sorted(set(bull_facts.fact_group_ids) & set(bear_facts.fact_group_ids))
+    shared_fact_resolution = (
+        "no_overlap"
+        if not shared_fact_group_ids
+        else "default_rejected_dual_use"
+    )
+
     conflict = {
         "conflict_id": conflict_id(alpha_a, alpha_b),
         "alpha_a": alpha_a,
         "alpha_b": alpha_b,
         "bull_alpha_id": bull_id,
         "bear_alpha_id": bear_id,
-        "bull_structure": _structure_block(bull_id, bull_fields, "positive", bull_qualifying),
-        "bear_structure": _structure_block(bear_id, bear_fields, "negative", bear_qualifying),
+        "bull_structure": _structure_block(bull_id, bull_fields, "positive", bull_qualifying, bull_facts),
+        "bear_structure": _structure_block(bear_id, bear_fields, "negative", bear_qualifying, bear_facts),
         "components": components,
         "alpha_a_strength": round(strength_a_raw, 4),
         "alpha_b_strength": round(strength_b_raw, 4),
@@ -734,6 +865,23 @@ def _evaluate_candidate(
         "conflict_level": level,
         "reason_codes": [],
         "explanation": explanation,
+        # Evidence Integrity Completion Sprint, Track B: additive fact-level
+        # evidence statistics -- existing bull_evidence/bear_evidence-shaped
+        # fields (bull_structure/bear_structure, evidence_strength,
+        # conflict_score, conflict_level, explanation) are unchanged above.
+        "bull_raw_claim_count": bull_facts.raw_claim_count,
+        "bull_unique_fact_count": bull_facts.unique_fact_count,
+        "bull_distinct_agent_count": bull_facts.distinct_agent_count,
+        "bull_overlap_ratio": bull_facts.overlap_ratio,
+        "bull_fact_group_ids": bull_facts.fact_group_ids,
+        "bear_raw_claim_count": bear_facts.raw_claim_count,
+        "bear_unique_fact_count": bear_facts.unique_fact_count,
+        "bear_distinct_agent_count": bear_facts.distinct_agent_count,
+        "bear_overlap_ratio": bear_facts.overlap_ratio,
+        "bear_fact_group_ids": bear_facts.fact_group_ids,
+        "shared_fact_group_ids": shared_fact_group_ids,
+        "shared_fact_group_count": len(shared_fact_group_ids),
+        "shared_fact_resolution": shared_fact_resolution,
         # Internal (unrounded) sort keys -- never displayed as "the" score,
         # kept alongside so main-conflict arbitration never re-derives them
         # from the rounded public values (display rounding must not be able
@@ -745,8 +893,14 @@ def _evaluate_candidate(
     return _audit_item(alpha_a, alpha_b, "admitted", [], evidence_audit), conflict
 
 
-def _structure_block(alpha_id: str, fields: _ActivationFields, direction: str, qualifying: list[dict[str, Any]]):
-    return {
+def _structure_block(
+    alpha_id: str,
+    fields: _ActivationFields,
+    direction: str,
+    qualifying: list[dict[str, Any]],
+    fact_summary: _FactSummary | None = None,
+):
+    block = {
         "alpha_id": alpha_id,
         "alpha_name": fields.name,
         "activation_score": round(fields.score, 4),
@@ -760,6 +914,20 @@ def _structure_block(alpha_id: str, fields: _ActivationFields, direction: str, q
         "evidence": [c["evidence"] for c in qualifying],
         "match_scores": [c["match_score"] for c in qualifying],
     }
+    if fact_summary is not None:
+        block["evidence_facts"] = [
+            {
+                "evidence_fact_group_id": group_id,
+                "representative_claim_id": max(members, key=lambda c: c["match_score"])["claim_id"],
+                "member_claim_ids": sorted(c["claim_id"] for c in members),
+                "supporting_agents": sorted({c["agent"] for c in members if c.get("agent")}),
+                "grouping_method": "evidence_fact_index.v1",
+            }
+            for group_id, members in zip(
+                fact_summary.fact_group_ids, fact_summary.fact_groups, strict=True
+            )
+        ]
+    return block
 
 
 def _build_explanation(bull_name: str, bear_name: str, level: str) -> str:
@@ -900,6 +1068,8 @@ def detect_alpha_conflicts(
             activations_by_id=activations_by_id,
             alpha_matches=canonical_matches,
             duplicate_counts=duplicate_counts,
+            run_id=run_id,
+            ticker=ticker,
         )
         candidate_evaluations.append(audit_item)
         if conflict is not None:

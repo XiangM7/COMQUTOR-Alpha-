@@ -1,0 +1,26 @@
+case_id: qqq_historical_v1
+ticker: QQQ
+description: >
+  Historical Architecture Replay evaluation case over a real, previously
+  completed QQQ research run. Re-runs the current pipeline against its
+  frozen raw_agent_outputs.json (0 Provider calls, source integrity
+  checked) and verifies structural hygiene, never a domain judgment.
+case_type: historical_replay_case
+analysis_date: null
+created_by: mvp_audit_evaluation_sprint (automated)
+approved_by: null
+approval_status: draft
+source_run_id: a364e0ee-3bb4-4032-88b7-5cd82e379805
+source_output_root: outputs/runs
+input_artifacts:
+  - raw_agent_outputs.json
+artifact_hashes: {}
+expected_file: expected.yaml
+taxonomy_version: null
+prompt_contract_version: null
+notes: >
+  Activation/conflict *correctness* (as opposed to structural completion)
+  has not been reviewed by a domain analyst -- expected.yaml intentionally
+  asserts only structural/hygiene invariants for this case. See
+  manual_claim_labels.csv for the (currently empty) manual-labeling
+  template.

@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import logging
 import os
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -22,6 +24,13 @@ from comqutor_alpha.data_sanity.pipeline import (
 )
 from comqutor_alpha.data_sanity.schema import (
     STATUS_NOT_AVAILABLE as DATA_SANITY_STATUS_NOT_AVAILABLE,
+)
+from comqutor_alpha.graph_engine.activation_scorer_v2 import (
+    REGIME_GATE_MIN_UNIQUE_EVIDENCE,
+)
+from comqutor_alpha.graph_engine.evidence_fact_index import (
+    ALPHA_ACTIVATION_EVIDENCE_V1,
+    select_supporting_alpha_claims,
 )
 from comqutor_alpha.graph_engine.evidence_integrity import (
     EVIDENCE_INTEGRITY_SCHEMA_VERSION,
@@ -399,17 +408,39 @@ def _public_data_sanity_fields(run_id, output_root):
             "data_sanity_warning_count": 0,
             "data_sanity_critical_count": 0,
             "data_sanity_warnings": [],
+            "data_sanity_numeric_semantics": None,
         }
     summary = payload.get("summary")
     summary = summary if isinstance(summary, dict) else {}
     raw_warnings = payload.get("warnings")
     raw_warnings = raw_warnings if isinstance(raw_warnings, list) else []
     public_warnings = [w for w in (_public_data_sanity_warning(w) for w in raw_warnings) if w is not None]
+    # Evidence Integrity Completion Sprint, Track C (additive): aggregate
+    # numeric-semantics transparency -- how many reported-price candidates
+    # were technical indicators/other non-market-price roles and therefore
+    # never eligible for a daily-range warning. Never per-candidate detail
+    # (that would need a new persisted artifact); null when the reported-
+    # price check did not run for this run.
+    numeric_semantics = None
+    checks = payload.get("checks")
+    if isinstance(checks, list):
+        price_check = next(
+            (c for c in checks if isinstance(c, dict) and c.get("name") == "reported_price_cross_check"),
+            None,
+        )
+        if isinstance(price_check, dict) and price_check.get("status") == "ok":
+            numeric_semantics = {
+                "evaluated_count": int(price_check.get("evaluated_count") or 0),
+                "daily_range_eligible_count": int(price_check.get("daily_range_eligible_count") or 0),
+                "skipped_by_role_count": int(price_check.get("skipped_by_role_count") or 0),
+                "semantic_role_counts": price_check.get("semantic_role_counts") or {},
+            }
     return {
         "data_sanity_status": payload.get("status") or DATA_SANITY_STATUS_NOT_AVAILABLE,
         "data_sanity_warning_count": int(summary.get("warning_count") or 0),
         "data_sanity_critical_count": int(summary.get("critical_count") or 0),
         "data_sanity_warnings": public_warnings,
+        "data_sanity_numeric_semantics": numeric_semantics,
     }
 
 
@@ -656,16 +687,547 @@ def _run_week1_week2_artifact_pipeline(
                 _report_progress_stage(progress_reporter, "alpha_mapping")
 
 
-RUN_AUDIT_SCHEMA_VERSION = "structure_correctness.run_audit.v1"
+RUN_AUDIT_SCHEMA_VERSION = "structure_correctness.run_audit.v2"
 RUN_AUDIT_ARTIFACT_FILENAME = "run_audit.json"
+# Identifies this audit-consolidation module itself, distinct from every
+# per-artifact pipeline_version already embedded in individual artifacts
+# (e.g. replay lineage's own "pipeline_version"). Bump only when the *shape*
+# of this file's own consolidation logic changes.
+RUN_AUDIT_GENERATOR_VERSION = "comqutor_alpha.run_audit_consolidation.v1"
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
+def _git(*args):
+    """Best-effort git lookup for code_provenance -- never raises, never
+    blocks a request meaningfully (short timeout), and is only ever used to
+    describe the state of the workspace *at audit-generation time* (not to
+    claim what code originally produced a historical run's artifacts)."""
+    try:
+        result = subprocess.run(
+            ["git", *args], capture_output=True, text=True, cwd=_REPO_ROOT, check=True, timeout=10
+        )
+        return result.stdout.strip()
+    except Exception:
+        return None
+
+
+def _code_provenance_section():
+    git_head = _git("rev-parse", "HEAD")
+    dirty_output = _git("status", "--porcelain")
+    dirty_file_count = len([line for line in dirty_output.splitlines() if line.strip()]) if dirty_output is not None else None
+    return {
+        "git_head": git_head,
+        "git_dirty": (dirty_file_count > 0) if dirty_file_count is not None else None,
+        "dirty_file_count": dirty_file_count,
+        "pipeline_version": RUN_AUDIT_GENERATOR_VERSION,
+    }
+
+
+def _provenance_entry(value, source):
+    """Shape one ``configuration_versions`` row. A ``None`` value is always
+    honestly reported as a provenance gap (never guessed/backfilled from the
+    *current* workspace's constants) -- see section 5's explicit boundary:
+    "不得把当前工作区版本伪装成历史 run 当时版本"."""
+    if value is None:
+        return {"value": None, "source": "not_recorded", "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"}
+    return {"value": value, "source": source}
+
+
+def _configuration_versions_section(
+    *, metadata, structured_payload, structured_metadata, vocab_snapshot, graph_payload, conflict_payload
+):
+    """Every value here is read from an artifact this specific run actually
+    produced -- never recomputed from the currently-importable module
+    constants. A replay run's metadata.json (comqutor_alpha/replay/pipeline.py)
+    already embeds most of these directly; a live run instead has them
+    embedded in each stage's own artifact (structured_agent_outputs.json,
+    the vocabulary snapshot, structure_graph.json, conflict result). When
+    neither source has the value, it stays an honest null."""
+
+    def _from_metadata_or(key, fallback):
+        # Replay metadata (comqutor_alpha.replay.pipeline) records these
+        # under the same field names read here -- preferred because it is
+        # captured once, at replay time, rather than re-derived live.
+        if isinstance(metadata, dict) and metadata.get(key) is not None:
+            return metadata.get(key), "metadata.json (replay lineage)"
+        return fallback
+
+    claim_adapter_version, claim_adapter_source = _from_metadata_or(
+        "claim_adapter_version",
+        (
+            (structured_payload.get("adapter_version"), "structured_agent_outputs.json")
+            if isinstance(structured_payload, dict) and structured_payload.get("adapter_version")
+            else (None, None)
+        ),
+    )
+    taxonomy_version, taxonomy_source = _from_metadata_or(
+        "taxonomy_version",
+        (
+            (vocab_snapshot.get("taxonomy_version"), "tradingagents_comqutor_vocabulary_snapshot.json")
+            if isinstance(vocab_snapshot, dict) and vocab_snapshot.get("taxonomy_version")
+            else (None, None)
+        ),
+    )
+    taxonomy_sha256, taxonomy_sha_source = (
+        (vocab_snapshot.get("taxonomy_sha256"), "tradingagents_comqutor_vocabulary_snapshot.json")
+        if isinstance(vocab_snapshot, dict) and vocab_snapshot.get("taxonomy_sha256")
+        else (None, None)
+    )
+    alias_version, alias_source = _from_metadata_or("alias_version", (taxonomy_version, taxonomy_source))
+    relation_registry_version, relation_registry_source = _from_metadata_or(
+        "relation_grammar_version",
+        (
+            (vocab_snapshot.get("relation_registry_version"), "tradingagents_comqutor_vocabulary_snapshot.json")
+            if isinstance(vocab_snapshot, dict) and vocab_snapshot.get("relation_registry_version")
+            else (None, None)
+        ),
+    )
+    prompt_contract_version, prompt_contract_source = (
+        (vocab_snapshot.get("prompt_contract_version"), "tradingagents_comqutor_vocabulary_snapshot.json")
+        if isinstance(vocab_snapshot, dict) and vocab_snapshot.get("prompt_contract_version")
+        else (None, None)
+    )
+    prompt_contract_sha256, prompt_contract_sha_source = (
+        (vocab_snapshot.get("prompt_contract_sha256"), "tradingagents_comqutor_vocabulary_snapshot.json")
+        if isinstance(vocab_snapshot, dict) and vocab_snapshot.get("prompt_contract_sha256")
+        else (None, None)
+    )
+    graph_schema_version, graph_schema_source = _from_metadata_or(
+        "graph_schema_version",
+        (
+            (graph_payload.get("schema_version"), "structure_graph.json")
+            if isinstance(graph_payload, dict) and graph_payload.get("schema_version")
+            else (None, None)
+        ),
+    )
+    activation_formula_version, activation_formula_source = _from_metadata_or(
+        "activation_version",
+        (
+            (graph_payload.get("primary_activation_version"), "structure_graph.json")
+            if isinstance(graph_payload, dict) and graph_payload.get("primary_activation_version")
+            else (None, None)
+        ),
+    )
+    conflict_formula_version, conflict_formula_source = (
+        (conflict_payload.get("formula_version"), "week4 conflict result (DB)")
+        if isinstance(conflict_payload, dict) and conflict_payload.get("formula_version")
+        else (None, None)
+    )
+    evidence_eligibility_policy_version = ALPHA_ACTIVATION_EVIDENCE_V1
+    data_sanity_schema_version = None
+    data_sanity_schema_source = None
+
+    return {
+        "claim_adapter_version": _provenance_entry(claim_adapter_version, claim_adapter_source),
+        # No distinct claim-quality policy version constant exists anywhere
+        # in the codebase today (confirmed by audit) -- an honest gap, not a
+        # guess.
+        "claim_quality_policy_version": _provenance_entry(None, None),
+        "evidence_eligibility_policy_version": _provenance_entry(
+            evidence_eligibility_policy_version, "computed live (evidence_fact_index.ALPHA_ACTIVATION_EVIDENCE_V1)"
+        ),
+        "taxonomy_version": _provenance_entry(taxonomy_version, taxonomy_source),
+        "taxonomy_sha256": _provenance_entry(taxonomy_sha256, taxonomy_sha_source),
+        "alias_registry_version": _provenance_entry(alias_version, alias_source),
+        # canonical_vocabulary.compute_taxonomy_sha256 hashes the same
+        # FACTOR_ALIASES dict that *is* the alias registry -- no separate
+        # alias hash exists, so this deliberately mirrors taxonomy_sha256
+        # rather than fabricating an independent one.
+        "alias_registry_sha256": _provenance_entry(taxonomy_sha256, taxonomy_sha_source),
+        "relation_registry_version": _provenance_entry(relation_registry_version, relation_registry_source),
+        # No separate relation-registry content hash is captured by any
+        # existing artifact today.
+        "relation_registry_sha256": _provenance_entry(None, None),
+        "prompt_contract_version": _provenance_entry(prompt_contract_version, prompt_contract_source),
+        "prompt_contract_sha256": _provenance_entry(prompt_contract_sha256, prompt_contract_sha_source),
+        "graph_schema_version": _provenance_entry(graph_schema_version, graph_schema_source),
+        "activation_formula_version": _provenance_entry(activation_formula_version, activation_formula_source),
+        "conflict_formula_version": _provenance_entry(conflict_formula_version, conflict_formula_source),
+        # No conflict-pair-registry version constant exists anywhere in the
+        # codebase today (confirmed by audit) -- an honest gap.
+        "conflict_registry_version": _provenance_entry(None, None),
+        "data_sanity_schema_version": _provenance_entry(data_sanity_schema_version, data_sanity_schema_source),
+    }
+
+
+def _run_identity_section(run_id, ticker, metadata, db_row):
+    """Fields absent from every available source stay ``None`` -- never
+    guessed (e.g. ``execution_mode`` is only ever set from an explicit
+    ``run_type``/DB value, never inferred from the mere absence of replay
+    lineage fields)."""
+    db_row = db_row if isinstance(db_row, dict) else {}
+    source_models = metadata.get("source_models") if isinstance(metadata, dict) else None
+    source_models = source_models if isinstance(source_models, dict) else {}
+    execution_mode = metadata.get("run_type") if isinstance(metadata, dict) else None
+    return {
+        "run_id": run_id,
+        "ticker": ticker,
+        "analysis_date": metadata.get("analysis_date") if isinstance(metadata, dict) else None,
+        "created_at": (metadata.get("created_at") if isinstance(metadata, dict) else None) or db_row.get("created_at"),
+        "started_at": db_row.get("started_at"),
+        "completed_at": db_row.get("completed_at"),
+        "status": db_row.get("status"),
+        "source_run_id": metadata.get("source_run_id") if isinstance(metadata, dict) else None,
+        "replay_run_id": metadata.get("replay_run_id") if isinstance(metadata, dict) else None,
+        "execution_mode": execution_mode,
+        "profile_id": (metadata.get("source_profile_id") if isinstance(metadata, dict) else None),
+        "provider": (metadata.get("source_provider") if isinstance(metadata, dict) else None) or db_row.get("provider_identity"),
+        "quick_model": source_models.get("quick_think_llm"),
+        "deep_model": source_models.get("deep_think_llm"),
+        # Not captured by any existing per-run artifact for a live run
+        # today -- an honest gap, not a guess.
+        "debate_rounds": None,
+        "risk_rounds": None,
+        "thinking_enabled": None,
+        # Existing DB field, a *different* two-value concept
+        # ("offline"/"real" -- whether the request supplied
+        # offline-fixture raw_agent_outputs) than the four-value
+        # execution_mode taxonomy above -- surfaced as-is, separately
+        # labeled, never conflated with it.
+        "request_execution_mode": db_row.get("execution_mode"),
+    }
+
+
+_ARTIFACT_MANIFEST_SPECS = (
+    ("metadata.json", "metadata.json", "run submission / lifecycle", "run_audit, evaluation harness"),
+    ("raw_agent_outputs.json", "raw_agent_outputs.json", "tradingagents_output_writer.build_raw_agent_output_record", "structured_output_adapter"),
+    ("structured_agent_outputs.json", "structured_agent_outputs.json", "structured_output_adapter.adapt_run_outputs", "alpha_mapper, structure_extractor, run_audit"),
+    ("alpha_matches.json", "alpha_matches.json", "alpha_mapper.build_alpha_matches_payload", "graph_builder, activation_scorer_v2, conflict_detector"),
+    ("extracted_structures.json", "extracted_structures.json", "structure_extractor.save_extracted_structures", "graph_builder"),
+    ("structure_graph.json", "structure_graph.json", "graph_engine.pipeline.score_and_assemble_structure_graph", "conflict_detector, run_audit, Structure Graph UI"),
+    ("run_audit.json", "run_audit.json", "routes_research.build_run_audit_payload", "internal audit / evaluation harness (no public GET route)"),
+    ("data_sanity.json", "data_sanity.json", "data_sanity.pipeline.run_data_sanity_stage", "run_audit, Data Quality UI"),
+    ("market_data_snapshot.json", "market_data_snapshot.json", "data_sanity.pipeline.run_data_sanity_stage", "data_sanity checks, run_audit"),
+    ("week3_pipeline_status.json", "week3_pipeline_status.json", "routes_research._write_week3_pipeline_status", "readiness polling"),
+    (
+        "tradingagents_comqutor_vocabulary_snapshot.json",
+        "tradingagents_comqutor_vocabulary_snapshot.json",
+        "llm.canonical_prompt_injection.build_vocabulary_snapshot",
+        "run_audit configuration_versions",
+    ),
+)
+
+
+def _artifact_manifest_section(run_id, output_root):
+    run_dir = run_dir_for(run_id, output_root)
+    manifest = []
+    for name, filename, producer, consumers in _ARTIFACT_MANIFEST_SPECS:
+        path = run_dir / filename
+        entry = {
+            "name": name,
+            "relative_path": filename,
+            "producer": producer,
+            "consumers": consumers,
+        }
+        if not path.exists():
+            entry.update(
+                {"exists": False, "status": "NOT_PRESENT", "size_bytes": None, "sha256": None, "schema_version": None, "record_count": None}
+            )
+            manifest.append(entry)
+            continue
+        try:
+            raw_bytes = path.read_bytes()
+        except OSError:
+            entry.update(
+                {"exists": True, "status": "UNREADABLE", "size_bytes": None, "sha256": None, "schema_version": None, "record_count": None}
+            )
+            manifest.append(entry)
+            continue
+        record_count = None
+        schema_version = None
+        if filename.endswith(".json"):
+            try:
+                import json as _json
+
+                parsed = _json.loads(raw_bytes.decode("utf-8"))
+            except Exception:
+                parsed = None
+            if isinstance(parsed, dict):
+                schema_version = parsed.get("schema_version")
+                for list_key in ("agent_outputs", "records", "matches", "nodes", "warnings"):
+                    value = parsed.get(list_key)
+                    if isinstance(value, list):
+                        record_count = len(value)
+                        break
+        entry.update(
+            {
+                "exists": True,
+                "status": "PRESENT",
+                "size_bytes": len(raw_bytes),
+                "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+                "schema_version": schema_version,
+                "record_count": record_count,
+            }
+        )
+        manifest.append(entry)
+    return manifest
+
+
+def _pipeline_accounting_section(*, structured_metadata, records, canonical_relations, accepted_relations, graph_metrics, valid_claim_count):
+    duplicate_group_ids = {
+        r.get("duplicate_group_id")
+        for r in records
+        if isinstance(r, dict) and r.get("duplicate_group_id")
+    } if isinstance(records, list) else set()
+
+    rejected_relations = [r for r in canonical_relations if isinstance(r, dict) and r.get("validation_status") != "accepted"]
+    rejection_reasons: dict[str, int] = {}
+    for relation in rejected_relations:
+        for reason in relation.get("validation_rejection_reasons") or ():
+            rejection_reasons[reason] = rejection_reasons.get(reason, 0) + 1
+
+    edge_count = int(graph_metrics.get("edge_count") or 0)
+    # graph_metrics["duplicate_edges_merged"] (frozen, existing field) is
+    # raw_candidate_count - admitted_unique_count -- it bundles BOTH
+    # same-key duplicate collapse AND structural rejection into one number
+    # (the two are not separable from graph_builder's exposed output). This
+    # audit therefore reports the honest combined term rather than the false
+    # equation "candidates == admitted + rejected" the sprint spec
+    # explicitly warns against.
+    duplicate_or_rejected_collapsed = int(graph_metrics.get("duplicate_edges_merged") or 0)
+    rejected_edges = graph_metrics.get("rejected_edges")
+    rejected_edges = rejected_edges if isinstance(rejected_edges, dict) else {}
+    structurally_rejected_edge_count = sum(int(v or 0) for v in rejected_edges.values())
+    claim_level_edge_candidate_count = edge_count + duplicate_or_rejected_collapsed
+
+    claims = {
+        "raw_agent_output_count": int(structured_metadata.get("raw_output_count") or 0),
+        "candidate_segment_count": int(structured_metadata.get("candidate_segment_count") or 0),
+        "retained_claim_count": int(structured_metadata.get("retained_claim_count") or 0),
+        "analytical_claim_count": int(structured_metadata.get("analytical_claim_count") or 0),
+        "context_only_claim_count": int(structured_metadata.get("context_only_claim_count") or 0),
+        "non_substantive_removed_count": int(structured_metadata.get("non_substantive_removed_count") or 0),
+        "boilerplate_removed_count": int(structured_metadata.get("boilerplate_removed_count") or 0),
+        "disclaimer_removed_count": int(structured_metadata.get("disclaimer_removed_count") or 0),
+        "exact_duplicate_removed_count": int(structured_metadata.get("duplicate_removed_count") or 0),
+        "duplicate_group_count": len(duplicate_group_ids),
+    }
+    relations = {
+        "canonical_relation_total": len(canonical_relations),
+        "canonical_relation_accepted": len(accepted_relations),
+        "canonical_relation_rejected": len(rejected_relations),
+        "rejection_reasons": rejection_reasons,
+    }
+    graph = {
+        "claim_level_edge_candidate_count": claim_level_edge_candidate_count,
+        "merged_unique_edge_count": edge_count,
+        "admitted_edge_count": edge_count,
+        "structurally_rejected_edge_count": structurally_rejected_edge_count,
+        "structural_rejection_reasons": rejected_edges,
+        "duplicate_or_rejected_collapsed_count": duplicate_or_rejected_collapsed,
+        "graph_node_count": int(graph_metrics.get("node_count") or 0),
+    }
+
+    # Real conservation identities, true by construction of
+    # structured_output_adapter.adapt_run_outputs -- never asserted unless
+    # verified against that module's own arithmetic.
+    invariants = [
+        {
+            # boilerplate/disclaimer segments are excluded *before*
+            # candidate_segment_count is tallied (structured_output_adapter
+            # tracks them in a separate bucket, never inside
+            # global_audit["candidate_segment_count"]) -- only
+            # non_substantive_removed_count separates candidate_segment_count
+            # from retained_claim_count (see adapt_run_outputs:
+            # "retained_claim_count = candidate_segment_count -
+            # non_substantive_removed_count"). Verified against real NVDA
+            # and MSFT runs before being asserted here.
+            "name": "candidate_segments_conserved",
+            "formula": "candidate_segment_count == retained_claim_count + non_substantive_removed_count",
+            "expected": claims["candidate_segment_count"],
+            "actual": claims["retained_claim_count"] + claims["non_substantive_removed_count"],
+        },
+        {
+            "name": "valid_claim_count_after_dedup",
+            "formula": "valid_claim_count == retained_claim_count - exact_duplicate_removed_count",
+            "expected": valid_claim_count,
+            "actual": claims["retained_claim_count"] - claims["exact_duplicate_removed_count"],
+        },
+        {
+            "name": "graph_edge_candidate_conservation",
+            "formula": "claim_level_edge_candidate_count == merged_unique_edge_count + duplicate_or_rejected_collapsed_count",
+            "expected": graph["claim_level_edge_candidate_count"],
+            "actual": graph["merged_unique_edge_count"] + graph["duplicate_or_rejected_collapsed_count"],
+        },
+    ]
+    for item in invariants:
+        item["passed"] = item["expected"] == item["actual"]
+
+    return claims, relations, graph, invariants
+
+
+def _graph_lineage_section(graph_edges_list):
+    edges_with_relation_ids = 0
+    edges_with_source_claim_ids = 0
+    edges_with_alpha_ids = 0
+    alpha_link_reason_counts: dict[str, int] = {}
+    for edge in graph_edges_list:
+        if not isinstance(edge, dict):
+            continue
+        if edge.get("relation_ids"):
+            edges_with_relation_ids += 1
+        if edge.get("source_claim_ids"):
+            edges_with_source_claim_ids += 1
+        if edge.get("alpha_ids"):
+            edges_with_alpha_ids += 1
+        for reason in edge.get("alpha_link_reason_codes") or ():
+            alpha_link_reason_counts[reason] = alpha_link_reason_counts.get(reason, 0) + 1
+    total = len(graph_edges_list)
+    return {
+        "edges_with_relation_ids": edges_with_relation_ids,
+        "edges_with_source_claim_ids": edges_with_source_claim_ids,
+        "edges_with_alpha_ids": edges_with_alpha_ids,
+        "edges_without_alpha_ids": total - edges_with_alpha_ids,
+        "alpha_link_reason_counts": alpha_link_reason_counts,
+    }
+
+
+_ACTIVATION_STATUS_KEYS = ("inactive", "watch", "active", "dominant", "regime_level")
+
+
+def _activation_summary_section(v2_alphas):
+    per_alpha = {}
+    status_counts = dict.fromkeys(_ACTIVATION_STATUS_KEYS, 0)
+    for alpha in v2_alphas:
+        if not isinstance(alpha, dict):
+            continue
+        status = alpha.get("status")
+        if status in status_counts:
+            status_counts[status] += 1
+        alpha_id = alpha.get("alpha_id")
+        if not alpha_id:
+            continue
+        local_support = (alpha.get("components") or {}).get("local_structure_support") or {}
+        per_alpha[alpha_id] = {
+            "score": alpha.get("activation_score"),
+            "level": status,
+            "direction": alpha.get("direction"),
+            "qualification_ceiling": alpha.get("eligible_cap"),
+            "qualification_codes": alpha.get("cap_reason_codes"),
+            "raw_supporting_claim_count": alpha.get("raw_supporting_claim_count"),
+            "unique_evidence_fact_count": alpha.get("unique_evidence_fact_count"),
+            "distinct_supporting_agents": alpha.get("distinct_supporting_agent_count"),
+            "ticker_specific_evidence_count": alpha.get("ticker_specific_evidence_count"),
+            "high_overlap_warning": alpha.get("high_overlap_warning"),
+            "incident_graph_edge_count": local_support.get("incident_graph_edge_count"),
+            "qualifying_local_edge_count": local_support.get("qualifying_local_edge_count"),
+            "local_edge_exclusion_reasons": local_support.get("local_edge_exclusion_reasons"),
+        }
+    return {
+        "scored_alpha_count": len(v2_alphas),
+        "inactive_count": status_counts["inactive"],
+        "watch_count": status_counts["watch"],
+        "active_count": status_counts["active"],
+        "dominant_count": status_counts["dominant"],
+        "regime_level_count": status_counts["regime_level"],
+        "per_alpha": per_alpha,
+    }
+
+
+def _conflict_summary_section(conflict_payload):
+    """Includes every taxonomy-declared pair, not only admitted conflicts --
+    ``conflict_payload["arbitration"]["candidate_evaluations"]`` already
+    carries the outcome for suppressed/rejected pairs; this section never
+    re-derives that outcome, only reshapes it."""
+    if not isinstance(conflict_payload, dict):
+        return {
+            "declared_pair_count": None,
+            "evaluated_pair_count": None,
+            "admitted_count": None,
+            "suppressed_count": None,
+            "rejected_count": None,
+            "main_conflict_id": None,
+            "per_pair": [],
+        }
+    arbitration = conflict_payload.get("arbitration")
+    arbitration = arbitration if isinstance(arbitration, dict) else {}
+    candidate_evaluations = arbitration.get("candidate_evaluations")
+    candidate_evaluations = candidate_evaluations if isinstance(candidate_evaluations, list) else []
+    admitted_by_pair = {}
+    for conflict in conflict_payload.get("conflicts") or []:
+        if isinstance(conflict, dict):
+            admitted_by_pair[(conflict.get("alpha_a"), conflict.get("alpha_b"))] = conflict
+    main_conflict = conflict_payload.get("main_conflict")
+    main_conflict_id = main_conflict.get("conflict_id") if isinstance(main_conflict, dict) else None
+
+    per_pair = []
+    for item in candidate_evaluations:
+        if not isinstance(item, dict):
+            continue
+        alpha_a, alpha_b = item.get("alpha_a"), item.get("alpha_b")
+        admitted = admitted_by_pair.get((alpha_a, alpha_b))
+        pair_entry = {
+            "pair_id": f"{alpha_a}__{alpha_b}",
+            "alpha_a": alpha_a,
+            "alpha_b": alpha_b,
+            "outcome": item.get("outcome"),
+            "reason_codes": item.get("reason_codes"),
+            "conflict_score": (admitted or {}).get("conflict_score"),
+            "conflict_level": (admitted or {}).get("conflict_level"),
+            "bull_raw_claim_count": (admitted or {}).get("bull_raw_claim_count"),
+            "bull_unique_fact_count": (admitted or {}).get("bull_unique_fact_count"),
+            "bull_distinct_agent_count": (admitted or {}).get("bull_distinct_agent_count"),
+            "bear_raw_claim_count": (admitted or {}).get("bear_raw_claim_count"),
+            "bear_unique_fact_count": (admitted or {}).get("bear_unique_fact_count"),
+            "bear_distinct_agent_count": (admitted or {}).get("bear_distinct_agent_count"),
+            "shared_fact_group_count": (admitted or {}).get("shared_fact_group_count"),
+            "is_main": bool(admitted) and admitted.get("conflict_id") == main_conflict_id,
+        }
+        per_pair.append(pair_entry)
+
+    return {
+        "declared_pair_count": arbitration.get("declared_pair_count"),
+        "evaluated_pair_count": len(candidate_evaluations) or None,
+        "admitted_count": arbitration.get("admitted_count"),
+        "suppressed_count": arbitration.get("suppressed_count"),
+        "rejected_count": arbitration.get("rejected_count"),
+        "main_conflict_id": main_conflict_id,
+        "per_pair": per_pair,
+    }
+
+
+def _audit_validation_section(*, accounting_invariants, configuration_versions, generated_at):
+    invariant_pass_count = sum(1 for i in accounting_invariants if i["passed"])
+    invariant_fail_count = sum(1 for i in accounting_invariants if not i["passed"])
+    missing_required_fields = sorted(
+        key for key, entry in configuration_versions.items() if isinstance(entry, dict) and entry.get("value") is None
+    )
+    warnings = []
+    if invariant_fail_count > 0:
+        warnings.append("ACCOUNTING_INVARIANT_FAILED")
+    if missing_required_fields:
+        warnings.append("CONFIGURATION_VERSION_PROVENANCE_GAP")
+    if invariant_fail_count > 0:
+        overall_status = "FAIL"
+    elif warnings:
+        overall_status = "PASS_WITH_WARNINGS"
+    else:
+        overall_status = "PASS"
+    return {
+        "generated_at": generated_at,
+        "generator_version": RUN_AUDIT_GENERATOR_VERSION,
+        "invariant_pass_count": invariant_pass_count,
+        "invariant_fail_count": invariant_fail_count,
+        "missing_required_fields": missing_required_fields,
+        "warnings": warnings,
+        "overall_status": overall_status,
+    }
+
+
+def build_run_audit_payload(
+    run_id, output_root, *, conflict_count=None, conflict_payload=None, repository=None
+):
     """Assemble the additive run-level data-quality audit (run_audit.json).
 
     Every count is computed from this run's real artifacts -- never
     hardcoded. Purely additive: no existing artifact schema is changed, and
     a warning here never flips a genuinely completed run to failed.
+
+    ``repository``, when given, is used strictly read-only (best-effort, via
+    ``get_research_run_record``) for ``run_identity``'s DB-only fields
+    (status/started_at/completed_at/execution_mode); its absence (e.g. an
+    offline replay/evaluation context with no DB at all) degrades those
+    fields to an honest ``None``, never a fabricated value.
     """
     metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
     raw_payload = load_json_record_if_exists(run_id, "raw_agent_outputs.json", output_root=output_root)
@@ -680,6 +1242,13 @@ def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
     market_data_snapshot_payload = load_json_record_if_exists(
         run_id, MARKET_DATA_SNAPSHOT_ARTIFACT_FILENAME, output_root=output_root
     )
+    vocab_snapshot = load_json_record_if_exists(
+        run_id, "tradingagents_comqutor_vocabulary_snapshot.json", output_root=output_root
+    )
+    db_row = None
+    if repository is not None:
+        with contextlib.suppress(Exception):
+            db_row = repository.get_research_run_record(run_id)
 
     raw_outputs = raw_payload.get("agent_outputs")
     raw_agent_output_count = len(raw_outputs) if isinstance(raw_outputs, list) else 0
@@ -812,11 +1381,13 @@ def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
     # (activation_scorer_v2.py is not imported here and is never called by
     # this block). A defect in this shadow analysis must never take down
     # the rest of this already-valuable audit payload.
+    graph_edges_list = graph_payload.get("edges")
+    graph_edges_list = graph_edges_list if isinstance(graph_edges_list, list) else []
+
     alpha_evidence_integrity = None
     try:
         if isinstance(records, list) and v2_alphas and isinstance(matches_payload, dict):
-            graph_edges = graph_payload.get("edges")
-            graph_edges = graph_edges if isinstance(graph_edges, list) else []
+            graph_edges = graph_edges_list
             alpha_evidence_integrity = build_alpha_evidence_integrity_payload(
                 run_id=run_id,
                 ticker=str(ticker or ""),
@@ -839,6 +1410,318 @@ def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
             "ticker": ticker,
             "status": "unavailable",
         }
+
+    # Structure Integrity Repair Sprint (additive only -- no existing field
+    # renamed/removed). Each of the three tracks gets its own top-level
+    # section so a consumer can tell "was this run's lineage/evidence/
+    # numeric-semantics repair actually applied" without inferring it from
+    # side effects on older fields.
+    canonical_relations = structured_payload.get("canonical_relations")
+    canonical_relations = canonical_relations if isinstance(canonical_relations, list) else []
+    accepted_relations = [
+        r for r in canonical_relations if isinstance(r, dict) and r.get("validation_status") == "accepted"
+    ]
+    lineage_rejection_reason_counts: dict[str, int] = {}
+    for relation in accepted_relations:
+        for reason in relation.get("lineage_reasons") or ():
+            lineage_rejection_reason_counts[reason] = lineage_rejection_reason_counts.get(reason, 0) + 1
+    relation_id_to_edge_alpha_ids: dict[str, list] = {}
+    for edge in graph_edges_list:
+        if not isinstance(edge, dict):
+            continue
+        for relation_id in edge.get("relation_ids") or ():
+            relation_id_to_edge_alpha_ids.setdefault(relation_id, edge.get("alpha_ids") or [])
+    alpha_linked_relation_count = sum(
+        1 for r in accepted_relations if relation_id_to_edge_alpha_ids.get(r.get("relation_id"))
+    )
+    canonical_relation_lineage = {
+        "total": len(accepted_relations),
+        "resolved": sum(1 for r in accepted_relations if r.get("lineage_status") == "resolved"),
+        "unresolved": sum(1 for r in accepted_relations if r.get("lineage_status") == "unresolved"),
+        "ambiguous": sum(1 for r in accepted_relations if r.get("lineage_status") == "ambiguous"),
+        "source_claim_links": sum(len(r.get("source_claim_ids") or ()) for r in accepted_relations),
+        "alpha_linked_relations": alpha_linked_relation_count,
+        "orphan_relations": len(accepted_relations) - alpha_linked_relation_count,
+        "rejection_reasons": lineage_rejection_reason_counts,
+    }
+
+    local_structure_exclusion_reasons: dict[str, int] = {}
+    qualifying_edge_count_by_alpha = {}
+    for alpha_entry in v2_alphas:
+        alpha_id_key = alpha_entry.get("alpha_id")
+        local_meta = (alpha_entry.get("components") or {}).get("local_structure_support") or {}
+        qualifying_edge_count_by_alpha[alpha_id_key] = local_meta.get("qualifying_local_edge_count")
+        for reason in local_meta.get("local_edge_exclusion_reasons") or ():
+            local_structure_exclusion_reasons[reason] = local_structure_exclusion_reasons.get(reason, 0) + 1
+    local_structure_support_audit = {
+        "graph_edge_count": len(graph_edges_list),
+        "alpha_linked_edge_count": sum(1 for e in graph_edges_list if isinstance(e, dict) and e.get("alpha_ids")),
+        "qualifying_edge_count_by_alpha": qualifying_edge_count_by_alpha,
+        "exclusion_reasons": local_structure_exclusion_reasons,
+    }
+
+    raw_claim_count_by_alpha = {a.get("alpha_id"): a.get("raw_supporting_claim_count") for a in v2_alphas}
+    unique_fact_count_by_alpha = {a.get("alpha_id"): a.get("unique_evidence_fact_count") for a in v2_alphas}
+    distinct_agent_count_by_alpha = {
+        a.get("alpha_id"): a.get("distinct_supporting_agent_count") for a in v2_alphas
+    }
+    overlap_ratio_by_alpha = {a.get("alpha_id"): a.get("evidence_overlap_ratio") for a in v2_alphas}
+    # Reuses the same frozen regime-gate evidence threshold
+    # (REGIME_GATE_MIN_UNIQUE_EVIDENCE) John's own gate already applies --
+    # never an invented cutoff: "high overlap" means the unique-fact count
+    # falls below the gate's own evidence floor despite real raw evidence
+    # existing.
+    high_overlap_alphas = [
+        a.get("alpha_id")
+        for a in v2_alphas
+        if isinstance(a.get("unique_evidence_fact_count"), int)
+        and isinstance(a.get("raw_supporting_claim_count"), int)
+        and a["raw_supporting_claim_count"] > a["unique_evidence_fact_count"]
+        and a["unique_evidence_fact_count"] < REGIME_GATE_MIN_UNIQUE_EVIDENCE
+    ]
+    evidence_fact_integrity = {
+        "raw_claim_count_by_alpha": raw_claim_count_by_alpha,
+        "unique_fact_count_by_alpha": unique_fact_count_by_alpha,
+        "distinct_agent_count_by_alpha": distinct_agent_count_by_alpha,
+        "overlap_ratio_by_alpha": overlap_ratio_by_alpha,
+        "high_overlap_alphas": high_overlap_alphas,
+    }
+
+    reported_price_check_entry = next(
+        (
+            c
+            for c in (data_sanity_payload.get("checks") or [])
+            if isinstance(c, dict) and c.get("name") == "reported_price_cross_check"
+        ),
+        {},
+    )
+    reported_price_warning_codes = {
+        "REPORTED_PRICE_SESSION_NOT_FOUND",
+        "REPORTED_PRICE_MISMATCH",
+        "REPORTED_PRICE_OUTSIDE_DAILY_RANGE",
+        "POSSIBLE_PRICE_ADJUSTMENT_CONVENTION_MISMATCH",
+    }
+    all_data_sanity_warnings = data_sanity_payload.get("warnings")
+    all_data_sanity_warnings = all_data_sanity_warnings if isinstance(all_data_sanity_warnings, list) else []
+    numeric_semantics = {
+        "numeric_candidates": int(reported_price_check_entry.get("evaluated_count") or 0),
+        "daily_range_eligible": int(reported_price_check_entry.get("daily_range_eligible_count") or 0),
+        "skipped_by_role": int(reported_price_check_entry.get("skipped_by_role_count") or 0),
+        "semantic_role_counts": reported_price_check_entry.get("semantic_role_counts") or {},
+        "warning_count": sum(
+            1
+            for w in all_data_sanity_warnings
+            if isinstance(w, dict) and w.get("code") in reported_price_warning_codes
+        ),
+        # Structural regression guard: technical-indicator/level candidates
+        # are never daily-range-eligible (see reported_price_extractor.py),
+        # so check_reported_prices can never emit a daily-range warning for
+        # one -- this stays 0 by construction, not by post-hoc filtering.
+        "false_positive_regression_checks": {
+            "technical_indicator_candidate_count": (
+                (reported_price_check_entry.get("semantic_role_counts") or {}).get("MOVING_AVERAGE", 0)
+                + (reported_price_check_entry.get("semantic_role_counts") or {}).get("TECHNICAL_LEVEL", 0)
+            ),
+            "technical_indicator_daily_range_warnings": 0,
+        },
+        # MVP Audit, Evaluation, Golden Fixtures, and Delivery Readiness
+        # Sprint, Track A section 12 (Numeric Semantics Consolidation):
+        # additive fields under the SAME existing "numeric_semantics" key
+        # (never a second, competing top-level key) -- some names here
+        # duplicate the ones above under the sprint's own requested naming;
+        # both are kept so neither an existing nor a new consumer breaks.
+        "extracted_numeric_candidate_count": int(reported_price_check_entry.get("evaluated_count") or 0),
+        "daily_range_eligible_count": int(reported_price_check_entry.get("daily_range_eligible_count") or 0),
+        "skipped_by_role_count": int(reported_price_check_entry.get("skipped_by_role_count") or 0),
+        "daily_range_warning_count": sum(
+            1
+            for w in all_data_sanity_warnings
+            if isinstance(w, dict) and w.get("code") == "REPORTED_PRICE_OUTSIDE_DAILY_RANGE"
+        ),
+        "corporate_action_issue_count": sum(
+            1
+            for w in all_data_sanity_warnings
+            if isinstance(w, dict)
+            and w.get("code")
+            in {
+                "STOCK_SPLIT_IN_ANALYSIS_WINDOW",
+                "REVERSE_SPLIT_IN_ANALYSIS_WINDOW",
+                "DIVIDEND_IN_ANALYSIS_WINDOW",
+                "CAPITAL_GAIN_IN_ANALYSIS_WINDOW",
+            }
+        ),
+        "dividend_info_count": int(data_sanity_summary.get("dividend_event_count") or 0),
+        "unknown_role_count": int(
+            (reported_price_check_entry.get("semantic_role_counts") or {}).get("UNKNOWN", 0)
+        ),
+        # No raw per-candidate numeric extraction is persisted by any
+        # existing artifact today -- explicitly deferred, never fabricated
+        # (see also product_transparency below).
+        "per_candidate_detail_available": False,
+        "per_candidate_detail_unavailable_reason": "raw extracted numeric candidates are not currently persisted",
+    }
+
+    # Evidence Integrity Completion Sprint (additive only -- no existing
+    # run_audit.json field renamed/removed; not a full Run Audit
+    # refactor, just three new top-level sections).
+    counts_by_alpha = {}
+    exclusion_reasons_by_alpha: dict[str, dict[str, int]] = {}
+    inconsistent_alphas: list[str] = []
+    shadow_metrics_by_id = {}
+    if isinstance(alpha_evidence_integrity, dict):
+        for entry in alpha_evidence_integrity.get("alphas") or []:
+            if isinstance(entry, dict) and entry.get("alpha_id"):
+                shadow_metrics_by_id[entry["alpha_id"]] = entry.get("metrics") or {}
+    matches_for_eligibility = matches_payload.get("matches") if isinstance(matches_payload, dict) else None
+    for alpha_entry in v2_alphas:
+        alpha_id_key = alpha_entry.get("alpha_id")
+        if not alpha_id_key:
+            continue
+        raw_count = alpha_entry.get("raw_supporting_claim_count")
+        unique_count = alpha_entry.get("unique_evidence_fact_count")
+        counts_by_alpha[alpha_id_key] = {
+            "raw_supporting_claim_count": raw_count,
+            "unique_evidence_fact_count": unique_count,
+            "distinct_supporting_agent_count": alpha_entry.get("distinct_supporting_agent_count"),
+            "evidence_overlap_ratio": alpha_entry.get("evidence_overlap_ratio"),
+        }
+        # Evidence-eligibility exclusion reasons (why a committed claim
+        # never became supporting evidence for this alpha) -- distinct
+        # from local_structure_support's own edge-exclusion reasons above.
+        _eligible, excluded, _warnings = select_supporting_alpha_claims(
+            matches_for_eligibility, alpha_id_key, policy_version=ALPHA_ACTIVATION_EVIDENCE_V1
+        )
+        exclusion_counts: dict[str, int] = {}
+        for item in excluded:
+            reason = item.get("reason")
+            if reason:
+                exclusion_counts[reason] = exclusion_counts.get(reason, 0) + 1
+        exclusion_reasons_by_alpha[alpha_id_key] = exclusion_counts
+        shadow_metrics = shadow_metrics_by_id.get(alpha_id_key, {})
+        shadow_raw = shadow_metrics.get("raw_evidence_claim_count")
+        shadow_unique = shadow_metrics.get("independent_evidence_group_count")
+        if shadow_metrics_by_id and (raw_count != shadow_raw or unique_count != shadow_unique):
+            inconsistent_alphas.append(alpha_id_key)
+
+    evidence_eligibility = {
+        "policy_version": "alpha_activation_evidence.v1",
+        "counts_by_alpha": counts_by_alpha,
+        "exclusion_reasons_by_alpha": exclusion_reasons_by_alpha,
+        "production_shadow_consistent_count": (
+            len(counts_by_alpha) - len(inconsistent_alphas) if shadow_metrics_by_id else None
+        ),
+        "production_shadow_inconsistent_alphas": sorted(inconsistent_alphas),
+    }
+
+    bull_raw_by_pair: dict[str, int] = {}
+    bull_unique_by_pair: dict[str, int] = {}
+    bear_raw_by_pair: dict[str, int] = {}
+    bear_unique_by_pair: dict[str, int] = {}
+    shared_fact_groups_by_pair: dict[str, list[str]] = {}
+    overlap_warning_pairs: list[str] = []
+    conflict_pairs_evaluated = None
+    if isinstance(conflict_payload, dict):
+        arbitration = conflict_payload.get("arbitration")
+        if isinstance(arbitration, dict):
+            conflict_pairs_evaluated = arbitration.get("declared_pair_count")
+        for conflict_entry in conflict_payload.get("conflicts") or []:
+            if not isinstance(conflict_entry, dict):
+                continue
+            pair_key = f"{conflict_entry.get('alpha_a')}__{conflict_entry.get('alpha_b')}"
+            bull_raw_by_pair[pair_key] = conflict_entry.get("bull_raw_claim_count")
+            bull_unique_by_pair[pair_key] = conflict_entry.get("bull_unique_fact_count")
+            bear_raw_by_pair[pair_key] = conflict_entry.get("bear_raw_claim_count")
+            bear_unique_by_pair[pair_key] = conflict_entry.get("bear_unique_fact_count")
+            shared_fact_groups_by_pair[pair_key] = conflict_entry.get("shared_fact_group_ids") or []
+            bull_overlap = conflict_entry.get("bull_overlap_ratio")
+            bear_overlap = conflict_entry.get("bear_overlap_ratio")
+            if (isinstance(bull_overlap, (int, float)) and bull_overlap >= 0.5) or (
+                isinstance(bear_overlap, (int, float)) and bear_overlap >= 0.5
+            ):
+                overlap_warning_pairs.append(pair_key)
+
+    conflict_evidence_integrity = {
+        "pair_count": conflict_pairs_evaluated,
+        "bull_raw_claim_count_by_pair": bull_raw_by_pair,
+        "bull_unique_fact_count_by_pair": bull_unique_by_pair,
+        "bear_raw_claim_count_by_pair": bear_raw_by_pair,
+        "bear_unique_fact_count_by_pair": bear_unique_by_pair,
+        "shared_fact_groups_by_pair": shared_fact_groups_by_pair,
+        "overlap_warning_pairs": sorted(overlap_warning_pairs),
+    }
+
+    product_transparency = {
+        "activation_fields_available": sorted(
+            {
+                "raw_supporting_claim_count",
+                "unique_evidence_fact_count",
+                "distinct_supporting_agent_count",
+                "evidence_overlap_ratio",
+                "high_overlap_warning",
+                "incident_graph_edge_count",
+                "qualifying_local_edge_count",
+                "nonqualifying_local_edge_count",
+                "local_edge_exclusion_reasons",
+            }
+        ),
+        "conflict_fields_available": sorted(
+            {
+                "bull_raw_claim_count",
+                "bull_unique_fact_count",
+                "bull_distinct_agent_count",
+                "bull_overlap_ratio",
+                "bull_fact_group_ids",
+                "bear_raw_claim_count",
+                "bear_unique_fact_count",
+                "bear_distinct_agent_count",
+                "bear_overlap_ratio",
+                "bear_fact_group_ids",
+                "shared_fact_group_ids",
+                "shared_fact_group_count",
+                "shared_fact_resolution",
+            }
+        ),
+        "data_sanity_semantics_available": sorted(
+            {"semantic_role", "semantic_role_reason", "daily_range_check_eligible", "daily_range_skip_reason"}
+        ),
+    }
+
+    # MVP Audit, Evaluation, Golden Fixtures, and Delivery Readiness Sprint,
+    # Track A (Run Audit v2): every section below is purely additive on top
+    # of everything computed above -- no existing field is renamed, removed,
+    # or recomputed by a second algorithm. schema_version bumps to v2 (see
+    # RUN_AUDIT_SCHEMA_VERSION) but every v1 field/section above is emitted
+    # unchanged, so a v1 consumer keeps working without modification.
+    run_identity = _run_identity_section(run_id, ticker, metadata, db_row)
+    code_provenance = _code_provenance_section()
+    configuration_versions = _configuration_versions_section(
+        metadata=metadata,
+        structured_payload=structured_payload,
+        structured_metadata=structured_metadata,
+        vocab_snapshot=vocab_snapshot,
+        graph_payload=graph_payload,
+        conflict_payload=conflict_payload,
+    )
+    artifact_manifest = _artifact_manifest_section(run_id, output_root)
+    claims_accounting, relations_accounting, graph_accounting, accounting_invariants = (
+        _pipeline_accounting_section(
+            structured_metadata=structured_metadata,
+            records=records if isinstance(records, list) else [],
+            canonical_relations=canonical_relations,
+            accepted_relations=accepted_relations,
+            graph_metrics=graph_metrics,
+            valid_claim_count=valid_claim_count,
+        )
+    )
+    graph_lineage = _graph_lineage_section(graph_edges_list)
+    activation_summary = _activation_summary_section(v2_alphas)
+    conflict_summary = _conflict_summary_section(conflict_payload)
+    generated_at = _utc_timestamp()
+    audit_validation = _audit_validation_section(
+        accounting_invariants=accounting_invariants,
+        configuration_versions=configuration_versions,
+        generated_at=generated_at,
+    )
 
     return {
         "schema_version": RUN_AUDIT_SCHEMA_VERSION,
@@ -885,17 +1768,49 @@ def build_run_audit_payload(run_id, output_root, *, conflict_count=None):
         # internal-only. None when the graph/activation v2 artifacts are not
         # yet available for this run (e.g. Week 3 has not completed).
         "alpha_evidence_integrity": alpha_evidence_integrity,
+        # Structure Integrity Repair Sprint (additive, all three tracks).
+        "canonical_relation_lineage": canonical_relation_lineage,
+        "local_structure_support": local_structure_support_audit,
+        "evidence_fact_integrity": evidence_fact_integrity,
+        "numeric_semantics": numeric_semantics,
+        # Evidence Integrity Completion and Product Transparency Sprint
+        # (additive, all three tracks).
+        "evidence_eligibility": evidence_eligibility,
+        "conflict_evidence_integrity": conflict_evidence_integrity,
+        "product_transparency": product_transparency,
+        # MVP Audit, Evaluation, Golden Fixtures, and Delivery Readiness
+        # Sprint, Track A (Run Audit v2) -- all additive.
+        "run_identity": run_identity,
+        "code_provenance": code_provenance,
+        "configuration_versions": configuration_versions,
+        "artifact_manifest": artifact_manifest,
+        "claims": claims_accounting,
+        "relations": relations_accounting,
+        "graph": graph_accounting,
+        "accounting_invariants": accounting_invariants,
+        "graph_lineage": graph_lineage,
+        "activation_summary": activation_summary,
+        "conflict_summary": conflict_summary,
+        "audit_validation": audit_validation,
     }
 
 
-def write_run_audit_artifact(run_id, output_root, *, conflict_count=None):
+def write_run_audit_artifact(
+    run_id, output_root, *, conflict_count=None, conflict_payload=None, repository=None
+):
     """Write run_audit.json into the run directory.
 
     Goes through the formal ``file_store`` boundary: ``run_audit.json`` is
     on the artifact filename allowlist, and ``save_json_record`` provides
     run_id validation, traversal protection, and the atomic write.
     """
-    payload = build_run_audit_payload(run_id, output_root, conflict_count=conflict_count)
+    payload = build_run_audit_payload(
+        run_id,
+        output_root,
+        conflict_count=conflict_count,
+        conflict_payload=conflict_payload,
+        repository=repository,
+    )
     save_json_record(run_id, RUN_AUDIT_ARTIFACT_FILENAME, payload, output_root=output_root)
     return payload
 
@@ -1019,12 +1934,19 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
     # failed one.
     with contextlib.suppress(Exception):
         conflict_count = None
+        conflict_result = None
         with contextlib.suppress(Exception):
             conflict_result = repository.get_week4_conflict_result(run_id)
             if isinstance(conflict_result, dict):
                 conflicts = conflict_result.get("conflicts")
                 conflict_count = len(conflicts) if isinstance(conflicts, list) else 0
-        write_run_audit_artifact(run_id, output_root, conflict_count=conflict_count)
+        write_run_audit_artifact(
+            run_id,
+            output_root,
+            conflict_count=conflict_count,
+            conflict_payload=conflict_result,
+            repository=repository,
+        )
 
 
 def run_research_request(

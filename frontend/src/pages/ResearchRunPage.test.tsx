@@ -97,7 +97,11 @@ describe("ResearchRunPage", () => {
     dataSanity: Partial<
       Pick<
         CanonicalResearchResponse,
-        "data_sanity_status" | "data_sanity_warning_count" | "data_sanity_critical_count" | "data_sanity_warnings"
+        | "data_sanity_status"
+        | "data_sanity_warning_count"
+        | "data_sanity_critical_count"
+        | "data_sanity_warnings"
+        | "data_sanity_numeric_semantics"
       >
     > = {}
   ): AgentOutputsResponse {
@@ -204,9 +208,7 @@ describe("ResearchRunPage", () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
     expect(screen.queryByText(/hidden unknown claim/i)).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/1 neutral or unclassified findings are not shown in this directional view/)
-    ).toBeInTheDocument();
+    expect(screen.getByText("Neutral and unclassified findings (1)")).toBeInTheDocument();
   });
 
   it("hides a mixed-direction finding from both panels", async () => {
@@ -217,16 +219,30 @@ describe("ResearchRunPage", () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
     expect(screen.queryByText(/hidden mixed claim/i)).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/1 neutral or unclassified findings are not shown in this directional view/)
-    ).toBeInTheDocument();
+    expect(screen.getByText("Neutral and unclassified findings (1)")).toBeInTheDocument();
   });
 
-  it("does not show the hidden-findings note when every finding is directional", async () => {
+  it("does not show the neutral/unclassified findings entry when every finding is directional", async () => {
     mockAgentOutputs([findingRecord({ claim_id: "c1", direction: "positive" })]);
     renderPage();
     await waitFor(() => expect(screen.getByText("Positive findings")).toBeInTheDocument());
-    expect(screen.queryByText(/not shown in this directional view/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Neutral and unclassified findings/)).not.toBeInTheDocument();
+  });
+
+  it("reveals neutral/unclassified findings on demand, reusing the same analytical claims", async () => {
+    mockAgentOutputs([
+      findingRecord({ claim_id: "c1", direction: "positive", claim: "Visible positive claim about SNDK." }),
+      findingRecord({ claim_id: "c2", direction: "unknown", claim: "Hidden unknown claim about SNDK." }),
+    ]);
+    renderPage();
+    await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
+    expect(screen.queryByText(/hidden unknown claim/i)).not.toBeInTheDocument();
+    const toggle = screen.getByText("Neutral and unclassified findings (1)");
+    toggle.click();
+    await waitFor(() => expect(screen.getByText(/hidden unknown claim/i)).toBeInTheDocument());
+    // Still capped, never renders every hidden finding at once beyond the
+    // same MAX_FINDINGS_PER_DIRECTION-style limit the directional panels use.
+    expect(screen.queryByText(/more neutral or unclassified finding/)).not.toBeInTheDocument();
   });
 
   it("shows an independent empty state for each panel when only unknown/mixed findings exist", async () => {
@@ -239,7 +255,7 @@ describe("ResearchRunPage", () => {
       expect(screen.getByText(/no eligible positive findings were identified/i)).toBeInTheDocument()
     );
     expect(screen.getByText(/no eligible negative findings were identified/i)).toBeInTheDocument();
-    expect(screen.getByText(/2 neutral or unclassified findings are not shown in this directional view/)).toBeInTheDocument();
+    expect(screen.getByText("Neutral and unclassified findings (2)")).toBeInTheDocument();
   });
 
   it("does not mutate the original agent-outputs API response object while filtering by direction", async () => {
@@ -473,6 +489,46 @@ describe("ResearchRunPage", () => {
           screen.getByText(/external market-data cross-check completed with no warnings/i)
         ).toBeInTheDocument()
       );
+    });
+
+    it("shows a low-risk numeric-semantics summary for skipped technical-indicator candidates, never as a warning", async () => {
+      mockAgentOutputs([findingRecord({ direction: "positive" })], {
+        data_sanity_status: "ok",
+        data_sanity_numeric_semantics: {
+          evaluated_count: 3,
+          daily_range_eligible_count: 2,
+          skipped_by_role_count: 1,
+          semantic_role_counts: { MOVING_AVERAGE: 1, OBSERVED_MARKET_PRICE: 2 },
+        },
+      });
+      renderPage();
+      await waitFor(() =>
+        expect(
+          screen.getByText(/1 numeric candidate\(s\) skipped as non-market-price/)
+        ).toBeInTheDocument()
+      );
+      // Never rendered inside/as a warning-severity item.
+      expect(document.querySelector(".data-quality-severity-warning")).not.toBeInTheDocument();
+      expect(document.querySelector(".data-quality-severity-critical")).not.toBeInTheDocument();
+    });
+
+    it("omits the numeric-semantics summary when nothing was skipped", async () => {
+      mockAgentOutputs([findingRecord({ direction: "positive" })], {
+        data_sanity_status: "ok",
+        data_sanity_numeric_semantics: {
+          evaluated_count: 2,
+          daily_range_eligible_count: 2,
+          skipped_by_role_count: 0,
+          semantic_role_counts: { OBSERVED_MARKET_PRICE: 2 },
+        },
+      });
+      renderPage();
+      await waitFor(() =>
+        expect(
+          screen.getByText(/external market-data cross-check completed with no warnings/i)
+        ).toBeInTheDocument()
+      );
+      expect(screen.queryByText(/skipped as non-market-price/)).not.toBeInTheDocument();
     });
 
     it("shows a warning panel with the warning's code/severity/message", async () => {

@@ -217,6 +217,18 @@ export interface DataSanityWarning {
   details: Record<string, unknown>;
 }
 
+/** Aggregate numeric-semantics transparency (Evidence Integrity Completion
+ * Sprint, Track C) -- how many reported-price candidates were technical
+ * indicators/other non-market-price roles and therefore never eligible for
+ * a daily-range warning. Never per-candidate detail. Null when the
+ * reported-price check did not run for this run. */
+export interface DataSanityNumericSemantics {
+  evaluated_count: number;
+  daily_range_eligible_count: number;
+  skipped_by_role_count: number;
+  semantic_role_counts: Record<string, number>;
+}
+
 export interface CanonicalResearchResponse {
   run_id: string;
   ticker: string | null;
@@ -233,6 +245,9 @@ export interface CanonicalResearchResponse {
   data_sanity_warning_count: number;
   data_sanity_critical_count: number;
   data_sanity_warnings: DataSanityWarning[];
+  /** Additive; absent/null on a payload predating this field or a run with
+   * no reported-price check. */
+  data_sanity_numeric_semantics?: DataSanityNumericSemantics | null;
 }
 
 export type CanonicalResearchResult = CanonicalResearchResponse | SafeErrorEnvelope;
@@ -338,12 +353,40 @@ export interface AlphaActivation {
   binding_cap_reason_codes: string[];
   unique_evidence_count: number | null;
   ticker_specific_evidence_count: number | null;
+  /** Historically ambiguous name: this is the number of QUALIFYING local
+   * structure edges the frozen Activation formula counted, never the raw
+   * number of graph edges incident to this alpha's factors. Prefer
+   * qualifying_local_edge_count/incident_graph_edge_count below when both
+   * are available; kept for backward compatibility, never removed. */
   local_edge_count: number | null;
   /** Backend's own regime-gate verdict -- the frontend must read this
    * directly (and regime_gate_failures) rather than re-deriving pass/fail
    * from activation_score/status itself. */
   regime_gate_passed: boolean | null;
   regime_gate_failures: string[];
+  /** Evidence Integrity Completion Sprint, Track C (additive, top-level;
+   * null/absent on an API response predating this field -- the UI must
+   * fall back gracefully, never crash). */
+  raw_supporting_claim_count?: number | null;
+  unique_evidence_fact_count?: number | null;
+  distinct_supporting_agent_count?: number | null;
+  evidence_overlap_ratio?: number | null;
+  /** Backend's own verdict (reuses the frozen regime-gate evidence floor)
+   * -- the UI must read this directly rather than picking its own
+   * threshold on evidence_overlap_ratio. */
+  high_overlap_warning?: boolean | null;
+}
+
+/** Additive fields on components.local_structure_support (Structure
+ * Integrity Repair Sprint, Track 1) -- "how many graph edges are incident
+ * to this alpha" vs "how many the frozen formula counted as qualifying"
+ * are two different, both-honest numbers. Optional: components is an
+ * untyped Record, so callers must narrow/guard before reading these. */
+export interface LocalStructureSupportComponent {
+  incident_graph_edge_count?: number | null;
+  qualifying_local_edge_count?: number | null;
+  nonqualifying_local_edge_count?: number | null;
+  local_edge_exclusion_reasons?: string[] | null;
 }
 
 export interface GraphActivation {
@@ -384,6 +427,16 @@ export type StructureGraphResult = StructureGraphResponse | SafeErrorEnvelope;
 export const CONFLICT_LEVELS = ["low", "medium", "medium_high", "high"] as const;
 export type ConflictLevel = (typeof CONFLICT_LEVELS)[number];
 
+/** One Evidence Fact group attached to a conflict side (Evidence Integrity
+ * Completion Sprint, Track B) -- see conflict_detector._structure_block. */
+export interface ConflictEvidenceFactGroup {
+  evidence_fact_group_id: string;
+  representative_claim_id: string;
+  member_claim_ids: string[];
+  supporting_agents: string[];
+  grouping_method: string;
+}
+
 /** bull_structure/bear_structure -- see conflict_detector._structure_block. */
 export interface ConflictSideStructure {
   alpha_id: string;
@@ -396,6 +449,8 @@ export interface ConflictSideStructure {
   agents: string[];
   evidence: string[];
   match_scores: number[];
+  /** Additive; absent on a payload predating this field. */
+  evidence_facts?: ConflictEvidenceFactGroup[];
 }
 
 /** One admitted conflict -- see week4_persistence._whitelist_conflict /
@@ -427,6 +482,21 @@ export interface AlphaConflict {
   explanation: string;
   bull_evidence: ConflictEvidenceItem[];
   bear_evidence: ConflictEvidenceItem[];
+  /** Evidence Integrity Completion Sprint, Track B (additive; absent on a
+   * payload predating this field -- the UI must fall back gracefully). */
+  bull_raw_claim_count?: number;
+  bull_unique_fact_count?: number;
+  bull_distinct_agent_count?: number;
+  bull_overlap_ratio?: number;
+  bull_fact_group_ids?: string[];
+  bear_raw_claim_count?: number;
+  bear_unique_fact_count?: number;
+  bear_distinct_agent_count?: number;
+  bear_overlap_ratio?: number;
+  bear_fact_group_ids?: string[];
+  shared_fact_group_ids?: string[];
+  shared_fact_group_count?: number;
+  shared_fact_resolution?: string;
 }
 
 /** One bull/bear evidence entry for an admitted conflict -- additive fields

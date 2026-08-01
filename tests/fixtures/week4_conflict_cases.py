@@ -60,6 +60,7 @@ def match_record(
     candidate_alpha_ids: list[str] | None = None,
     direction: str = "positive",
     claim_quality: str = "analytical",
+    factors: list[str] | None = None,
 ) -> dict[str, Any]:
     """Build one raw alpha_matches.json record (the exact JSON artifact
     shape, not the DB-row shape) -- the same shape
@@ -92,6 +93,7 @@ def match_record(
         "plausible_alphas": plausible_alphas or [],
         "candidate_scores": candidate_scores,
         "claim_quality": claim_quality,
+        "factors": factors or [],
     }
 
 

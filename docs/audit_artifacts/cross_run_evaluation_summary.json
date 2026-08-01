@@ -1,0 +1,76 @@
+{
+  "schema_version": "comqutor_alpha.evaluation.cross_run.v1",
+  "evaluation_id": "eval-20260801T002017Z-d19cb673",
+  "generated_at": "2026-08-01T00:22:26Z",
+  "case_count": 11,
+  "cases_completed": 6,
+  "cases_pending_fixture": 5,
+  "cases_blocked": 0,
+  "cases_failed": 0,
+  "cases_with_failed_required_expectations": 0,
+  "provider_calls": 0,
+  "source_artifacts_changed": false,
+  "metrics": {
+    "operational": {
+      "total_cases": 11,
+      "completed_cases": 6,
+      "pending_fixture_cases": 5,
+      "blocked_cases": 0,
+      "failed_cases": 0,
+      "provider_calls": 0,
+      "missing_artifact_rate": 0.45454545454545453,
+      "schema_failure_rate": 0.0,
+      "canonical_block_parse_failure_rate": null
+    },
+    "claims": {
+      "retained_claims_total": 8501,
+      "analytical_claim_total": 4694,
+      "context_only_claim_total": 3807,
+      "analytical_to_context_only_ratio": 1.2329918571053322
+    },
+    "relations_graph": {
+      "graph_node_count_distribution": [
+        7,
+        8,
+        10,
+        10,
+        12,
+        13
+      ],
+      "graph_edge_count_distribution": [
+        0,
+        0,
+        0,
+        8,
+        9,
+        9
+      ],
+      "zero_edge_case_count": 3
+    },
+    "activation": {
+      "scored_case_count": 6,
+      "active_alpha_count_distribution": [
+        0,
+        1,
+        2,
+        3,
+        3,
+        5
+      ],
+      "no_active_alpha_rate": 0.16666666666666666
+    },
+    "conflict": {
+      "declared_pair_count_total": 36,
+      "evaluated_pair_count_total": 36,
+      "admitted_pair_count_total": 0,
+      "conflicts_missing_bull_evidence": 0,
+      "conflicts_missing_bear_evidence": 0,
+      "main_conflict_available_case_count": 0
+    },
+    "data_sanity": {
+      "available": false,
+      "reason": "cross_run.py does not recompute data-sanity checks; a case's source run's own data_sanity.json is not read by this harness today"
+    },
+    "policy_violations": []
+  }
+}

@@ -162,6 +162,78 @@ describe("AlphaCard", () => {
     expect(screen.queryByText("Uncapped score")).not.toBeInTheDocument();
   });
 
+  it("shows raw/independent/overlap evidence fact fields when the API provides them (A304 profile)", () => {
+    renderCard({
+      status: "active",
+      activation: makeActivation({
+        raw_supporting_claim_count: 11,
+        unique_evidence_fact_count: 5,
+        distinct_supporting_agent_count: 5,
+        evidence_overlap_ratio: 0.5455,
+        high_overlap_warning: true,
+      }),
+    });
+    expect(screen.getByText("Raw supporting claims").closest("div")?.textContent).toContain("11");
+    expect(
+      screen.getByText("Independent evidence facts").closest("div")?.textContent
+    ).toContain("5");
+    expect(screen.getByText("Evidence overlap").closest("div")?.textContent).toContain("54.5%");
+    expect(
+      screen.getByText(/Several supporting claims appear to restate the same underlying facts/)
+    ).toBeInTheDocument();
+    // The raw count (11) must never be presented as "11 independent facts".
+    expect(screen.queryByText(/11 independent/i)).not.toBeInTheDocument();
+  });
+
+  it("omits the evidence-fact breakdown and overlap warning when the API predates these fields", () => {
+    renderCard({ status: "active", activation: makeActivation() });
+    expect(screen.queryByText("Raw supporting claims")).not.toBeInTheDocument();
+    expect(screen.queryByText("Independent evidence facts")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Evidence overlap warning/)).not.toBeInTheDocument();
+  });
+
+  it("distinguishes incident graph edges from qualifying activation-support edges, with exclusion reasons", () => {
+    renderCard({
+      status: "active",
+      activation: makeActivation({
+        components: {
+          local_structure_support: {
+            incident_graph_edge_count: 4,
+            qualifying_local_edge_count: 0,
+            nonqualifying_local_edge_count: 4,
+            local_edge_exclusion_reasons: ["NO_COMMITTED_ALPHA_MATCH"],
+          },
+        },
+      }),
+    });
+    expect(screen.getByText("Incident graph edges").closest("div")?.textContent).toContain("4");
+    expect(
+      screen.getByText("Qualifying activation-support edges").closest("div")?.textContent
+    ).toContain("0");
+    expect(screen.getByText("Why edges did not qualify")).toBeInTheDocument();
+    expect(screen.getByText("NO_COMMITTED_ALPHA_MATCH")).toBeInTheDocument();
+  });
+
+  it("never claims 4 incident edges all qualify when qualifying count is 0", () => {
+    renderCard({
+      status: "active",
+      activation: makeActivation({
+        components: {
+          local_structure_support: {
+            incident_graph_edge_count: 4,
+            qualifying_local_edge_count: 0,
+            nonqualifying_local_edge_count: 4,
+            local_edge_exclusion_reasons: [],
+          },
+        },
+      }),
+    });
+    const incidentRow = screen.getByText("Incident graph edges").closest("div");
+    const qualifyingRow = screen.getByText("Qualifying activation-support edges").closest("div");
+    expect(incidentRow?.textContent).toContain("4");
+    expect(qualifyingRow?.textContent).toContain("0");
+  });
+
   it("renders expandable evidence with claim, agent, match provenance, keywords and factors", () => {
     renderCard({ relatedConflicts: ["A101 vs A304"], evidenceDetail: EVIDENCE });
     expect(screen.getByText(/Evidence \(1\)/)).toBeInTheDocument();

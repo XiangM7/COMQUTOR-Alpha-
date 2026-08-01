@@ -8,7 +8,12 @@ import { EmptyState } from "../components/EmptyState";
 import { useRunPolling } from "../hooks/useRunPolling";
 import { useResearchRun } from "../hooks/useResearchRun";
 import { describeApiError } from "../api/errors";
-import type { CanonicalResearchResponse, DataSanityWarning, StructuredAgentOutputRecord } from "../api/types";
+import type {
+  CanonicalResearchResponse,
+  DataSanityNumericSemantics,
+  DataSanityWarning,
+  StructuredAgentOutputRecord,
+} from "../api/types";
 
 function shortenRunId(runId: string): string {
   return runId.length > 12 ? `${runId.slice(0, 8)}…${runId.slice(-4)}` : runId;
@@ -122,6 +127,44 @@ function DirectionalFindingsPanel({
   );
 }
 
+// Section 19 (Product Transparency, low priority): a low-risk entry point
+// onto the neutral/unclassified findings the two directional panels
+// deliberately exclude -- reuses the SAME analytical claims the API already
+// returns (never mixes in context-only claims, never deletes the
+// positive/negative panels, never renders all hidden findings at once).
+function NeutralFindingsPanel({ records }: { records: StructuredAgentOutputRecord[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const hidden = records.filter((record) => !isDirectionalFinding(record.direction));
+  if (hidden.length === 0) return null;
+  const sorted = [...hidden].sort(compareFindings);
+  const shown = sorted.slice(0, MAX_FINDINGS_PER_DIRECTION);
+  const truncatedCount = hidden.length - shown.length;
+
+  return (
+    <details
+      className="panel neutral-findings-panel"
+      open={expanded}
+      onToggle={(event) => setExpanded((event.target as HTMLDetailsElement).open)}
+    >
+      <summary>Neutral and unclassified findings ({hidden.length})</summary>
+      {expanded ? (
+        <>
+          <ul className="analyst-output-list">
+            {shown.map((record) => (
+              <FindingCard key={record.claim_id} record={record} />
+            ))}
+          </ul>
+          {truncatedCount > 0 ? (
+            <p className="analyst-output-hidden-note">
+              {truncatedCount} more neutral or unclassified finding(s) are not shown here.
+            </p>
+          ) : null}
+        </>
+      ) : null}
+    </details>
+  );
+}
+
 function detailString(details: Record<string, unknown>, key: string): string | null {
   const value = details[key];
   return typeof value === "string" ? value : null;
@@ -191,15 +234,60 @@ function DataQualityWarningItem({ warning }: { warning: DataSanityWarning }) {
   );
 }
 
+// Evidence Integrity Completion Sprint, Track C: aggregate transparency for
+// numeric candidates that were classified as a technical indicator (or
+// other non-market-price role) and therefore never entered the warning list
+// above -- never per-candidate detail (the backend does not persist that),
+// and never itself rendered as a warning.
+function DataQualityNumericSemanticsSummary({
+  semantics,
+}: {
+  semantics: DataSanityNumericSemantics;
+}) {
+  if (semantics.skipped_by_role_count === 0) return null;
+  const roleEntries = Object.entries(semantics.semantic_role_counts);
+  return (
+    <details className="data-quality-numeric-semantics">
+      <summary>
+        {semantics.skipped_by_role_count} numeric candidate(s) skipped as non-market-price
+      </summary>
+      <p className="data-quality-numeric-semantics-note">
+        These figures (e.g. a moving average) are not observed market prices and are never
+        compared against a day&apos;s trading range.
+      </p>
+      {roleEntries.length > 0 ? (
+        <ul>
+          {roleEntries.map(([role, count]) => (
+            <li key={role}>
+              Numeric role: {role} — {count}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <p className="data-quality-numeric-semantics-eligible">
+        Daily-range check: eligible for {semantics.daily_range_eligible_count} of{" "}
+        {semantics.evaluated_count} candidate(s); skipped for the rest (reason: technical
+        indicator or unresolved numeric role).
+      </p>
+    </details>
+  );
+}
+
 // Yahoo Finance/yfinance is one independent cross-check input, never
 // treated as absolute market truth -- this panel only ever surfaces the
 // backend's own status/warnings verbatim, never recomputes or upgrades
 // severity, and never hides/alters Analyst findings, claims, or Activation.
 function DataQualityPanel({ response }: { response: CanonicalResearchResponse }) {
   const status = response.data_sanity_status;
+  const numericSemantics = response.data_sanity_numeric_semantics ?? null;
 
   if (status === "ok") {
-    return <p className="data-quality-ok-text">External market-data cross-check completed with no warnings.</p>;
+    return (
+      <>
+        <p className="data-quality-ok-text">External market-data cross-check completed with no warnings.</p>
+        {numericSemantics ? <DataQualityNumericSemanticsSummary semantics={numericSemantics} /> : null}
+      </>
+    );
   }
   if (status === "unavailable") {
     return <p className="data-quality-neutral-text">External market-data cross-check is unavailable for this run.</p>;
@@ -219,6 +307,7 @@ function DataQualityPanel({ response }: { response: CanonicalResearchResponse })
           <DataQualityWarningItem key={`${warning.code}-${index}`} warning={warning} />
         ))}
       </ul>
+      {numericSemantics ? <DataQualityNumericSemanticsSummary semantics={numericSemantics} /> : null}
     </div>
   );
 }
@@ -247,10 +336,6 @@ export function ResearchRunPage() {
 
   const allRecords =
     agentOutputs && "structured_agent_outputs" in agentOutputs ? agentOutputs.structured_agent_outputs : [];
-  // A new array, never a mutation of the API response -- direction filtering
-  // is presentation-only, nothing is deleted from artifacts/API/DB.
-  const visibleRecords = allRecords.filter((record) => isDirectionalFinding(record.direction));
-  const hiddenCount = allRecords.length - visibleRecords.length;
 
   return (
     <div className="research-run-page">
@@ -356,11 +441,7 @@ export function ResearchRunPage() {
                       records={allRecords}
                     />
                   </div>
-                  {hiddenCount > 0 ? (
-                    <p className="analyst-output-hidden-note">
-                      {hiddenCount} neutral or unclassified findings are not shown in this directional view.
-                    </p>
-                  ) : null}
+                  <NeutralFindingsPanel records={allRecords} />
                 </>
               )
             ) : null}

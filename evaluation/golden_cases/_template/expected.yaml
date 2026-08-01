@@ -1,0 +1,56 @@
+# expected.yaml template -- every section below is optional; only
+# sections actually present are checked (an absent section asserts
+# nothing, neither pass nor fail). Delete whichever you don't need.
+#
+# Every leaf expectation is one of:
+#   exact: <value>              # must equal exactly
+#   range: [<lo>, <hi>]         # must fall within an inclusive range
+#   minimum: <n>                # must be >= n
+#   maximum: <n>                # must be <= n
+#   set_equals: [<a>, <b>]      # actual set must equal exactly this set
+#   set_contains: [<a>, <b>]    # actual set must be a superset of this
+#   one_of: [<a>, <b>]          # actual value must be one of these
+#   must_exist: true            # actual value must not be None
+#   must_not_exist: true        # actual value must be None
+#   manual_review: true         # always reported, never auto-verified;
+#                                 use this instead of inventing a fake
+#                                 oracle for anything a live LLM's
+#                                 non-deterministic text would affect.
+#
+# Never encode an exact expectation over live/stochastic LLM text output
+# (see live_smoke_result's own boundary) -- use manual_review instead.
+
+graph:
+  node_count:
+    minimum: 0
+  edge_count:
+    minimum: 0
+  # Explicit opt-in: a case whose correct behavior includes zero edges
+  # must say so here, rather than the harness silently assuming edges are
+  # always required.
+  zero_edges_allowed: true
+  required_paths:
+    - source: ai_capex
+      target: revenue_growth
+      max_hops: 3
+
+activation:
+  required_active_alphas:
+    set_contains:
+      - A101
+  forbidden_regime_alphas:
+    set_contains:
+      - A102
+
+conflicts:
+  main_conflict:
+    one_of:
+      - A101__A304
+      - A301__A304
+  all_admitted_require_bull_evidence: true
+  all_admitted_require_bear_evidence: true
+
+claims:
+  forbidden_patterns:
+    - "I now have all the data"
+    - "Let me synthesize"

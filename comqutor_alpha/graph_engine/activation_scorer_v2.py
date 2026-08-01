@@ -41,6 +41,15 @@ from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
+from comqutor_alpha.graph_engine.evidence_fact_index import (
+    ALPHA_ACTIVATION_EVIDENCE_V1,
+    EvidenceFactCandidate,
+    evidence_fact_group_id,
+    group_evidence_candidates,
+    relation_for_match as _relation_for_match,
+    relation_triple_index,
+    select_supporting_alpha_claims,
+)
 from comqutor_alpha.graph_engine.graph_schema import (
     MVP_ALPHA_IDS,
     clamp_percent,
@@ -65,7 +74,11 @@ ACTIVATION_V2_WEIGHTS = {
 
 # EvidenceQuality
 EVIDENCE_QUALITY_SATURATION = 4.0
-QUALIFYING_RELATIONS = frozenset({"activation", "conditional", "mixed"})
+# QUALIFYING_RELATIONS now lives in evidence_fact_index.py (imported above)
+# -- the single canonical "supporting evidence" relation set shared with the
+# Evidence Integrity shadow layer (Evidence Integrity Completion Sprint,
+# Track A). Re-exported under this name so every existing internal
+# reference/test in this module keeps working unchanged.
 RELATION_WEIGHTS = {"activation": 1.00, "conditional": 0.65, "mixed": 0.40}
 ASSERTION_WEIGHTS = {"asserted": 1.00, "conditional": 0.70, "mixed": 0.50, "negated": 0.00}
 
@@ -187,17 +200,6 @@ def _semantic_group_key(record: Mapping[str, Any], duplicate_group_ids: Mapping[
     )
 
 
-def _relation_for_match(record: Mapping[str, Any], alpha_id: str) -> str:
-    for pool_key in ("eligible_candidates", "top_candidates", "candidate_scores"):
-        pool = record.get(pool_key)
-        if not isinstance(pool, list):
-            continue
-        for candidate in pool:
-            if isinstance(candidate, Mapping) and str(candidate.get("alpha_id")) == alpha_id:
-                return str(candidate.get("relation") or "unknown").strip().lower()
-    return "unknown"
-
-
 def _candidate_for_match(record: Mapping[str, Any], alpha_id: str) -> Mapping[str, Any] | None:
     for pool_key in ("eligible_candidates", "top_candidates", "candidate_scores"):
         pool = record.get(pool_key)
@@ -258,6 +260,7 @@ def _gather_qualifying_evidence(
     alpha_matches_payload: Mapping[str, Any],
     alpha_id: str,
     duplicate_group_ids: Mapping[str, str],
+    relation_triples: Mapping[str, tuple[str, str, str, str]] | None = None,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Return (qualifying records, evidence integrity warnings).
 
@@ -265,60 +268,87 @@ def _gather_qualifying_evidence(
     claim_id/evidence, a finite match score in [0,1], relation in
     {activation, conditional, mixed}, and assertion_status != negated.
     Deduplicated by claim_id first (repeated rows can never double count).
+
+    Eligibility itself is delegated to the shared canonical selector
+    (``evidence_fact_index.select_supporting_alpha_claims``, Evidence
+    Integrity Completion Sprint, Track A) -- this function only shapes the
+    result into Activation's own richer per-claim dict, it never
+    re-derives the eligibility decision.
     """
     matches = (
         alpha_matches_payload.get("matches") if isinstance(alpha_matches_payload, Mapping) else None
     )
-    if not isinstance(matches, list):
-        return [], []
+    relation_triples = relation_triples or {}
+    eligible_records, _excluded, warnings = select_supporting_alpha_claims(
+        matches, alpha_id, policy_version=ALPHA_ACTIVATION_EVIDENCE_V1
+    )
 
-    warnings: list[str] = []
     by_claim_id: dict[str, dict[str, Any]] = {}
-    for record in matches:
-        if not isinstance(record, Mapping):
-            continue
-        if record.get("match_status") != "matched":
-            continue
-        if str(record.get("matched_alpha") or "") != alpha_id:
-            continue
-        # Unified Claim Admissibility Sprint: context_only/non_substantive
-        # claims must never contribute Activation evidence.
-        if not is_claim_eligible(record, CONSUMER_ACTIVATION):
-            continue
+    for record in eligible_records:
         claim_id = str(record.get("claim_id") or "").strip()
         evidence_text = str(record.get("evidence") or record.get("claim") or "").strip()
-        if not claim_id or not evidence_text:
-            continue
-        score = record.get("score", None)
-        if not is_finite_number(score) or not 0.0 <= float(score) <= 1.0:
-            warnings.append("NON_FINITE_OR_OUT_OF_RANGE_MATCH_SCORE")
-            continue
+        score = float(record.get("score"))
         relation = _relation_for_match(record, alpha_id)
-        if relation not in QUALIFYING_RELATIONS:
-            continue
         assertion_status = str(record.get("assertion_status") or "unknown").strip().lower()
-        if assertion_status == "negated":
-            continue
-        if claim_id in by_claim_id:
-            continue
         by_claim_id[claim_id] = {
             "claim_id": claim_id,
             "agent": str(record.get("agent") or "").strip(),
             "evidence": evidence_text,
             "claim": str(record.get("claim") or evidence_text),
-            "match_score": float(score),
+            "match_score": score,
             "relation": relation,
             "assertion_status": assertion_status,
             "semantic_group": _semantic_group_key(record, duplicate_group_ids),
+            # Structure Integrity Repair Sprint, Track 2: the extra facts
+            # the canonical Evidence Fact Index needs to detect a
+            # cross-agent near-paraphrase, never just an exact-text/
+            # duplicate_group_id match.
+            "factors": tuple(
+                str(f) for f in (record.get("factors") or []) if str(f or "").strip()
+            ),
+            "semantic_polarity": str(record.get("semantic_polarity") or "unknown").strip().lower(),
+            "duplicate_group_id": duplicate_group_ids.get(claim_id),
+            "relation_triple": relation_triples.get(claim_id),
             "record": record,
         }
-    return [by_claim_id[claim_id] for claim_id in sorted(by_claim_id)], sorted(set(warnings))
+    return [by_claim_id[claim_id] for claim_id in sorted(by_claim_id)], warnings
 
 
-def _group_evidence(qualifying: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def _group_evidence(
+    qualifying: list[dict[str, Any]], ticker: str | None = None, run_id: str | None = None
+) -> dict[str, list[dict[str, Any]]]:
+    """Group qualifying evidence into canonical Evidence Facts via the
+    shared Evidence Fact Index (Structure Integrity Repair Sprint, Track 2)
+    -- the SAME grouping algorithm the Evidence Integrity shadow layer
+    uses, so production EvidenceQuality/AgentIndependence and the shadow
+    audit can never again report two different "how many independent facts"
+    numbers for the same alpha."""
+    if not qualifying:
+        return {}
+    candidates = [
+        EvidenceFactCandidate(
+            claim_id=item["claim_id"],
+            claim_text=f"{item['claim']} {item['evidence']}".strip(),
+            factors=item.get("factors") or (),
+            assertion_status=item.get("assertion_status", "unknown"),
+            semantic_polarity=item.get("semantic_polarity", "unknown"),
+            duplicate_group_id=item.get("duplicate_group_id"),
+            relation_triple=item.get("relation_triple"),
+        )
+        for item in qualifying
+    ]
+    grouped = group_evidence_candidates(candidates, str(ticker or ""))
+    by_claim_id = {item["claim_id"]: item for item in qualifying}
     groups: dict[str, list[dict[str, Any]]] = {}
-    for item in qualifying:
-        groups.setdefault(item["semantic_group"], []).append(item)
+    for members in grouped:
+        claim_ids = sorted(m.claim_id for m in members)
+        # Evidence Integrity Completion Sprint, Track A: the SAME canonical
+        # group-id hash the shadow layer uses (evidence_fact_index.
+        # evidence_fact_group_id) -- the same run/ticker/claim-id-set must
+        # produce the identical id everywhere, never independently derived
+        # ad hoc strings per consumer.
+        group_key = evidence_fact_group_id(str(run_id or ""), str(ticker or ""), claim_ids)
+        groups[group_key] = [by_claim_id[cid] for cid in claim_ids]
     return groups
 
 
@@ -383,23 +413,53 @@ def _edge_contribution(edge_type: str, assertion_status: str) -> float:
     return EDGE_CONTRIBUTIONS.get((edge_type, assertion_status), 0.0)
 
 
+def _edge_claim_pool(edge: Mapping[str, Any]) -> set[str]:
+    """The real, Alpha-Mapper-linkable claim_ids an edge's evidence traces
+    back to (Structure Integrity Repair Sprint, Track 1). Uses the edge's
+    own ``source_claim_ids`` (resolved lineage claim_ids for a canonical-
+    relation edge; identical to ``claim_ids`` for a deterministic/LLM edge)
+    when present, and falls back to ``claim_ids`` only for a legacy/
+    synthetic edge dict that never set the new field at all -- so a
+    canonical edge's synthetic ``canrel_*`` id can never again be
+    (silently, incorrectly) treated as though it intersected an alpha's own
+    qualifying claim ids."""
+    if edge.get("source_claim_ids") is not None:
+        return {str(c) for c in edge["source_claim_ids"] if str(c or "").strip()}
+    return {str(c) for c in (edge.get("claim_ids") or []) if str(c or "").strip()}
+
+
 def _local_structure_component(
     qualifying: list[dict[str, Any]],
     graph_edges: Sequence[Mapping[str, Any]],
+    alpha_id: str,
 ) -> tuple[float, dict[str, Any]]:
     alpha_claim_ids = {item["claim_id"] for item in qualifying}
     unique_edges: dict[tuple[str, str, str], dict[str, Any]] = {}
+    incident_keys: set[tuple[str, str, str]] = set()
+    nonqualifying_reason_codes: set[str] = set()
     for edge in graph_edges or ():
         if not isinstance(edge, Mapping):
-            continue
-        edge_claims = {str(c) for c in (edge.get("claim_ids") or []) if str(c or "").strip()}
-        if not edge_claims & alpha_claim_ids:
             continue
         source = str(edge.get("source") or "")
         target = str(edge.get("target") or "")
         edge_type = str(edge.get("edge_type") or "unknown").strip().lower()
-        assertion_status = str(edge.get("assertion_status") or "unknown").strip().lower()
         key = (source, target, edge_type)
+        edge_alpha_ids = edge.get("alpha_ids")
+        is_incident = isinstance(edge_alpha_ids, (list, tuple, set)) and alpha_id in edge_alpha_ids
+
+        edge_claims = _edge_claim_pool(edge)
+        qualifying_claims = edge_claims & alpha_claim_ids
+        if not qualifying_claims:
+            if is_incident:
+                incident_keys.add(key)
+                nonqualifying_reason_codes.add("RELATION_OR_ASSERTION_NOT_QUALIFYING")
+            else:
+                for code in edge.get("alpha_link_reason_codes") or ():
+                    nonqualifying_reason_codes.add(str(code))
+            continue
+
+        incident_keys.add(key)
+        assertion_status = str(edge.get("assertion_status") or "unknown").strip().lower()
         contribution = _edge_contribution(edge_type, assertion_status)
         existing = unique_edges.get(key)
         if existing is None or contribution > existing["contribution"]:
@@ -407,15 +467,17 @@ def _local_structure_component(
                 "key": key,
                 "assertion_status": assertion_status,
                 "contribution": contribution,
-                "claim_ids": edge_claims & alpha_claim_ids,
+                "claim_ids": qualifying_claims,
             }
 
     ordered = [unique_edges[key] for key in sorted(unique_edges)]
     contribution_sum = sum(edge["contribution"] for edge in ordered)
     raw = min(100.0, contribution_sum / LOCAL_STRUCTURE_SATURATION * 100.0)
     local_claim_ids = sorted({c for edge in ordered for c in edge["claim_ids"]})
+    incident_count = len(incident_keys)
+    qualifying_count = len(ordered)
     return clamp_percent(raw), {
-        "local_edge_count": len(ordered),
+        "local_edge_count": qualifying_count,
         "asserted_local_edge_count": sum(
             1 for e in ordered if e["assertion_status"] == "asserted"
         ),
@@ -426,6 +488,15 @@ def _local_structure_component(
         "local_claim_ids": local_claim_ids,
         "unique_edge_contribution_sum": round(contribution_sum, 4),
         "saturation": LOCAL_STRUCTURE_SATURATION,
+        # Structure Integrity Repair Sprint, Track 1 (additive): "how many
+        # graph edges even touch this alpha" vs "how many of those the
+        # frozen Activation formula actually counted as qualifying local
+        # structure support" are two different, both-honest numbers -- never
+        # collapsed into one.
+        "incident_graph_edge_count": incident_count,
+        "qualifying_local_edge_count": qualifying_count,
+        "nonqualifying_local_edge_count": max(0, incident_count - qualifying_count),
+        "local_edge_exclusion_reasons": sorted(nonqualifying_reason_codes),
     }
 
 
@@ -737,15 +808,17 @@ def score_alpha_v2(
     alpha_def = taxonomy.get(alpha_id)
     duplicate_group_ids = _duplicate_group_index(structured_records)
     entities_by_claim = _entities_index(structured_records)
+    relation_triples = relation_triple_index(graph_edges)
 
     qualifying, integrity_warnings = _gather_qualifying_evidence(
-        alpha_matches_payload, alpha_id, duplicate_group_ids
+        alpha_matches_payload, alpha_id, duplicate_group_ids, relation_triples
     )
-    groups = _group_evidence(qualifying)
+    run_id = alpha_matches_payload.get("run_id") if isinstance(alpha_matches_payload, Mapping) else None
+    groups = _group_evidence(qualifying, ticker, run_id)
 
     evidence_quality_raw, evidence_quality_meta = _evidence_quality_component(groups)
     agent_independence_raw, agent_meta = _agent_independence_component(groups)
-    local_raw, local_meta = _local_structure_component(qualifying, graph_edges)
+    local_raw, local_meta = _local_structure_component(qualifying, graph_edges, alpha_id)
     ticker_raw, ticker_meta = _ticker_specificity_component(
         groups,
         ticker=ticker,
@@ -866,6 +939,19 @@ def score_alpha_v2(
     evidence_texts = sorted({item["evidence"] for item in qualifying if item["evidence"]})
     claim_ids = sorted({item["claim_id"] for item in qualifying})
 
+    # Structure Integrity Repair Sprint, Track 2 (additive): explicit raw vs.
+    # unique-fact vs. agent-count vs. overlap-ratio fields, so a consumer
+    # never has to infer "how much did dedup actually do here" from
+    # unique_evidence_count alone. evidence_overlap_ratio is defined as 0
+    # when there is no raw evidence at all (never a division error).
+    raw_supporting_claim_count = len(qualifying)
+    unique_evidence_fact_count = unique_evidence_count
+    evidence_overlap_ratio = (
+        round(1.0 - unique_evidence_fact_count / raw_supporting_claim_count, 4)
+        if raw_supporting_claim_count > 0
+        else 0.0
+    )
+
     return {
         "alpha_id": alpha_id,
         "alpha_name": alpha_def.name_en if alpha_def else alpha_id,
@@ -890,6 +976,20 @@ def score_alpha_v2(
         "claim_ids": claim_ids,
         "evidence": evidence_texts,
         "reason_codes": list(cap_reason_codes),
+        "raw_supporting_claim_count": raw_supporting_claim_count,
+        "unique_evidence_fact_count": unique_evidence_fact_count,
+        "distinct_supporting_agent_count": distinct_agents,
+        "evidence_overlap_ratio": evidence_overlap_ratio,
+        # Evidence Integrity Completion Sprint, Track C: reuses the SAME
+        # frozen regime-gate evidence floor (REGIME_GATE_MIN_UNIQUE_EVIDENCE)
+        # run_audit.json's high_overlap_alphas already applies -- never an
+        # invented threshold. True only when real overlap exists (raw >
+        # unique) AND the deduplicated count falls below the gate's own
+        # evidence floor.
+        "high_overlap_warning": (
+            raw_supporting_claim_count > unique_evidence_fact_count
+            and unique_evidence_fact_count < REGIME_GATE_MIN_UNIQUE_EVIDENCE
+        ),
     }
 
 

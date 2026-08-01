@@ -79,6 +79,34 @@ def _ambiguous_alpha_ids_for_claim(claim_info: Mapping[str, Any] | None) -> list
     return [str(a) for a in plausible if a]
 
 
+# Structure Integrity Repair Sprint, Track 1: an edge's alpha-link reason is
+# a genuine, auditable outcome, not an error -- "this edge's evidence has no
+# committed Alpha match" is a legal result, never silently indistinguishable
+# from "this edge's lineage never resolved to a real source claim at all".
+_ALPHA_LINK_REASON_LINEAGE_UNRESOLVED = "LINEAGE_UNRESOLVED"
+_ALPHA_LINK_REASON_LINEAGE_AMBIGUOUS = "LINEAGE_AMBIGUOUS"
+_ALPHA_LINK_REASON_NO_COMMITTED_ALPHA_MATCH = "NO_COMMITTED_ALPHA_MATCH"
+
+
+def _edge_alpha_link_reason_codes(edge: Mapping[str, Any], committed_alpha_ids: set[str]) -> list[str]:
+    if committed_alpha_ids:
+        return []
+    reasons: set[str] = set()
+    lineage_statuses = edge.get("lineage_statuses") or set()
+    if "unresolved" in lineage_statuses:
+        reasons.add(_ALPHA_LINK_REASON_LINEAGE_UNRESOLVED)
+    if "ambiguous" in lineage_statuses:
+        reasons.add(_ALPHA_LINK_REASON_LINEAGE_AMBIGUOUS)
+    if edge.get("source_claim_ids") and not reasons:
+        reasons.add(_ALPHA_LINK_REASON_NO_COMMITTED_ALPHA_MATCH)
+    if not reasons and not edge.get("source_claim_ids"):
+        # A deterministic/LLM edge (not canonical-relation-sourced) with an
+        # empty source_claim_ids set has no relation lineage to blame --
+        # this is just "its own claim has no committed Alpha match".
+        reasons.add(_ALPHA_LINK_REASON_NO_COMMITTED_ALPHA_MATCH)
+    return sorted(reasons)
+
+
 def _normalize_input_nodes(raw_nodes: Sequence[Any]) -> dict[str, dict[str, Any]]:
     """Canonically merge input nodes by id, order-independently.
 
@@ -96,6 +124,21 @@ def _normalize_input_nodes(raw_nodes: Sequence[Any]) -> dict[str, dict[str, Any]
         canonical_factor = str(raw.get("canonical_factor") or label)
         node_type = str(raw.get("node_type") or "factor")
         claim_ids = [str(v) for v in (raw.get("source_records") or []) if str(v or "").strip()]
+        # Structure Integrity Repair Sprint, Track 1: the real, Alpha-Mapper-
+        # linkable claim_ids this node's evidence traces back to. For a
+        # deterministically-extracted node this is identical to claim_ids
+        # (unchanged behavior); for a canonical-relation-only node it is the
+        # resolved lineage claim_ids, never the synthetic relation_id that
+        # claim_ids continues to carry for legacy provenance display. A raw
+        # node that never sets this key at all (legacy/synthetic input that
+        # predates this field) falls back to claim_ids -- never silently
+        # loses alpha coverage it already had.
+        raw_source_claim_ids = raw.get("source_claim_ids")
+        source_claim_ids = [
+            str(v)
+            for v in (raw_source_claim_ids if raw_source_claim_ids is not None else claim_ids)
+            if str(v or "").strip()
+        ]
         source_output_ids = [
             str(v) for v in (raw.get("source_agent_output_ids") or []) if str(v or "").strip()
         ]
@@ -110,6 +153,7 @@ def _normalize_input_nodes(raw_nodes: Sequence[Any]) -> dict[str, dict[str, Any]
                 "canonical_factor": canonical_factor,
                 "original_labels": {label},
                 "claim_ids": set(claim_ids),
+                "source_claim_ids": set(source_claim_ids),
                 "source_agent_output_ids": set(source_output_ids),
                 "evidence": set(evidence),
                 "score": clamp_percent(score, 0.0, 1.0),
@@ -118,6 +162,7 @@ def _normalize_input_nodes(raw_nodes: Sequence[Any]) -> dict[str, dict[str, Any]
             existing = merged[node_id]
             existing["original_labels"].add(label)
             existing["claim_ids"].update(claim_ids)
+            existing["source_claim_ids"].update(source_claim_ids)
             existing["source_agent_output_ids"].update(source_output_ids)
             existing["evidence"].update(evidence)
             existing["score"] = max(existing["score"], clamp_percent(score, 0.0, 1.0))
@@ -203,6 +248,29 @@ def _normalize_and_merge_edges(
         evidence = str(raw.get("evidence") or "").strip()
         extraction_method = str(raw.get("extraction_method") or "unknown")
         rule_name = str(raw.get("rule_name") or "")
+        # Structure Integrity Repair Sprint, Track 1: additive lineage
+        # fields, unioned across every raw edge merged into this run-level
+        # edge. ``source_claim_ids`` is the real, Alpha-Mapper-linkable
+        # claim pool (identical to claim_ids for deterministic/LLM edges;
+        # resolved lineage claim_ids -- possibly empty -- for canonical-
+        # relation edges); ``relation_ids``/``lineage_statuses``/
+        # ``lineage_rejection_reasons`` only ever come from canonical-
+        # relation-sourced raw edges. A raw edge that never sets this key at
+        # all (legacy/synthetic input predating this field) falls back to
+        # its own claim_id -- never silently loses alpha coverage it
+        # already had.
+        raw_source_claim_ids = raw.get("source_claim_ids")
+        fallback_source_claim_ids = [str(claim_id)] if claim_id else []
+        source_claim_ids = [
+            str(v)
+            for v in (
+                raw_source_claim_ids if raw_source_claim_ids is not None else fallback_source_claim_ids
+            )
+            if str(v or "").strip()
+        ]
+        relation_id = raw.get("relation_id")
+        lineage_status = raw.get("lineage_status")
+        lineage_reasons = [str(v) for v in (raw.get("lineage_reasons") or []) if str(v or "").strip()]
 
         key = (source, target, edge_type)
         if key not in merged:
@@ -213,6 +281,10 @@ def _normalize_and_merge_edges(
                 "weights": [weight],
                 "assertion_statuses": {assertion_status},
                 "claim_ids": {str(claim_id)} if claim_id else set(),
+                "source_claim_ids": set(source_claim_ids),
+                "relation_ids": {str(relation_id)} if relation_id else set(),
+                "lineage_statuses": {str(lineage_status)} if lineage_status else set(),
+                "lineage_rejection_reasons": set(lineage_reasons),
                 "source_agent_output_ids": {str(source_output_id)} if source_output_id else set(),
                 "evidence": {evidence} if evidence else set(),
                 "extraction_methods": {extraction_method},
@@ -224,6 +296,12 @@ def _normalize_and_merge_edges(
             existing["assertion_statuses"].add(assertion_status)
             if claim_id:
                 existing["claim_ids"].add(str(claim_id))
+            existing["source_claim_ids"].update(source_claim_ids)
+            if relation_id:
+                existing["relation_ids"].add(str(relation_id))
+            if lineage_status:
+                existing["lineage_statuses"].add(str(lineage_status))
+            existing["lineage_rejection_reasons"].update(lineage_reasons)
             if source_output_id:
                 existing["source_agent_output_ids"].add(str(source_output_id))
             if evidence:
@@ -279,13 +357,18 @@ def build_structure_graph(
     merged_edges, rejections = _normalize_and_merge_edges(raw_edges, known_node_ids)
 
     # Attach alpha_ids / agents / ambiguous_alpha_ids to nodes strictly via
-    # each node's own claim_ids, so one claim's alpha can never leak onto a
-    # node built from a different, unrelated claim.
+    # each node's own source_claim_ids -- the real, Alpha-Mapper-linkable
+    # claim pool (Structure Integrity Repair Sprint, Track 1). For a
+    # deterministically-extracted node this is identical to claim_ids
+    # (unchanged behavior); a canonical-relation-only node whose lineage
+    # never resolved simply contributes no claim ids here, so one claim's
+    # alpha can never leak onto a node built from a different, unrelated
+    # claim, and a synthetic relation_id can never masquerade as one either.
     for node in nodes.values():
         committed: set[str] = set()
         ambiguous: set[str] = set()
         agents: set[str] = set()
-        for claim_id in node["claim_ids"]:
+        for claim_id in node["source_claim_ids"]:
             claim_info = claim_index.get(claim_id)
             committed.update(_committed_alpha_ids_for_claim(claim_info))
             ambiguous.update(_ambiguous_alpha_ids_for_claim(claim_info))
@@ -301,7 +384,7 @@ def build_structure_graph(
     for (source, target, edge_type), edge in merged_edges.items():
         committed: set[str] = set()
         agents: set[str] = set()
-        for claim_id in edge["claim_ids"]:
+        for claim_id in edge["source_claim_ids"]:
             claim_info = claim_index.get(claim_id)
             committed.update(_committed_alpha_ids_for_claim(claim_info))
             if claim_info and claim_info.get("agent"):
@@ -309,6 +392,7 @@ def build_structure_graph(
         edge["alpha_ids"] = sorted(committed)
         edge["agents"] = sorted(agents)
         edge["weight"] = clamp_percent(max(edge["weights"]), 0.0, 1.0)
+        edge["alpha_link_reason_codes"] = _edge_alpha_link_reason_codes(edge, committed)
         graph.add_edge(source, target, edge_type=edge_type, weight=edge["weight"])
 
     serialized_nodes = [_serialize_node(node) for node in nodes.values()]
@@ -348,6 +432,7 @@ def _serialize_node(node: dict[str, Any]) -> dict[str, Any]:
         "ambiguous_alpha_ids": node["ambiguous_alpha_ids"],
         "score": clamp_percent(node["score"], 0.0, 1.0),
         "claim_ids": sorted(node["claim_ids"]),
+        "source_claim_ids": sorted(node["source_claim_ids"]),
         "source_agent_output_ids": sorted(node["source_agent_output_ids"]),
         "agents": node["agents"],
         "evidence": sorted(node["evidence"]),
@@ -362,7 +447,12 @@ def _serialize_edge(edge: dict[str, Any]) -> dict[str, Any]:
         "weight": edge["weight"],
         "assertion_status": _merge_assertion_status(edge["assertion_statuses"]),
         "alpha_ids": edge["alpha_ids"],
+        "alpha_link_reason_codes": edge["alpha_link_reason_codes"],
         "claim_ids": sorted(edge["claim_ids"]),
+        "source_claim_ids": sorted(edge["source_claim_ids"]),
+        "relation_ids": sorted(edge["relation_ids"]),
+        "lineage_statuses": sorted(edge["lineage_statuses"]),
+        "lineage_rejection_reasons": sorted(edge["lineage_rejection_reasons"]),
         "source_agent_output_ids": sorted(edge["source_agent_output_ids"]),
         "agents": edge["agents"],
         "evidence": sorted(edge["evidence"]),

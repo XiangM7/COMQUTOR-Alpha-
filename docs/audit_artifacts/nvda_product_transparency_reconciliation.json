@@ -1,0 +1,142 @@
+{
+  "run_id": "e434f80b-e4d0-4b09-9471-d84532659de5",
+  "provider_calls": 0,
+  "eligibility_unification": {
+    "diff_rows_remaining": 0,
+    "alphas_consistent": 10,
+    "alphas_total": 10
+  },
+  "conflict_fact_integration": {
+    "pairs_evaluated": 6,
+    "pairs_admitted": 3,
+    "main_conflict": "A301 vs A304",
+    "fact_group_rows": 41
+  },
+  "gpu_demand_a301": {
+    "incident_edges": 0,
+    "qualifying_edges": 0,
+    "a301_activation_score": 66.4936
+  },
+  "run_audit_evidence_eligibility": {
+    "policy_version": "alpha_activation_evidence.v1",
+    "counts_by_alpha": {
+      "A001": {
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A003": {
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A101": {
+        "raw_supporting_claim_count": 7,
+        "unique_evidence_fact_count": 6,
+        "distinct_supporting_agent_count": 4,
+        "evidence_overlap_ratio": 0.1429
+      },
+      "A102": {
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A103": {
+        "raw_supporting_claim_count": 3,
+        "unique_evidence_fact_count": 3,
+        "distinct_supporting_agent_count": 2,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A201": {
+        "raw_supporting_claim_count": 6,
+        "unique_evidence_fact_count": 5,
+        "distinct_supporting_agent_count": 5,
+        "evidence_overlap_ratio": 0.1667
+      },
+      "A301": {
+        "raw_supporting_claim_count": 11,
+        "unique_evidence_fact_count": 11,
+        "distinct_supporting_agent_count": 8,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A304": {
+        "raw_supporting_claim_count": 11,
+        "unique_evidence_fact_count": 5,
+        "distinct_supporting_agent_count": 5,
+        "evidence_overlap_ratio": 0.5455
+      },
+      "A501": {
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A601": {
+        "raw_supporting_claim_count": 9,
+        "unique_evidence_fact_count": 9,
+        "distinct_supporting_agent_count": 3,
+        "evidence_overlap_ratio": 0.0
+      }
+    },
+    "exclusion_reasons_by_alpha": {
+      "A001": {
+        "RELATION_NOT_SUPPORTING": 1
+      },
+      "A003": {},
+      "A101": {},
+      "A102": {},
+      "A103": {},
+      "A201": {
+        "NON_ANALYTICAL_QUALITY": 3
+      },
+      "A301": {},
+      "A304": {
+        "NON_ANALYTICAL_QUALITY": 2
+      },
+      "A501": {
+        "RELATION_NOT_SUPPORTING": 2
+      },
+      "A601": {
+        "RELATION_NOT_SUPPORTING": 1
+      }
+    },
+    "production_shadow_consistent_count": 10,
+    "production_shadow_inconsistent_alphas": []
+  },
+  "run_audit_conflict_evidence_integrity": {
+    "pair_count": 6,
+    "bull_raw_claim_count_by_pair": {
+      "A301__A304": 11,
+      "A101__A304": 7,
+      "A304__A601": 9
+    },
+    "bull_unique_fact_count_by_pair": {
+      "A301__A304": 11,
+      "A101__A304": 6,
+      "A304__A601": 9
+    },
+    "bear_raw_claim_count_by_pair": {
+      "A301__A304": 11,
+      "A101__A304": 11,
+      "A304__A601": 11
+    },
+    "bear_unique_fact_count_by_pair": {
+      "A301__A304": 5,
+      "A101__A304": 5,
+      "A304__A601": 5
+    },
+    "shared_fact_groups_by_pair": {
+      "A301__A304": [],
+      "A101__A304": [],
+      "A304__A601": []
+    },
+    "overlap_warning_pairs": [
+      "A101__A304",
+      "A301__A304",
+      "A304__A601"
+    ]
+  }
+}
