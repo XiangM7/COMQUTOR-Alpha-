@@ -245,6 +245,8 @@ export interface CanonicalResearchResponse {
   data_sanity_warning_count: number;
   data_sanity_critical_count: number;
   data_sanity_warnings: DataSanityWarning[];
+  entity_alpha_exposures?: EntityAlphaExposureRecord[];
+  entity_alpha_exposure_status?: "ready" | "unavailable";
   /** Additive; absent/null on a payload predating this field or a run with
    * no reported-price check. */
   data_sanity_numeric_semantics?: DataSanityNumericSemantics | null;
@@ -316,6 +318,32 @@ export interface AlphaEvidenceDetail {
   direction: string;
 }
 
+export interface EntityExposure {
+  historical_mapping: number | null;
+  current_evidence: number;
+  agent_confidence: number;
+  final_exposure: number | null;
+  seed_version: string;
+  seed_effective_date: string;
+  seed_approval_status: string;
+  mode: "off" | "shadow" | "enforced";
+  exposure_status: "computed" | "missing_seed";
+  would_block_dominant: boolean;
+  would_block_regime_level: boolean;
+  override_candidate: boolean;
+  qualification_effect_applied: boolean;
+  unique_evidence_fact_count: number;
+  ticker_specific_fact_count: number;
+  distinct_supporting_agent_count: number;
+  reason_codes: string[];
+}
+
+export interface EntityAlphaExposureRecord extends EntityExposure {
+  run_id: string;
+  ticker: string;
+  alpha_id: string;
+}
+
 /** One of the 10 MVP-10 alphas' full scored result -- see
  * activation_scorer.score_alpha. */
 export interface AlphaActivation {
@@ -375,6 +403,8 @@ export interface AlphaActivation {
    * -- the UI must read this directly rather than picking its own
    * threshold on evidence_overlap_ratio. */
   high_overlap_warning?: boolean | null;
+  /** Draft/shadow Entity Exposure sidecar; null on historical payloads. */
+  entity_exposure?: EntityExposure | null;
 }
 
 /** Additive fields on components.local_structure_support (Structure

@@ -117,6 +117,45 @@ alpha_activations = sa.Table(
 )
 
 
+entity_alpha_exposures = sa.Table(
+    "entity_alpha_exposures",
+    metadata,
+    sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+    sa.Column("run_id", sa.String(80), nullable=False),
+    sa.Column("ticker", sa.String(16), nullable=False),
+    sa.Column("alpha_id", sa.String(16), nullable=False),
+    sa.Column("seed_version", sa.String(32), nullable=False),
+    sa.Column("seed_effective_date", sa.Date, nullable=True),
+    sa.Column("seed_approval_status", sa.String(32), nullable=False),
+    sa.Column("historical_mapping", sa.Float, nullable=True),
+    sa.Column("current_evidence", sa.Float, nullable=True),
+    sa.Column("agent_confidence", sa.Float, nullable=True),
+    sa.Column("final_exposure", sa.Float, nullable=True),
+    sa.Column("unique_evidence_fact_count", sa.Integer, nullable=False),
+    sa.Column("ticker_specific_fact_count", sa.Integer, nullable=False),
+    sa.Column("distinct_supporting_agent_count", sa.Integer, nullable=False),
+    sa.Column("mode", sa.String(16), nullable=False),
+    sa.Column("exposure_status", sa.String(32), nullable=False),
+    sa.Column("would_block_dominant", sa.Boolean, nullable=False),
+    sa.Column("would_block_regime_level", sa.Boolean, nullable=False),
+    sa.Column("override_candidate", sa.Boolean, nullable=False),
+    sa.Column("qualification_effect_applied", sa.Boolean, nullable=False),
+    sa.Column("reason_codes_json", _json_type(), nullable=False),
+    sa.Column("provenance_json", _json_type(), nullable=False),
+    sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    sa.Column(
+        "updated_at",
+        sa.DateTime(timezone=True),
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
+        nullable=False,
+    ),
+    sa.UniqueConstraint("run_id", "alpha_id", name="uq_entity_alpha_exposures_run_alpha"),
+    sa.Index("ix_entity_alpha_exposures_run_id", "run_id"),
+    sa.Index("ix_entity_alpha_exposures_ticker", "ticker"),
+)
+
+
 alpha_conflicts = sa.Table(
     "alpha_conflicts",
     metadata,
@@ -297,4 +336,5 @@ MIGRATIONS: tuple[tuple[str, tuple[sa.Table, ...]], ...] = (
     ("0003_create_research_runs", (research_runs,)),
     ("0004_create_agent_outputs", (agent_outputs,)),
     ("0005_create_research_run_progress", (research_run_progress,)),
+    ("0006_create_entity_alpha_exposures", (entity_alpha_exposures,)),
 )

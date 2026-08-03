@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import type { AlphaActivation, AlphaEvidenceDetail } from "../api/types";
+import type { AlphaActivation, AlphaEvidenceDetail, EntityExposure } from "../api/types";
 import { AlphaCard } from "./AlphaCard";
 
 function makeActivation(overrides: Partial<AlphaActivation> = {}): AlphaActivation {
@@ -62,7 +62,65 @@ function renderCard(overrides: Partial<Parameters<typeof AlphaCard>[0]> = {}) {
   );
 }
 
+function makeExposure(overrides: Partial<EntityExposure> = {}): EntityExposure {
+  return {
+    historical_mapping: 0.95,
+    current_evidence: 0.5,
+    agent_confidence: 0.8,
+    final_exposure: 0.785,
+    seed_version: "v0.1",
+    seed_effective_date: "2026-07-31",
+    seed_approval_status: "draft",
+    mode: "shadow",
+    exposure_status: "computed",
+    would_block_dominant: false,
+    would_block_regime_level: false,
+    override_candidate: false,
+    qualification_effect_applied: false,
+    unique_evidence_fact_count: 4,
+    ticker_specific_fact_count: 2,
+    distinct_supporting_agent_count: 3,
+    reason_codes: [],
+    ...overrides,
+  };
+}
+
 describe("AlphaCard", () => {
+  it("shows draft shadow Entity Exposure components and would-block fields", () => {
+    renderCard({ activation: makeActivation({ entity_exposure: makeExposure() }) });
+    expect(screen.getByText("Entity Exposure").closest("div")?.textContent).toContain("0.785");
+    expect(screen.getByText("Draft seed — pending product-owner approval")).toBeInTheDocument();
+    expect(screen.getByText("Shadow only — Not applied to Activation")).toBeInTheDocument();
+    expect(screen.getByText("Historical mapping").closest("div")?.textContent).toContain("0.950");
+    expect(screen.getByText("Current evidence").closest("div")?.textContent).toContain("0.500");
+    expect(screen.getByText("Agent confidence").closest("div")?.textContent).toContain("0.800");
+    expect(screen.getByText("Would block dominant").closest("div")?.textContent).toContain("No");
+    expect(screen.getByText("Would block regime level").closest("div")?.textContent).toContain("No");
+  });
+
+  it("shows an explicit missing-seed fallback", () => {
+    renderCard({
+      activation: makeActivation({
+        entity_exposure: makeExposure({
+          historical_mapping: null,
+          final_exposure: null,
+          exposure_status: "missing_seed",
+        }),
+      }),
+    });
+    expect(screen.getByText("Entity Exposure").closest("div")?.textContent).toContain(
+      "Not available",
+    );
+    expect(screen.getByText("No approved/configured seed entry")).toBeInTheDocument();
+  });
+
+  it("handles an old Activation payload with no Entity Exposure", () => {
+    renderCard({ activation: makeActivation() });
+    expect(screen.getByText("Entity Exposure").closest("div")?.textContent).toContain(
+      "Not available",
+    );
+  });
+
   it("shows related conflicts when this run has conflicts involving the alpha", () => {
     renderCard({ relatedConflicts: ["A101 vs A304"] });
     expect(screen.getByText("A101 vs A304")).toBeInTheDocument();

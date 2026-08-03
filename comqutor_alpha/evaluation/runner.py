@@ -77,6 +77,7 @@ def _summarize_actual_for_report(actual: dict[str, Any]) -> dict[str, Any]:
     activation = actual.get("activation") or {}
     conflicts = actual.get("conflicts") or {}
     claims = actual.get("claims") or {}
+    exposures = actual.get("entity_exposure") or {}
     return {
         "graph_node_count": graph.get("node_count"),
         "graph_edge_count": graph.get("edge_count"),
@@ -85,6 +86,7 @@ def _summarize_actual_for_report(actual: dict[str, Any]) -> dict[str, Any]:
         "admitted_conflict_count": len(conflicts.get("admitted") or []),
         "main_conflict_id": conflicts.get("main_conflict_id"),
         "retained_claim_count": claims.get("retained_claim_count"),
+        "entity_exposure_record_count": len(exposures.get("records") or []),
     }
 
 
@@ -95,7 +97,9 @@ def _read_replay_json(path: Path) -> dict[str, Any]:
         return json.load(handle)
 
 
-def _actual_from_replayed_artifacts(structured: dict, graph: dict, conflicts: dict) -> dict[str, Any]:
+def _actual_from_replayed_artifacts(
+    structured: dict, graph: dict, conflicts: dict, exposures: dict | None = None
+) -> dict[str, Any]:
     graph_metrics = graph.get("graph_metrics") if isinstance(graph.get("graph_metrics"), dict) else {}
     activation = graph.get("activation") if isinstance(graph.get("activation"), dict) else {}
     alphas = activation.get("alphas") if isinstance(activation.get("alphas"), list) else []
@@ -117,6 +121,11 @@ def _actual_from_replayed_artifacts(structured: dict, graph: dict, conflicts: di
 
     records = structured.get("records") if isinstance(structured.get("records"), list) else []
     structured_metadata = structured.get("metadata") if isinstance(structured.get("metadata"), dict) else {}
+    exposure_records = (
+        exposures.get("records")
+        if isinstance(exposures, dict) and isinstance(exposures.get("records"), list)
+        else []
+    )
 
     return {
         "graph": {
@@ -141,6 +150,15 @@ def _actual_from_replayed_artifacts(structured: dict, graph: dict, conflicts: di
             "retained_claim_count": len(records),
             "analytical_claim_count": int(structured_metadata.get("analytical_claim_count") or 0),
             "context_only_claim_count": int(structured_metadata.get("context_only_claim_count") or 0),
+        },
+        "entity_exposure": {
+            "mode": exposures.get("mode") if isinstance(exposures, dict) else None,
+            "records": exposure_records,
+            "by_alpha": {
+                str(record.get("alpha_id")): record.get("final_exposure")
+                for record in exposure_records
+                if isinstance(record, dict)
+            },
         },
     }
 
@@ -202,8 +220,9 @@ def _run_replay_backed_case(
     structured = _read_replay_json(output_dir / "structured_agent_outputs.json")
     graph = _read_replay_json(output_dir / "structure_graph.json")
     conflicts = _read_replay_json(output_dir / "conflict_results.json")
+    exposures = _read_replay_json(output_dir / "entity_alpha_exposures.json")
 
-    actual = _actual_from_replayed_artifacts(structured, graph, conflicts)
+    actual = _actual_from_replayed_artifacts(structured, graph, conflicts, exposures)
     return CaseResult(
         case_id=case_id,
         case_type=case_type,

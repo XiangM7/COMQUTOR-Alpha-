@@ -61,6 +61,7 @@ _ACTIVATION_FIELDS = (
     "claim_ids",
     "evidence",
     "reason_codes",
+    "entity_exposure",
 )
 _CANDIDATE_FIELDS = ("alpha_a", "alpha_b", "outcome", "reason_codes", "evidence_audit")
 _CONFLICT_FIELDS = (
@@ -452,8 +453,71 @@ _V2_ONLY_ACTIVATION_FIELDS = frozenset(
         "distinct_supporting_agent_count",
         "evidence_overlap_ratio",
         "high_overlap_warning",
+        "entity_exposure",
     }
 )
+
+
+def _whitelist_entity_exposure(value: Any, reason_code: str) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        _fail(reason_code)
+    allowed = {
+        "historical_mapping",
+        "current_evidence",
+        "agent_confidence",
+        "final_exposure",
+        "seed_version",
+        "seed_effective_date",
+        "seed_approval_status",
+        "mode",
+        "exposure_status",
+        "would_block_dominant",
+        "would_block_regime_level",
+        "override_candidate",
+        "qualification_effect_applied",
+        "unique_evidence_fact_count",
+        "ticker_specific_fact_count",
+        "distinct_supporting_agent_count",
+        "reason_codes",
+    }
+    if set(value) != allowed:
+        _fail(reason_code)
+    result = {
+        "historical_mapping": (
+            None
+            if value["historical_mapping"] is None
+            else _number(value["historical_mapping"], 0.0, 1.0, reason_code)
+        ),
+        "current_evidence": _number(value["current_evidence"], 0.0, 1.0, reason_code),
+        "agent_confidence": _number(value["agent_confidence"], 0.0, 1.0, reason_code),
+        "final_exposure": (
+            None
+            if value["final_exposure"] is None
+            else _number(value["final_exposure"], 0.0, 1.0, reason_code)
+        ),
+        "seed_version": _text(value["seed_version"], reason_code),
+        "seed_effective_date": _text(value["seed_effective_date"], reason_code),
+        "seed_approval_status": _text(value["seed_approval_status"], reason_code),
+        "mode": _text(value["mode"], reason_code),
+        "exposure_status": _text(value["exposure_status"], reason_code),
+        "would_block_dominant": _bool(value["would_block_dominant"], reason_code),
+        "would_block_regime_level": _bool(value["would_block_regime_level"], reason_code),
+        "override_candidate": _bool(value["override_candidate"], reason_code),
+        "qualification_effect_applied": _bool(
+            value["qualification_effect_applied"], reason_code
+        ),
+        "unique_evidence_fact_count": _integer(
+            value["unique_evidence_fact_count"], reason_code
+        ),
+        "ticker_specific_fact_count": _integer(
+            value["ticker_specific_fact_count"], reason_code
+        ),
+        "distinct_supporting_agent_count": _integer(
+            value["distinct_supporting_agent_count"], reason_code
+        ),
+        "reason_codes": _string_list(value["reason_codes"], reason_code),
+    }
+    return _json_copy(result, reason_code)
 
 
 def _whitelist_activation_components(value: Any, allowed_names: frozenset[str]) -> dict[str, Any]:
@@ -547,6 +611,10 @@ def _whitelist_activation(entry: Mapping[str, Any]) -> dict[str, Any]:
         activation["high_overlap_warning"] = _bool(entry["high_overlap_warning"], reason)
     if "regime_gate_passed" in entry:
         activation["regime_gate_passed"] = _bool(entry["regime_gate_passed"], reason)
+    if "entity_exposure" in entry:
+        activation["entity_exposure"] = _whitelist_entity_exposure(
+            entry["entity_exposure"], reason
+        )
     return _json_copy(activation, reason)
 
 

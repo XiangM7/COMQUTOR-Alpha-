@@ -106,6 +106,44 @@ def aggregate_cross_run_metrics(results: list[CaseResult]) -> dict[str, Any]:
         "reason": "cross_run.py does not recompute data-sanity checks; a case's source run's own data_sanity.json is not read by this harness today",
     }
 
+    exposure_blocks = [
+        result.actual.get("entity_exposure", {})
+        for result in completed
+        if result.actual.get("entity_exposure")
+    ]
+    exposure_records = [
+        record
+        for block in exposure_blocks
+        for record in (block.get("records") or [])
+        if isinstance(record, dict)
+    ]
+    seeded_records = [
+        record for record in exposure_records if record.get("historical_mapping") is not None
+    ]
+    final_exposures = [
+        float(record["final_exposure"])
+        for record in exposure_records
+        if isinstance(record.get("final_exposure"), (int, float))
+    ]
+    entity_exposure = {
+        "seed_coverage_rate": _rate(len(seeded_records), len(exposure_records)),
+        "final_exposure_distribution": sorted(final_exposures),
+        "would_block_dominant_count": sum(
+            1 for record in exposure_records if record.get("would_block_dominant") is True
+        ),
+        "would_block_regime_count": sum(
+            1 for record in exposure_records if record.get("would_block_regime_level") is True
+        ),
+        "missing_seed_ticker_count": sum(
+            1
+            for block in exposure_blocks
+            if any(
+                isinstance(record, dict) and record.get("historical_mapping") is None
+                for record in (block.get("records") or [])
+            )
+        ),
+    }
+
     return {
         "operational": operational,
         "claims": claims,
@@ -113,6 +151,7 @@ def aggregate_cross_run_metrics(results: list[CaseResult]) -> dict[str, Any]:
         "activation": activation,
         "conflict": conflict,
         "data_sanity": data_sanity,
+        "entity_exposure": entity_exposure,
     }
 
 

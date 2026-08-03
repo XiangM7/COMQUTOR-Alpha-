@@ -218,6 +218,19 @@ def evaluate_expected(expected: dict[str, Any], actual: dict[str, Any]) -> list[
             )
         )
 
+    # Optional Entity Exposure oracle. No case receives values implicitly;
+    # only alpha IDs explicitly authored in expected.yaml are evaluated.
+    exposure_expected = expected.get("entity_exposure") or {}
+    exposure_actual = (actual.get("entity_exposure") or {}).get("by_alpha") or {}
+    for alpha_id in sorted(exposure_expected):
+        spec = exposure_expected[alpha_id]
+        if _is_leaf_expectation(spec):
+            results.append(
+                evaluate_leaf(
+                    f"entity_exposure.{alpha_id}", spec, exposure_actual.get(alpha_id)
+                )
+            )
+
     conflicts_expected = expected.get("conflicts") or {}
     conflicts_actual = actual.get("conflicts") or {}
     if "main_conflict" in conflicts_expected and _is_leaf_expectation(conflicts_expected["main_conflict"]):

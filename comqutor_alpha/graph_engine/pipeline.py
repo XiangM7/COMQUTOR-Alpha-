@@ -13,6 +13,8 @@ from collections.abc import Mapping
 from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
+from comqutor_alpha.exposure.seed_loader import load_exposure_seed, resolve_exposure_mode
+from comqutor_alpha.exposure_engine import compute_run_entity_alpha_exposures
 from comqutor_alpha.graph_engine.activation_scorer import score_alpha_activations
 from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     ACTIVATION_V2_FORMULA_VERSION,
@@ -153,6 +155,9 @@ def score_and_assemble_structure_graph(
     run_timestamp: Any = None,
     as_of: Any = None,
     structured_records: Any = None,
+    exposure_run_id: str | None = None,
+    exposure_seed_bundle: Any = None,
+    exposure_mode_decision: Any = None,
 ) -> dict[str, Any]:
     """Stage 2: score all MVP-10 Alphas against an already-built graph and
     assemble the final ``structure_graph.json`` contract.
@@ -184,6 +189,15 @@ def score_and_assemble_structure_graph(
         as_of=as_of,
     )
     _attach_evidence_detail(activation_v2["alphas"], alpha_matches_payload)
+    seed_bundle = exposure_seed_bundle or load_exposure_seed()
+    mode_decision = exposure_mode_decision or resolve_exposure_mode(seed_bundle.manifest)
+    activation_v2, exposure_artifact = compute_run_entity_alpha_exposures(
+        run_id=exposure_run_id or str(graph["run_id"]),
+        ticker=str(graph["ticker"]),
+        activation_payload=activation_v2,
+        seed_bundle=seed_bundle,
+        mode_decision=mode_decision,
+    )
 
     # Built exactly once and reused for both "activation" (the primary
     # payload callers read) and activation_versions["v2"] -- so the two can
@@ -210,6 +224,7 @@ def score_and_assemble_structure_graph(
         },
         "primary_activation_version": ACTIVATION_V2_FORMULA_VERSION,
         "dominant_alphas": activation_v2["dominant_alphas"],
+        "entity_alpha_exposures": exposure_artifact,
         "provenance": _provenance(alpha_matches_payload, extracted_structures_payload),
     }
 

@@ -8,10 +8,9 @@ the research pipeline, the API, the frontend, Activation, or Conflict --
 this package only freezes the contract and provides a strict loader,
 validator, deterministic scorer, and semantic fingerprint.
 
-Any future Seed, Exposure artifact, Exposure Engine, or UI must reference
-this contract's ``schema_version``/``contract_version``/``taxonomy_version``/
-``contract_fingerprint`` rather than redefining the rubric from a copied
-constant.
+The historical-mapping seed is loaded separately by ``seed_loader``; the
+rubric remains an independent structural contract and is never used to
+rewrite seed values.
 """
 
 from comqutor_alpha.exposure.rubric_contract import (
@@ -21,11 +20,19 @@ from comqutor_alpha.exposure.rubric_contract import (
     load_exposure_rubric_contract,
     validate_exposure_rubric_contract,
 )
+from comqutor_alpha.exposure.seed_loader import (
+    ExposureSeedError,
+    load_exposure_seed,
+    resolve_exposure_mode,
+)
 
 __all__ = [
     "ExposureContractError",
+    "ExposureSeedError",
     "compute_contract_fingerprint",
     "compute_structural_exposure",
     "load_exposure_rubric_contract",
+    "load_exposure_seed",
+    "resolve_exposure_mode",
     "validate_exposure_rubric_contract",
 ]

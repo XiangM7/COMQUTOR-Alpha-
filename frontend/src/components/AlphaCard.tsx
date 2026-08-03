@@ -76,6 +76,7 @@ export function AlphaCard({
     localStructure != null &&
     localStructure.incident_graph_edge_count != null &&
     localStructure.qualifying_local_edge_count != null;
+  const entityExposure = activation?.entity_exposure ?? null;
   return (
     <article className={`alpha-card alpha-card-${status}${isDominant ? " alpha-card-dominant" : ""}`} tabIndex={0}>
       <header className="alpha-card-header">
@@ -145,6 +146,75 @@ export function AlphaCard({
           <dt>Distinct supporting agents</dt>
           <dd>{distinctSupportingAgents != null ? distinctSupportingAgents : "Not available"}</dd>
         </div>
+        {activation ? (
+          <div className="alpha-card-row alpha-card-row-entity-exposure">
+            <dt>Entity Exposure</dt>
+            <dd>
+              {entityExposure?.exposure_status === "computed" &&
+              entityExposure.final_exposure != null
+                ? entityExposure.final_exposure.toFixed(3)
+                : "Not available"}
+            </dd>
+          </div>
+        ) : null}
+        {entityExposure ? (
+          <>
+            {entityExposure.seed_approval_status === "draft" ? (
+              <div className="alpha-card-row alpha-card-row-warning">
+                <dt>Seed approval</dt>
+                <dd>Draft seed — pending product-owner approval</dd>
+              </div>
+            ) : null}
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Historical mapping</dt>
+              <dd>
+                {entityExposure.historical_mapping != null
+                  ? entityExposure.historical_mapping.toFixed(3)
+                  : "Not available"}
+              </dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Current evidence</dt>
+              <dd>{entityExposure.current_evidence.toFixed(3)}</dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Agent confidence</dt>
+              <dd>{entityExposure.agent_confidence.toFixed(3)}</dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Seed version</dt>
+              <dd>{entityExposure.seed_version}</dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Seed status</dt>
+              <dd>{entityExposure.seed_approval_status}</dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Exposure mode</dt>
+              <dd>{entityExposure.mode}</dd>
+            </div>
+            {entityExposure.mode === "shadow" ? (
+              <div className="alpha-card-row alpha-card-row-warning">
+                <dt>Qualification effect</dt>
+                <dd>Shadow only — Not applied to Activation</dd>
+              </div>
+            ) : null}
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Would block dominant</dt>
+              <dd>{entityExposure.would_block_dominant ? "Yes" : "No"}</dd>
+            </div>
+            <div className="alpha-card-row alpha-card-row-detail">
+              <dt>Would block regime level</dt>
+              <dd>{entityExposure.would_block_regime_level ? "Yes" : "No"}</dd>
+            </div>
+            {entityExposure.exposure_status === "missing_seed" ? (
+              <div className="alpha-card-row alpha-card-row-warning">
+                <dt>Reason</dt>
+                <dd>No approved/configured seed entry</dd>
+              </div>
+            ) : null}
+          </>
+        ) : null}
         {hasEvidenceFactFields && activation ? (
           <>
             <div className="alpha-card-row alpha-card-row-detail">

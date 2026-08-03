@@ -6,28 +6,19 @@ Implements exactly the Development Plan's Exposure formula::
                + current_evidence * 0.30
                + agent_confidence * 0.20
 
-Pure, deterministic, dependency-free: no filesystem, no database, no
-environment variable, no network, no randomness, no wall-clock read. This
-module does not know about -- and must never invent -- the formal
-``entity_alpha_exposure_seed.yaml`` that ``historical_mapping`` values will
-eventually come from in production. Callers supply
-``historical_mapping``/``current_evidence``/``agent_confidence`` explicitly;
-this module only computes the formula against whatever it is given.
-
-Not wired into the research pipeline, any HTTP API, or the database in this
-phase -- no ``entity_alpha_exposures`` table, no exposure endpoint. See
-``docs/week4_spec_freeze_audit.md`` 第13节 (``EXPOSURE_SEED_UNAVAILABLE``):
-the Exposure *Product* Gate remains ``BLOCKED_BY_SEED`` until the seed is
-provided and signed off. This module only proves the Exposure *Core*
-formula itself is correct, symmetric across inputs, and safely rejects
-malformed input -- it is not a claim that any particular ticker/Alpha
-exposure value is real.
+The formula functions remain pure and deterministic: callers explicitly
+supply historical mapping, current evidence, and agent confidence. The
+productization helpers later in this module consume an already-validated
+seed bundle plus canonical Evidence Fact summaries, attach additive runtime
+records, and implement the separately gated qualification ceiling. They do
+not read files, call Providers, or change the numeric Activation score.
 """
 
 from __future__ import annotations
 
 import math
 from collections.abc import Mapping
+from copy import deepcopy
 from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_loader import EXPECTED_ALPHA_IDS
@@ -42,6 +33,19 @@ EXPOSURE_WEIGHTS = {
     "current_evidence": 0.30,
     "agent_confidence": 0.20,
 }
+
+ENTITY_EXPOSURE_ARTIFACT_SCHEMA_VERSION = "entity_alpha_exposure.run.v1"
+DOMINANT_EXPOSURE_THRESHOLD = 0.30
+REGIME_EXPOSURE_THRESHOLD = 0.60
+OVERRIDE_MIN_TICKER_FACTS = 4
+OVERRIDE_MIN_DISTINCT_AGENTS = 3
+OVERRIDE_MIN_LOCAL_EDGES = 1
+OVERRIDE_MIN_MEAN_MATCH_SCORE = 0.80
+
+EXPOSURE_BELOW_DOMINANT_THRESHOLD = "EXPOSURE_BELOW_DOMINANT_THRESHOLD"
+EXPOSURE_BELOW_REGIME_THRESHOLD = "EXPOSURE_BELOW_REGIME_THRESHOLD"
+EXPOSURE_SEED_MISSING = "EXPOSURE_SEED_MISSING"
+EXPOSURE_QUALIFICATION_APPLIED = "EXPOSURE_QUALIFICATION_APPLIED"
 
 
 class ExposureInputError(Exception):
@@ -203,10 +207,268 @@ def compute_entity_alpha_exposures(
     }
 
 
+def calculate_runtime_exposure_inputs(evidence_summary: Mapping[str, Any] | None) -> dict[str, Any]:
+    """Calculate per-run inputs from canonical unique Evidence Facts.
+
+    ``evidence_summary`` is produced from Activation v2's already-grouped
+    Evidence Fact Index. This function never groups raw claims and therefore
+    cannot create a second claim-deduplication implementation.
+    """
+    summary = evidence_summary if isinstance(evidence_summary, Mapping) else {}
+    raw_facts = summary.get("facts")
+    facts = raw_facts if isinstance(raw_facts, list) else []
+    ticker_facts: list[Mapping[str, Any]] = []
+    agent_scores: dict[str, float] = {}
+    for fact in facts:
+        if not isinstance(fact, Mapping):
+            continue
+        if fact.get("ticker_specific") is True:
+            score = _require_unit_interval_number(
+                fact.get("representative_match_score"), "INVALID_EXPOSURE_INPUT"
+            )
+            ticker_facts.append({**fact, "representative_match_score": score})
+        representatives = fact.get("agent_representatives")
+        if not isinstance(representatives, list):
+            continue
+        for representative in representatives:
+            if not isinstance(representative, Mapping):
+                continue
+            agent = str(representative.get("agent") or "").strip()
+            if not agent:
+                continue
+            confidence = _require_unit_interval_number(
+                representative.get("confidence"), "INVALID_EXPOSURE_INPUT"
+            )
+            agent_scores[agent] = max(agent_scores.get(agent, 0.0), confidence)
+
+    ticker_specific_fact_count = len(ticker_facts)
+    mean_match_score = (
+        sum(float(fact["representative_match_score"]) for fact in ticker_facts)
+        / ticker_specific_fact_count
+        if ticker_specific_fact_count
+        else 0.0
+    )
+    ticker_specific_fact_ratio = min(ticker_specific_fact_count / 4.0, 1.0)
+    current_evidence = min(1.0, max(0.0, ticker_specific_fact_ratio * mean_match_score))
+    agent_confidence = (
+        sum(agent_scores.values()) / len(agent_scores) if agent_scores else 0.0
+    )
+    unique_count = summary.get("unique_evidence_fact_count", len(facts))
+    local_edge_count = summary.get("qualifying_local_edge_count", 0)
+    if isinstance(unique_count, bool) or not isinstance(unique_count, int) or unique_count < 0:
+        raise ExposureInputError("INVALID_EXPOSURE_INPUT")
+    if isinstance(local_edge_count, bool) or not isinstance(local_edge_count, int) or local_edge_count < 0:
+        raise ExposureInputError("INVALID_EXPOSURE_INPUT")
+    return {
+        "current_evidence": current_evidence,
+        "agent_confidence": min(1.0, max(0.0, agent_confidence)),
+        "unique_evidence_fact_count": unique_count,
+        "ticker_specific_fact_count": ticker_specific_fact_count,
+        "distinct_supporting_agent_count": len(agent_scores),
+        "qualifying_local_edge_count": local_edge_count,
+        "mean_representative_match_score": mean_match_score,
+        "ticker_specific_fact_ratio": ticker_specific_fact_ratio,
+        "representative_fact_group_ids": [
+            str(fact.get("evidence_fact_group_id") or "") for fact in ticker_facts
+        ],
+    }
+
+
+def _public_entity_exposure(record: Mapping[str, Any]) -> dict[str, Any]:
+    fields = (
+        "historical_mapping",
+        "current_evidence",
+        "agent_confidence",
+        "final_exposure",
+        "seed_version",
+        "seed_effective_date",
+        "seed_approval_status",
+        "mode",
+        "exposure_status",
+        "would_block_dominant",
+        "would_block_regime_level",
+        "override_candidate",
+        "qualification_effect_applied",
+        "unique_evidence_fact_count",
+        "ticker_specific_fact_count",
+        "distinct_supporting_agent_count",
+        "reason_codes",
+    )
+    return {field: deepcopy(record.get(field)) for field in fields}
+
+
+_LEVEL_RANK = {"inactive": 0, "watch": 1, "active": 2, "dominant": 3, "regime_level": 4}
+
+
+def _cap_status(status: str, ceiling: str) -> str:
+    if status not in _LEVEL_RANK or ceiling not in _LEVEL_RANK:
+        return status
+    return ceiling if _LEVEL_RANK[status] > _LEVEL_RANK[ceiling] else status
+
+
+def compute_run_entity_alpha_exposures(
+    *,
+    run_id: str,
+    ticker: str,
+    activation_payload: Mapping[str, Any],
+    seed_bundle: Any,
+    mode_decision: Any,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Attach Entity Exposure and return (activation, run artifact).
+
+    Shadow mode is observational: score/status/dominant membership are
+    byte-for-byte unchanged. Enforced mode changes only the final status
+    qualification ceiling after the signed manifest gate has allowed it;
+    ``activation_score`` is never modified.
+    """
+    activation = deepcopy(dict(activation_payload))
+    entries = activation.get("alphas")
+    if not isinstance(entries, list):
+        raise ExposureInputError("INVALID_EXPOSURE_INPUT")
+
+    manifest = seed_bundle.manifest
+    effective_mode = mode_decision.effective_mode
+    before_scores = {str(entry.get("alpha_id")): entry.get("activation_score") for entry in entries}
+    before_levels = {str(entry.get("alpha_id")): entry.get("status") for entry in entries}
+    records: list[dict[str, Any]] = []
+
+    for entry in sorted(entries, key=lambda item: str(item.get("alpha_id") or "")):
+        alpha_id = str(entry.get("alpha_id") or "")
+        evidence_summary = entry.pop("_exposure_evidence", None)
+        if effective_mode == "off":
+            entry.pop("entity_exposure", None)
+            continue
+        runtime = calculate_runtime_exposure_inputs(evidence_summary)
+        historical = seed_bundle.historical_mapping(ticker, alpha_id)
+        reasons = list(mode_decision.reason_codes)
+        if historical is None:
+            final_exposure = None
+            exposure_status = "missing_seed"
+            reasons.append("SEED_ENTRY_MISSING")
+        else:
+            final_exposure = calculate_exposure(
+                historical_mapping=historical,
+                current_evidence=runtime["current_evidence"],
+                agent_confidence=runtime["agent_confidence"],
+            )["exposure_score"]
+            exposure_status = "computed"
+
+        would_block_dominant = (
+            final_exposure is not None and final_exposure < DOMINANT_EXPOSURE_THRESHOLD
+        )
+        would_block_regime = (
+            final_exposure is not None and final_exposure < REGIME_EXPOSURE_THRESHOLD
+        )
+        override_candidate = (
+            runtime["ticker_specific_fact_count"] >= OVERRIDE_MIN_TICKER_FACTS
+            and runtime["distinct_supporting_agent_count"] >= OVERRIDE_MIN_DISTINCT_AGENTS
+            and runtime["qualifying_local_edge_count"] >= OVERRIDE_MIN_LOCAL_EDGES
+            and runtime["mean_representative_match_score"] >= OVERRIDE_MIN_MEAN_MATCH_SCORE
+        )
+        qualification_applied = False
+
+        if effective_mode == "enforced":
+            if final_exposure is None:
+                entry["status"] = _cap_status(str(entry.get("status") or ""), "active")
+                reasons.extend([EXPOSURE_SEED_MISSING, EXPOSURE_QUALIFICATION_APPLIED])
+                qualification_applied = True
+            elif final_exposure < DOMINANT_EXPOSURE_THRESHOLD:
+                entry["status"] = _cap_status(str(entry.get("status") or ""), "active")
+                reasons.extend(
+                    [
+                        EXPOSURE_BELOW_DOMINANT_THRESHOLD,
+                        EXPOSURE_BELOW_REGIME_THRESHOLD,
+                        EXPOSURE_QUALIFICATION_APPLIED,
+                    ]
+                )
+                qualification_applied = True
+            elif final_exposure < REGIME_EXPOSURE_THRESHOLD:
+                entry["status"] = _cap_status(str(entry.get("status") or ""), "dominant")
+                reasons.extend(
+                    [EXPOSURE_BELOW_REGIME_THRESHOLD, EXPOSURE_QUALIFICATION_APPLIED]
+                )
+                qualification_applied = True
+
+        record = {
+            "run_id": run_id,
+            "ticker": ticker,
+            "alpha_id": alpha_id,
+            "seed_version": manifest.seed_version,
+            "seed_effective_date": manifest.effective_date,
+            "seed_approval_status": manifest.approval_status,
+            "historical_mapping": historical,
+            "current_evidence": runtime["current_evidence"],
+            "agent_confidence": runtime["agent_confidence"],
+            "final_exposure": final_exposure,
+            "unique_evidence_fact_count": runtime["unique_evidence_fact_count"],
+            "ticker_specific_fact_count": runtime["ticker_specific_fact_count"],
+            "distinct_supporting_agent_count": runtime["distinct_supporting_agent_count"],
+            "mode": effective_mode,
+            "exposure_status": exposure_status,
+            "would_block_dominant": would_block_dominant,
+            "would_block_regime_level": would_block_regime,
+            "override_candidate": override_candidate,
+            "qualification_effect_applied": qualification_applied,
+            "reason_codes": sorted(set(reasons)),
+            "provenance": {
+                "formula_version": EXPOSURE_FORMULA_VERSION,
+                "evidence_fact_index_version": (
+                    evidence_summary.get("evidence_fact_index_version")
+                    if isinstance(evidence_summary, Mapping)
+                    else None
+                ),
+                "representative_fact_group_ids": runtime["representative_fact_group_ids"],
+                "mean_representative_match_score": runtime[
+                    "mean_representative_match_score"
+                ],
+                "ticker_specific_fact_ratio": runtime["ticker_specific_fact_ratio"],
+                "qualifying_local_edge_count": runtime["qualifying_local_edge_count"],
+            },
+        }
+        entry["entity_exposure"] = _public_entity_exposure(record)
+        records.append(record)
+
+    if effective_mode == "enforced":
+        by_alpha = {str(entry.get("alpha_id")): entry for entry in entries}
+        dominant = []
+        for original in activation.get("dominant_alphas") or []:
+            alpha_id = str(original.get("alpha_id") or "")
+            entry = by_alpha.get(alpha_id)
+            if entry and entry.get("status") in {"dominant", "regime_level"}:
+                updated = deepcopy(original)
+                updated["status"] = entry["status"]
+                dominant.append(updated)
+        activation["dominant_alphas"] = dominant
+
+    after_scores = {str(entry.get("alpha_id")): entry.get("activation_score") for entry in entries}
+    after_levels = {str(entry.get("alpha_id")): entry.get("status") for entry in entries}
+    artifact = {
+        "schema_version": ENTITY_EXPOSURE_ARTIFACT_SCHEMA_VERSION,
+        "run_id": run_id,
+        "ticker": ticker,
+        "requested_mode": mode_decision.requested_mode,
+        "mode": effective_mode,
+        "mode_reason_codes": list(mode_decision.reason_codes),
+        "seed_manifest": manifest.to_dict(),
+        "records": records,
+        "activation_invariants": {
+            "scores_unchanged": before_scores == after_scores,
+            "levels_unchanged": before_levels == after_levels,
+            "shadow_mode_did_not_alter_activation": (
+                effective_mode != "shadow" or before_levels == after_levels
+            ),
+        },
+    }
+    return activation, artifact
+
+
 __all__ = [
     "EXPOSURE_FORMULA_VERSION",
     "EXPOSURE_WEIGHTS",
+    "ENTITY_EXPOSURE_ARTIFACT_SCHEMA_VERSION",
     "ExposureInputError",
     "calculate_exposure",
+    "calculate_runtime_exposure_inputs",
     "compute_entity_alpha_exposures",
+    "compute_run_entity_alpha_exposures",
 ]

@@ -469,6 +469,7 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     # the separate WEEK3_PIPELINE_ERROR_LOG_ARTIFACT_PATH remains a pure
     # append-only audit trail and is deliberately not consulted here.
     structure_graph_path = run_dir / "structure_graph.json"
+    entity_exposure_path = run_dir / "entity_alpha_exposures.json"
     metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
     raw_payload = load_json_record_if_exists(
         run_id,
@@ -527,6 +528,11 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         status = "failed"
 
     summary = _build_research_summary(conflict_status, main_conflict, dominant_alphas)
+    exposure_payload = load_json_record_if_exists(
+        run_id, "entity_alpha_exposures.json", output_root=output_root
+    )
+    exposure_records = exposure_payload.get("records")
+    exposure_records = exposure_records if isinstance(exposure_records, list) else []
 
     return {
         "run_id": run_id,
@@ -549,6 +555,10 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         "main_conflict": main_conflict,
         "conflict_status": conflict_status,
         "summary": summary,
+        "entity_alpha_exposures": exposure_records,
+        "entity_alpha_exposure_status": (
+            "ready" if entity_exposure_path.exists() else "unavailable"
+        ),
         # Data Sanity Cross-Check v1 additive fields -- an independent
         # cross-validation warning, never a change to claims/Activation/
         # Graph/Conflict, and never blocks "completed".
@@ -895,6 +905,7 @@ _ARTIFACT_MANIFEST_SPECS = (
     ("alpha_matches.json", "alpha_matches.json", "alpha_mapper.build_alpha_matches_payload", "graph_builder, activation_scorer_v2, conflict_detector"),
     ("extracted_structures.json", "extracted_structures.json", "structure_extractor.save_extracted_structures", "graph_builder"),
     ("structure_graph.json", "structure_graph.json", "graph_engine.pipeline.score_and_assemble_structure_graph", "conflict_detector, run_audit, Structure Graph UI"),
+    ("entity_alpha_exposures.json", "entity_alpha_exposures.json", "exposure_engine.compute_run_entity_alpha_exposures", "database, Research API, AlphaCard, run_audit"),
     ("run_audit.json", "run_audit.json", "routes_research.build_run_audit_payload", "internal audit / evaluation harness (no public GET route)"),
     ("data_sanity.json", "data_sanity.json", "data_sanity.pipeline.run_data_sanity_stage", "run_audit, Data Quality UI"),
     ("market_data_snapshot.json", "market_data_snapshot.json", "data_sanity.pipeline.run_data_sanity_stage", "data_sanity checks, run_audit"),
@@ -1236,6 +1247,9 @@ def build_run_audit_payload(
     )
     matches_payload = load_json_record_if_exists(run_id, "alpha_matches.json", output_root=output_root)
     graph_payload = load_json_record_if_exists(run_id, "structure_graph.json", output_root=output_root)
+    exposure_payload = load_json_record_if_exists(
+        run_id, "entity_alpha_exposures.json", output_root=output_root
+    )
     data_sanity_payload = load_json_record_if_exists(
         run_id, DATA_SANITY_ARTIFACT_FILENAME, output_root=output_root
     )
@@ -1722,6 +1736,69 @@ def build_run_audit_payload(
         configuration_versions=configuration_versions,
         generated_at=generated_at,
     )
+    raw_exposure_records = exposure_payload.get("records")
+    exposure_records = (
+        [record for record in raw_exposure_records if isinstance(record, dict)]
+        if isinstance(raw_exposure_records, list)
+        else []
+    )
+    seed_manifest = exposure_payload.get("seed_manifest")
+    seed_manifest = seed_manifest if isinstance(seed_manifest, dict) else {}
+    exposure_invariants = exposure_payload.get("activation_invariants")
+    exposure_invariants = exposure_invariants if isinstance(exposure_invariants, dict) else {}
+    exposure_mode = exposure_payload.get("mode")
+    no_exposure_qualification = all(
+        record.get("qualification_effect_applied") is False for record in exposure_records
+    )
+    entity_exposure_audit = {
+        "mode": exposure_mode,
+        "seed_version": seed_manifest.get("seed_version"),
+        "seed_sha256": seed_manifest.get("seed_sha256"),
+        "seed_approval_status": seed_manifest.get("approval_status"),
+        "enforcement_allowed": seed_manifest.get("enforcement_allowed"),
+        "ticker_seed_available": any(
+            record.get("historical_mapping") is not None for record in exposure_records
+        ),
+        "computed_alpha_count": sum(
+            1 for record in exposure_records if record.get("exposure_status") == "computed"
+        ),
+        "missing_seed_alpha_count": sum(
+            1 for record in exposure_records if record.get("exposure_status") == "missing_seed"
+        ),
+        "per_alpha": {
+            str(record.get("alpha_id")): {
+                key: record.get(key)
+                for key in (
+                    "historical_mapping",
+                    "current_evidence",
+                    "agent_confidence",
+                    "final_exposure",
+                    "would_block_dominant",
+                    "would_block_regime_level",
+                    "override_candidate",
+                    "qualification_effect_applied",
+                    "reason_codes",
+                )
+            }
+            for record in exposure_records
+        },
+        "shadow_mode_did_not_alter_activation": exposure_invariants.get(
+            "shadow_mode_did_not_alter_activation"
+        ),
+        "activation_scores_before_equal_after": exposure_invariants.get("scores_unchanged"),
+        "activation_levels_before_equal_after": exposure_invariants.get("levels_unchanged"),
+        # Conflict is a deterministic function of the same unmodified
+        # Activation payload in shadow mode; Exposure is never a conflict
+        # component. This records that structural invariant explicitly.
+        "conflict_outcomes_before_equal_after": (
+            exposure_mode == "shadow" and no_exposure_qualification
+        ),
+        "note": (
+            "shadow mode did not alter Activation"
+            if exposure_mode == "shadow" and no_exposure_qualification
+            else None
+        ),
+    }
 
     return {
         "schema_version": RUN_AUDIT_SCHEMA_VERSION,
@@ -1792,6 +1869,7 @@ def build_run_audit_payload(
         "activation_summary": activation_summary,
         "conflict_summary": conflict_summary,
         "audit_validation": audit_validation,
+        "entity_exposure": entity_exposure_audit,
     }
 
 
@@ -1871,6 +1949,15 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
 
     try:
         save_json_record(run_id, "structure_graph.json", graph_payload, output_root=output_root)
+        exposure_payload = graph_payload.get("entity_alpha_exposures")
+        if not isinstance(exposure_payload, dict):
+            raise ValueError("ENTITY_EXPOSURE_ARTIFACT_INVALID")
+        save_json_record(
+            run_id,
+            "entity_alpha_exposures.json",
+            exposure_payload,
+            output_root=output_root,
+        )
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_artifact_write")
         return
@@ -1888,6 +1975,13 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
             alpha_matches_payload=alpha_matches_payload,
             graph_payload=graph_payload,
         )
+        persist_exposures = getattr(repository, "upsert_entity_alpha_exposures", None)
+        if callable(persist_exposures):
+            persist_exposures(
+                run_id=run_id,
+                ticker=ticker,
+                artifact=exposure_payload,
+            )
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_persistence")
         return
@@ -2074,6 +2168,53 @@ def get_research_run(run_id, output_root="outputs/runs", *, graph_repository=Non
 # Retrieve the research response for a given run_id, loading from the stored JSON record.
 def get_research_response(run_id, output_root="outputs/runs"):
     return load_json_record(run_id, "research_response.json", output_root=output_root)
+
+
+def get_entity_alpha_exposures(
+    run_id, output_root="outputs/runs", *, graph_repository=None
+):
+    """Read a run's Exposure sidecar, with an old-run-safe empty fallback."""
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+        run_dir = run_dir_for(safe_run_id, output_root)
+    except ValueError:
+        return {
+            "schema_version": "entity_alpha_exposure.run.v1",
+            "run_id": str(run_id),
+            "ticker": None,
+            "status": "unavailable",
+            "records": [],
+            "reason_codes": ["INVALID_RUN_ID"],
+        }
+    metadata = load_json_record_if_exists(safe_run_id, "metadata.json", output_root=output_root)
+    ticker = metadata.get("ticker")
+    if not run_dir.exists():
+        return {
+            "schema_version": "entity_alpha_exposure.run.v1",
+            "run_id": safe_run_id,
+            "ticker": ticker,
+            "status": "unavailable",
+            "records": [],
+            "reason_codes": ["RUN_NOT_FOUND"],
+        }
+    artifact = load_json_record_if_exists(
+        safe_run_id, "entity_alpha_exposures.json", output_root=output_root
+    )
+    if isinstance(artifact.get("records"), list):
+        return {**artifact, "status": "ready"}
+    try:
+        repository = graph_repository or build_repository_from_env(output_root)
+        records = repository.get_entity_alpha_exposures(safe_run_id)
+    except Exception:
+        records = []
+    return {
+        "schema_version": "entity_alpha_exposure.run.v1",
+        "run_id": safe_run_id,
+        "ticker": ticker,
+        "status": "ready" if records else "unavailable",
+        "records": records,
+        "reason_codes": [] if records else ["ENTITY_EXPOSURE_UNAVAILABLE"],
+    }
 
 
 _GRAPH_ERROR_MESSAGES = {
@@ -2739,6 +2880,10 @@ try:
     @router.get("/api/research/{run_id}/conflicts")
     def get_research_conflicts_route(run_id: str, http_request: Request):
         return get_persisted_conflicts(run_id, _request_output_root(http_request))
+
+    @router.get("/api/research/{run_id}/entity-exposures")
+    def get_research_entity_exposures_route(run_id: str, http_request: Request):
+        return get_entity_alpha_exposures(run_id, _request_output_root(http_request))
 
     @router.get("/api/research/{run_id}/agent-outputs")
     def get_research_agent_outputs_route(run_id: str, http_request: Request):

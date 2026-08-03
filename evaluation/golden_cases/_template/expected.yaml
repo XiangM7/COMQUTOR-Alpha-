@@ -42,6 +42,14 @@ activation:
     set_contains:
       - A102
 
+# Optional only. Add values solely after product-owner review; the harness
+# never auto-generates an Entity Exposure oracle.
+# entity_exposure:
+#   A101:
+#     range: [0.80, 1.00]
+#   A102:
+#     maximum: 0.30
+
 conflicts:
   main_conflict:
     one_of:

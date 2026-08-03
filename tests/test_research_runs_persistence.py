@@ -80,6 +80,7 @@ def test_migration_does_not_alter_0001_0002_semantics():
         "0003_create_research_runs",
         "0004_create_agent_outputs",
         "0005_create_research_run_progress",
+        "0006_create_entity_alpha_exposures",
     ]
 
 

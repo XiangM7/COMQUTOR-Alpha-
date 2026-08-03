@@ -40,12 +40,18 @@ from comqutor_alpha.storage.db.engine import (
     resolve_database_url,
     sqlite_file_path,
 )
+from comqutor_alpha.storage.db.exposure_persistence import (
+    ExposurePersistenceDataError,
+    build_entity_exposure_rows,
+    reconstruct_entity_exposure_record,
+)
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.schema import (
     agent_outputs,
     alpha_activations,
     alpha_conflicts,
     alpha_matches,
+    entity_alpha_exposures,
     research_run_progress,
     research_runs,
     structure_graphs,
@@ -711,6 +717,87 @@ class GraphPersistenceRepository:
         except SQLAlchemyError as exc:
             raise GraphPersistenceError("DB_READ_FAILED") from exc
         return [dict(row) for row in rows]
+
+    def _entity_exposure_upsert_statement(self, values: Mapping[str, Any]):
+        if self.dialect_name == "postgresql":
+            from sqlalchemy.dialects.postgresql import insert as dialect_insert
+        elif self.dialect_name == "sqlite":
+            from sqlalchemy.dialects.sqlite import insert as dialect_insert
+        else:
+            raise GraphPersistenceError("UNSUPPORTED_DATABASE_DIALECT")
+        statement = dialect_insert(entity_alpha_exposures).values(**values)
+        update_values = {
+            key: statement.excluded[key]
+            for key in values
+            if key not in {"run_id", "alpha_id", "created_at"}
+        }
+        update_values["updated_at"] = sa.func.now()
+        return statement.on_conflict_do_update(
+            index_elements=["run_id", "alpha_id"], set_=update_values
+        )
+
+    def upsert_entity_alpha_exposures(
+        self,
+        *,
+        run_id: str,
+        ticker: str,
+        artifact: Mapping[str, Any],
+    ) -> None:
+        """Idempotently replace one run's complete Exposure record set."""
+        self._require_supported_dialect()
+        try:
+            rows = build_entity_exposure_rows(run_id=run_id, ticker=ticker, artifact=artifact)
+        except ExposurePersistenceDataError as exc:
+            raise GraphPersistenceError(exc.reason_code) from exc
+        try:
+            with self._engine.begin() as connection:
+                alpha_ids = [row["alpha_id"] for row in rows]
+                delete_stale = sa.delete(entity_alpha_exposures).where(
+                    entity_alpha_exposures.c.run_id == run_id
+                )
+                if alpha_ids:
+                    delete_stale = delete_stale.where(
+                        entity_alpha_exposures.c.alpha_id.not_in(alpha_ids)
+                    )
+                connection.execute(delete_stale)
+                for row in rows:
+                    connection.execute(self._entity_exposure_upsert_statement(row))
+        except GraphPersistenceError:
+            raise
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_WRITE_FAILED") from exc
+
+    def get_entity_alpha_exposures(self, run_id: str) -> list[dict[str, Any]]:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return []
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as connection:
+                rows = connection.execute(
+                    sa.select(entity_alpha_exposures)
+                    .where(entity_alpha_exposures.c.run_id == run_id)
+                    .order_by(entity_alpha_exposures.c.alpha_id)
+                ).mappings().all()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return [reconstruct_entity_exposure_record(dict(row)) for row in rows]
+
+    def get_entity_alpha_exposure(
+        self, run_id: str, alpha_id: str
+    ) -> dict[str, Any] | None:
+        if self._missing_sqlite_guard is not None and not self._missing_sqlite_guard.exists():
+            return None
+        self._require_supported_dialect()
+        try:
+            with self._engine.connect() as connection:
+                row = connection.execute(
+                    sa.select(entity_alpha_exposures)
+                    .where(entity_alpha_exposures.c.run_id == run_id)
+                    .where(entity_alpha_exposures.c.alpha_id == alpha_id)
+                ).mappings().first()
+        except SQLAlchemyError as exc:
+            raise GraphPersistenceError("DB_READ_FAILED") from exc
+        return reconstruct_entity_exposure_record(dict(row)) if row is not None else None
 
     def get_alpha_conflicts(
         self,

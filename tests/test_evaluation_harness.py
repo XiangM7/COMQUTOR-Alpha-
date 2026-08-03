@@ -148,6 +148,18 @@ def test_per_case_minimum_edge_expectation_can_fail():
     assert any(not r.passed for r in results)
 
 
+def test_optional_entity_exposure_expectations_are_evaluated_only_when_declared():
+    results = evaluate_expected(
+        {"entity_exposure": {"A101": {"range": [0.8, 1.0]}, "A102": {"maximum": 0.3}}},
+        {"entity_exposure": {"by_alpha": {"A101": 0.9, "A102": 0.25}}},
+    )
+    assert [result.name for result in results] == [
+        "entity_exposure.A101",
+        "entity_exposure.A102",
+    ]
+    assert all(result.passed for result in results)
+
+
 # ---------------------------------------------------------------------------
 # 2. Golden Case bundle loading
 # ---------------------------------------------------------------------------

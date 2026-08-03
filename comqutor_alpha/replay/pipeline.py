@@ -324,7 +324,11 @@ def run_structure_replay(
     extracted = build_extracted_structures_payload(structured)
     graph_stage = build_structure_graph_stage(alpha_matches, extracted)
     graph = score_and_assemble_structure_graph(
-        graph_stage, alpha_matches, extracted, structured_records=structured.get("records")
+        graph_stage,
+        alpha_matches,
+        extracted,
+        structured_records=structured.get("records"),
+        exposure_run_id=resolved_replay_run_id,
     )
     conflicts = detect_alpha_conflicts(
         run_id=resolved_replay_run_id,
@@ -400,6 +404,7 @@ def run_structure_replay(
         "llm_provider_calls": 0,
         "market_data_provider_calls": 0,
         "database_writes": 0,
+        "entity_exposure_mode": (graph.get("entity_alpha_exposures") or {}).get("mode"),
     }
 
     comparison_payload = None
@@ -416,11 +421,28 @@ def run_structure_replay(
             raise FileExistsError(f"Replay output directory already exists and is non-empty: {target_dir}")
         _write_json(target_dir / "metadata.json", lineage)
         _write_json(target_dir / "structured_agent_outputs.json", structured)
+        _write_json(target_dir / "alpha_matches.json", alpha_matches)
         _write_json(target_dir / "extracted_structures.json", extracted)
         _write_json(target_dir / "structure_graph.json", graph)
+        _write_json(
+            target_dir / "entity_alpha_exposures.json",
+            graph.get("entity_alpha_exposures") or {},
+        )
         _write_json(target_dir / "conflict_results.json", conflicts)
         if comparison_payload is not None:
             _write_json(target_dir / "replay_comparison.json", comparison_payload)
+        # Same additive Run Audit producer as a live run. It is strictly
+        # offline here (repository=None) and therefore performs no DB or
+        # Provider calls.
+        from comqutor_alpha.api.routes_research import write_run_audit_artifact
+
+        write_run_audit_artifact(
+            resolved_replay_run_id,
+            replay_output_root,
+            conflict_count=len(conflicts.get("conflicts") or []),
+            conflict_payload=conflicts,
+            repository=None,
+        )
         output_dir_str = str(target_dir)
 
     return ReplayResult(

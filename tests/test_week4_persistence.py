@@ -156,6 +156,7 @@ class TestWeek4Schema:
             "0003_create_research_runs",
             "0004_create_agent_outputs",
             "0005_create_research_run_progress",
+            "0006_create_entity_alpha_exposures",
         ]
         assert MIGRATIONS[0][1] == (alpha_matches, structure_graphs)
         assert MIGRATIONS[1][1] == (alpha_activations, alpha_conflicts)
@@ -221,6 +222,7 @@ class TestMigration0002:
             "0003_create_research_runs",
             "0004_create_agent_outputs",
             "0005_create_research_run_progress",
+            "0006_create_entity_alpha_exposures",
         ]
         with engine.connect() as conn:
             assert conn.scalar(sa.select(sa.func.count()).select_from(alpha_matches)) == 1
@@ -232,6 +234,7 @@ class TestMigration0002:
             "0003_create_research_runs",
             "0004_create_agent_outputs",
             "0005_create_research_run_progress",
+            "0006_create_entity_alpha_exposures",
         ]
 
 

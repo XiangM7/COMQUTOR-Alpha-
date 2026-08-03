@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import re
@@ -17,6 +18,7 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "alpha_matches.json",
     "extracted_structures.json",
     "structure_graph.json",
+    "entity_alpha_exposures.json",
     "week3_pipeline_status.json",
     "run_audit.json",
     "final_report.md",
@@ -115,22 +117,16 @@ def atomic_write_text(path, text, encoding="utf-8") -> Path:
     tmp_path = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
     try:
         tmp_path.write_text(text, encoding=encoding)
-        try:
+        with contextlib.suppress(AttributeError, NotImplementedError, OSError):
             os.chmod(tmp_path, 0o600)
-        except (AttributeError, NotImplementedError, OSError):
-            pass
         os.replace(tmp_path, path)
-        try:
+        with contextlib.suppress(AttributeError, NotImplementedError, OSError):
             os.chmod(path, 0o600)
-        except (AttributeError, NotImplementedError, OSError):
-            pass
         return path
     finally:
         if tmp_path.exists():
-            try:
+            with contextlib.suppress(OSError):
                 tmp_path.unlink()
-            except OSError:
-                pass
 
 # Save a JSON record to the run directory, ensuring atomic write and proper encoding.
 def save_json_record(run_id, filename, data, output_root="outputs/runs"):

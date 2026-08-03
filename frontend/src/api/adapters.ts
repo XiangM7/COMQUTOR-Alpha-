@@ -23,6 +23,8 @@ import type {
   DataSanityStatus,
   DataSanityWarning,
   DominantAlpha,
+  EntityAlphaExposureRecord,
+  EntityExposure,
   GraphActivation,
   AlphaActivation,
   HealthResponse,
@@ -449,6 +451,13 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
     if (!adapted.ok) return fail(`invalid data sanity warning: ${adapted.reason}`);
     dataSanityWarnings.push(adapted.value);
   }
+  const entityAlphaExposures: EntityAlphaExposureRecord[] = [];
+  if (Array.isArray(payload.entity_alpha_exposures)) {
+    for (const raw of payload.entity_alpha_exposures) {
+      const adapted = adaptEntityAlphaExposureRecord(raw);
+      if (adapted.ok) entityAlphaExposures.push(adapted.value);
+    }
+  }
 
   return ok({
     run_id,
@@ -468,6 +477,9 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
     data_sanity_warning_count: payload.data_sanity_warning_count,
     data_sanity_critical_count: payload.data_sanity_critical_count,
     data_sanity_warnings: dataSanityWarnings,
+    entity_alpha_exposures: entityAlphaExposures,
+    entity_alpha_exposure_status:
+      payload.entity_alpha_exposure_status === "ready" ? "ready" : "unavailable",
   });
 }
 
@@ -542,12 +554,88 @@ function adaptAlphaEvidenceDetail(value: unknown): AlphaEvidenceDetail[] {
     }));
 }
 
+function adaptEntityExposure(payload: unknown): AdaptResult<EntityExposure> {
+  if (!isRecord(payload)) return fail("entity exposure is unavailable");
+  const requiredNumbers = [
+    payload.current_evidence,
+    payload.agent_confidence,
+    payload.unique_evidence_fact_count,
+    payload.ticker_specific_fact_count,
+    payload.distinct_supporting_agent_count,
+  ];
+  if (
+    requiredNumbers.some((value) => !isNumber(value)) ||
+    !isString(payload.seed_version) ||
+    !isString(payload.seed_effective_date) ||
+    !isString(payload.seed_approval_status) ||
+    !isString(payload.mode) ||
+    !isString(payload.exposure_status) ||
+    typeof payload.would_block_dominant !== "boolean" ||
+    typeof payload.would_block_regime_level !== "boolean" ||
+    typeof payload.override_candidate !== "boolean" ||
+    typeof payload.qualification_effect_applied !== "boolean" ||
+    !isStringArray(payload.reason_codes)
+  ) {
+    return fail("invalid entity exposure fields");
+  }
+  if (
+    payload.historical_mapping !== null &&
+    !isNumber(payload.historical_mapping)
+  ) {
+    return fail("invalid historical mapping");
+  }
+  if (payload.final_exposure !== null && !isNumber(payload.final_exposure)) {
+    return fail("invalid final exposure");
+  }
+  return ok({
+    historical_mapping: payload.historical_mapping,
+    current_evidence: payload.current_evidence as number,
+    agent_confidence: payload.agent_confidence as number,
+    final_exposure: payload.final_exposure,
+    seed_version: payload.seed_version,
+    seed_effective_date: payload.seed_effective_date,
+    seed_approval_status: payload.seed_approval_status,
+    mode: payload.mode as EntityExposure["mode"],
+    exposure_status: payload.exposure_status as EntityExposure["exposure_status"],
+    would_block_dominant: payload.would_block_dominant,
+    would_block_regime_level: payload.would_block_regime_level,
+    override_candidate: payload.override_candidate,
+    qualification_effect_applied: payload.qualification_effect_applied,
+    unique_evidence_fact_count: payload.unique_evidence_fact_count as number,
+    ticker_specific_fact_count: payload.ticker_specific_fact_count as number,
+    distinct_supporting_agent_count: payload.distinct_supporting_agent_count as number,
+    reason_codes: payload.reason_codes,
+  });
+}
+
+function adaptEntityAlphaExposureRecord(
+  payload: unknown,
+): AdaptResult<EntityAlphaExposureRecord> {
+  if (!isRecord(payload)) return fail("entity exposure record is not an object");
+  const exposure = adaptEntityExposure(payload);
+  if (
+    !exposure.ok ||
+    !isString(payload.run_id) ||
+    !isString(payload.ticker) ||
+    !isString(payload.alpha_id)
+  ) {
+    return fail("invalid entity exposure record");
+  }
+  return ok({
+    ...exposure.value,
+    run_id: payload.run_id,
+    ticker: payload.ticker,
+    alpha_id: payload.alpha_id,
+  });
+}
+
 function adaptAlphaActivation(payload: unknown): AdaptResult<AlphaActivation> {
   if (!isRecord(payload)) return fail("activation is not an object");
   const { alpha_id, alpha_name, activation_score, status, direction } = payload;
   if (!isString(alpha_id) || !isString(alpha_name) || !isNumber(activation_score) || !isString(status)) {
     return fail("missing alpha activation fields");
   }
+  const exposure = adaptEntityExposure(payload.entity_exposure);
   return ok({
     alpha_id,
     alpha_name,
@@ -581,6 +669,7 @@ function adaptAlphaActivation(payload: unknown): AdaptResult<AlphaActivation> {
     regime_gate_failures: isStringArray(payload.regime_gate_failures)
       ? payload.regime_gate_failures
       : [],
+    entity_exposure: exposure.ok ? exposure.value : null,
   });
 }
 

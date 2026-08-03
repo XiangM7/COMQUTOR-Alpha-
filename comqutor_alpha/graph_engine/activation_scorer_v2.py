@@ -43,6 +43,7 @@ from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     ALPHA_ACTIVATION_EVIDENCE_V1,
+    EVIDENCE_FACT_INDEX_VERSION,
     EvidenceFactCandidate,
     evidence_fact_group_id,
     group_evidence_candidates,
@@ -792,6 +793,90 @@ def _entities_index(
     return index
 
 
+def _confidence_index(
+    structured_records: Iterable[Mapping[str, Any]] | None,
+) -> dict[str, float]:
+    """Return only legal structured confidence values, keyed by claim."""
+    index: dict[str, float] = {}
+    for record in structured_records or ():
+        if not isinstance(record, Mapping):
+            continue
+        claim_id = str(record.get("claim_id") or "").strip()
+        confidence = record.get("confidence")
+        if claim_id and is_finite_number(confidence) and 0.0 <= float(confidence) <= 1.0:
+            index[claim_id] = float(confidence)
+    return index
+
+
+def _exposure_evidence_summary(
+    groups: Mapping[str, list[dict[str, Any]]],
+    *,
+    ticker: str | None,
+    company_names: Sequence[str],
+    entities_by_claim: Mapping[str, Sequence[str]],
+    confidence_by_claim: Mapping[str, float],
+    qualifying_local_edge_count: int,
+) -> dict[str, Any]:
+    """Summarize the exact canonical fact groups for Exposure.
+
+    No regrouping occurs here. Each unique fact contributes one match-score
+    representative and at most one confidence representative per agent.
+    """
+    facts: list[dict[str, Any]] = []
+    distinct_agents: set[str] = set()
+    ticker_specific_count = 0
+    for group_id in sorted(groups):
+        members = groups[group_id]
+        specific_members = [
+            member
+            for member in members
+            if _is_ticker_specific(member["record"], ticker, company_names, entities_by_claim)
+        ]
+        is_ticker_specific = bool(specific_members)
+        if is_ticker_specific:
+            ticker_specific_count += 1
+        representative_pool = specific_members if specific_members else members
+        representative = min(
+            representative_pool,
+            key=lambda item: (-float(item["match_score"]), str(item["claim_id"])),
+        )
+
+        by_agent: dict[str, dict[str, Any]] = {}
+        for member in members:
+            agent = str(member.get("agent") or "").strip()
+            claim_id = str(member.get("claim_id") or "")
+            confidence = confidence_by_claim.get(claim_id)
+            if not agent or confidence is None:
+                continue
+            current = by_agent.get(agent)
+            candidate = {"agent": agent, "claim_id": claim_id, "confidence": confidence}
+            if current is None or (-confidence, claim_id) < (
+                -float(current["confidence"]),
+                str(current["claim_id"]),
+            ):
+                by_agent[agent] = candidate
+            distinct_agents.add(agent)
+
+        facts.append(
+            {
+                "evidence_fact_group_id": group_id,
+                "representative_claim_id": representative["claim_id"],
+                "representative_match_score": float(representative["match_score"]),
+                "ticker_specific": is_ticker_specific,
+                "member_claim_ids": sorted(str(member["claim_id"]) for member in members),
+                "agent_representatives": [by_agent[agent] for agent in sorted(by_agent)],
+            }
+        )
+    return {
+        "evidence_fact_index_version": EVIDENCE_FACT_INDEX_VERSION,
+        "facts": facts,
+        "unique_evidence_fact_count": len(facts),
+        "ticker_specific_fact_count": ticker_specific_count,
+        "distinct_supporting_agent_count": len(distinct_agents),
+        "qualifying_local_edge_count": qualifying_local_edge_count,
+    }
+
+
 def score_alpha_v2(
     alpha_id: str,
     alpha_matches_payload: Mapping[str, Any],
@@ -808,6 +893,7 @@ def score_alpha_v2(
     alpha_def = taxonomy.get(alpha_id)
     duplicate_group_ids = _duplicate_group_index(structured_records)
     entities_by_claim = _entities_index(structured_records)
+    confidence_by_claim = _confidence_index(structured_records)
     relation_triples = relation_triple_index(graph_edges)
 
     qualifying, integrity_warnings = _gather_qualifying_evidence(
@@ -888,6 +974,14 @@ def score_alpha_v2(
     distinct_agents = agent_meta["distinct_agents"]
     ticker_specific_count = ticker_meta["ticker_specific_evidence_count"]
     local_edge_count = local_meta["local_edge_count"]
+    exposure_evidence = _exposure_evidence_summary(
+        groups,
+        ticker=ticker,
+        company_names=company_names,
+        entities_by_claim=entities_by_claim,
+        confidence_by_claim=confidence_by_claim,
+        qualifying_local_edge_count=local_meta["qualifying_local_edge_count"],
+    )
 
     uncapped_score = clamp_percent(sum(c["contribution"] for c in components.values()))
 
@@ -990,6 +1084,10 @@ def score_alpha_v2(
             raw_supporting_claim_count > unique_evidence_fact_count
             and unique_evidence_fact_count < REGIME_GATE_MIN_UNIQUE_EVIDENCE
         ),
+        # Transient canonical representatives consumed by the Exposure
+        # productization seam. The graph pipeline removes this internal
+        # helper after attaching the public entity_exposure record.
+        "_exposure_evidence": exposure_evidence,
     }
 
 
