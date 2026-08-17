@@ -1,0 +1,233 @@
+{
+  "schema_version": "a3_unclassified_findings_control_report.v1",
+  "task": "A3_UNCLASSIFIED_FINDINGS_CONTROL",
+  "branch": "comqutor-structure-layer",
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "commit": null,
+  "push": null,
+  "provider_calls": 0,
+  "implementation_complete": true,
+  "formal_product_owner_acceptance_pending": true,
+  "formal_acceptance_note": "All technical/functional completion criteria (task section 23) are met; no human product-owner sign-off has occurred in this session.",
+  "unclassified_reason_vocabulary_decision_required": false,
+  "layering_preserved": {
+    "never_reclassifies_alpha_mapping": true,
+    "never_reclassifies_evidence_stance": true,
+    "never_regroups_evidence_facts": true,
+    "never_recomputes_activation_or_conflict": true,
+    "never_calls_llm_or_provider": true,
+    "never_creates_second_dedup_system": true
+  },
+  "root_cause_of_pre_a3_neutral_unclassified_bucket": {
+    "component": "frontend/src/pages/ResearchRunPage.tsx",
+    "old_function": "isDirectionalFinding",
+    "old_data_source": "structured_agent_outputs.json (pre-Alpha-mapping)",
+    "conflation": "claim-level direction (positive/negative/neutral/unknown) used as a proxy for 'unclassified', with no access to matched_alpha/evidence_stance/duplicate-group fields at all",
+    "concrete_failure_example": "a direction=neutral claim with a real matched_alpha, a supports_alpha B1 stance, and ticker-specific text was always shown as 'neutral and unclassified'"
+  },
+  "universe_definition": {
+    "base_universe": "alpha_matches.json matches[] (1:1 with structured_agent_outputs.json, PD-014-compliant)",
+    "unclassified_iff": "at least one of the 5 canonical reasons applies (evaluated from existing signals only); zero reasons => fully classified => excluded from the artifact entirely",
+    "reason_signals": {
+      "no_alpha_match": "match.matched_alpha is None",
+      "generic_background": "match.matched_evidence_stance in {neutral_background, mentions_alpha}, only when matched_alpha is present",
+      "duplicate_supporting_text": "claim is a non-representative member_claim_ids entry of an evidence_facts.json group whose supporting_alpha_ids includes the claim's own matched_alpha",
+      "no_ticker_specific_evidence": "activation_scorer_v2._is_ticker_specific(match, ticker, (), {}) is False, only when matched_alpha is present -- same function/call-convention B2's conflict_admissibility.py already uses",
+      "low_confidence": "never assigned -- see low_confidence_status"
+    },
+    "unresolved_escape_hatch": "fires only when matched_alpha is present and matched_evidence_stance is neither a known classified value (supports_alpha/opposes_alpha/supports_counter_alpha) nor a known background value (neutral_background/mentions_alpha) -- a genuine data anomaly, never guessed into one of the 5"
+  },
+  "low_confidence_status": "LOW_CONFIDENCE_THRESHOLD_NOT_FORMALLY_DEFINED",
+  "low_confidence_rejected_candidate_signal": {
+    "field": "candidate_scores[].stance_confidence_band / matched_stance_confidence_band",
+    "reason_rejected": "different concept (confidence in the Evidence Stance classification itself, not in the claim's own assertion); every CONFIDENCE_LOW branch already produces a neutral_background/mentions_alpha stance, so it would never win primary under the frozen priority order anyway; reusing it would repeat the confidence/relevance conflation PD-012 already forbids for match scores"
+  },
+  "reason_priority_frozen": [
+    "duplicate_supporting_text",
+    "generic_background",
+    "low_confidence",
+    "no_alpha_match",
+    "no_ticker_specific_evidence"
+  ],
+  "top_20_ordering": {
+    "sort_key": ["ticker_specific desc", "confidence present-first then desc", "claim_index present-first then asc", "claim_id asc"],
+    "missing_confidence_or_claim_index": "sorts after present values, never guessed as 0/1",
+    "display_rank_scope": "assigned over the entire unclassified universe; the artifact's findings list is never truncated -- only the API/UI layer slices [:display_limit]"
+  },
+  "artifact_manifest_api_run_audit_consistency": {
+    "artifact_filename": "unclassified_findings.json",
+    "schema_version": "unclassified_findings.v1",
+    "registered_in": "PRODUCT_EXTENSION_ARTIFACT_FILENAMES (not REQUIRED_ARTIFACT_FILENAMES)",
+    "a2_required_artifact_count_unchanged": 9,
+    "download_route": "existing generic GET /api/research/{run_id}/artifacts/{artifact_name} -- no new route built; validate_run_id_for_path/validate_artifact_filename boundary reused unchanged",
+    "run_audit_block_fields": ["status", "total_count", "display_count", "display_limit", "reason_counts", "unresolved_reason_count"],
+    "research_api_fields": [
+      "unclassified_findings_top20",
+      "unclassified_findings_total_count",
+      "unclassified_findings_reason_counts",
+      "unclassified_findings_status",
+      "unclassified_findings_download_available"
+    ],
+    "incompatible_schema_version_handling": "treated identically to artifact-absent by both build_run_audit_payload and build_research_response",
+    "historical_run_status_value": "unavailable",
+    "historical_run_never_reports": "a fabricated total_count of 0"
+  },
+  "files_created": [
+    "comqutor_alpha/api/unclassified_findings.py",
+    "tests/test_a3_unclassified_findings_control.py",
+    "docs/audit_artifacts/a3_unclassified_findings_control_report.md",
+    "docs/audit_artifacts/a3_unclassified_findings_control_report.json"
+  ],
+  "files_modified": [
+    "comqutor_alpha/api/artifact_export.py",
+    "comqutor_alpha/api/routes_research.py",
+    "comqutor_alpha/storage/file_store.py",
+    "frontend/src/api/types.ts",
+    "frontend/src/api/adapters.ts",
+    "frontend/src/pages/ResearchRunPage.tsx",
+    "frontend/src/pages/ResearchRunPage.test.tsx",
+    "frontend/src/styles.css"
+  ],
+  "not_touched": [
+    "comqutor_alpha/structure_engine/alpha_mapper.py",
+    "comqutor_alpha/structure_engine/evidence_stance.py",
+    "comqutor_alpha/structure_engine/evidence_stance_llm.py",
+    "comqutor_alpha/graph_engine/activation_scorer_v2.py (scoring logic; only the existing _is_ticker_specific helper is imported)",
+    "comqutor_alpha/conflict_engine/conflict_detector.py",
+    "comqutor_alpha/conflict_engine/conflict_admissibility.py",
+    "comqutor_alpha/api/artifact_export.py::REQUIRED_ARTIFACT_FILENAMES",
+    "alpha taxonomy / alpha_library"
+  ],
+  "real_saved_run": {
+    "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+    "ticker": "NVDA",
+    "offline_reprocess_only": true,
+    "live_provider_or_llm_calls": 0,
+    "total_structured_claims": 863,
+    "total_alpha_matches_records": 863,
+    "unclassified_total_count": 855,
+    "fully_classified_count": 8,
+    "reason_counts": {
+      "no_alpha_match": 803,
+      "no_ticker_specific_evidence": 51,
+      "generic_background": 9,
+      "duplicate_supporting_text": 7,
+      "low_confidence": 0
+    },
+    "unresolved_reason_count": 0,
+    "upstream_artifact_sha256_before_equals_after": {
+      "alpha_matches.json": true,
+      "evidence_facts.json": true,
+      "structure_graph.json": true,
+      "conflicts.json": true,
+      "structured_agent_outputs.json": true,
+      "evidence_stance_audit.json": true
+    },
+    "named_checks": {
+      "direction_neutral_but_valid_never_wrongly_unclassified": {
+        "initial_naive_check_apparent_violations": 2,
+        "root_caused_as_bug": false,
+        "explanation": "both claims genuinely lack ticker-specific text in their own sentence (macro/valuation commentary never naming NVDA); no_ticker_specific_evidence correctly still applies independent of direction/stance",
+        "corrected_check_violations": 0,
+        "corrected_check_qualifying_claim_count": 1
+      },
+      "repeated_debate_history_uses_existing_duplicate_groups": {
+        "real_duplicate_supporting_text_findings": 7,
+        "all_carry_real_evidence_fact_group_id_and_representative_claim_id": true
+      },
+      "unmatched_high_confidence_ticker_specific_shows_no_alpha_match": {
+        "matching_real_examples": 1,
+        "violations": 0
+      },
+      "non_ticker_specific_matched_shows_no_ticker_specific_evidence": {
+        "matching_real_examples": 51,
+        "violations": 0
+      },
+      "mentions_alpha_neutral_background_never_counted_as_supporting": {
+        "generic_background_findings": 9,
+        "findings_with_underlying_supports_alpha_stance": 0
+      }
+    },
+    "artifacts_present_after_run": ["unclassified_findings.json", "artifact_manifest.json (regenerated)", "run_audit.json (regenerated, additive)"]
+  },
+  "frontend_visual_verification": {
+    "method": "real backend (fresh process, port 8010) + real Vite dev server (port 5190) + Playwright, against the real NVDA run",
+    "live_provider_or_llm_calls": 0,
+    "db_seed_technique": "one research_runs row inserted directly from the run's own metadata.json (status=completed) so the polling endpoint would serve an already-completed offline run",
+    "heading_text": "Unclassified findings (855)",
+    "count_note_text": "Showing 20 of 855",
+    "cards_rendered": 20,
+    "download_href_correct": true,
+    "download_filename": "e3eb3909-3744-4a02-9b32-b225cf6ef665_unclassified_findings_audit.json",
+    "missing_run_shows_clean_error_panel": true,
+    "structure_graph_page_navigation_ok": true,
+    "conflict_radar_page_navigation_ok": true,
+    "console_errors": 0,
+    "forbidden_language_scan": {
+      "naive_substring_matches_found": ["BUY", "SELL", "HOLD", "guarantee profit"],
+      "manual_context_review_genuine_violations": 0,
+      "explanation": "all matches are either false positives against ordinary English (holding/threshold/'expectations hold'), verbatim quoted analyst/social-sentiment claim text displayed for traceability (a pre-existing, cross-panel property, not introduced by or in scope for A3), or COMQUTOR's own disclaimer sentence ('...does not predict outcomes, guarantee profit...') being caught by the crude phrase match"
+    },
+    "screenshots_reviewed": true,
+    "cleanup": {
+      "temp_playwright_scripts_deleted": true,
+      "servers_killed": ["port 8010 backend", "port 5190 frontend"],
+      "pre_existing_servers_left_untouched": ["port 8000", "port 8001", "port 5175"]
+    }
+  },
+  "test_results": {
+    "a3_dedicated_suite": {
+      "file": "tests/test_a3_unclassified_findings_control.py",
+      "passed": 58,
+      "failed": 0,
+      "sections": {"A": 7, "B": 12, "C": 6, "D": 10, "E": 6, "F": 7, "G": 8}
+    },
+    "backend_full_regression": {
+      "before_a3_own_tests": {"passed": 3357, "failed": 3, "skipped": 47},
+      "after_a3_own_tests": {"passed": 3415, "failed": 3, "skipped": 47},
+      "new_a3_regressions": 0
+    },
+    "frontend": {
+      "typecheck": "clean",
+      "vitest": {"before_segment": "165/165", "after_segment": "170/170", "files": 17},
+      "build": "clean",
+      "eslint_on_touched_files": "clean"
+    },
+    "ruff_on_touched_files": "clean"
+  },
+  "known_pre_existing_failures": [
+    {
+      "test": "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+      "cause": "frozen SHA-256 baseline of alpha_mapper.py/week2_llm.py predates B1's own intentional Evidence Stance changes to those files; baseline never updated",
+      "caused_by_a3": false
+    },
+    {
+      "test": "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "cause": "NVDA_MAIN_CONFLICT_NOT_ARBITRATED -- demo/seed golden fixture predates B2's stricter Conflict Evidence Admissibility gate",
+      "caused_by_a3": false
+    },
+    {
+      "test": "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded",
+      "cause": "NVDA_MAIN_CONFLICT_NOT_ARBITRATED -- same root cause as above",
+      "caused_by_a3": false
+    }
+  ],
+  "explicit_non_goals_confirmed_not_done": [
+    "A4 Regression Runner",
+    "J2 regression labels",
+    "J3 human semantic review",
+    "cold-start history fix",
+    "B1 live configuration repair",
+    "repository cleanup / old artifact deletion",
+    "John-20 gold audit",
+    "additional Alpha invalidation content",
+    "Alpha threshold change",
+    "confidence/Alpha-score relationship change",
+    "B1 50-row sample re-run",
+    "new semantic classifier",
+    "new deduplication system",
+    "new Provider client"
+  ],
+  "known_follow_up_not_expanded_into_a3_scope": "a claim that is direction-neutral/unknown AND fully classified (0 A3 reasons) has no dedicated display slot on the Research Run page (it was never shown by the Positive/Negative panels before A3 either); adding one would require either shipping the full unclassified-claim-id set to the client on every poll (explicitly disallowed) or a new backend concept outside A3's mandate",
+  "report_created": "2026-08-13"
+}

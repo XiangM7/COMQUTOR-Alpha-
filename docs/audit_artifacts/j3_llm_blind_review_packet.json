@@ -1,0 +1,1191 @@
+{
+  "schema_version": "j3.llm_blind_review_packet.v1",
+  "created_at": "2026-08-13T23:05:09Z",
+  "source_sample": {
+    "path": "docs/evidence_review_sample_records.json",
+    "sha256": "0e7976f6704b26e8cba8de0b29a27116afe0e464937aa1c7f02534d3907d2eb5",
+    "row_count": 50
+  },
+  "review_status": "awaiting_independent_llm_adjudication",
+  "intended_review_authority": "user_authorized_provisional",
+  "human_review_required_by_runtime": false,
+  "formal_john_approval": "pending",
+  "stance_ontology": {
+    "values": {
+      "supports_alpha": "The Evidence directly supports the target Alpha's thesis.",
+      "opposes_alpha": "The Evidence directly weakens, negates, or rebuts the target Alpha's thesis.",
+      "mentions_alpha": "The Evidence references a concept related to the target Alpha, but does not take a clear supporting or opposing position on it.",
+      "neutral_background": "The Evidence is background information only and cannot form a meaningful semantic stance toward the target Alpha.",
+      "supports_counter_alpha": "The Evidence primarily supports the target Alpha's canonical conflict (counter) Alpha. Only this stance may return a counter_alpha_id."
+    },
+    "notes": "Stance is always an Alpha-relative judgment, evaluated with respect to the given target_alpha_id -- it is not the claim's own directional tone, not the reporting agent's bull/bear role, and not a keyword match."
+  },
+  "canonical_taxonomy": {
+    "A001": {
+      "alpha_id": "A001",
+      "name": "Rate Cut Cycle",
+      "layer": "Macro",
+      "core_thesis": "Falling rates lower discount rates and support long-duration growth assets.",
+      "core_function": null,
+      "conflict_alphas": [
+        "A501"
+      ]
+    },
+    "A003": {
+      "alpha_id": "A003",
+      "name": "Liquidity Expansion",
+      "layer": "Macro",
+      "core_thesis": "Improving liquidity supports risk appetite and equity inflows.",
+      "core_function": null,
+      "conflict_alphas": [
+        "A501"
+      ]
+    },
+    "A101": {
+      "alpha_id": "A101",
+      "name": "AI Expansion",
+      "layer": "Theme",
+      "core_thesis": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "core_function": null,
+      "conflict_alphas": [
+        "A304"
+      ]
+    },
+    "A102": {
+      "alpha_id": "A102",
+      "name": "Inference Explosion",
+      "layer": "Theme",
+      "core_thesis": "Enterprise AI applications and AI agents increase inference compute demand.",
+      "core_function": null,
+      "conflict_alphas": []
+    },
+    "A103": {
+      "alpha_id": "A103",
+      "name": "AI Infrastructure",
+      "layer": "Infrastructure",
+      "core_thesis": "AI buildout drives datacenter, power, cooling, networking, and server demand.",
+      "core_function": null,
+      "conflict_alphas": []
+    },
+    "A201": {
+      "alpha_id": "A201",
+      "name": "Semiconductor Supercycle",
+      "layer": "Industry",
+      "core_thesis": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand.",
+      "core_function": null,
+      "conflict_alphas": []
+    },
+    "A301": {
+      "alpha_id": "A301",
+      "name": "Revenue Expansion",
+      "layer": "Fundamental",
+      "core_thesis": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "core_function": null,
+      "conflict_alphas": [
+        "A304"
+      ]
+    },
+    "A304": {
+      "alpha_id": "A304",
+      "name": "Multiple Compression",
+      "layer": "Valuation",
+      "core_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "core_function": null,
+      "conflict_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ]
+    },
+    "A501": {
+      "alpha_id": "A501",
+      "name": "Recession Risk",
+      "layer": "MacroRisk",
+      "core_thesis": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+      "core_function": null,
+      "conflict_alphas": [
+        "A001",
+        "A003",
+        "A601"
+      ]
+    },
+    "A601": {
+      "alpha_id": "A601",
+      "name": "Narrative Momentum",
+      "layer": "Sentiment",
+      "core_thesis": "Investor attention and crowded narratives drive reflexive flows and momentum.",
+      "core_function": null,
+      "conflict_alphas": [
+        "A304",
+        "A501"
+      ]
+    }
+  },
+  "review_instructions": {
+    "response_schema": {
+      "run_id": "string, returned exactly as given",
+      "claim_id": "string, returned exactly as given",
+      "target_alpha_id": "string, returned exactly as given",
+      "reviewed_stance": "one of: supports_alpha | opposes_alpha | mentions_alpha | neutral_background | supports_counter_alpha",
+      "reviewed_counter_alpha_id": "string (must be one of legal_counter_alphas) or null",
+      "review_confidence": "one of: high | medium | low",
+      "review_reason": "short, specific statement of the semantic basis for the stance"
+    },
+    "contract_rules": [
+      "Identity fields (run_id, claim_id, target_alpha_id) must be returned unchanged.",
+      "reviewed_stance must be exactly one of the five canonical values.",
+      "Only reviewed_stance == supports_counter_alpha may carry a non-null reviewed_counter_alpha_id.",
+      "reviewed_counter_alpha_id, when present, must be a member of this row's own legal_counter_alphas.",
+      "Every other stance's reviewed_counter_alpha_id must be null.",
+      "review_reason must briefly state the specific semantic basis for the judgment.",
+      "Do not infer stance from the reporting agent's name or role.",
+      "Do not classify a stance merely because a keyword (e.g. valuation, risk, AI, growth) appears.",
+      "Explicitly look for negation, rebuttal, quoted opposing arguments, and meta-commentary about an argument.",
+      "Do not alter claim, evidence, or any identity field."
+    ]
+  },
+  "rows": [
+    {
+      "sample_id": "evrs-001",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:62",
+      "evidence_fact_group_id": "e51ac2e4538e936ea1d05235",
+      "agent": "aggressive_risk_analyst",
+      "claim": "If AMD delivers a beat-and-raise — which the data suggests is highly likely — the stock reclaims the 50-day SMA at $512.45 and heads toward the $550-$580 zone.",
+      "evidence": "If AMD delivers a beat-and-raise — which the data suggests is highly likely — the stock reclaims the 50-day SMA at $512.45 and heads toward the $550-$580 zone.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-002",
+      "run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "ticker": "TSM",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+      "evidence_fact_group_id": "bd5b1079eeeabd599c5a713a",
+      "agent": "fundamental_agent",
+      "claim": "Semiconductor Cyclicality: The industry is inherently cyclical; a downturn in AI demand or a broader economic slowdown could compress earnings.",
+      "evidence": "Semiconductor Cyclicality: The industry is inherently cyclical; a downturn in AI demand or a broader economic slowdown could compress earnings.",
+      "target_alpha_id": "A101",
+      "target_alpha_name": "AI Expansion",
+      "target_alpha_definition": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-003",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:49",
+      "evidence_fact_group_id": "76b297adeb1107fbd30eec0f",
+      "agent": "fundamental_agent",
+      "claim": "Conversely, a delayed easing cycle would pressure the fund's elevated multiple.",
+      "evidence": "Conversely, a delayed easing cycle would pressure the fund's elevated multiple.",
+      "target_alpha_id": "A001",
+      "target_alpha_name": "Rate Cut Cycle",
+      "target_alpha_definition": "Falling rates lower discount rates and support long-duration growth assets.",
+      "legal_counter_alphas": [
+        "A501"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-004",
+      "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "ticker": "SNDK",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+      "evidence_fact_group_id": "7accbf948fcdd428049954da",
+      "agent": "aggressive_risk_analyst",
+      "claim": "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+      "evidence": "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+      "target_alpha_id": "A102",
+      "target_alpha_name": "Inference Explosion",
+      "target_alpha_definition": "Enterprise AI applications and AI agents increase inference compute demand.",
+      "legal_counter_alphas": [],
+      "source_refs": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-005",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:conservative_risk_analyst:risk_debate_state.conservative_history:claim:54",
+      "evidence_fact_group_id": "8f50585716b060021f712c8e",
+      "agent": "conservative_risk_analyst",
+      "claim": "If Azure growth does not accelerate proportionally in the coming quarters, the stock could face multiple compression despite strong absolute fundamentals.",
+      "evidence": "If Azure growth does not accelerate proportionally in the coming quarters, the stock could face multiple compression despite strong absolute fundamentals.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-006",
+      "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "ticker": "SNDK",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+      "evidence_fact_group_id": "7accbf948fcdd428049954da",
+      "agent": "aggressive_risk_analyst",
+      "claim": "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+      "evidence": "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+      "target_alpha_id": "A003",
+      "target_alpha_name": "Liquidity Expansion",
+      "target_alpha_definition": "Improving liquidity supports risk appetite and equity inflows.",
+      "legal_counter_alphas": [
+        "A501"
+      ],
+      "source_refs": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-007",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision:claim:10",
+      "evidence_fact_group_id": "e1fc08e17521eef01076c967",
+      "agent": "portfolio_manager",
+      "claim": "The central tension is the $115.95B CapEx: it compressed FCF 6.5% to $66.99B despite record OCF, and the market has validated the quarter but not yet the multi-year conversion of that spending into proportional revenue growth.",
+      "evidence": "The central tension is the $115.95B CapEx: it compressed FCF 6.5% to $66.99B despite record OCF, and the market has validated the quarter but not yet the multi-year conversion of that spending into proportional revenue growth.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-008",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:12",
+      "evidence_fact_group_id": "91e5e7ba27d08907bdff6515",
+      "agent": "sentiment_agent",
+      "claim": "economy — \"one powerful investment trend is masking a broader slowdown\" (GuruFocus), pointing to recession risk beneath the AI narrative.",
+      "evidence": "economy — \"one powerful investment trend is masking a broader slowdown\" (GuruFocus), pointing to recession risk beneath the AI narrative.",
+      "target_alpha_id": "A601",
+      "target_alpha_name": "Narrative Momentum",
+      "target_alpha_definition": "Investor attention and crowded narratives drive reflexive flows and momentum.",
+      "legal_counter_alphas": [
+        "A304",
+        "A501"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-009",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:102",
+      "evidence_fact_group_id": "b229f062e3c105be497b4548",
+      "agent": "fundamental_agent",
+      "claim": "Valuation Risk: Despite the pullback, at $3.43T market cap, the stock remains priced for continued high growth.",
+      "evidence": "Valuation Risk: Despite the pullback, at $3.43T market cap, the stock remains priced for continued high growth.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-010",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:51",
+      "evidence_fact_group_id": "c880431afb3abe37ad0652b4",
+      "agent": "fundamental_agent",
+      "claim": "Recession Risk: An economic slowdown would disproportionately pressure high-multiple growth names, making QQQ more vulnerable than broad-market indices to recessionary shocks.",
+      "evidence": "Recession Risk: An economic slowdown would disproportionately pressure high-multiple growth names, making QQQ more vulnerable than broad-market indices to recessionary shocks.",
+      "target_alpha_id": "A501",
+      "target_alpha_name": "Recession Risk",
+      "target_alpha_definition": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+      "legal_counter_alphas": [
+        "A001",
+        "A003",
+        "A601"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-011",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:58",
+      "evidence_fact_group_id": "852f972622a519c2195f8234",
+      "agent": "news_agent",
+      "claim": "Theme: Hyperscaler AI CapEx; Evidence: Microsoft $41B AI spend; Azure growth accelerated; Implication for NVDA: Bullish — validates GPU demand engine",
+      "evidence": "Theme: Hyperscaler AI CapEx; Evidence: Microsoft $41B AI spend; Azure growth accelerated; Implication for NVDA: Bullish — validates GPU demand engine",
+      "target_alpha_id": "A101",
+      "target_alpha_name": "AI Expansion",
+      "target_alpha_definition": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-012",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:32",
+      "evidence_fact_group_id": null,
+      "agent": "news_agent",
+      "claim": "US recession risk is low (12%), which is supportive for risk assets and NVDA's growth outlook.",
+      "evidence": "US recession risk is low (12%), which is supportive for risk assets and NVDA's growth outlook.",
+      "target_alpha_id": "A501",
+      "target_alpha_name": "Recession Risk",
+      "target_alpha_definition": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+      "legal_counter_alphas": [
+        "A001",
+        "A003",
+        "A601"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-013",
+      "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "ticker": "SNDK",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+      "evidence_fact_group_id": "41aca6d010ebc88fb2236523",
+      "agent": "news_agent",
+      "claim": "AI demand narrative increasingly contested and subject to sentiment shifts",
+      "evidence": "AI demand narrative increasingly contested and subject to sentiment shifts",
+      "target_alpha_id": "A101",
+      "target_alpha_name": "AI Expansion",
+      "target_alpha_definition": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-014",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:23",
+      "evidence_fact_group_id": "6311d5467779218e58ec3a36",
+      "agent": "aggressive_risk_analyst",
+      "claim": "The \"valuation risk\" argument is a lazy heuristic that ignores the actual numbers.",
+      "evidence": "The \"valuation risk\" argument is a lazy heuristic that ignores the actual numbers.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-015",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:27",
+      "evidence_fact_group_id": "2356bdad996fd10ef0e50244",
+      "agent": "conservative_risk_analyst",
+      "claim": "The fundamental report explicitly flags this as a \"Valuation Risk\" factor, noting the fund is \"priced for perfection, leaving limited margin for error if earnings disappoint.\" The market research report itself is split on this issue, with some analysts arguing earnings are catching up, while Michael Burry is placing fresh downside bets on Nvidia and Micron.",
+      "evidence": "The fundamental report explicitly flags this as a \"Valuation Risk\" factor, noting the fund is \"priced for perfection, leaving limited margin for error if earnings disappoint.\" The market research report itself is split on this issue, with some analysts arguing earnings are catching up, while Michael Burry is placing fresh downside bets on Nvidia and Micron.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-016",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:60",
+      "evidence_fact_group_id": "4c72a25cf5070be69ddd7c10",
+      "agent": "sentiment_agent",
+      "claim": "AI CapEx / AI Infrastructure boom (bullish): Microsoft's blockbuster cloud quarter is the week's defining positive catalyst, reinforcing the \"AI spending boom remains alive\" narrative.",
+      "evidence": "AI CapEx / AI Infrastructure boom (bullish): Microsoft's blockbuster cloud quarter is the week's defining positive catalyst, reinforcing the \"AI spending boom remains alive\" narrative.",
+      "target_alpha_id": "A103",
+      "target_alpha_name": "AI Infrastructure",
+      "target_alpha_definition": "AI buildout drives datacenter, power, cooling, networking, and server demand.",
+      "legal_counter_alphas": [],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-017",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:79",
+      "evidence_fact_group_id": "249e4c67447e22f800f0ab1b",
+      "agent": "fundamental_agent",
+      "claim": "The primary fundamental risks are Valuation Risk (priced for perfection) and Recession Risk (growth names are most vulnerable to economic slowdowns).",
+      "evidence": "The primary fundamental risks are Valuation Risk (priced for perfection) and Recession Risk (growth names are most vulnerable to economic slowdowns).",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-018",
+      "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "ticker": "SNDK",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:72",
+      "evidence_fact_group_id": null,
+      "agent": "news_agent",
+      "claim": "Category: Recession Risk; Data Point: 12% US recession probability by end of 2026; Signal: 🟢 Mildly Positive; Implication for SNDK: Low recession risk supports demand environment",
+      "evidence": "Category: Recession Risk; Data Point: 12% US recession probability by end of 2026; Signal: 🟢 Mildly Positive; Implication for SNDK: Low recession risk supports demand environment",
+      "target_alpha_id": "A501",
+      "target_alpha_name": "Recession Risk",
+      "target_alpha_definition": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+      "legal_counter_alphas": [
+        "A001",
+        "A003",
+        "A601"
+      ],
+      "source_refs": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-019",
+      "run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "ticker": "TSM",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:56",
+      "evidence_fact_group_id": null,
+      "agent": "bear_researcher",
+      "claim": "The risk of a multiple compression is far greater than the potential for multiple expansion.",
+      "evidence": "The risk of a multiple compression is far greater than the potential for multiple expansion.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-020",
+      "run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "ticker": "TSM",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:59",
+      "evidence_fact_group_id": "756536febd2ecf04cd1e7a65",
+      "agent": "sentiment_agent",
+      "claim": "Valuation risk if the 335% run has priced in expectations (though sources call it reasonable).",
+      "evidence": "Valuation risk if the 335% run has priced in expectations (though sources call it reasonable).",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-021",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:news_agent:news_report:claim:79",
+      "evidence_fact_group_id": null,
+      "agent": "news_agent",
+      "claim": "Factor: Rate Cut Cycle; Status: Hawkish; Evidence: 89% prob of NO 2026 cuts; 19-yr-high yields; Implication for AMD: Negative — headwind for high-multiple growth",
+      "evidence": "Factor: Rate Cut Cycle; Status: Hawkish; Evidence: 89% prob of NO 2026 cuts; 19-yr-high yields; Implication for AMD: Negative — headwind for high-multiple growth",
+      "target_alpha_id": "A001",
+      "target_alpha_name": "Rate Cut Cycle",
+      "target_alpha_definition": "Falling rates lower discount rates and support long-duration growth assets.",
+      "legal_counter_alphas": [
+        "A501"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-022",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:sentiment_agent:sentiment_report:claim:13",
+      "evidence_fact_group_id": "68680664eb4889bae8cffd10",
+      "agent": "sentiment_agent",
+      "claim": "Several cite the accelerating AI capex from Microsoft, Meta, and Amazon earnings as confirmation that \"AI capex is accelerating and no signs of slowing down.\" There is notable attention on Michael Burry's short position — one user notes he has increased NVDA short exposure and added put positions with December 2026/January 2027 expirations, while another mocks that Burry has been short since November while the stock is up 30%.",
+      "evidence": "Several cite the accelerating AI capex from Microsoft, Meta, and Amazon earnings as confirmation that \"AI capex is accelerating and no signs of slowing down.\" There is notable attention on Michael Burry's short position — one user notes he has increased NVDA short exposure and added put positions with December 2026/January 2027 expirations, while another mocks that Burry has been short since November while the stock is up 30%.",
+      "target_alpha_id": "A101",
+      "target_alpha_name": "AI Expansion",
+      "target_alpha_definition": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:sentiment_agent:sentiment_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-023",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+      "evidence_fact_group_id": "396fccaca2bfac95681b0f7e",
+      "agent": "fundamental_agent",
+      "claim": "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+      "evidence": "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+      "target_alpha_id": "A001",
+      "target_alpha_name": "Rate Cut Cycle",
+      "target_alpha_definition": "Falling rates lower discount rates and support long-duration growth assets.",
+      "legal_counter_alphas": [
+        "A501"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-024",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:fundamental_agent:fundamentals_report:claim:90",
+      "evidence_fact_group_id": "70463c52b6110955ae23bfe8",
+      "agent": "fundamental_agent",
+      "claim": "Any slowdown in AI spending could trigger significant multiple compression.",
+      "evidence": "Any slowdown in AI spending could trigger significant multiple compression.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-025",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:75",
+      "evidence_fact_group_id": "fef23afcc4f38d5f821fabce",
+      "agent": "neutral_risk_analyst",
+      "claim": "If it doesn't, multiple compression is likely regardless of the technical setup.",
+      "evidence": "If it doesn't, multiple compression is likely regardless of the technical setup.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-026",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report:claim:66",
+      "evidence_fact_group_id": "83f0970444dc03651e1246ac",
+      "agent": "sentiment_agent",
+      "claim": "The dominant tension is between a strong AI growth narrative and a rich valuation ahead of a high-stakes earnings report.",
+      "evidence": "The dominant tension is between a strong AI growth narrative and a rich valuation ahead of a high-stakes earnings report.",
+      "target_alpha_id": "A601",
+      "target_alpha_name": "Narrative Momentum",
+      "target_alpha_definition": "Investor attention and crowded narratives drive reflexive flows and momentum.",
+      "legal_counter_alphas": [
+        "A304",
+        "A501"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-027",
+      "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "ticker": "SNDK",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+      "evidence_fact_group_id": "4bca38d1fff2c79d7e57b672",
+      "agent": "bull_researcher",
+      "claim": "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack.",
+      "evidence": "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-028",
+      "run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "ticker": "TSM",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+      "evidence_fact_group_id": "bd5b1079eeeabd599c5a713a",
+      "agent": "fundamental_agent",
+      "claim": "Semiconductor Cyclicality: The industry is inherently cyclical; a downturn in AI demand or a broader economic slowdown could compress earnings.",
+      "evidence": "Semiconductor Cyclicality: The industry is inherently cyclical; a downturn in AI demand or a broader economic slowdown could compress earnings.",
+      "target_alpha_id": "A501",
+      "target_alpha_name": "Recession Risk",
+      "target_alpha_definition": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+      "legal_counter_alphas": [
+        "A001",
+        "A003",
+        "A601"
+      ],
+      "source_refs": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-029",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report:claim:66",
+      "evidence_fact_group_id": "83f0970444dc03651e1246ac",
+      "agent": "sentiment_agent",
+      "claim": "The dominant tension is between a strong AI growth narrative and a rich valuation ahead of a high-stakes earnings report.",
+      "evidence": "The dominant tension is between a strong AI growth narrative and a rich valuation ahead of a high-stakes earnings report.",
+      "target_alpha_id": "A101",
+      "target_alpha_name": "AI Expansion",
+      "target_alpha_definition": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-030",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+      "evidence_fact_group_id": "396fccaca2bfac95681b0f7e",
+      "agent": "fundamental_agent",
+      "claim": "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+      "evidence": "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-031",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:research_manager:investment_plan:claim:5",
+      "evidence_fact_group_id": "f28865c3f296b039aadd6334",
+      "agent": "research_manager",
+      "claim": "The evidence cited—Microsoft's and Amazon's record single-day surges on AI-driven earnings, a combined $750 billion in 2026 AI CapEx plans, and AMD's own 34% revenue growth in 2025—is compelling.",
+      "evidence": "The evidence cited—Microsoft's and Amazon's record single-day surges on AI-driven earnings, a combined $750 billion in 2026 AI CapEx plans, and AMD's own 34% revenue growth in 2025—is compelling.",
+      "target_alpha_id": "A101",
+      "target_alpha_name": "AI Expansion",
+      "target_alpha_definition": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:research_manager:investment_plan"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-032",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:44",
+      "evidence_fact_group_id": null,
+      "agent": "news_agent",
+      "claim": "Market: US recession by end 2026; Probability: 12%; Notes: Low recession risk",
+      "evidence": "Market: US recession by end 2026; Probability: 12%; Notes: Low recession risk",
+      "target_alpha_id": "A501",
+      "target_alpha_name": "Recession Risk",
+      "target_alpha_definition": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+      "legal_counter_alphas": [
+        "A001",
+        "A003",
+        "A601"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-033",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:54",
+      "evidence_fact_group_id": "d1a1693f3389a2a548df7d39",
+      "agent": "news_agent",
+      "claim": "Valuation risk: After a 15% single-day jump, the stock is priced for continued perfection; any disappointment could trigger sharp profit-taking.",
+      "evidence": "Valuation risk: After a 15% single-day jump, the stock is priced for continued perfection; any disappointment could trigger sharp profit-taking.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-034",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:115",
+      "evidence_fact_group_id": "2964868f652f9f8f16a286e6",
+      "agent": "fundamental_agent",
+      "claim": "This investment is driving near-term FCF compression but positions Microsoft for significant AI/cloud revenue growth.",
+      "evidence": "This investment is driving near-term FCF compression but positions Microsoft for significant AI/cloud revenue growth.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-035",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:7",
+      "evidence_fact_group_id": "9d4d18645fd5d34e198097f3",
+      "agent": "news_agent",
+      "claim": "The market is pricing a \"no rate cuts in 2026\" base case (89%), a low US recession probability (12%), and a modest 20% chance of an AI bubble burst — a backdrop that is broadly supportive of growth/tech equities but leaves NVDA exposed to multiple-compression risk given its premium valuation.",
+      "evidence": "The market is pricing a \"no rate cuts in 2026\" base case (89%), a low US recession probability (12%), and a modest 20% chance of an AI bubble burst — a backdrop that is broadly supportive of growth/tech equities but leaves NVDA exposed to multiple-compression risk given its premium valuation.",
+      "target_alpha_id": "A001",
+      "target_alpha_name": "Rate Cut Cycle",
+      "target_alpha_definition": "Falling rates lower discount rates and support long-duration growth assets.",
+      "legal_counter_alphas": [
+        "A501"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-036",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:bull_researcher:investment_debate_state.bull_history:claim:20",
+      "evidence_fact_group_id": "83f0970444dc03651e1246ac",
+      "agent": "bull_researcher",
+      "claim": "Let me walk you through the numbers, because the bear narrative that AMD is \"priced for perfection\" ignores how dramatically the underlying business has improved.",
+      "evidence": "Let me walk you through the numbers, because the bear narrative that AMD is \"priced for perfection\" ignores how dramatically the underlying business has improved.",
+      "target_alpha_id": "A601",
+      "target_alpha_name": "Narrative Momentum",
+      "target_alpha_definition": "Investor attention and crowded narratives drive reflexive flows and momentum.",
+      "legal_counter_alphas": [
+        "A304",
+        "A501"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-037",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:fundamental_agent:fundamentals_report:claim:77",
+      "evidence_fact_group_id": "d854989f417c7f6c07be86c8",
+      "agent": "fundamental_agent",
+      "claim": "⚠️ Valuation risk: TTM P/E of 162x leaves little room for disappointment; any AI demand slowdown could trigger sharp multiple compression.",
+      "evidence": "⚠️ Valuation risk: TTM P/E of 162x leaves little room for disappointment; any AI demand slowdown could trigger sharp multiple compression.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-038",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:7",
+      "evidence_fact_group_id": "9d4d18645fd5d34e198097f3",
+      "agent": "news_agent",
+      "claim": "The market is pricing a \"no rate cuts in 2026\" base case (89%), a low US recession probability (12%), and a modest 20% chance of an AI bubble burst — a backdrop that is broadly supportive of growth/tech equities but leaves NVDA exposed to multiple-compression risk given its premium valuation.",
+      "evidence": "The market is pricing a \"no rate cuts in 2026\" base case (89%), a low US recession probability (12%), and a modest 20% chance of an AI bubble burst — a backdrop that is broadly supportive of growth/tech equities but leaves NVDA exposed to multiple-compression risk given its premium valuation.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-039",
+      "run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "ticker": "TSM",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:42",
+      "evidence_fact_group_id": "08c977ec94bbe31fc3e94b1e",
+      "agent": "neutral_risk_analyst",
+      "claim": "If Apple even signals a willingness to dual-source, TSM's revenue growth narrative is immediately called into question.",
+      "evidence": "If Apple even signals a willingness to dual-source, TSM's revenue growth narrative is immediately called into question.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-040",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:6",
+      "evidence_fact_group_id": "ba23d2acf0a60bae949234ab",
+      "agent": "news_agent",
+      "claim": "NVDA enters the final days of July 2026 in a state of constructive tension: the long-term AI demand narrative remains firmly intact (hyperscaler capex is accelerating, CEO Jensen Huang is actively defending the growth thesis), yet the stock has experienced a recent selloff and is trading with elevated sensitivity to macro and valuation concerns.",
+      "evidence": "NVDA enters the final days of July 2026 in a state of constructive tension: the long-term AI demand narrative remains firmly intact (hyperscaler capex is accelerating, CEO Jensen Huang is actively defending the growth thesis), yet the stock has experienced a recent selloff and is trading with elevated sensitivity to macro and valuation concerns.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-041",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:trader:trader_investment_plan:claim:1",
+      "evidence_fact_group_id": "efb3201e1674eb1ecd9facdd",
+      "agent": "trader",
+      "claim": "Reasoning: The debate produced no decisive winner: the bull's case rests on exceptional FY2026 fundamentals (17.8% revenue growth, 46.8% operating margins, record $182.94B OCF) that justify long-term ownership, while the bear's case rests on objectively overbought technicals (RSI 74, price above upper Bollinger Band, unresolved death cross) and a hostile macro backdrop with no rate cuts.",
+      "evidence": "Reasoning: The debate produced no decisive winner: the bull's case rests on exceptional FY2026 fundamentals (17.8% revenue growth, 46.8% operating margins, record $182.94B OCF) that justify long-term ownership, while the bear's case rests on objectively overbought technicals (RSI 74, price above upper Bollinger Band, unresolved death cross) and a hostile macro backdrop with no rate cuts.",
+      "target_alpha_id": "A001",
+      "target_alpha_name": "Rate Cut Cycle",
+      "target_alpha_definition": "Falling rates lower discount rates and support long-duration growth assets.",
+      "legal_counter_alphas": [
+        "A501"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:trader:trader_investment_plan"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-042",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history:claim:84",
+      "evidence_fact_group_id": "7fdbcd36fd87000a02fef495",
+      "agent": "bear_researcher",
+      "claim": "If the depreciation hits the income statement as expected, or if AI revenue growth decelerates, the forward EPS will be revised down, and the \"cheap\" 20x P/E will quickly become an expensive 25x+ P/E.",
+      "evidence": "If the depreciation hits the income statement as expected, or if AI revenue growth decelerates, the forward EPS will be revised down, and the \"cheap\" 20x P/E will quickly become an expensive 25x+ P/E.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-043",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:research_manager:investment_plan:claim:24",
+      "evidence_fact_group_id": "0f9ae13639deb4db3b0232c5",
+      "agent": "research_manager",
+      "claim": "Watch the inventory build ($25.80 billion) and receivables ($40.71 billion) in the next earnings report—if inventory continues to outpace revenue growth, treat it as a caution flag and reassess the overweight stance.",
+      "evidence": "Watch the inventory build ($25.80 billion) and receivables ($40.71 billion) in the next earnings report—if inventory continues to outpace revenue growth, treat it as a caution flag and reassess the overweight stance.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:research_manager:investment_plan"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-044",
+      "run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "ticker": "NVDA",
+      "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:15",
+      "evidence_fact_group_id": "ce390be3bbe84d520ffac1d1",
+      "agent": "news_agent",
+      "claim": "The fact that Microsoft's massive AI investment is now translating into accelerated Azure growth validates the ROI of AI infrastructure spending, supporting the sustainability of the capex cycle.",
+      "evidence": "The fact that Microsoft's massive AI investment is now translating into accelerated Azure growth validates the ROI of AI infrastructure spending, supporting the sustainability of the capex cycle.",
+      "target_alpha_id": "A103",
+      "target_alpha_name": "AI Infrastructure",
+      "target_alpha_definition": "AI buildout drives datacenter, power, cooling, networking, and server demand.",
+      "legal_counter_alphas": [],
+      "source_refs": [
+        "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-045",
+      "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "ticker": "SNDK",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:22",
+      "evidence_fact_group_id": null,
+      "agent": "news_agent",
+      "claim": "This is a headwind for any premium multiple attached to SNDK's AI supercycle narrative.",
+      "evidence": "This is a headwind for any premium multiple attached to SNDK's AI supercycle narrative.",
+      "target_alpha_id": "A601",
+      "target_alpha_name": "Narrative Momentum",
+      "target_alpha_definition": "Investor attention and crowded narratives drive reflexive flows and momentum.",
+      "legal_counter_alphas": [
+        "A304",
+        "A501"
+      ],
+      "source_refs": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-046",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:30",
+      "evidence_fact_group_id": "2356bdad996fd10ef0e50244",
+      "agent": "conservative_risk_analyst",
+      "claim": "The index-level valuation is still stretched, and any single earnings miss from a top-weighted constituent could trigger a significant multiple compression.",
+      "evidence": "The index-level valuation is still stretched, and any single earnings miss from a top-weighted constituent could trigger a significant multiple compression.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-047",
+      "run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "ticker": "TSM",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:49",
+      "evidence_fact_group_id": "08c977ec94bbe31fc3e94b1e",
+      "agent": "conservative_risk_analyst",
+      "claim": "If Apple even signals a willingness to dual-source, TSM's revenue growth narrative is immediately called into question.",
+      "evidence": "If Apple even signals a willingness to dual-source, TSM's revenue growth narrative is immediately called into question.",
+      "target_alpha_id": "A301",
+      "target_alpha_name": "Revenue Expansion",
+      "target_alpha_definition": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-048",
+      "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "ticker": "MSFT",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:50",
+      "evidence_fact_group_id": null,
+      "agent": "news_agent",
+      "claim": "Low recession risk (12%) supports continued risk appetite in growth names.",
+      "evidence": "Low recession risk (12%) supports continued risk appetite in growth names.",
+      "target_alpha_id": "A501",
+      "target_alpha_name": "Recession Risk",
+      "target_alpha_definition": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+      "legal_counter_alphas": [
+        "A001",
+        "A003",
+        "A601"
+      ],
+      "source_refs": [
+        "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-049",
+      "run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report:claim:36",
+      "evidence_fact_group_id": "83f0970444dc03651e1246ac",
+      "agent": "sentiment_agent",
+      "claim": "This is a notable mismatch: institutions are leaning into the AI growth story while retail is wary of the earnings event and the stock's rich valuation.",
+      "evidence": "This is a notable mismatch: institutions are leaning into the AI growth story while retail is wary of the earnings event and the stock's rich valuation.",
+      "target_alpha_id": "A101",
+      "target_alpha_name": "AI Expansion",
+      "target_alpha_definition": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "legal_counter_alphas": [
+        "A304"
+      ],
+      "source_refs": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report"
+      ],
+      "source_context": null
+    },
+    {
+      "sample_id": "evrs-050",
+      "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "ticker": "QQQ",
+      "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:56",
+      "evidence_fact_group_id": "2356bdad996fd10ef0e50244",
+      "agent": "fundamental_agent",
+      "claim": "Any earnings disappointment among top-weighted constituents could trigger multiple compression.",
+      "evidence": "Any earnings disappointment among top-weighted constituents could trigger multiple compression.",
+      "target_alpha_id": "A304",
+      "target_alpha_name": "Multiple Compression",
+      "target_alpha_definition": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "legal_counter_alphas": [
+        "A101",
+        "A301",
+        "A601"
+      ],
+      "source_refs": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "source_context": null
+    }
+  ]
+}

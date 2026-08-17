@@ -1,0 +1,179 @@
+{
+  "schema_version": "a4_regression_runner_report.v1",
+  "task": "A4_REGRESSION_RUNNER + J2_PROVISIONAL_LABELS",
+  "branch": "comqutor-structure-layer",
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "commit": null,
+  "push": null,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "a4_implementation_complete": true,
+  "j2_provisional_label_set_complete": true,
+  "j2_shadow_evaluation_complete": true,
+  "j2_formal_product_owner_approval_pending": true,
+  "six_ticker_live_coverage": "complete",
+  "fixed_command": "python scripts/run_regression.py --tickers NVDA QQQ MSFT SNDK TSM AMD",
+  "regression_report_path": "outputs/regression/regression_report.json",
+  "existing_mechanisms_reused": {
+    "offline_reprocess_path": "comqutor_alpha.replay.pipeline.run_structure_replay (Raw Rebuild Diagnostic Replay, Track D)",
+    "ticker_consistency": "comqutor_alpha.audit.ticker_consistency.audit_ticker_consistency / resolve_expected_ticker (A1)",
+    "artifact_completeness_contract": "comqutor_alpha.api.artifact_export.REQUIRED_ARTIFACT_FILENAMES (A2, read-only)",
+    "alpha_classification_collections": "structure_graph.json's active_alphas/dominant_alphas/regime_level_alphas/candidate_alphas/blocked_alphas (B4, already computed)",
+    "conflict_result": "conflicts.json's conflicts/main_conflict/arbitration.candidate_evaluations[*].admissibility (B2, already computed)",
+    "conflict_pair_identity": "comqutor_alpha.conflict_engine.conflict_schema.conflict_id / canonical_pair_key (already produces the exact A101__A304 format J2 uses)",
+    "evidence_stance_vocabulary": "comqutor_alpha.structure_engine.evidence_stance.VALID_EVIDENCE_STANCES / SUPPORTS_ALPHA / SUPPORTS_COUNTER_ALPHA (B1, already computed)",
+    "exposure_cross_check_data": "comqutor_alpha/config/entity_alpha_exposure_seed_v0.1.yaml (B3, already approved -- confirmed byte-identical to the numbers task section 6 supplied)",
+    "not_reused_deliberately": "evaluation/golden_case.py + tests/golden_cases/ -- a separate, pre-existing J3-scoped human-label harness; A4 does not touch or parallel it"
+  },
+  "no_pre_existing_a4_mechanism_found": true,
+  "database_state_at_start": {
+    "research_runs_rows": 1,
+    "note": "only NVDA's e3eb3909... run (finalized live during the prior A3 segment) had a database row; the other 5 selected runs' database_record_status is 'not_found' -- reported honestly, never assumed to agree with file state, never blocking selection"
+  },
+  "label_schema": {
+    "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+    "schema_version": "regression_labels.v1",
+    "label_version": "j2.provisional.v0.1",
+    "status": "provisional_ai_predicted",
+    "evaluation_mode": "shadow",
+    "evaluation_authority": "provisional",
+    "approved_by": null,
+    "formal_product_owner_approval": "pending",
+    "env_var_upgrade_possible": false,
+    "canonical_conflict_pairs": ["A001__A501", "A003__A501", "A101__A304", "A301__A304", "A304__A601", "A501__A601"],
+    "undeclared_conflict_pairs": {
+      "MSFT": ["A102__A304"],
+      "SNDK": ["A201__A304"],
+      "TSM": ["A201__A304"],
+      "AMD": ["A201__A304"]
+    },
+    "undeclared_pairs_taxonomy_modified": false,
+    "undeclared_pairs_silently_dropped": false
+  },
+  "run_selection_rule": {
+    "hard_requirement": ["metadata.json", "raw_agent_outputs.json"],
+    "preference": "file_artifact_completeness == pass (A2 9-artifact contract, read-only check)",
+    "tie_break_order": ["analysis_date desc", "created_at desc", "run_id desc"],
+    "database_status": "reported independently, never gates selection"
+  },
+  "six_ticker_coverage": [
+    {"ticker": "NVDA", "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665", "analysis_date": "2026-08-11", "file_artifact_completeness": "pass", "database_record_status": "found:completed", "offline_reprocess_status": "completed"},
+    {"ticker": "QQQ", "run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805", "analysis_date": "2026-07-31", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
+    {"ticker": "MSFT", "run_id": "0cb43bae-1a4d-4003-bb29-55d420498842", "analysis_date": "2026-07-31", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
+    {"ticker": "SNDK", "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f", "analysis_date": "2026-07-27", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
+    {"ticker": "TSM", "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6", "analysis_date": "2026-08-03", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
+    {"ticker": "AMD", "run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6", "analysis_date": "2026-07-31", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"}
+  ],
+  "expected_vs_detected_summary": [
+    {"ticker": "NVDA", "missing_expected": ["A103", "A201"], "unexpected_alphas": ["A001"], "main_conflict": "A301__A304", "main_conflict_match": true},
+    {"ticker": "QQQ", "missing_expected": ["A001", "A003"], "unexpected_alphas": ["A301"], "main_conflict": null, "main_conflict_match": false},
+    {"ticker": "MSFT", "missing_expected": ["A101", "A102", "A304"], "unexpected_alphas": [], "main_conflict": null, "main_conflict_match": false},
+    {"ticker": "SNDK", "missing_expected": ["A201", "A301", "A304"], "unexpected_alphas": [], "main_conflict": null, "main_conflict_match": false},
+    {"ticker": "TSM", "missing_expected": ["A103", "A304"], "unexpected_alphas": [], "main_conflict": null, "main_conflict_match": false},
+    {"ticker": "AMD", "missing_expected": ["A101", "A201"], "unexpected_alphas": ["A501"], "main_conflict": "A301__A304", "main_conflict_match": false}
+  ],
+  "dominance_guard_review_required_total": 0,
+  "evidence_polarity_errors_total": 0,
+  "evidence_polarity_error_scope": "contract_integrity_only",
+  "semantic_polarity_accuracy": null,
+  "semantic_polarity_review_status": "PENDING_J3_HUMAN_REVIEW",
+  "stance_source_by_ticker": {
+    "NVDA": "deterministic_baseline",
+    "QQQ": "deterministic_baseline",
+    "MSFT": "deterministic_baseline",
+    "SNDK": "deterministic_baseline",
+    "TSM": "deterministic_baseline",
+    "AMD": "deterministic_baseline"
+  },
+  "stance_source_explanation": "Architecture Replay always calls build_alpha_matches_payload with no llm_gateway, so B1's LLM stance upgrade is always a zero-cost no-op here -- never llm_semantic/mixed by construction, disclosed explicitly not hidden",
+  "ticker_consistency_all_pass": true,
+  "artifact_hash_verification": {
+    "method": "full run-directory sha256 (all files, sorted) captured before and after two full six-ticker CLI runs (12 replay invocations total)",
+    "all_six_source_runs_unchanged_both_times": true
+  },
+  "known_replay_characteristic_found": {
+    "field": "evidence_fact_group_id (and evidence_fact_groups ordering)",
+    "explanation": "intentionally scoped to (run_id, ticker, claim_ids); legitimately differs across separate replay_run_ids of the same source run, by design -- has zero effect on any A4 comparison (alpha_id-keyed fields only)",
+    "distinct_from": "the previously-known RECENCY_FALLBACK_SCORE/as_of replay confound noted during the B4 segment"
+  },
+  "cli": {
+    "fixed_command_runs_end_to_end": true,
+    "exit_code_on_real_run": 0,
+    "exit_code_policy": {
+      "0": "every requested ticker's evaluation ran to completion, including coverage_partial -- a provisional mismatch alone never flips this",
+      "2": "invalid CLI arguments",
+      "3": "J2 label file failed to load/validate",
+      "4": "runner crashed, OR any ticker's ticker_consistency == fail, OR a replay's own source-artifact hash-identity check failed"
+    },
+    "repeated_execution_deterministic": "verified: two full runs' regression_report.json byte-identical except generated_at and per-run replay_run_id (both legitimately non-deterministic identifiers)"
+  },
+  "files_created": [
+    "comqutor_alpha/regression/__init__.py",
+    "comqutor_alpha/regression/labels.py",
+    "comqutor_alpha/regression/run_selection.py",
+    "comqutor_alpha/regression/evaluator.py",
+    "comqutor_alpha/regression/report.py",
+    "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+    "scripts/run_regression.py",
+    "tests/test_a4_regression_runner.py",
+    "docs/audit_artifacts/a4_regression_runner_report.md",
+    "docs/audit_artifacts/a4_regression_runner_report.json"
+  ],
+  "files_modified": [],
+  "not_touched": [
+    "comqutor_alpha/replay/pipeline.py (imported/called only)",
+    "any B1-B5/A3 module",
+    "the Alpha taxonomy",
+    "the Conflict taxonomy",
+    "the Alpha Mapper threshold",
+    "Activation Score",
+    "ConflictScore",
+    "evaluation/golden_case.py and tests/golden_cases/ (separate J3-scoped harness)",
+    "frontend (no shared type/API contract change this segment)"
+  ],
+  "test_results": {
+    "a4_dedicated_suite": {
+      "file": "tests/test_a4_regression_runner.py",
+      "passed": 41,
+      "failed": 0,
+      "sections": {"A_labels": 7, "B_run_selection": 6, "C_alpha_comparison": 7, "D_conflict_comparison": 4, "E_evidence_polarity": 4, "F_safety": 6, "report_assembly_and_stance_source": 7}
+    },
+    "backend_full_regression": {
+      "before_a4_own_tests": {"passed": 3415, "failed": 3, "skipped": 47},
+      "after_a4_own_tests": {"passed": 3456, "failed": 3, "skipped": 47},
+      "new_a4_regressions": 0
+    },
+    "frontend": "not re-run this segment (no shared type/API contract change; task section 19 step 10 explicitly says not to touch/test frontend 'just for form')",
+    "ruff_on_touched_files": "clean"
+  },
+  "known_pre_existing_failures": [
+    {
+      "test": "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+      "cause": "frozen SHA-256 baseline of alpha_mapper.py/week2_llm.py predates B1's own intentional Evidence Stance changes; baseline never updated",
+      "caused_by_a4": false
+    },
+    {
+      "test": "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "cause": "NVDA_MAIN_CONFLICT_NOT_ARBITRATED -- demo/seed golden fixture predates B2's stricter Conflict Evidence Admissibility gate",
+      "caused_by_a4": false
+    },
+    {
+      "test": "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded",
+      "cause": "NVDA_MAIN_CONFLICT_NOT_ARBITRATED -- same root cause as above",
+      "caused_by_a4": false
+    }
+  ],
+  "explicit_non_goals_confirmed_not_done": [
+    "J3 50-Evidence human semantic review",
+    "John-20 Alpha Mapper gold audit",
+    "B1 live environment configuration fix",
+    "cold-start history repair",
+    "repository cleanup",
+    "old artifact deletion",
+    "low-confidence threshold product decision",
+    "new Alpha invalidation content",
+    "new ticker beyond the fixed 6",
+    "real Provider run"
+  ],
+  "report_created": "2026-08-13"
+}

@@ -1,0 +1,282 @@
+{
+  "schema_version": "msft_a102_a304_taxonomy_adjudication_report.v1",
+  "task": "MSFT_A102_A304_TAXONOMY_ADJUDICATION",
+  "branch": "comqutor-structure-layer",
+  "head_before": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "head_after": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "worktree_preserved": true,
+  "commit": "none",
+  "push": "none",
+  "subagents_used": 0,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "authority_hierarchy_applied": [
+    "1. canonical Alpha definitions (comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml)",
+    "2. approved Product Decisions / ADRs (docs/specs/product_decisions_and_unknowns.md, docs/adr/*)",
+    "3. canonical conflict taxonomy contract (alpha_loader.py MANDATORY_CONFLICT_WEIGHTS + validate_taxonomy)",
+    "4. Development Plan v1.0 (docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx, PD-001 SOURCE_FROZEN)",
+    "5. saved production artifacts (outputs/runs/ MSFT saved run)",
+    "6. provisional J2 predictions (never used to define production taxonomy)"
+  ],
+  "a102_canonical_definition": {
+    "alpha_id": "A102",
+    "name_en": "Inference Explosion",
+    "layer": "Theme",
+    "core_thesis": "Enterprise AI applications and AI agents increase inference compute demand.",
+    "conflict_alphas_declared": [],
+    "relations_declared": [
+      {
+        "target_alpha_id": "A103",
+        "relation_type": "supportive",
+        "weight": 0.8
+      },
+      {
+        "target_alpha_id": "A301",
+        "relation_type": "supportive",
+        "weight": 0.7
+      }
+    ]
+  },
+  "a304_canonical_definition": {
+    "alpha_id": "A304",
+    "name_en": "Multiple Compression",
+    "layer": "Valuation",
+    "core_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+    "conflict_alphas_declared": [
+      {
+        "alpha_id": "A101",
+        "contradiction_weight": 0.9
+      },
+      {
+        "alpha_id": "A301",
+        "contradiction_weight": 0.85
+      },
+      {
+        "alpha_id": "A601",
+        "contradiction_weight": 0.8
+      }
+    ]
+  },
+  "conflict_taxonomy_contract": {
+    "mandatory_pairs": [
+      "A101__A304",
+      "A301__A304",
+      "A001__A501",
+      "A003__A501",
+      "A304__A601",
+      "A501__A601"
+    ],
+    "source": "comqutor_alpha/alpha_library/alpha_loader.py MANDATORY_CONFLICT_WEIGHTS + validate_taxonomy",
+    "design_pattern": "A304 conflicts with exactly one representative Alpha per causal layer that terminates a growth thesis (A101=Theme-top, A301=Fundamental-terminal, A601=Sentiment cross-cutting); supportive chain-input Alphas that feed into those (A102, A103, A201) deliberately carry conflict_alphas=[]."
+  },
+  "development_plan_expectation": {
+    "source_path": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+    "source_sha256": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+    "pd001_status": "SOURCE_FROZEN (docs/specs/product_decisions_and_unknowns.md PD-001)",
+    "section_4_six_mandatory_pairs": "A101 vs A304, A301 vs A304, A001 vs A501, A003 vs A501, A601 vs A304, A601 vs A501 -- does NOT include A102 vs A304",
+    "section_12_golden_test_cases_msft_row": {
+      "expected_dominant_alphas": "A101, A102, A301, A304",
+      "expected_main_conflict": "Bull A102 vs Bear A304",
+      "attribution": "\"Golden tickers (John supplies expectations)\""
+    },
+    "internal_contradiction": "Section 4's own six-mandatory-pair list excludes A102 vs A304, while Section 12's MSFT golden row names exactly that non-mandatory pair -- the only one of the three worked golden rows (NVDA, QQQ, MSFT) whose stated main conflict is not one of Section 4's own six mandatory pairs. MSFT's own dominant-alpha cell in the same row already lists A101, so 'Bull A101 vs Bear A304' (consistent with NVDA's row and Section 4) was directly available without inventing anything -- the most parsimonious reading is a drafting slip between the adjacent, similarly-named A101/A102 Theme-layer IDs, not a reasoned, ticker-specific design decision."
+  },
+  "existing_product_decisions_adrs_reviewed": {
+    "pd_001_through_016": "reviewed in full; none addresses A102__A304 or MSFT's conflict-pair set",
+    "adr_001_through_010": "reviewed (grep); none addresses A102__A304 or MSFT's conflict-pair set",
+    "closest_related": "PD-013 (A101/A102/A103 Alpha *matching*-threshold carve-out) -- a different topic, not conflict-pair declaration"
+  },
+  "msft_saved_run_evidence": {
+    "run_id": "0cb43bae-1a4d-4003-bb29-55d420498842",
+    "artifact_completeness": "fail",
+    "stance_source": "deterministic_baseline",
+    "note": "deterministic_baseline replay of a known-incomplete saved artifact -- not current B1-LLM-authoritative end-to-end behavior; informational only, not decisive (a single run's absence of evidence does not itself prove a pair is semantically nonexistent)",
+    "a102_activation_score": 0.0,
+    "a102_evidence_count": 0,
+    "a102_ticker_specific_evidence_count": 0,
+    "a304_activation_score": 39.7525,
+    "a304_evidence_count": 7,
+    "a301_activation_score_for_context": 60.0,
+    "admitted_conflicts": [],
+    "candidate_conflicts": [
+      "A001__A501",
+      "A301__A304",
+      "A304__A601"
+    ],
+    "main_conflict": null
+  },
+  "arguments_for_approve_pair": [
+    "Development Plan Section 12's MSFT golden row explicitly states 'Bull A102 vs Bear A304', attributed to John's own supplied expectations.",
+    "A102 (enterprise AI/inference demand) and A304 (valuation risk) can plausibly be co-activated simultaneously for MSFT (Copilot/Azure AI narrative vs. rich multiple)."
+  ],
+  "arguments_for_reject_pair": [
+    "A102's canonical conflict_alphas is [] -- deliberately, consistently with A103/A201's identical 'supportive chain-input, zero declared conflicts' design pattern.",
+    "A304's canonical conflict_alphas explicitly lists A101/A301/A601 and not A102.",
+    "The Development Plan's own Section 4 (six mandatory pairs) excludes A102 vs A304 -- the Section 12 golden-row line contradicts the same document's own formal declaration.",
+    "MSFT's golden-row dominant-alpha list already contains A101, making 'Bull A101 vs Bear A304' (matching NVDA's row and Section 4) directly available without any pair addition -- the far more parsimonious reading of a same-document, adjacent-ID inconsistency.",
+    "The tension A102 might carry against A304 is already transitively expressed via the existing A301<->A304 pair (A102 supports A301 at weight 0.70; A301 conflicts A304 at weight 0.85).",
+    "Approving on general 'AI-growth-Alpha vs valuation-risk' logic would equally justify A103__A304 and A201__A304, which the taxonomy's design has consistently avoided across all MVP-10 authoring -- exactly the semantic over-generalization / duplicate-conflict risk this adjudication was asked to guard against.",
+    "The only evidence for approval is MSFT-specific (one golden-case line), not a general Alpha-to-Alpha semantic argument that would generalize to every other A102-exposed ticker.",
+    "No approved Product Decision or ADR (rank-2 authority) supports the pair; the canonical taxonomy contract (rank-3, outranks the Development Plan's rank-4) deliberately excludes it.",
+    "The one available MSFT saved run shows zero evidence for A102 (activation_score=0.0, evidence_count=0) -- no empirical push toward approval either."
+  ],
+  "decision": "REJECT_PAIR",
+  "decision_confidence": "high -- converging evidence from ranks 1, 2, 3 authority sources, plus the Development Plan's own internal self-contradiction, with only a single ambiguous line as counter-evidence",
+  "decision_source": "User-authorized independent LLM product adjudication",
+  "decision_record": {
+    "identifier": "PD-017",
+    "path": "docs/specs/product_decisions_and_unknowns.md",
+    "status": "REJECTED_BY_INDEPENDENT_LLM_ADJUDICATION"
+  },
+  "taxonomy_before_after": {
+    "path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+    "changed": false,
+    "sha256_before": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    "sha256_after": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c"
+  },
+  "j2_before_after": {
+    "v0_1": {
+      "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+      "changed": false,
+      "note": "preserved as a frozen historical snapshot by design; still shows MSFT allowed_main_conflicts=[A102__A304] and the resulting PREDICTED_CONFLICT_PAIR_NOT_DECLARED note -- unchanged, as before this adjudication",
+      "sha256_before": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1",
+      "sha256_after": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1"
+    },
+    "v0_2": {
+      "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+      "changed": true,
+      "msft_before": {
+        "product_decision_pending": [
+          {
+            "pair_id": "A102__A304",
+            "reason": "Development Plan expectation conflicts with canonical taxonomy."
+          }
+        ],
+        "remove_while_undeclared": []
+      },
+      "msft_after": {
+        "product_decision_pending": [],
+        "remove_while_undeclared": [
+          "A102__A304"
+        ]
+      },
+      "sha256_before": "6428d437ca684fde53e8b1c3ecb3810292b949d7ca1cb837c0a1dd140ae2c81d",
+      "sha256_after": "9988036ee94b06d60e874de118dde644beb89716f693653c54928d691e774af6"
+    }
+  },
+  "a4_before_after": {
+    "code_changed": false,
+    "note": "comqutor_alpha/regression/evaluation_contract.py required zero changes -- remove_while_undeclared pairs were already surfaced informationally regardless of ticker evaluability by the existing J2 v0.2 evaluator from the prior segment",
+    "msft_evaluation_contract_after": {
+      "ticker": "MSFT",
+      "evaluation_status": "not_evaluable",
+      "ticker_status": "not_evaluable",
+      "artifact_completeness": "fail",
+      "required_conflict_results": [],
+      "conditional_conflict_results": [],
+      "allowed_conflict_results": [],
+      "product_decision_pending_results": [],
+      "removed_while_undeclared_pairs": [
+        "A102__A304"
+      ],
+      "structural_expectation_results": {},
+      "run_bound_expectations": null
+    }
+  },
+  "b1_b2_b3_b4_invariants": {
+    "note": "byte-identical, confirmed by SHA-256",
+    "week2_llm_py_sha256": "a190fb9be805ae458d80d03c5aca3c5897e684683cd885594808ccd6973b6acd",
+    "alpha_mapper_py_sha256": "138af8eb20531a31b71e31bcda3fa4194ba4eae5b974da8251c3cd8afa53ec1a",
+    "conflict_schema_py_sha256": "58466213a20810a062d98551866d4e4895f97771792ccaf6d08991655f28969e",
+    "conflict_admissibility_py_sha256": "0b795d4b2ee36fe11496b6766a83196b81d8afaec6c83f15cae2dbd0699b1f41",
+    "conflict_detector_py_sha256": "eea8055e07c23c90f53c500c5c4952d2a7d78541429d9acf0a13a941a1c88a55"
+  },
+  "source_hashes_before_after": {
+    "canonical_taxonomy": {
+      "before": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+      "after": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+      "identical": true
+    },
+    "development_plan_docx": {
+      "before": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+      "after": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+      "identical": true
+    },
+    "j3_provisional_benchmark": {
+      "before": "0a021feff423ae075dd55d27c77f8e063826caf0046a1756fb92768ab6698ca6",
+      "after": "0a021feff423ae075dd55d27c77f8e063826caf0046a1756fb92768ab6698ca6",
+      "identical": true
+    },
+    "j2_v0_1_labels": {
+      "before": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1",
+      "after": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1",
+      "identical": true
+    },
+    "msft_saved_run_raw_agent_outputs": {
+      "before_equals_after": true,
+      "run_id": "0cb43bae-1a4d-4003-bb29-55d420498842"
+    },
+    "j2_v0_2_labels_intentionally_changed": {
+      "before": "6428d437ca684fde53e8b1c3ecb3810292b949d7ca1cb837c0a1dd140ae2c81d",
+      "after": "9988036ee94b06d60e874de118dde644beb89716f693653c54928d691e774af6"
+    },
+    "pd_register_intentionally_changed": {
+      "before": "4c57250320284e72306ccdd16bf2d048469116f3f645e14236abf4ec6f2858ba",
+      "after": "81237b9d09894e4b5e3944db67adad61aeb86448ddb38b6d30545ef7733ce6d8"
+    }
+  },
+  "targeted_tests": {
+    "new_file": "tests/test_msft_a102_a304_taxonomy_adjudication.py",
+    "new_file_result": "16 passed",
+    "updated_test": "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c26_msft_a102_a304_was_adjudicated_and_rejected_not_pending (previously asserted the pre-PD-017 pending state; updated to assert the post-PD-017 rejected state, not loosened)",
+    "combined_related_suite_result": "293 passed (this task's 16 + test_j3_semantic_benchmark_j2_v0_2.py 61 + test_a4_regression_runner.py 41 + test_j3_review_packet_export.py 29 + test_conflict_detector.py full suite)"
+  },
+  "known_failures": [
+    "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline (pre-existing, frozen SHA-256 baseline predates B1's Evidence Stance changes)",
+    "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider (pre-existing, predates B2's stricter admissibility gate)",
+    "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded (pre-existing, same cause)"
+  ],
+  "frontend": "not modified this task -- not rerun",
+  "non_goals_honored": [
+    "no J4 six-ticker live LLM run",
+    "no new Provider review",
+    "no new TradingAgents run",
+    "no Golden Baseline v1.0",
+    "no B1 prompt tuning",
+    "no deterministic heuristic expansion",
+    "no B2 threshold adjustment",
+    "no unrelated taxonomy expansion",
+    "no other Alpha pair cleanup",
+    "no frontend redesign",
+    "no repository cleanup",
+    "no commit",
+    "no push"
+  ],
+  "declarations": {
+    "MSFT_A102_A304_TAXONOMY_ADJUDICATION": "COMPLETE",
+    "DECISION": "REJECT_PAIR",
+    "CANONICAL_TAXONOMY": "UNCHANGED",
+    "J2_V0_2": "ALIGNED",
+    "J4": "NOT_STARTED",
+    "USER_AUTHORIZED_INDEPENDENT_LLM_ADJUDICATION": true,
+    "JOHN_APPROVAL_NOT_CLAIMED": true,
+    "HUMAN_REVIEW_NOT_PERFORMED": true,
+    "PROVIDER_CALLS": 0,
+    "TRADINGAGENTS_CALLS": 0,
+    "COMMIT": "none",
+    "PUSH": "none"
+  },
+  "full_backend_regression": {
+    "command": "python -m pytest --tb=short -q",
+    "result": "3562 passed, 3 failed (pre-existing, unrelated), 47 skipped, 69 subtests passed in 736.66s",
+    "baseline_before_this_task": "3546 passed / 3 pre-existing failed / 47 skipped (J2-v0.2 checkpoint)",
+    "delta_explained": "+16 (this task's own new tests) = 3562 - 3546",
+    "pre_existing_failures_unchanged": [
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ],
+    "new_failures_introduced_by_this_task": 0
+  },
+  "ruff": "clean on all of this task's own new/modified Python files"
+}

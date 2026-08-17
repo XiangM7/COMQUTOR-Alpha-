@@ -397,13 +397,25 @@ a {
 
 /* -- Alpha cards ------------------------------------------------------------*/
 
+/* Desktop: exactly two columns, each filling its own column (never a
+   narrow auto-fill leftover, never four Candidate columns). Narrow
+   screens: one column. `minmax(0, 1fr)` (not a fixed px floor) is what
+   lets a lone card still take a full, reasonable column width instead of
+   collapsing to a fixed minimum. */
 .alpha-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
 }
 
+@media (max-width: 640px) {
+  .alpha-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .alpha-card {
+  min-width: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-4);
@@ -430,11 +442,13 @@ a {
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+  overflow-wrap: anywhere;
 }
 
 .alpha-card-name {
   margin: 0;
   font-size: var(--font-size-base);
+  overflow-wrap: anywhere;
 }
 
 .alpha-card-badge {
@@ -449,19 +463,59 @@ a {
 
 .alpha-card-body {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-2);
   margin: 0;
 }
 
 .alpha-card-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-3);
+  min-width: 0;
   font-size: var(--font-size-sm);
 }
 
-.alpha-card-row dt { color: var(--color-text-muted); }
-.alpha-card-row dd { margin: 0; font-weight: 600; }
+.alpha-card-row dt {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.alpha-card-row dd {
+  margin: 0;
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: right;
+}
+
+/* Held/diagnostic detail rows (blocked_from, blocked_reason_codes,
+   diagnostic_reason_codes, supporting-agent/related-conflict lists) can
+   carry long comma-joined lists and reason codes -- never allowed to
+   overflow the card or overlap the row above/below. */
+.alpha-card-row-detail dd,
+.alpha-card-row-warning dd,
+.alpha-card-row-blocked dd,
+.alpha-card-related-conflicts {
+  text-align: left;
+  width: 100%;
+}
+
+.alpha-card-diagnostic-reasons {
+  margin-top: var(--space-2);
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.alpha-card-diagnostic-reasons ul {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-4);
+}
+
+.alpha-card-diagnostic-reasons li {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 
 /* -- Conflict cards ----------------------------------------------------------*/
 
@@ -610,6 +664,22 @@ a {
   display: grid;
   gap: var(--space-4);
   margin-top: var(--space-4);
+}
+
+/* Bull|Bear and Counter|Missing pair up on desktop; Invalidation
+   (bull/bear) pairs up the same way, full width of the outer single
+   column above. Qualification Gaps stays a standalone full-width child of
+   .conflict-evidence-ui (never crammed into the Counter|Missing row). */
+.evidence-ui-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .evidence-ui-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .evidence-ui-section h4 {

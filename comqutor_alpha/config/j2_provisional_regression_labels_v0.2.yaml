@@ -1,0 +1,224 @@
+# J2 six-ticker provisional regression labels, v0.2 (task
+# J2_V0.2_EVALUATION_CONTRACT_ALIGNMENT).
+#
+# v0.1 (j2_provisional_regression_labels_v0.1.yaml) is preserved UNCHANGED
+# alongside this file -- v0.2 is a new, additive evaluation contract, not
+# a replacement or overwrite. Both remain loadable; the A4 CLI's default
+# label version is changed explicitly and auditably (see
+# scripts/run_regression.py), never silently.
+#
+# v0.2 replaces v0.1's flat "expected_positive_alphas is always a strict
+# per-run expectation" framing with five explicitly distinct categories,
+# because v0.1's own flat list conflated two different claims: "this
+# ticker is generally exposed to this Alpha" (a structural, ticker-general
+# fact) and "this specific run must show this Alpha active" (a claim that
+# is only meaningful once bound to one specific, reference run). See task
+# section 7 for the formal semantics of each category below.
+#
+# NONE of the six tickers currently has a formally John-approved,
+# artifact-complete, version-locked reference run -- so `required_conflicts`
+# is correctly empty for every ticker in this file. This is not an
+# oversight: promoting anything into `required_conflicts` requires a real,
+# future, explicit approval action, never inferred from a provisional
+# shadow-evaluation run.
+schema_version: regression_labels.v2
+label_version: j2.provisional.v0.2
+taxonomy_version: alpha_taxonomy_v1
+label_scope: ticker_general
+status: provisional_ai_predicted
+evaluation_mode: shadow
+evaluation_authority: provisional
+prepared_for: COMQUTOR Alpha J2 v0.2 Evaluation Contract Alignment
+approved_by: null
+approved_at: null
+formal_product_owner_approval: pending
+supersedes: null  # v0.1 is not superseded -- both remain independently loadable
+derived_from: comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml
+
+tickers:
+  NVDA:
+    # Structural: ticker is generally exposed to these Alphas -- never a
+    # per-run strict expectation on its own (task section 7.1). Carried
+    # over from v0.1's expected_positive_alphas/expected_negative_alphas/
+    # conditional_alphas verbatim, re-labeled to its honest category.
+    structural_expectations:
+      positive_alphas: [A101, A103, A201, A301]
+      negative_alphas: [A304]
+      conditional_alphas: [A102, A601]
+    # Only meaningful as a strict per-run expectation because it is bound
+    # to this specific, already-observed reference run (task section 7.2).
+    # Still never promoted to `required_conflicts` -- no formal approval
+    # exists for this run.
+    run_bound_expectations:
+      reference_run_id: e3eb3909-3744-4a02-9b32-b225cf6ef665
+      analysis_date: "2026-08-11"
+      taxonomy_version: alpha_taxonomy_v1
+      b1_stance_source: deterministic_baseline
+      b1_stance_version: evidence_stance.deterministic.v1
+      artifact_completeness_required: pass
+      observed_historical_main_conflict: A301__A304
+      note: >-
+        The observed main conflict match is a single-run historical
+        observation, not a claim that this run's full Alpha label set
+        matches structural_expectations -- see A4's real replay result
+        (missing_expected: A103, A201; unexpected: A001).
+    required_conflicts: []
+    conditional_conflicts:
+      - A101__A304
+      - A301__A304
+    product_decision_pending: []
+    remove_while_undeclared: []
+    allowed_conflicts: []
+    should_not_be_dominant_without_strong_evidence:
+      A102: inference-specific demand or revenue evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - COMQUTOR Alpha Development Plan v1.0
+      - John entity exposure seed v0.1
+      - provisional product inference
+      - j2_provisional_regression_labels_v0.1.yaml
+
+  QQQ:
+    # A001/A003 are ticker-general (ETF-level) expectations -- must never
+    # be treated as a strict per-run active-Alpha requirement (task
+    # section 8, QQQ).
+    structural_expectations:
+      positive_alphas: [A001, A003]
+      negative_alphas: [A304, A501]
+      conditional_alphas: [A101, A601]
+    run_bound_expectations: null
+    required_conflicts: []
+    conditional_conflicts:
+      - A001__A501
+    product_decision_pending: []
+    remove_while_undeclared: []
+    allowed_conflicts: []
+    should_not_be_dominant_without_strong_evidence:
+      A102: broad ETF-level inference demand evidence
+      A103: broad constituent infrastructure evidence
+      A201: broad semiconductor-cycle transmission evidence
+      A301: broad constituent revenue-expansion evidence
+    source_basis:
+      - COMQUTOR Alpha Development Plan v1.0
+      - John entity exposure seed v0.1
+      - provisional product inference
+      - j2_provisional_regression_labels_v0.1.yaml
+
+  MSFT:
+    structural_expectations:
+      positive_alphas: [A101, A102, A301]
+      negative_alphas: [A304]
+      conditional_alphas: [A103, A601]
+    run_bound_expectations: null
+    required_conflicts: []
+    conditional_conflicts: []
+    product_decision_pending: []
+    # A102__A304 was formally adjudicated (PD-017,
+    # docs/specs/product_decisions_and_unknowns.md) as
+    # REJECTED_BY_INDEPENDENT_LLM_ADJUDICATION, not a Product Owner /
+    # John-approved decision. It is not a canonical taxonomy conflict pair
+    # (A102's conflict_alphas is [] in alpha_taxonomy_v1.yaml) and is never
+    # added to production taxonomy -- tracked here only as a rejected,
+    # non-executable product expectation, distinct from the still-open
+    # product_decision_pending it carried before PD-017.
+    remove_while_undeclared: [A102__A304]
+    allowed_conflicts: []
+    should_not_be_dominant_without_strong_evidence:
+      A201: direct semiconductor-cycle evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - COMQUTOR Alpha Development Plan v1.0
+      - John entity exposure seed v0.1
+      - provisional product inference
+      - j2_provisional_regression_labels_v0.1.yaml
+      - PD-017 (docs/specs/product_decisions_and_unknowns.md)
+
+  SNDK:
+    structural_expectations:
+      positive_alphas: [A201, A301]
+      negative_alphas: [A304]
+      conditional_alphas: [A103, A601]
+    run_bound_expectations: null
+    required_conflicts: []
+    conditional_conflicts:
+      - A301__A304
+    product_decision_pending: []
+    # A201__A304 is not a canonical taxonomy conflict pair -- removed from
+    # the executable regression-expectation set. This never deletes any
+    # production/historical data; it only stops A4 from treating an
+    # undeclared pair as something it could ever admit or reach candidate
+    # status for.
+    remove_while_undeclared:
+      - A201__A304
+    allowed_conflicts: []
+    should_not_be_dominant_without_strong_evidence:
+      A101: company-specific AI demand transmission evidence
+      A102: company-specific inference demand evidence
+      A103: company-specific infrastructure demand evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - John entity exposure seed v0.1
+      - Alpha Taxonomy v1
+      - provisional product inference
+      - j2_provisional_regression_labels_v0.1.yaml
+
+  TSM:
+    structural_expectations:
+      positive_alphas: [A103, A201, A301]
+      negative_alphas: [A304]
+      conditional_alphas: [A101, A601]
+    run_bound_expectations: null
+    required_conflicts: []
+    conditional_conflicts:
+      - A301__A304
+    product_decision_pending: []
+    remove_while_undeclared:
+      - A201__A304
+    allowed_conflicts: []
+    should_not_be_dominant_without_strong_evidence:
+      A102: inference-specific orders or revenue evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+      A601: strong multi-source narrative or flow evidence
+    source_basis:
+      - John entity exposure seed v0.1
+      - Alpha Taxonomy v1
+      - provisional product inference
+      - j2_provisional_regression_labels_v0.1.yaml
+
+  AMD:
+    structural_expectations:
+      positive_alphas: [A101, A201, A301]
+      negative_alphas: [A304]
+      conditional_alphas: [A102, A103, A601]
+    run_bound_expectations: null
+    required_conflicts: []
+    conditional_conflicts:
+      - A101__A304
+    product_decision_pending: []
+    remove_while_undeclared:
+      - A201__A304
+    # A301__A304 is a real, canonical taxonomy pair -- permitted to appear
+    # as an admitted/candidate conflict and reported when it does, but
+    # never auto-promoted to required_conflicts without a complete,
+    # approved, version-locked AMD reference run (task section 8, AMD).
+    allowed_conflicts:
+      - A301__A304
+    should_not_be_dominant_without_strong_evidence:
+      A102: inference-specific product or revenue evidence
+      A103: direct infrastructure deployment evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - John entity exposure seed v0.1
+      - Alpha Taxonomy v1
+      - provisional product inference
+      - j2_provisional_regression_labels_v0.1.yaml

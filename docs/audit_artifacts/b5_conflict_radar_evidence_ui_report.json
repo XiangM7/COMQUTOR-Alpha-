@@ -29,8 +29,27 @@
   "bull_evidence_contract": {
     "stance_filter": "supports_alpha only, relative to bull_alpha_id",
     "deduplication": "unique Evidence Fact groups (reuses evidence_fact_index.group_evidence_candidates via conflict_detector._group_qualifying_claims_into_facts verbatim -- never raw claim counts",
-    "excludes": ["opposes_alpha", "mentions_alpha", "neutral_background", "supports_counter_alpha"],
-    "fields_per_item": ["evidence_fact_group_id", "representative_claim_id", "member_claim_ids", "evidence_text", "agents", "source_agent_output_ids", "target_alpha_id", "evidence_stance", "stance_method", "evidence_stance_version", "stance_confidence_band", "ticker_specific", "representative_match_score"]
+    "excludes": [
+      "opposes_alpha",
+      "mentions_alpha",
+      "neutral_background",
+      "supports_counter_alpha"
+    ],
+    "fields_per_item": [
+      "evidence_fact_group_id",
+      "representative_claim_id",
+      "member_claim_ids",
+      "evidence_text",
+      "agents",
+      "source_agent_output_ids",
+      "target_alpha_id",
+      "evidence_stance",
+      "stance_method",
+      "evidence_stance_version",
+      "stance_confidence_band",
+      "ticker_specific",
+      "representative_match_score"
+    ]
   },
   "bear_evidence_contract": {
     "stance_filter": "supports_alpha only, relative to bear_alpha_id",
@@ -39,7 +58,11 @@
   "counter_evidence_routing": {
     "case_a_opposes_alpha": "a claim whose stance relative to a conflict side's own alpha_id is opposes_alpha becomes Counter Evidence against that alpha",
     "case_b_supports_counter_alpha": "a claim with evidence_stance=supports_counter_alpha and counter_alpha_id equal to the conflict's OTHER side becomes Counter Evidence against the side it was evaluated relative to, tagged supports_counter_alpha_id",
-    "excludes": ["mentions_alpha", "neutral_background", "an unrelated counter_alpha_id not matching the conflict's other side"],
+    "excludes": [
+      "mentions_alpha",
+      "neutral_background",
+      "an unrelated counter_alpha_id not matching the conflict's other side"
+    ],
     "dedup_key": "evidence_fact_group_id + counter_target_alpha_id, per task section 6",
     "dual_role_preserved": "the same underlying claim can appear in bear_evidence (supports_alpha relative to its own matched_alpha) AND in counter_evidence (opposes_alpha/supports_counter_alpha relative to a different alpha it also carries a candidate_scores entry for) -- both roles kept independently, never dropped",
     "real_data_confirmation": "the real saved NVDA run's PEG rebuttal claim (see section 'real_saved_run' below) exhibits exactly this dual role and is displayed correctly in both places",
@@ -58,7 +81,9 @@
   "invalidation_source_coverage": {
     "registry_file": "comqutor_alpha/config/alpha_invalidation_conditions_v0.1.yaml",
     "loader_module": "comqutor_alpha/conflict_engine/invalidation_registry.py",
-    "approved_alphas": ["A101"],
+    "approved_alphas": [
+      "A101"
+    ],
     "a101_exact_john_conditions_verified": [
       "hyperscaler capex slows",
       "GPU demand weakens",
@@ -76,7 +101,10 @@
   },
   "artifact_db_api_consistency": {
     "computed_at": "conflict_detector._evaluate_candidate, immediately after admissibility (same call site, same unconditional-computation pattern)",
-    "attached_to": ["the full conflict dict (conflicts[]/main_conflict)", "the audit_item (arbitration.candidate_evaluations[])"],
+    "attached_to": [
+      "the full conflict dict (conflicts[]/main_conflict)",
+      "the audit_item (arbitration.candidate_evaluations[])"
+    ],
     "attached_for": "every fully-evaluated pair, admitted or B2-suppressed -- a pair rejected before reaching B2 (missing evidence, unresolved bull/bear role) has neither admissibility nor evidence_ui, exactly mirroring the pre-existing admissibility attachment pattern",
     "new_field_bull_bear_alpha_id_on_candidate": "audit_item gained bull_alpha_id/bear_alpha_id (previously absent even before B5) -- required so the UI can correctly label evidence sides for a candidate pair without guessing from claim content",
     "persistence_whitelist": "week4_persistence._whitelist_conflict / _whitelist_candidate gained an explicit, fully-typed evidence_ui validator, wired additively (if \"evidence_ui\" in payload: ...) -- never via the pre-existing narrow tuple-based pass-through, so a malformed value fails closed rather than being silently persisted unchecked",
@@ -232,5 +260,206 @@
   "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
   "branch": "comqutor-structure-layer",
   "commit": "NO",
-  "push": "NO"
+  "push": "NO",
+  "follow_on_task_2026_08_14": {
+    "task": "Complete the Missing B5 Conflict Radar Frontend",
+    "correction_to_prior_record": "The task that commissioned this follow-on was based on a claim in live_run_5ffe121a_pipeline_failure_report.md (section 14.7) that ConflictRadarPage.tsx does not render evidence_ui's counter_evidence/missing_evidence/qualification_gaps/invalidation_conditions at all. That claim was incorrect -- it was based on grepping ConflictRadarPage.tsx directly and missed that rendering happens in child components (ConflictCard.tsx -> ConflictEvidenceSections.tsx, CandidateConflictCard.tsx -> the same), which this report's own 2026-08-13 original body already documents as built, backend-tested (36/36), and visually verified. live_run_5ffe121a_pipeline_failure_report.md has been corrected in place.",
+    "real_gaps_found_and_fixed": [
+      "EvidenceFactCard did not render target_alpha_id, evidence_stance_version, stance_confidence_band, or source_agent_output_ids (provenance) even though the API already returns them and the TypeScript type already models them -- now rendered additively.",
+      "QualificationGapsSection returned null (hid the section) for a genuinely empty, schema-guaranteed array instead of an explicit message like its Missing Evidence sibling -- now shows 'No qualification gaps identified.' for that case.",
+      "The requested two-column row pairing (Bull|Bear, Counter|Missing, Invalidation full width) was not implemented -- the five regions were a plain single-column stack -- now implemented via a new .evidence-ui-row CSS rule.",
+      "No permanent, automated, CI-reproducible test file existed for ConflictEvidenceSections or CandidateConflictCard -- the original implementation's own report candidly notes frontend coverage came from a one-time Playwright visual pass, not component tests. Closed with 19 component tests (16 in ConflictEvidenceSections.test.tsx + 3 in ConflictCard.test.tsx) + 3 layout tests (styles.layout.test.ts) = 22 total."
+    ],
+    "real_payload_verification": {
+      "run_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "method": "live read-only GET against the restarted backend; every real pair rendered through the actual ConflictCard/CandidateConflictCard components via a temporary ad-hoc test, deleted after use",
+      "pairs": [
+        {
+          "pair": "A301__A304",
+          "status": "main",
+          "bull": 6,
+          "bear": 7,
+          "counter": 1,
+          "missing": 0,
+          "qualification_gaps": 0,
+          "invalidation": "bull(A301) not_defined / bear(A304) not_defined"
+        },
+        {
+          "pair": "A304__A601",
+          "status": "admitted",
+          "bull": 11,
+          "bear": 7,
+          "counter": 2,
+          "missing": 0,
+          "qualification_gaps": 0,
+          "invalidation": "bull(A304) not_defined / bear(A601) not_defined"
+        },
+        {
+          "pair": "A101__A304",
+          "status": "candidate",
+          "bull": 1,
+          "bear": 7,
+          "counter": 7,
+          "missing": 2,
+          "qualification_gaps": 1,
+          "invalidation": "bull(A101) approved (John, v0.1) / bear(A304) not_defined"
+        },
+        {
+          "pair": "A001__A501",
+          "status": "not_evaluated_suppressed",
+          "reason_codes": [
+            "MISSING_LEFT_EVIDENCE"
+          ]
+        },
+        {
+          "pair": "A003__A501",
+          "status": "not_evaluated_rejected",
+          "reason_codes": [
+            "DIRECTION_ROLE_UNRESOLVED"
+          ]
+        },
+        {
+          "pair": "A501__A601",
+          "status": "not_evaluated_rejected",
+          "reason_codes": [
+            "DIRECTION_ROLE_UNRESOLVED"
+          ]
+        }
+      ],
+      "zero_crashes": true,
+      "browser_visual_verification": "NOT_AVAILABLE",
+      "note": "No browser-automation tool is available in this task's environment (unlike the 2026-08-13 original pass, which used Playwright). Real-payload component-render output is the closest available substitute and is reported as such, never represented as a browser screenshot."
+    },
+    "files_changed": [
+      "frontend/src/components/ConflictEvidenceSections.tsx",
+      "frontend/src/components/ConflictEvidenceSections.test.tsx",
+      "frontend/src/components/ConflictCard.test.tsx",
+      "frontend/src/styles.css",
+      "frontend/src/styles.layout.test.ts",
+      "docs/audit_artifacts/b5_conflict_radar_evidence_ui_report.md",
+      "docs/audit_artifacts/b5_conflict_radar_evidence_ui_report.json",
+      "docs/audit_artifacts/live_run_5ffe121a_pipeline_failure_report.md"
+    ],
+    "python_files_changed": 0,
+    "test_results": {
+      "new_or_changed_frontend_tests": 22,
+      "conflict_evidence_sections_test_tsx": "16 passed (new file)",
+      "conflict_card_test_tsx": "7 passed (4 original + 3 new)",
+      "styles_layout_test_ts": "8 passed (5 original + 3 new)",
+      "full_frontend_suite": "199 passed, 19 files, 0 failed (was 177/18 before this task)",
+      "typescript_typecheck": "clean",
+      "production_build": "clean",
+      "backend_b5_api_invariant_tests": "166 passed (test_b5_conflict_radar_evidence_ui.py 36, test_week4_pipeline_api.py 18, test_b4_activation_level_alignment.py 28, test_a3_unclassified_findings_control.py 58)",
+      "full_backend_regression": "not re-run -- zero Python files changed this task, consistent with the immediately-preceding CSS-only task's own precedent",
+      "ruff": "not run -- no Python file changed"
+    },
+    "declarations": {
+      "B5_IMPLEMENTATION_COMPLETE": true,
+      "B5_INVALIDATION_CONTENT_COVERAGE_PARTIAL": true,
+      "B5_FORMAL_PRODUCT_OWNER_ACCEPTANCE_PENDING": true,
+      "B5_FIVE_UI_REGIONS": "PASS",
+      "COUNTER_TARGET_ROUTING": "PASS",
+      "MISSING_EVIDENCE_DISPLAY": "PASS",
+      "INVALIDATION_DISPLAY": "PASS",
+      "HISTORICAL_COMPATIBILITY": "PASS",
+      "REAL_SAVED_RUN_RENDER": "PASS",
+      "BROWSER_VISUAL_VERIFICATION": "NOT_AVAILABLE",
+      "PROVIDER_CALLS": 0,
+      "TRADINGAGENTS_CALLS": 0,
+      "SUBAGENTS": 0,
+      "COMMIT": "none",
+      "PUSH": "none"
+    }
+  },
+  "final_verification_pass_2026_08_14": {
+    "task": "执行 B5 最终验证收尾 (final verification wrap-up, no scope expansion)",
+    "test_count_correction": "19 component tests (16 ConflictEvidenceSections.test.tsx + 3 ConflictCard.test.tsx) + 3 layout tests (styles.layout.test.ts) = 22 total. No more ambiguous bare '19'.",
+    "browser_visual_verification": {
+      "status": "PASS",
+      "mechanism": "Repository's own Playwright (@playwright/test, Chromium cached locally) driven via a standalone script using chromium.launch() directly against the already-running dev backend (127.0.0.1:8001) and Vite dev server (127.0.0.1:5175) -- NOT via `npx playwright test` / playwright.config.ts, whose default webServer launches scripts/run_w5_demo.sh (a full demo environment on different ports that must not be triggered here).",
+      "checks_passed": 17,
+      "checks_total": 17,
+      "checks": [
+        "page loads the real Conflict Radar for this run with zero console errors",
+        "no CONFLICTS_CORRUPTED / missing-required-fields / historical-unavailable text",
+        "at least two .evidence-ui-row containers present (Bull|Bear, Counter|Missing) -- found 12",
+        "evidence-ui-row[0] renders as two grid columns on desktop",
+        "evidence-ui-row[1] renders as two grid columns on desktop",
+        "Invalidation Conditions headings present -- count=8",
+        "Qualification gaps renders as its own titled section -- count=4",
+        "no horizontal page overflow at 1280px",
+        "A101 vs A304 candidate card present",
+        "A101 shows 'hyperscaler capex slows'",
+        "A101 shows 'GPU demand weakens'",
+        "A101 shows 'revenue growth decelerates'",
+        "A101 shows 'AI demand already priced in'",
+        "A101 shows source John / version v0.1",
+        "evidence-ui-row collapses to one column under 640px",
+        "at least one 'Show all' control present -- count=8",
+        "clicking a section's 'Show all' toggles that same button to 'Show less'"
+      ],
+      "screenshots_captured": [
+        "b5_conflict_radar_full.png (1280px)",
+        "b5_conflict_radar_narrow.png (480px)"
+      ],
+      "screenshots_committed_to_repo": false,
+      "note": "Both screenshots visually inspected directly; not represented as anything other than what they are."
+    },
+    "official_full_repository_regression": {
+      "source": ".github/workflows/ci.yml (also documented in README_DEV.md) -- a 3-job matrix, not plain pytest",
+      "backend_offline": {
+        "command": "COMQUTOR_DATABASE_URL=\"\" COMQUTOR_ENV=\"\" python -m pytest -m \"not integration\" -q",
+        "passed": 3563,
+        "failed": 3,
+        "skipped": 1,
+        "deselected": 47,
+        "duration_seconds": 708.13,
+        "failures": [
+          "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+          "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+          "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+        ],
+        "all_failures_pre_existing_and_unrelated": true
+      },
+      "frontend": {
+        "command": "npm run typecheck && npm run lint && npm run test -- --run && npm run build",
+        "typecheck": "clean",
+        "lint_bare": "3 errors, 2 warnings -- all inside frontend/.vite/deps/* (dependency cache, not source)",
+        "lint_src_only": "clean (npx eslint src)",
+        "test": "199 passed, 19 files, 0 failed",
+        "build": "clean"
+      },
+      "postgres_integration": {
+        "command": "python -m pytest tests/test_agent_outputs_postgres_integration.py tests/test_graph_persistence_postgres_integration.py tests/test_research_progress_postgres_integration.py tests/test_research_runs_postgres_integration.py tests/test_w5_1b_postgres_integration.py tests/test_week4_postgres_persistence.py -q",
+        "database": "local Docker Postgres, COMQUTOR_TEST_DATABASE_URL from .env, dedicated comqutor_alpha_test database",
+        "passed": 44,
+        "failed": 1,
+        "failures": [
+          "tests/test_w5_1b_postgres_integration.py::test_migration_0004_exists"
+        ],
+        "failure_newly_discovered_this_session": true,
+        "failure_explanation": "Hardcoded, exact 5-entry MIGRATIONS list assertion is stale -- a 6th migration (0006_create_entity_alpha_exposures) was added in an already-committed change and this assertion was never updated. Neither migrations.py nor this test file appears in git status at all (fully committed base state) -- unrelated to B1-B5 or this task."
+      },
+      "combined_totals": {
+        "passed": 3806,
+        "failed": 4,
+        "skipped": 1,
+        "deselected": 47
+      },
+      "all_failures_pre_existing": true,
+      "new_failures_introduced_by_this_task": 0,
+      "skip_xfail_delete_loosen_used": false
+    },
+    "declarations": {
+      "B5_IMPLEMENTATION_COMPLETE": true,
+      "B5_INVALIDATION_CONTENT_COVERAGE_PARTIAL": true,
+      "B5_FORMAL_PRODUCT_OWNER_ACCEPTANCE_PENDING": true,
+      "BROWSER_VISUAL_VERIFICATION": "PASS",
+      "FULL_REPOSITORY_REGRESSION": "backend-offline 3563/3/1/47; frontend 199/0; postgres-integration 44/1 (pre-existing)",
+      "PROVIDER_CALLS": 0,
+      "TRADINGAGENTS_CALLS": 0,
+      "COMMIT": "none",
+      "PUSH": "none"
+    }
+  }
 }

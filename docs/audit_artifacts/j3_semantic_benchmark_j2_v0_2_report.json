@@ -1,0 +1,437 @@
+{
+  "schema_version": "j3_semantic_benchmark_j2_v0_2_report.v1",
+  "task": "J3_PROVISIONAL_SEMANTIC_BENCHMARK_INTEGRATION + J2_V0.2_EVALUATION_CONTRACT_ALIGNMENT",
+  "branch": "comqutor-structure-layer",
+  "head_before": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "head_after": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "worktree_preserved": true,
+  "commit": "none",
+  "push": "none",
+  "subagents_used": 0,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "files_added": [
+    "comqutor_alpha/evaluation/j3_semantic_benchmark.py",
+    "comqutor_alpha/regression/semantic_benchmark.py",
+    "comqutor_alpha/regression/labels_v2.py",
+    "comqutor_alpha/regression/evaluation_contract.py",
+    "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+    "comqutor_alpha/config/j3_provisional_semantic_benchmark_v0.1.json",
+    "tests/test_j3_semantic_benchmark_j2_v0_2.py",
+    "docs/audit_artifacts/j3_semantic_benchmark_j2_v0_2_report.md",
+    "docs/audit_artifacts/j3_semantic_benchmark_j2_v0_2_report.json"
+  ],
+  "files_extended_additively": [
+    "comqutor_alpha/regression/report.py",
+    "scripts/run_regression.py"
+  ],
+  "files_never_touched_this_segment": [
+    "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+    "comqutor_alpha/regression/labels.py",
+    "comqutor_alpha/regression/run_selection.py",
+    "comqutor_alpha/regression/evaluator.py",
+    "comqutor_alpha/structure_engine/week2_llm.py (B1 prompt)",
+    "comqutor_alpha/structure_engine/evidence_stance.py (5-value vocabulary)",
+    "comqutor_alpha/conflict_engine/* (B2 admissibility, ConflictScore)",
+    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (canonical taxonomy)"
+  ],
+  "j3_benchmark": {
+    "output_path": "comqutor_alpha/config/j3_provisional_semantic_benchmark_v0.1.json",
+    "schema_version": "j3.provisional_semantic_benchmark.v0.1",
+    "authority": "independent_llm_provisional",
+    "human_review_performed": false,
+    "john_approved": false,
+    "row_count": 50,
+    "stance_distribution": {
+      "supports_alpha": 26,
+      "opposes_alpha": 16,
+      "mentions_alpha": 5,
+      "neutral_background": 1,
+      "supports_counter_alpha": 2
+    },
+    "confidence_distribution": {
+      "medium": 12,
+      "high": 38
+    }
+  },
+  "semantic_comparison": {
+    "row_count": 50,
+    "stance_distribution": {
+      "supports_alpha": 26,
+      "opposes_alpha": 16,
+      "mentions_alpha": 5,
+      "neutral_background": 1,
+      "supports_counter_alpha": 2
+    },
+    "confidence_distribution": {
+      "medium": 12,
+      "high": 38
+    },
+    "independent_vs_b1_llm_agreement_count": 39,
+    "independent_vs_b1_llm_agreement_rate": 0.78,
+    "independent_vs_deterministic_agreement_count": 22,
+    "independent_vs_deterministic_agreement_rate": 0.44,
+    "both_agree_count": 18,
+    "b1_llm_only_count": 21,
+    "deterministic_only_count": 4,
+    "neither_count": 7,
+    "both_agree_rows": [
+      "evrs-001",
+      "evrs-010",
+      "evrs-012",
+      "evrs-014",
+      "evrs-015",
+      "evrs-018",
+      "evrs-021",
+      "evrs-024",
+      "evrs-025",
+      "evrs-028",
+      "evrs-032",
+      "evrs-033",
+      "evrs-035",
+      "evrs-037",
+      "evrs-041",
+      "evrs-046",
+      "evrs-048",
+      "evrs-050"
+    ],
+    "b1_llm_only_rows": [
+      "evrs-002",
+      "evrs-003",
+      "evrs-004",
+      "evrs-005",
+      "evrs-009",
+      "evrs-011",
+      "evrs-016",
+      "evrs-017",
+      "evrs-019",
+      "evrs-022",
+      "evrs-023",
+      "evrs-027",
+      "evrs-029",
+      "evrs-030",
+      "evrs-031",
+      "evrs-038",
+      "evrs-039",
+      "evrs-043",
+      "evrs-044",
+      "evrs-047",
+      "evrs-049"
+    ],
+    "deterministic_only_rows": [
+      "evrs-006",
+      "evrs-008",
+      "evrs-013",
+      "evrs-020"
+    ],
+    "neither_rows": [
+      "evrs-007",
+      "evrs-026",
+      "evrs-034",
+      "evrs-036",
+      "evrs-040",
+      "evrs-042",
+      "evrs-045"
+    ],
+    "strict_reversal_rows": [
+      "evrs-002",
+      "evrs-003",
+      "evrs-019",
+      "evrs-027",
+      "evrs-039",
+      "evrs-043",
+      "evrs-047"
+    ],
+    "disagreement_rows": [
+      "evrs-006",
+      "evrs-007",
+      "evrs-008",
+      "evrs-013",
+      "evrs-020",
+      "evrs-026",
+      "evrs-034",
+      "evrs-036",
+      "evrs-040",
+      "evrs-042",
+      "evrs-045"
+    ],
+    "support_pool_changes": {
+      "false_support_positive_count": 0,
+      "false_support_positive_rows": [],
+      "false_support_negative_count": 4,
+      "false_support_negative_rows": [
+        "evrs-020",
+        "evrs-026",
+        "evrs-034",
+        "evrs-040"
+      ]
+    }
+  },
+  "reversal_rows_support_original_b1_llm": true,
+  "j2_v0_1": {
+    "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+    "status": "preserved unchanged, remains the CLI default",
+    "sha256": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1"
+  },
+  "j2_v0_2": {
+    "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+    "label_version": "j2.provisional.v0.2",
+    "per_ticker_conflict_categorization": {
+      "NVDA": {
+        "required_conflicts": [],
+        "conditional_conflicts": [
+          "A101__A304",
+          "A301__A304"
+        ],
+        "product_decision_pending": [],
+        "remove_while_undeclared": [],
+        "allowed_conflicts": []
+      },
+      "QQQ": {
+        "required_conflicts": [],
+        "conditional_conflicts": [
+          "A001__A501"
+        ],
+        "product_decision_pending": [],
+        "remove_while_undeclared": [],
+        "allowed_conflicts": []
+      },
+      "MSFT": {
+        "required_conflicts": [],
+        "conditional_conflicts": [],
+        "product_decision_pending": [
+          {
+            "pair_id": "A102__A304",
+            "reason": "Development Plan expectation conflicts with canonical taxonomy."
+          }
+        ],
+        "remove_while_undeclared": [],
+        "allowed_conflicts": []
+      },
+      "SNDK": {
+        "required_conflicts": [],
+        "conditional_conflicts": [
+          "A301__A304"
+        ],
+        "product_decision_pending": [],
+        "remove_while_undeclared": [
+          "A201__A304"
+        ],
+        "allowed_conflicts": []
+      },
+      "TSM": {
+        "required_conflicts": [],
+        "conditional_conflicts": [
+          "A301__A304"
+        ],
+        "product_decision_pending": [],
+        "remove_while_undeclared": [
+          "A201__A304"
+        ],
+        "allowed_conflicts": []
+      },
+      "AMD": {
+        "required_conflicts": [],
+        "conditional_conflicts": [
+          "A101__A304"
+        ],
+        "product_decision_pending": [],
+        "remove_while_undeclared": [
+          "A201__A304"
+        ],
+        "allowed_conflicts": [
+          "A301__A304"
+        ]
+      }
+    }
+  },
+  "six_ticker_shadow_evaluation": {
+    "source": "real saved outputs/runs/, offline Architecture Replay only",
+    "cli_invocation": "python scripts/run_regression.py --tickers NVDA QQQ MSFT SNDK TSM AMD --labels-v2 comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml --semantic-benchmark comqutor_alpha/config/j3_provisional_semantic_benchmark_v0.1.json --report-path outputs/regression/regression_report_v0.2.json",
+    "report_path": "outputs/regression/regression_report_v0.2.json",
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "overall_execution_status": "complete",
+    "results": [
+      {
+        "ticker": "NVDA",
+        "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+        "run_selection_status": "selected",
+        "offline_reprocess_status": "completed",
+        "stance_source": "deterministic_baseline",
+        "artifact_completeness": "pass",
+        "main_conflict_match": true,
+        "missing_expected": [
+          "A103",
+          "A201"
+        ],
+        "unexpected_alphas": [
+          "A001"
+        ]
+      },
+      {
+        "ticker": "QQQ",
+        "run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+        "run_selection_status": "selected",
+        "offline_reprocess_status": "completed",
+        "stance_source": "deterministic_baseline",
+        "artifact_completeness": "fail",
+        "main_conflict_match": false,
+        "missing_expected": [
+          "A001",
+          "A003"
+        ],
+        "unexpected_alphas": [
+          "A301"
+        ]
+      },
+      {
+        "ticker": "MSFT",
+        "run_id": "0cb43bae-1a4d-4003-bb29-55d420498842",
+        "run_selection_status": "selected",
+        "offline_reprocess_status": "completed",
+        "stance_source": "deterministic_baseline",
+        "artifact_completeness": "fail",
+        "main_conflict_match": false,
+        "missing_expected": [
+          "A101",
+          "A102",
+          "A304"
+        ],
+        "unexpected_alphas": []
+      },
+      {
+        "ticker": "SNDK",
+        "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "run_selection_status": "selected",
+        "offline_reprocess_status": "completed",
+        "stance_source": "deterministic_baseline",
+        "artifact_completeness": "fail",
+        "main_conflict_match": false,
+        "missing_expected": [
+          "A201",
+          "A301",
+          "A304"
+        ],
+        "unexpected_alphas": []
+      },
+      {
+        "ticker": "TSM",
+        "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+        "run_selection_status": "selected",
+        "offline_reprocess_status": "completed",
+        "stance_source": "deterministic_baseline",
+        "artifact_completeness": "fail",
+        "main_conflict_match": false,
+        "missing_expected": [
+          "A103",
+          "A304"
+        ],
+        "unexpected_alphas": []
+      },
+      {
+        "ticker": "AMD",
+        "run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+        "run_selection_status": "selected",
+        "offline_reprocess_status": "completed",
+        "stance_source": "deterministic_baseline",
+        "artifact_completeness": "fail",
+        "main_conflict_match": false,
+        "missing_expected": [
+          "A101",
+          "A201"
+        ],
+        "unexpected_alphas": [
+          "A501"
+        ]
+      }
+    ],
+    "evaluation_contract_summary": {
+      "j2_label_version": "j2.provisional.v0.2",
+      "evaluated_tickers": [
+        "NVDA"
+      ],
+      "not_evaluable_tickers": [
+        "QQQ",
+        "MSFT",
+        "SNDK",
+        "TSM",
+        "AMD"
+      ],
+      "product_decision_pending_tickers": [
+        "MSFT"
+      ]
+    }
+  },
+  "source_artifact_integrity": {
+    "note": "SHA-256 identical before and after this segment's work (git status clean / replay's own before-after check both confirm)",
+    "hashes": {
+      "j3_llm_blind_review_packet.json": "53bfa2e6d6299bb4d445b130d2f30c730796c339c3d1ea71f7c7f7ccbcbe609b",
+      "j3_llm_comparison_reference.json": "6c57805d0d3d2bae19fd06e8d9fdd3e288ed67d8ca17107fa9d418792f891494",
+      "b1_llm_stance_50_validation_after_parser_fix.csv": "9fb312877d5f8692142b41289b1ea88c8853a9cce4a6db2eede921b83754abe2",
+      "j2_provisional_regression_labels_v0.1.yaml": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1",
+      "alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c"
+    },
+    "saved_run_raw_agent_outputs_hash_before_equals_after": {
+      "NVDA": true,
+      "QQQ": true,
+      "MSFT": true,
+      "SNDK": true,
+      "TSM": true,
+      "AMD": true
+    }
+  },
+  "tests": {
+    "new_file": "tests/test_j3_semantic_benchmark_j2_v0_2.py",
+    "new_file_test_count": 61,
+    "new_file_result": "61 passed",
+    "covers_task_checklist_items": "all 43 (A1-10, B11-18, C19-28, D29-35, E36-43), several split into multiple sub-cases for precision",
+    "related_suites_rerun": {
+      "tests/test_a4_regression_runner.py": "41 passed (unchanged, confirms report.py extension stayed backward compatible)",
+      "tests/test_j3_review_packet_export.py": "29 passed (unchanged)"
+    },
+    "full_backend_regression": {
+      "command": "python -m pytest --tb=short -q",
+      "result": "3546 passed, 3 failed (pre-existing, unrelated), 47 skipped, 69 subtests passed",
+      "baseline_before_this_segment": "3415 passed / 3 pre-existing failed / 47 skipped (as of A3 checkpoint, predating A4/J3-export/this segment's own new tests)",
+      "delta_explained": "+41 (A4) +29 (J3-export) +61 (this segment) = +131 = 3546 - 3415",
+      "pre_existing_failures_unchanged": [
+        "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+        "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+        "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+      ],
+      "new_failures_introduced_by_this_segment": 0
+    },
+    "ruff": "clean on all 7 new/modified Python files this segment",
+    "frontend": "not modified this segment -- not rerun"
+  },
+  "non_goals_honored": [
+    "no new Provider LLM review",
+    "no new TradingAgents analysis",
+    "no J4 paid six-ticker live run",
+    "no production stance correction",
+    "no historical run mutation",
+    "no taxonomy revision",
+    "no MSFT A102__A304 product approval",
+    "no B1 prompt tuning",
+    "no deterministic heuristic expansion",
+    "no B2 threshold tuning",
+    "no frontend feature",
+    "no repository cleanup",
+    "no commit",
+    "no push"
+  ],
+  "declarations": {
+    "J3_PROVISIONAL_SEMANTIC_BENCHMARK_INTEGRATION": "COMPLETE",
+    "J2_V0_2_EVALUATION_CONTRACT": "COMPLETE",
+    "A4_V0_2_SHADOW_EVALUATION": "COMPLETE",
+    "J3_HUMAN_REVIEW": "NOT PERFORMED",
+    "J3_FORMAL_JOHN_APPROVAL": "NOT CLAIMED",
+    "J2_LABELS": "REMAIN PROVISIONAL",
+    "MSFT_A102__A304": "PRODUCT DECISION PENDING",
+    "PROVIDER_CALLS": 0,
+    "TRADINGAGENTS_CALLS": 0,
+    "COMMIT": "none",
+    "PUSH": "none"
+  }
+}

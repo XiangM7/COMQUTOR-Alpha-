@@ -1,5 +1,58 @@
 # B5 Conflict Radar Evidence UI — Implementation and Validation Report
 
+## UPDATE (2026-08-14, follow-on task: "Complete the Missing B5 Conflict Radar Frontend")
+
+**Correction to the record, stated plainly first:** the follow-on task that produced this update was
+commissioned on the basis of a claim in `docs/audit_artifacts/live_run_5ffe121a_pipeline_failure_report.md`
+(§14.7) that "`ConflictRadarPage.tsx` does not render `main_conflict.evidence_ui`'s `counter_evidence`,
+`missing_evidence`, `qualification_gaps`, or `invalidation_conditions` at all." **That claim was incorrect.**
+It was based on grepping `ConflictRadarPage.tsx` directly and did not check the child components
+(`ConflictCard.tsx` → `ConflictEvidenceSections.tsx`, `CandidateConflictCard.tsx` → the same). This report
+(original body below, dated 2026-08-13) already documents that all five UI regions were built, backend-
+tested (36/36), and visually verified against a real saved run — correctly. `docs/audit_artifacts/
+live_run_5ffe121a_pipeline_failure_report.md` has been corrected in place (see its own §18 addendum).
+
+**What this follow-on task actually found and did**, having re-read the real components in full:
+
+1. All five regions (Bull/Bear/Counter/Missing Evidence, Invalidation Conditions), the Main/Admitted/
+   Candidate/Not-evaluated distinction, the B2-gate-failure detail on candidate cards, the historical
+   "not available" fallback (with legacy bull/bear still rendering), and independent per-section Show-all/
+   Show-less state were **already correctly implemented** — confirmed by re-reading
+   `ConflictEvidenceSections.tsx` and `CandidateConflictCard.tsx` in full and by fresh real-payload
+   rendering (§17 below).
+2. **A real, narrower gap did exist**: `EvidenceFactCard` did not render `target_alpha_id`,
+   `evidence_stance_version`, `stance_confidence_band`, or `source_agent_output_ids` (provenance) even
+   though the API already returns them and the TypeScript type already models them — additive fields, now
+   rendered (§18.1).
+3. **A real, minor inconsistency existed**: `QualificationGapsSection` returned `null` (hid the section
+   entirely) for a genuinely-empty, schema-guaranteed array, unlike the sibling Missing Evidence section's
+   explicit "No B2 evidence gaps identified." — now shows "No qualification gaps identified." for the same
+   case, consistent with the rest of the panel (§18.1).
+4. **A real, structural gap existed**: the task's requested two-column pairing (Bull|Bear as one row,
+   Counter|Missing as another, Invalidation full width) was not implemented — the five regions rendered as
+   a plain single-column stack. Now implemented as `.evidence-ui-row` (§18.2).
+5. **The most significant real gap**: §13 of this report's original body candidly states frontend coverage
+   for this feature came from "live real-run visual verification... rather than additional synthetic
+   component tests" — i.e., **there was no permanent, automated, CI-reproducible test file for
+   `ConflictEvidenceSections`/`CandidateConflictCard` at all**, only a one-time Playwright pass. This is now
+   closed: 19 component tests + 3 layout tests = 22 total new/changed permanent tests (§18.3).
+
+Status (unchanged from the original conclusion, now additionally confirmed against a second real run):
+
+```
+B5 IMPLEMENTATION COMPLETE
+B5 INVALIDATION CONTENT COVERAGE PARTIAL
+B5 FORMAL PRODUCT OWNER ACCEPTANCE PENDING
+```
+
+See §17-20 below for this follow-on task's real-payload verification, exact files changed, exact test
+results, and final declarations. §§1-16 above the original "Status:" line are preserved unmodified as the
+2026-08-13 original implementation record — still accurate for everything they describe.
+
+---
+
+# (Original report body, 2026-08-13, preserved below)
+
 Status:
 
 ```
@@ -439,3 +492,270 @@ to B1/B2/B3/B4's own authoritative results. Only A101 currently carries
 Product-Owner-approved invalidation content; this is an honest, expected,
 non-blocking content gap, not a defect, and not something this report
 claims Product Owner acceptance on behalf of anyone.
+
+---
+
+# Follow-on task (2026-08-14): additive fields, layout, and permanent tests
+
+## 17. Real-payload verification against a second run (5ffe121a)
+
+Live, read-only, against the just-restarted backend
+(`docs/audit_artifacts/live_run_5ffe121a_pipeline_failure_report.md` §14.1), `GET /api/research/
+5ffe121a-68fd-473b-82b5-c9465332d8a2/conflicts` — every real pair rendered through the actual
+`ConflictCard`/`CandidateConflictCard` components without modification, no crash:
+
+| Pair | Status | Bull | Bear | Counter | Missing | Qualification | Invalidation |
+|---|---|---:|---:|---:|---:|---:|---|
+| A301__A304 | Main | 6 | 7 | 1 | 0 | 0 | bull(A301) not_defined / bear(A304) not_defined |
+| A304__A601 | Admitted | 11 | 7 | 2 | 0 | 0 | bull(A304) not_defined / bear(A601) not_defined |
+| A101__A304 | Candidate (reached B2) | 1 | 7 | 7 | 2 | 1 | bull(A101) **approved** (John, v0.1) / bear(A304) not_defined |
+| A001__A501 | Not evaluated (suppressed, `MISSING_LEFT_EVIDENCE`) | n/a | n/a | n/a | n/a | n/a | n/a |
+| A003__A501 | Not evaluated (rejected, `DIRECTION_ROLE_UNRESOLVED`) | n/a | n/a | n/a | n/a | n/a | n/a |
+| A501__A601 | Not evaluated (rejected, `DIRECTION_ROLE_UNRESOLVED`) | n/a | n/a | n/a | n/a | n/a | n/a |
+
+All 6 of this run's declared pairs consumed correctly: the 3 that reached B2 (main, one other admitted, one
+candidate) show real, non-empty region content where the backend has it; the 3 that never reached B2 show
+honest `n/a` (no admissibility, no evidence_ui — never a fabricated B2 verdict). `A101__A304`'s candidate
+card is the one real, non-synthetic confirmation that the approved-A101-content path renders correctly
+against genuine production data, independent of the synthetic A101 fixture test in §18.3.
+
+Method: a temporary, ad-hoc test file (`frontend/src/__adhoc_b5_real_payload_verification.test.tsx`) loaded
+the real captured JSON and rendered every pair once; deleted immediately after recording this table — not
+part of the permanent suite (same pattern as the live-run report's own visual-verification method).
+
+```
+BROWSER_VISUAL_VERIFICATION_NOT_AVAILABLE
+```
+
+No browser-automation tool is available in this task's environment (unlike the original 2026-08-13 pass,
+which used Playwright). The real-payload component-render table above is the closest available substitute
+and is reported as such, not represented as a browser screenshot.
+
+## 18. Changes made this follow-on task
+
+### 18.1 `frontend/src/components/ConflictEvidenceSections.tsx`
+
+- `EvidenceFactCard` now also renders `target_alpha_id`, `evidence_stance_version` (appended to the stance
+  label), `stance_confidence_band` (when present), and `source_agent_output_ids` (provenance, when
+  present) — all already returned by the API and already typed, simply not rendered before.
+- `QualificationGapsSection` now renders "No qualification gaps identified." for a genuinely empty (not
+  absent — `qualification_gaps` is a required field, only reached once the whole `evidence_ui` block is
+  present) array, instead of returning `null` and hiding the region entirely.
+
+### 18.2 Two-column row layout
+
+`ConflictEvidenceSections`'s top-level return now groups Bull+Bear and Counter+Missing into
+`.evidence-ui-row` (new CSS rule: `display: grid; grid-template-columns: repeat(2, minmax(0, 1fr))`,
+collapsing to `1fr` under `@media (max-width: 640px)`, matching the same pattern the prior task's Alpha-card
+fix already established). Invalidation Conditions (bull + bear) pair up the same way, full width of the
+outer single-column `.conflict-evidence-ui`. Qualification Gaps remains a standalone, full-width section
+(never crammed into the Counter|Missing row). No visual style/color/badge convention changed.
+
+### 18.3 New permanent tests (did not exist before this task)
+
+- `frontend/src/components/ConflictEvidenceSections.test.tsx` (new file, 16 tests): all five regions
+  present; Qualification Gaps separate from Missing Evidence; Counter Evidence grouped and labeled by
+  target side; an unrelated counter-target Alpha never mis-routed into either group; Missing Evidence
+  shows current/required/deficit; admitted-conflict empty Missing Evidence shows "No B2 evidence gaps
+  identified."; empty Qualification Gaps shows its own message; A101's four conditions render **verbatim**
+  with correct source/version; an unapproved Alpha shows the pending message; Show-all/Show-less never
+  drops evidence and Bull/Bear/Counter expand state is independent; a single Evidence Fact's raw duplicate
+  claims never render as two cards; the new additive meta fields render when present.
+- `frontend/src/components/ConflictCard.test.tsx` (+3 tests): historical payload (no `evidence_ui`) never
+  crashes, shows the honest "not available for this historical run" note, never fabricates a verified-empty
+  Missing/Qualification/Invalidation result, and still renders legacy bull/bear evidence; the note disappears
+  once `evidence_ui` is present; the card's own authored copy (badges/headers/labels — never quoted
+  evidence text, which is real backend data shown verbatim) contains no trading recommendation or profit
+  guarantee.
+- `frontend/src/styles.layout.test.ts` (+3 tests): `.evidence-ui-row` is a fixed two-column grid on desktop,
+  collapses to one column under the narrow-screen media query, and evidence items keep the safe text-wrap
+  property.
+
+Total new/changed frontend tests this task: **22** (16 + 3 + 3).
+
+## 19. Verification run this task
+
+```
+frontend/src/components/ConflictEvidenceSections.test.tsx  16 passed
+frontend/src/components/ConflictCard.test.tsx                7 passed (4 original + 3 new)
+frontend/src/styles.layout.test.ts                            8 passed (5 original + 3 new)
+Full frontend suite (npx vitest run)                        199 passed, 19 files, 0 failed
+  (was 177/18 before this task -- delta of +22 matches exactly: 16 + 3 + 3)
+npx tsc --noEmit                                             clean
+npm run build                                                 clean (dist/assets/index-*.css 18.46 kB, index-*.js 276.33 kB gzip 81.03 kB)
+```
+
+Backend: **zero Python files changed this task** (confirmed via `git status --porcelain` — every backend
+file already staged/modified belongs to earlier segments in this same session, none touched further here).
+Per the same reasoning already applied to the immediately-preceding CSS-only task, the full ~3500-test
+backend regression was not re-run for a change that touches no backend code; the relevant backend B5/API
+invariant suites were re-run directly to confirm no regression:
+
+```
+tests/test_b5_conflict_radar_evidence_ui.py       36 passed
+tests/test_week4_pipeline_api.py                  18 passed
+tests/test_b4_activation_level_alignment.py       28 passed
+tests/test_a3_unclassified_findings_control.py    58 passed
+(166 passed total)
+```
+
+`Ruff`: not run — no Python file changed.
+
+```
+PROVIDER_CALLS = 0
+TRADINGAGENTS_CALLS = 0
+SUBAGENTS = 0
+COMMIT = none
+PUSH = none
+```
+
+## 20. Files changed this follow-on task
+
+```
+frontend/src/components/ConflictEvidenceSections.tsx   (additive fields, empty-state fix, row layout)
+frontend/src/components/ConflictEvidenceSections.test.tsx   (new, 16 tests)
+frontend/src/components/ConflictCard.test.tsx           (+3 tests)
+frontend/src/styles.css                                  (.evidence-ui-row + narrow-screen override)
+frontend/src/styles.layout.test.ts                       (+3 tests)
+docs/audit_artifacts/b5_conflict_radar_evidence_ui_report.md    (this update)
+docs/audit_artifacts/b5_conflict_radar_evidence_ui_report.json  (this update)
+docs/audit_artifacts/live_run_5ffe121a_pipeline_failure_report.md   (correction, see its own addendum)
+```
+
+No backend file, no saved run artifact, no database row was touched. No new research run was created. No
+Provider/LLM/TradingAgents call was made.
+
+---
+
+# Final verification pass (2026-08-14, second follow-on: "执行 B5 最终验证收尾")
+
+No implementation scope was added in this pass — verification and reporting only, per instruction.
+
+## 21. Test-count correction
+
+§18.3 above previously read "closed: 19 new permanent tests" — ambiguous against the "22" used elsewhere
+in this same report (§18.3's own final sentence, §19). Corrected to the unambiguous breakdown used
+everywhere else in this report: **19 component tests** (16 in `ConflictEvidenceSections.test.tsx` + 3 in
+`ConflictCard.test.tsx`) **+ 3 layout tests** (`styles.layout.test.ts`) **= 22 total.**
+
+## 22. Real browser verification (Playwright) — this time genuinely available
+
+The prior pass reported `BROWSER_VISUAL_VERIFICATION = NOT_AVAILABLE` because this task's own tool access
+has no built-in screenshot/browser tool. That conclusion did not check whether the **repository itself**
+ships a usable browser-automation mechanism — it does: `frontend/playwright.config.ts` +
+`@playwright/test` (Chromium already downloaded/cached locally) + an existing `e2e/w5-demo.spec.ts`.
+
+`playwright.config.ts`'s own `webServer` launches `scripts/run_w5_demo.sh` (a full demo environment, on
+different ports, that this task must not trigger — no new stock analysis). So `npx playwright test` was
+**not** used. Instead, a standalone script imported `@playwright/test`'s `chromium.launch()` directly and
+pointed it at the **already-running** dev backend (`127.0.0.1:8001`, the same restarted process from
+`live_run_5ffe121a_pipeline_failure_report.md` §14.1) and Vite dev server (`127.0.0.1:5175`) — a real
+Chromium browser, driving the real page, over the real running servers, for the real saved run. The script
+was deleted after use (ad-hoc, not part of the permanent suite, same pattern as the real-payload
+verification in §17).
+
+**17/17 checks passed:**
+
+```
+PASS  page loads the real Conflict Radar for this run with zero console errors
+PASS  no CONFLICTS_CORRUPTED / missing-required-fields / historical-unavailable text
+PASS  at least two .evidence-ui-row containers present (Bull|Bear, Counter|Missing)  -- found 12
+PASS  .evidence-ui-row[0] renders as two grid columns on desktop  -- computed columns=2
+PASS  .evidence-ui-row[1] renders as two grid columns on desktop  -- computed columns=2
+PASS  Invalidation Conditions headings are present  -- count=8
+PASS  Qualification gaps renders as its own titled section  -- count=4
+PASS  no horizontal page overflow at 1280px (long text wraps, never escapes)
+PASS  A101 vs A304 candidate card is present on the page
+PASS  A101 candidate card shows John's approved condition: "hyperscaler capex slows"
+PASS  A101 candidate card shows John's approved condition: "GPU demand weakens"
+PASS  A101 candidate card shows John's approved condition: "revenue growth decelerates"
+PASS  A101 candidate card shows John's approved condition: "AI demand already priced in"
+PASS  A101 candidate card shows source John / version v0.1
+PASS  evidence-ui-row collapses to one column under 640px  -- computed columns=1
+PASS  at least one 'Show all' control is present -- count=8
+PASS  clicking a section's 'Show all' toggles that same button to 'Show less'
+```
+
+Two full-page screenshots were captured (desktop 1280px and narrow 480px) and visually inspected directly:
+both confirm the two-column desktop layout, the dashed-border "Not evaluated"/"Candidate conflict" styling
+distinct from solid admitted/main cards, and a genuinely single-column narrow layout with no overflow.
+Screenshots are session-scratch files, not committed to the repository.
+
+```
+BROWSER VISUAL VERIFICATION = PASS
+```
+
+## 23. Official full-repository regression
+
+`.venv` `pytest`/`npm` ad hoc invocations in earlier passes were not the repository's own defined
+regression. The actual definition is a 3-job matrix (`.github/workflows/ci.yml`, also documented in
+`README_DEV.md`):
+
+**`backend-offline`** — `COMQUTOR_DATABASE_URL="" COMQUTOR_ENV="" python -m pytest -m "not integration" -q`:
+
+```
+3563 passed, 3 failed, 1 skipped, 47 deselected, 69 subtests passed in 708.13s (0:11:48)
+```
+
+The 3 failures are the same, already-documented, unrelated pre-existing set: `structured_output_shadow/
+test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline`,
+`test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider`,
+`test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded`. The 47 "deselected" are exactly the
+integration-marked tests that show as SKIPPED under a plain, unmarked `pytest` invocation — same tests,
+correctly excluded here by `-m "not integration"` instead.
+
+**`frontend`** — `npm run typecheck && npm run lint && npm run test -- --run && npm run build`:
+
+```
+typecheck: clean
+lint (bare `eslint .`): 3 errors, 2 warnings -- all inside frontend/.vite/deps/* (Vite's local
+  third-party dependency cache, not source code). `npx eslint src` (the actual source tree): clean,
+  0 problems. Pre-existing, config-level, unrelated to this or any other segment's own code.
+test -- --run: 199 passed, 19 files, 0 failed
+build: clean
+```
+
+**`postgres-integration`** — the 6 `tests/test_*_postgres_integration.py`/`test_week4_postgres_persistence.py`
+files, against the real local Postgres already configured for dev (`COMQUTOR_TEST_DATABASE_URL` from `.env`,
+reachable, a dedicated `comqutor_alpha_test` database — never the dev/production database used elsewhere in
+this session):
+
+```
+44 passed, 1 failed in 1.60s
+```
+
+The 1 failure, **newly surfaced by actually running this job for the first time this session**:
+`tests/test_w5_1b_postgres_integration.py::test_migration_0004_exists` asserts an exact, hardcoded 5-entry
+migration list; a 6th migration (`0006_create_entity_alpha_exposures`) was added in an already-committed
+change and this specific assertion was never updated. Confirmed via `git status --porcelain` that neither
+`comqutor_alpha/storage/db/migrations.py` nor this test file appears at all (fully committed base state,
+predating every segment in this session, unrelated to B1-B5 or this task). Not skipped, xfailed, or
+loosened — recorded here and in project memory as a 4th known pre-existing failure.
+
+**Combined totals across all three official jobs:** `3563 + 199 + 44 = 3806 passed`; `3 + 0 + 1 = 4 failed`
+(all pre-existing, none caused by this task); `1 + 0 + 0 = 1 skipped`; `47 deselected`.
+
+```
+PROVIDER_CALLS = 0
+TRADINGAGENTS_CALLS = 0
+```
+
+No B1/B2/B3/B4 code, `ConflictScore`, admissibility logic, saved run artifact, or database row was
+modified by this verification pass — read-only test execution and one real, already-completed run's data
+rendered in a real browser.
+
+## Final declarations (this verification pass)
+
+```
+B5 IMPLEMENTATION COMPLETE
+B5 INVALIDATION CONTENT COVERAGE PARTIAL
+B5 FORMAL PRODUCT OWNER ACCEPTANCE PENDING
+
+BROWSER VISUAL VERIFICATION = PASS
+FULL REPOSITORY REGRESSION = backend-offline 3563 passed/3 failed/1 skipped/47 deselected;
+  frontend 199 passed/0 failed (typecheck+build clean, lint clean on src/);
+  postgres-integration 44 passed/1 failed (newly-found pre-existing, unrelated)
+PROVIDER_CALLS = 0
+COMMIT = NONE
+PUSH = NONE
+```

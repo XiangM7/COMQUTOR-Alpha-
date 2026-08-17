@@ -38,9 +38,20 @@ function EvidenceFactCard({ item }: { item: ConflictEvidenceUIItem }) {
         {" · "}
         <span>Match {item.representative_match_score.toFixed(2)}</span>
         {" · "}
+        <span>Target Alpha: {item.target_alpha_id}</span>
+        {" · "}
         <span>{item.ticker_specific ? "Ticker-specific" : "Not ticker-specific"}</span>
         {" · "}
-        <span>Stance: {item.evidence_stance} ({stanceMethodLabel(item)})</span>
+        <span>
+          Stance: {item.evidence_stance} ({stanceMethodLabel(item)}
+          {item.evidence_stance_version ? `, ${item.evidence_stance_version}` : ""})
+        </span>
+        {item.stance_confidence_band ? (
+          <>
+            {" · "}
+            <span>Confidence: {item.stance_confidence_band}</span>
+          </>
+        ) : null}
         {item.supports_counter_alpha_id ? (
           <>
             {" · "}
@@ -60,6 +71,12 @@ function EvidenceFactCard({ item }: { item: ConflictEvidenceUIItem }) {
       ) : null}
       <p className="evidence-ui-item-id">
         <code>{item.evidence_fact_group_id}</code>
+        {item.source_agent_output_ids.length > 0 ? (
+          <>
+            {" · Source: "}
+            <code>{item.source_agent_output_ids.join(", ")}</code>
+          </>
+        ) : null}
       </p>
     </li>
   );
@@ -175,25 +192,35 @@ function MissingEvidenceSection({ items }: { items: ConflictMissingEvidenceItem[
 }
 
 function QualificationGapsSection({ items }: { items: ConflictQualificationGapItem[] }) {
-  if (items.length === 0) return null;
+  // `items` is only ever reached once the whole evidence_ui block is
+  // present (see ConflictCard's historical fallback below) -- at that
+  // point qualification_gaps is a required, non-optional field, so an
+  // empty array here is the backend's own explicit "zero gaps" answer,
+  // never a historical/absent-field case standing in for one.
   return (
     <section className="evidence-ui-section qualification-gaps-section">
       <h4>Qualification gaps</h4>
-      <p className="qualification-gaps-note">
-        Not an evidence gap -- an Activation-score shortfall for this side.
-      </p>
-      <ul>
-        {items.map((item, index) => (
-          <li key={`${item.side}-${item.gap_reason_code}-${index}`}>
-            <span>
-              {item.side === "bull" ? "Bull" : "Bear"} ({item.alpha_id})
-            </span>
-            {" — Activation score "}
-            <span>{item.current_value != null ? item.current_value.toFixed(1) : "unavailable"}</span>
-            {` (requires >= ${item.required_value.toFixed(0)})`}
-          </li>
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <p className="evidence-ui-section-empty">No qualification gaps identified.</p>
+      ) : (
+        <>
+          <p className="qualification-gaps-note">
+            Not an evidence gap -- an Activation-score shortfall for this side.
+          </p>
+          <ul>
+            {items.map((item, index) => (
+              <li key={`${item.side}-${item.gap_reason_code}-${index}`}>
+                <span>
+                  {item.side === "bull" ? "Bull" : "Bear"} ({item.alpha_id})
+                </span>
+                {" — Activation score "}
+                <span>{item.current_value != null ? item.current_value.toFixed(1) : "unavailable"}</span>
+                {` (requires >= ${item.required_value.toFixed(0)})`}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   );
 }
@@ -236,25 +263,31 @@ export function ConflictEvidenceSections({
 }) {
   return (
     <div className="conflict-evidence-ui">
-      <EvidenceSection
-        title="Bull Evidence"
-        items={evidenceUi.bull_evidence}
-        emptyMessage="No supporting evidence for the bull structure."
-      />
-      <EvidenceSection
-        title="Bear Evidence"
-        items={evidenceUi.bear_evidence}
-        emptyMessage="No supporting evidence for the bear structure."
-      />
-      <CounterEvidenceSection
-        items={evidenceUi.counter_evidence}
-        bullAlphaId={bullAlphaId}
-        bearAlphaId={bearAlphaId}
-      />
-      <MissingEvidenceSection items={evidenceUi.missing_evidence} />
+      <div className="evidence-ui-row">
+        <EvidenceSection
+          title="Bull Evidence"
+          items={evidenceUi.bull_evidence}
+          emptyMessage="No supporting evidence for the bull structure."
+        />
+        <EvidenceSection
+          title="Bear Evidence"
+          items={evidenceUi.bear_evidence}
+          emptyMessage="No supporting evidence for the bear structure."
+        />
+      </div>
+      <div className="evidence-ui-row">
+        <CounterEvidenceSection
+          items={evidenceUi.counter_evidence}
+          bullAlphaId={bullAlphaId}
+          bearAlphaId={bearAlphaId}
+        />
+        <MissingEvidenceSection items={evidenceUi.missing_evidence} />
+      </div>
       <QualificationGapsSection items={evidenceUi.qualification_gaps} />
-      <InvalidationSection entry={evidenceUi.invalidation_conditions.bull_alpha} roleLabel="the bull alpha" />
-      <InvalidationSection entry={evidenceUi.invalidation_conditions.bear_alpha} roleLabel="the bear alpha" />
+      <div className="evidence-ui-row invalidation-conditions-row">
+        <InvalidationSection entry={evidenceUi.invalidation_conditions.bull_alpha} roleLabel="the bull alpha" />
+        <InvalidationSection entry={evidenceUi.invalidation_conditions.bear_alpha} roleLabel="the bear alpha" />
+      </div>
     </div>
   );
 }

@@ -277,4 +277,107 @@ describe("ConflictRadarPage", () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/only partially complete/i)).toBeInTheDocument());
   });
+
+  // Regression test for docs/audit_artifacts/live_run_5ffe121a_pipeline_failure_report.md
+  // (B5): "Persisted conflict result is missing required fields" must only
+  // ever be shown for a genuinely corrupted/incomplete persisted result --
+  // never for a run whose conflicts payload is actually complete, and
+  // never conflated with the separate "not ready yet" state above.
+  it("shows 'missing required fields' only for a genuinely corrupted persisted result", async () => {
+    vi.spyOn(client, "getResearchConflicts").mockResolvedValue({
+      run_id: "run-1",
+      ticker: null,
+      status: "failed",
+      error_code: "CONFLICTS_CORRUPTED",
+      message: "Persisted conflict result is missing required fields.",
+    });
+    vi.spyOn(client, "getResearchRun").mockResolvedValue({
+      run_id: "run-1",
+      ticker: "NVDA",
+      status: "completed",
+      artifacts: {
+        metadata: true,
+        raw_agent_outputs: true,
+        structured_agent_outputs: true,
+        final_report: false,
+        alpha_matches: true,
+        extracted_structures: true,
+        structured_output_error_logs: false,
+        week2_llm_error_logs: false,
+        week2_pipeline_error_logs: false,
+      },
+      agent_output_count: 1,
+      structured_output_count: 1,
+      structure_graph_status: "ready",
+      dominant_alphas: [],
+      main_conflict: null,
+      conflict_status: "not_ready",
+      summary: "Conflict analysis is not ready for this research run.",
+      data_sanity_status: "not_available",
+      data_sanity_warning_count: 0,
+      data_sanity_critical_count: 0,
+      data_sanity_warnings: [],
+    });
+
+    renderPage();
+    await waitFor(() =>
+      expect(screen.getByText(/persisted conflict result is missing required fields/i)).toBeInTheDocument()
+    );
+    // Distinct from the "not ready yet" wording above -- never the same message.
+    expect(screen.queryByText(/has not been generated for this research run yet/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/only partially complete/i)).not.toBeInTheDocument();
+  });
+
+  it("never shows 'missing required fields' when the conflicts payload is actually complete", async () => {
+    const mainConflict = makeConflict();
+    vi.spyOn(client, "getResearchConflicts").mockResolvedValue({
+      status: "ok",
+      schema_version: "week4.alpha_conflicts.v1",
+      formula_version: "week4.conflict_score.mvp_v1",
+      activation_formula_version: "activation.v2.evidence_local_structure.v1",
+      run_id: "run-1",
+      ticker: "NVDA",
+      conflicts: [mainConflict],
+      main_conflict: mainConflict,
+      arbitration: {
+        declared_pair_count: 1,
+        admitted_count: 1,
+        suppressed_count: 0,
+        rejected_count: 0,
+        candidate_evaluations: [],
+      },
+    });
+    vi.spyOn(client, "getResearchRun").mockResolvedValue({
+      run_id: "run-1",
+      ticker: "NVDA",
+      status: "completed",
+      artifacts: {
+        metadata: true,
+        raw_agent_outputs: true,
+        structured_agent_outputs: true,
+        final_report: false,
+        alpha_matches: true,
+        extracted_structures: true,
+        structured_output_error_logs: false,
+        week2_llm_error_logs: false,
+        week2_pipeline_error_logs: false,
+      },
+      agent_output_count: 2,
+      structured_output_count: 2,
+      structure_graph_status: "ready",
+      dominant_alphas: [],
+      main_conflict: mainConflict,
+      conflict_status: "ready",
+      summary: mainConflict.explanation,
+      data_sanity_status: "not_available",
+      data_sanity_warning_count: 0,
+      data_sanity_critical_count: 0,
+      data_sanity_warnings: [],
+    });
+
+    renderPage();
+    await waitFor(() => expect(screen.getAllByText(mainConflict.explanation).length).toBeGreaterThan(0));
+    expect(screen.queryByText(/missing required fields/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/conflict analysis unavailable/i)).not.toBeInTheDocument();
+  });
 });

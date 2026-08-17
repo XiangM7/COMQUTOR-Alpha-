@@ -138,4 +138,70 @@ describe("ConflictCard", () => {
     expect(screen.getByText("Valuation multiples remain stretched.")).toBeInTheDocument();
     expect(screen.getByText("Valuation multiples look stretched too.")).toBeInTheDocument();
   });
+
+  // Historical payload (no evidence_ui at all): must not crash, must not
+  // fabricate a verified-empty Counter/Missing/Qualification/Invalidation
+  // result, and must say so honestly per section -- while the older,
+  // still-available legacy bull/bear evidence keeps rendering exactly as
+  // it always did.
+  it("never crashes on a historical payload predating evidence_ui, and says so instead of fabricating empty sections", () => {
+    render(<ConflictCard conflict={makeConflict()} />);
+    expect(
+      screen.getByText(
+        "Counter Evidence, Missing Evidence, and Invalidation Conditions are not available for this historical run."
+      )
+    ).toBeInTheDocument();
+    // Never a fabricated "No B2 evidence gaps identified." / "No
+    // qualification gaps identified." for a run that was never actually
+    // checked against these newer fields.
+    expect(screen.queryByText("No B2 evidence gaps identified.")).not.toBeInTheDocument();
+    expect(screen.queryByText("No qualification gaps identified.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/What would invalidate/)).not.toBeInTheDocument();
+    // The legacy bull/bear evidence panel is unaffected by evidence_ui's absence.
+    expect(screen.getByText("Valuation multiples remain stretched.")).toBeInTheDocument();
+  });
+
+  it("never shows the historical-unavailable note once evidence_ui is present", () => {
+    render(
+      <ConflictCard
+        conflict={makeConflict({
+          evidence_ui: {
+            schema_version: "conflict_evidence_ui.v1",
+            bull_evidence: [],
+            bear_evidence: [],
+            counter_evidence: [],
+            missing_evidence: [],
+            qualification_gaps: [],
+            invalidation_conditions: {
+              bull_alpha: { alpha_id: "A301", alpha_name: null, approval_status: "not_defined", source: null, version: null, conditions: [] },
+              bear_alpha: { alpha_id: "A304", alpha_name: null, approval_status: "not_defined", source: null, version: null, conditions: [] },
+            },
+          },
+        })}
+      />
+    );
+    expect(
+      screen.queryByText(
+        "Counter Evidence, Missing Evidence, and Invalidation Conditions are not available for this historical run."
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("No B2 evidence gaps identified.")).toBeInTheDocument();
+  });
+
+  // Product-language guardrails scoped to this card's own authored copy
+  // (badges, headers, static labels) -- never asserted against real
+  // quoted evidence text, which is backend data shown verbatim and is not
+  // this component's copy to police.
+  it("never renders a trading recommendation or a profit guarantee in its own authored copy", () => {
+    const { container } = render(<ConflictCard conflict={makeConflict()} isMain />);
+    const ownCopyNodes = [
+      ...container.querySelectorAll(
+        ".conflict-card-header, .conflict-card-badge, .conflict-score-row, .conflict-side-role, .conflict-evidence-strength"
+      ),
+    ];
+    const ownCopyText = ownCopyNodes.map((node) => node.textContent ?? "").join(" ");
+    expect(ownCopyText).not.toMatch(/\b(buy|sell|hold)\b/i);
+    expect(ownCopyText.toLowerCase()).not.toContain("guaranteed");
+    expect(ownCopyText.toLowerCase()).not.toContain("risk-free");
+  });
 });

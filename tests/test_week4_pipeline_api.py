@@ -502,3 +502,100 @@ def test_conflict_detector_inputs_come_from_this_runs_own_persisted_artifacts(tm
     )
     persisted = repo.get_week4_conflict_result(run_id)
     assert persisted == recomputed
+
+
+# ---------------------------------------------------------------------------
+# G. A3/B4/B5 fields survive the real orchestration -> DB -> API round trip
+#
+# Gap found auditing a stale-process production failure
+# (docs/audit_artifacts/live_run_5ffe121a_pipeline_failure_report.md,
+# section 8): every other A3/B4/B5 test calls a narrower helper/detector
+# function directly, or builds its own isolated fixture DB, or constructs
+# a payload by hand -- none of them drives the actual live entry point
+# (run_research_request / _run_week3_graph_pipeline) and then reads back
+# through the actual API-facing functions the frontend calls
+# (build_research_response, get_persisted_structure_graph,
+# get_persisted_conflicts). These two tests do exactly that, end to end,
+# in one process, against a real (temp) migrated DB -- so either would
+# have caught a field silently dropped between finalization and API
+# serialization (e.g. by a stale in-memory process), independent of
+# whether any one field's own computation logic is correct (that is
+# separately covered by test_a3_unclassified_findings_control.py /
+# test_b4_activation_level_alignment.py / test_b5_conflict_radar_evidence_ui.py).
+# ---------------------------------------------------------------------------
+
+
+def _assert_a3_ready(detail):
+    assert detail["unclassified_findings_status"] == "ready"
+    assert isinstance(detail["unclassified_findings_total_count"], int)
+    assert detail["unclassified_findings_total_count"] >= 0
+    assert isinstance(detail["unclassified_findings_reason_counts"], dict)
+    assert detail["unclassified_findings_download_available"] is True
+
+
+def _assert_b4_fields_present(graph):
+    alphas = graph["activation"]["alphas"]
+    assert len(alphas) == 10
+    for alpha in alphas:
+        assert alpha["qualified_level"] is not None, alpha["alpha_id"]
+        assert alpha["target_level"] is not None, alpha["alpha_id"]
+        assert alpha["is_blocked"] in (True, False), alpha["alpha_id"]
+        assert alpha["classification_version"] == "b4.alpha_level.v1"
+
+
+def _assert_b5_reconstructs_cleanly(conflicts):
+    assert conflicts["status"] == "ok"
+    assert conflicts.get("error_code") is None
+    assert conflicts.get("message") is None
+    # All six taxonomy-declared pairs are always evaluated, whether or not
+    # any one of them clears B2 admissibility for this fixture.
+    assert len(conflicts["arbitration"]["candidate_evaluations"]) == 6
+
+
+def test_a3_b4_b5_fields_survive_real_orchestration_persistence_and_api_round_trip(tmp_path):
+    repo = _repo()
+    response = run_research_request(_nvda_payload(), output_root=tmp_path, graph_repository=repo)
+    run_id = response["run_id"]
+    assert response["status"] == "completed"
+
+    # A3: the real finalizer wrote unclassified_findings.json; the exact
+    # function GET /api/research/{run_id} calls must read it back "ready"
+    # -- never "unavailable" for a run that just completed.
+    detail = build_research_response(run_id, output_root=tmp_path, graph_repository=repo)
+    _assert_a3_ready(detail)
+
+    # B4: every alpha in the real, persisted Structure Graph carries a
+    # non-null qualified_level/target_level/classification_version through
+    # the exact function GET .../graph calls -- never the "Legacy
+    # classification" gap (null qualified_level/target_level).
+    graph = get_persisted_structure_graph(run_id, output_root=tmp_path, graph_repository=repo)
+    _assert_b4_fields_present(graph)
+
+    # B5: the real, persisted conflict result reconstructs cleanly through
+    # the exact function GET .../conflicts calls -- never CONFLICTS_
+    # CORRUPTED/CONFLICTS_NOT_READY for a run whose Week 4 pipeline
+    # actually ran. This fixture's real evidence does not clear B2 (see
+    # test_week4_golden_closure.py) so no conflict is admitted here --
+    # the populated-evidence_ui case is covered in full by
+    # test_b5_conflict_radar_evidence_ui.py.
+    conflicts = get_persisted_conflicts(run_id, output_root=tmp_path, graph_repository=repo)
+    _assert_b5_reconstructs_cleanly(conflicts)
+    assert conflicts["conflicts"] == []
+    assert conflicts["main_conflict"] is None
+
+
+def test_a3_b4_b5_fields_survive_round_trip_even_with_zero_evidence(tmp_path):
+    repo = _repo()
+    response = run_research_request(_empty_evidence_payload(), output_root=tmp_path, graph_repository=repo)
+    run_id = response["run_id"]
+    assert response["status"] == "completed"
+
+    detail = build_research_response(run_id, output_root=tmp_path, graph_repository=repo)
+    _assert_a3_ready(detail)
+    assert detail["unclassified_findings_total_count"] == 0
+
+    graph = get_persisted_structure_graph(run_id, output_root=tmp_path, graph_repository=repo)
+    _assert_b4_fields_present(graph)
+
+    conflicts = get_persisted_conflicts(run_id, output_root=tmp_path, graph_repository=repo)
+    _assert_b5_reconstructs_cleanly(conflicts)
