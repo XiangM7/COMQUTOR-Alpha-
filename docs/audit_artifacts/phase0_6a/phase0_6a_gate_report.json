@@ -1,0 +1,79 @@
+{
+  "schema_version": "phase0_6a_gate_report_v1",
+  "phase": "0.6A",
+  "task": "Offline LLM Semantic Runtime Contract, Cache Primitives, and Exact-Replay Artifact Foundation",
+  "branch": "comqutor-structure-layer",
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "final_gate": "PASS",
+  "foundation_status": [
+    "ACCEPTED_FOR_OFFLINE_FOUNDATION",
+    "NOT_INTEGRATED",
+    "NO_PRODUCTION_AUTHORITY"
+  ],
+  "requirements": {
+    "semantic_call_contract_v1": true,
+    "deterministic_canonical_json_and_sha256": true,
+    "versioned_cache_key_contract": true,
+    "null_cache": true,
+    "injected_redis_adapter_fake_only": true,
+    "semantic_call_recorder": true,
+    "semantic_manifest": true,
+    "exact_replay_artifact_contract": true,
+    "adr_005": true,
+    "production_importer_count_zero": true,
+    "current_runtime_behavior_unchanged": true,
+    "default_llm_state_unchanged": true,
+    "canonical_prompt_injection_unchanged": true,
+    "replay_behavior_unchanged": true,
+    "source_artifacts_unchanged": true,
+    "preexisting_worktree_unchanged": true,
+    "targeted_tests_passed": true,
+    "no_new_full_suite_failure": true
+  },
+  "integrity": {
+    "preexisting_files_checked": 162,
+    "preexisting_files_changed": 0,
+    "outputs_runs_files_checked": 133,
+    "outputs_runs_files_changed": 0,
+    "outputs_replays_files_checked": 108,
+    "outputs_replays_files_changed": 0,
+    "phase0_and_phase0_5_files_checked": 37,
+    "phase0_and_phase0_5_files_changed": 0,
+    "protected_runtime_files_checked": 7,
+    "protected_runtime_files_changed": 0,
+    "phase0_6a_files": 32,
+    "disallowed_phase0_6a_files": 0,
+    "staged_files": 0
+  },
+  "side_effects": {
+    "provider_calls": 0,
+    "real_redis_connections": 0,
+    "completed_external_connections": 0,
+    "database_writes": 0,
+    "commit": false,
+    "push": false
+  },
+  "tests": {
+    "llm_runtime": "74 passed",
+    "related_existing": "297 passed, 1 provider smoke skipped",
+    "llm_boundary_audit": "4/4 PASS",
+    "phase0_6a_verifier": "20/20 PASS",
+    "ruff": "PASS",
+    "full_offline_suite": "KNOWN_TEST_ISOLATION_GAP_ONLY",
+    "full_offline_counts": "2663 passed, 5 known failed, 1 skipped, 47 deselected, 69 subtests passed",
+    "new_failures": 0
+  },
+  "non_blocking_observations": [
+    {
+      "code": "LEGACY_PHASE_SCOPE_REJECTS_AUTHORIZED_PHASE_0_6A_ADDITIONS",
+      "detail": "The unchanged Phase 0.5 verifier reports aggregate FAIL only because its allowed-path check rejects later-phase package/tests/script additions. Its other 18 checks pass, including every Phase 0/0.5 integrity check."
+    },
+    {
+      "code": "KNOWN_TEST_ISOLATION_GAP_ONLY",
+      "detail": "Exactly the same five sentiment-agent tests attempted Stocktwits access and were blocked before connection completion; there were no new failures."
+    }
+  ],
+  "blocking_conditions": [],
+  "failure_conditions": [],
+  "next_allowed_phase": "Phase 0.6B only after independent review and explicit approval"
+}

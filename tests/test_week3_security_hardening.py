@@ -95,8 +95,13 @@ def _seed_week1_2_artifacts(tmp_path, run_id, ticker="NVDA", matches=None):
     (run_dir / "structured_agent_outputs.json").write_text(
         json.dumps({"run_id": run_id, "ticker": ticker, "records": []}), encoding="utf-8"
     )
+    # Every real alpha_matches.json record carries its own "ticker" field
+    # (structure_engine.alpha_mapper) -- backfilled here for any
+    # caller-supplied match dict that omits it, so this fixture matches the
+    # current real contract instead of silently drifting from it.
+    normalized_matches = [{"ticker": ticker, **match} for match in (matches or [])]
     (run_dir / "alpha_matches.json").write_text(
-        json.dumps({"run_id": run_id, "ticker": ticker, "matches": matches or []}), encoding="utf-8"
+        json.dumps({"run_id": run_id, "ticker": ticker, "matches": normalized_matches}), encoding="utf-8"
     )
     (run_dir / "extracted_structures.json").write_text(
         json.dumps({"run_id": run_id, "ticker": ticker, "nodes": [], "edges": []}), encoding="utf-8"

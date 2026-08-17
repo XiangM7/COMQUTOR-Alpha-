@@ -1,0 +1,47 @@
+{
+  "schema_version": "comqutor.phase1b1.allowed_diff_report.v1",
+  "note": "Categorizes every git-status entry touching comqutor_alpha/scripts/docs/tests as either a Phase 1B.1 deliverable or pre-existing state from earlier phases (Sprint 1/2, Phase 0.5-1A), verified unchanged by preexisting_dirty_file_comparison.json.",
+  "phase1b1_new_files": [
+    "comqutor_alpha/structure_engine/structured_output_shadow_provider.py",
+    "comqutor_alpha/structure_engine/structured_output_shadow_replay.py",
+    "scripts/run_phase1b1_provider_smoke.py",
+    "scripts/verify_phase1b1.py",
+    "tests/structured_output_shadow/test_shadow_provider_invoker.py",
+    "tests/structured_output_shadow/test_shadow_semantic_runtime.py",
+    "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py",
+    "tests/structured_output_shadow/test_shadow_exact_replay.py",
+    "tests/structured_output_shadow/test_shadow_review_bundle_real_output.py",
+    "tests/structured_output_shadow/test_phase1b1_boundaries.py",
+    "docs/adr/ADR-009-structured-output-provider-smoke.md",
+    "docs/specs/phase1b1_provider_smoke_contract_v1.md",
+    "docs/audit_artifacts/phase1b1/ (all files, this audit's own deliverables)",
+    "outputs/evaluations/phase1b1-smoke-attempt-20260806/ (2 files: real BLOCKED smoke result)"
+  ],
+  "phase1b1_minimal_authorized_modifications": [
+    {
+      "path": "comqutor_alpha/llm_runtime/contracts.py",
+      "change": "Added 'structured_claim_shadow' to SEMANTIC_TASKS frozenset. No other line changed.",
+      "authorized_by": "Task section 4: '允许最小修改 comqutor_alpha/llm_runtime/contracts.py ... 允许新增 semantic task: structured_claim_shadow'"
+    },
+    {
+      "path": "comqutor_alpha/structure_engine/week2_llm.py",
+      "change": "Added invoke_prebuilt_json_prompt() method and MAX_PREBUILT_PROMPT_CHARS constant. _TASK_INSTRUCTIONS, _TASK_RUNTIME_METADATA, invoke_json(), invoke_json_with_trace(), and all three existing tasks' behavior are byte-for-byte unchanged (verified: existing_three_tasks_metadata_unchanged, existing_three_task_prompt_identity_unaffected_by_new_task tests PASS).",
+      "authorized_by": "Task section 4: '允许对 comqutor_alpha/structure_engine/week2_llm.py 进行最小、向后兼容的 API 扩展...例如 invoke_prebuilt_json_prompt(...)'"
+    }
+  ],
+  "preexisting_files_from_earlier_phases_not_touched_this_session": {
+    "count_confirmed_unchanged": 234,
+    "verification_artifact": "docs/audit_artifacts/phase1b1/preexisting_dirty_file_comparison.json (verdict: PASS, changed_count: 0)",
+    "representative_examples": [
+      "comqutor_alpha/structure_engine/structured_output_adapter.py (Phase 1A boundary: read-only reuse of extract_claim_segments_with_audit only)",
+      "comqutor_alpha/structure_engine/structure_extractor.py (untouched)",
+      "comqutor_alpha/replay/__init__.py, cli.py, exact_semantic.py, modes.py, semantic_binding.py, source_bundle.py (Phase 0.6C Exact Semantic Replay work, untouched)",
+      "comqutor_alpha/structure_engine/structured_output_shadow.py, structured_output_shadow_schema.py, structured_output_shadow_prompt.py, structured_output_shadow_review.py (Phase 1A Shadow core, untouched)",
+      "docs/adr/ADR-006, ADR-007, ADR-008 (untouched)",
+      "scripts/verify_phase0_6b.py, verify_phase0_6c.py, verify_phase1a.py, build_phase1a_shadow_review_bundle.py (untouched)",
+      "tests/llm_runtime/*, tests/replay/*, tests/structured_output_shadow/test_shadow_{schema,parser,prompt,validator,identity,abstention,comparison,review_contract}.py, test_no_live_integration.py, test_source_integrity.py, test_review_bundle_builder.py (untouched)"
+    ]
+  },
+  "disallowed_files_found": [],
+  "verdict": "PASS -- every change traces to an explicitly authorized Phase 1B.1 file; every pre-existing file is hash-confirmed unchanged."
+}

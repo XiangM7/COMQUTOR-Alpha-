@@ -1,0 +1,37 @@
+{
+  "schema_version": "comqutor.phase1b1.provider_call_guard_report.v1",
+  "authorization_inputs_required": [
+    "--execute-provider-smoke CLI flag",
+    "--research-profile <existing-profile-id>",
+    "--max-provider-calls <=4",
+    "--output-dir <path under outputs/evaluations/>",
+    "COMQUTOR_PHASE1B1_PROVIDER_SMOKE_APPROVED environment variable == 'true' (exact string match)"
+  ],
+  "authorization_inference_forbidden_and_confirmed_absent": {
+    "from_COMQUTOR_WEEK2_LLM_ENABLED": true,
+    "from_provider_credential_presence": true,
+    "from_build_server_week2_llm_gateway": true
+  },
+  "real_invocation_attempt": {
+    "command": "python scripts/run_phase1b1_provider_smoke.py --research-profile comqutor_deepseek_default_v1 --max-provider-calls 4 --output-dir outputs/evaluations/phase1b1-smoke-attempt-20260806 --execute-provider-smoke",
+    "COMQUTOR_PHASE1B1_PROVIDER_SMOKE_APPROVED_at_invocation_time": "<unset>",
+    "outcome": "BLOCKED_PROVIDER_SMOKE_NOT_AUTHORIZED",
+    "provider_calls_made": 0,
+    "exit_code": 0,
+    "assistant_did_not_set_the_approval_variable": true
+  },
+  "boundary_tests_confirming_every_gate_independently": {
+    "max_provider_calls_gt_4": "FAIL_PROVIDER_CALL_LIMIT_EXCEEDED (verified interactively and in tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_max_provider_calls_above_four_fails_before_any_call)",
+    "invalid_research_profile": "BLOCKED_RESEARCH_PROFILE_INVALID (verified interactively and in tests)",
+    "output_dir_outside_evaluation_root": "BLOCKED_OUTPUT_DIRECTORY_INVALID (verified interactively and in tests)",
+    "output_dir_traversal": "BLOCKED_OUTPUT_DIRECTORY_INVALID (verified in tests)",
+    "execute_flag_without_approval_env_var": "BLOCKED_PROVIDER_SMOKE_NOT_AUTHORIZED, create_llm_client never called (verified in tests with an AssertionError-raising stub)",
+    "approval_env_var_without_execute_flag": "BLOCKED_PROVIDER_SMOKE_NOT_AUTHORIZED, create_llm_client never called (verified in tests)"
+  },
+  "gateway_construction_independent_of_live_route_flag": {
+    "test": "tests/structured_output_shadow/test_shadow_provider_invoker.py::test_build_real_provider_gateway_never_reads_week2_enabled_env",
+    "method": "COMQUTOR_WEEK2_LLM_ENABLED explicitly set to 'true' and build_server_week2_llm_gateway monkeypatched to raise AssertionError if called -- gateway construction succeeds via the explicit ResearchProfile path only, forbidden helper never invoked."
+  },
+  "final_status": "BLOCKED_PROVIDER_SMOKE_NOT_AUTHORIZED",
+  "conclusion": "No real Provider, network, market-data, Redis, or database call occurred during Phase 1B.1."
+}

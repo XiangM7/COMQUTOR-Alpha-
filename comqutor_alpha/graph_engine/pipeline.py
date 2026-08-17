@@ -20,6 +20,7 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     ACTIVATION_V2_FORMULA_VERSION,
     score_alpha_activations_v2,
 )
+from comqutor_alpha.graph_engine.alpha_level_classifier import classify_and_rebuild_collections
 from comqutor_alpha.graph_engine.graph_builder import build_structure_graph
 from comqutor_alpha.graph_engine.graph_schema import (
     ACTIVATION_SCORER_VERSION,
@@ -190,7 +191,7 @@ def score_and_assemble_structure_graph(
     )
     _attach_evidence_detail(activation_v2["alphas"], alpha_matches_payload)
     seed_bundle = exposure_seed_bundle or load_exposure_seed()
-    mode_decision = exposure_mode_decision or resolve_exposure_mode(seed_bundle.manifest)
+    mode_decision = exposure_mode_decision or resolve_exposure_mode(seed_bundle, str(graph["ticker"]))
     activation_v2, exposure_artifact = compute_run_entity_alpha_exposures(
         run_id=exposure_run_id or str(graph["run_id"]),
         ticker=str(graph["ticker"]),
@@ -198,6 +199,16 @@ def score_and_assemble_structure_graph(
         seed_bundle=seed_bundle,
         mode_decision=mode_decision,
     )
+    # B4 alpha-level classification (task B4_ACTIVATION_LEVEL_ALIGNMENT):
+    # the single authoritative pass, run only now that every qualification
+    # input -- Activation v2's own score/caps/regime gate, and B3 Entity
+    # Exposure's per-alpha record -- is available. Writes the final
+    # status/target_level/qualified_level/is_blocked/blocked_from/
+    # blocked_reason_codes/diagnostic_reason_codes onto each v2 alpha entry
+    # and rebuilds dominant_alphas/active_alphas/regime_level_alphas/
+    # candidate_alphas/blocked_alphas exactly once -- never re-derived
+    # independently by the API or the frontend afterward.
+    activation_v2 = classify_and_rebuild_collections(activation_v2)
 
     # Built exactly once and reused for both "activation" (the primary
     # payload callers read) and activation_versions["v2"] -- so the two can
@@ -224,6 +235,18 @@ def score_and_assemble_structure_graph(
         },
         "primary_activation_version": ACTIVATION_V2_FORMULA_VERSION,
         "dominant_alphas": activation_v2["dominant_alphas"],
+        # B4 additive authoritative collections (task
+        # B4_ACTIVATION_LEVEL_ALIGNMENT, section 11) -- dominant_alphas
+        # above keeps its exact pre-existing meaning (dominant OR
+        # regime_level) for backward compatibility; these four are new,
+        # split by the single true qualified_level/is_blocked B4 just
+        # computed. Sibling top-level fields, same pattern as
+        # dominant_alphas -- never nested inside the narrower
+        # activation/activation_versions blocks.
+        "active_alphas": activation_v2["active_alphas"],
+        "regime_level_alphas": activation_v2["regime_level_alphas"],
+        "candidate_alphas": activation_v2["candidate_alphas"],
+        "blocked_alphas": activation_v2["blocked_alphas"],
         "entity_alpha_exposures": exposure_artifact,
         "provenance": _provenance(alpha_matches_payload, extracted_structures_payload),
     }

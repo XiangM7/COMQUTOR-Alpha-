@@ -8,6 +8,7 @@ sanity check, not a market-prediction accuracy claim.
 """
 
 import json
+import re
 
 from comqutor_alpha.api.routes_research import (
     get_persisted_structure_graph,
@@ -143,8 +144,17 @@ def test_graph_is_not_converted_into_a_buy_sell_hold_conclusion(tmp_path):
     _, graph, _ = _run_nvda_fixture(tmp_path)
 
     serialized = json.dumps(graph).lower()
+    # Word-boundary match, not a bare substring check (same pattern as
+    # test_week4_golden_closure.py's _BARE_TRADING_TERMS): a naive `in`
+    # check false-positives on legitimate non-trading-advice content that
+    # happens to contain one of these terms as a substring -- e.g. John's
+    # B3 gated seed lifecycle's own EXPOSURE_BELOW_REGIME_THRESHOLD reason
+    # code contains "hold" (thresHOLD), with zero relation to trading
+    # advice. This graph legitimately reaching that reason code (NVDA is
+    # now one of John's approved_gating tickers) is exactly the case a
+    # substring check gets wrong and a word-boundary check gets right.
     for banned_term in ("buy", "sell", "hold", "recommendation", "conclusion"):
-        assert banned_term not in serialized
+        assert re.search(rf"\b{banned_term}\b", serialized) is None
 
 
 def test_no_week4_conflict_fields_are_present(tmp_path):

@@ -1,0 +1,87 @@
+{
+  "schema_version": "phase0_6c_exact_replay_behavioral_comparison_v1",
+  "phase": "0.6C",
+  "fixture": {
+    "source_run_id": "eligible-live-source",
+    "replay_id": "behavioral-equivalence",
+    "created_via_existing_phase0_6b_live_path": true,
+    "provider_kind": "offline_prompt_aware_fake",
+    "semantic_manifest_complete": true,
+    "exact_replay_ready": true,
+    "accepted_semantic_records": 3,
+    "records_by_task": {
+      "structured_adapter": 1,
+      "alpha_classifier": 1,
+      "structure_extractor": 1
+    }
+  },
+  "semantic_artifacts": {
+    "llm_semantic_calls.jsonl": {
+      "source_sha256": "6da912cefe78fe420426a19269bacea06254337b69be4e0a63b4840fcf8658aa",
+      "copy_sha256": "6da912cefe78fe420426a19269bacea06254337b69be4e0a63b4840fcf8658aa",
+      "byte_identical": true
+    },
+    "llm_semantic_manifest.json": {
+      "source_sha256": "d800b5484d96511c0d2dcf91df9caf43225b97ac19a124665cf7cf433e8b0469",
+      "copy_sha256": "d800b5484d96511c0d2dcf91df9caf43225b97ac19a124665cf7cf433e8b0469",
+      "byte_identical": true
+    },
+    "structured_agent_outputs.json": {
+      "source_sha256": "76b41a768f72246ae1444a511a5114cde6ac4c0d5f805fd17622dd5445efe2f3",
+      "copy_sha256": "76b41a768f72246ae1444a511a5114cde6ac4c0d5f805fd17622dd5445efe2f3",
+      "byte_identical": true
+    },
+    "alpha_matches.json": {
+      "source_sha256": "d3a5d95cc0071b4a3392ed0a18bebb938c1d0b0e28bff918f2333afd7df93fd6",
+      "copy_sha256": "d3a5d95cc0071b4a3392ed0a18bebb938c1d0b0e28bff918f2333afd7df93fd6",
+      "byte_identical": true
+    },
+    "extracted_structures.json": {
+      "source_sha256": "97853159e317ead69963b434068a3f2752dacd34b0be42619cadf22b7614bdd6",
+      "copy_sha256": "97853159e317ead69963b434068a3f2752dacd34b0be42619cadf22b7614bdd6",
+      "byte_identical": true
+    }
+  },
+  "semantic_binding": {
+    "total_records": 3,
+    "uniquely_bound_records": 3,
+    "orphan_records": 0,
+    "missing_bindings": 0,
+    "ambiguous_bindings": 0,
+    "input_hash_mismatches": 0,
+    "output_hash_mismatches": 0,
+    "artifact_decision_mismatches": 0,
+    "final_status": "PASS"
+  },
+  "downstream_comparisons": {
+    "graph": {
+      "source_normalized_sha256": "70031fd27dc0a3bc86de0233d1674ea761a0a44849e9e20fa3b5e4b70e914a32",
+      "replay_normalized_sha256": "70031fd27dc0a3bc86de0233d1674ea761a0a44849e9e20fa3b5e4b70e914a32",
+      "semantically_equivalent": true
+    },
+    "activation": {
+      "source_normalized_sha256": "85f3c1c5ec715c76c8c7607b061561fbf3e023776200130ca74b266207c7af1a",
+      "replay_normalized_sha256": "85f3c1c5ec715c76c8c7607b061561fbf3e023776200130ca74b266207c7af1a",
+      "semantically_equivalent": true
+    },
+    "exposure": {
+      "source_normalized_sha256": "d7a7aab9d9e0b2d112ad9be8e9099e250d941261180c3e39db46cccf0e6e3322",
+      "replay_normalized_sha256": "d7a7aab9d9e0b2d112ad9be8e9099e250d941261180c3e39db46cccf0e6e3322",
+      "semantically_equivalent": true
+    },
+    "conflict": {
+      "source_normalized_sha256": "1cda321f3db2b596fc27581379b1266d3ab8ec383dba0eca20d585014e613d34",
+      "replay_normalized_sha256": "1cda321f3db2b596fc27581379b1266d3ab8ec383dba0eca20d585014e613d34",
+      "semantically_equivalent": true
+    }
+  },
+  "semantic_inputs_reused_exactly": true,
+  "source_files_unchanged_by_path_size_sha256_mtime": true,
+  "deterministic_downstream_equivalent": true,
+  "deterministic_engine_delta": false,
+  "provider_calls_during_exact_replay": 0,
+  "tradingagents_calls_during_exact_replay": 0,
+  "market_data_calls_during_exact_replay": 0,
+  "database_writes_during_exact_replay": 0,
+  "overall_status": "PASS"
+}

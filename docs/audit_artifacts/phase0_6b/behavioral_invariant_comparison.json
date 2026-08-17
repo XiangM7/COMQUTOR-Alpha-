@@ -1,0 +1,72 @@
+{
+  "schema_version": "phase0_6b_behavioral_invariant_comparison_v1",
+  "phase": "0.6B",
+  "captured_at": "2026-08-06T17:26:00Z",
+  "overall_status": "PASS",
+  "method": {
+    "run_id": "behavior-invariant",
+    "input": "identical offline raw input, analysis date, fake Provider behavior, and cache miss",
+    "before": "Week2LLMGateway with semantic_runtime=None",
+    "after": "same Week2LLMGateway behavior with one live SemanticRuntimeSession",
+    "repository": "in-memory repository-shaped fake; no database engine or connection",
+    "network": "disabled; prompt-aware fake Provider only",
+    "normalization": [
+      "created_at",
+      "updated_at",
+      "generated_at",
+      "timestamp",
+      "code_provenance"
+    ]
+  },
+  "business_artifacts_semantically_equal": true,
+  "comparisons": [
+    {
+      "artifact": "structured_agent_outputs.json",
+      "before_sha256": "a29b454b0e7657156b7427c55e47d37659a0ea10e40039a045313121cb197efe",
+      "after_sha256": "a29b454b0e7657156b7427c55e47d37659a0ea10e40039a045313121cb197efe",
+      "semantically_equal": true
+    },
+    {
+      "artifact": "alpha_matches.json",
+      "before_sha256": "7f3167a63f34027d81320e1620342af1b859e3711d370d9c59eeec748cb7e09e",
+      "after_sha256": "7f3167a63f34027d81320e1620342af1b859e3711d370d9c59eeec748cb7e09e",
+      "semantically_equal": true
+    },
+    {
+      "artifact": "extracted_structures.json",
+      "before_sha256": "a677e0b64fbb9fb0422cc3d4e9cbf464ce1719f169841449a19c88185393fae0",
+      "after_sha256": "a677e0b64fbb9fb0422cc3d4e9cbf464ce1719f169841449a19c88185393fae0",
+      "semantically_equal": true
+    },
+    {
+      "artifact": "structure_graph.json",
+      "before_sha256": "a93d763121579219f4da4a981166240f878bae19458830f14155220b7921abb8",
+      "after_sha256": "a93d763121579219f4da4a981166240f878bae19458830f14155220b7921abb8",
+      "semantically_equal": true
+    },
+    {
+      "artifact": "conflicts.json",
+      "before_sha256": "4a5ed1cd0b05dd9c7a8f3164bd46b210ccfffe968ec410fea67e2e0bf5001dd3",
+      "after_sha256": "4a5ed1cd0b05dd9c7a8f3164bd46b210ccfffe968ec410fea67e2e0bf5001dd3",
+      "semantically_equal": true,
+      "note": "conflicts.json is the current live canonical artifact; replay-only conflict_results.json was absent in both live runs"
+    }
+  ],
+  "research_response_semantically_equal": true,
+  "legacy_provider_call_count": 3,
+  "integrated_provider_call_count": 3,
+  "provider_call_count_unchanged": true,
+  "legacy_semantic_sidecars_present": false,
+  "integrated_semantic_sidecars_present": true,
+  "invariants": {
+    "claim_count_changed": false,
+    "evidence_changed": false,
+    "matched_alpha_changed": false,
+    "alpha_score_changed": false,
+    "edge_changed": false,
+    "activation_changed": false,
+    "conflict_changed": false,
+    "exposure_changed": false
+  },
+  "test_evidence": "tests/test_semantic_artifact_live_pipeline.py::test_cache_miss_integration_adds_only_sidecars_not_business_semantics"
+}

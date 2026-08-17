@@ -1,0 +1,48 @@
+{
+  "schema_version": "comqutor.phase1b1.production_behavior_invariant.v1",
+  "invariants_checked": {
+    "current_adapter_unchanged": {"status": "PASS", "evidence": "structured_output_adapter.py hash-unchanged (preexisting_dirty_file_comparison.json)"},
+    "alpha_mapper_unchanged": {"status": "PASS", "evidence": "alpha_mapper.py hash-unchanged"},
+    "structure_extractor_unchanged": {"status": "PASS", "evidence": "structure_extractor.py hash-unchanged"},
+    "live_routes_unchanged": {"status": "PASS", "evidence": "routes_research.py hash-unchanged"},
+    "production_replay_unchanged": {"status": "PASS", "evidence": "replay/pipeline.py hash-unchanged; replay still passes adapt_run_outputs(source_run_dir, llm_gateway=None) explicitly (verified by test_replay_pipeline_still_passes_llm_gateway_none_explicitly)"},
+    "graph_activation_exposure_conflict_unchanged": {"status": "PASS", "evidence": "activation_scorer_v2.py, exposure_engine.py, conflict_engine/* hash-unchanged"},
+    "tradingagents_unchanged": {"status": "PASS", "evidence": "git status --short -- tradingagents/ is empty"},
+    "canonical_prompt_injection_unchanged": {"status": "PASS", "evidence": "canonical_prompt_injection.py, canonical_relation_prompt.py hash-unchanged"},
+    "default_llm_setting_unchanged": {"status": "PASS", "evidence": "week2_llm_enabled() returns False with COMQUTOR_WEEK2_LLM_ENABLED unset, confirmed by test"},
+    "existing_three_week2_tasks_unchanged": {"status": "PASS", "evidence": "_TASK_INSTRUCTIONS keys/text and prompt_identity_sha256 for claim_batch_enrichment/alpha_classifier/structure_extractor unchanged, confirmed by tests"},
+    "shadow_engine_zero_production_importers": {"status": "PASS", "evidence": "test_no_production_scope_imports_phase1b1_smoke_modules PASS; scripts/verify_phase1b1.py check_no_production_importer_of_smoke_modules PASS"},
+    "historical_outputs_runs_unchanged": {"status": "PASS", "evidence": "no write to outputs/runs/ anywhere in Phase 1B.1 code (structured_output_shadow_provider.py reads outputs/runs/ read-only via _load_raw_report)"},
+    "historical_outputs_replays_unchanged": {"status": "PASS", "evidence": "no write to outputs/replays/ anywhere in Phase 1B.1 code"},
+    "new_output_confined_to_evaluations_root": {"status": "PASS", "evidence": "_validate_output_dir enforces outputs/evaluations/ containment with no traversal/symlink escape"},
+    "no_12_report_pilot_started": {"status": "PASS", "evidence": "no docs/audit_artifacts/phase1b2 or phase1b3 directory exists"},
+    "no_24_report_evaluation_started": {"status": "PASS", "evidence": "same as above"}
+  },
+  "overall": "PASS -- zero production behavior changes.",
+  "explicit_files_confirmed_unchanged_by_hash": [
+    "comqutor_alpha/structure_engine/structured_output_adapter.py",
+    "comqutor_alpha/structure_engine/alpha_mapper.py",
+    "comqutor_alpha/structure_engine/structure_extractor.py",
+    "comqutor_alpha/api/routes_research.py",
+    "comqutor_alpha/replay/pipeline.py",
+    "comqutor_alpha/graph_engine/activation_scorer_v2.py",
+    "comqutor_alpha/exposure_engine.py",
+    "comqutor_alpha/llm/canonical_prompt_injection.py",
+    "comqutor_alpha/structure_engine/canonical_relation_prompt.py",
+    "docs/adr/ADR-001 through ADR-008",
+    "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx"
+  ],
+  "explicit_files_intentionally_and_minimally_changed": [
+    "comqutor_alpha/llm_runtime/contracts.py (SEMANTIC_TASKS += structured_claim_shadow)",
+    "comqutor_alpha/structure_engine/week2_llm.py (+ invoke_prebuilt_json_prompt, + MAX_PREBUILT_PROMPT_CHARS)",
+    "scripts/verify_phase1b1.py (no_secrets_or_hidden_reasoning false-positive fix, this session's own new script)"
+  ],
+  "real_smoke_execution_confirmation": {
+    "confirmed_after_real_authorized_provider_smoke_ran": true,
+    "production_file_sizes_match_protected_manifest": true,
+    "outputs_runs_git_status_diff": "empty (unchanged)",
+    "outputs_replays_git_status_diff": "empty (unchanged)",
+    "new_output_confined_to": "outputs/evaluations/phase1b1-smoke-20260806T222402Z/",
+    "guarded_full_pytest_suite_node_ids_identical_before_and_after_real_smoke": true
+  }
+}

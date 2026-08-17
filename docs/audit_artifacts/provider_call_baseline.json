@@ -1,0 +1,73 @@
+{
+  "audit": "phase_0_development_plan_llm_boundary_audit",
+  "generated_at": "2026-08-05T00:00:00Z",
+  "method": "Static call-graph analysis + existing code-level instrumentation only. No real Provider was invoked during this audit.",
+  "stage_matrix": [
+    {
+      "stage": "TradingAgents native agents (12 nodes: market/sentiment/news/fundamentals analysts; bull/bear researchers; research_manager; trader; aggressive/conservative/neutral risk debators; portfolio_manager)",
+      "purpose": "native report/debate/decision generation",
+      "provider_call_possible": true,
+      "typical_count_per_run": "UNKNOWN_NOT_INSTRUMENTED (each of the 12 nodes calls its LLM exactly once per graph execution in the standard LangGraph topology, but no counter/log in this repo records the realized per-run total; debate nodes (bull/bear) may loop more than once depending on max_debate_rounds config, which this audit did not enumerate)",
+      "required_by_plan": "upstream (TradingAgents itself, outside §5.1/5.2/5.3 scope)"
+    },
+    {
+      "stage": "Structured Adapter (claim_batch_enrichment)",
+      "purpose": "claim parsing/enrichment",
+      "provider_call_possible": true,
+      "typical_count_per_run": "UNKNOWN_NOT_INSTRUMENTED (bounded by ceil(candidate_segment_count_for_LLM_STRUCTURED_AGENTS / LLM_CLAIM_BATCH_SIZE=64) batches, one call per batch, but the realized segment count varies per report; llm_batch_count/llm_batch_fallback_count ARE recorded per run in structured_agent_outputs.json metadata, so a specific historical run's actual count is knowable from its own artifact -- but no fleet-wide/typical baseline is computed anywhere in this repo)",
+      "required_by_plan": "5.1",
+      "disabled_by_default": true,
+      "env_gate": "COMQUTOR_WEEK2_LLM_ENABLED"
+    },
+    {
+      "stage": "Alpha Mapper (alpha_classifier)",
+      "purpose": "ambiguous-candidate classification",
+      "provider_call_possible": true,
+      "typical_count_per_run": "UNKNOWN_NOT_INSTRUMENTED (at most one call per claim with match_status != no_match and >= 2 eligible candidates; classifier metadata (status: disabled/not_needed/applied/fallback/timeout/error/...) IS recorded per-claim in alpha_matches.json, so per-run realized counts are reconstructable from that artifact, but no aggregate baseline exists in this repo)",
+      "required_by_plan": "5.2",
+      "disabled_by_default": true,
+      "env_gate": "COMQUTOR_WEEK2_LLM_ENABLED"
+    },
+    {
+      "stage": "Structure Extractor (structure_extractor)",
+      "purpose": "relation edge extraction",
+      "provider_call_possible": true,
+      "typical_count_per_run": "UNKNOWN_NOT_INSTRUMENTED (at most one call per claim with >= 2 deterministically-extracted factors; llm_edge_count vs deterministic_edge_count IS recorded per run in extracted_structures.json metadata, but not a per-call count, and no aggregate baseline exists in this repo)",
+      "required_by_plan": "5.3",
+      "disabled_by_default": true,
+      "env_gate": "COMQUTOR_WEEK2_LLM_ENABLED"
+    },
+    {
+      "stage": "Activation",
+      "purpose": "scoring",
+      "provider_call_possible": false,
+      "typical_count_per_run": 0,
+      "required_by_plan": "deterministic",
+      "evidence": "no LLM/gateway import found in comqutor_alpha/graph_engine (grep, this audit)"
+    },
+    {
+      "stage": "Conflict",
+      "purpose": "arbitration",
+      "provider_call_possible": false,
+      "typical_count_per_run": 0,
+      "required_by_plan": "deterministic",
+      "evidence": "no LLM/gateway import found in comqutor_alpha/conflict_engine (grep, this audit)"
+    },
+    {
+      "stage": "Replay",
+      "purpose": "all stages, reprocessed",
+      "provider_call_possible": false,
+      "typical_count_per_run": 0,
+      "required_by_plan": "saved outputs only",
+      "evidence": "comqutor_alpha/replay/pipeline.py:405 passes llm_gateway=None explicitly to adapt_run_outputs; lines 409-410 call build_alpha_matches_payload(structured) and build_extracted_structures_payload(structured) with no llm_gateway argument, which defaults to None in both functions' signatures. ReplayResult.llm_provider_calls/tradingagents_calls/market_data_provider_calls/database_writes are hardcoded literal 0 in every return path (lines 471-474, 501-504, 634-637) -- these are architectural guarantees encoded in the return type, not measured runtime counters."
+    }
+  ],
+  "direct_answers": {
+    "adapter_called_per_agent_or_per_report": "Per raw agent output (one 'report'), batched: deterministic segmentation always runs first for the whole report; if the agent is in LLM_STRUCTURED_AGENTS and a gateway is present, its segments are split into sequential batches of at most LLM_CLAIM_BATCH_SIZE=64 and each batch gets one LLM call. A report with <=64 eligible segments = 1 call; a longer report = multiple calls. Never per-individual-claim.",
+    "alpha_mapper_called_per_claim_or_only_ambiguous": "Only claims where the deterministic pipeline already produced >=2 eligible candidates (match_status != 'no_match'). This is the code-level definition of 'ambiguous' for this gate (alpha_mapper.py:340). Claims with 0 or 1 eligible candidate never reach the LLM at all, regardless of gateway availability.",
+    "structure_extractor_call_granularity": "Per-claim (structure_extractor.py:415, one call per record with >=2 deterministically-extracted factors) -- not per-agent, not per-run.",
+    "duplicate_text_recall_risk": "Yes, structurally possible: no caching layer exists anywhere in the LLM call path (confirmed by repo-wide search), so if the identical claim/evidence text appears twice in one run (e.g. cross-agent near-duplicates that survive dedupe with different claim_ids) or across two runs for the same ticker/date, each occurrence independently triggers its own LLM call and its own budget consumption. This is a real, currently-unaddressed inefficiency/cost risk when COMQUTOR_WEEK2_LLM_ENABLED is on.",
+    "redis_or_local_cache_present": false,
+    "replay_can_accidentally_trigger_provider": "No. llm_gateway=None is hardcoded (adapter) or defaulted (mapper/extractor) at every replay call site; TradingAgentsGraph is never imported or constructed anywhere in comqutor_alpha/replay/pipeline.py."
+  }
+}

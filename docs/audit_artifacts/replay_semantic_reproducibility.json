@@ -1,0 +1,30 @@
+{
+  "audit": "phase_0_development_plan_llm_boundary_audit",
+  "generated_at": "2026-08-05T00:00:00Z",
+  "REPLAY_SEMANTIC_REPRODUCIBILITY": "PARTIAL",
+  "confirmed_true": [
+    "Replay never calls TradingAgents (no import of tradingagents.graph.trading_graph anywhere in comqutor_alpha/replay/pipeline.py)",
+    "Replay never calls an LLM Provider (adapt_run_outputs called with llm_gateway=None explicit at replay/pipeline.py:405; build_alpha_matches_payload/build_extracted_structures_payload called with no llm_gateway kwarg at lines 409-410, defaulting to None)",
+    "Replay never calls a market-data provider (no yfinance/data_sanity import in replay/pipeline.py)",
+    "DB writes = 0 (repository=None passed explicitly to write_run_audit_artifact at line 609; no repository.persist_* call anywhere in this module)",
+    "Replay uses only the source run's saved raw_agent_outputs.json -- explicitly refuses to fall back to a prior structured_agent_outputs.json (ReplaySourceIncompleteError, module docstring lines 6-8)",
+    "replay-local run_id (resolved_replay_run_id, format replay-<timestamp>-<uuid> or an explicit deterministic override) is used consistently; source_run_id is preserved only as lineage metadata, never conflated with the replay's own identity (_rebase_structured_payload_for_replay)",
+    "Source raw artifact integrity is checked before and after (sha256/size/mtime); any drift flips status to 'blocked', never a false 'completed'",
+    "tradingagents_calls / llm_provider_calls / market_data_provider_calls / database_writes are hardcoded literal 0 in every ReplayResult return path -- an architectural guarantee, not a measured counter that could silently drift"
+  ],
+  "confirmed_false_or_gap": [
+    {
+      "claim": "Replay can reproduce a historical live run's LLM-influenced semantic output",
+      "status": "FALSE for any run where the original live run had COMQUTOR_WEEK2_LLM_ENABLED=true",
+      "reasoning": "Because replay always forces llm_gateway=None, any claim-enrichment (entities/factors/direction/confidence), Alpha classifier selection, or LLM-sourced structure edge that the ORIGINAL live run produced via the Week2LLMGateway is NOT reproduced -- replay silently substitutes the deterministic fallback path for those specific claims/edges instead. The replay's own structured_agent_outputs.json / alpha_matches.json / extracted_structures.json will genuinely differ from the original live run's saved artifacts wherever the live run actually used the LLM tier, and replay_comparison.json (built by _build_comparison) will show these as real new/removed edges and claim_count deltas -- it does not hide this, but it also does not attempt to reproduce it.",
+      "practical_impact": "Currently low in practice because COMQUTOR_WEEK2_LLM_ENABLED defaults to disabled server-side, so most/all historical runs likely never exercised the LLM tier in the first place (this could not be independently confirmed for every historical run without inspecting each run's own structured_agent_outputs.json metadata.llm_enabled field, which this Phase 0 audit did not enumerate across all outputs/runs/ directories)."
+    },
+    {
+      "claim": "Replay reproduces TradingAgents' own canonical-relation-block output identically",
+      "status": "TRUE, conditionally",
+      "reasoning": "The canonical_relations array is part of structured_agent_outputs.json's own output (derived by split_human_text_and_canonical_block from the SAVED raw_agent_outputs.json text), so if the original live run's raw text already contains a COMQUTOR_CANONICAL_RELATIONS block, replay deterministically re-parses and re-validates it identically every time -- this part IS Provider-zero and reproducible, since it never re-invokes an LLM, only re-parses already-saved text."
+    }
+  ],
+  "degradation_when_historical_llm_artifact_missing": "There is no separate 'historical LLM artifact' saved independently of raw_agent_outputs.json's embedded canonical-relation-block text -- the LLM-batch-enrichment/alpha_classifier/structure_extractor call RESULTS (as opposed to the deterministic-fallback results) are not separately persisted anywhere for later replay to consume. Replay's only degradation path is therefore always 'use the deterministic fallback,' the same fallback every disabled-gateway live run already uses -- there is no missing-artifact error state distinct from that.",
+  "is_current_saved_artifact_sufficient_for_future_provider_zero_replay": "Yes, in the sense that replay already IS Provider-zero today and needs no future change to remain so. No, in the sense that it cannot and will never be able to reconstruct what a historical LLM-enabled live run's LLM tier actually decided, because that decision was never separately persisted -- only its downstream effect (already baked into structured_agent_outputs.json/alpha_matches.json/extracted_structures.json on the SOURCE run's own directory, which replay deliberately does not read for anything except the raw text)."
+}

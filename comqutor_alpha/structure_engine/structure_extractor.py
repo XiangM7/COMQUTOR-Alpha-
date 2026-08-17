@@ -415,16 +415,42 @@ def _canonical_relation_edges_and_nodes(
 def _llm_edges(llm_gateway: Any, record: Mapping[str, Any], factors: list[str]):
     if llm_gateway is None or len(factors) < 2:
         return None
-    return llm_gateway.invoke_json(
+    request = {
+        "claim_id": _source_record_id(record),
+        "claim": str(record.get("claim") or ""),
+        "evidence": str(record.get("evidence") or ""),
+        "allowed_factors": factors,
+    }
+
+    def validator(payload):
+        return _validated_llm_edges(payload, record, factors)
+
+    if getattr(llm_gateway, "semantic_runtime", None) is None or not callable(
+        getattr(llm_gateway, "invoke_json_with_trace", None)
+    ):
+        return llm_gateway.invoke_json("structure_extractor", request, validator)
+
+    invocation = llm_gateway.invoke_json_with_trace(
         "structure_extractor",
-        {
-            "claim_id": _source_record_id(record),
-            "claim": str(record.get("claim") or ""),
-            "evidence": str(record.get("evidence") or ""),
-            "allowed_factors": factors,
-        },
-        lambda payload: _validated_llm_edges(payload, record, factors),
+        request,
+        validator,
     )
+    if invocation.validation_accepted and invocation.validated_output:
+        llm_gateway.finalize_semantic_invocation(invocation, accepted=True)
+        return invocation.validated_output
+    llm_gateway.finalize_semantic_invocation(
+        invocation,
+        accepted=False,
+        fallback_reason=(
+            invocation.error_code
+            or (
+                "WEEK2_LLM_EMPTY_RESULT_FALLBACK"
+                if invocation.validation_accepted
+                else "WEEK2_LLM_STRUCTURE_EXTRACTOR_FALLBACK"
+            )
+        ),
+    )
+    return invocation.validated_output if invocation.validation_accepted else None
 
 
 def extract_structures_from_records(

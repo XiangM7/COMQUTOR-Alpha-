@@ -61,6 +61,8 @@ def match_record(
     direction: str = "positive",
     claim_quality: str = "analytical",
     factors: list[str] | None = None,
+    evidence_stance: str | None = "supports_alpha",
+    ticker_specific_text: str | None = "NVDA",
 ) -> dict[str, Any]:
     """Build one raw alpha_matches.json record (the exact JSON artifact
     shape, not the DB-row shape) -- the same shape
@@ -70,11 +72,36 @@ def match_record(
     Conflict Detector's own admission/formula logic in isolation (Unified
     Claim Admissibility Sprint's quality gate is a separate, upstream
     concern), so every synthetic claim is already-quality-gated unless a
-    test explicitly overrides it to exercise routing behavior."""
-    evidence_text = evidence if evidence is not None else f"evidence for {claim_id}"
+    test explicitly overrides it to exercise routing behavior.
+
+    B2 Conflict Evidence Admissibility: ``evidence_stance`` defaults to
+    ``"supports_alpha"`` on every generated
+    candidate_scores entry, following this file's own established "already
+    happy-path by default unless a test explicitly overrides it" philosophy
+    -- pass ``evidence_stance=None`` to omit the field entirely (simulating
+    a pre-B1 record), or any other stance string to test a non-supporting
+    B1 verdict. ``ticker_specific_text`` is prepended to the default
+    evidence text (never to caller-supplied ``evidence=...``, so tests that
+    rely on exact/near-paraphrase text for Evidence Fact grouping are
+    unaffected) so a fixture is, by default, genuinely ticker-specific per
+    ``activation_scorer_v2._is_ticker_specific``'s real token-boundary
+    check -- pass ``ticker_specific_text=None`` to build a claim with no
+    ticker-specific signal at all."""
+    if evidence is not None:
+        evidence_text = evidence
+    elif ticker_specific_text:
+        evidence_text = f"{ticker_specific_text} evidence for {claim_id}"
+    else:
+        evidence_text = f"evidence for {claim_id}"
     candidate_ids = candidate_alpha_ids or ([matched_alpha] if matched_alpha else [])
     candidate_scores = [
-        {"alpha_id": alpha_id, "score": score, "relation": relation} for alpha_id in candidate_ids
+        {
+            "alpha_id": alpha_id,
+            "score": score,
+            "relation": relation,
+            **({"evidence_stance": evidence_stance} if evidence_stance is not None else {}),
+        }
+        for alpha_id in candidate_ids
     ]
     return {
         "claim_id": claim_id,

@@ -1,4 +1,5 @@
 import type { AlphaConflict, ConflictEvidenceFactGroup, ConflictEvidenceItem } from "../api/types";
+import { ConflictEvidenceSections } from "./ConflictEvidenceSections";
 
 const LEVEL_LABELS: Record<string, string> = {
   low: "Low",
@@ -150,7 +151,12 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
         <h3>
           {conflict.alpha_a} vs {conflict.alpha_b}
         </h3>
-        {isMain ? <span className="conflict-card-badge">Main conflict</span> : null}
+        {/* Every AlphaConflict rendered here already cleared B2 (task
+            B5_CONFLICT_RADAR_EVIDENCE_UI section 12) -- Main is a strict
+            subset of Admitted, never a separate/competing status. */}
+        <span className={`conflict-card-badge${isMain ? " conflict-card-badge-main" : ""}`}>
+          {isMain ? "Main conflict" : "Admitted conflict"}
+        </span>
       </header>
       <p className="conflict-card-explanation">{conflict.explanation}</p>
       <div className="conflict-score-row">
@@ -180,11 +186,13 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
             agentCount={conflict.bull_distinct_agent_count}
             overlapRatio={conflict.bull_overlap_ratio}
           />
-          <ConflictSideEvidence
-            title="Bull evidence"
-            items={conflict.bull_evidence}
-            factGroups={conflict.bull_structure.evidence_facts}
-          />
+          {conflict.evidence_ui ? null : (
+            <ConflictSideEvidence
+              title="Bull evidence (legacy -- not B1-stance-filtered)"
+              items={conflict.bull_evidence}
+              factGroups={conflict.bull_structure.evidence_facts}
+            />
+          )}
         </div>
         <div className="conflict-side">
           <p className="conflict-side-role">Bear side</p>
@@ -200,13 +208,27 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
             agentCount={conflict.bear_distinct_agent_count}
             overlapRatio={conflict.bear_overlap_ratio}
           />
-          <ConflictSideEvidence
-            title="Bear evidence"
-            items={conflict.bear_evidence}
-            factGroups={conflict.bear_structure.evidence_facts}
-          />
+          {conflict.evidence_ui ? null : (
+            <ConflictSideEvidence
+              title="Bear evidence (legacy -- not B1-stance-filtered)"
+              items={conflict.bear_evidence}
+              factGroups={conflict.bear_structure.evidence_facts}
+            />
+          )}
         </div>
       </div>
+      {conflict.evidence_ui ? (
+        <ConflictEvidenceSections
+          evidenceUi={conflict.evidence_ui}
+          bullAlphaId={conflict.bull_alpha_id}
+          bearAlphaId={conflict.bear_alpha_id}
+        />
+      ) : (
+        <p className="conflict-evidence-ui-unavailable" role="note">
+          Counter Evidence, Missing Evidence, and Invalidation Conditions are not
+          available for this historical run.
+        </p>
+      )}
       <div className="conflict-evidence-strength">
         <span>Evidence strength: {(conflict.evidence_strength * 100).toFixed(0)}%</span>
         <div

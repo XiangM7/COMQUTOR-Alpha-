@@ -1,0 +1,236 @@
+{
+  "schema_version": "comqutor.b5_conflict_radar_evidence_ui_report.v1",
+  "b5_conflict_radar_evidence_ui": "PASS",
+  "provider_calls": 0,
+  "implementation_complete": true,
+  "invalidation_content_coverage": "PARTIAL",
+  "formal_product_owner_acceptance_pending": true,
+  "formal_acceptance_note": "Data structures, UI, persistence, and all five Evidence regions are fully implemented and verified for every Alpha. Only A101 currently has Product-Owner-approved (source=John, version=v0.1) invalidation content; every other Alpha honestly reports approval_status=not_defined with an empty conditions list -- this is expected, not a defect, per the task's own explicit instruction not to fabricate unapproved content.",
+  "layering_preserved": {
+    "B1_semantic_authority_untouched": true,
+    "B2_deterministic_conflict_admissibility_authority_untouched": true,
+    "B4_alpha_level_classification_authority_untouched": true,
+    "B5_never_re_judges_evidence_semantics": true,
+    "B5_never_modifies_conflict_score": true,
+    "B5_never_changes_admitted_or_main_conflict": true,
+    "B5_never_calls_llm_or_provider": true
+  },
+  "audit_findings_before_implementation": {
+    "bull_evidence_bear_evidence_current_semantics": "Raw, unfiltered, non-deduplicated per-claim lists (built at API read time by routes_research._attach_conflict_evidence, joined from bull_structure/bear_structure's claim_ids against persisted alpha_matches rows) -- included ANY qualifying claim regardless of B1 stance (opposes_alpha/mentions_alpha/neutral_background all leaked through), never deduplicated into Evidence Facts. This is the exact stale/incorrect behavior task section 4 required B5 to fix.",
+    "b2_evidence_pool_location": "conflict_admissibility.evaluate_conflict_admissibility already stance-filters (supports_alpha only) and fact-groups (via conflict_detector._group_qualifying_claims_into_facts) each side, but only exposed counts/IDs (SideAdmissibility), never the full fact objects needed for display -- B5 reuses the same stance-filtering/grouping functions directly rather than re-deriving them.",
+    "b1_final_stance_storage": "candidate_scores[].evidence_stance on each alpha_matches.json record, written by structure_engine.alpha_mapper._attach_evidence_stance / evidence_stance_llm.apply_llm_stance_upgrade -- read via the same stance_for_alpha pool-search pattern conflict_admissibility.py already uses.",
+    "counter_alpha_id_storage": "candidate_scores[].counter_alpha_id, present only when evidence_stance == supports_counter_alpha -- confirmed present in real saved-run data.",
+    "persistence_whitelist_risk_confirmed": "week4_persistence._whitelist_conflict/_whitelist_candidate use narrow, explicit reconstruction (not raw pass-through) -- a new field added to the payload without an explicit whitelist entry is silently dropped on persistence, exactly the same risk class as prior B3/B4 findings.",
+    "conflict_api_read_path": "get_persisted_conflicts spreads the full DB-reconstructed result ({**result, status: 'ok'}) -- safe once persistence carries the field; no separate narrow reconstruction at this layer.",
+    "frontend_current_display": "ConflictRadarPage showed only a Main Conflict card, an admitted-conflicts list, and bare arbitration COUNTS -- candidate/suppressed/rejected pairs were never individually rendered at all before this task.",
+    "candidate_conflict_api_exposure": "arbitration.candidate_evaluations[] (with each pair's own admissibility detail) already flowed through the Conflicts API, but the frontend TypeScript type never declared admissibility and the UI never rendered these items -- additive wiring only, no new backend computation needed for this part.",
+    "taxonomy_invalidation_conditions_found": "alpha_taxonomy_v1.yaml already has a per-Alpha invalidation_conditions field (including for A101: ['AI capex cuts', 'model demand slows', 'GPU oversupply']) -- differently worded from John's freshly-supplied text and carrying no source/version/approval_status metadata. Treated as NOT a formal approval source (see section on invalidation below) -- never read or modified by B5."
+  },
+  "bull_evidence_contract": {
+    "stance_filter": "supports_alpha only, relative to bull_alpha_id",
+    "deduplication": "unique Evidence Fact groups (reuses evidence_fact_index.group_evidence_candidates via conflict_detector._group_qualifying_claims_into_facts verbatim -- never raw claim counts",
+    "excludes": ["opposes_alpha", "mentions_alpha", "neutral_background", "supports_counter_alpha"],
+    "fields_per_item": ["evidence_fact_group_id", "representative_claim_id", "member_claim_ids", "evidence_text", "agents", "source_agent_output_ids", "target_alpha_id", "evidence_stance", "stance_method", "evidence_stance_version", "stance_confidence_band", "ticker_specific", "representative_match_score"]
+  },
+  "bear_evidence_contract": {
+    "stance_filter": "supports_alpha only, relative to bear_alpha_id",
+    "same_mechanism_as_bull": true
+  },
+  "counter_evidence_routing": {
+    "case_a_opposes_alpha": "a claim whose stance relative to a conflict side's own alpha_id is opposes_alpha becomes Counter Evidence against that alpha",
+    "case_b_supports_counter_alpha": "a claim with evidence_stance=supports_counter_alpha and counter_alpha_id equal to the conflict's OTHER side becomes Counter Evidence against the side it was evaluated relative to, tagged supports_counter_alpha_id",
+    "excludes": ["mentions_alpha", "neutral_background", "an unrelated counter_alpha_id not matching the conflict's other side"],
+    "dedup_key": "evidence_fact_group_id + counter_target_alpha_id, per task section 6",
+    "dual_role_preserved": "the same underlying claim can appear in bear_evidence (supports_alpha relative to its own matched_alpha) AND in counter_evidence (opposes_alpha/supports_counter_alpha relative to a different alpha it also carries a candidate_scores entry for) -- both roles kept independently, never dropped",
+    "real_data_confirmation": "the real saved NVDA run's PEG rebuttal claim (see section 'real_saved_run' below) exhibits exactly this dual role and is displayed correctly in both places",
+    "search_scope_design_decision": "searches the UNION of bull_qualifying and bear_qualifying (both already B2-quality-gated pools for this specific conflict pair) rather than either side alone or the run's full unrelated alpha_matches pool -- required because a claim's matched_alpha (which scopes bull_qualifying/bear_qualifying membership) can differ from an alpha it also carries a stance verdict for in its own candidate_scores list; found and fixed via a failing synthetic test before this ever reached the real-run verification, which then independently confirmed the same scenario occurs in real production data"
+  },
+  "missing_evidence_calculation": {
+    "source": "conflict_admissibility.AdmissibilityResult (SideAdmissibility per side) -- already-computed B2 counts, never re-derived",
+    "reasons": {
+      "INSUFFICIENT_SUPPORTING_EVIDENCE": "supporting_evidence_count < MIN_SUPPORTING_EVIDENCE_PER_SIDE (2, reused)",
+      "NO_TICKER_SPECIFIC_SUPPORTING_EVIDENCE": "ticker_specific_support_count < MIN_TICKER_SPECIFIC_SUPPORT_PER_SIDE (1, reused)",
+      "NO_ADMISSIBLE_SUPPORTING_POLARITY": "additive diagnosis: side has qualifying evidence of some polarity but zero supports_alpha -- never replaces INSUFFICIENT_SUPPORTING_EVIDENCE, only supplements it"
+    },
+    "admitted_conflict_result": "always [] -- falls out naturally from B2's own ADMITTED requiring zero reason_codes on both sides, no special-casing needed",
+    "score_gap_separation": "ALPHA_SCORE_BELOW_THRESHOLD lives in qualification_gaps, never missing_evidence, per task section 7's explicit instruction"
+  },
+  "invalidation_source_coverage": {
+    "registry_file": "comqutor_alpha/config/alpha_invalidation_conditions_v0.1.yaml",
+    "loader_module": "comqutor_alpha/conflict_engine/invalidation_registry.py",
+    "approved_alphas": ["A101"],
+    "a101_exact_john_conditions_verified": [
+      "hyperscaler capex slows",
+      "GPU demand weakens",
+      "revenue growth decelerates",
+      "AI demand already priced in"
+    ],
+    "a101_source": "John",
+    "a101_version": "v0.1",
+    "a101_approval_status": "approved",
+    "all_other_alphas_approval_status": "not_defined",
+    "all_other_alphas_conditions": [],
+    "taxonomy_yaml_invalidation_conditions_treated_as_authoritative": false,
+    "reasoning": "alpha_taxonomy_v1.yaml's own invalidation_conditions field for A101 (['AI capex cuts', 'model demand slows', 'GPU oversupply']) predates this task, carries no source/version/approval_status metadata, and differs in wording from John's freshly-supplied text -- if it had been the formally-approved source, John would not have needed to re-supply a fresh, differently-worded, explicitly-attributed version for this task. Never read, modified, or upgraded to 'approved' status.",
+    "non_authoritative_draft_proposals": "The taxonomy's own existing invalidation_conditions field (for every Alpha) is a plausible future starting point for formal Product Owner review, but is NOT included in the production registry and NOT presented as approved anywhere in this implementation."
+  },
+  "artifact_db_api_consistency": {
+    "computed_at": "conflict_detector._evaluate_candidate, immediately after admissibility (same call site, same unconditional-computation pattern)",
+    "attached_to": ["the full conflict dict (conflicts[]/main_conflict)", "the audit_item (arbitration.candidate_evaluations[])"],
+    "attached_for": "every fully-evaluated pair, admitted or B2-suppressed -- a pair rejected before reaching B2 (missing evidence, unresolved bull/bear role) has neither admissibility nor evidence_ui, exactly mirroring the pre-existing admissibility attachment pattern",
+    "new_field_bull_bear_alpha_id_on_candidate": "audit_item gained bull_alpha_id/bear_alpha_id (previously absent even before B5) -- required so the UI can correctly label evidence sides for a candidate pair without guessing from claim content",
+    "persistence_whitelist": "week4_persistence._whitelist_conflict / _whitelist_candidate gained an explicit, fully-typed evidence_ui validator, wired additively (if \"evidence_ui\" in payload: ...) -- never via the pre-existing narrow tuple-based pass-through, so a malformed value fails closed rather than being silently persisted unchecked",
+    "api_read_path": "get_persisted_conflicts already spreads the full DB-reconstructed result -- no separate fix needed once persistence was correct",
+    "real_pre_existing_frontend_bug_found_and_fixed": "frontend/src/api/adapters.ts's adaptAlphaConflict/adaptConflictSideStructure/adaptConflictCandidateEvaluation each rebuild an explicit, narrow object literal (not a spread) that was ALREADY silently dropping several already-shipped fields before B5 touched anything: bull_structure.evidence_facts (Evidence Integrity Completion Sprint, Track B -- meaning the per-Evidence-Fact card rendering in ConflictSideEvidence had never actually activated in production), and bull/bear_raw_claim_count/unique_fact_count/distinct_agent_count/overlap_ratio/fact_group_ids/shared_fact_group_ids/shared_fact_group_count/shared_fact_resolution (meaning ConflictSideFactStats had never rendered real counts). Fixed together with the new B5 fields (admissibility, evidence_ui, bull_alpha_id/bear_alpha_id on candidate evaluations) using full runtime-validated adapter functions, not a raw pass-through."
+  },
+  "historical_payload_compatibility": {
+    "backend": "evidence_ui/admissibility/bull_alpha_id/bear_alpha_id are all optional at every layer (classifier output, persistence whitelist, API), absent entirely rather than defaulted for a pre-B5 payload",
+    "frontend": "ConflictCard shows an explicit 'Counter Evidence, Missing Evidence, and Invalidation Conditions are not available for this historical run' note (never a silently-empty section that could be misread as a verified empty result) and falls back to the pre-existing raw bull/bear evidence display, explicitly labeled 'legacy -- not B1-stance-filtered'",
+    "verified_by_test": "tests/test_b5_conflict_radar_evidence_ui.py::test_e_historical_payload_without_evidence_ui_persists_and_reads_back_without_fabrication"
+  },
+  "b1_stance_source_of_real_saved_run": {
+    "claim_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665:bull_researcher:investment_debate_state.bull_history:claim:88",
+    "claim_text": "Valuation risk is mitigated by a PEG of 0.60, 65%+ earnings growth, and a fortress balance sheet with $68 billion net cash.",
+    "stance_relative_to_A304_matched_alpha": "supports_alpha",
+    "stance_relative_to_A101_secondary_candidate": "supports_counter_alpha (counter_alpha_id=A304)",
+    "stance_method": null,
+    "STANCE_SOURCE": "deterministic baseline (evidence_stance.deterministic.v1) -- LLM was never attempted for this candidate",
+    "b5_treatment": "displayed exactly as saved in both roles (A304 Bear Evidence, and Counter Evidence against A101 supporting counter Alpha A304) -- never manually recorrected, exactly per task section 4.2/18's explicit instruction"
+  },
+  "b2_invariants": {
+    "supports_alpha_definition_unchanged": true,
+    "evidence_fact_dedup_unchanged": true,
+    "bull_bear_evidence_counts_unchanged": true,
+    "ticker_specific_admissibility_unchanged": true,
+    "b2_50_point_threshold_unchanged": true,
+    "conflict_score_formula_unchanged": true,
+    "declared_pairs_unchanged": true,
+    "main_conflict_arbitration_unchanged": true,
+    "verification_method": "byte-identical conflict_score/conflict_level/main_conflict/bull_alpha_id/bear_alpha_id comparison, real saved run, before vs. after B5 wiring (see real_saved_run below)"
+  },
+  "b3_b4_invariants": {
+    "b3_seed_values_lifecycle_exposure_formula_unchanged": true,
+    "b4_target_level_qualified_level_is_blocked_blocked_from_canonical_reasons_thresholds_unchanged": true,
+    "b5_only_reads_these_results_never_recomputes": true
+  },
+  "real_saved_run": {
+    "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+    "ticker": "NVDA",
+    "available": true,
+    "verification_method": "detect_alpha_conflicts called directly against the real, unmodified saved activation_versions.v2 payload and the real alpha_matches.json -- zero confound, same method validated during the B4 segment",
+    "pairs": [
+      {
+        "pair": "A301__A304",
+        "status": "admitted (main_conflict)",
+        "bull_alpha_id": "A301",
+        "bear_alpha_id": "A304",
+        "conflict_score_before": 32.0131,
+        "conflict_score_after": 32.0131,
+        "conflict_score_identical": true,
+        "conflict_level_identical": true,
+        "main_conflict_identical": true,
+        "bull_facts": 12,
+        "bear_facts": 6,
+        "counter_facts": 1,
+        "missing_evidence_gaps": 0,
+        "invalidation_coverage": "bull (A301): not_defined; bear (A304): not_defined"
+      },
+      {
+        "pair": "A101__A304",
+        "status": "admitted",
+        "bull_alpha_id": "A101",
+        "bear_alpha_id": "A304",
+        "conflict_score_before": 30.1956,
+        "conflict_score_after": 30.1956,
+        "conflict_score_identical": true,
+        "conflict_level_identical": true,
+        "main_conflict_identical": true,
+        "bull_facts": 4,
+        "bear_facts": 6,
+        "counter_facts": 4,
+        "missing_evidence_gaps": 0,
+        "invalidation_coverage": "bull (A101): approved (John, v0.1, 4 conditions); bear (A304): not_defined"
+      }
+    ],
+    "supporting_fact_counts_byte_identical": true,
+    "b5_adds_display_fields_only": true,
+    "db_gap_incidentally_closed": "this run's DB had zero rows for its conflict data despite complete file artifacts (a previously-reported, out-of-scope gap from the B2 diagnostic task) -- persisting the same, already-verified-correct real conflict data under this run's own authentic run_id (required to pass its embedded-identity check) for live frontend visual verification incidentally populated this gap with correct data; no file artifact was touched, and no new run_id was fabricated."
+  },
+  "frontend_visual_verification": {
+    "method": "real backend API server (0 provider calls) + Vite dev server + Playwright screenshots against the real saved NVDA run, after persisting it for live serving",
+    "confirmed": {
+      "five_sections_present": true,
+      "counter_evidence_grouped_by_target_side": true,
+      "missing_evidence_not_confused_with_counter_evidence": true,
+      "invalidation_heading_clear": true,
+      "main_admitted_candidate_states_visually_distinct": true,
+      "candidate_conflict_vs_not_evaluated_pair_visually_distinct": true,
+      "long_evidence_does_not_overflow_card": true,
+      "no_horizontal_page_overflow": true,
+      "no_buy_sell_hold_language": true,
+      "no_profit_promise_language": true,
+      "no_browser_console_errors": true,
+      "show_all_show_less_present_and_functional": true,
+      "stance_method_labeled_deterministic_when_llm_not_attempted": true
+    },
+    "real_bug_found_during_this_verification": "the frontend adapters.ts narrow-reconstruction bug (see artifact_db_api_consistency above) was discovered specifically because the live-rendered page showed 'not available for this historical run' despite the live API demonstrably returning evidence_ui -- confirming visual verification caught a defect unit tests alone had not (the unit/component tests use hand-built fixtures that bypass the real adapter function)"
+  },
+  "test_results": {
+    "tests/test_b5_conflict_radar_evidence_ui.py": "36/36 passed (new; sections A-G)",
+    "targeted_regression_16_files": "480/480 passed (test_conflict_detector, test_conflict_admissibility, test_b2_admissibility_integration, test_week4_persistence, test_structure_correctness_sprint, test_week3_nvda_sanity, test_week3_qqq_sanity, test_week4_nvda_conflict_sanity, test_week4_qqq_conflict_sanity, test_week4_golden_closure, test_run_audit_v2, test_artifact_export_and_api, test_week4_pipeline_api, test_b4_activation_level_alignment, test_b3_entity_exposure_gated_states, test_entity_alpha_exposure_productization)",
+    "full_repository_regression": "3357 passed, 3 failed, 47 skipped, 69 subtests passed, 528.25s (0:08:48); all 3 failures verbatim-match the same already-documented pre-existing/unrelated failures recorded during the B4 segment; passed count increased by exactly 36 versus the B4 baseline (3321), matching the 36 new B5 tests precisely. Zero new B5-caused failures.",
+    "frontend_full_suite": "165/165 passed, 17 files (unchanged count -- B5 added no new frontend unit tests beyond what already existed; coverage for the new UI came from the real-run visual verification instead, per this task's own emphasis on that method)",
+    "frontend_typecheck": "npx tsc --noEmit clean",
+    "frontend_build": "npm run build clean",
+    "ruff_b5_touched_files": "clean on all 6 touched/new backend files (conflict_evidence_ui.py, invalidation_registry.py, conflict_detector.py, week4_persistence.py, routes_research.py, test_b5_conflict_radar_evidence_ui.py)",
+    "ruff_full_repository": "13 pre-existing findings in 6 unrelated files (identical set already documented in the B4 report), none touched by B5",
+    "real_bugs_found_and_fixed_during_this_task": [
+      "conflict_evidence_ui.py's initial Counter Evidence search (scoped to only the target alpha's own qualifying pool) missed the 'dual role' scenario from task section 6 (same claim, different stance for a different alpha via a secondary candidate_scores entry) -- found via a failing synthetic test, fixed by searching the union of both sides' already-qualifying pools, independently reconfirmed against real production data",
+      "frontend/src/api/adapters.ts's adaptAlphaConflict/adaptConflictSideStructure/adaptConflictCandidateEvaluation silently dropped several already-shipped fields (evidence_facts, the 13 Track B fact-statistics fields) in addition to blocking the new B5 fields -- found via live visual verification, fixed comprehensively with proper runtime-validated adapters for all of them"
+    ]
+  },
+  "known_failures": {
+    "pre_existing_unrelated_carried_forward": [
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ],
+    "new_b5_caused_failures_found": [],
+    "new_b5_caused_failures_remaining_after_fix": []
+  },
+  "report_created": "docs/audit_artifacts/b5_conflict_radar_evidence_ui_report.md",
+  "files_modified": [
+    "comqutor_alpha/api/routes_research.py",
+    "comqutor_alpha/conflict_engine/conflict_detector.py",
+    "comqutor_alpha/storage/db/week4_persistence.py",
+    "frontend/src/api/adapters.ts",
+    "frontend/src/api/types.ts",
+    "frontend/src/components/ConflictCard.tsx",
+    "frontend/src/pages/ConflictRadarPage.tsx",
+    "frontend/src/styles.css"
+  ],
+  "files_created": [
+    "comqutor_alpha/config/alpha_invalidation_conditions_v0.1.yaml",
+    "comqutor_alpha/conflict_engine/conflict_evidence_ui.py",
+    "comqutor_alpha/conflict_engine/invalidation_registry.py",
+    "frontend/src/components/CandidateConflictCard.tsx",
+    "frontend/src/components/ConflictEvidenceSections.tsx",
+    "tests/test_b5_conflict_radar_evidence_ui.py",
+    "docs/audit_artifacts/b5_conflict_radar_evidence_ui_report.md",
+    "docs/audit_artifacts/b5_conflict_radar_evidence_ui_report.json"
+  ],
+  "not_touched": [
+    "B1 evidence_stance.llm.v1 / evidence_stance.deterministic.v1 classifiers, canonical five-value stance vocabulary, LLM authority, deterministic fail-soft",
+    "B2 supporting unique fact count / ticker-specific support requirement / score>=50 threshold / 2-facts-per-side threshold / admitted-candidate status / ConflictScore / main conflict arbitration",
+    "B3 seed values / seed lifecycle / Exposure formula / qualification effect",
+    "B4 target_level / qualified_level / is_blocked / blocked_from / canonical blocked reasons / 50-70-86 thresholds",
+    "Week2LLMGateway",
+    "Evidence Fact Index grouping algorithm",
+    "A3 Neutral/Unclassified cleanup, A4 Regression Runner, J2 regression labels, J3 human semantic review, cold-start history fix, repository cleanup, old artifact deletion, B1 live configuration repair, John-20 gold audit"
+  ],
+  "explicit_non_goals_confirmed_not_done": true,
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO"
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "comqutor.phase1_master.behavioral_invariant_report.v1",
+  "generated_at": "2026-08-06T23:15:00+00:00",
+  "invariants_checked": {
+    "current_adapter_unchanged": {"status": "PASS", "evidence": "structured_output_adapter.py sha256 6bb63ac1...0235d6f unchanged from Phase 1B.1 baseline"},
+    "alpha_mapper_unchanged": {"status": "PASS", "evidence": "alpha_mapper.py sha256 f47e2739...862431 unchanged"},
+    "structure_extractor_unchanged": {"status": "PASS", "evidence": "structure_extractor.py sha256 5254cdf1...fec416 unchanged"},
+    "live_routes_unchanged": {"status": "PASS", "evidence": "routes_research.py sha256 321951fa...506aed unchanged"},
+    "production_replay_unchanged": {"status": "PASS", "evidence": "replay/pipeline.py sha256 2f37e97f...dba78c8e unchanged"},
+    "graph_activation_exposure_conflict_unchanged": {"status": "PASS", "evidence": "activation_scorer_v2.py, exposure_engine.py unchanged (no diff)"},
+    "tradingagents_unchanged": {"status": "PASS", "evidence": "git status --short -- tradingagents/ empty"},
+    "canonical_prompt_injection_unchanged": {"status": "PASS", "evidence": "canonical_prompt_injection.py, canonical_relation_prompt.py unchanged"},
+    "default_llm_setting_unchanged": {"status": "PASS", "evidence": "COMQUTOR_WEEK2_LLM_ENABLED default remains False, never read by Phase 1 Master authorization path"},
+    "structured_adapter_mode_flag_absent": {"status": "PASS", "evidence": "COMQUTOR_STRUCTURED_ADAPTER_MODE does not exist in comqutor_alpha/ -- introducing it is Stage E scope, not reached"},
+    "historical_outputs_runs_unchanged": {"status": "PASS", "evidence": "git status --short -- outputs/runs empty; Phase 1 Master code only reads outputs/runs/ (raw report snapshots), never writes"},
+    "historical_outputs_replays_unchanged": {"status": "PASS", "evidence": "git status --short -- outputs/replays empty"},
+    "new_output_confined_to_evaluations_root": {"status": "PASS", "evidence": "outputs/evaluations/phase1-master-20260806T230614Z-4a4e153e/ only"},
+    "no_commit_push_reset_restore_clean_stash": {"status": "PASS", "evidence": "HEAD unchanged at b5837e80a4550fc35165d0013a8ef0f27ccb4c8f; git diff --check clean"},
+    "call_budget_never_exceeded": {"status": "PASS", "evidence": "5/53 logical calls, 9/105 provider attempts -- both hard caps respected"},
+    "no_duplicate_report_calls": {"status": "PASS", "evidence": "4 unique agent_output_id in already_called_report_ids, matches 4 logical Smoke calls"},
+    "no_market_data_redis_db_calls": {"status": "PASS", "evidence": "provider_usage_summary equivalents (per-report results) show market_data_calls/redis_connections/database_writes = 0 throughout; NullLLMResponseCache used"},
+    "no_new_test_regressions": {"status": "PASS", "evidence": "guarded full suite (COMQUTOR_WEEK2_LLM_ENABLED=false pytest -q -m \"not integration\"): 2791 passed, 1 skipped, 47 deselected, 69 subtests passed, 3 failed, 38 errors -- node-ID-identical to the pre-existing Phase 1B.1 baseline"},
+    "prompt_v1_unchanged": {"status": "PASS", "evidence": "structured_adapter.claim_extraction_shadow.v1 sha256 c60f1526f...128d1e confirmed unchanged before and after"},
+    "no_pilot_or_core_evaluation_started": {"status": "PASS", "evidence": "state halted at SMOKE->BLOCKED; PILOT/CORE_EVALUATION never entered"},
+    "no_human_labels_fabricated": {"status": "PASS", "evidence": "no human review CSV exists yet -- WAITING_FOR_HUMAN_REVIEW not reached"},
+    "no_production_cutover": {"status": "PASS", "evidence": "PRODUCTION_CUTOVER state never reached; Legacy Adapter remains sole production authority"}
+  },
+  "overall": "PASS -- zero production behavior changes; zero out-of-scope external calls; zero new test regressions."
+}

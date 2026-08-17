@@ -1,0 +1,58 @@
+{
+  "schema_version": "phase0_6c_exact_replay_test_results_v1",
+  "phase": "0.6C",
+  "runs": [
+    {
+      "command": "COMQUTOR_WEEK2_LLM_ENABLED=false pytest -q tests/replay",
+      "passed": 40,
+      "failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "COMQUTOR_WEEK2_LLM_ENABLED=false pytest -q tests/test_replay_pipeline.py tests/test_replay_identity_correction.py tests/test_replay_all_api.py tests/test_artifact_export_and_api.py tests/test_canonical_relation_prompt_injection.py",
+      "passed": 129,
+      "failed": 0,
+      "warnings": 1,
+      "status": "PASS"
+    },
+    {
+      "command": "ruff check comqutor_alpha/replay tests/replay",
+      "errors": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "COMQUTOR_WEEK2_LLM_ENABLED=false pytest -q -m 'not integration'",
+      "passed": 2730,
+      "failed": 0,
+      "skipped": 1,
+      "deselected": 47,
+      "warnings": 17,
+      "subtests_passed": 69,
+      "status": "PASS"
+    },
+    {
+      "command": "python scripts/audit_llm_boundary.py",
+      "checks_passed": 4,
+      "checks_failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "python scripts/verify_phase0_6c.py",
+      "checks_passed": 30,
+      "checks_failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "python scripts/verify_phase0_6b.py",
+      "status": "EXPECTED_RETROSPECTIVE_SCOPE_FAILURE",
+      "explanation": "The immutable Phase 0.6B verifier correctly flags Phase 0.6C's explicitly authorized Replay files and pipeline metadata delta as outside the older phase's allowlist; all 0.6B live/runtime/prompt/provider/historical checks still pass."
+    }
+  ],
+  "offline": true,
+  "pytest_tmp_path_only": true,
+  "provider_calls": 0,
+  "network_connections": 0,
+  "redis_connections": 0,
+  "database_writes": 0,
+  "status": "PASS"
+}

@@ -1,0 +1,132 @@
+{
+  "audit": "phase_0_development_plan_llm_boundary_audit",
+  "generated_at": "2026-08-05T00:00:00Z",
+  "gateway_chokepoint": {
+    "file": "comqutor_alpha/structure_engine/week2_llm.py",
+    "class": "Week2LLMGateway",
+    "invoke_method_line": 156,
+    "provider_call_line": 182,
+    "note": "All three COMQUTOR Week2 LLM tasks (claim_batch_enrichment / alpha_classifier / structure_extractor) share ONE Week2LLMGateway instance per run, built once in routes_research.py:2337 and threaded through all three writers -- meaning they also share ONE per-run call budget (default max_calls=32, server-capped at 100), not independent per-module budgets."
+  },
+  "real_call_sites": [
+    {
+      "call_site_id": "CS-01",
+      "file": "comqutor_alpha/structure_engine/structured_output_adapter.py",
+      "symbol": "_llm_batch_enrichment",
+      "line": 956,
+      "caller": "adapt_raw_agent_outputs (line 1180)",
+      "purpose": "Enrich already-segmented claims with entities/factors/direction/confidence for LLM_STRUCTURED_AGENTS only (market/technical/sentiment/news/fundamental[s]_agent); claim/evidence/source_section returned byte-for-byte unchanged, validated by _validate_llm_batch_enrichment",
+      "development_plan_module": "5.1",
+      "provider": "whatever comqutor_alpha.llm/tradingagents.llm_clients client the gateway's model was built with (DeepSeek by default per research_profiles.py)",
+      "model_source": "tradingagents.llm_clients.create_llm_client via build_server_week2_llm_gateway (week2_llm.py:257-267)",
+      "prompt_source": "Week2LLMGateway._TASK_INSTRUCTIONS['claim_batch_enrichment'] (week2_llm.py:27-35), embedded in invoke_json's own prompt template (week2_llm.py:170-174)",
+      "structured_output": true,
+      "retry_count": "max_retries default 1, server-capped MAX_SERVER_RETRIES=2",
+      "timeout": "DEFAULT_TIMEOUT_SECONDS=15.0, bounded [1.0, 120.0]",
+      "cache_enabled": false,
+      "live_run_reachable": true,
+      "replay_reachable": false,
+      "fallback": "per-batch deterministic enrichment (extraction_method=deterministic_splitter) -- never a whole-run crash, never silently drops a segment",
+      "affects_activation": true,
+      "affects_conflict": true,
+      "gated_by_env": "COMQUTOR_WEEK2_LLM_ENABLED"
+    },
+    {
+      "call_site_id": "CS-02",
+      "file": "comqutor_alpha/structure_engine/alpha_mapper.py",
+      "symbol": "_apply_optional_classifier",
+      "line": 393,
+      "caller": "map_claim_to_alpha (line 624)",
+      "purpose": "Disambiguate among >=2 deterministically-eligible Alpha candidates (select or defer); cannot create candidates, change admissibility, or produce a trading decision",
+      "development_plan_module": "5.2",
+      "provider": "same shared Week2LLMGateway model as CS-01",
+      "model_source": "same as CS-01",
+      "prompt_source": "Week2LLMGateway._TASK_INSTRUCTIONS['alpha_classifier'] (week2_llm.py:36-41)",
+      "structured_output": true,
+      "retry_count": "shared gateway default (see CS-01)",
+      "timeout": "shared gateway default (see CS-01); classifier_timeout_seconds=5.0 is a separate, unused-in-this-branch parameter for the non-gateway `classifier` callable path",
+      "cache_enabled": false,
+      "live_run_reachable": true,
+      "replay_reachable": false,
+      "fallback": "keeps the already-computed deterministic matched_alpha/status decided before the classifier ran (classifier_metadata status='fallback') -- never crashes, never returns 'unknown'",
+      "affects_activation": true,
+      "affects_conflict": true,
+      "gated_by_env": "COMQUTOR_WEEK2_LLM_ENABLED",
+      "trigger_condition": "match_status != 'no_match' AND len(eligible_candidates) >= 2 -- this is the concrete 'ambiguity' definition in code; every other claim never reaches this call site regardless of gateway availability"
+    },
+    {
+      "call_site_id": "CS-03",
+      "file": "comqutor_alpha/structure_engine/structure_extractor.py",
+      "symbol": "_llm_edges",
+      "line": 415,
+      "caller": "extract_structures_from_records (line 451)",
+      "purpose": "Extract evidence-backed factor-to-factor relation edges (causal/supportive/conflicting) from one claim's evidence text, restricted to that claim's own deterministically-extracted allowed_factors",
+      "development_plan_module": "5.3",
+      "provider": "same shared Week2LLMGateway model as CS-01",
+      "model_source": "same as CS-01",
+      "prompt_source": "Week2LLMGateway._TASK_INSTRUCTIONS['structure_extractor'] (week2_llm.py:42-47)",
+      "structured_output": true,
+      "retry_count": "shared gateway default (see CS-01)",
+      "timeout": "shared gateway default (see CS-01)",
+      "cache_enabled": false,
+      "live_run_reachable": true,
+      "replay_reachable": false,
+      "fallback": "per-claim deterministic rule extraction (_extract_edges, relation_grammar.py) -- never an empty-graph crash",
+      "affects_activation": true,
+      "affects_conflict": true,
+      "gated_by_env": "COMQUTOR_WEEK2_LLM_ENABLED",
+      "trigger_condition": "llm_gateway is not None AND len(factors) >= 2, evaluated per claim",
+      "call_frequency": "per-claim (not per-agent-report, not per-run) -- called once per structured claim record with >=2 deterministic factors"
+    },
+    {
+      "call_site_id": "CS-04-to-CS-16",
+      "file": "tradingagents/agents/{analysts,researchers,trader,managers,risk_mgmt}/*.py",
+      "symbol": "12 native agent node functions (market/sentiment/news/fundamentals analysts; bull/bear researchers; research_manager; trader; aggressive/conservative/neutral risk debators; portfolio_manager) + 1 post-run reflection call",
+      "line": "n/a (see repo-wide inventory sub-agent report for exact per-file line numbers)",
+      "caller": "TradingAgentsGraph.propagate() / .graph.stream(), invoked from comqutor_alpha/runners/tradingagents_runner.py:172,384",
+      "purpose": "TradingAgents' own native per-agent analysis/debate/decision generation -- upstream functionality, not a COMQUTOR addition",
+      "development_plan_module": "TradingAgents",
+      "provider": "tradingagents.llm_clients.create_llm_client dispatch (openai/anthropic/google/azure/bedrock/openai-compatible incl. DeepSeek)",
+      "model_source": "comqutor_alpha/research_profiles.py fixed ResearchProfile registry for real web-submitted runs (default DeepSeek comqutor_deepseek_default_v1; alternate Anthropic comqutor_anthropic_medium_sonnet46_v1) -- HTTP requests cannot select provider/model directly",
+      "prompt_source": "each agent's own native TradingAgents prompt-builder function, with the COMQUTOR Structure Output Contract suffix appended at runtime (see canonical_prompt_injection.py) for the duration of the run",
+      "structured_output": "partial -- 5 of the 12 (sentiment, research_manager, trader, portfolio_manager, plus market via a different path) use bind_structured/invoke_structured_or_freetext (tradingagents/agents/utils/structured.py); the rest are free-text",
+      "retry_count": "unclear / underlying LangChain SDK default (no explicit COMQUTOR-side retry wrapper found)",
+      "timeout": "unclear / underlying LangChain SDK default",
+      "cache_enabled": false,
+      "live_run_reachable": true,
+      "replay_reachable": false,
+      "fallback": "n/a -- this is TradingAgents' own native behavior, out of COMQUTOR's Development Plan scope",
+      "affects_activation": true,
+      "affects_conflict": true,
+      "note": "Every one of these 12 agents' prompt is functionally modified at runtime by canonical_prompt_injection.py to also request a COMQUTOR_CANONICAL_RELATIONS JSON block -- see tradingagents_modification_audit.csv. This does not add a new LLM call (same single call each agent already makes), but it is a genuine prompt-content change, achieved via monkeypatch rather than a tradingagents/ source edit."
+    }
+  ],
+  "test_fake_call_sites": [
+    "tests/conftest.py:100-108 mock_llm_client fixture (patches tradingagents.llm_clients.factory.create_llm_client)",
+    "tests/test_week2_llm.py FakeClient class",
+    "tests/test_structured_output_adapter.py _FakeBatchLLMGateway class",
+    "tests/test_structured_agents.py, tests/test_memory_log.py, tests/test_signal_processing.py -- unittest.mock.MagicMock() llm objects",
+    "tests/test_week3_security_hardening.py:160-165 monkeypatches routes_research.build_server_week2_llm_gateway to a call-recording stub"
+  ],
+  "dead_or_legacy_or_manual_only_call_sites": [
+    {
+      "file": "tradingagents/graph/signal_processing.py",
+      "lines": "20-31",
+      "note": "SignalProcessor.process_signal explicitly documents it no longer makes an LLM call; quick_thinking_llm constructor argument accepted only for backward-compatible signature, unused."
+    },
+    {
+      "file": "comqutor_alpha/llm/deepseek_smoke.py",
+      "lines": "337-340",
+      "note": "run_deepseek_smoke -> run_original_tradingagents_research: real, opt-in, manual DeepSeek smoke entrypoint. Not invoked by any production code path, tests only exercise it mocked."
+    },
+    {
+      "file": "scripts/smoke_structured_output.py",
+      "lines": "121-122",
+      "note": "Manual dev CLI script to verify a provider's native structured-output mode. Not part of any automated production or replay path."
+    }
+  ],
+  "cache_infrastructure": {
+    "found": false,
+    "note": "No Redis/disk/in-process cache wraps any LLM .invoke() call anywhere in the repository. The only functools.lru_cache found (tradingagents/agents/utils/agent_utils.py:78, resolve_instrument_identity) caches a yfinance ticker lookup, unrelated to LLM calls."
+  }
+}

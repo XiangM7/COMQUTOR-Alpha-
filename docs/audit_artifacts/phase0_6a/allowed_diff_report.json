@@ -1,0 +1,803 @@
+{
+  "schema_version": "phase0_6a_allowed_diff_report_v1",
+  "phase": "0.6A",
+  "captured_at": "2026-08-05T19:01:37.889979+00:00",
+  "baseline_preexisting_file_count": 162,
+  "current_status_entry_count": 194,
+  "preexisting_status_entries": [
+    {
+      "status": " M",
+      "path": "comqutor_alpha/api/routes_research.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/graph_engine/activation_scorer_v2.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/replay/pipeline.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/storage/file_store.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/structure_engine/alpha_mapper.py"
+    },
+    {
+      "status": " M",
+      "path": "frontend/src/pages/StructureGraphPage.tsx"
+    },
+    {
+      "status": " M",
+      "path": "tests/test_ai_alpha_mapper_discrimination.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/test_week3_security_hardening.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/api/artifact_export.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/audit/__init__.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/audit/ticker_consistency.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/evaluation/evidence_review_sample.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/structure_engine/evidence_stance.py"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-001-semantic-authority.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-002-tradingagents-boundary.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-003-replay-semantics.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-004-evidence-stance-provenance.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/alpha_mapper_gap_matrix.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/artifact_completeness_case_results.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/artifact_completeness_summary.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/deterministic_core_boundary_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/development_plan_compliance_matrix.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/development_plan_source_inventory.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/evidence_review_sample_validation.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/evidence_stance_behavior_invariants.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/evidence_stance_case_results.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/evidence_stance_summary.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/frontend_run_switch_verification.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/llm_call_site_inventory.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/llm_prompt_inventory.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/phase0_5_completion_report.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/phase0_5_gate_report.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/phase0_original_file_hashes.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/preexisting_dirty_file_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/reconciled_compliance_matrix.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/source_artifact_integrity_after.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/source_artifact_integrity_before.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_5/worktree_start_snapshot.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/proposed_phase_1_3_plan.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/provider_call_baseline.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/replay_identity_case_results.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/replay_identity_consistency.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/replay_semantic_reproducibility.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/semantic_pipeline_call_graph.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/sndk_tsm_forensic_report.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/structure_extractor_gap_matrix.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/structured_adapter_gap_matrix.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/ticker_consistency_case_results.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/ticker_consistency_summary.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/tradingagents_modification_audit.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/development_plan_llm_boundary_audit.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/development_plan_llm_boundary_audit_consolidated.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/development_plan_llm_boundary_audit_reconciliation.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/evidence_review_instructions.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/evidence_review_sample.csv"
+    },
+    {
+      "status": "??",
+      "path": "docs/evidence_review_sample_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/evidence_review_sample_records.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/evidence_stance_and_review_sample_report.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/run_identity_and_artifact_export_sprint_report.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/README.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/current_vs_target_semantic_architecture.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/development_plan_v1.0_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/development_plan_v1.0_reference_index.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/future_semantic_phase_contract.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/product_decisions_and_unknowns.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/semantic_authority_matrix.csv"
+    },
+    {
+      "status": "??",
+      "path": "frontend/src/pages/StructureGraphPage.test.tsx"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/alpha_activations.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/alpha_matches.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/artifact_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/conflict_results.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/conflicts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/entity_alpha_exposures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/evidence_facts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/evidence_stance_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/extracted_structures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/metadata.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/run_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/structure_graph.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/structured_agent_outputs.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/summary.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/alpha_activations.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/alpha_matches.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/artifact_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/conflict_results.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/conflicts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/entity_alpha_exposures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/evidence_facts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/evidence_stance_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/extracted_structures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/metadata.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/run_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/structure_graph.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/structured_agent_outputs.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/summary.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/alpha_activations.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/alpha_matches.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/artifact_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/conflict_results.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/conflicts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/entity_alpha_exposures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/evidence_facts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/evidence_stance_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/extracted_structures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/metadata.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/run_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/structure_graph.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/structured_agent_outputs.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/summary.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/alpha_activations.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/alpha_matches.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/artifact_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/conflict_results.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/conflicts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/entity_alpha_exposures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/evidence_facts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/evidence_stance_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/extracted_structures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/metadata.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/run_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/structure_graph.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/structured_agent_outputs.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/summary.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/alpha_activations.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/alpha_matches.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/artifact_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/conflict_results.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/conflicts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/entity_alpha_exposures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/evidence_facts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/evidence_stance_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/extracted_structures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/metadata.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/run_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/structure_graph.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/structured_agent_outputs.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/summary.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/alpha_activations.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/alpha_matches.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/artifact_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/conflict_results.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/conflicts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/entity_alpha_exposures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/evidence_facts.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/evidence_stance_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/extracted_structures.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/metadata.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/run_audit.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/structure_graph.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/structured_agent_outputs.json"
+    },
+    {
+      "status": "??",
+      "path": "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/summary.json"
+    },
+    {
+      "status": "??",
+      "path": "scripts/audit_llm_boundary.py"
+    },
+    {
+      "status": "??",
+      "path": "scripts/build_development_plan_llm_boundary_audit.py"
+    },
+    {
+      "status": "??",
+      "path": "scripts/export_evidence_review_sample.py"
+    },
+    {
+      "status": "??",
+      "path": "scripts/verify_phase0_5_spec_freeze.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/test_artifact_export_and_api.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/test_evidence_review_sample.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/test_evidence_stance_classifier.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/test_evidence_stance_integration.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/test_replay_identity_correction.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/test_ticker_consistency_audit.py"
+    }
+  ],
+  "phase0_6a_files": [
+    {
+      "status": "??",
+      "path": "comqutor_alpha/llm_runtime/__init__.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/llm_runtime/cache.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/llm_runtime/canonical_json.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/llm_runtime/contracts.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/llm_runtime/errors.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/llm_runtime/manifest.py"
+    },
+    {
+      "status": "??",
+      "path": "comqutor_alpha/llm_runtime/recorder.py"
+    },
+    {
+      "status": "??",
+      "path": "docs/adr/ADR-005-llm-execution-substrate.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/allowed_diff_report.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/phase0_6a_completion_report.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/phase0_6a_gate_report.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/preexisting_dirty_file_comparison.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/preexisting_dirty_file_manifest.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/source_artifact_integrity_after.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/source_artifact_integrity_before.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/test_results.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/worktree_end_snapshot.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/audit_artifacts/phase0_6a/worktree_start_snapshot.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/exact_semantic_replay_artifact_contract_v1.md"
+    },
+    {
+      "status": "??",
+      "path": "docs/specs/llm_semantic_call_contract_v1.md"
+    },
+    {
+      "status": "??",
+      "path": "scripts/verify_phase0_6a.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/__init__.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/fakes.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_cache_key.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_canonical_json.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_contracts.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_corruption.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_manifest.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_no_production_importers.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_null_cache.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_recorder.py"
+    },
+    {
+      "status": "??",
+      "path": "tests/llm_runtime/test_redis_cache_adapter.py"
+    }
+  ],
+  "phase0_6a_file_count": 32,
+  "allowed_roots": [
+    "comqutor_alpha/llm_runtime/**",
+    "tests/llm_runtime/**",
+    "docs/audit_artifacts/phase0_6a/**"
+  ],
+  "allowed_exact_files": [
+    "docs/specs/llm_semantic_call_contract_v1.md",
+    "docs/specs/exact_semantic_replay_artifact_contract_v1.md",
+    "docs/adr/ADR-005-llm-execution-substrate.md",
+    "scripts/verify_phase0_6a.py"
+  ],
+  "disallowed_phase_files": [],
+  "disallowed_count": 0,
+  "staged_files": [],
+  "allowed_diff_only": true
+}

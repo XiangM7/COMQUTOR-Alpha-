@@ -1,0 +1,80 @@
+{
+  "schema_version": "phase0_6a_test_results_v1",
+  "phase": "0.6A",
+  "network_guard": {
+    "enabled": true,
+    "reason_code": "PHASE_0_6A_NETWORK_BLOCKED",
+    "completed_external_connections": 0,
+    "real_provider_calls": 0,
+    "real_redis_connections": 0,
+    "database_writes": 0
+  },
+  "llm_runtime_tests": {
+    "command": "pytest -q tests/llm_runtime",
+    "status": "PASS",
+    "passed": 74,
+    "failed": 0,
+    "duration_seconds": 0.96
+  },
+  "related_existing_tests": {
+    "command": "pytest -q tests/test_week2_llm.py tests/test_structured_output_adapter.py tests/test_alpha_mapper.py tests/test_alpha_mapper_nvda_real_report.py tests/test_ai_alpha_mapper_discrimination.py tests/test_structure_extractor.py tests/test_replay_pipeline.py tests/test_run_audit_v2.py",
+    "status": "PASS",
+    "passed": 297,
+    "failed": 0,
+    "skipped": 1,
+    "skip_reason": "COMQUTOR_RUN_WEEK2_PROVIDER_SMOKE was not enabled",
+    "architecture_replay_glob_note": "No tests/test_architecture_replay*.py files exist; test_replay_pipeline.py and test_run_audit_v2.py were used as the repository's direct replay tests.",
+    "duration_seconds": 9.66
+  },
+  "llm_boundary_audit": {
+    "command": "python scripts/audit_llm_boundary.py",
+    "status": "PASS",
+    "checks_passed": 4,
+    "checks_total": 4
+  },
+  "phase0_5_verifier": {
+    "command": "python scripts/verify_phase0_5_spec_freeze.py",
+    "process_exit_code": 1,
+    "aggregate_status": "FAIL",
+    "immutable_checks_passed": 18,
+    "failed_checks": [
+      "phase0_5_changes_only_allowed_paths"
+    ],
+    "classification": "LEGACY_PHASE_SCOPE_REJECTS_AUTHORIZED_PHASE_0_6A_ADDITIONS",
+    "detail": "All Phase 0/0.5 hashes, ADRs, canonical prompt, Week2 default, outputs, preexisting files, branch, and HEAD checks passed. The older verifier allows only Phase 0.5 paths and therefore rejects the authorized Phase 0.6A package/tests/script paths. The verifier was not modified."
+  },
+  "phase0_6a_verifier": {
+    "command": "python scripts/verify_phase0_6a.py",
+    "status": "PASS",
+    "checks_passed": 20,
+    "checks_total": 20,
+    "terminal": "PHASE_0_6A_OFFLINE_FOUNDATION: PASS"
+  },
+  "ruff": {
+    "command": "ruff check comqutor_alpha/llm_runtime tests/llm_runtime scripts/verify_phase0_6a.py",
+    "status": "PASS",
+    "errors": 0
+  },
+  "guarded_full_offline_suite": {
+    "command": "COMQUTOR_WEEK2_LLM_ENABLED=false pytest -q -m 'not integration'",
+    "status": "KNOWN_TEST_ISOLATION_GAP_ONLY",
+    "passed": 2663,
+    "failed": 5,
+    "skipped": 1,
+    "deselected": 47,
+    "subtests_passed": 69,
+    "warnings": 17,
+    "duration_seconds": 214.29,
+    "phase0_5_passed_baseline": 2589,
+    "phase0_6a_new_passed_tests": 74,
+    "new_failures": [],
+    "known_failure_node_ids": [
+      "tests/test_structured_agents.py::TestSentimentAnalystAgent::test_structured_path_produces_rendered_markdown",
+      "tests/test_structured_agents.py::TestSentimentAnalystAgent::test_sentiment_report_also_in_messages",
+      "tests/test_structured_agents.py::TestSentimentAnalystAgent::test_prompt_contains_ticker",
+      "tests/test_structured_agents.py::TestSentimentAnalystAgent::test_falls_back_to_freetext_when_structured_unavailable",
+      "tests/test_structured_agents.py::TestSentimentAnalystAgent::test_falls_back_to_freetext_when_structured_call_fails"
+    ],
+    "failure_cause": "Existing sentiment tests do not mock Stocktwits. The fail-closed guard blocked all five before socket connection completion."
+  }
+}

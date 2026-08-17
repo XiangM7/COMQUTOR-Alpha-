@@ -1,0 +1,177 @@
+{
+  "audit": "phase_0_development_plan_llm_boundary_audit",
+  "generated_at": "2026-08-05T00:00:00Z",
+  "method": "grep -rln for LLM/gateway imports (comqutor_alpha.llm, comqutor_alpha.structure_engine.week2_llm, 'llm_gateway') across comqutor_alpha/graph_engine, comqutor_alpha/conflict_engine, comqutor_alpha/exposure, comqutor_alpha/exposure_engine.py, comqutor_alpha/storage; confirmed with scripts/audit_llm_boundary.py::check_deterministic_core_no_llm_import (also enumerates comqutor_alpha/structure_engine/evidence_stance.py explicitly).",
+  "modules": [
+    {
+      "module": "taxonomy loading",
+      "file": "comqutor_alpha/alpha_library/alpha_loader.py",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "alpha_taxonomy_v1.yaml",
+      "output_schema": "dict[str, AlphaDefinition]",
+      "test_proof": "tests/test_alpha_loader.py"
+    },
+    {
+      "module": "Evidence Fact grouping",
+      "file": "comqutor_alpha/api/artifact_export.py (extract_evidence_facts_export)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "alpha_matches.json + extracted_structures.json + graph payload",
+      "output_schema": "evidence_facts.json",
+      "test_proof": "tests/test_artifact_export_and_api.py"
+    },
+    {
+      "module": "claim dedupe",
+      "file": "comqutor_alpha/structure_engine/structured_output_adapter.py (dedupe_structured_records)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "list of structured claim records",
+      "output_schema": "(deduped_records, removed_count)",
+      "test_proof": "tests/test_structured_output_adapter.py"
+    },
+    {
+      "module": "graph admission",
+      "file": "comqutor_alpha/graph_engine/pipeline.py / graph_builder logic",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "alpha_matches.json + extracted_structures.json",
+      "output_schema": "structure_graph.json edges/nodes",
+      "test_proof": "tests/test_graph_engine.py (see full test suite listing)"
+    },
+    {
+      "module": "graph normalization",
+      "file": "comqutor_alpha/graph_engine/pipeline.py",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "candidate edges",
+      "output_schema": "normalized/merged edges",
+      "test_proof": "tests/test_graph_engine.py"
+    },
+    {
+      "module": "Activation scoring",
+      "file": "comqutor_alpha/graph_engine/activation_scorer_v2.py (1182 lines)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "structure_graph edges + alpha_matches",
+      "output_schema": "activation block (alphas[], dominant_alphas, main_conflict)",
+      "test_proof": "tests/test_activation_scorer_v2.py"
+    },
+    {
+      "module": "qualification ceiling",
+      "file": "comqutor_alpha/graph_engine/activation_scorer_v2.py",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "activation intermediate scores",
+      "output_schema": "clamped activation scores",
+      "test_proof": "tests/test_activation_scorer_v2.py"
+    },
+    {
+      "module": "Exposure calculation",
+      "file": "comqutor_alpha/exposure_engine.py (474 lines)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "historical_mapping/current_evidence/agent_confidence per Development-Plan-frozen weights 0.50/0.30/0.20",
+      "output_schema": "entity_alpha_exposures.json",
+      "test_proof": "tests/test_exposure_engine.py",
+      "note": "EXPOSURE_WEIGHTS confirmed unchanged (0.50/0.30/0.20) -- exposure formula itself is Development-Plan-sourced, cited here only for deterministic-core-boundary purposes, not a §5.1/5.2/5.3 item."
+    },
+    {
+      "module": "Conflict pair registry",
+      "file": "comqutor_alpha/alpha_library/alpha_schema.py (AlphaDefinition.conflict_alphas)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "alpha_taxonomy_v1.yaml",
+      "output_schema": "declared conflict pairs, checked both directions",
+      "test_proof": "tests/test_alpha_loader.py, tests/test_week4_conflict_core.py"
+    },
+    {
+      "module": "Conflict admission / score / main-conflict arbitration",
+      "file": "comqutor_alpha/conflict_engine/conflict_detector.py (1174 lines) + conflict_schema.py",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "activation payload + alpha_matches",
+      "output_schema": "conflict_results.json",
+      "test_proof": "tests/test_week4_conflict_core.py",
+      "note": "CONFLICT_FORMULA_VERSION = 'week4.conflict_score.mvp_v1' unchanged; formula min(Activation A, Activation B) x contradiction_weight x evidence_strength confirmed frozen per conflict_schema.py:1-8 SOURCE-FROZEN annotation."
+    },
+    {
+      "module": "ticker/run identity",
+      "file": "comqutor_alpha/storage/file_store.py (validate_run_id_for_path, validate_ticker)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "run_id/ticker strings",
+      "output_schema": "validated identity strings",
+      "test_proof": "tests/test_ticker_consistency_audit.py"
+    },
+    {
+      "module": "artifact export",
+      "file": "comqutor_alpha/api/artifact_export.py",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "in-memory graph/conflict/alpha_matches payloads (never recomputed)",
+      "output_schema": "evidence_facts.json, evidence_stance_audit.json, run_audit.json, artifact_manifest.json",
+      "test_proof": "tests/test_artifact_export_and_api.py"
+    },
+    {
+      "module": "replay identity",
+      "file": "comqutor_alpha/replay/pipeline.py (_rebase_structured_payload_for_replay)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "source structured payload",
+      "output_schema": "replay-rebased structured payload (run_id fields only)",
+      "test_proof": "tests/test_replay_identity_correction.py"
+    },
+    {
+      "module": "API serialization",
+      "file": "comqutor_alpha/api/routes_research.py (build_research_response, get_research_response, get_evidence_stances_response)",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": false,
+      "deterministic": true,
+      "input_schema": "already-persisted run artifacts",
+      "output_schema": "HTTP JSON response bodies",
+      "test_proof": "tests/test_artifact_export_and_api.py"
+    },
+    {
+      "module": "Evidence Stance classifier (Sprint 2, additive/shadow)",
+      "file": "comqutor_alpha/structure_engine/evidence_stance.py",
+      "llm_imported": false,
+      "provider_reachable": false,
+      "free_text_reparsed": true,
+      "deterministic": true,
+      "input_schema": "(claim_id, target_alpha_id) + candidate scoring dict",
+      "output_schema": "EvidenceStanceResult (additive fields only, effect_mode=shadow)",
+      "test_proof": "tests/test_evidence_stance_classifier.py, tests/test_evidence_stance_integration.py",
+      "note": "free_text_reparsed=true here is intentional and in-scope: this module's entire job is deterministic regex/rule classification of claim+evidence free text into a stance label. It never reaches a decision that Activation/Conflict/Graph/Exposure treat as authoritative -- see docs/evidence_stance_and_review_sample_report.md for the proof this does not change production score paths."
+    }
+  ],
+  "downstream_free_text_leakage_flagged": false,
+  "downstream_free_text_leakage_note": "Every module above except Evidence Stance consumes only already-structured JSON (alpha_matches.json / extracted_structures.json / structure_graph.json / conflict_results.json), never re-parsing an agent's raw prose. Evidence Stance is the sole deterministic-core module that re-parses free text, and it is explicitly a Sprint 2 (John-later-requirement) addition operating in shadow mode, not a Development-Plan-frozen module -- see evidence_stance provenance section of the main report."
+}

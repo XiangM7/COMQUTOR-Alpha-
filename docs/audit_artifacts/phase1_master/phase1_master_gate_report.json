@@ -1,0 +1,158 @@
+{
+  "schema_version": "comqutor.phase1_master.gate_report.v1",
+  "final_gate": "BLOCKED",
+  "final_gate_reason_code": "BLOCKED_ANTHROPIC_PROVIDER_RELIABILITY",
+  "current_state": "BLOCKED",
+  "completed_at": "2026-08-07T01:35:24.071235+00:00",
+  "evaluation_dir": "outputs/evaluations/phase1-master-anthropic-20260807T011444Z-7ce7880c",
+  "task_routing": {
+    "structured_claim_shadow": {
+      "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6",
+      "timeout_seconds": 180.0,
+      "max_retries": 1
+    },
+    "existing_week2_tasks": {
+      "tasks": [
+        "structured_adapter",
+        "alpha_classifier",
+        "structure_extractor"
+      ],
+      "profile_id": "comqutor_deepseek_default_v1",
+      "unchanged": true
+    }
+  },
+  "provider_configuration_precheck": {
+    "dotenv_present": true,
+    "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "credential_env_name": "ANTHROPIC_API_KEY",
+    "key_present": true,
+    "key_length": 108,
+    "sanitized_hostname": "api.anthropic.com",
+    "secret_persisted": false,
+    "passed": true
+  },
+  "qualification": {
+    "final_outcome": "response_received_and_parsed",
+    "logical_calls": 1,
+    "provider_attempts": 1,
+    "retry_count": 0,
+    "raw_output_persisted": false,
+    "prior_sandbox_restricted_attempt_preserved": true,
+    "prior_attempt_reason_code": "BLOCKED_ANTHROPIC_NETWORK"
+  },
+  "anthropic_smoke": {
+    "frozen_ticker": "NVDA",
+    "report_count": 4,
+    "unique_report_count": 4,
+    "logical_calls": 4,
+    "provider_attempts": 7,
+    "provider_completed_response_count": 2,
+    "provider_completed_response_rate": 0.5,
+    "timeout_count": 2,
+    "malformed_json_count": 2,
+    "accepted_count": 0,
+    "valid_empty_count": 0,
+    "abstained_count": 0,
+    "meets_3_of_4_response_threshold": false,
+    "meets_2_of_4_reproducible_outcome_target": false,
+    "per_report": [
+      {
+        "agent_family": "fundamental",
+        "provider_status": "timeout",
+        "provider_attempts": 2,
+        "retry_count": 1,
+        "error_code": "WEEK2_LLM_TIMEOUT"
+      },
+      {
+        "agent_family": "news",
+        "provider_status": "provider_error",
+        "provider_attempts": 2,
+        "retry_count": 1,
+        "error_code": "WEEK2_LLM_INVALID_JSON"
+      },
+      {
+        "agent_family": "sentiment",
+        "provider_status": "provider_error",
+        "provider_attempts": 1,
+        "retry_count": 0,
+        "error_code": "WEEK2_LLM_INVALID_JSON"
+      },
+      {
+        "agent_family": "technical",
+        "provider_status": "timeout",
+        "provider_attempts": 2,
+        "retry_count": 1,
+        "error_code": "WEEK2_LLM_TIMEOUT"
+      }
+    ]
+  },
+  "exact_replay": {
+    "final_status": "PASS",
+    "provider_calls_made": 0,
+    "per_report_status": "AUDITABLE_NO_ACCEPTED_OUTPUT",
+    "report_count": 4,
+    "accepted_output_count": 0,
+    "implementation_defect": false,
+    "artifact": "outputs/evaluations/phase1-master-anthropic-20260807T011444Z-7ce7880c/shadow_exact_replay_audit.json"
+  },
+  "prompt_and_schema": {
+    "prompt_version": "structured_adapter.claim_extraction_shadow.v1",
+    "prompt_sha256": "c60f1526fd927e4593ab5913bc3c653cd2a05f6d24dc5fdf3e258a3e62128d1e",
+    "schema_version": "comqutor.structured_claim_shadow.v1",
+    "unchanged": true
+  },
+  "master_contract_budget": {
+    "logical_calls": 15,
+    "logical_call_hard_cap": 53,
+    "provider_attempts": 22,
+    "provider_attempt_hard_cap": 105,
+    "reset": false
+  },
+  "all_phase1_actual_provider_usage": {
+    "ledger_entries": 15,
+    "known_exact_logical_calls": 22,
+    "unknown_minimum_logical_call_entries": 2,
+    "unknown_minimum_logical_calls": 8,
+    "minimum_total_logical_calls": 30,
+    "provider_attempts": 47,
+    "ad_hoc_diagnostic_logical_calls": 3,
+    "ad_hoc_diagnostic_provider_attempts": 3,
+    "ledger": "docs/audit_artifacts/phase1_master/phase1_global_provider_call_ledger.jsonl"
+  },
+  "stage_progression": {
+    "anthropic_qualification": "PASS",
+    "smoke": "BLOCKED",
+    "pilot": "NOT_STARTED",
+    "core_evaluation": "NOT_STARTED",
+    "human_review": "NOT_REACHED"
+  },
+  "verification": {
+    "targeted_phase1_master_tests": "21 passed",
+    "structured_output_shadow_suite": "134 passed",
+    "llm_runtime_suite": "83 passed",
+    "replay_suite": "40 passed",
+    "phase1_master_verifier": "17/17 PASS",
+    "llm_boundary_audit": "4/4 PASS",
+    "guarded_suite": "2864 passed, 1 skipped, 47 deselected, 69 subtests passed",
+    "ruff": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "production_boundaries": {
+    "production_authority": "LEGACY_ADAPTER",
+    "shadow_outputs_written_to_production": false,
+    "mapper_or_extractor_consumes_shadow": false,
+    "graph_consumes_shadow": false,
+    "tradingagents_modified_by_this_task": false,
+    "phase2_started": false
+  },
+  "required_final_statuses": {
+    "SEMANTIC_QUALITY": "UNPROVEN",
+    "HUMAN_REVIEW": "PENDING",
+    "PRODUCTION_AUTHORITY": "LEGACY_ADAPTER"
+  },
+  "next_allowed_action": "Product-owner decision is required before any third model/profile evaluation. Do not retry these four Anthropic reports, do not auto-fallback to DeepSeek, and do not start Pilot/Core while the Smoke provider reliability gate is blocked."
+}

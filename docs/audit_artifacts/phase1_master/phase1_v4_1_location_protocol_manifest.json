@@ -1,0 +1,77 @@
+{
+  "schema_version": "comqutor.phase1.structured_adapter_location_protocol_manifest.v1",
+  "created_at": "2026-08-10T22:37:44Z",
+  "classification": "V4_1_LOCATION_PROTOCOL_HARDENING",
+  "parent_prompt": "structured_adapter.claim_extraction_shadow.v4",
+  "parent_prompt_sha256": "1de0d3dad615946b4670cc7458a75fccbeffdbdcb3cefe54d00097c3d4478b3a",
+  "protocol_identity": "structured_adapter.claim_extraction_shadow.v4.1",
+  "prompt_sha256": "c5ac3a9b44df24970d27ebd5670cb7f09eb934b01a0d99d7cd4ff93e5f225c6b",
+  "semantic_rule_delta": "NONE",
+  "location_protocol_delta": "DETERMINISTIC_CANDIDATE_BINDING",
+  "provider_visible_delta": {
+    "request_candidate_manifest": [
+      "candidate_id",
+      "run_id",
+      "ticker",
+      "agent",
+      "agent_output_id",
+      "source_report_sha256",
+      "source_start",
+      "source_end",
+      "candidate_text_sha256"
+    ],
+    "response_evidence_shape": {
+      "quote": "verbatim exact Unicode source text",
+      "candidate_id": "one pre-registered request candidate ID or null"
+    },
+    "provider_generated_offsets_allowed": false
+  },
+  "candidate_id": {
+    "existing_algorithm_reused": true,
+    "stable": true,
+    "caller_owned": true,
+    "provider_may_create": false
+  },
+  "resolver_invariants": {
+    "global_exact_match_required": true,
+    "candidate_local_unique_match_required_for_duplicates": true,
+    "selected_occurrence_must_be_fully_inside_candidate": true,
+    "overlapping_candidates_allowed": true,
+    "first_match_fallback": false,
+    "nearest_match_fallback": false,
+    "fuzzy_matching": false,
+    "semantic_disambiguation": false,
+    "markdown_or_whitespace_normalization": false
+  },
+  "rejected_forensics": {
+    "classification": "REJECTED_CANDIDATE",
+    "non_authoritative": true,
+    "forensic_only": true,
+    "parsed_candidate_payload_persisted": true,
+    "resolver_diagnostics_persisted": true,
+    "unexpected_free_text_persisted": false,
+    "admission_changed": false,
+    "cache_eligible": false,
+    "replay_mode": "REJECTED_DETERMINISTIC_REPLAY",
+    "replay_provider_calls": 0
+  },
+  "quality": {
+    "semantic_quality_baseline": "PASS_V4",
+    "v4_1_protocol_delta_validation": "PENDING_LIVE_QUALIFICATION",
+    "live_provider_qualification": "PENDING",
+    "ready_for_recanary": false,
+    "next_required_stage": "V4_1_LIMITED_PROVIDER_QUALIFICATION"
+  },
+  "offline_test_results": {
+    "duplicate_and_shadow_regression": "99 passed",
+    "runtime_week2_and_shadow_replay": "122 passed, 1 Provider smoke skipped by explicit gate",
+    "exact_semantic_replay": "40 passed",
+    "hardening_verifier": "9/9 PASS",
+    "historical_canary_repair_verifier": "9/9 PASS",
+    "historical_canary_verifier": "14/14 PASS",
+    "phase1_master_verifier": "22/22 PASS"
+  },
+  "production_authority": "LEGACY_ADAPTER",
+  "production_cutover": "NOT_RUN",
+  "provider_calls_during_hardening": 0
+}

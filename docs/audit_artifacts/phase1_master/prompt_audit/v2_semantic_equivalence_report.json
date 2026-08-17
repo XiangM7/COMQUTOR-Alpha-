@@ -1,0 +1,82 @@
+{
+  "schema_version": "comqutor.phase1_master.prompt_audit.v2_semantic_equivalence_report.v1",
+  "provider_calls_made_to_produce_this_report": 0,
+  "method": "Fake-Provider-driven, deterministic-pipeline tests through the SAME unchanged validate_shadow_bundle / comqutor.structured_claim_shadow.v1 schema used by v1. These prove the v2 wire-format reduction preserves every canonical bundle capability v1 had; they do not and cannot prove real-model semantic quality (SEMANTIC_QUALITY remains UNPROVEN, unchanged, pending human review under WAITING_FOR_HUMAN_REVIEW).",
+  "test_files": {
+    "tests/structured_output_shadow/test_shadow_v2_semantic_equivalence.py": {
+      "test_count": 16,
+      "status": "16 passed",
+      "concepts_covered": [
+        "single claim (one candidate to one claim)",
+        "split (one source region into two claims)",
+        "merge (two source spans into one claim, evidence = bounded join)",
+        "negation (preserved wording, not flipped)",
+        "hypothetical/question (abstention, not assertion)",
+        "quoted attribution (preserved wording)",
+        "temporal qualification (preserved wording)",
+        "uncertainty (confidence + hedging wording preserved)",
+        "multiple evidence spans (both validated)",
+        "factor vocabulary enforcement (in-vocabulary accepted, out-of-vocabulary rejected)",
+        "direction enum enforcement (invalid value rejected)",
+        "entity grounding enforcement (ungrounded entity rejected)",
+        "claim outside any candidate hint (model not restricted to the located-hint subset)",
+        "candidate lineage resolution (short int id -> full candidate_segment_id)",
+        "identity fields always caller-owned (never required from, or trusted from, the Provider)",
+        "full parser round trip (prompt build -> Fake Provider -> JSON parse -> normalize -> validate)"
+      ]
+    },
+    "tests/structured_output_shadow/test_shadow_v2_provenance_safety.py": {
+      "test_count": 11,
+      "status": "11 passed",
+      "concepts_covered": [
+        "exact_quote reconstructed from offsets alone (Provider never sends quote text)",
+        "unicode and emoji offsets",
+        "newline and punctuation offsets",
+        "overlapping spans across claims recorded as a diagnostic warning, not an error (unchanged v1 behavior)",
+        "non-int offset type rejected, not crashed",
+        "negative offset rejected",
+        "out-of-range end offset rejected",
+        "inverted (end<=start) offset rejected",
+        "missing span keys rejected, not crashed (no KeyError)",
+        "span not an object rejected, not crashed",
+        "empty spans list rejected, not silently accepted"
+      ],
+      "explicit_non_repair_proof": "No case fuzzy-matches or auto-corrects an invalid span; every invalid case is rejected by the unchanged validate_shadow_bundle and, at the full-parser level, produces an empty claims list."
+    },
+    "tests/structured_output_shadow/test_shadow_v2_injection_safety.py": {
+      "test_count": 7,
+      "status": "7 passed",
+      "concepts_covered": [
+        "report text structurally labeled by its own JSON key, fixed instruction precedes the entire JSON payload",
+        "proposal top-level identity fields (schema_version/run_id/production_authority) ignored, never trusted",
+        "claim-level unapproved fields (shadow_claim_id, production_authority, shadow_only) cannot flip authority -- final claim key set is exactly CLAIM_FIELDS",
+        "invented/out-of-range span asserting fabricated content rejected",
+        "credential-like report text rejected even though v2 never asks the model to copy evidence text (evidence is deterministically reconstructed, and still runs through the same _CREDENTIAL_RE filter)",
+        "schema_version cannot be changed regardless of report or proposal content",
+        "full parser pipeline never leaks injected report content into identity fields"
+      ]
+    },
+    "tests/structured_output_shadow/test_shadow_v2_prompt_size.py": {
+      "test_count": 5,
+      "status": "5 passed",
+      "concepts_covered": [
+        "real v2 request for the frozen NVDA fundamental report is <= 40,000 chars",
+        "report duplication ratio is at the 1.0 target (report sent exactly once, no claim_hint/evidence_hint text anywhere)",
+        "v2 request construction is deterministic (byte-identical across two independent builds)",
+        "v1 baseline (98,633 chars) still reproduces from the real production code -- pins the audit against silent drift",
+        "v2 is a >=50% reduction from v1 (actual measured: 80.86%)"
+      ]
+    }
+  },
+  "totals": {
+    "new_v2_test_count": 39,
+    "new_v2_tests_status": "39 passed, 0 failed",
+    "full_structured_output_shadow_suite_status": "173 passed (includes the 39 new v2 tests plus all pre-existing v1/Phase-1-Master tests, unmodified and still passing)"
+  },
+  "canonical_schema_and_validator": {
+    "comqutor_structured_claim_shadow_v1_schema_changed": false,
+    "validate_shadow_bundle_modified": false,
+    "assign_deterministic_claim_ids_modified": false,
+    "note": "Every v2 test exercises the identical, unmodified validate_shadow_bundle function v1 uses. No v2-specific validation branch or relaxed check was added anywhere."
+  }
+}

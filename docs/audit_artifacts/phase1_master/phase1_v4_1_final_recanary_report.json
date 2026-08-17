@@ -1,0 +1,154 @@
+{
+  "schema_version": "comqutor.phase1_v4_1.final_recanary_report.v1",
+  "reported_at": "2026-08-10T23:13:04.891605+00:00",
+  "phase1_stage": "FINAL_V4_1_RECANARY",
+  "final_v4_1_recanary": "FAIL",
+  "canary_slots_passed": "0/4",
+  "logical_calls": "4/4",
+  "real_provider_attempts": "4/4",
+  "retries": 0,
+  "subagents": 0,
+  "post_canary_provider_calls": 0,
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "prompt_version": "structured_adapter.claim_extraction_shadow.v4.1",
+  "prompt_sha256": "c5ac3a9b44df24970d27ebd5670cb7f09eb934b01a0d99d7cd4ff93e5f225c6b",
+  "duplicate_quote_branch_exercised": true,
+  "ambiguous_or_unresolved_evidence_admitted": 0,
+  "identity_failure_admitted": 0,
+  "accepted_outputs": "0/4",
+  "accepted_output_exact_replay": "0/4_NOT_APPLICABLE",
+  "provider_zero_replay_verifier": "PASS_WITH_ZERO_ACCEPTED_REPORTS",
+  "exact_replay_provider_calls": 0,
+  "legacy_isolation": "4/4_PASS",
+  "authoritative_artifacts_equal": true,
+  "api_response_equal": true,
+  "shadow_output_reached_authoritative_downstream": false,
+  "production_cutover": "NOT_RUN",
+  "production_authority": "LEGACY_ADAPTER",
+  "section_5_1": "BLOCKED_AT_FINAL_RECANARY",
+  "next_allowed_stage": "NONE",
+  "slots": [
+    {
+      "slot": 1,
+      "family": "fundamental",
+      "transport": "SUCCESS",
+      "parser": "VALIDATION_REJECTED",
+      "reason_codes": [
+        "SHADOW_EMPTY_OR_NON_SUBSTANTIVE",
+        "SHADOW_SOURCE_SPAN_INVALID"
+      ],
+      "evidence_items": 36,
+      "located_items": 34,
+      "invalid_or_unresolved_items": 2,
+      "duplicate_global_match_items": 2,
+      "candidate_binding": "FAIL",
+      "exact_provenance": "FAIL",
+      "identity_binding": "PASS",
+      "forensic_persistence": "PASS",
+      "legacy_isolation": "PASS",
+      "status": "FAIL"
+    },
+    {
+      "slot": 2,
+      "family": "news",
+      "transport": "SUCCESS",
+      "parser": "VALIDATION_REJECTED",
+      "reason_codes": [
+        "SHADOW_EMPTY_OR_NON_SUBSTANTIVE",
+        "SHADOW_SOURCE_SPAN_INVALID"
+      ],
+      "evidence_items": 17,
+      "located_items": 0,
+      "invalid_or_unresolved_items": 17,
+      "duplicate_global_match_items": 0,
+      "candidate_binding": "FAIL",
+      "exact_provenance": "FAIL",
+      "identity_binding": "PASS",
+      "forensic_persistence": "PASS",
+      "legacy_isolation": "PASS",
+      "status": "FAIL"
+    },
+    {
+      "slot": 3,
+      "family": "sentiment",
+      "transport": "SUCCESS",
+      "parser": "VALIDATION_REJECTED",
+      "reason_codes": [
+        "SHADOW_EMPTY_OR_NON_SUBSTANTIVE",
+        "SHADOW_SOURCE_SPAN_INVALID"
+      ],
+      "evidence_items": 24,
+      "located_items": 0,
+      "invalid_or_unresolved_items": 24,
+      "duplicate_global_match_items": 0,
+      "candidate_binding": "FAIL",
+      "exact_provenance": "FAIL",
+      "identity_binding": "PASS",
+      "forensic_persistence": "PASS",
+      "legacy_isolation": "PASS",
+      "status": "FAIL"
+    },
+    {
+      "slot": 4,
+      "family": "technical",
+      "transport": "SUCCESS",
+      "parser": "VALIDATION_REJECTED",
+      "reason_codes": [
+        "SHADOW_EMPTY_OR_NON_SUBSTANTIVE",
+        "SHADOW_SOURCE_SPAN_INVALID"
+      ],
+      "evidence_items": 22,
+      "located_items": 4,
+      "invalid_or_unresolved_items": 18,
+      "duplicate_global_match_items": 1,
+      "candidate_binding": "FAIL",
+      "exact_provenance": "FAIL",
+      "identity_binding": "PASS",
+      "forensic_persistence": "PASS",
+      "legacy_isolation": "PASS",
+      "status": "FAIL"
+    }
+  ],
+  "blocker": {
+    "summary": "All four Provider transports succeeded, but every v4.1 proposal failed deterministic admission. Candidate IDs were either absent for globally duplicated quotes or bound to candidate spans that did not contain the supplied exact quote exactly once.",
+    "stable_reason_codes": [
+      "SHADOW_EMPTY_OR_NON_SUBSTANTIVE",
+      "SHADOW_SOURCE_SPAN_INVALID"
+    ],
+    "rejected_forensics_persisted": "4/4",
+    "code_fix_after_failure": "NONE",
+    "additional_recanary": "NOT_RUN"
+  },
+  "budget_after": {
+    "cumulative_logical_calls": 99,
+    "cumulative_provider_attempts": 106
+  },
+  "verification": {
+    "pre_provider_focused_tests": "36_PASS",
+    "pre_provider_duplicate_hardening_verifier": "9/9_PASS",
+    "pre_provider_canary_repair_verifier": "9/9_PASS",
+    "pre_provider_phase1_master_verifier": "22/22_PASS",
+    "post_provider_phase1_master_verifier": "20/22_FAIL_STALE_STATE_ENUMERATION_AND_MODE_STAGE_GUARD",
+    "semantic_manifest": "PASS",
+    "source_artifact_unchanged": true,
+    "git_diff_check": "PASS"
+  },
+  "artifacts": {
+    "execution_contract": "docs/audit_artifacts/phase1_master/phase1_v4_1_final_recanary_execution_contract.json",
+    "runtime_result": "docs/audit_artifacts/phase1_master/phase1_v4_1_final_recanary_runtime_result.json",
+    "runtime_artifact_root": "outputs/canaries/phase1-v4-1-final-recanary-20260810T230224Z",
+    "state": "docs/audit_artifacts/phase1_master/phase1_master_state.json"
+  },
+  "history_preserved": {
+    "original_v4_canary": "FAIL_UNCHANGED",
+    "v4_isolation_repair": "PASS",
+    "v4_1_duplicate_protocol_hardening": "PASS",
+    "final_v4_1_recanary": "FAIL",
+    "production_cutover": "NOT_RUN"
+  },
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO"
+}

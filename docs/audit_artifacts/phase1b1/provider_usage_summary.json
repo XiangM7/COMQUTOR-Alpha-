@@ -1,0 +1,74 @@
+{
+  "schema_version": "comqutor.phase1b1.provider_usage_summary.v1",
+  "real_smoke_execution": {
+    "bundle_directory": "outputs/evaluations/phase1b1-smoke-20260806T222402Z",
+    "logical_calls_made": 4,
+    "logical_call_limit": 4,
+    "provider_attempt_count_total": 8,
+    "max_provider_attempts_allowed": 8,
+    "formula": "logical_call_limit * (1 + Week2LLMGateway.DEFAULT_MAX_RETRIES) = 4 * (1 + 1) = 8",
+    "attempts_exceeded_limit": false,
+    "manual_retries_beyond_gateway_policy": 0,
+    "market_data_calls": 0,
+    "redis_connections": 0,
+    "database_writes": 0
+  },
+  "profile_used": {
+    "research_profile_id": "comqutor_deepseek_default_v1",
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "resolution_rule_applied": "rule 1 -- current live-route default (get_active_research_profile()), no ambiguity"
+  },
+  "per_report": [
+    {
+      "agent_family": "fundamental",
+      "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:fundamental_agent:fundamentals_report",
+      "provider_status": "timeout",
+      "validation_accepted": false,
+      "provider_attempt_count": 2,
+      "retry_count": 1,
+      "shadow_status": "parser_error",
+      "claim_count": 0,
+      "abstention_count": 0,
+      "token_usage": null
+    },
+    {
+      "agent_family": "news",
+      "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:news_agent:news_report",
+      "provider_status": "timeout",
+      "validation_accepted": false,
+      "provider_attempt_count": 2,
+      "retry_count": 1,
+      "shadow_status": "parser_error",
+      "claim_count": 0,
+      "abstention_count": 0,
+      "token_usage": null
+    },
+    {
+      "agent_family": "sentiment",
+      "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:sentiment_agent:sentiment_report",
+      "provider_status": "timeout",
+      "validation_accepted": false,
+      "provider_attempt_count": 2,
+      "retry_count": 1,
+      "shadow_status": "parser_error",
+      "claim_count": 0,
+      "abstention_count": 0,
+      "token_usage": null
+    },
+    {
+      "agent_family": "technical",
+      "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:market_agent:market_report",
+      "provider_status": "timeout",
+      "validation_accepted": false,
+      "provider_attempt_count": 2,
+      "retry_count": 1,
+      "shadow_status": "parser_error",
+      "claim_count": 0,
+      "abstention_count": 0,
+      "token_usage": null
+    }
+  ],
+  "provider_completed_connections": 0,
+  "note": "100% timeout rate across all 8 real attempts. No response body was ever returned by the Provider within the Gateway's own bounded 15s x 2-attempt policy; no attempt was manually retried beyond that policy."
+}

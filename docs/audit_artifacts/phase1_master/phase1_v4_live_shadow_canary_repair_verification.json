@@ -1,0 +1,52 @@
+{
+  "schema_version": "comqutor.phase1_v4.live_shadow_canary_repair_verification.v1",
+  "verified_at": "2026-08-10T22:12:11Z",
+  "status": "PASS_WITH_B1_UNREPAIRED_BY_POLICY",
+  "external_provider_calls": 0,
+  "subagents_spawned": 0,
+  "original_canary": "FAIL_UNCHANGED",
+  "failure_a_offline_verification": "PASS",
+  "failure_b_classification": "B1_EXPECTED_SAFE_AMBIGUOUS_REJECTION",
+  "failure_b_fix": "NONE",
+  "technical_recorded_response_offline_revalidation": "NOT_APPLICABLE_RESPONSE_NOT_PERSISTED",
+  "canonical_week2_error_log_changed_by_shadow_after_fix": false,
+  "resolver_strictness_weakened": false,
+  "prompt_v4_changed": false,
+  "fabricated_or_unresolved_evidence_admitted": 0,
+  "provider_ledger_unchanged": {
+    "cumulative_logical_calls": 95,
+    "cumulative_provider_attempts": 102,
+    "global_ledger_sha256": "a56e6774a586bcdc0d534ca1672b2931dd470c6eeb1d6ce6bb92dc7e6f17b156",
+    "master_ledger_sha256": "881a85baf82ba1a7c045ba7b87eaad58a016ffa47e9a42936d8377ed9f0c7c40"
+  },
+  "tests": [
+    {
+      "command_scope": "live Shadow integration + shared Week2 + file-store",
+      "result": "43 passed, 1 provider-smoke skipped by explicit gate"
+    },
+    {
+      "command_scope": "Shadow Provider v1/v4 + Anthropic routing + semantic runtime",
+      "result": "30 passed"
+    },
+    {
+      "command_scope": "three new real-Gateway-path isolation cases",
+      "result": "3 passed"
+    }
+  ],
+  "final_checks": {
+    "repair_verifier": "9/9 PASS",
+    "original_canary_verifier": "14/14 PASS",
+    "phase1_master_verifier": "22/22 PASS",
+    "original_exact_replay": "3/3 PASS; Provider calls=0",
+    "ruff_changed_files": "PASS",
+    "git_diff_check": "PASS",
+    "json_validation": "PASS",
+    "artifact_sensitive_content_scan": "PASS"
+  },
+  "pending_final_checks": [],
+  "canary_failure_repair": "PARTIAL",
+  "ready_for_recanary": false,
+  "production_authority": "LEGACY_ADAPTER",
+  "production_cutover": "NOT_RUN",
+  "next_allowed_stage": "PRODUCT_OWNER_DECISION"
+}

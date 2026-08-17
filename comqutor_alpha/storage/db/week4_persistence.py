@@ -24,14 +24,29 @@ import math
 from collections.abc import Mapping, Sequence
 from typing import Any, NoReturn
 
+from comqutor_alpha.conflict_engine.conflict_evidence_ui import (
+    REASON_ALPHA_SCORE_BELOW_THRESHOLD,
+    REASON_INSUFFICIENT_SUPPORTING_EVIDENCE,
+    REASON_NO_ADMISSIBLE_SUPPORTING_POLARITY,
+    REASON_NO_TICKER_SPECIFIC_SUPPORTING_EVIDENCE,
+)
 from comqutor_alpha.conflict_engine.conflict_schema import (
     CONFLICT_FORMULA_VERSION,
     CONFLICT_SCHEMA_VERSION,
+)
+from comqutor_alpha.conflict_engine.invalidation_registry import (
+    APPROVED as INVALIDATION_APPROVED,
+    NOT_DEFINED as INVALIDATION_NOT_DEFINED,
 )
 from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     ACTIVATION_V2_FORMULA_VERSION,
 )
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
+from comqutor_alpha.structure_engine.evidence_stance import (
+    OPPOSES_ALPHA,
+    SUPPORTS_ALPHA,
+    SUPPORTS_COUNTER_ALPHA,
+)
 
 # Activation payloads accepted for persistence: the frozen v1 formula and
 # the versioned Activation v2 formula. The row's formula_version column
@@ -49,6 +64,22 @@ DB_DATA_CORRUPTED = "DB_DATA_CORRUPTED"
 
 _OUTCOMES = frozenset({"admitted", "suppressed", "rejected"})
 _CONFLICT_LEVELS = frozenset({"low", "medium", "medium_high", "high"})
+# John's B5 Conflict Radar Evidence UI gate (task
+# B5_CONFLICT_RADAR_EVIDENCE_UI): every enum this whitelist validates is
+# imported from the module that defines it -- never a second, hand-copied
+# literal set that could silently drift from the real source of truth.
+_EVIDENCE_UI_SIDES = frozenset({"bull", "bear"})
+_EVIDENCE_UI_SUPPORTING_STANCE = frozenset({SUPPORTS_ALPHA})
+_EVIDENCE_UI_COUNTER_STANCES = frozenset({OPPOSES_ALPHA, SUPPORTS_COUNTER_ALPHA})
+_MISSING_EVIDENCE_REASON_CODES = frozenset(
+    {
+        REASON_INSUFFICIENT_SUPPORTING_EVIDENCE,
+        REASON_NO_TICKER_SPECIFIC_SUPPORTING_EVIDENCE,
+        REASON_NO_ADMISSIBLE_SUPPORTING_POLARITY,
+    }
+)
+_QUALIFICATION_GAP_REASON_CODES = frozenset({REASON_ALPHA_SCORE_BELOW_THRESHOLD})
+_INVALIDATION_APPROVAL_STATUSES = frozenset({INVALIDATION_APPROVED, INVALIDATION_NOT_DEFINED})
 _ACTIVATION_FIELDS = (
     "alpha_id",
     "alpha_name",
@@ -63,7 +94,13 @@ _ACTIVATION_FIELDS = (
     "reason_codes",
     "entity_exposure",
 )
-_CANDIDATE_FIELDS = ("alpha_a", "alpha_b", "outcome", "reason_codes", "evidence_audit")
+# John's B2 Conflict Evidence Admissibility gate (Week 4 Conflict Core):
+# "admissibility" is one additive, pass-through-validated dict (built by
+# conflict_admissibility.AdmissibilityResult.to_dict()) present on BOTH a
+# candidate's audit item and, when it exists, its full conflict record --
+# so it survives DB round-trip on both tables' JSON blob columns exactly
+# like every other additive field this whitelist already carries.
+_CANDIDATE_FIELDS = ("alpha_a", "alpha_b", "outcome", "reason_codes", "evidence_audit", "admissibility")
 _CONFLICT_FIELDS = (
     "conflict_id",
     "alpha_a",
@@ -80,6 +117,7 @@ _CONFLICT_FIELDS = (
     "conflict_level",
     "reason_codes",
     "explanation",
+    "admissibility",
 )
 _STRUCTURE_FIELDS = (
     "alpha_id",
@@ -120,6 +158,16 @@ def _text(value: Any, reason_code: str) -> str:
     if not isinstance(value, str) or not value.strip():
         _fail(reason_code)
     return value.strip()
+
+
+def _optional_text(value: Any, reason_code: str) -> str | None:
+    """Like _text, but None is legal -- e.g. a draft_shadow ticker's
+    owner/approved_by/approved_at (task B3_ENTITY_EXPOSURE_GATED_STATES),
+    which are genuinely absent for a never-approved seed, never coerced to
+    an empty string."""
+    if value is None:
+        return None
+    return _text(value, reason_code)
 
 
 def _number(value: Any, minimum: float, maximum: float, reason_code: str) -> float:
@@ -454,6 +502,17 @@ _V2_ONLY_ACTIVATION_FIELDS = frozenset(
         "evidence_overlap_ratio",
         "high_overlap_warning",
         "entity_exposure",
+        # B4 Activation Level Alignment: the single authoritative classifier
+        # (graph_engine.alpha_level_classifier) writes these onto every v2
+        # alpha entry; a v1 entry never passes through that classifier, so
+        # these stay v2-only, same as every other additive v2 field above.
+        "target_level",
+        "qualified_level",
+        "is_blocked",
+        "blocked_from",
+        "blocked_reason_codes",
+        "diagnostic_reason_codes",
+        "classification_version",
     }
 )
 
@@ -479,6 +538,16 @@ def _whitelist_entity_exposure(value: Any, reason_code: str) -> dict[str, Any]:
         "ticker_specific_fact_count",
         "distinct_supporting_agent_count",
         "reason_codes",
+        # John's B3 gated seed lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES):
+        # additive, per-ticker provenance -- owner/approved_by/approved_at
+        # are nullable (a draft_shadow ticker was never approved);
+        # configured_status/effective_status are always one of the three
+        # canonical values.
+        "owner",
+        "approved_by",
+        "approved_at",
+        "configured_status",
+        "effective_status",
     }
     if set(value) != allowed:
         _fail(reason_code)
@@ -516,6 +585,11 @@ def _whitelist_entity_exposure(value: Any, reason_code: str) -> dict[str, Any]:
             value["distinct_supporting_agent_count"], reason_code
         ),
         "reason_codes": _string_list(value["reason_codes"], reason_code),
+        "owner": _optional_text(value["owner"], reason_code),
+        "approved_by": _optional_text(value["approved_by"], reason_code),
+        "approved_at": _optional_text(value["approved_at"], reason_code),
+        "configured_status": _text(value["configured_status"], reason_code),
+        "effective_status": _text(value["effective_status"], reason_code),
     }
     return _json_copy(result, reason_code)
 
@@ -615,6 +689,21 @@ def _whitelist_activation(entry: Mapping[str, Any]) -> dict[str, Any]:
         activation["entity_exposure"] = _whitelist_entity_exposure(
             entry["entity_exposure"], reason
         )
+    # B4 Activation Level Alignment: additive, same "if present" pattern as
+    # every other v2-only field above -- an old v2 row persisted before B4
+    # shipped legitimately has none of these, and must round-trip unchanged
+    # rather than fail or synthesize a fabricated classification.
+    if "target_level" in entry:
+        activation["target_level"] = _text(entry["target_level"], reason)
+    if "qualified_level" in entry:
+        activation["qualified_level"] = _text(entry["qualified_level"], reason)
+    if "is_blocked" in entry:
+        activation["is_blocked"] = _bool(entry["is_blocked"], reason)
+    for field in ("blocked_from", "blocked_reason_codes", "diagnostic_reason_codes"):
+        if field in entry:
+            activation[field] = _string_list(entry[field], reason)
+    if "classification_version" in entry:
+        activation["classification_version"] = _text(entry["classification_version"], reason)
     return _json_copy(activation, reason)
 
 
@@ -762,6 +851,23 @@ def _whitelist_candidate(candidate: Mapping[str, Any]) -> dict[str, Any]:
             ),
         }
     )
+    # John's B5 Conflict Radar Evidence UI gate: additive and optional --
+    # a candidate evaluated before this task shipped simply has none, and
+    # must round-trip that way rather than fail or fabricate the field.
+    # Explicitly validated here (never via the raw _CANDIDATE_FIELDS
+    # pass-through above) so a malformed/unknown value fails closed.
+    # bull_alpha_id/bear_alpha_id are only ever present together with
+    # admissibility/evidence_ui (all four attached by the same
+    # conflict_detector call site, once bull/bear roles are resolved).
+    if "bull_alpha_id" in candidate or "bear_alpha_id" in candidate:
+        bull_alpha_id = _text(candidate.get("bull_alpha_id"), reason)
+        bear_alpha_id = _text(candidate.get("bear_alpha_id"), reason)
+        if bull_alpha_id == bear_alpha_id or {bull_alpha_id, bear_alpha_id} != {alpha_a, alpha_b}:
+            _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
+        whitelisted["bull_alpha_id"] = bull_alpha_id
+        whitelisted["bear_alpha_id"] = bear_alpha_id
+    if "evidence_ui" in candidate:
+        whitelisted["evidence_ui"] = _whitelist_evidence_ui(candidate["evidence_ui"], reason)
     return _json_copy(whitelisted, reason)
 
 
@@ -822,6 +928,176 @@ def _whitelist_components(value: Any) -> dict[str, float]:
             value["alpha_b_evidence_strength"], 0.0, 1.0, reason
         ),
         "evidence_strength": _number(value["evidence_strength"], 0.0, 1.0, reason),
+    }
+
+
+def _whitelist_evidence_item(item: Any, reason: str, *, allowed_stances: frozenset[str]) -> dict[str, Any]:
+    if not isinstance(item, Mapping):
+        _fail(reason)
+    stance = item.get("evidence_stance")
+    if stance not in allowed_stances:
+        _fail(reason)
+    whitelisted = {
+        "evidence_fact_group_id": _text(item.get("evidence_fact_group_id"), reason),
+        "representative_claim_id": _text(item.get("representative_claim_id"), reason),
+        "member_claim_ids": _string_list(item.get("member_claim_ids"), reason),
+        "evidence_text": _text(item.get("evidence_text"), reason),
+        "agents": _string_list(item.get("agents"), reason),
+        "source_agent_output_ids": _string_list(item.get("source_agent_output_ids"), reason),
+        "target_alpha_id": _text(item.get("target_alpha_id"), reason),
+        "evidence_stance": stance,
+        "stance_method": _optional_text(item.get("stance_method"), reason),
+        "evidence_stance_version": _optional_text(item.get("evidence_stance_version"), reason),
+        "stance_confidence_band": _optional_text(item.get("stance_confidence_band"), reason),
+        "ticker_specific": _bool(item.get("ticker_specific"), reason),
+        "representative_match_score": _number(item.get("representative_match_score"), 0.0, 1.0, reason),
+    }
+    if stance == SUPPORTS_COUNTER_ALPHA:
+        whitelisted["supports_counter_alpha_id"] = _optional_text(
+            item.get("supports_counter_alpha_id"), reason
+        )
+    if "counter_target_alpha_id" in item:
+        whitelisted["counter_target_alpha_id"] = _text(item.get("counter_target_alpha_id"), reason)
+    return whitelisted
+
+
+def _whitelist_missing_evidence_item(item: Any, reason: str) -> dict[str, Any]:
+    if not isinstance(item, Mapping):
+        _fail(reason)
+    side = item.get("side")
+    if side not in _EVIDENCE_UI_SIDES:
+        _fail(reason)
+    reason_code = item.get("missing_reason_code")
+    if reason_code not in _MISSING_EVIDENCE_REASON_CODES:
+        _fail(reason)
+    current_value = _integer(item.get("current_value"), reason)
+    required_value = _integer(item.get("required_value"), reason)
+    deficit = _integer(item.get("deficit"), reason)
+    if deficit != required_value - current_value:
+        _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
+    return {
+        "side": side,
+        "alpha_id": _text(item.get("alpha_id"), reason),
+        "missing_reason_code": reason_code,
+        "current_value": current_value,
+        "required_value": required_value,
+        "deficit": deficit,
+    }
+
+
+def _whitelist_qualification_gap_item(item: Any, reason: str) -> dict[str, Any]:
+    if not isinstance(item, Mapping):
+        _fail(reason)
+    side = item.get("side")
+    if side not in _EVIDENCE_UI_SIDES:
+        _fail(reason)
+    gap_reason_code = item.get("gap_reason_code")
+    if gap_reason_code not in _QUALIFICATION_GAP_REASON_CODES:
+        _fail(reason)
+    return {
+        "side": side,
+        "alpha_id": _text(item.get("alpha_id"), reason),
+        "gap_reason_code": gap_reason_code,
+        "current_value": _number(item.get("current_value"), 0.0, 100.0, reason),
+        "required_value": _number(item.get("required_value"), 0.0, 100.0, reason),
+    }
+
+
+def _whitelist_invalidation_entry(value: Any, reason: str) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        _fail(reason)
+    approval_status = value.get("approval_status")
+    if approval_status not in _INVALIDATION_APPROVAL_STATUSES:
+        _fail(reason)
+    entry = {
+        "alpha_id": _text(value.get("alpha_id"), reason),
+        "alpha_name": _optional_text(value.get("alpha_name"), reason),
+        "approval_status": approval_status,
+        "source": _optional_text(value.get("source"), reason),
+        "version": _optional_text(value.get("version"), reason),
+    }
+    raw_conditions = value.get("conditions")
+    if not isinstance(raw_conditions, list):
+        _fail(reason)
+    conditions = []
+    for condition in raw_conditions:
+        if not isinstance(condition, Mapping):
+            _fail(reason)
+        conditions.append(
+            {
+                "condition_id": _text(condition.get("condition_id"), reason),
+                "condition_text": _text(condition.get("condition_text"), reason),
+            }
+        )
+    if approval_status == INVALIDATION_NOT_DEFINED and conditions:
+        _fail(WEEK4_CONFLICT_DATA_INCONSISTENT)
+    entry["conditions"] = conditions
+    return entry
+
+
+def _whitelist_evidence_ui(value: Any, reason_code: str) -> dict[str, Any]:
+    """John's B5 Conflict Radar Evidence UI gate: one additive, optional
+    (``if "evidence_ui" in ...`` at the call site) block -- absent entirely
+    on a historical conflict payload predating this task, never fabricated,
+    never required. Every enum field is validated against the exact set
+    the producing module defines (imported, never hand-copied), so an
+    unknown/malformed value fails closed rather than silently persisting
+    something no reader can trust."""
+    if not isinstance(value, Mapping):
+        _fail(reason_code)
+    schema_version = _text(value.get("schema_version"), reason_code)
+
+    raw_bull_evidence = value.get("bull_evidence")
+    raw_bear_evidence = value.get("bear_evidence")
+    raw_counter_evidence = value.get("counter_evidence")
+    raw_missing_evidence = value.get("missing_evidence")
+    raw_qualification_gaps = value.get("qualification_gaps")
+    if not all(
+        isinstance(raw, list)
+        for raw in (
+            raw_bull_evidence,
+            raw_bear_evidence,
+            raw_counter_evidence,
+            raw_missing_evidence,
+            raw_qualification_gaps,
+        )
+    ):
+        _fail(reason_code)
+
+    bull_evidence = [
+        _whitelist_evidence_item(item, reason_code, allowed_stances=_EVIDENCE_UI_SUPPORTING_STANCE)
+        for item in raw_bull_evidence
+    ]
+    bear_evidence = [
+        _whitelist_evidence_item(item, reason_code, allowed_stances=_EVIDENCE_UI_SUPPORTING_STANCE)
+        for item in raw_bear_evidence
+    ]
+    counter_evidence = [
+        _whitelist_evidence_item(item, reason_code, allowed_stances=_EVIDENCE_UI_COUNTER_STANCES)
+        for item in raw_counter_evidence
+    ]
+    missing_evidence = [
+        _whitelist_missing_evidence_item(item, reason_code) for item in raw_missing_evidence
+    ]
+    qualification_gaps = [
+        _whitelist_qualification_gap_item(item, reason_code) for item in raw_qualification_gaps
+    ]
+
+    invalidation_conditions_raw = value.get("invalidation_conditions")
+    if not isinstance(invalidation_conditions_raw, Mapping):
+        _fail(reason_code)
+    invalidation_conditions = {
+        "bull_alpha": _whitelist_invalidation_entry(invalidation_conditions_raw.get("bull_alpha"), reason_code),
+        "bear_alpha": _whitelist_invalidation_entry(invalidation_conditions_raw.get("bear_alpha"), reason_code),
+    }
+    return {
+        "schema_version": schema_version,
+        "bull_evidence": bull_evidence,
+        "bear_evidence": bear_evidence,
+        "counter_evidence": counter_evidence,
+        "missing_evidence": missing_evidence,
+        "qualification_gaps": qualification_gaps,
+        "invalidation_conditions": invalidation_conditions,
     }
 
 
@@ -898,6 +1174,11 @@ def _whitelist_conflict(conflict: Mapping[str, Any]) -> dict[str, Any]:
             "shared_fact_resolution": _text(conflict.get("shared_fact_resolution"), reason),
         }
     )
+    # John's B5 Conflict Radar Evidence UI gate: additive and optional --
+    # a conflict computed before this task shipped simply has none. See
+    # the identical comment in _whitelist_candidate.
+    if "evidence_ui" in conflict:
+        whitelisted["evidence_ui"] = _whitelist_evidence_ui(conflict["evidence_ui"], reason)
     return _json_copy(whitelisted, reason)
 
 

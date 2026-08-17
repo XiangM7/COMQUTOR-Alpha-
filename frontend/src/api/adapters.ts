@@ -14,9 +14,17 @@ import type {
   AgentOutputsResponse,
   AlphaConflict,
   AlphaEvidenceDetail,
+  AlphaInvalidationCondition,
+  AlphaInvalidationEntry,
+  ConflictAdmissibility,
   ConflictAuditSide,
   ConflictCandidateEvaluation,
+  ConflictEvidenceFactGroup,
   ConflictEvidenceItem,
+  ConflictEvidenceUI,
+  ConflictEvidenceUIItem,
+  ConflictMissingEvidenceItem,
+  ConflictQualificationGapItem,
   ConflictSideStructure,
   ConflictsResponse,
   DataSanitySeverity,
@@ -41,8 +49,15 @@ import type {
   StructureGraphNode,
   StructureGraphResponse,
   StructuredAgentOutputRecord,
+  UnclassifiedFinding,
+  UnclassifiedFindingReason,
 } from "./types";
-import { DATA_SANITY_SEVERITIES, DATA_SANITY_STATUSES } from "./types";
+import {
+  DATA_SANITY_SEVERITIES,
+  DATA_SANITY_STATUSES,
+  UNCLASSIFIED_FINDING_REASONS,
+  UNCLASSIFIED_FINDING_REASON_UNRESOLVED,
+} from "./types";
 
 export type AdaptResult<T> = { ok: true; value: T } | { ok: false; reason: string };
 
@@ -72,6 +87,10 @@ function isStringArray(value: unknown): value is string[] {
 
 function isNumberArray(value: unknown): value is number[] {
   return Array.isArray(value) && value.every((item) => typeof item === "number");
+}
+
+function isBoolean(value: unknown): value is boolean {
+  return typeof value === "boolean";
 }
 
 function optionalString(value: unknown): string | undefined {
@@ -307,7 +326,236 @@ function adaptConflictSideStructure(payload: unknown): AdaptResult<ConflictSideS
     agents: isStringArray(payload.agents) ? payload.agents : [],
     evidence: isStringArray(payload.evidence) ? payload.evidence : [],
     match_scores: isNumberArray(payload.match_scores) ? payload.match_scores : [],
+    // Evidence Integrity Completion Sprint, Track B: was silently dropped
+    // by this adapter's own narrow reconstruction (a real, pre-existing
+    // bug found while wiring B5 -- ConflictSideEvidence's per-Evidence-
+    // Fact rendering has never actually activated in production). Fixed
+    // additively here alongside the B5 fields below.
+    evidence_facts: adaptConflictEvidenceFactGroups(payload.evidence_facts),
   });
+}
+
+function adaptConflictEvidenceFactGroups(value: unknown): ConflictEvidenceFactGroup[] {
+  return Array.isArray(value)
+    ? value
+        .filter(isRecord)
+        .filter((item) => isString(item.evidence_fact_group_id) && isString(item.representative_claim_id))
+        .map((item) => ({
+          evidence_fact_group_id: item.evidence_fact_group_id as string,
+          representative_claim_id: item.representative_claim_id as string,
+          member_claim_ids: isStringArray(item.member_claim_ids) ? item.member_claim_ids : [],
+          supporting_agents: isStringArray(item.supporting_agents) ? item.supporting_agents : [],
+          grouping_method: isString(item.grouping_method) ? item.grouping_method : "unknown",
+        }))
+    : [];
+}
+
+// B5 Conflict Radar Evidence UI (task B5_CONFLICT_RADAR_EVIDENCE_UI) --
+// every field below is optional at the call site (absent entirely on a
+// historical payload); a present-but-malformed value is treated the same
+// as absent (undefined) rather than failing the whole conflict, matching
+// this file's own "lenient about additive detail, strict about required
+// top-level fields" philosophy.
+
+function adaptConflictAdmissibility(value: unknown): ConflictAdmissibility | undefined {
+  if (!isRecord(value)) return undefined;
+  const { admissibility_version, status, bull_score, bear_score } = value;
+  if (
+    !isString(admissibility_version) ||
+    (status !== "admitted" && status !== "candidate") ||
+    (bull_score !== null && !isNumber(bull_score)) ||
+    (bear_score !== null && !isNumber(bear_score))
+  ) {
+    return undefined;
+  }
+  return {
+    admissibility_version,
+    status,
+    reason_codes: isStringArray(value.reason_codes) ? value.reason_codes : [],
+    bull_score: bull_score === null ? null : bull_score,
+    bear_score: bear_score === null ? null : bear_score,
+    bull_supporting_evidence_count: isNumber(value.bull_supporting_evidence_count)
+      ? value.bull_supporting_evidence_count
+      : 0,
+    bear_supporting_evidence_count: isNumber(value.bear_supporting_evidence_count)
+      ? value.bear_supporting_evidence_count
+      : 0,
+    bull_ticker_specific_support_count: isNumber(value.bull_ticker_specific_support_count)
+      ? value.bull_ticker_specific_support_count
+      : 0,
+    bear_ticker_specific_support_count: isNumber(value.bear_ticker_specific_support_count)
+      ? value.bear_ticker_specific_support_count
+      : 0,
+    bull_supporting_fact_group_ids: isStringArray(value.bull_supporting_fact_group_ids)
+      ? value.bull_supporting_fact_group_ids
+      : [],
+    bear_supporting_fact_group_ids: isStringArray(value.bear_supporting_fact_group_ids)
+      ? value.bear_supporting_fact_group_ids
+      : [],
+  };
+}
+
+const EVIDENCE_STANCE_VALUE_SET: ReadonlySet<string> = new Set([
+  "supports_alpha",
+  "opposes_alpha",
+  "supports_counter_alpha",
+]);
+
+function adaptConflictEvidenceUIItems(value: unknown): ConflictEvidenceUIItem[] {
+  if (!Array.isArray(value)) return [];
+  const items: ConflictEvidenceUIItem[] = [];
+  for (const raw of value) {
+    if (!isRecord(raw)) continue;
+    const {
+      evidence_fact_group_id,
+      representative_claim_id,
+      evidence_text,
+      target_alpha_id,
+      evidence_stance,
+      ticker_specific,
+      representative_match_score,
+    } = raw;
+    if (
+      !isString(evidence_fact_group_id) ||
+      !isString(representative_claim_id) ||
+      !isString(evidence_text) ||
+      !isString(target_alpha_id) ||
+      !isString(evidence_stance) ||
+      !EVIDENCE_STANCE_VALUE_SET.has(evidence_stance) ||
+      !isBoolean(ticker_specific) ||
+      !isNumber(representative_match_score)
+    ) {
+      continue;
+    }
+    const item: ConflictEvidenceUIItem = {
+      evidence_fact_group_id,
+      representative_claim_id,
+      member_claim_ids: isStringArray(raw.member_claim_ids) ? raw.member_claim_ids : [],
+      evidence_text,
+      agents: isStringArray(raw.agents) ? raw.agents : [],
+      source_agent_output_ids: isStringArray(raw.source_agent_output_ids) ? raw.source_agent_output_ids : [],
+      target_alpha_id,
+      evidence_stance: evidence_stance as ConflictEvidenceUIItem["evidence_stance"],
+      stance_method: isString(raw.stance_method) ? raw.stance_method : null,
+      evidence_stance_version: isString(raw.evidence_stance_version) ? raw.evidence_stance_version : null,
+      stance_confidence_band: isString(raw.stance_confidence_band) ? raw.stance_confidence_band : null,
+      ticker_specific,
+      representative_match_score,
+    };
+    if (isString(raw.counter_target_alpha_id)) item.counter_target_alpha_id = raw.counter_target_alpha_id;
+    if (isString(raw.supports_counter_alpha_id)) item.supports_counter_alpha_id = raw.supports_counter_alpha_id;
+    items.push(item);
+  }
+  return items;
+}
+
+const MISSING_EVIDENCE_SIDE_SET: ReadonlySet<string> = new Set(["bull", "bear"]);
+const MISSING_EVIDENCE_REASON_SET: ReadonlySet<string> = new Set([
+  "INSUFFICIENT_SUPPORTING_EVIDENCE",
+  "NO_TICKER_SPECIFIC_SUPPORTING_EVIDENCE",
+  "NO_ADMISSIBLE_SUPPORTING_POLARITY",
+]);
+
+function adaptConflictMissingEvidenceItems(value: unknown): ConflictMissingEvidenceItem[] {
+  if (!Array.isArray(value)) return [];
+  const items: ConflictMissingEvidenceItem[] = [];
+  for (const raw of value) {
+    if (!isRecord(raw)) continue;
+    const { side, alpha_id, missing_reason_code, current_value, required_value, deficit } = raw;
+    if (
+      !isString(side) ||
+      !MISSING_EVIDENCE_SIDE_SET.has(side) ||
+      !isString(alpha_id) ||
+      !isString(missing_reason_code) ||
+      !MISSING_EVIDENCE_REASON_SET.has(missing_reason_code) ||
+      !isNumber(current_value) ||
+      !isNumber(required_value) ||
+      !isNumber(deficit)
+    ) {
+      continue;
+    }
+    items.push({
+      side: side as "bull" | "bear",
+      alpha_id,
+      missing_reason_code: missing_reason_code as ConflictMissingEvidenceItem["missing_reason_code"],
+      current_value,
+      required_value,
+      deficit,
+    });
+  }
+  return items;
+}
+
+function adaptConflictQualificationGapItems(value: unknown): ConflictQualificationGapItem[] {
+  if (!Array.isArray(value)) return [];
+  const items: ConflictQualificationGapItem[] = [];
+  for (const raw of value) {
+    if (!isRecord(raw)) continue;
+    const { side, alpha_id, gap_reason_code, current_value, required_value } = raw;
+    if (
+      !isString(side) ||
+      !MISSING_EVIDENCE_SIDE_SET.has(side) ||
+      !isString(alpha_id) ||
+      gap_reason_code !== "ALPHA_SCORE_BELOW_THRESHOLD" ||
+      (current_value !== null && !isNumber(current_value)) ||
+      !isNumber(required_value)
+    ) {
+      continue;
+    }
+    items.push({
+      side: side as "bull" | "bear",
+      alpha_id,
+      gap_reason_code,
+      current_value: current_value === null ? null : current_value,
+      required_value,
+    });
+  }
+  return items;
+}
+
+function adaptAlphaInvalidationEntry(value: unknown): AlphaInvalidationEntry | undefined {
+  if (!isRecord(value)) return undefined;
+  const { alpha_id, alpha_name, approval_status, source, version, conditions } = value;
+  if (
+    !isString(alpha_id) ||
+    (alpha_name !== null && !isString(alpha_name)) ||
+    (approval_status !== "approved" && approval_status !== "not_defined") ||
+    (source !== null && !isString(source)) ||
+    (version !== null && !isString(version)) ||
+    !Array.isArray(conditions)
+  ) {
+    return undefined;
+  }
+  const adaptedConditions: AlphaInvalidationCondition[] = conditions
+    .filter(isRecord)
+    .filter((c) => isString(c.condition_id) && isString(c.condition_text))
+    .map((c) => ({ condition_id: c.condition_id as string, condition_text: c.condition_text as string }));
+  return {
+    alpha_id,
+    alpha_name: alpha_name === null ? null : alpha_name,
+    approval_status,
+    source: source === null ? null : source,
+    version: version === null ? null : version,
+    conditions: adaptedConditions,
+  };
+}
+
+function adaptConflictEvidenceUI(value: unknown): ConflictEvidenceUI | undefined {
+  if (!isRecord(value)) return undefined;
+  const { schema_version, invalidation_conditions } = value;
+  if (!isString(schema_version) || !isRecord(invalidation_conditions)) return undefined;
+  const bullAlpha = adaptAlphaInvalidationEntry(invalidation_conditions.bull_alpha);
+  const bearAlpha = adaptAlphaInvalidationEntry(invalidation_conditions.bear_alpha);
+  if (!bullAlpha || !bearAlpha) return undefined;
+  return {
+    schema_version,
+    bull_evidence: adaptConflictEvidenceUIItems(value.bull_evidence),
+    bear_evidence: adaptConflictEvidenceUIItems(value.bear_evidence),
+    counter_evidence: adaptConflictEvidenceUIItems(value.counter_evidence),
+    missing_evidence: adaptConflictMissingEvidenceItems(value.missing_evidence),
+    qualification_gaps: adaptConflictQualificationGapItems(value.qualification_gaps),
+    invalidation_conditions: { bull_alpha: bullAlpha, bear_alpha: bearAlpha },
+  };
 }
 
 export function adaptAlphaConflict(payload: unknown): AdaptResult<AlphaConflict> {
@@ -337,6 +585,8 @@ export function adaptAlphaConflict(payload: unknown): AdaptResult<AlphaConflict>
   const bullStructure = adaptConflictSideStructure(payload.bull_structure);
   const bearStructure = adaptConflictSideStructure(payload.bear_structure);
   if (!bullStructure.ok || !bearStructure.ok) return fail("invalid bull/bear structure");
+  const admissibility = adaptConflictAdmissibility(payload.admissibility);
+  const evidenceUi = adaptConflictEvidenceUI(payload.evidence_ui);
 
   const components = isRecord(payload.components) ? payload.components : {};
   const numericComponent = (key: string): number => (isNumber(components[key]) ? (components[key] as number) : 0);
@@ -381,6 +631,35 @@ export function adaptAlphaConflict(payload: unknown): AdaptResult<AlphaConflict>
     conflict_level: conflict_level as AlphaConflict["conflict_level"],
     reason_codes: isStringArray(payload.reason_codes) ? payload.reason_codes : [],
     explanation,
+    // Evidence Integrity Completion Sprint, Track B -- also previously
+    // silently dropped by this adapter's narrow reconstruction (same real,
+    // pre-existing bug as evidence_facts above); ConflictSideFactStats has
+    // never actually rendered real counts in production. Fixed additively.
+    ...(isNumber(payload.bull_raw_claim_count) ? { bull_raw_claim_count: payload.bull_raw_claim_count } : {}),
+    ...(isNumber(payload.bull_unique_fact_count) ? { bull_unique_fact_count: payload.bull_unique_fact_count } : {}),
+    ...(isNumber(payload.bull_distinct_agent_count)
+      ? { bull_distinct_agent_count: payload.bull_distinct_agent_count }
+      : {}),
+    ...(isNumber(payload.bull_overlap_ratio) ? { bull_overlap_ratio: payload.bull_overlap_ratio } : {}),
+    ...(isStringArray(payload.bull_fact_group_ids) ? { bull_fact_group_ids: payload.bull_fact_group_ids } : {}),
+    ...(isNumber(payload.bear_raw_claim_count) ? { bear_raw_claim_count: payload.bear_raw_claim_count } : {}),
+    ...(isNumber(payload.bear_unique_fact_count) ? { bear_unique_fact_count: payload.bear_unique_fact_count } : {}),
+    ...(isNumber(payload.bear_distinct_agent_count)
+      ? { bear_distinct_agent_count: payload.bear_distinct_agent_count }
+      : {}),
+    ...(isNumber(payload.bear_overlap_ratio) ? { bear_overlap_ratio: payload.bear_overlap_ratio } : {}),
+    ...(isStringArray(payload.bear_fact_group_ids) ? { bear_fact_group_ids: payload.bear_fact_group_ids } : {}),
+    ...(isStringArray(payload.shared_fact_group_ids)
+      ? { shared_fact_group_ids: payload.shared_fact_group_ids }
+      : {}),
+    ...(isNumber(payload.shared_fact_group_count)
+      ? { shared_fact_group_count: payload.shared_fact_group_count }
+      : {}),
+    ...(isString(payload.shared_fact_resolution) ? { shared_fact_resolution: payload.shared_fact_resolution } : {}),
+    // John's B2 Conflict Evidence Admissibility gate + B5 Conflict Radar
+    // Evidence UI (additive; absent entirely on a historical payload).
+    ...(admissibility ? { admissibility } : {}),
+    ...(evidenceUi ? { evidence_ui: evidenceUi } : {}),
   });
 }
 
@@ -406,6 +685,61 @@ function adaptDataSanityWarning(payload: unknown): AdaptResult<DataSanityWarning
     severity: severity as DataSanitySeverity,
     message,
     details: isRecord(details) ? details : {},
+  });
+}
+
+// Sprint 3 (Unclassified Findings Control), Track A3.
+const UNCLASSIFIED_FINDING_REASON_SET = new Set<string>([
+  ...UNCLASSIFIED_FINDING_REASONS,
+  UNCLASSIFIED_FINDING_REASON_UNRESOLVED,
+]);
+
+function adaptUnclassifiedFindingReason(
+  value: unknown
+): UnclassifiedFindingReason | typeof UNCLASSIFIED_FINDING_REASON_UNRESOLVED | null {
+  return isString(value) && UNCLASSIFIED_FINDING_REASON_SET.has(value)
+    ? (value as UnclassifiedFindingReason | typeof UNCLASSIFIED_FINDING_REASON_UNRESOLVED)
+    : null;
+}
+
+function adaptUnclassifiedFinding(payload: unknown): AdaptResult<UnclassifiedFinding> {
+  if (!isRecord(payload)) return fail("finding is not an object");
+  const { run_id, ticker, claim_id } = payload;
+  if (!isString(run_id) || !isString(ticker) || !isString(claim_id)) {
+    return fail("missing run_id/ticker/claim_id");
+  }
+  const reason = adaptUnclassifiedFindingReason(payload.reason);
+  if (!reason) return fail("missing/unknown reason");
+  if (!isNumber(payload.display_rank)) return fail("missing display_rank");
+  const reasonCodes = isStringArray(payload.reason_codes)
+    ? payload.reason_codes
+        .map(adaptUnclassifiedFindingReason)
+        .filter((code): code is NonNullable<typeof code> => code !== null)
+    : [];
+  return ok({
+    run_id,
+    ticker,
+    claim_id,
+    claim: nullableString(payload.claim),
+    evidence: nullableString(payload.evidence),
+    agent: nullableString(payload.agent),
+    confidence: nullableNumber(payload.confidence),
+    matched_alpha: nullableString(payload.matched_alpha),
+    secondary_alphas: isStringArray(payload.secondary_alphas) ? payload.secondary_alphas : [],
+    direction: nullableString(payload.direction),
+    reason,
+    reason_codes: reasonCodes,
+    diagnostic_reason_codes: isStringArray(payload.diagnostic_reason_codes)
+      ? payload.diagnostic_reason_codes
+      : [],
+    ticker_specific: isBoolean(payload.ticker_specific) ? payload.ticker_specific : false,
+    duplicate_group_id: nullableString(payload.duplicate_group_id),
+    evidence_fact_group_id: nullableString(payload.evidence_fact_group_id),
+    representative_claim_id: nullableString(payload.representative_claim_id),
+    source_refs: isStringArray(payload.source_refs) ? payload.source_refs : [],
+    source_agent_output_id: nullableString(payload.source_agent_output_id),
+    claim_index: nullableNumber(payload.claim_index),
+    display_rank: payload.display_rank,
   });
 }
 
@@ -459,6 +793,34 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
     }
   }
 
+  // Sprint 3 (Unclassified Findings Control), Track A3. Absent on a raw
+  // payload predating this field -- `unclassified_findings_top20` etc.
+  // are left undefined below rather than defaulted to an empty/"ready"
+  // shape, so a historical caller can distinguish "field never existed"
+  // from "computed, genuinely zero".
+  let unclassifiedFindingsTop20: UnclassifiedFinding[] | undefined;
+  if (Array.isArray(payload.unclassified_findings_top20)) {
+    unclassifiedFindingsTop20 = [];
+    for (const raw of payload.unclassified_findings_top20) {
+      const adapted = adaptUnclassifiedFinding(raw);
+      if (adapted.ok) unclassifiedFindingsTop20.push(adapted.value);
+    }
+  }
+  const unclassifiedFindingsTotalCount =
+    payload.unclassified_findings_total_count === null
+      ? null
+      : nullableNumber(payload.unclassified_findings_total_count);
+  const unclassifiedFindingsReasonCounts = isRecord(payload.unclassified_findings_reason_counts)
+    ? (payload.unclassified_findings_reason_counts as Record<string, number>)
+    : undefined;
+  const unclassifiedFindingsStatus =
+    payload.unclassified_findings_status === "ready" || payload.unclassified_findings_status === "unavailable"
+      ? payload.unclassified_findings_status
+      : undefined;
+  const unclassifiedFindingsDownloadAvailable = isBoolean(payload.unclassified_findings_download_available)
+    ? payload.unclassified_findings_download_available
+    : undefined;
+
   return ok({
     run_id,
     ticker: nullableString(payload.ticker),
@@ -480,6 +842,11 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
     entity_alpha_exposures: entityAlphaExposures,
     entity_alpha_exposure_status:
       payload.entity_alpha_exposure_status === "ready" ? "ready" : "unavailable",
+    unclassified_findings_top20: unclassifiedFindingsTop20,
+    unclassified_findings_total_count: unclassifiedFindingsTotalCount,
+    unclassified_findings_reason_counts: unclassifiedFindingsReasonCounts,
+    unclassified_findings_status: unclassifiedFindingsStatus,
+    unclassified_findings_download_available: unclassifiedFindingsDownloadAvailable,
   });
 }
 
@@ -785,12 +1152,21 @@ function adaptConflictCandidateEvaluation(payload: unknown): AdaptResult<Conflic
   const auditA = adaptConflictAuditSide(audit.alpha_a);
   const auditB = adaptConflictAuditSide(audit.alpha_b);
   if (!auditA.ok || !auditB.ok) return fail("invalid evidence_audit");
+  const admissibility = adaptConflictAdmissibility(payload.admissibility);
+  const evidenceUi = adaptConflictEvidenceUI(payload.evidence_ui);
   return ok({
     alpha_a,
     alpha_b,
     outcome,
     reason_codes: isStringArray(payload.reason_codes) ? payload.reason_codes : [],
     evidence_audit: { alpha_a: auditA.value, alpha_b: auditB.value },
+    // Only present once bull/bear roles were actually resolved for this
+    // pair (task B5_CONFLICT_RADAR_EVIDENCE_UI) -- absent together with
+    // admissibility/evidence_ui for a pair rejected before B2 evaluation.
+    ...(isString(payload.bull_alpha_id) ? { bull_alpha_id: payload.bull_alpha_id } : {}),
+    ...(isString(payload.bear_alpha_id) ? { bear_alpha_id: payload.bear_alpha_id } : {}),
+    ...(admissibility ? { admissibility } : {}),
+    ...(evidenceUi ? { evidence_ui: evidenceUi } : {}),
   });
 }
 

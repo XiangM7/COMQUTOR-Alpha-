@@ -16,6 +16,21 @@ from comqutor_alpha.adapters.tradingagents_output_writer import (
     build_raw_agent_output_record,
 )
 from comqutor_alpha.api.agent_output_reader import get_agent_outputs_response
+from comqutor_alpha.api.artifact_export import (
+    build_and_write_artifact_manifest,
+    extract_evidence_facts_export,
+    finalize_completed_run_artifacts,
+)
+from comqutor_alpha.api.unclassified_findings import (
+    ARTIFACT_FILENAME as UNCLASSIFIED_FINDINGS_ARTIFACT_FILENAME,
+    DEFAULT_DISPLAY_LIMIT as UNCLASSIFIED_FINDINGS_DISPLAY_LIMIT,
+    SCHEMA_VERSION as UNCLASSIFIED_FINDINGS_SCHEMA_VERSION,
+)
+from comqutor_alpha.audit.ticker_consistency import (
+    audit_ticker_consistency,
+    resolve_expected_ticker,
+)
+from comqutor_alpha.conflict_engine.conflict_admissibility import CANDIDATE as B2_CANDIDATE
 from comqutor_alpha.conflict_engine.pipeline import run_week4_conflict_pipeline
 from comqutor_alpha.data_sanity.pipeline import (
     DATA_SANITY_ARTIFACT_FILENAME,
@@ -27,6 +42,9 @@ from comqutor_alpha.data_sanity.schema import (
 )
 from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     REGIME_GATE_MIN_UNIQUE_EVIDENCE,
+)
+from comqutor_alpha.graph_engine.alpha_level_classifier import (
+    REASON_LOW_ENTITY_EXPOSURE,
 )
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     ALPHA_ACTIVATION_EVIDENCE_V1,
@@ -45,6 +63,7 @@ from comqutor_alpha.graph_engine.pipeline import (
     build_structure_graph_stage,
     score_and_assemble_structure_graph,
 )
+from comqutor_alpha.llm_runtime.session import SemanticRuntimeSession
 from comqutor_alpha.research_lifecycle import (
     RESEARCH_RUN_STATUSES,
     ResearchLifecycleError,
@@ -63,17 +82,32 @@ from comqutor_alpha.storage.file_store import (
     load_json_record_if_exists,
     run_dir_for,
     save_json_record,
+    validate_artifact_filename,
     validate_run_id_for_path,
 )
 from comqutor_alpha.structure_engine.alpha_mapper import save_alpha_matches
+from comqutor_alpha.structure_engine.evidence_stance import (
+    CLASSIFIER_VERSION as EVIDENCE_STANCE_VERSION,
+)
+from comqutor_alpha.structure_engine.evidence_stance_llm import (
+    STANCE_METHOD_LLM,
+    VALID_FALLBACK_REASONS as STANCE_LLM_VALID_FALLBACK_REASONS,
+)
 from comqutor_alpha.structure_engine.structure_extractor import save_extracted_structures
 from comqutor_alpha.structure_engine.structured_output_adapter import (
     ERROR_LOG_ARTIFACT_PATH,
     save_structured_agent_outputs,
 )
+from comqutor_alpha.structure_engine.structured_output_live_shadow import (
+    resolve_structured_adapter_mode,
+    run_live_shadow_sidecar,
+    select_primary_authority,
+)
 from comqutor_alpha.structure_engine.week2_llm import (
     ERROR_LOG_ARTIFACT_PATH as WEEK2_LLM_ERROR_LOG_ARTIFACT_PATH,
+    Week2LLMGateway,
     build_server_week2_llm_gateway,
+    week2_llm_enabled,
 )
 
 logger = logging.getLogger(__name__)
@@ -511,6 +545,31 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         else ([], None, "not_ready")
     )
 
+    # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+    # Track A2: "completed" additionally requires the Ticker Consistency
+    # Audit and artifact completeness (both written by
+    # _run_week3_graph_pipeline's finalizer, synchronously, before this
+    # function is ever called) to not have explicitly failed. A run whose
+    # run_audit.json/artifact_manifest.json were never generated at all
+    # (a historical run predating this sprint, or a context that never
+    # calls the finalizer) reports these fields as ``None`` here -- never
+    # treated as a failure, only an explicit "fail" ever degrades status,
+    # so no pre-existing run is retroactively downgraded.
+    run_audit_for_gate = load_json_record_if_exists(run_id, "run_audit.json", output_root=output_root)
+    ticker_consistency_value = (
+        run_audit_for_gate.get("ticker_consistency") if isinstance(run_audit_for_gate, dict) else None
+    )
+    artifact_manifest_for_gate = load_json_record_if_exists(
+        run_id, "artifact_manifest.json", output_root=output_root
+    )
+    artifact_completeness_value = (
+        artifact_manifest_for_gate.get("artifact_completeness")
+        if isinstance(artifact_manifest_for_gate, dict)
+        else None
+    )
+    ticker_consistency_ok = ticker_consistency_value != "fail"
+    artifact_completeness_ok = artifact_completeness_value != "fail"
+
     # "completed" now requires Week 3 (graph build + activation scoring +
     # persistence) *and* Week 4 (conflict detection + persistence) to have
     # actually succeeded, not just Week 1-2. A Week 3 failure, or a Week 3
@@ -520,7 +579,13 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     # result. A Week 4 run that legitimately found zero admitted conflicts
     # is NOT a Week 4 failure -- conflict_status is "ready" either way, so
     # it never blocks "completed" on its own.
-    if complete and structure_graph_ready and conflict_status == "ready":
+    if (
+        complete
+        and structure_graph_ready
+        and conflict_status == "ready"
+        and ticker_consistency_ok
+        and artifact_completeness_ok
+    ):
         status = "completed"
     elif complete or has_any:
         status = "partial"
@@ -533,6 +598,44 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     )
     exposure_records = exposure_payload.get("records")
     exposure_records = exposure_records if isinstance(exposure_records, list) else []
+
+    # Sprint 3 (Unclassified Findings Control), Track A3: the polling
+    # response gets only the Top 20 slice + lightweight counts -- never
+    # the full authoritative list (that stays behind the artifact/
+    # download route). A run with no unclassified_findings.json (predates
+    # A3, or never reprocessed since) reports "unavailable", never a
+    # fabricated empty/zero result.
+    unclassified_findings_payload = load_json_record_if_exists(
+        run_id, UNCLASSIFIED_FINDINGS_ARTIFACT_FILENAME, output_root=output_root
+    )
+    _unclassified_ready = (
+        isinstance(unclassified_findings_payload, dict)
+        and unclassified_findings_payload.get("schema_version") == UNCLASSIFIED_FINDINGS_SCHEMA_VERSION
+    )
+    if _unclassified_ready:
+        _uf_all_findings = unclassified_findings_payload.get("findings")
+        _uf_all_findings = _uf_all_findings if isinstance(_uf_all_findings, list) else []
+        _uf_display_limit = unclassified_findings_payload.get("display_limit")
+        _uf_display_limit = (
+            _uf_display_limit if isinstance(_uf_display_limit, int) else UNCLASSIFIED_FINDINGS_DISPLAY_LIMIT
+        )
+        # Already sorted + display_rank-assigned by build_unclassified_
+        # findings_export -- a plain slice, never a second sort.
+        unclassified_findings_top20 = _uf_all_findings[:_uf_display_limit]
+        _uf_total_count = unclassified_findings_payload.get("total_count")
+        unclassified_findings_total_count = (
+            _uf_total_count if isinstance(_uf_total_count, int) else len(_uf_all_findings)
+        )
+        _uf_reason_counts = unclassified_findings_payload.get("reason_counts")
+        unclassified_findings_reason_counts = _uf_reason_counts if isinstance(_uf_reason_counts, dict) else {}
+        unclassified_findings_status = "ready"
+        unclassified_findings_download_available = True
+    else:
+        unclassified_findings_top20 = []
+        unclassified_findings_total_count = None
+        unclassified_findings_reason_counts = {}
+        unclassified_findings_status = "unavailable"
+        unclassified_findings_download_available = False
 
     return {
         "run_id": run_id,
@@ -563,6 +666,23 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         # cross-validation warning, never a change to claims/Activation/
         # Graph/Conflict, and never blocks "completed".
         **_public_data_sanity_fields(run_id, output_root),
+        # Sprint 2 (Alpha-Relative Evidence Stance Classification), Track
+        # B1: read straight off run_audit.json's own "evidence_stance"
+        # section (already computed above via run_audit_for_gate) -- never
+        # a second classification pass. None for a historical run whose
+        # run_audit.json predates this Sprint, never a fabricated summary.
+        "evidence_stance_summary": (
+            run_audit_for_gate.get("evidence_stance") if isinstance(run_audit_for_gate, dict) else None
+        ),
+        # Sprint 3 (Unclassified Findings Control), Track A3. Only the Top
+        # 20 (by the artifact's own frozen deterministic order) travels on
+        # every poll; the complete authoritative list stays behind the
+        # artifact/download route (see get_research_artifact_download_route).
+        "unclassified_findings_top20": unclassified_findings_top20,
+        "unclassified_findings_total_count": unclassified_findings_total_count,
+        "unclassified_findings_reason_counts": unclassified_findings_reason_counts,
+        "unclassified_findings_status": unclassified_findings_status,
+        "unclassified_findings_download_available": unclassified_findings_download_available,
     }
 
 # Run a research request with the given payload, optionally using a custom runner.
@@ -645,6 +765,9 @@ def _run_week1_week2_artifact_pipeline(
     *,
     graph_repository=None,
     progress_reporter=None,
+    structured_adapter_mode_decision=None,
+    structured_adapter_shadow_executor=None,
+    structured_adapter_shadow_cache=None,
 ):
     run_dir = Path(run_dir).expanduser().resolve()
     run_id = validate_run_id_for_path(run_dir.name)
@@ -656,6 +779,71 @@ def _run_week1_week2_artifact_pipeline(
         _log_pipeline_error(run_id, output_root, "structured_agent_outputs")
         return
     _report_progress_stage(progress_reporter, "structured_claims")
+
+    # Phase 1 Stage E/G: the v4.2 branch observes the same raw reports only
+    # after Legacy has succeeded. It writes separate sidecars and is fully
+    # contained: no Shadow exception can change the Legacy artifact, the
+    # request outcome, or any authoritative downstream input below -- for
+    # legacy/shadow mode. For primary mode, Stage G's authority routing
+    # below (select_primary_authority) may still, deterministically and
+    # explicitly, overwrite structured_agent_outputs.json with this same
+    # already-computed v4.2 result before it is read back -- but only when
+    # that result is unanimously accepted; any Shadow failure/exception/
+    # rejection leaves the Legacy write below completely untouched.
+    mode_decision = structured_adapter_mode_decision or resolve_structured_adapter_mode()
+    shadow_validation_payload = None
+    try:
+        shadow_validation_payload = run_live_shadow_sidecar(
+            run_dir,
+            mode_decision=mode_decision,
+            executor=structured_adapter_shadow_executor,
+            cache=structured_adapter_shadow_cache,
+        )
+    except Exception as exc:
+        logger.warning(
+            "structured adapter shadow sidecar failed "
+            "(run_id=%s, reason_code=%s, exc_type=%s)",
+            run_id,
+            "STRUCTURED_ADAPTER_SHADOW_SIDECAR_FAILED",
+            type(exc).__name__,
+        )
+
+    authority_decision = select_primary_authority(
+        run_dir, mode_decision=mode_decision, validation_payload=shadow_validation_payload
+    )
+    if authority_decision.primary_succeeded and authority_decision.authoritative_payload is not None:
+        save_json_record(
+            run_id,
+            "structured_agent_outputs.json",
+            authority_decision.authoritative_payload,
+            output_root=output_root,
+        )
+    try:
+        save_json_record(
+            run_id,
+            "structured_adapter_authority_routing.json",
+            {
+                "schema_version": "comqutor.structured_adapter_authority_routing.v1",
+                "run_id": run_id,
+                "requested_mode": mode_decision.requested_mode,
+                "effective_mode": mode_decision.effective_mode,
+                "primary_attempted": authority_decision.primary_attempted,
+                "primary_succeeded": authority_decision.primary_succeeded,
+                "authoritative_adapter": authority_decision.authoritative_adapter,
+                "fallback_used": authority_decision.fallback_used,
+                "fallback_reason": authority_decision.fallback_reason,
+                "active_protocol": authority_decision.active_protocol,
+            },
+            output_root=output_root,
+        )
+    except Exception as exc:
+        logger.warning(
+            "structured adapter authority routing metadata write failed "
+            "(run_id=%s, reason_code=%s, exc_type=%s)",
+            run_id,
+            "STRUCTURED_ADAPTER_AUTHORITY_ROUTING_METADATA_WRITE_FAILED",
+            type(exc).__name__,
+        )
 
     try:
         structured_payload = load_json_record(
@@ -873,9 +1061,11 @@ def _run_identity_section(run_id, ticker, metadata, db_row):
         "run_id": run_id,
         "ticker": ticker,
         "analysis_date": metadata.get("analysis_date") if isinstance(metadata, dict) else None,
-        "created_at": (metadata.get("created_at") if isinstance(metadata, dict) else None) or db_row.get("created_at"),
-        "started_at": db_row.get("started_at"),
-        "completed_at": db_row.get("completed_at"),
+        "created_at": _isoformat(
+            (metadata.get("created_at") if isinstance(metadata, dict) else None) or db_row.get("created_at")
+        ),
+        "started_at": _isoformat(db_row.get("started_at")),
+        "completed_at": _isoformat(db_row.get("completed_at")),
         "status": db_row.get("status"),
         "source_run_id": metadata.get("source_run_id") if isinstance(metadata, dict) else None,
         "replay_run_id": metadata.get("replay_run_id") if isinstance(metadata, dict) else None,
@@ -1093,10 +1283,17 @@ def _graph_lineage_section(graph_edges_list):
     }
 
 
-_ACTIVATION_STATUS_KEYS = ("inactive", "watch", "active", "dominant", "regime_level")
+_ACTIVATION_STATUS_KEYS = ("inactive", "watch", "candidate", "active", "dominant", "regime_level")
 
 
 def _activation_summary_section(v2_alphas):
+    """"candidate" is B4's authoritative new-output level (task
+    B4_ACTIVATION_LEVEL_ALIGNMENT, Decision 3: unifies the old ``inactive``/
+    ``watch``); both legacy keys are kept in ``_ACTIVATION_STATUS_KEYS`` so
+    a historical payload that still carries them is counted correctly, but
+    a new B4 run never produces either -- ``candidate_count`` absorbs what
+    would previously have split across ``inactive_count``/``watch_count``.
+    """
     per_alpha = {}
     status_counts = dict.fromkeys(_ACTIVATION_STATUS_KEYS, 0)
     for alpha in v2_alphas:
@@ -1128,6 +1325,7 @@ def _activation_summary_section(v2_alphas):
         "scored_alpha_count": len(v2_alphas),
         "inactive_count": status_counts["inactive"],
         "watch_count": status_counts["watch"],
+        "candidate_count": status_counts["candidate"],
         "active_count": status_counts["active"],
         "dominant_count": status_counts["dominant"],
         "regime_level_count": status_counts["regime_level"],
@@ -1139,7 +1337,21 @@ def _conflict_summary_section(conflict_payload):
     """Includes every taxonomy-declared pair, not only admitted conflicts --
     ``conflict_payload["arbitration"]["candidate_evaluations"]`` already
     carries the outcome for suppressed/rejected pairs; this section never
-    re-derives that outcome, only reshapes it."""
+    re-derives that outcome, only reshapes it.
+
+    John's B2 Conflict Evidence Admissibility gate (task
+    B2_CONFLICT_EVIDENCE_ADMISSIBILITY): ``admitted_count`` already means
+    exactly ``admitted_conflict_count`` since B2 shipped -- a candidate now
+    only reaches ``conflict_payload["conflicts"]``/``arbitration.
+    admitted_count`` once it also clears B2, so no existing field changed
+    meaning. ``admitted_conflict_count`` below is an explicit, same-named
+    alias of the pre-existing ``admitted_count`` (never a second count, same
+    source), added per task section 16 alongside the new
+    ``candidate_conflict_count`` (pairs that reached B2 evaluation but were
+    denied admission -- a strict subset of ``suppressed_count``, which also
+    includes pairs suppressed for pre-B2 reasons, e.g. missing evidence,
+    that never reached B2 evaluation at all and so carry no
+    ``admissibility`` block)."""
     if not isinstance(conflict_payload, dict):
         return {
             "declared_pair_count": None,
@@ -1147,6 +1359,8 @@ def _conflict_summary_section(conflict_payload):
             "admitted_count": None,
             "suppressed_count": None,
             "rejected_count": None,
+            "admitted_conflict_count": None,
+            "candidate_conflict_count": None,
             "main_conflict_id": None,
             "per_pair": [],
         }
@@ -1162,11 +1376,15 @@ def _conflict_summary_section(conflict_payload):
     main_conflict_id = main_conflict.get("conflict_id") if isinstance(main_conflict, dict) else None
 
     per_pair = []
+    candidate_conflict_count = 0
     for item in candidate_evaluations:
         if not isinstance(item, dict):
             continue
         alpha_a, alpha_b = item.get("alpha_a"), item.get("alpha_b")
         admitted = admitted_by_pair.get((alpha_a, alpha_b))
+        admissibility = item.get("admissibility")
+        if isinstance(admissibility, dict) and admissibility.get("status") == B2_CANDIDATE:
+            candidate_conflict_count += 1
         pair_entry = {
             "pair_id": f"{alpha_a}__{alpha_b}",
             "alpha_a": alpha_a,
@@ -1182,16 +1400,45 @@ def _conflict_summary_section(conflict_payload):
             "bear_unique_fact_count": (admitted or {}).get("bear_unique_fact_count"),
             "bear_distinct_agent_count": (admitted or {}).get("bear_distinct_agent_count"),
             "shared_fact_group_count": (admitted or {}).get("shared_fact_group_count"),
+            # John's B2 Conflict Evidence Admissibility gate: the exact same
+            # diagnostic object the Conflict Detector already attached to
+            # this candidate (bull/bear score, supporting-evidence/ticker-
+            # specific counts, reason codes) -- reused verbatim, never
+            # recomputed. ``None`` for a pair suppressed/rejected before B2
+            # was ever evaluated (e.g. missing evidence, unresolved
+            # bull/bear role).
+            "admissibility": admissibility,
             "is_main": bool(admitted) and admitted.get("conflict_id") == main_conflict_id,
         }
+        # John's B5 Conflict Radar Evidence UI gate: lightweight counts
+        # only (never the full evidence text -- that already lives in
+        # conflicts.json/the Conflict API; run_audit.json stays a summary,
+        # not a second full copy). Absent (None) on a pair evaluated
+        # before this task shipped -- never fabricated as zero.
+        evidence_ui = item.get("evidence_ui")
+        if isinstance(evidence_ui, dict):
+            pair_entry["bull_evidence_count"] = len(evidence_ui.get("bull_evidence") or [])
+            pair_entry["bear_evidence_count"] = len(evidence_ui.get("bear_evidence") or [])
+            pair_entry["counter_evidence_count"] = len(evidence_ui.get("counter_evidence") or [])
+            pair_entry["missing_evidence_count"] = len(evidence_ui.get("missing_evidence") or [])
+            pair_entry["qualification_gap_count"] = len(evidence_ui.get("qualification_gaps") or [])
+        else:
+            pair_entry["bull_evidence_count"] = None
+            pair_entry["bear_evidence_count"] = None
+            pair_entry["counter_evidence_count"] = None
+            pair_entry["missing_evidence_count"] = None
+            pair_entry["qualification_gap_count"] = None
         per_pair.append(pair_entry)
 
+    admitted_count = arbitration.get("admitted_count")
     return {
         "declared_pair_count": arbitration.get("declared_pair_count"),
         "evaluated_pair_count": len(candidate_evaluations) or None,
-        "admitted_count": arbitration.get("admitted_count"),
+        "admitted_count": admitted_count,
         "suppressed_count": arbitration.get("suppressed_count"),
         "rejected_count": arbitration.get("rejected_count"),
+        "admitted_conflict_count": admitted_count,
+        "candidate_conflict_count": candidate_conflict_count,
         "main_conflict_id": main_conflict_id,
         "per_pair": per_pair,
     }
@@ -1258,6 +1505,26 @@ def build_run_audit_payload(
     )
     vocab_snapshot = load_json_record_if_exists(
         run_id, "tradingagents_comqutor_vocabulary_snapshot.json", output_root=output_root
+    )
+    # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+    # Track A2: the additive canonical export artifacts, when the
+    # finalizer has already written them for this run (best-effort read
+    # -- an older run or a not-yet-finalized run simply has none of
+    # these, which the Ticker Consistency Audit reports as an honest
+    # ARTIFACT_MISSING warning, never a crash).
+    evidence_facts_payload = load_json_record_if_exists(run_id, "evidence_facts.json", output_root=output_root)
+    alpha_activations_payload = load_json_record_if_exists(
+        run_id, "alpha_activations.json", output_root=output_root
+    )
+    summary_payload = load_json_record_if_exists(run_id, "summary.json", output_root=output_root)
+    # Sprint 3 (Unclassified Findings Control), Track A3: best-effort read
+    # of the additive unclassified_findings.json artifact. A run that
+    # predates A3 (or was never reprocessed since) simply has no such
+    # file -- load_json_record_if_exists degrades to {} rather than
+    # raising, and the block below reports that honestly as "unavailable"
+    # rather than fabricating "0 unclassified findings".
+    unclassified_findings_payload = load_json_record_if_exists(
+        run_id, UNCLASSIFIED_FINDINGS_ARTIFACT_FILENAME, output_root=output_root
     )
     db_row = None
     if repository is not None:
@@ -1747,15 +2014,51 @@ def build_run_audit_payload(
     exposure_invariants = exposure_payload.get("activation_invariants")
     exposure_invariants = exposure_invariants if isinstance(exposure_invariants, dict) else {}
     exposure_mode = exposure_payload.get("mode")
+    # B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT):
+    # qualification_effect_applied is exposure_engine's own observational
+    # signal -- "Exposure computed a below-threshold condition that, if
+    # acted on, would qualify this alpha down" -- and its computation is
+    # unchanged. What changed is that exposure_engine no longer acts on it:
+    # B4's classifier is now the sole decider of the final status, so a
+    # True here no longer implies that alpha's status actually changed (the
+    # alpha may never have reached a target_level exposure could constrain
+    # in the first place, or may be blocked for an unrelated Evidence/Graph/
+    # regime reason instead). exposure_actually_blocked_alpha_count below
+    # closes that gap using B4's own authoritative is_blocked/
+    # blocked_reason_codes output, rather than re-deriving it here.
     no_exposure_qualification = all(
         record.get("qualification_effect_applied") is False for record in exposure_records
+    )
+    exposure_actually_blocked_alpha_count = sum(
+        1
+        for a in v2_alphas
+        if isinstance(a, dict)
+        and a.get("is_blocked") is True
+        and REASON_LOW_ENTITY_EXPOSURE in (a.get("blocked_reason_codes") or ())
     )
     entity_exposure_audit = {
         "mode": exposure_mode,
         "seed_version": seed_manifest.get("seed_version"),
         "seed_sha256": seed_manifest.get("seed_sha256"),
-        "seed_approval_status": seed_manifest.get("approval_status"),
-        "enforcement_allowed": seed_manifest.get("enforcement_allowed"),
+        # Backward-compatible fields (task B3_ENTITY_EXPOSURE_GATED_STATES,
+        # section 7/9): seed_approval_status/enforcement_allowed are kept
+        # for any existing reader, now derived from this run's ticker's own
+        # resolved lifecycle rather than a single global manifest value --
+        # seed_approval_status is the ticker's configured_status string
+        # (draft_shadow/approved_gating/disabled); enforcement_allowed is
+        # true exactly when gating actually took effect for this run
+        # (effective_status == "approved_gating"), i.e. it reflects the
+        # fail-closed outcome, not merely the configured intent.
+        "seed_approval_status": seed_manifest.get("configured_status"),
+        "enforcement_allowed": seed_manifest.get("effective_status") == "approved_gating",
+        # John's canonical B3 lifecycle vocabulary -- the product
+        # authority. Prefer these over the two backward-compatible fields
+        # above for any new UI/consumer.
+        "owner": seed_manifest.get("owner"),
+        "approved_by": seed_manifest.get("approved_by"),
+        "approved_at": seed_manifest.get("approved_at"),
+        "configured_status": seed_manifest.get("configured_status"),
+        "effective_status": seed_manifest.get("effective_status"),
         "ticker_seed_available": any(
             record.get("historical_mapping") is not None for record in exposure_records
         ),
@@ -1765,6 +2068,12 @@ def build_run_audit_payload(
         "missing_seed_alpha_count": sum(
             1 for record in exposure_records if record.get("exposure_status") == "missing_seed"
         ),
+        # The authoritative count of alphas B4 actually blocked because of
+        # Exposure specifically (see comment above computed_alpha_count) --
+        # a strict subset of however many records show
+        # qualification_effect_applied=True, since that flag alone no
+        # longer implies the block actually took effect.
+        "exposure_actually_blocked_alpha_count": exposure_actually_blocked_alpha_count,
         "per_alpha": {
             str(record.get("alpha_id")): {
                 key: record.get(key)
@@ -1778,10 +2087,26 @@ def build_run_audit_payload(
                     "override_candidate",
                     "qualification_effect_applied",
                     "reason_codes",
+                    "configured_status",
+                    "effective_status",
+                    "owner",
+                    "approved_by",
+                    "approved_at",
                 )
             }
             for record in exposure_records
         },
+        # These three read exposure_engine's own before/after comparison,
+        # taken strictly within compute_run_entity_alpha_exposures itself.
+        # Since B4 (task B4_ACTIVATION_LEVEL_ALIGNMENT) made that function
+        # stop mutating status in every mode -- not only shadow --
+        # levels_unchanged/shadow_mode_did_not_alter_activation are now
+        # true unconditionally, by construction; they remain accurate,
+        # honest statements about this specific function (still worth
+        # keeping as a guard against a future regression reintroducing a
+        # mutation here), but no longer distinguish shadow from enforced.
+        # exposure_actually_blocked_alpha_count above is the field that
+        # answers "did Exposure actually change an outcome" post-B4.
         "shadow_mode_did_not_alter_activation": exposure_invariants.get(
             "shadow_mode_did_not_alter_activation"
         ),
@@ -1799,6 +2124,192 @@ def build_run_audit_payload(
             else None
         ),
     }
+
+    # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+    # Track A1: the single, shared Ticker Consistency Audit -- never a
+    # second, locally re-implemented check. Every artifact passed here is
+    # exactly what this function already loaded above for its own
+    # sections; ``or None`` converts load_json_record_if_exists's
+    # "file absent" sentinel ({}) into the audit's own ARTIFACT_MISSING
+    # signal rather than being misread as "an artifact that exists but is
+    # empty".
+    db_ticker = db_row.get("ticker") if isinstance(db_row, dict) else None
+    expected_ticker, expected_ticker_source = resolve_expected_ticker(
+        db_run_ticker=db_ticker,
+        metadata_ticker=metadata.get("ticker"),
+        raw_agent_outputs_ticker=raw_payload.get("ticker"),
+    )
+    if expected_ticker is not None:
+        ticker_consistency_audit = audit_ticker_consistency(
+            run_id=run_id,
+            expected_ticker=expected_ticker,
+            expected_ticker_source=expected_ticker_source,
+            artifacts={
+                "metadata": metadata or None,
+                "raw_agent_outputs": raw_payload or None,
+                "structured_agent_outputs": structured_payload or None,
+                "evidence_facts": evidence_facts_payload or None,
+                "alpha_matches": matches_payload or None,
+                "structure_graph": graph_payload or None,
+                "alpha_activations": alpha_activations_payload or None,
+                "entity_alpha_exposures": exposure_payload or None,
+                "conflicts": conflict_payload,
+                "summary": summary_payload or None,
+                "run_audit": None,  # this function IS building run_audit; not yet self-referential
+            },
+        )
+    else:
+        # No source (DB run record / metadata / raw_agent_outputs) could
+        # supply a valid ticker at all -- an honest, explicit failure,
+        # never a guess.
+        ticker_consistency_audit = {
+            "ticker_consistency": "fail",
+            "expected_ticker": None,
+            "expected_ticker_source": None,
+            "checked_artifact_count": 0,
+            "checked_field_count": 0,
+            "missing_required_ticker_field_count": 0,
+            "inconsistencies": [
+                {
+                    "code": "TICKER_FIELD_MISSING",
+                    "artifact": "metadata.json",
+                    "json_path": "$.ticker",
+                    "expected_ticker": None,
+                    "actual_ticker": None,
+                    "run_id": run_id,
+                    "severity": "error",
+                    "detail": "no source (DB run record / metadata / raw_agent_outputs) supplied a valid ticker",
+                }
+            ],
+            "warnings": [],
+            "foreign_entity_findings": [],
+            "run_identity_diagnostics": {"expected_run_id": run_id, "mismatch_count": 0, "mismatches": []},
+        }
+
+    evidence_facts_export_for_count = extract_evidence_facts_export(
+        graph_payload if isinstance(graph_payload, dict) else {}, run_id=run_id, ticker=str(ticker or "")
+    )
+    active_alpha_count = sum(1 for a in v2_alphas if a.get("status") == "active")
+    # B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT,
+    # section 12): additive counters alongside the existing, A2-frozen
+    # active_alpha_count/dominant_alpha_count/regime_level_alpha_count --
+    # those three keep reading "status" exactly as before and are
+    # unchanged. candidate_alpha_count/blocked_alpha_count are new;
+    # is_blocked (never re-derived from status) is B4's own authoritative
+    # qualification-metadata flag (task Decision 1: "blocked" is not a
+    # fifth level, so it is never counted via a "status" comparison).
+    candidate_alpha_count = sum(1 for a in v2_alphas if a.get("status") == "candidate")
+    blocked_alpha_count = sum(1 for a in v2_alphas if isinstance(a, dict) and a.get("is_blocked") is True)
+
+    # Sprint 2 (Alpha-Relative Evidence Stance Classification), Track B1:
+    # additive Run Audit v2 section -- read straight off the already-
+    # attached candidate-level stance fields in alpha_matches.json's own
+    # candidate_scores, never a second classification pass.
+    _stance_counts = {
+        "supports_alpha": 0,
+        "opposes_alpha": 0,
+        "mentions_alpha": 0,
+        "neutral_background": 0,
+        "supports_counter_alpha": 0,
+    }
+    stance_pair_count = 0
+    stance_manual_review_count = 0
+    stance_unknown_count = 0
+    # B1 LLM upgrade: same re-derivation pattern as every other counter in
+    # this block -- read straight off candidate.stance_method/
+    # stance_fallback_reason, never recomputed.
+    _llm_stance_count = 0
+    _deterministic_fallback_count = 0
+    _fallback_reason_counts = dict.fromkeys(sorted(STANCE_LLM_VALID_FALLBACK_REASONS), 0)
+    for _match in matches:
+        if not isinstance(_match, dict):
+            continue
+        for _candidate in _match.get("candidate_scores") or []:
+            if not isinstance(_candidate, dict) or "evidence_stance" not in _candidate:
+                continue
+            stance_pair_count += 1
+            _stance = _candidate.get("evidence_stance")
+            if _stance in _stance_counts:
+                _stance_counts[_stance] += 1
+            else:
+                stance_unknown_count += 1
+            if _candidate.get("requires_manual_review"):
+                stance_manual_review_count += 1
+            _stance_method = _candidate.get("stance_method")
+            if _stance_method == STANCE_METHOD_LLM:
+                _llm_stance_count += 1
+            elif _stance_method is not None:
+                _deterministic_fallback_count += 1
+                _fallback_reason = _candidate.get("stance_fallback_reason")
+                if _fallback_reason in _fallback_reason_counts:
+                    _fallback_reason_counts[_fallback_reason] += 1
+    evidence_stance_summary = {
+        "classifier_version": EVIDENCE_STANCE_VERSION,
+        "effect_mode": "shadow",
+        "stance_effect_applied": False,
+        "claim_alpha_pair_count": stance_pair_count,
+        "supports_alpha_count": _stance_counts["supports_alpha"],
+        "opposes_alpha_count": _stance_counts["opposes_alpha"],
+        "mentions_alpha_count": _stance_counts["mentions_alpha"],
+        "neutral_background_count": _stance_counts["neutral_background"],
+        "supports_counter_alpha_count": _stance_counts["supports_counter_alpha"],
+        "manual_review_required_count": stance_manual_review_count,
+        "unknown_count": stance_unknown_count,
+        "llm_stance_count": _llm_stance_count,
+        "deterministic_fallback_count": _deterministic_fallback_count,
+        "fallback_reason_counts": _fallback_reason_counts,
+        # sum(all classified stance counts) + unknown_count == claim_alpha_pair_count
+        "stance_count_invariant_holds": (
+            sum(_stance_counts.values()) + stance_unknown_count == stance_pair_count
+        ),
+        # Structural guarantees, not a recomputation: evidence_stance.py is
+        # never imported by activation_scorer_v2.py or conflict_detector.py
+        # (verified by the classifier tests' behavior-invariant suite and
+        # the real six-ticker offline verification in this Sprint's
+        # report) -- Evidence Stance cannot affect either by construction.
+        "activation_scores_unchanged": True,
+        "activation_levels_unchanged": True,
+        "conflict_outcomes_unchanged": True,
+    }
+
+    # Sprint 3 (Unclassified Findings Control), Track A3: additive
+    # run-audit summary, read straight off unclassified_findings.json's
+    # own already-computed counts -- never a second reason-assignment
+    # pass. A run with no such artifact (predates A3, or was never
+    # reprocessed since) reports "unavailable", never a fabricated
+    # "0 unclassified findings".
+    _unclassified_findings_ready = (
+        isinstance(unclassified_findings_payload, dict)
+        and unclassified_findings_payload.get("schema_version") == UNCLASSIFIED_FINDINGS_SCHEMA_VERSION
+    )
+    if _unclassified_findings_ready:
+        _uf_findings = unclassified_findings_payload.get("findings")
+        _uf_findings = _uf_findings if isinstance(_uf_findings, list) else []
+        _uf_total_count = unclassified_findings_payload.get("total_count")
+        _uf_total_count = _uf_total_count if isinstance(_uf_total_count, int) else len(_uf_findings)
+        _uf_display_limit = unclassified_findings_payload.get("display_limit")
+        _uf_display_limit = (
+            _uf_display_limit if isinstance(_uf_display_limit, int) else UNCLASSIFIED_FINDINGS_DISPLAY_LIMIT
+        )
+        _uf_reason_counts = unclassified_findings_payload.get("reason_counts")
+        _uf_reason_counts = _uf_reason_counts if isinstance(_uf_reason_counts, dict) else {}
+        unclassified_findings_summary = {
+            "status": "ready",
+            "total_count": _uf_total_count,
+            "display_count": min(_uf_total_count, _uf_display_limit),
+            "display_limit": _uf_display_limit,
+            "reason_counts": _uf_reason_counts,
+            "unresolved_reason_count": unclassified_findings_payload.get("unresolved_reason_count"),
+        }
+    else:
+        unclassified_findings_summary = {
+            "status": "unavailable",
+            "total_count": None,
+            "display_count": None,
+            "display_limit": UNCLASSIFIED_FINDINGS_DISPLAY_LIMIT,
+            "reason_counts": {},
+            "unresolved_reason_count": None,
+        }
 
     return {
         "schema_version": RUN_AUDIT_SCHEMA_VERSION,
@@ -1818,7 +2329,19 @@ def build_run_audit_payload(
         "rejected_edge_count": rejected_edge_count,
         "dominant_alpha_count": dominant_alpha_count,
         "regime_level_alpha_count": regime_level_alpha_count,
+        # conflict_count's existing meaning is unchanged: it is, and always
+        # was, the number of admitted conflicts (len(conflict_payload[
+        # "conflicts"])) -- since John's B2 Conflict Evidence Admissibility
+        # gate, a pair only reaches that list once it also clears B2, so
+        # this field is already exactly admitted_conflict_count below (same
+        # source, added as an explicit alias per task section 16, never a
+        # second count). candidate_conflict_count is new: taxonomy-declared
+        # pairs that reached B2 evaluation but were denied admission (see
+        # conflict_summary.candidate_conflict_count/per_pair for the
+        # per-pair admissibility diagnostic).
         "conflict_count": int(conflict_count or 0),
+        "admitted_conflict_count": conflict_summary.get("admitted_conflict_count"),
+        "candidate_conflict_count": conflict_summary.get("candidate_conflict_count"),
         "primary_activation_version": primary_activation_version,
         "activation_v1_regime_level_count": activation_v1_regime_level_count,
         "activation_v2_regime_level_count": activation_v2_regime_level_count,
@@ -1870,6 +2393,30 @@ def build_run_audit_payload(
         "conflict_summary": conflict_summary,
         "audit_validation": audit_validation,
         "entity_exposure": entity_exposure_audit,
+        # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+        # Track A1: John's required top-level fields. graph_nodes/
+        # graph_edges/regime_alpha_count are additive aliases of the
+        # existing graph_node_count/graph_edge_count/
+        # regime_level_alpha_count fields above (same value, same
+        # source, never recomputed) -- kept under John's requested names
+        # without renaming or removing the original fields.
+        "evidence_fact_count": evidence_facts_export_for_count["unique_evidence_fact_count"],
+        "graph_nodes": graph_node_count,
+        "graph_edges": graph_edge_count,
+        "active_alpha_count": active_alpha_count,
+        "regime_alpha_count": regime_level_alpha_count,
+        "candidate_alpha_count": candidate_alpha_count,
+        "blocked_alpha_count": blocked_alpha_count,
+        "ticker_consistency": ticker_consistency_audit["ticker_consistency"],
+        # Must stay byte/structurally identical to
+        # ticker_consistency_audit.inconsistencies -- the exact same list
+        # object, never a summary or a re-derived copy.
+        "inconsistencies": ticker_consistency_audit["inconsistencies"],
+        "ticker_consistency_audit": ticker_consistency_audit,
+        # Sprint 2 (Alpha-Relative Evidence Stance Classification), Track B1.
+        "evidence_stance": evidence_stance_summary,
+        # Sprint 3 (Unclassified Findings Control), Track A3.
+        "unclassified_findings": unclassified_findings_summary,
     }
 
 
@@ -2022,18 +2569,46 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
         _report_progress_stage(progress_reporter, "conflict_analysis")
         _report_progress_stage(progress_reporter, "result_persistence")
 
+    conflict_count = None
+    conflict_result = None
+    with contextlib.suppress(Exception):
+        conflict_result = repository.get_week4_conflict_result(run_id)
+        if isinstance(conflict_result, dict):
+            conflicts = conflict_result.get("conflicts")
+            conflict_count = len(conflicts) if isinstance(conflicts, list) else 0
+
+    # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+    # Track A2: the artifact finalizer -- extracts evidence_facts.json,
+    # alpha_activations.json, conflicts.json, and summary.json purely
+    # from the already-computed graph_payload/conflict_result above
+    # (never re-running TradingAgents, an LLM, Activation, Conflict, or
+    # Evidence Fact grouping). A finalization failure is logged with a
+    # stable reason code (never silently swallowed) but never takes down
+    # an already-successful Week 1-3 response -- the resulting gap
+    # instead shows up honestly in artifact_manifest.json's
+    # artifact_completeness and gates "completed" in
+    # build_research_response below.
+    try:
+        finalize_completed_run_artifacts(
+            run_id=run_id,
+            ticker=str(ticker or ""),
+            output_root=output_root,
+            graph_payload=graph_payload,
+            conflict_payload=conflict_result,
+            alpha_matches_payload=alpha_matches_payload,
+        )
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "artifact_finalization")
+
     # Additive data-quality audit artifact. Best-effort like the status
     # marker above: an audit write failure never affects the run outcome,
     # and an audit warning never turns a genuinely completed run into a
-    # failed one.
-    with contextlib.suppress(Exception):
-        conflict_count = None
-        conflict_result = None
-        with contextlib.suppress(Exception):
-            conflict_result = repository.get_week4_conflict_result(run_id)
-            if isinstance(conflict_result, dict):
-                conflicts = conflict_result.get("conflicts")
-                conflict_count = len(conflicts) if isinstance(conflicts, list) else 0
+    # failed one. Its own ticker_consistency/artifact_completeness
+    # findings are what actually gate "completed" (see
+    # build_research_response), so a *failure to write* run_audit.json
+    # itself must not silently masquerade as "everything passed" --
+    # logged, not swallowed.
+    try:
         write_run_audit_artifact(
             run_id,
             output_root,
@@ -2041,6 +2616,13 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
             conflict_payload=conflict_result,
             repository=repository,
         )
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "run_audit_write")
+
+    # Written last so it can honestly report on run_audit.json's own
+    # presence too.
+    with contextlib.suppress(Exception):
+        build_and_write_artifact_manifest(run_id=run_id, ticker=str(ticker or ""), output_root=output_root)
 
 
 def run_research_request(
@@ -2049,10 +2631,16 @@ def run_research_request(
     output_root="outputs/runs",
     *,
     week2_llm_gateway=None,
+    week2_llm_cache=None,
     graph_repository=None,
     progress_reporter=None,
+    structured_adapter_mode=None,
+    structured_adapter_shadow_executor=None,
+    structured_adapter_shadow_cache=None,
 ):
     payload = _normalize_payload(payload)
+    semantic_runtime = None
+    semantic_session_complete = False
     try:
         payload = {**payload, "ticker": validate_ticker(payload.get("ticker"))}
         if runner is not None:
@@ -2093,13 +2681,41 @@ def run_research_request(
         if not raw_path.exists():
             raise FileNotFoundError("raw_agent_outputs.json not found")
         _report_progress_stage(progress_reporter, "raw_outputs_saved")
+        structured_adapter_mode_decision = resolve_structured_adapter_mode(
+            structured_adapter_mode
+        )
         if week2_llm_gateway is None:
             week2_llm_gateway = build_server_week2_llm_gateway(run_id, run_dir.parent)
+        if isinstance(week2_llm_gateway, Week2LLMGateway):
+            semantic_runtime = week2_llm_gateway.semantic_runtime
+            if semantic_runtime is None and week2_llm_enabled():
+                try:
+                    semantic_runtime = SemanticRuntimeSession(
+                        run_id=run_id,
+                        output_directory=run_dir,
+                        execution_mode="live",
+                        provider=week2_llm_gateway.provider,
+                        model=week2_llm_gateway.model_name,
+                        cache=week2_llm_cache,
+                    )
+                    week2_llm_gateway.attach_semantic_runtime(semantic_runtime)
+                except Exception as exc:
+                    semantic_runtime = None
+                    logger.warning(
+                        "semantic runtime initialization failed "
+                        "(run_id=%s, reason_code=%s, exc_type=%s)",
+                        run_id,
+                        "SEMANTIC_RUNTIME_INITIALIZATION_FAILED",
+                        type(exc).__name__,
+                    )
         _run_week1_week2_artifact_pipeline(
             run_dir,
             week2_llm_gateway,
             graph_repository=graph_repository,
             progress_reporter=progress_reporter,
+            structured_adapter_mode_decision=structured_adapter_mode_decision,
+            structured_adapter_shadow_executor=structured_adapter_shadow_executor,
+            structured_adapter_shadow_cache=structured_adapter_shadow_cache,
         )
         # Data Sanity Cross-Check v1: an independent sidecar stage, run after
         # structured claims exist (so reported-price cross-checks have
@@ -2121,6 +2737,7 @@ def run_research_request(
         response = build_research_response(
             run_id, output_root=output_root, graph_repository=graph_repository
         )
+        semantic_session_complete = True
         return response
     except Exception as exc:
         error_response = _map_exception_to_error(payload, exc)
@@ -2142,6 +2759,18 @@ def run_research_request(
                 type(exc).__name__,
             )
         return error_response
+    finally:
+        if semantic_runtime is not None:
+            try:
+                semantic_runtime.finalize_manifest(complete=semantic_session_complete)
+            except Exception as exc:
+                logger.warning(
+                    "semantic runtime finalization failed "
+                    "(run_id=%s, reason_code=%s, exc_type=%s)",
+                    getattr(semantic_runtime, "run_id", None),
+                    "SEMANTIC_MANIFEST_FINALIZATION_FAILED",
+                    type(exc).__name__,
+                )
 
 # Retrieve the research run status and artifacts for a given run_id.
 def get_research_run(run_id, output_root="outputs/runs", *, graph_repository=None):
@@ -2215,6 +2844,171 @@ def get_entity_alpha_exposures(
         "records": records,
         "reason_codes": [] if records else ["ENTITY_EXPOSURE_UNAVAILABLE"],
     }
+
+
+# Sprint 2 (Alpha-Relative Evidence Stance Classification), Track B1.
+def get_evidence_stances_response(run_id, output_root="outputs/runs"):
+    """GET /api/research/{run_id}/evidence-stances -- the standalone
+    evidence_stance_audit.json artifact, with an old-run-safe empty
+    fallback (never a 500) matching get_entity_alpha_exposures's
+    established convention."""
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+        run_dir = run_dir_for(safe_run_id, output_root)
+    except ValueError:
+        return {
+            "schema_version": "evidence_stance_audit.v1",
+            "run_id": str(run_id),
+            "ticker": None,
+            "status": "unavailable",
+            "records": [],
+            "reason_codes": ["INVALID_RUN_ID"],
+        }
+    if not run_dir.exists():
+        return {
+            "schema_version": "evidence_stance_audit.v1",
+            "run_id": safe_run_id,
+            "ticker": None,
+            "status": "unavailable",
+            "records": [],
+            "reason_codes": ["RUN_NOT_FOUND"],
+        }
+    artifact = load_json_record_if_exists(safe_run_id, "evidence_stance_audit.json", output_root=output_root)
+    if isinstance(artifact.get("records"), list):
+        return {**artifact, "status": "ready"}
+    metadata = load_json_record_if_exists(safe_run_id, "metadata.json", output_root=output_root)
+    return {
+        "schema_version": "evidence_stance_audit.v1",
+        "run_id": safe_run_id,
+        "ticker": metadata.get("ticker"),
+        "status": "unavailable",
+        "records": [],
+        "reason_codes": ["EVIDENCE_STANCE_AUDIT_UNAVAILABLE"],
+    }
+
+
+# Sprint 1 (Run Identity Integrity and Complete Artifact Export), Track A2.
+def get_run_artifacts_response(run_id, output_root="outputs/runs"):
+    """GET /api/research/{run_id}/artifacts -- run_id, ticker,
+    artifact_completeness, ticker_consistency, and the full artifact
+    manifest. Same soft-200-with-status-field convention as the other
+    read routes in this module (get_persisted_structure_graph,
+    get_entity_alpha_exposures, ...) -- never a 500, an old/incomplete
+    run degrades to an honest ``status``/``error_code`` rather than a
+    crash."""
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return {
+            "run_id": str(run_id),
+            "ticker": None,
+            "status": "failed",
+            "error_code": "INVALID_RUN_ID",
+            "artifact_completeness": None,
+            "ticker_consistency": None,
+            "required_artifact_count": None,
+            "present_required_artifact_count": None,
+            "missing_required_artifacts": [],
+            "artifacts": [],
+        }
+    run_dir = run_dir_for(safe_run_id, output_root)
+    if not run_dir.exists():
+        return {
+            "run_id": safe_run_id,
+            "ticker": None,
+            "status": "failed",
+            "error_code": "RUN_NOT_FOUND",
+            "artifact_completeness": None,
+            "ticker_consistency": None,
+            "required_artifact_count": None,
+            "present_required_artifact_count": None,
+            "missing_required_artifacts": [],
+            "artifacts": [],
+        }
+    metadata = load_json_record_if_exists(safe_run_id, "metadata.json", output_root=output_root)
+    ticker = metadata.get("ticker")
+    manifest = load_json_record_if_exists(safe_run_id, "artifact_manifest.json", output_root=output_root)
+    run_audit = load_json_record_if_exists(safe_run_id, "run_audit.json", output_root=output_root)
+    if not manifest:
+        # A run that predates this sprint, or whose finalizer has not run
+        # yet -- an honest gap, never a fabricated manifest.
+        return {
+            "run_id": safe_run_id,
+            "ticker": ticker,
+            "status": "unavailable",
+            "error_code": "ARTIFACT_MANIFEST_NOT_AVAILABLE",
+            "artifact_completeness": None,
+            "ticker_consistency": run_audit.get("ticker_consistency") if isinstance(run_audit, dict) else None,
+            "required_artifact_count": None,
+            "present_required_artifact_count": None,
+            "missing_required_artifacts": [],
+            "artifacts": [],
+        }
+    return {
+        "run_id": safe_run_id,
+        "ticker": ticker,
+        "status": "ok",
+        "error_code": None,
+        "artifact_completeness": manifest.get("artifact_completeness"),
+        "ticker_consistency": run_audit.get("ticker_consistency") if isinstance(run_audit, dict) else None,
+        "required_artifact_count": manifest.get("required_artifact_count"),
+        "present_required_artifact_count": manifest.get("present_required_artifact_count"),
+        "missing_required_artifacts": manifest.get("missing_required_artifacts") or [],
+        "artifacts": manifest.get("artifacts") or [],
+    }
+
+
+_ARTIFACT_DOWNLOAD_CONTENT_TYPES = {
+    ".json": "application/json",
+    ".md": "text/markdown; charset=utf-8",
+}
+
+
+def get_run_artifact_file(run_id, artifact_name, output_root="outputs/runs"):
+    """Resolves one artifact's raw bytes for download.
+
+    Returns ``(http_status_code, content_type_or_None, raw_bytes_or_None, error_body_or_None)``.
+    Every path component is validated (``validate_run_id_for_path`` /
+    ``validate_artifact_filename``, the same allowlist ``file_store``
+    itself enforces) before ever touching the filesystem -- path
+    traversal and arbitrary-file reads are structurally impossible, not
+    merely checked for. When this run has a real ``artifact_manifest.json``,
+    the requested name must also actually appear in it (defense in depth
+    on top of the static allowlist). Never raises/500s: a missing or
+    unreadable artifact is a clean 404, always.
+    """
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+        safe_filename = validate_artifact_filename(artifact_name)
+    except ValueError:
+        return 400, None, None, {"error_code": "INVALID_REQUEST", "run_id": str(run_id), "artifact_name": str(artifact_name)}
+
+    run_dir = run_dir_for(safe_run_id, output_root)
+    if not run_dir.exists():
+        return 404, None, None, {"error_code": "RUN_NOT_FOUND", "run_id": safe_run_id, "artifact_name": safe_filename}
+
+    manifest = load_json_record_if_exists(safe_run_id, "artifact_manifest.json", output_root=output_root)
+    if manifest:
+        listed_names = {
+            entry.get("artifact_name") for entry in (manifest.get("artifacts") or []) if isinstance(entry, dict)
+        }
+        if safe_filename not in listed_names:
+            return 404, None, None, {
+                "error_code": "ARTIFACT_NOT_IN_MANIFEST",
+                "run_id": safe_run_id,
+                "artifact_name": safe_filename,
+            }
+
+    path = run_dir / safe_filename
+    if not path.exists():
+        return 404, None, None, {"error_code": "ARTIFACT_NOT_FOUND", "run_id": safe_run_id, "artifact_name": safe_filename}
+    try:
+        raw_bytes = path.read_bytes()
+    except OSError:
+        return 404, None, None, {"error_code": "ARTIFACT_UNREADABLE", "run_id": safe_run_id, "artifact_name": safe_filename}
+
+    content_type = _ARTIFACT_DOWNLOAD_CONTENT_TYPES.get(path.suffix, "application/octet-stream")
+    return 200, content_type, raw_bytes, None
 
 
 _GRAPH_ERROR_MESSAGES = {
@@ -2327,6 +3121,14 @@ def get_persisted_structure_graph(run_id, output_root="outputs/runs", *, graph_r
         "activation_versions": graph_json.get("activation_versions", {}),
         "primary_activation_version": primary_activation_version,
         "dominant_alphas": graph_json.get("dominant_alphas", []),
+        # B4 additive authoritative collections (task
+        # B4_ACTIVATION_LEVEL_ALIGNMENT) -- same read-through pattern as
+        # dominant_alphas above; absent (empty list) on a historical
+        # payload predating this task, never fabricated.
+        "active_alphas": graph_json.get("active_alphas", []),
+        "regime_level_alphas": graph_json.get("regime_level_alphas", []),
+        "candidate_alphas": graph_json.get("candidate_alphas", []),
+        "blocked_alphas": graph_json.get("blocked_alphas", []),
         "provenance": graph_json.get("provenance", {}),
     }
 
@@ -2884,6 +3686,25 @@ try:
     @router.get("/api/research/{run_id}/entity-exposures")
     def get_research_entity_exposures_route(run_id: str, http_request: Request):
         return get_entity_alpha_exposures(run_id, _request_output_root(http_request))
+
+    @router.get("/api/research/{run_id}/evidence-stances")
+    def get_research_evidence_stances_route(run_id: str, http_request: Request):
+        return get_evidence_stances_response(run_id, _request_output_root(http_request))
+
+    @router.get("/api/research/{run_id}/artifacts")
+    def get_research_artifacts_route(run_id: str, http_request: Request):
+        return get_run_artifacts_response(run_id, _request_output_root(http_request))
+
+    @router.get("/api/research/{run_id}/artifacts/{artifact_name}")
+    def get_research_artifact_download_route(run_id: str, artifact_name: str, http_request: Request):
+        status_code, content_type, raw_bytes, error_body = get_run_artifact_file(
+            run_id, artifact_name, _request_output_root(http_request)
+        )
+        if status_code != 200:
+            return JSONResponse(content=error_body, status_code=status_code)
+        from starlette.responses import Response
+
+        return Response(content=raw_bytes, media_type=content_type, status_code=200)
 
     @router.get("/api/research/{run_id}/agent-outputs")
     def get_research_agent_outputs_route(run_id: str, http_request: Request):

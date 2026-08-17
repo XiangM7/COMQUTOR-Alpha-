@@ -1,0 +1,75 @@
+{
+  "audit": "phase_0_development_plan_llm_boundary_audit",
+  "generated_at": "2026-08-05T00:00:00Z",
+  "scope_note": "Phase 0 implements nothing. Every item below is a recommendation only, strictly limited to LLM functionality the task's own quoted Development Plan §5.1/§5.2/§5.3 wording already allows. Evidence Stance LLM-ification is deliberately excluded from Phases 1-3 and placed in the Proposed Addendum instead, per explicit instruction.",
+  "phase_1": {
+    "title": "Development-Plan Structured Output Adapter",
+    "current_gap": "Structured Output Adapter already exists and is largely compliant (see structured_adapter_gap_matrix.csv), but (a) the accuracy/coverage of LLM-vs-deterministic claim/evidence extraction has never been evaluated against a labeled set, and (b) it is currently opt-in and off by default, so in practice most historical runs never exercised it at all.",
+    "files_likely_affected": [
+      "comqutor_alpha/structure_engine/structured_output_adapter.py",
+      "comqutor_alpha/structure_engine/week2_llm.py",
+      "docs/audit_artifacts/structured_adapter_gap_matrix.csv (baseline reference)"
+    ],
+    "existing_code_reusable": "Week2LLMGateway (retry/timeout/budget), _validate_llm_batch_enrichment strict schema, safe_default_record fallback -- all already production-grade and reusable as-is.",
+    "provider_call_impact": "No change to call count logic; would only change whether COMQUTOR_WEEK2_LLM_ENABLED defaults on for a defined rollout population.",
+    "prompt_impact": "None required -- PROMPT-01 already matches plan intent.",
+    "schema_impact": "None -- structured_agent_outputs.json schema_version unchanged.",
+    "replay_impact": "None -- replay already correctly forces llm_gateway=None and would continue to.",
+    "backward_compatibility": "Full -- purely a rollout/measurement change, not a code-shape change.",
+    "tests_needed": "A labeled-claim accuracy evaluation harness (does not currently exist per compliance matrix MISSING finding) to measure enrichment quality before any default-on decision.",
+    "cutover_strategy": "Enable COMQUTOR_WEEK2_LLM_ENABLED in a staging/shadow environment first, compare structured_agent_outputs.json quality metrics against the deterministic-only baseline, then decide on a production default.",
+    "blockers": "No accuracy baseline exists yet to compare against.",
+    "explicit_non_goals": ["Changing the deterministic segmentation boundary", "Removing the verbatim claim/evidence preservation guarantee", "Adding a second LLM call per report"]
+  },
+  "phase_2": {
+    "title": "Development-Plan Hybrid Alpha Mapper",
+    "current_gap": "Tier 1/2/3 already implemented and compliant. The missing piece is the plan-mandated evaluation: John's 20 labeled claims and the >=80% accuracy target were not found anywhere in this repository (MISSING in compliance matrix).",
+    "files_likely_affected": [
+      "comqutor_alpha/structure_engine/alpha_mapper.py (no code change expected)",
+      "a new evaluation harness under comqutor_alpha/evaluation/ or tests/, analogous in spirit to evaluation/ already in the repo"
+    ],
+    "existing_code_reusable": "map_claim_to_alpha's existing candidate_scores/eligible_candidates/classifier metadata already expose everything an accuracy harness needs without any pipeline change.",
+    "provider_call_impact": "None if the evaluation runs against already-saved historical claims; would add calls only if run live against the LLM tier.",
+    "prompt_impact": "None.",
+    "schema_impact": "None.",
+    "replay_impact": "None -- an accuracy evaluation is a separate offline script, not a pipeline stage.",
+    "backward_compatibility": "Full.",
+    "tests_needed": "Obtain or reconstruct John's 20 labeled claims (not found in-repo); build a deterministic scoring harness; report accuracy against the 80% target explicitly, honestly, per-claim.",
+    "cutover_strategy": "n/a -- this is a measurement/reporting phase, not a code cutover.",
+    "blockers": "The 20 labeled claims themselves are not present in this repository and must be sourced from the product owner before this phase can start.",
+    "explicit_non_goals": ["Changing scoring weights (0.50/0.30/0.08/0.12)", "Changing min_score=0.35", "Changing top-3 output shape"]
+  },
+  "phase_3": {
+    "title": "Development-Plan LLM Structure Extractor",
+    "current_gap": "The dedicated `structure_extractor` LLM task is compliant and already gated by deterministic evidence-backing re-validation. The real gap is architectural clarity: a third, undocumented-in-the-plan edge source (CANONICAL_BLOCK, from the prompt-injected TradingAgents native call) already contributes real production edges alongside it, and the two are not clearly distinguished in any user-facing artifact today beyond the internal extraction_method field.",
+    "files_likely_affected": [
+      "comqutor_alpha/structure_engine/structure_extractor.py (documentation/metadata surfacing only)",
+      "comqutor_alpha/llm/canonical_prompt_injection.py (see Proposed Addendum for the deeper compliance question)"
+    ],
+    "existing_code_reusable": "extracted_structures.json's metadata already tracks llm_edge_count / deterministic_edge_count / canonical_relation_edge_count separately -- this data already exists and only needs surfacing in reports/UI.",
+    "provider_call_impact": "None.",
+    "prompt_impact": "None to the dedicated structure_extractor task prompt itself.",
+    "schema_impact": "None -- purely a reporting/documentation change.",
+    "replay_impact": "None -- RULE_EXTRACTED and CANONICAL_BLOCK edges already replay deterministically; LLM_EXTRACTED edges already correctly do not.",
+    "backward_compatibility": "Full.",
+    "tests_needed": "A run-level report (or UI badge) distinguishing LLM_EXTRACTED / RULE_EXTRACTED / CANONICAL_BLOCK edges for any given ticker/run, so product owners can see the real provenance mix.",
+    "cutover_strategy": "Additive reporting change only.",
+    "blockers": "None technical; requires a product decision on whether CANONICAL_BLOCK edges should be renamed/reclassified as a fourth Development-Plan-recognized source rather than silently folded into '5.3 LLM edges' in casual conversation.",
+    "explicit_non_goals": ["Adding a second LLM call to produce canonical-relation edges", "Changing VALID_EDGE_TYPES"]
+  },
+  "proposed_addendum": {
+    "title": "TradingAgents Prompt-Injection Compliance Review (not Evidence Stance LLM-ification -- see note)",
+    "note_on_evidence_stance": "The task instructions asked that 'Evidence Stance LLM化' specifically be isolated into this Addendum, not Phases 1-3. No work toward making Evidence Stance LLM-driven has been proposed, scoped, or started anywhere in this repository as of this audit; Evidence Stance remains a purely deterministic, shadow-mode, John-later-requirement module (see evidence_stance provenance section of the main report). This Addendum instead documents the other item the task explicitly said must not be silently folded into Phase 1-3 frozen scope: the TradingAgents prompt-injection mechanism.",
+    "items": [
+      {
+        "item": "Reclassify canonical_prompt_injection.py's runtime monkeypatch against the literal Development Plan wording 'TradingAgents modifications are output capture hooks'",
+        "why_flagged": "This audit's single highest-severity finding (DIVERGED/MAJOR in the compliance matrix) is that this mechanism changes every native agent's effective prompt at runtime, even though it edits zero files under tradingagents/ and adds zero LLM calls. Whether this is acceptable requires a product decision, not an engineering one -- Phase 0 explicitly may not modify this mechanism or decide the question itself.",
+        "decision_needed_from_product": "Does 'output capture hooks only' mean (a) no tradingagents/ file may be edited on disk (satisfied today), or (b) no runtime change to what an agent is asked to produce at all (not satisfied today)? This audit cannot resolve that ambiguity -- it can only make the gap explicit."
+      },
+      {
+        "item": "Evidence-Stance-LLM-ification placeholder (intentionally unscoped)",
+        "why_flagged": "Reserved per task instructions so a future explicit request can scope it separately; no proposal is made here."
+      }
+    ]
+  }
+}

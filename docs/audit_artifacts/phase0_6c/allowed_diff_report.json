@@ -1,0 +1,29 @@
+{
+  "schema_version": "phase0_6c_allowed_diff_report_v1",
+  "phase": "0.6C",
+  "captured_at": "2026-08-06T18:45:31Z",
+  "allowed_existing_files_modified": [
+    "comqutor_alpha/replay/__init__.py",
+    "comqutor_alpha/replay/cli.py",
+    "comqutor_alpha/replay/pipeline.py"
+  ],
+  "allowed_new_production_files": [
+    "comqutor_alpha/replay/exact_semantic.py",
+    "comqutor_alpha/replay/modes.py",
+    "comqutor_alpha/replay/semantic_binding.py",
+    "comqutor_alpha/replay/source_bundle.py"
+  ],
+  "allowed_new_documentation": [
+    "docs/adr/ADR-007-exact-semantic-replay-integration.md",
+    "docs/specs/exact_semantic_replay_integration_contract_v1.md"
+  ],
+  "allowed_new_test_prefix": "tests/replay/",
+  "allowed_new_verifier": "scripts/verify_phase0_6c.py",
+  "allowed_new_audit_prefix": "docs/audit_artifacts/phase0_6c/",
+  "actual_phase_status_addition_count": 30,
+  "disallowed_paths": [],
+  "protected_file_changes": [],
+  "historical_output_changes": [],
+  "phase0_6c_verifier_check": "29/30 PASS (allowed_diff_scope); overall 30/30 PASS",
+  "status": "PASS"
+}

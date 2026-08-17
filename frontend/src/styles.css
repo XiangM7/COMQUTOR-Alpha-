@@ -571,6 +571,148 @@ a {
   margin: var(--space-1) 0 0;
 }
 
+/* -- B5 Conflict Radar Evidence UI --------------------------------------------*/
+
+.conflict-card-badge-candidate {
+  background: var(--color-neutral-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.candidate-conflict-card {
+  border-style: dashed;
+}
+
+.candidate-conflict-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.candidate-conflict-admissibility {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0;
+  font-size: var(--font-size-sm);
+}
+
+.candidate-conflict-admissibility dt {
+  color: var(--color-text-muted);
+}
+
+.candidate-conflict-admissibility dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.conflict-evidence-ui {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.evidence-ui-section h4 {
+  margin: 0 0 var(--space-2);
+}
+
+.evidence-ui-section-empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.evidence-ui-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.evidence-ui-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  overflow-wrap: anywhere;
+}
+
+.evidence-ui-item-text {
+  margin: 0;
+}
+
+.evidence-ui-item-meta {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.evidence-ui-item-id code {
+  font-family: ui-monospace, monospace;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.evidence-ui-show-toggle {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}
+
+.counter-evidence-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .counter-evidence-groups {
+    grid-template-columns: 1fr;
+  }
+}
+
+.counter-evidence-group-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-1);
+}
+
+.missing-evidence-item,
+.qualification-gaps-section li {
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) 0;
+}
+
+.qualification-gaps-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-1);
+}
+
+.invalidation-provenance {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.invalidation-pending {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.conflict-evidence-ui-unavailable {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-top: var(--space-3);
+}
+
 /* -- Structure graph ---------------------------------------------------------*/
 
 .structure-graph-layout {
@@ -729,6 +871,54 @@ a {
   .directional-findings-columns {
     flex-direction: column;
   }
+}
+
+/* -- Unclassified findings panel (Research run page, Track A3) --------------*/
+
+.unclassified-findings-panel {
+  margin-top: var(--space-4);
+}
+
+.unclassified-findings-unavailable-text {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.unclassified-findings-count-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-2);
+}
+
+.unclassified-findings-reason-summary {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.unclassified-findings-reason-summary li {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+}
+
+.unclassified-finding-card {
+  overflow-wrap: anywhere;
+}
+
+.unclassified-finding-representative-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-2);
+}
+
+.unclassified-findings-download {
+  margin-top: var(--space-3);
 }
 
 /* -- Data Quality panel (Research run page) ---------------------------------*/

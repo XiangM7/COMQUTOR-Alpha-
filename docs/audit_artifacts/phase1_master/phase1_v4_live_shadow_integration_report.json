@@ -1,0 +1,179 @@
+{
+  "schema_version": "comqutor.phase1_v4.live_shadow_integration_report.v1",
+  "generated_at": "2026-08-10T21:12:08Z",
+  "phase_1_stage": "LIVE_SHADOW_INTEGRATION",
+  "status": "PASS",
+  "quality_gate": "PASS_V4",
+  "semantic_quality": "PASS_V4",
+  "shadow_candidate": "STRUCTURED_LLM_ADAPTER_V4",
+  "production_authority": "LEGACY_ADAPTER",
+  "mode": {
+    "environment_variable": "COMQUTOR_STRUCTURED_ADAPTER_MODE",
+    "recognized_values": [
+      "legacy",
+      "shadow",
+      "primary"
+    ],
+    "default": "legacy",
+    "shadow_default": "OFF",
+    "primary_authorized": false,
+    "primary_request_behavior": "fail-safe downgrade to legacy with STRUCTURED_ADAPTER_PRIMARY_NOT_AUTHORIZED"
+  },
+  "specification_conflict": {
+    "present": true,
+    "older_pre_registered_contract": "Stage E default=shadow",
+    "later_product_owner_decision_for_this_task": "default behavior=LEGACY ONLY; explicit shadow enablement=LEGACY + V4 SHADOW",
+    "resolution": "later explicit product-owner decision applied; default remains OFF"
+  },
+  "contract_requires_provider_execution": false,
+  "hook": {
+    "module": "comqutor_alpha.structure_engine.structured_output_live_shadow",
+    "production_entry_point": "comqutor_alpha.api.routes_research._run_week1_week2_artifact_pipeline",
+    "position": "after successful Legacy structured_agent_outputs.json persistence and before authoritative database/Mapper/Extractor processing",
+    "mode_resolved_once_per_run": true,
+    "tradingagents_modified": false
+  },
+  "sidecar_artifacts": [
+    "structured_agent_outputs_shadow.json",
+    "structured_adapter_shadow_validation.json",
+    "structured_adapter_shadow_comparison.json"
+  ],
+  "semantic_runtime": {
+    "uses_existing_session_and_gateway_contract": true,
+    "runtime_artifact_directory": "structured_adapter_shadow_runtime/",
+    "isolated_from_canonical_week2_call_sequence": true,
+    "provider_profile_unchanged": "comqutor_anthropic_medium_sonnet46_v1 / claude-sonnet-4-6",
+    "external_provider_calls_this_task": 0
+  },
+  "source_fixture": {
+    "path": "outputs/runs/0e044e37-862c-43be-871c-31012cd660e7/raw_agent_outputs.json",
+    "ticker": "NVDA",
+    "report_families": [
+      "fundamental",
+      "news",
+      "sentiment",
+      "technical"
+    ],
+    "agents": [
+      "fundamental_agent",
+      "news_agent",
+      "sentiment_agent",
+      "market_agent"
+    ],
+    "external_provider_substitution": "LocalV4Executor using real v4 parser/validator with deterministic recorded-style proposals"
+  },
+  "case_results": [
+    {
+      "case": 1,
+      "name": "shadow disabled",
+      "status": "PASS",
+      "result": "Legacy completed; executor calls=0; sidecars absent"
+    },
+    {
+      "case": 2,
+      "name": "shadow enabled and v4 accepted",
+      "status": "PASS",
+      "result": "4/4 report families accepted into separate shadow-only records; production_authority=false"
+    },
+    {
+      "case": 3,
+      "name": "malformed semantic result",
+      "status": "PASS",
+      "result": "0 accepted; 4 rejected; Legacy completed and retained claims"
+    },
+    {
+      "case": 4,
+      "name": "unresolved evidence",
+      "status": "PASS",
+      "result": "strict EvidenceQuoteResolver/validator rejected every attempt; no accepted shadow claim"
+    },
+    {
+      "case": 5,
+      "name": "provider timeout simulation",
+      "status": "PASS",
+      "result": "SHADOW_INVOKER_ERROR recorded per report; exception did not escape; Legacy completed"
+    },
+    {
+      "case": 6,
+      "name": "identity mismatch",
+      "status": "PASS",
+      "result": "SHADOW_IDENTITY_MISMATCH rejected every attempt; Legacy completed"
+    },
+    {
+      "case": 7,
+      "name": "exact replay",
+      "status": "PASS",
+      "result": "accepted canonical shadow records, validation, comparison, source hashes, and artifact hashes reproduced with provider calls=0"
+    },
+    {
+      "case": 8,
+      "name": "production downstream isolation",
+      "status": "PASS",
+      "result": "Legacy-only and Legacy+Shadow authoritative content equivalent for response, Claims, Mapper, Extractor, Graph, Activation, and Conflict; shadow claim IDs absent downstream"
+    }
+  ],
+  "legacy_authority_comparison": {
+    "status": "PASS",
+    "comparison_semantics": "canonical content equality after excluding pre-existing wall-clock timestamp fields from independent runs",
+    "artifacts_compared": [
+      "structured_agent_outputs.json",
+      "alpha_matches.json",
+      "extracted_structures.json",
+      "structure_graph.json",
+      "alpha_activations.json",
+      "conflicts.json",
+      "API response"
+    ],
+    "authoritative_downstream_changed": false,
+    "shadow_output_reached_authoritative_downstream": false
+  },
+  "invariants": {
+    "shadow_can_be_enabled_independently": true,
+    "legacy_remains_production_authority": true,
+    "shadow_accepted_output_separate": true,
+    "shadow_failure_isolated": true,
+    "malformed_output_fail_closed": true,
+    "unresolved_evidence_fail_closed": true,
+    "identity_mismatch_fail_closed": true,
+    "provider_exception_does_not_break_legacy": true,
+    "exact_replay_provider_calls": 0,
+    "prompt_v4_modified": false,
+    "evidence_quote_resolver_modified": false,
+    "external_provider_calls": 0,
+    "subagents_spawned": 0
+  },
+  "verification": {
+    "pytest": [
+      {
+        "scope": "tests/structured_output_shadow",
+        "passed": 397,
+        "failed": 0
+      },
+      {
+        "scope": "tests/llm_runtime tests/replay",
+        "passed": 123,
+        "failed": 0
+      },
+      {
+        "scope": "shared live/API guarded regression",
+        "passed": 66,
+        "failed": 0,
+        "warnings": 1
+      }
+    ],
+    "pytest_passed_total_across_non_overlapping_final_suites": 586,
+    "phase1_master_verifier": "22/22 PASS",
+    "combined_collection_attempt": "COLLECTION_ERROR_ONLY: existing top-level conftest module-name collision between tests/replay and tests/structured_output_shadow; canonical suites passed separately",
+    "ruff": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "repository": {
+    "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+    "branch": "comqutor-structure-layer",
+    "commit": false,
+    "push": false
+  },
+  "live_provider_canary": "NOT_RUN",
+  "production_cutover": "NOT_RUN",
+  "next_allowed_stage": "LIVE_SHADOW_CANARY"
+}

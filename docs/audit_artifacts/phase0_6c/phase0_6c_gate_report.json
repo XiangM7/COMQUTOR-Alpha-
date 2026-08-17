@@ -1,0 +1,39 @@
+{
+  "schema_version": "phase0_6c_gate_report_v1",
+  "phase": "0.6C",
+  "task": "Exact Semantic Replay Integration, Semantic Artifact Binding, and Explicit Replay Modes",
+  "gate": "PASS",
+  "criteria": {
+    "two_explicit_replay_modes": "PASS",
+    "raw_rebuild_backward_compatible": "PASS",
+    "saved_semantic_artifacts_are_authority": "PASS",
+    "manifest_and_calls_verified": "PASS",
+    "all_fixture_bindings_unique": "PASS",
+    "semantic_copies_byte_identical": "PASS",
+    "no_raw_reinterpretation": "PASS",
+    "no_gateway_provider_tradingagents_fallback": "PASS",
+    "missing_not_ready_corrupt_ambiguous_fail_closed": "PASS",
+    "no_automatic_raw_downgrade": "PASS",
+    "deterministic_downstream_rebuilt": "PASS",
+    "graph_activation_exposure_conflict_equivalent": "PASS",
+    "source_run_unchanged": "PASS",
+    "historical_outputs_unchanged": "PASS",
+    "live_llm_and_default_setting_unchanged": "PASS",
+    "provider_network_redis_database_zero": "PASS",
+    "new_test_failures": 0
+  },
+  "verification": {
+    "phase0_6c_checks": "30/30 PASS",
+    "llm_boundary_checks": "4/4 PASS",
+    "new_exact_replay_tests": "40/40 PASS",
+    "existing_replay_regression_tests": "129/129 PASS",
+    "guarded_full_suite": "2730 passed, 1 skipped, 47 deselected, 69 subtests passed, 0 failed",
+    "ruff": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "phase0_6b_verifier_note": "The unmodified retrospective 0.6B verifier reports expected failures only for Replay files and metadata changes explicitly authorized by Phase 0.6C; its live Week2, runtime, prompt, Provider-zero, and historical-output checks pass.",
+  "commit": false,
+  "push": false,
+  "next_phase_started": false,
+  "final_status": "PASS"
+}

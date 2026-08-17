@@ -1,0 +1,68 @@
+{
+  "data_to_function_to_prompt_component": [
+    {
+      "component": "fixed_instruction (incl. examples, schema prose, output shape)",
+      "source_file": "comqutor_alpha/structure_engine/structured_output_shadow_prompt.py",
+      "source_function_or_constant": "STRUCTURED_OUTPUT_SHADOW_PROMPT",
+      "chars": 3948,
+      "necessary_for_llm": "Yes -- security framing, claim semantics, abstention rules, and the output shape are the model's actual task definition.",
+      "can_be_deterministically_reconstructed": false
+    },
+    {
+      "component": "agent_report (full report text)",
+      "source_file": "scripts/run_phase1_master.py -> comqutor_alpha/structure_engine/structured_output_shadow.py",
+      "source_function_or_constant": "_load_raw_report() runtime field -> build_shadow_request()['agent_report']",
+      "chars": 14160,
+      "necessary_for_llm": "Yes -- the model must read the source text to propose claims/spans.",
+      "can_be_deterministically_reconstructed": false
+    },
+    {
+      "component": "candidate_segments[].claim_hint / evidence_hint",
+      "source_file": "comqutor_alpha/structure_engine/structured_output_shadow.py -> comqutor_alpha/structure_engine/structured_output_adapter.py",
+      "source_function_or_constant": "build_candidate_segments() -> extract_claim_segments_with_audit()",
+      "chars": 35497,
+      "necessary_for_llm": "Partially -- a segment boundary HINT is useful, but sending the full duplicate text of both claim_hint and evidence_hint (byte-identical) for all 163 segments is not; an offset hint is sufficient once the full report is already present.",
+      "can_be_deterministically_reconstructed": true
+    },
+    {
+      "component": "candidate_segments[].source_spans[].exact_quote",
+      "source_file": "comqutor_alpha/structure_engine/structured_output_shadow.py",
+      "source_function_or_constant": "build_candidate_segments() -> _locate_exact_hint()",
+      "chars": 1958,
+      "necessary_for_llm": "No -- report[start:end] already reproduces this deterministically, and validate_shadow_bundle already re-derives/enforces it independently.",
+      "can_be_deterministically_reconstructed": true
+    },
+    {
+      "component": "candidate_segments[].candidate_segment_id",
+      "source_file": "comqutor_alpha/structure_engine/structured_output_shadow.py",
+      "source_function_or_constant": "_candidate_id()",
+      "chars": 22331,
+      "necessary_for_llm": "No -- the model only needs a short local identifier (e.g. a per-report sequence number) to reference in candidate_segment_ids on its output claims; the full globally-unique ID (which re-embeds agent_output_id 163 times) is a caller-side bookkeeping concern.",
+      "can_be_deterministically_reconstructed": true
+    },
+    {
+      "component": "factor_vocabulary",
+      "source_file": "comqutor_alpha/structure_engine/factor_normalizer.py",
+      "source_function_or_constant": "FACTOR_ALIASES.keys()",
+      "chars": 248,
+      "necessary_for_llm": "Yes -- the model must know the closed vocabulary to select from; already minimal (id-only).",
+      "can_be_deterministically_reconstructed": false
+    },
+    {
+      "component": "source_metadata / candidate_segment_contract_version / candidate_segment_source / allowed_source_refs",
+      "source_file": "comqutor_alpha/structure_engine/structured_output_shadow.py",
+      "source_function_or_constant": "build_shadow_request()",
+      "chars": 332,
+      "necessary_for_llm": "Marginal -- allowed_source_refs is empty here; candidate_segment_contract_version/source are caller provenance strings with no semantic task value to the model.",
+      "can_be_deterministically_reconstructed": true
+    },
+    {
+      "component": "identity_metadata (run_id/ticker/agent/agent_output_id/hashes/prompt version+sha/boundary markers)",
+      "source_file": "comqutor_alpha/structure_engine/structured_output_shadow.py",
+      "source_function_or_constant": "build_shadow_request()",
+      "chars": 668,
+      "necessary_for_llm": "Partially -- ticker/agent give the model useful context; source_report_sha256/prompt_sha256/prompt_version are caller-owned identity that the prompt tells the model to copy verbatim (validated bit-for-bit by validate_shadow_bundle regardless of what the model echoes back).",
+      "can_be_deterministically_reconstructed": true
+    }
+  ]
+}

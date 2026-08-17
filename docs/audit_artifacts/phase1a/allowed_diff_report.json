@@ -1,0 +1,29 @@
+{
+  "schema_version": "comqutor.phase1a.allowed_diff_report.v1",
+  "phase": "1A",
+  "allowed_new_production_modules": [
+    "comqutor_alpha/structure_engine/structured_output_shadow.py",
+    "comqutor_alpha/structure_engine/structured_output_shadow_prompt.py",
+    "comqutor_alpha/structure_engine/structured_output_shadow_review.py",
+    "comqutor_alpha/structure_engine/structured_output_shadow_schema.py"
+  ],
+  "allowed_test_prefix": "tests/structured_output_shadow/",
+  "allowed_scripts": [
+    "scripts/build_phase1a_shadow_review_bundle.py",
+    "scripts/verify_phase1a.py"
+  ],
+  "allowed_documentation": [
+    "docs/adr/ADR-008-structured-output-adapter-shadow.md",
+    "docs/specs/structured_output_adapter_shadow_contract_v1.md",
+    "docs/specs/structured_output_adapter_review_contract_v1.md",
+    "docs/specs/phase1_structured_output_quality_gate_proposal.md"
+  ],
+  "allowed_audit_prefix": "docs/audit_artifacts/phase1a/",
+  "existing_files_modified_by_phase1a": [],
+  "production_files_modified_by_phase1a": [],
+  "disallowed_paths": [],
+  "historical_output_changes": [],
+  "baseline_status_sha256_after_filtering_phase1a": "4878b5725162a22b24ec6cf6b86e2a65882e2a35562999d246f76cdec10dcbf0",
+  "expected_phase1a_status_path_count_at_completion": 40,
+  "status": "PASS"
+}

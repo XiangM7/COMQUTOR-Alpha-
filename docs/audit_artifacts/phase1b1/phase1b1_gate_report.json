@@ -1,0 +1,53 @@
+{
+  "schema_version": "comqutor.phase1b1.gate_report.v1",
+  "final_gate": "BLOCKED",
+  "final_gate_reason_code": "BLOCKED_PROVIDER_UNREACHABLE_ALL_CALLS_TIMED_OUT",
+  "bundle_directory": "outputs/evaluations/phase1b1-smoke-20260806T222402Z",
+  "engineering_criteria": {
+    "offline_implementation_and_tests_complete": true,
+    "explicit_opt_in_present": true,
+    "four_report_selection_correct": true,
+    "real_provider_smoke_completed": true,
+    "logical_calls_within_limit": "true (4/4 used, limit=4)",
+    "provider_attempts_within_derived_limit": "true (8/8 used, limit=8)",
+    "prompt_version_hash_unchanged": true,
+    "every_result_has_explicit_status": "true (4/4 timeout / parser_error)",
+    "accepted_claims_provenance_valid": "n/a (0 accepted claims -- Provider never returned a response)",
+    "semantic_runtime_artifacts_complete": true,
+    "shadow_exact_replay_pass": false,
+    "review_bundle_generated": true,
+    "human_labels_still_blank": true,
+    "production_behavior_unchanged": true,
+    "historical_artifacts_unchanged": true,
+    "no_new_unexplained_regressions": true,
+    "no_out_of_scope_external_calls": true,
+    "pilot_not_started": true
+  },
+  "fail_conditions_checked_and_absent": {
+    "prompt_silent_change": false,
+    "accepted_invalid_provenance": false,
+    "accepted_invented_evidence": false,
+    "exceeded_4_logical_calls": false,
+    "exceeded_derived_provider_attempt_limit": false,
+    "modified_production_adapter_mapper_extractor": false,
+    "modified_live_route": false,
+    "modified_graph_conflict": false,
+    "wrote_historical_runs_or_replays": false,
+    "auto_filled_human_labels": false,
+    "used_llm_self_evaluation": false,
+    "saved_secret_or_hidden_reasoning": false,
+    "started_12_report_pilot": false,
+    "committed_or_pushed": false,
+    "selection_replaced": false,
+    "manual_retries_beyond_gateway_policy": false
+  },
+  "why_blocked_not_fail": "Per task section 16: 'Provider credentials缺失、Provider临时不可达或授权变量未设置：状态应为 BLOCKED，而不是 FAIL.' Authorization and credentials were both present, and the real Smoke genuinely executed (4/4 logical calls, 8/8 provider attempts, exactly at the derived limit, no manual retries beyond the Gateway's own bounded policy). However every single attempt timed out with zero response from the Provider -- a real-world 'Provider不可达' condition, discovered during (not before) the one authorized execution. None of the section-8 FAIL conditions (prompt drift, accepted-invalid data, exceeded limits, production/historical modification, auto-filled labels, secret persistence, unauthorized Pilot start) are present -- 'the Provider never answered' is not itself a FAIL condition under this task's own taxonomy.",
+  "why_not_pass": "PASS requires (section 25) the real Provider Smoke to have completed with valid per-result status AND Shadow Exact Replay to PASS. The Smoke did complete and every result has an explicit, honest status (timeout/parser_error) -- but Shadow Exact Replay correctly reported FAIL (PHASE1B1_REPLAY_VALIDATION_NOT_REPRODUCIBLE), because a persisted 'parser_error' status was never actually a validate_shadow_bundle() outcome to begin with (see shadow_exact_replay_summary.json). No real semantic output exists to certify as reproducible, so PASS cannot be honestly claimed.",
+  "provider_semantic_quality_finding": "0 of 4 real Provider attempts returned any response within the Gateway's existing 15s x 2-attempt timeout policy (100% timeout, 8/8 attempts, 18 total real timeout attempts observed across all invocations this session including the two voided ones). This says nothing about DeepSeek's semantic output quality (none was ever produced) -- it indicates an infrastructure reachability issue for real outbound Provider calls from this execution environment, which is outside this phase's scope to diagnose or fix.",
+  "required_final_statuses": {
+    "SEMANTIC_QUALITY": "UNPROVEN",
+    "HUMAN_REVIEW": "PENDING",
+    "PRODUCTION_AUTHORITY": "FALSE"
+  },
+  "next_allowed_action": "Diagnose why real outbound calls to the DeepSeek Provider endpoint time out from this execution environment (network egress, backend_url, proxy, or credential-routing issue) -- this is an infrastructure question, not a Phase 1B.1 code question, since all 35 structural/offline verifier checks pass and the guarded regression suite is unchanged. Once Provider connectivity is confirmed working, an explicit product-owner decision can authorize exactly one more official Smoke run. Do not begin the 12-report Pilot automatically, and do not begin it even after a future successful smoke without separate approval. Do not modify Week2LLMGateway's timeout/retry policy to work around this without separate review, since MAX_PREBUILT_PROMPT_CHARS and retry counts are already verified correct against the FakeModel path."
+}

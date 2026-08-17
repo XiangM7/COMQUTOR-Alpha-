@@ -1,9 +1,9 @@
-"""``python -m comqutor_alpha.replay`` -- Track D CLI for the Historical
-Architecture Replay service.
+"""CLI for the two explicit Provider-zero replay modes.
 
 Example::
 
-    python -m comqutor_alpha.replay --source-run-id 61f3e019-... --mode structure-only
+    python -m comqutor_alpha.replay --source-run-id 61f3e019-... \
+        --mode EXACT_SEMANTIC_REPLAY
 """
 
 from __future__ import annotations
@@ -11,27 +11,37 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
+from comqutor_alpha.replay.exact_semantic import run_exact_semantic_replay
+from comqutor_alpha.replay.modes import ReplayMode
 from comqutor_alpha.replay.pipeline import (
     DEFAULT_REPLAY_OUTPUT_ROOT,
     DEFAULT_SOURCE_OUTPUT_ROOT,
     ReplaySourceIncompleteError,
     run_structure_replay,
 )
+from comqutor_alpha.replay.source_bundle import ExactReplayError
+
+_LEGACY_RAW_MODE_ALIAS = "structure-only"
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m comqutor_alpha.replay",
-        description="Reprocess a completed run's raw_agent_outputs.json through the current "
-        "COMQUTOR structure pipeline. Never re-invokes TradingAgents or any Provider.",
+        description="Run Exact Semantic Replay from saved semantic decisions, or the "
+        "separate raw-rebuild diagnostic. Neither mode invokes a Provider.",
     )
     parser.add_argument("--source-run-id", required=True, help="The completed run to replay.")
     parser.add_argument(
         "--mode",
-        default="structure-only",
-        choices=["structure-only"],
-        help="Replay mode (only structure-only is currently supported).",
+        default=_LEGACY_RAW_MODE_ALIAS,
+        choices=[
+            _LEGACY_RAW_MODE_ALIAS,
+            ReplayMode.EXACT_SEMANTIC_REPLAY.value,
+            ReplayMode.RAW_REBUILD_DIAGNOSTIC.value,
+        ],
+        help="Explicit replay mode; structure-only remains a compatibility alias for raw rebuild.",
     )
     parser.add_argument(
         "--output-root",
@@ -77,17 +87,38 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
 
+    exact_mode = args.mode == ReplayMode.EXACT_SEMANTIC_REPLAY.value
     try:
-        result = run_structure_replay(
-            args.source_run_id,
-            source_output_root=args.source_output_root,
-            replay_output_root=args.output_root,
-            replay_run_id=args.replay_run_id,
-            persist=args.persist,
-            comparison=args.comparison,
-        )
+        if exact_mode:
+            result = run_exact_semantic_replay(
+                Path(args.source_output_root) / args.source_run_id,
+                args.output_root,
+                replay_id=args.replay_run_id,
+                persist=args.persist,
+            )
+        else:
+            result = run_structure_replay(
+                args.source_run_id,
+                source_output_root=args.source_output_root,
+                replay_output_root=args.output_root,
+                replay_run_id=args.replay_run_id,
+                persist=args.persist,
+                comparison=args.comparison,
+            )
     except ReplaySourceIncompleteError as exc:
         print(json.dumps({"status": "REPLAY_SOURCE_INCOMPLETE", "error": str(exc)}, indent=2))
+        return 2
+    except ExactReplayError as exc:
+        print(
+            json.dumps(
+                {
+                    "status": "EXACT_SEMANTIC_REPLAY_BLOCKED",
+                    "reason_code": exc.reason_code,
+                    "artifact": exc.artifact,
+                },
+                indent=2,
+            )
+        )
         return 2
 
     payload = result.to_dict()
@@ -114,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 3
 
-    if payload.get("comparison"):
+    if not exact_mode and payload.get("comparison"):
         comp = payload["comparison"]
         summary = {
             "source_run_id": payload["source_run_id"],

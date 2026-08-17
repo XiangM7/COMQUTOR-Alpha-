@@ -3,11 +3,26 @@
 Exercises the *complete* Week 4 end-to-end path -- offline inputs ->
 structured outputs -> alpha matches -> graph -> activation -> conflict
 detector -> W4 persistence -> canonical research response -> conflicts API
--- for the two tickers whose offline fixtures already produce real,
-taxonomy-declared, admitted conflicts (see docs/week4_conflict_core_report.md
-sections 20/21). Reuses the existing, already-clearly-labeled
-synthetic/offline NVDA and QQQ fixtures via direct import -- never copies
-fixture text, never invents ticker data.
+-- for the two tickers whose offline fixtures were originally built to
+produce real, taxonomy-declared, admitted conflicts (see
+docs/week4_conflict_core_report.md sections 20/21). Reuses the existing,
+already-clearly-labeled synthetic/offline NVDA and QQQ fixtures via direct
+import -- never copies fixture text, never invents ticker data.
+
+John's B2 Conflict Evidence Admissibility gate (task
+B2_CONFLICT_EVIDENCE_ADMISSIBILITY): under real, deterministic (0-Provider)
+B1 stance classification, both of these fixtures' committed evidence has
+only one unique ``supports_alpha`` fact on at least one side of their
+previously-admitted pair -- one short of B2's >=2-per-side minimum -- so
+both pairs now correctly close as B2 candidates rather than admitted
+conflicts. This is an honest, correctly-computed consequence of these
+fixtures' evidence volume (built before B1/B2 existed), not a defect in B2
+-- see task spec section 23/25 ("never tune upstream stages to force a
+prettier result"). What this file continues to prove end-to-end --
+including, for NVDA, that the exact same computed admissibility diagnostic
+reaches the DB reconstruction, the /conflicts API, and the GET response
+without recomputation -- remains fully exercised below; only the specific
+admitted-vs-candidate outcome changed.
 
 Also locks a *blocker guard* for MSFT A102-A304 (docs/week4_spec_freeze_audit.md
 section 16: BLOCKED_BY_SPEC_CONFLICT, taxonomy does not declare this pair).
@@ -91,21 +106,6 @@ def _without_additive_conflict_evidence(conflicts_response):
     return stripped
 
 
-def _assert_additive_conflict_evidence_present(conflicts_response):
-    targets = list(conflicts_response.get("conflicts", []))
-    if isinstance(conflicts_response.get("main_conflict"), dict):
-        targets.append(conflicts_response["main_conflict"])
-    for conflict in targets:
-        assert isinstance(conflict.get("bull_evidence"), list)
-        assert isinstance(conflict.get("bear_evidence"), list)
-        for item in (*conflict["bull_evidence"], *conflict["bear_evidence"]):
-            assert item["claim_id"]
-            assert item["claim_text"]
-            assert item["agent"]
-            assert 0.0 <= item["match_score"] <= 1.0
-            assert item["relation"]
-
-
 def _nvda_payload():
     return {
         "ticker": "NVDA",
@@ -140,40 +140,65 @@ def test_nvda_golden_closure_full_week1_through_4_path(tmp_path):
     assert post_response["conflict_status"] == "ready"
     _assert_agent_output_traceability(repo, run_id)
 
-    main_conflict = post_response["main_conflict"]
-    assert main_conflict is not None
-    assert main_conflict["conflict_id"] == "A101__A304"
-    assert main_conflict["bull_alpha_id"] == "A101"
-    assert main_conflict["bear_alpha_id"] == "A304"
-    assert main_conflict["bull_structure"]["claim_ids"]
-    assert main_conflict["bull_structure"]["evidence"]
-    assert main_conflict["bear_structure"]["claim_ids"]
-    assert main_conflict["bear_structure"]["evidence"]
+    # B2: this fixture's real, deterministic evidence gives A101 only one
+    # unique supports_alpha fact and A304 both a sub-threshold activation
+    # score and only one unique supports_alpha fact -- one short of B2's
+    # >=2-per-side minimum on both counts. main_conflict is correctly null;
+    # never backfilled from a merely-candidate pair regardless of its
+    # (still-computed, still-visible) conflict score.
+    assert post_response["main_conflict"] is None
 
-    # Only bounds/composition/direction/ranking are asserted -- never a
-    # brittle exact conflict_score.
-    assert 0.0 <= main_conflict["conflict_score"] <= 100.0
-    assert main_conflict["conflict_level"] in {"low", "medium", "medium_high", "high"}
-    components = main_conflict["components"]
-    assert components["contradiction_weight"] == 0.90  # taxonomy-declared A101<->A304 weight
-    assert components["minimum_activation"] == min(components["activation_a"], components["activation_b"])
+    # Taxonomy-declared A101<->A304 weight is a static taxonomy property,
+    # independent of any run's admissibility outcome.
+    taxonomy = load_alpha_taxonomy()
+    a101_weight = next(
+        c.contradiction_weight for c in taxonomy["A101"].conflict_alphas if c.alpha_id == "A304"
+    )
+    assert a101_weight == 0.90
 
-    # POST vs repository reconstruction vs /conflicts vs GET all agree.
+    # POST vs repository reconstruction vs /conflicts vs GET all agree --
+    # including the full admissibility diagnostic the DB persisted for the
+    # A101/A304 candidate, computed exactly once by the Conflict Detector
+    # and never recomputed by any of these three read paths.
     db_result = repo.get_week4_conflict_result(run_id)
     assert db_result is not None
+    assert db_result["conflicts"] == []
     assert post_response["main_conflict"] == db_result["main_conflict"]
+
+    evaluations = {
+        (c["alpha_a"], c["alpha_b"]): c for c in db_result["arbitration"]["candidate_evaluations"]
+    }
+    assert ("A101", "A304") in evaluations
+    a101_a304 = evaluations[("A101", "A304")]
+    assert a101_a304["outcome"] == "suppressed"
+    assert a101_a304["evidence_audit"]["alpha_a"]["qualifying_count"] > 0
+    assert a101_a304["evidence_audit"]["alpha_b"]["qualifying_count"] > 0
+    admissibility = a101_a304["admissibility"]
+    assert admissibility["status"] == "candidate"
+    assert admissibility["reason_codes"]
+    assert admissibility["bull_supporting_evidence_count"] < 2 or admissibility["bear_supporting_evidence_count"] < 2
 
     conflicts_response = get_persisted_conflicts(run_id, output_root=tmp_path, graph_repository=repo)
     assert conflicts_response["status"] == "ok"
     assert _without_additive_conflict_evidence(conflicts_response) == db_result
-    _assert_additive_conflict_evidence_present(conflicts_response)
+    # No admitted conflict exists for this fixture under B2, so the
+    # Structure Correctness Sprint's additive bull_evidence/bear_evidence
+    # enrichment (which only attaches to entries in conflicts/main_conflict)
+    # has nothing to enrich here; its wiring is exercised by
+    # test_conflict_detector.py/test_week4_persistence.py fixtures that do
+    # clear B2.
 
     get_response = get_research_run(run_id, output_root=tmp_path, graph_repository=repo)
     assert get_response["main_conflict"] == post_response["main_conflict"]
     assert get_response["conflict_status"] == post_response["conflict_status"]
     assert get_response["summary"] == post_response["summary"]
 
-    assert post_response["summary"] == main_conflict["explanation"]
+    assert post_response["summary"] in (
+        "Dominant Alpha structures were identified, but no "
+        "taxonomy-declared conflict was admitted for this research run.",
+        "No dominant Alpha structure or admitted conflict was identified "
+        "for this research run.",
+    )
     _assert_no_bare_trading_language(post_response["summary"])
 
 
@@ -211,15 +236,33 @@ def test_qqq_golden_closure_full_week1_through_4_path(tmp_path):
     assert db_result["main_conflict"] is None
 
     # Both approved pairs were genuinely arbitrated (evaluated, then
-    # rejected below the activation threshold) -- never skipped.
+    # rejected) -- never skipped. Since task B4_ACTIVATION_LEVEL_ALIGNMENT
+    # added "candidate" to ADMISSIBLE_STATUSES (this thin single-claim
+    # fixture's alphas now classify as "candidate" rather than the old,
+    # boundary-buggy v2 band's "inactive"), the pair no longer trips the
+    # early, terse BELOW_ACTIVATION_THRESHOLD gate -- it now reaches B2's
+    # own independent, stronger score>=50 admissibility check instead,
+    # which rejects it with richer, more specific per-side reasons. The
+    # outcome (suppressed/rejected) is unchanged; only which gate names the
+    # rejection is, which is exactly the intended, non-breaking effect of
+    # that additive change (see conflict_schema.ADMISSIBLE_STATUSES).
     evaluations = {
         (c["alpha_a"], c["alpha_b"]): c
         for c in db_result["arbitration"]["candidate_evaluations"]
     }
+    # A501 (the shared bear side of both pairs) is consistently weak; the
+    # bull side's specific shortfall differs per alpha (A001 fails on raw
+    # score, A003 on supporting-evidence count) -- both are legitimate,
+    # alpha-specific B2 admissibility reasons, not a shared constant.
+    bull_side_reason = {
+        ("A001", "A501"): "BULL_SCORE_BELOW_THRESHOLD",
+        ("A003", "A501"): "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+    }
     for pair in (("A001", "A501"), ("A003", "A501")):
         assert pair in evaluations
         assert evaluations[pair]["outcome"] in {"suppressed", "rejected"}
-        assert "BELOW_ACTIVATION_THRESHOLD" in evaluations[pair]["reason_codes"]
+        assert bull_side_reason[pair] in evaluations[pair]["reason_codes"]
+        assert "BEAR_SCORE_BELOW_THRESHOLD" in evaluations[pair]["reason_codes"]
 
     # POST / repository / conflicts API agreement.
     assert post_response["main_conflict"] is None
@@ -234,9 +277,16 @@ def test_qqq_golden_closure_full_week1_through_4_path(tmp_path):
     _assert_no_bare_trading_language(post_response["summary"])
 
     # Historical-run compatibility: the preserved v1 activation payload,
-    # fed to the (unchanged min() formula) detector, still admits both
-    # approved QQQ pairs with A501 on the bear side -- byte-for-byte v1
-    # oracle behavior.
+    # fed to the (unchanged min() formula) detector, still evaluates both
+    # approved QQQ pairs with A501 on the bear side (byte-for-byte v1
+    # activation-score oracle behavior -- both clear the v1 activation
+    # threshold, unlike under the primary v2 payload above). John's B2 gate
+    # then applies identically regardless of activation formula version:
+    # this fixture's real evidence gives A501 (bear, both pairs) only one
+    # unique supports_alpha fact with no verified ticker-specific support --
+    # one short of B2's per-side minimum -- so neither pair is admitted.
+    # This is an honest, correctly-computed consequence of this fixture's
+    # evidence (predates B1/B2), not a defect in B2 or in v1 compatibility.
     import json as _json
 
     graph_json = repo.get_graph(run_id)["graph_json"]
@@ -251,12 +301,23 @@ def test_qqq_golden_closure_full_week1_through_4_path(tmp_path):
         activation_payload=activation_v1,
         alpha_matches=matches_payload["matches"],
     )
-    v1_conflict_ids = {c["conflict_id"] for c in v1_result["conflicts"]}
-    assert {"A001__A501", "A003__A501"}.issubset(v1_conflict_ids)
-    for conflict in v1_result["conflicts"]:
-        if conflict["conflict_id"] in {"A001__A501", "A003__A501"}:
-            assert conflict["bear_alpha_id"] == "A501"
-            assert conflict["bull_alpha_id"] in {"A001", "A003"}
+    assert v1_result["conflicts"] == []
+    assert v1_result["main_conflict"] is None
+    v1_evaluations = {
+        (c["alpha_a"], c["alpha_b"]): c for c in v1_result["arbitration"]["candidate_evaluations"]
+    }
+    for pair in (("A001", "A501"), ("A003", "A501")):
+        assert pair in v1_evaluations
+        item = v1_evaluations[pair]
+        assert item["outcome"] == "suppressed"
+        admissibility = item["admissibility"]
+        assert admissibility["status"] == "candidate"
+        # Both pairs clear the v1 activation threshold (unlike the primary
+        # v2 payload above) -- B2 suppression here is evidence-driven, not
+        # activation-driven.
+        assert "BULL_SCORE_BELOW_THRESHOLD" not in admissibility["reason_codes"]
+        assert "BEAR_SCORE_BELOW_THRESHOLD" not in admissibility["reason_codes"]
+        assert admissibility["bear_supporting_evidence_count"] < 2
 
 
 # ---------------------------------------------------------------------------

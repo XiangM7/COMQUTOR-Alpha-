@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as client from "../api/client";
-import type { AgentOutputsResponse, CanonicalResearchResponse, StructuredAgentOutputRecord } from "../api/types";
+import type {
+  AgentOutputsResponse,
+  CanonicalResearchResponse,
+  StructuredAgentOutputRecord,
+  UnclassifiedFinding,
+} from "../api/types";
 import { makeRunRecord } from "../tests/factories";
 import { ResearchRunPage } from "./ResearchRunPage";
 
@@ -200,7 +205,7 @@ describe("ResearchRunPage", () => {
     expect(screen.getByText(/Confidence 85%/)).toBeInTheDocument();
   });
 
-  it("hides an unknown-direction finding from both panels but reports it as not shown", async () => {
+  it("hides an unknown-direction finding from both directional panels", async () => {
     mockAgentOutputs([
       findingRecord({ claim_id: "c1", direction: "positive", claim: "Visible positive claim about SNDK." }),
       findingRecord({ claim_id: "c2", direction: "unknown", claim: "Hidden unknown claim about SNDK." }),
@@ -208,10 +213,18 @@ describe("ResearchRunPage", () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
     expect(screen.queryByText(/hidden unknown claim/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Neutral and unclassified findings (1)")).toBeInTheDocument();
+    // Sprint 3, Track A3: which findings are "unclassified" (and why) is now
+    // computed backend-side (comqutor_alpha/api/unclassified_findings.py),
+    // never re-derived here from the claim's own `direction`. This mocked
+    // getResearchRun response predates that field entirely, so the panel
+    // must show the honest historical-unavailable state, never a fabricated
+    // "0 unclassified findings" or a frontend-guessed direction-based count.
+    expect(
+      screen.getByText(/unclassified finding audit is not available for this historical run/i)
+    ).toBeInTheDocument();
   });
 
-  it("hides a mixed-direction finding from both panels", async () => {
+  it("hides a mixed-direction finding from both directional panels", async () => {
     mockAgentOutputs([
       findingRecord({ claim_id: "c1", direction: "positive", claim: "Visible positive claim about SNDK." }),
       findingRecord({ claim_id: "c2", direction: "mixed", claim: "Hidden mixed claim about SNDK." }),
@@ -219,7 +232,9 @@ describe("ResearchRunPage", () => {
     renderPage();
     await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
     expect(screen.queryByText(/hidden mixed claim/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Neutral and unclassified findings (1)")).toBeInTheDocument();
+    expect(
+      screen.getByText(/unclassified finding audit is not available for this historical run/i)
+    ).toBeInTheDocument();
   });
 
   it("does not show the neutral/unclassified findings entry when every finding is directional", async () => {
@@ -229,23 +244,7 @@ describe("ResearchRunPage", () => {
     expect(screen.queryByText(/Neutral and unclassified findings/)).not.toBeInTheDocument();
   });
 
-  it("reveals neutral/unclassified findings on demand, reusing the same analytical claims", async () => {
-    mockAgentOutputs([
-      findingRecord({ claim_id: "c1", direction: "positive", claim: "Visible positive claim about SNDK." }),
-      findingRecord({ claim_id: "c2", direction: "unknown", claim: "Hidden unknown claim about SNDK." }),
-    ]);
-    renderPage();
-    await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
-    expect(screen.queryByText(/hidden unknown claim/i)).not.toBeInTheDocument();
-    const toggle = screen.getByText("Neutral and unclassified findings (1)");
-    toggle.click();
-    await waitFor(() => expect(screen.getByText(/hidden unknown claim/i)).toBeInTheDocument());
-    // Still capped, never renders every hidden finding at once beyond the
-    // same MAX_FINDINGS_PER_DIRECTION-style limit the directional panels use.
-    expect(screen.queryByText(/more neutral or unclassified finding/)).not.toBeInTheDocument();
-  });
-
-  it("shows an independent empty state for each panel when only unknown/mixed findings exist", async () => {
+  it("shows an independent empty state for each directional panel when only unknown/mixed findings exist", async () => {
     mockAgentOutputs([
       findingRecord({ claim_id: "c1", direction: "unknown" }),
       findingRecord({ claim_id: "c2", direction: "mixed" }),
@@ -255,7 +254,9 @@ describe("ResearchRunPage", () => {
       expect(screen.getByText(/no eligible positive findings were identified/i)).toBeInTheDocument()
     );
     expect(screen.getByText(/no eligible negative findings were identified/i)).toBeInTheDocument();
-    expect(screen.getByText("Neutral and unclassified findings (2)")).toBeInTheDocument();
+    expect(
+      screen.getByText(/unclassified finding audit is not available for this historical run/i)
+    ).toBeInTheDocument();
   });
 
   it("does not mutate the original agent-outputs API response object while filtering by direction", async () => {
@@ -661,6 +662,182 @@ describe("ResearchRunPage", () => {
       renderPage();
       await waitFor(() => expect(screen.getByText(/visible positive claim/i)).toBeInTheDocument());
       expect(screen.getByText("NO_MARKET_DATA_AVAILABLE")).toBeInTheDocument();
+    });
+  });
+
+  // Sprint 3 (Unclassified Findings Control), Track A3.
+  describe("Unclassified findings panel", () => {
+    function unclassifiedFinding(overrides: Partial<UnclassifiedFinding>): UnclassifiedFinding {
+      return {
+        run_id: "run-1",
+        ticker: "SNDK",
+        claim_id: "u1",
+        claim: "Analysis Date: 2026-08-11 | Exchange: NMS | Sector: Technology.",
+        evidence: "Analysis Date: 2026-08-11 | Exchange: NMS | Sector: Technology.",
+        agent: "market_agent",
+        confidence: 0.4,
+        matched_alpha: null,
+        secondary_alphas: [],
+        direction: "unknown",
+        reason: "no_alpha_match",
+        reason_codes: ["no_alpha_match"],
+        diagnostic_reason_codes: [],
+        ticker_specific: false,
+        duplicate_group_id: null,
+        evidence_fact_group_id: null,
+        representative_claim_id: null,
+        source_refs: [],
+        source_agent_output_id: "o1",
+        claim_index: 0,
+        display_rank: 1,
+        ...overrides,
+      };
+    }
+
+    function mockResearch(overrides: Partial<CanonicalResearchResponse>) {
+      vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+        makeRunRecord({
+          selected_analysts: ["market"],
+          status: "completed",
+          stage: "completed",
+          message: "Research run completed.",
+        })
+      );
+      vi.spyOn(client, "getResearchRun").mockResolvedValue({
+        run_id: "run-1",
+        ticker: "SNDK",
+        status: "completed",
+        artifacts: BASE_ARTIFACTS,
+        agent_output_count: 0,
+        structured_output_count: 0,
+        structure_graph_status: "ready",
+        dominant_alphas: [],
+        main_conflict: null,
+        conflict_status: "ready",
+        summary: "Summary.",
+        data_sanity_status: "not_available",
+        data_sanity_warning_count: 0,
+        data_sanity_critical_count: 0,
+        data_sanity_warnings: [],
+        ...overrides,
+      });
+      vi.spyOn(client, "getAgentOutputs").mockResolvedValue({
+        run_id: "run-1",
+        ticker: "SNDK",
+        status: "ok",
+        schema_version: "week1a.structured_agent_outputs.v2",
+        count: 0,
+        structured_agent_outputs: [],
+      });
+    }
+
+    it("shows friendly reason labels and an accurate Showing X of Y count", async () => {
+      mockResearch({
+        unclassified_findings_status: "ready",
+        unclassified_findings_total_count: 2,
+        unclassified_findings_reason_counts: { no_alpha_match: 1, no_ticker_specific_evidence: 1 },
+        unclassified_findings_download_available: true,
+        unclassified_findings_top20: [
+          unclassifiedFinding({ claim_id: "u1", reason: "no_alpha_match", display_rank: 1 }),
+          unclassifiedFinding({
+            claim_id: "u2",
+            reason: "no_ticker_specific_evidence",
+            reason_codes: ["no_ticker_specific_evidence"],
+            matched_alpha: "A601",
+            ticker_specific: false,
+            claim: "Momentum is broadly positive across the sector.",
+            display_rank: 2,
+          }),
+        ],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Unclassified findings (2)")).toBeInTheDocument());
+      expect(screen.getByText("Showing 2 of 2")).toBeInTheDocument();
+      // Friendly text, never the raw snake_case reason code, in the card body.
+      // (u1 has no matched_alpha, so both its Reason and Alpha match rows
+      // legitimately read "No canonical Alpha match" -- two distinct cells.)
+      expect(screen.getAllByText("No canonical Alpha match").length).toBeGreaterThan(0);
+      expect(screen.getByText("No ticker-specific Evidence")).toBeInTheDocument();
+      expect(screen.queryByText("no_alpha_match")).not.toBeInTheDocument();
+      expect(screen.queryByText("no_ticker_specific_evidence")).not.toBeInTheDocument();
+      // A mention/no-match finding is never worded as supporting its Alpha.
+      expect(screen.getByText("A601")).toBeInTheDocument();
+    });
+
+    it("shows a Download full audit link pointing at the existing artifact route", async () => {
+      mockResearch({
+        unclassified_findings_status: "ready",
+        unclassified_findings_total_count: 1,
+        unclassified_findings_reason_counts: { no_alpha_match: 1 },
+        unclassified_findings_download_available: true,
+        unclassified_findings_top20: [unclassifiedFinding({ claim_id: "u1" })],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText(/download full audit/i)).toBeInTheDocument());
+      const link = screen.getByText(/download full audit \(1\)/i).closest("a");
+      expect(link).not.toBeNull();
+      expect(link?.getAttribute("href")).toContain("/api/research/run-1/artifacts/unclassified_findings.json");
+      expect(link?.getAttribute("download")).toBe("run-1_unclassified_findings_audit.json");
+    });
+
+    it("omits the Download full audit link when the backend reports it unavailable", async () => {
+      mockResearch({
+        unclassified_findings_status: "ready",
+        unclassified_findings_total_count: 1,
+        unclassified_findings_reason_counts: { no_alpha_match: 1 },
+        unclassified_findings_download_available: false,
+        unclassified_findings_top20: [unclassifiedFinding({ claim_id: "u1" })],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Unclassified findings (1)")).toBeInTheDocument());
+      expect(screen.queryByText(/download full audit/i)).not.toBeInTheDocument();
+    });
+
+    it("shows a Representative finding note for a non-representative duplicate", async () => {
+      mockResearch({
+        unclassified_findings_status: "ready",
+        unclassified_findings_total_count: 1,
+        unclassified_findings_reason_counts: { duplicate_supporting_text: 1 },
+        unclassified_findings_download_available: true,
+        unclassified_findings_top20: [
+          unclassifiedFinding({
+            claim_id: "u2",
+            matched_alpha: "A304",
+            reason: "duplicate_supporting_text",
+            reason_codes: ["duplicate_supporting_text"],
+            evidence_fact_group_id: "group-1",
+            representative_claim_id: "u1",
+          }),
+        ],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Duplicate supporting text")).toBeInTheDocument());
+      expect(screen.getByText("Representative finding:")).toBeInTheDocument();
+      expect(screen.getByText("u1")).toBeInTheDocument();
+    });
+
+    it("shows an honest empty state, never a fake Showing 0 of 0, when the run genuinely has zero unclassified findings", async () => {
+      mockResearch({
+        unclassified_findings_status: "ready",
+        unclassified_findings_total_count: 0,
+        unclassified_findings_reason_counts: {},
+        unclassified_findings_download_available: false,
+        unclassified_findings_top20: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("No unclassified findings for this run.")).toBeInTheDocument());
+      expect(screen.queryByText(/Showing 0 of 0/)).not.toBeInTheDocument();
+    });
+
+    it("shows the historical-unavailable message, never a fabricated zero, when the backend explicitly reports unavailable", async () => {
+      mockResearch({ unclassified_findings_status: "unavailable" });
+      renderPage();
+      await waitFor(() =>
+        expect(
+          screen.getByText(/unclassified finding audit is not available for this historical run/i)
+        ).toBeInTheDocument()
+      );
+      expect(screen.queryByText(/Showing \d+ of \d+/)).not.toBeInTheDocument();
     });
   });
 });

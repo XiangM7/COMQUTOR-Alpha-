@@ -1,0 +1,81 @@
+{
+  "schema_version": "phase0_5_gate_report_v1",
+  "task": "Phase 0.5 — Specification Reconciliation, Semantic Authority Freeze, and Replay Architecture Decision",
+  "generated_at": "2026-08-05",
+  "branch": "comqutor-structure-layer",
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "final_gate": "PASS",
+  "canonical_specification": {
+    "source_found": true,
+    "source_path": "/Users/xiangmao/Downloads/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+    "repository_path": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+    "source_sha256": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+    "repository_sha256": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+    "byte_identical": true,
+    "status": "SOURCE_FROZEN"
+  },
+  "reconciliation": {
+    "section_5_1": [
+      "PARTIAL",
+      "SEMANTIC_QUALITY_UNPROVEN"
+    ],
+    "section_5_2": [
+      "IMPLEMENTATION_STRUCTURE_COMPLIANT",
+      "PRODUCT_VALIDATION_MISSING"
+    ],
+    "section_5_3_functional": "PARTIAL",
+    "section_5_3_integration": "DIVERGED_MAJOR",
+    "tradingagents_boundary": "CURRENT_IMPLEMENTATION_DIVERGED_MAJOR",
+    "deterministic_core": "COMPLIANT_FOR_CURRENT_AUDITED_SCOPE",
+    "replay_provider_zero": "COMPLIANT",
+    "replay_semantic_reproducibility": "PARTIAL",
+    "evidence_stance": {
+      "development_plan_status": "NOT_APPLICABLE",
+      "provenance": "JOHN_LATER_REQUIREMENT",
+      "current_effect": "SHADOW_ONLY"
+    }
+  },
+  "architecture_decisions": {
+    "ADR-001": "ACCEPTED_FOR_FUTURE_IMPLEMENTATION; NOT_YET_ENFORCED_IN_PRODUCTION",
+    "ADR-002": "ACCEPTED_FOR_FUTURE_IMPLEMENTATION; CURRENT_CODE_DIVERGES; RUNTIME_CHANGE_DEFERRED",
+    "ADR-003": "ACCEPTED_FOR_FUTURE_IMPLEMENTATION; CURRENT_REPLAY_PARTIAL",
+    "ADR-004": "RECORDED; NO_PRODUCTION_AUTHORITY",
+    "production_enforcement_performed": false
+  },
+  "integrity": {
+    "preexisting_dirty_files_baselined": 140,
+    "preexisting_dirty_files_unchanged": true,
+    "phase0_original_files_hashed": 15,
+    "phase0_original_hashes_unchanged": true,
+    "outputs_runs_file_count": 133,
+    "outputs_runs_unchanged": true,
+    "outputs_replays_file_count": 108,
+    "outputs_replays_unchanged": true,
+    "canonical_prompt_injection_unchanged": true,
+    "canonical_relation_prompt_unchanged": true,
+    "week2_llm_default_unchanged": true,
+    "production_files_changed_by_phase0_5": [],
+    "tradingagents_files_changed_by_phase0_5": []
+  },
+  "validation": {
+    "audit_llm_boundary": "PASS (4/4)",
+    "verify_phase0_5_spec_freeze": "PASS",
+    "json_validation": "PASS",
+    "csv_validation": "PASS; RFC-style quoting and uniform widths",
+    "ruff": "PASS",
+    "targeted_offline_tests": "PASS (559 passed, 1 deselected)",
+    "full_offline_suite": "FULL_OFFLINE_SUITE_NOT_PROVABLY_SAFE",
+    "full_suite_guarded_result": "2589 passed, 5 failed, 1 skipped, 47 deselected, 69 subtests passed",
+    "full_suite_guarded_failure_reason": "Five non-integration sentiment-agent tests attempted api.stocktwits.com; the fail-closed guard blocked every connection before network I/O",
+    "llm_provider_calls": 0,
+    "completed_external_network_connections": 0,
+    "blocked_stocktwits_connection_attempts": 5,
+    "database_writes": 0
+  },
+  "repository_actions": {
+    "commit": false,
+    "push": false,
+    "reset_restore_checkout_clean_stash": false
+  },
+  "next_allowed_phase": "Phase 0.6 only after independent review and explicit approval"
+}

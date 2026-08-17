@@ -98,6 +98,33 @@ def build_entity_exposure_rows(
             _fail()
         if not isinstance(provenance, Mapping):
             _fail()
+        # John's B3 gated seed lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES):
+        # owner/approved_by/approved_at/configured_status/effective_status
+        # are additive, per-ticker provenance -- stored inside the existing
+        # provenance_json blob (never a new column/table; this repo's
+        # migration runner only supports CREATE TABLE IF NOT EXISTS, never
+        # ALTER TABLE, so an existing DB's entity_alpha_exposures table
+        # cannot safely gain new columns). Nested under its own key so it
+        # can never collide with the pre-existing provenance fields.
+        for optional_text_field in ("owner", "approved_by", "approved_at"):
+            value = record.get(optional_text_field)
+            if value is not None and not isinstance(value, str):
+                _fail()
+        for required_status_field in ("configured_status", "effective_status"):
+            if not isinstance(record.get(required_status_field), str) or not record.get(
+                required_status_field
+            ):
+                _fail()
+        provenance_with_lifecycle = {
+            **provenance,
+            "b3_lifecycle": {
+                "owner": record.get("owner"),
+                "approved_by": record.get("approved_by"),
+                "approved_at": record.get("approved_at"),
+                "configured_status": record.get("configured_status"),
+                "effective_status": record.get("effective_status"),
+            },
+        }
         rows.append(
             {
                 "run_id": run_id,
@@ -124,7 +151,7 @@ def build_entity_exposure_rows(
                     record.get("qualification_effect_applied")
                 ),
                 "reason_codes_json": _json_copy(reason_codes),
-                "provenance_json": _json_copy(provenance),
+                "provenance_json": _json_copy(provenance_with_lifecycle),
             }
         )
     return rows
@@ -132,6 +159,13 @@ def build_entity_exposure_rows(
 
 def reconstruct_entity_exposure_record(row: Mapping[str, Any]) -> dict[str, Any]:
     effective_date = row.get("seed_effective_date")
+    provenance = _json_copy(row.get("provenance_json") or {})
+    # John's B3 gated seed lifecycle: unpacked back to top-level record
+    # keys (matching the original in-memory record shape exactly) --
+    # stored inside provenance_json only as a persistence-layer detail
+    # (see build_entity_exposure_rows), never exposed as nested there.
+    lifecycle = provenance.pop("b3_lifecycle", None)
+    lifecycle = lifecycle if isinstance(lifecycle, Mapping) else {}
     return {
         "run_id": row.get("run_id"),
         "ticker": row.get("ticker"),
@@ -154,8 +188,13 @@ def reconstruct_entity_exposure_record(row: Mapping[str, Any]) -> dict[str, Any]
         "would_block_regime_level": row.get("would_block_regime_level"),
         "override_candidate": row.get("override_candidate"),
         "qualification_effect_applied": row.get("qualification_effect_applied"),
+        "owner": lifecycle.get("owner"),
+        "approved_by": lifecycle.get("approved_by"),
+        "approved_at": lifecycle.get("approved_at"),
+        "configured_status": lifecycle.get("configured_status"),
+        "effective_status": lifecycle.get("effective_status"),
         "reason_codes": _json_copy(row.get("reason_codes_json") or []),
-        "provenance": _json_copy(row.get("provenance_json") or {}),
+        "provenance": provenance,
     }
 
 

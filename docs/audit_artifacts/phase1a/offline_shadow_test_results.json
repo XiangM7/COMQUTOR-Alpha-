@@ -1,0 +1,66 @@
+{
+  "schema_version": "comqutor.phase1a.offline_test_results.v1",
+  "captured_at": "2026-08-06T19:30:12Z",
+  "shadow_tests": {
+    "command": ".venv/bin/pytest -q tests/structured_output_shadow",
+    "passed": 60,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "current_adapter_and_week2": {
+    "command": ".venv/bin/pytest -q tests/test_structured_output_adapter.py tests/test_week2_llm.py",
+    "passed": 59,
+    "skipped": 1,
+    "failed": 0,
+    "skip_reason": "explicit real-Provider smoke remains opt-in",
+    "status": "PASS"
+  },
+  "alpha_extractor_replay_regressions": {
+    "command": ".venv/bin/pytest -q tests/test_alpha_mapper.py tests/test_ai_alpha_mapper_discrimination.py tests/test_alpha_mapper_nvda_real_report.py tests/test_structure_extractor.py tests/test_replay_pipeline.py tests/test_replay_all_api.py tests/replay",
+    "passed": 280,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "llm_boundary_audit": {
+    "command": ".venv/bin/python scripts/audit_llm_boundary.py",
+    "passed_checks": 4,
+    "total_checks": 4,
+    "status": "PASS"
+  },
+  "phase0_6c_forward_scope_result": {
+    "command": ".venv/bin/python scripts/verify_phase0_6c.py",
+    "passed_checks": 29,
+    "total_checks": 30,
+    "status": "EXPECTED_FORWARD_SCOPE_FAIL",
+    "only_failure": "old Phase 0.6C allowed-diff allowlist rejects new Phase 1A files",
+    "old_verifier_modified": false
+  },
+  "phase1a_verifier": {
+    "command": ".venv/bin/python scripts/verify_phase1a.py",
+    "passed_checks": 35,
+    "total_checks": 35,
+    "status": "PASS"
+  },
+  "ruff": {
+    "command": ".venv/bin/ruff check comqutor_alpha/structure_engine/structured_output_shadow*.py tests/structured_output_shadow scripts/build_phase1a_shadow_review_bundle.py scripts/verify_phase1a.py",
+    "status": "PASS"
+  },
+  "guarded_full_suite": {
+    "command": "COMQUTOR_WEEK2_LLM_ENABLED=false .venv/bin/pytest -q -m \"not integration\"",
+    "baseline_passed": 2730,
+    "passed": 2790,
+    "new_shadow_passes": 60,
+    "skipped": 1,
+    "deselected": 47,
+    "subtests_passed": 69,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "provider_calls": 0,
+  "network_connections": 0,
+  "redis_connections": 0,
+  "database_writes": 0,
+  "real_semantic_quality_evaluated": false,
+  "fake_results_called_human_or_gold": false,
+  "status": "PASS"
+}

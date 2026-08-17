@@ -1,0 +1,92 @@
+{
+  "schema_version": "comqutor.phase1_master.prompt_audit.v1_breakdown.v1",
+  "report_identity": {
+    "source_run_id": "0e044e37-862c-43be-871c-31012cd660e7",
+    "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:fundamental_agent:fundamentals_report",
+    "real_evaluation_run_id_reused": "anthropic-smoke-20260807T011444Z-9038cf75cdbd6b10",
+    "ticker": "NVDA",
+    "agent": "fundamental_agent",
+    "report_sha256": "6e745b7c192eab1d111c26c9f259b97ddf6b86de5b88a4c03ae67cdf8f7954f1",
+    "raw_report_chars": 13887
+  },
+  "determinism_cross_check": {
+    "compared_against": "outputs/evaluations/phase1-master-anthropic-20260807T011444Z-7ce7880c/reports/NVDA/fundamental/candidate_segments.json",
+    "real_segment_count": 163,
+    "recomputed_segment_count": 163,
+    "byte_identical": true
+  },
+  "candidate_segment_count": 163,
+  "filtered_segment_count": 1,
+  "components": {
+    "fixed_instruction_chars": 3948,
+    "fixed_instruction_tokens_estimate": 987,
+    "examples_chars": 842,
+    "examples_tokens_estimate": 210,
+    "schema_instruction_chars": 1177,
+    "schema_instruction_tokens_estimate": 294,
+    "output_format_instruction_chars": 730,
+    "output_format_instruction_tokens_estimate": 182,
+    "instruction_boilerplate_chars": 1199,
+    "instruction_boilerplate_tokens_estimate": 300,
+    "raw_report_chars": 13887,
+    "raw_report_tokens_estimate": 3472,
+    "agent_report_json_field_chars": 14160,
+    "candidate_segment_metadata_chars": 41780,
+    "candidate_segment_metadata_tokens_estimate": 10445,
+    "candidate_segment_text_chars": 37455,
+    "candidate_segment_text_tokens_estimate": 9364,
+    "candidate_segment_text_subfields": {
+      "claim_hint_chars": 17504,
+      "evidence_hint_chars": 17993,
+      "exact_quote_chars": 1958
+    },
+    "candidate_segment_metadata_subfields": {
+      "candidate_segment_id_chars": 22331,
+      "candidate_index_chars": 3313,
+      "source_section_chars": 7087,
+      "semantic_authority_chars": 4238,
+      "span_offset_and_structural_chars": 877,
+      "array_and_object_punctuation_chars": 1468
+    },
+    "factor_vocabulary_chars": 248,
+    "factor_vocabulary_tokens_estimate": 62,
+    "factor_vocabulary_item_count": 13,
+    "source_metadata_chars": 332,
+    "source_metadata_tokens_estimate": 83,
+    "identity_metadata_chars": 668,
+    "identity_metadata_tokens_estimate": 167,
+    "other_chars": 42,
+    "other_chars_tokens_estimate": 10,
+    "total_chars": 98633,
+    "total_tokens_estimate": 24658
+  },
+  "percentages_of_total": {
+    "fixed_instruction_pct": 4.0,
+    "examples_pct": 0.85,
+    "schema_instruction_pct": 1.19,
+    "output_format_instruction_pct": 0.74,
+    "raw_report_pct": 14.36,
+    "candidate_segment_metadata_pct": 42.36,
+    "candidate_segment_text_pct": 37.97,
+    "factor_vocabulary_pct": 0.25,
+    "source_metadata_pct": 0.34,
+    "identity_metadata_pct": 0.68,
+    "other_pct": 0.04
+  },
+  "duplication": {
+    "duplicated_report_text_chars": 4866,
+    "duplicated_report_text_pct_of_total": 4.93,
+    "duplicated_candidate_text_chars": 16681,
+    "duplicated_candidate_text_pct_of_total": 16.91,
+    "identical_claim_and_evidence_hint_segment_count": 163,
+    "identical_claim_and_evidence_hint_segment_pct": 100.0,
+    "duplicated_schema_chars": 0,
+    "duplicated_schema_note": "OUTPUT SHAPE appears exactly once (a JSON skeleton) and CLAIM RULES appears exactly once (prose). They are complementary, not textual duplicates of each other -- measured, not assumed. No third (e.g. JSON-Schema-object) restatement exists in the frozen v1 prompt.",
+    "report_duplication_ratio": 3.6971,
+    "report_duplication_ratio_definition": "(raw_report_chars + candidate_segment_text_chars) / raw_report_chars; 1.0 means the report's content appears exactly once in total."
+  },
+  "reconstruction_proof": {
+    "fixed_instruction_chars_plus_separator_plus_json_chars_equals_total": true,
+    "component_sum_equals_total_chars": true
+  }
+}

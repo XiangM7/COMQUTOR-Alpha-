@@ -590,13 +590,19 @@ class TestArtifactSchemaCompatibility:
             assert "ai_gate_passed" in candidate
 
     def test_non_ai_candidate_score_keys_are_unchanged(self):
+        # Sprint 2 (Alpha-Relative Evidence Stance Classification) added six
+        # additive keys (evidence_stance, counter_alpha_id,
+        # stance_reason_codes, stance_confidence_band, requires_manual_review,
+        # evidence_stance_version) to every candidate dict -- this asserts
+        # every pre-existing key is still present and unchanged, not that the
+        # key set is closed.
         result = map_claim_to_alpha(_record("High valuation is creating downside risk.", direction="negative"))
         candidate = next(c for c in result["candidate_scores"] if c["alpha_id"] == "A304")
-        assert set(candidate) == {
+        assert {
             "alpha_id", "alpha_name", "score", "keyword_score", "factor_score",
             "direction_score", "semantic_score", "relation", "eligible",
             "rejection_reason", "matched_keywords", "matched_factors", "ai_gate_passed",
-        }
+        }.issubset(set(candidate))
 
 
 class TestDownstreamInputFieldsUnchanged:

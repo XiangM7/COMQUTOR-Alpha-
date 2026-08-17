@@ -1,0 +1,79 @@
+{
+  "schema_version": "comqutor.section_5_2_alpha_mapper_implementation_precheck.v1",
+  "section_5_2_precheck": "COMPLETE",
+  "real_provider_calls": 0,
+  "subagents": 0,
+  "production_code_changed": false,
+  "tests_changed": false,
+  "prompts_changed": false,
+  "section_5_1_input_contract": "One structured claim record at a time (from the run's structured_agent_outputs.json records list), fields run_id/ticker/agent/timestamp/claim/evidence/entities/factors/direction/confidence/source_type/source_refs plus claim_id/source_agent_output_id/claim_quality; identical core fields produced by both the Legacy adapter and the v4.2 Shadow/Primary path.",
+  "alpha_taxonomy_source": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (matches the frozen plan's own named path exactly)",
+  "canonical_alpha_count": 10,
+  "factor_alpha_distinction": "Distinct concepts, never conflated: factors are per-claim semantic descriptors from §5.1; alphas are the canonical MVP-10 taxonomy hypotheses. Bridged explicitly via FACTOR_ALPHA_WEIGHTS plus keyword matching in alpha_mapper.py.",
+  "existing_alpha_mapper_status": "PARTIAL",
+  "existing_alpha_mapper_status_note": "Tier 1 (deterministic keyword/factor) and Tier 3 (deterministic fallback) are PRODUCTION_ACTIVE and fully wired into the real pipeline and persistence (file + DB). Tier 2 (LLM classification) is code-complete and already live-wired to the shared Week2LLMGateway, but its production authority is explicitly PRODUCT_VALIDATION_MISSING per semantic_authority_matrix.csv, gated on the same missing John-20 set as PD-005.",
+  "john_20_labels": "NOT_FOUND",
+  "john_label_count": null,
+  "john_label_format": "UNKNOWN — PD-005 requires John to supply claims + labels + rubric + version + sign-off owner; none of this exists in the repository. Two unrelated fixtures exist in tests/ (a 20-case engineering stand-in with no provenance header, and an unrelated 30-case real-report robustness set) and must not be treated as John's set.",
+  "evaluation_target": ">=80% accuracy on John's 20 labeled claims (Development Plan §5.2, §10 Week 2 gate, and Definition of Done all state this target)",
+  "evaluation_metric_defined": "NO",
+  "multi_alpha_mapping": "AMBIGUOUS",
+  "multi_alpha_mapping_note": "The frozen plan itself is internally inconsistent: §5.2's worked example uses a plural JSON key (matched_alphas: [...]) while §10's acceptance-gate prose says singular 'matched_alpha'. Current code and the alpha_matches DB table (UNIQUE(run_id, claim_id)) have already committed to a single authoritative matched_alpha per claim plus auxiliary candidate lists, without documented product sign-off on that resolution.",
+  "score_range": "[0.0, 1.0], clamped and rounded to 4dp (structure_schema.clamp_score) -- not literally stated as a bound in the frozen text but consistent with every example given",
+  "threshold": "0.35 confirmed by frozen plan and matched by DEFAULT_MIN_MATCH_SCORE in code, EXCEPT A101/A102/A103 bypass it entirely via an independent AI-alpha hard gate",
+  "top_k": "3 confirmed by frozen plan ('top-3 alphas') and matched by code ([:3] slicing in three places)",
+  "mapper_llm_input": "claim, evidence, factors, direction, allowed_alpha_ids, and up to 3 deterministic eligible candidates (with taxonomy core_thesis/trigger_signals/confirmation_signals) -- confidence is NOT included",
+  "deterministic_candidate_generation": "SPECIFIED and IMPLEMENTED: keyword index (alpha_id/names/core_thesis/keywords/trigger_signals/confirmation_signals) plus an explicit factor-to-alpha weight table (FACTOR_ALPHA_WEIGHTS). No embeddings, vector search, or candidate IDs.",
+  "deterministic_fallback": "SPECIFIED (frozen plan item 3, glossed precisely by semantic_authority_matrix.csv) and IMPLEMENTED: not a distinct algorithm -- retains the already-computed Tier 1 result unchanged, with an explicit degradation-reason status recorded.",
+  "no_match_behavior": "NOT_FOUND in frozen plan (silent on this case). CURRENT_IMPLEMENTATION: record retained with match_status='no_match', matched_alpha=None, score=0.0 -- never dropped, no special NONE alpha, no dedicated review queue. Never product-specified.",
+  "direction_role": "Used as a genuine scoring input (8% weight) and an opposing-pair/ambiguity signal; passed through unchanged to output; never reinterpreted into later Evidence Stance vocabulary (supports_alpha/opposes_alpha/etc.), which is explicitly out of scope for §5.2.",
+  "claim_confidence_role": "UNUSED -- record.get('confidence') is never read anywhere in alpha_mapper.py despite being present in the frozen plan's own worked input example. PRODUCT_DECISION_REQUIRED.",
+  "section_5_2_output_contract": "alpha_matches.json: {schema_version, mapper_version, minimum_match_score, run_id, ticker, matches: [...]}. Each match record: run_id/ticker/agent/claim_id/source_agent_output_id/claim/evidence/factors/direction (REQUIRED_CONFIRMED); matched_alpha (singular, nullable)/matched_alpha_name/score/keyword_score/factor_score/direction_score/match_status (REQUIRED_CONFIRMED); candidate_scores/top_candidates/eligible_candidates/plausible_alphas/secondary_alphas/ai_alpha_matches (OPTIONAL_CONFIRMED, read by some downstream consumers); matched_evidence_stance and related fields (NOT_REQUIRED, additive, PD-006-gated); claim_quality (REQUIRED_CONFIRMED passthrough). Mirrored in the alpha_matches DB table, one row per (run_id, claim_id).",
+  "section_5_3_expected_input": "NOTHING from §5.2. §5.3 Structure Extractor is a parallel sibling consumer of §5.1's structured_agent_outputs.json, not a downstream consumer of alpha_matches.json -- confirmed by both the frozen plan's own §3 data-flow list and the current code's self-documented artifact-lineage table in routes_research.py. This corrects a working assumption in this precheck task's own framing.",
+  "entity_exposure_construction_stage": "§5.7 Exposure Engine (exposure_engine.py), a separate, later pipeline stage (_run_week3_graph_pipeline) writing a separate artifact (entity_alpha_exposures.json). Not §5.2's responsibility beyond carrying `ticker` on every output record, which it already does.",
+  "out_of_scope_for_5_2": [
+    "Evidence Stance stance vocabulary (supports_alpha/opposes_alpha/mentions_alpha/neutral_background/supports_counter_alpha) -- JOHN_LATER_REQUIREMENT, PD-006, NOT_APPROVED, SHADOW_ONLY",
+    "Activation thresholds/bands (active/dominant/regime) -- §5.5, activation_scorer*.py",
+    "B2 conflict evidence-admissibility -- §5.6, conflict_detector.py, further gated by PD-007",
+    "Graph relationship construction -- §5.4, graph_builder.py",
+    "Entity Exposure (ticker x alpha) computation -- §5.7, exposure_engine.py"
+  ],
+  "reusable_existing_components": [
+    "alpha_loader.load_alpha_taxonomy / validate_taxonomy / build_keyword_index",
+    "alpha_mapper.keyword_score / factor_score / direction_score / _candidate_score (Tier 1)",
+    "alpha_mapper._apply_optional_classifier + Week2LLMGateway.invoke_json_with_trace (Tier 2, already live-wired via routes_research.py's shared llm_gateway)",
+    "alpha_mapper's Tier 3 fallback (retained Tier-1 result + classifier status metadata)",
+    "save_alpha_matches / alpha_matches.json / alpha_matches DB table + repository.py persistence",
+    "claim_quality.is_claim_eligible shared eligibility gate"
+  ],
+  "implementation_gaps": [
+    "John's real 20 labeled claims (data only, not a code gap)",
+    "Explicit >=80% metric definition",
+    "Product sign-off on single-vs-multi-alpha output cardinality",
+    "Product sign-off on claim confidence's role (if any) in alpha score",
+    "Product sign-off on the elaborated Tier-1 scoring formula and the AI-alpha 0.35-threshold carve-out for A101/A102/A103",
+    "Formal production-authority graduation of the already-live Tier-2 LLM classifier"
+  ],
+  "product_decision_required": [
+    "Supply John's real 20 labeled claims + rubric + version + sign-off owner (PD-005, still open)",
+    "Define the exact >=80% accuracy metric",
+    "Resolve single- vs multi-alpha mapping cardinality per claim (frozen plan is internally inconsistent on this point)",
+    "Define the role (if any) of claim confidence in alpha match score",
+    "Approve or revise the elaborated Tier-1 scoring formula (0.50/0.30/0.08/0.12) and the AI-alpha hard-gate threshold bypass",
+    "Approve Tier-2 LLM classifier for production authority once the above are resolved"
+  ],
+  "spec_code_conflicts": [
+    "§5.2's worked JSON example uses a plural 'matched_alphas' array key while §10's Week 2 acceptance-gate prose uses singular 'matched_alpha' -- an inconsistency inside the frozen document itself",
+    "tests/test_week2_labeled_accuracy.py and tests/golden_cases/labeled_claims_v1.json self-describe as John's 'approved labeled set', directly conflicting with PD-005's explicit BLOCKED_BY_PRODUCT_OWNER / 'do not substitute a locally invented set' status for the same concept",
+    "The AI-alpha hard gate (A101/A102/A103) bypasses the frozen 'threshold 0.35' rule entirely, with no located PD/ADR approval"
+  ],
+  "report_created": "docs/audit_artifacts/phase1_master/section_5_2_alpha_mapper_implementation_precheck.md",
+  "files_modified": [
+    "docs/audit_artifacts/phase1_master/section_5_2_alpha_mapper_implementation_precheck.md",
+    "docs/audit_artifacts/phase1_master/section_5_2_alpha_mapper_implementation_precheck.json"
+  ],
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO"
+}

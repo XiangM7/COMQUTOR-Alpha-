@@ -1,0 +1,71 @@
+{
+  "schema_version": "comqutor.section_5_2_product_decisions_and_john_gold_provenance.v1",
+  "section_5_2_stage": "PRODUCT_DECISION_CLOSURE_AND_GOLD_PROVENANCE_AUDIT",
+  "real_provider_calls": 0,
+  "subagents": 0,
+  "production_code_changed": false,
+  "cardinality_decision": "ONE_PRIMARY_ALPHA_PLUS_UP_TO_TWO_SECONDARY",
+  "primary_alpha_authoritative": true,
+  "secondary_alphas_coauthoritative": false,
+  "claim_confidence_affects_alpha_score": false,
+  "alpha_score_semantics": "SEMANTIC_RELEVANCE_ONLY",
+  "global_minimum_match_score": 0.35,
+  "ai_alpha_special_gate_status": "UNAPPROVED_IMPLEMENTATION_DETAIL",
+  "ai_alpha_special_gate_detail": {
+    "code_location": "comqutor_alpha/structure_engine/ai_alpha_discriminator.py (AI_ALPHA_IDS, line 28); consumed at alpha_mapper.py:517",
+    "rule": "For A101/A102/A103, an independent boolean hard gate (anchor phrase + co-located change predicate) replaces the 0.35 score check entirely instead of supplementing it",
+    "introducing_commit": "2fe129705d824d46b4bcf7f0fc1eb43e27972824 (\"0.1.1 test\", 2026-07-24, sole author xiangmao)",
+    "claimed_rationale": "Generic taxonomy keywords are sufficient for candidate recall but not specific enough for a formal match, and the factor-weight table's deliberate cross-alpha partial credit is appropriate for scoring but not hard admission -- a genuine engineering rationale with no located Product Owner/ADR approval",
+    "formal_approval_source": "NONE_FOUND",
+    "future_alignment_target": "ALL_10_ALPHAS_USE_0_35_MINIMUM_MATCH_THRESHOLD"
+  },
+  "no_match_behavior": "RETAIN_CLAIM_WITH_MATCHED_ALPHA_NULL",
+  "no_match_current_implementation_aligns": true,
+  "tier_2_authority": "PRODUCT_VALIDATION_PENDING",
+  "john_dataset_path": "tests/golden_cases/labeled_claims_v1.json",
+  "john_dataset_sha256": "9c0561fbf9dd23cd6ed1bd2eaedb6536887b8623ffedb6a53faa4553344c2bc7",
+  "john_dataset_record_count": 20,
+  "john_dataset_label_cardinality": "SINGLE",
+  "john_dataset_fields": ["id", "text", "expected_alpha", "expected_alpha_name", "expected_direction"],
+  "john_dataset_missing_fields": ["ticker", "score", "notes/rationale", "author/creator", "approval/sign-off metadata", "ranked/Top-K expectation", "negative/no-alpha cases"],
+  "john_dataset_alpha_distribution": {"A001": 2, "A003": 2, "A101": 3, "A102": 2, "A103": 2, "A201": 2, "A301": 2, "A304": 2, "A501": 2, "A601": 1},
+  "john_dataset_git_history": {
+    "introducing_commit": "7d6d5c7d58ceea58ce2b79079f368f05945f8e53 (\"w2v1\", 2026-07-09, sole author xiangmao)",
+    "modified_since_creation": false,
+    "test_file_introducing_commit": "62747173eede5750ad84fe167810fae49744c21a (\"w6v1\", 2026-07-16, same sole author, one week later, different commit)",
+    "full_history_commit_messages_mentioning_john_or_approval_or_signoff": 0
+  },
+  "john_approval_evidence": [
+    "tests/test_week2_labeled_accuracy.py line 1 module docstring: 'Standalone Formal Week 2 accuracy gate over the approved labeled set.'",
+    "tests/test_week2_labeled_accuracy.py line 53 function name: test_approved_labeled_claim_accuracy_is_at_least_80_percent"
+  ],
+  "john_approval_evidence_authoritative": false,
+  "john_approval_evidence_note": "Both items are developer-written test docstring/function-name self-description, explicitly disqualified as proof of approval by the task's own evidentiary standard. No PD record, ADR, sign-off artifact, or later requirement anywhere in the repository names this exact file/version. Seven independent, pre-existing repository documents (development_plan_llm_boundary_audit.md and its consolidated/reconciliation versions, development_plan_compliance_matrix.csv, phase0_5_completion_report.md, phase0_5/reconciled_compliance_matrix.csv, future_semantic_phase_contract.md, ADR-001-semantic-authority.md, llm_semantic_call_contract_v1.md, semantic_authority_matrix.csv), written independently at different times for different purposes -- several specifically searching for this exact artifact -- all conclude John's 20 labels are missing/not found/blocked, and none of them cites labeled_claims_v1.json as a candidate.",
+  "john_approval_version_bound": "UNKNOWN",
+  "john_approval_version_bound_note": "No approval event was found at all, so there is nothing to bind to a version; classified NO_APPROVAL_FOUND rather than an older-version-only scenario.",
+  "pd_005_status": "BLOCKED_BY_PRODUCT_OWNER",
+  "pd_005_authoritatively_closed": false,
+  "john_gold_status": "SELF_DESCRIBED_AS_APPROVED_BUT_UNVERIFIED",
+  "evaluation_metric": "BLOCKED_NO_AUTHENTIC_GOLD",
+  "evaluation_metric_conditional_decision": "PD-016: IF an authentic benchmark is later confirmed single-label, metric = TOP_1_EXACT_PRIMARY_ALPHA_ACCURACY, pass = >=16/20. Not yet applicable -- gold is unverified.",
+  "pass_threshold": "16/20 (conditional on PD-016 applying, i.e. on an authentic single-label benchmark being supplied)",
+  "section_5_2_acceptance_ready": false,
+  "section_5_2_acceptance_blocker": "BLOCKED_BY_PRODUCT_OWNER_GOLD_DATA -- John's real 20 labeled claims + rubric + version + sign-off (PD-005) remain unsupplied",
+  "schema_change_required_for_cardinality_decision": false,
+  "schema_change_note": "matched_alpha (singular) already exists as the primary field in both alpha_matches.json and the DB alpha_matches.alpha_id column; secondary_alphas is already structurally capped at <=2 as an emergent property of existing eligible_candidates[:3] / [1:] slicing logic. No migration needed. The DB has no dedicated secondary_alphas column but candidate_scores (JSON blob) already carries the detail.",
+  "implementation_alignment_required": [
+    "Future task: remove/align the A101/A102/A103 hard-gate threshold bypass to the uniform 0.35 rule (PD-013) -- not performed in this task",
+    "No cardinality/confidence/no-match code changes required -- current implementation already complies with PD-011/PD-012/PD-014"
+  ],
+  "next_legitimate_task": "Either obtain the authentic John-approved 20-claim benchmark from the product owner and then run a bounded SECTION_5_2_20_CLAIM_ACCEPTANCE_EVALUATION under PD-011-PD-016, or perform a separately-scoped implementation task to align the A101/A102/A103 threshold gate to the uniform 0.35 rule per PD-013 (does not require the benchmark). Neither is started by this task.",
+  "report_created": "docs/audit_artifacts/phase1_master/section_5_2_product_decisions_and_john_gold_provenance.md",
+  "files_modified": [
+    "docs/specs/product_decisions_and_unknowns.md",
+    "docs/audit_artifacts/phase1_master/section_5_2_product_decisions_and_john_gold_provenance.md",
+    "docs/audit_artifacts/phase1_master/section_5_2_product_decisions_and_john_gold_provenance.json"
+  ],
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO"
+}

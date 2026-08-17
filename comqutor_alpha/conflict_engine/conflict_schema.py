@@ -30,8 +30,19 @@ CONFLICT_FORMULA_VERSION = "week4.conflict_score.mvp_v1"
 QUALIFYING_RELATIONS = frozenset({"activation", "conditional", "mixed"})
 
 # Admissibility (APPROVED -- SPEC-FROZEN FOR W4.1, audit #11): both sides of a
-# candidate pair must have `status` at least `watch`.
-ADMISSIBLE_STATUSES = frozenset({"watch", "active", "dominant", "regime_level"})
+# candidate pair must have `status` at least `watch`. The W4.1 *rule* is
+# frozen (a below-"watch" status is inadmissible); the status *vocabulary*
+# it is checked against is not -- "watch" stays for v1/historical-payload
+# compatibility (activation_scorer.py's frozen v1 formula still emits it),
+# and "candidate" (task B4_ACTIVATION_LEVEL_ALIGNMENT's unified name for
+# what v2 used to split across "inactive"/"watch") is added so a v2
+# candidate-level pair reaches this module's own, already-authoritative
+# score>=50 admissibility check (BULL_SCORE_BELOW_THRESHOLD/etc., with a
+# full diagnostic) instead of being silently short-circuited one gate
+# earlier with no diagnostic at all -- never a change to which pairs are
+# ultimately admitted, since B2's own score>=50 requirement is strictly
+# stronger than this gate's old "watch" (score>30) floor either way.
+ADMISSIBLE_STATUSES = frozenset({"watch", "candidate", "active", "dominant", "regime_level"})
 
 _DIRECTION_POSITIVE = "positive"
 _DIRECTION_NEGATIVE = "negative"

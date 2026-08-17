@@ -1018,7 +1018,11 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
             {
                 "alpha_id": "A304",
                 "alpha_name": "A304",
-                "activation_score": 40.0,
+                # B2's own score threshold is 50.0 -- 55.0 keeps this
+                # clearly the LOWER of the two scores (preserving the
+                # min()-vs-max() distinction this test proves) while also
+                # clearing B2 admission.
+                "activation_score": 55.0,
                 "status": "watch",
                 "direction": "negative",
                 "components": {},
@@ -1030,6 +1034,12 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
             },
         ],
     }
+    # John's B2 Conflict Evidence Admissibility gate: each side needs >=2
+    # unique, ticker-specific, supports_alpha Evidence Facts to be admitted
+    # at all -- c1b/c2b are additional, genuinely distinct claims added
+    # purely to clear that bar (their own activation_score above is
+    # hand-fixed at 90.0/40.0 regardless of claim count, so this does not
+    # touch the min()-vs-max() formula behavior this test actually proves).
     alpha_matches = [
         {
             "claim_id": "c1",
@@ -1040,7 +1050,24 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
             "matched_alpha": "A101",
             "score": 0.9,
             "assertion_status": "asserted",
-            "eligible_candidates": [{"alpha_id": "A101", "relation": "activation"}],
+            "eligible_candidates": [
+                {"alpha_id": "A101", "relation": "activation", "evidence_stance": "supports_alpha"}
+            ],
+            "claim_quality": "analytical",
+            "direction": "positive",
+        },
+        {
+            "claim_id": "c1b",
+            "agent": "agent_three",
+            "claim": "ACME datacenter demand is accelerating.",
+            "evidence": "ACME datacenter demand is accelerating.",
+            "match_status": "matched",
+            "matched_alpha": "A101",
+            "score": 0.9,
+            "assertion_status": "asserted",
+            "eligible_candidates": [
+                {"alpha_id": "A101", "relation": "activation", "evidence_stance": "supports_alpha"}
+            ],
             "claim_quality": "analytical",
             "direction": "positive",
         },
@@ -1053,7 +1080,24 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
             "matched_alpha": "A304",
             "score": 0.9,
             "assertion_status": "asserted",
-            "eligible_candidates": [{"alpha_id": "A304", "relation": "activation"}],
+            "eligible_candidates": [
+                {"alpha_id": "A304", "relation": "activation", "evidence_stance": "supports_alpha"}
+            ],
+            "claim_quality": "analytical",
+            "direction": "negative",
+        },
+        {
+            "claim_id": "c2b",
+            "agent": "agent_four",
+            "claim": "ACME margin compression was flagged by analysts.",
+            "evidence": "ACME margin compression was flagged by analysts.",
+            "match_status": "matched",
+            "matched_alpha": "A304",
+            "score": 0.9,
+            "assertion_status": "asserted",
+            "eligible_candidates": [
+                {"alpha_id": "A304", "relation": "activation", "evidence_stance": "supports_alpha"}
+            ],
             "claim_quality": "analytical",
             "direction": "negative",
         },
@@ -1066,16 +1110,16 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
     )
     conflict = next((c for c in result["conflicts"] if c["conflict_id"] == "A101__A304"), None)
     assert conflict is not None
-    # Correct min() formula: minimum_activation must be 40.0 (the lower of
+    # Correct min() formula: minimum_activation must be 55.0 (the lower of
     # the two), never 90.0.
-    assert conflict["components"]["minimum_activation"] == 40.0
+    assert conflict["components"]["minimum_activation"] == 55.0
 
     # Simulate the forbidden min->max substitution directly (not by
     # monkeypatching the builtin, which conflict_detector does not expose
     # as an overridable seam) and prove it disagrees with the real result --
     # i.e. an existing correctness assertion on the real formula would fail
     # under a min->max change.
-    simulated_max_variant_minimum_activation = max(90.0, 40.0)
+    simulated_max_variant_minimum_activation = max(90.0, 55.0)
     with pytest.raises(AssertionError):
         assert conflict["components"]["minimum_activation"] == simulated_max_variant_minimum_activation
 

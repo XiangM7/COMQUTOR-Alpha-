@@ -971,10 +971,33 @@ def _llm_batch_enrichment(
         }
         for segment in batch_segments
     ]
+    request = {"ticker": ticker, "agent": agent, "segments": payload_segments}
+
+    def validator(payload):
+        return _validate_llm_batch_enrichment(payload, batch_segments)
+
+    if getattr(llm_gateway, "semantic_runtime", None) is not None and callable(
+        getattr(llm_gateway, "invoke_json_with_trace", None)
+    ):
+        invocation = llm_gateway.invoke_json_with_trace(
+            "claim_batch_enrichment",
+            request,
+            validator,
+        )
+        if invocation.validation_accepted:
+            llm_gateway.finalize_semantic_invocation(invocation, accepted=True)
+            return invocation.validated_output
+        llm_gateway.finalize_semantic_invocation(
+            invocation,
+            accepted=False,
+            fallback_reason=invocation.error_code or "WEEK2_LLM_BATCH_ENRICHMENT_FALLBACK",
+        )
+        return None
+
     return llm_gateway.invoke_json(
         "claim_batch_enrichment",
-        {"ticker": ticker, "agent": agent, "segments": payload_segments},
-        lambda payload: _validate_llm_batch_enrichment(payload, batch_segments),
+        request,
+        validator,
     )
 
 

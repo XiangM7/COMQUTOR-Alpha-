@@ -24,6 +24,11 @@ from comqutor_alpha.structure_engine.claim_semantics import (
     analyze_claim_semantics,
     semantic_score_for_relation,
 )
+from comqutor_alpha.structure_engine.evidence_stance import (
+    CLASSIFIER_VERSION as EVIDENCE_STANCE_VERSION,
+    classify_evidence_stance,
+)
+from comqutor_alpha.structure_engine.evidence_stance_llm import apply_llm_stance_upgrade
 from comqutor_alpha.structure_engine.factor_normalizer import (
     extract_known_factors_from_text,
     normalize_factor_label,
@@ -256,6 +261,39 @@ def _candidate_score(
         "ai_gate_passed": ai_gate_passed,
     }
 
+# Sprint 2 (Alpha-Relative Evidence Stance Classification), Track B1: attach
+# the shadow Evidence Stance verdict onto every candidate dict IN PLACE, once
+# per (claim, alpha) pair, so candidate_scores/top_candidates/eligible_
+# candidates -- all list slices of these SAME dict objects -- read the
+# identical result rather than each re-classifying independently ("不得分别
+# 重新分类导致结果漂移"). Purely additive keys; never reads or writes score,
+# eligible, relation, or any other admission/scoring field.
+def _attach_evidence_stance(
+    candidates: list[dict[str, Any]],
+    stance_record: Mapping[str, Any],
+    taxonomy: Mapping[str, AlphaDefinition],
+) -> None:
+    for candidate in candidates:
+        stance = classify_evidence_stance(
+            record=stance_record,
+            target_alpha_id=candidate["alpha_id"],
+            candidate=candidate,
+            taxonomy=taxonomy,
+        )
+        candidate["evidence_stance"] = stance.evidence_stance
+        candidate["counter_alpha_id"] = stance.counter_alpha_id
+        candidate["stance_reason_codes"] = list(stance.stance_reason_codes)
+        candidate["stance_confidence_band"] = stance.stance_confidence_band
+        candidate["requires_manual_review"] = stance.requires_manual_review
+        candidate["evidence_stance_version"] = EVIDENCE_STANCE_VERSION
+        # B1 LLM upgrade (Sprint 2 follow-on): default provenance for every
+        # stance-bearing candidate is "deterministic, LLM never attempted".
+        # apply_llm_stance_upgrade() below overwrites these two fields only
+        # for the <=3 retained-scope candidates it actually processes.
+        candidate["stance_method"] = None
+        candidate["stance_fallback_reason"] = None
+
+
 # Sort candidate scores by descending score and ascending alpha_id for tie-breaking.
 def _sort_candidates(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(
@@ -359,11 +397,32 @@ def _apply_optional_classifier(
                     return {"match_status": "matched", "alpha_id": selected_alpha_id}
                 raise ValueError("classifier response violates the candidate contract")
 
-            response = llm_gateway.invoke_json(
-                "alpha_classifier",
-                request,
-                validate_response,
-            )
+            if getattr(llm_gateway, "semantic_runtime", None) is None or not callable(
+                getattr(llm_gateway, "invoke_json_with_trace", None)
+            ):
+                response = llm_gateway.invoke_json(
+                    "alpha_classifier",
+                    request,
+                    validate_response,
+                )
+            else:
+                invocation = llm_gateway.invoke_json_with_trace(
+                    "alpha_classifier",
+                    request,
+                    validate_response,
+                )
+                if invocation.validation_accepted:
+                    llm_gateway.finalize_semantic_invocation(invocation, accepted=True)
+                    response = invocation.validated_output
+                else:
+                    llm_gateway.finalize_semantic_invocation(
+                        invocation,
+                        accepted=False,
+                        fallback_reason=(
+                            invocation.error_code or "WEEK2_LLM_ALPHA_CLASSIFIER_FALLBACK"
+                        ),
+                    )
+                    response = None
             if response is None:
                 result["classifier"] = _classifier_metadata(True, "fallback", used=True)
                 return result
@@ -514,6 +573,27 @@ def map_claim_to_alpha(
             if top["score"] - item["score"] <= DEFAULT_SECONDARY_DELTA
         ]
 
+    # Sprint 2, Track B1: classify Evidence Stance for every candidate now
+    # that `matched_alpha` is known (needed for the supports_counter_alpha
+    # check) -- attaches additive fields onto the SAME dict objects that
+    # candidate_scores/top_candidates/eligible_candidates below reference,
+    # so every view reads one identical, non-drifting result per candidate.
+    # `candidates` is sorted eligible-first (see _sort_candidates), so
+    # eligible_candidates is always a prefix of it -- classifying
+    # candidates[:max(5, len(eligible_candidates))] fully covers
+    # candidate_scores (candidates[:5]), top_candidates (candidates[:3]),
+    # and eligible_candidates without wastefully classifying every one of
+    # the taxonomy's other alphas for every single claim.
+    stance_scope = max(5, len(eligible_candidates))
+    _attach_evidence_stance(
+        candidates[:stance_scope],
+        {**record, "matched_alpha": matched_alpha},
+        taxonomy,
+    )
+    matched_candidate = next(
+        (item for item in candidates if item["alpha_id"] == matched_alpha), None
+    ) if (status == "matched" and matched_alpha) else None
+
     result = {
         "run_id": record.get("run_id"),
         "ticker": record.get("ticker"),
@@ -548,6 +628,19 @@ def map_claim_to_alpha(
         # `secondary_alphas` are unaffected -- this is a new field only.
         "ai_alpha_matches": sorted(
             item["alpha_id"] for item in eligible_candidates if item["alpha_id"] in AI_ALPHA_IDS
+        ),
+        # Sprint 2, Track B1: the matched Alpha's own Evidence Stance
+        # verdict, copied from the same candidate dict candidate_scores/
+        # top_candidates/eligible_candidates already carry -- null (not a
+        # fabricated default) whenever match_status != "matched", per spec
+        # section 10 ("candidate-level stance必须仍存在，matched_evidence_
+        # stance可以为null").
+        "matched_evidence_stance": matched_candidate["evidence_stance"] if matched_candidate else None,
+        "matched_counter_alpha_id": matched_candidate["counter_alpha_id"] if matched_candidate else None,
+        "matched_stance_reason_codes": matched_candidate["stance_reason_codes"] if matched_candidate else None,
+        "matched_stance_confidence_band": matched_candidate["stance_confidence_band"] if matched_candidate else None,
+        "matched_stance_requires_manual_review": (
+            matched_candidate["requires_manual_review"] if matched_candidate else None
         ),
         # Unified Claim Admissibility Sprint: carried through unchanged from
         # the structured record so Activation/Conflict can read the
@@ -612,20 +705,27 @@ def build_alpha_matches_payload(
     records = structured_payload.get("records", [])
     if not isinstance(records, list):
         records = []
+    matches = map_structured_records(
+        records,
+        taxonomy,
+        classifier=classifier,
+        classifier_enabled=classifier_enabled,
+        classifier_timeout_seconds=classifier_timeout_seconds,
+        llm_gateway=llm_gateway,
+    )
+    # B1 LLM upgrade: additive post-pass over the already-computed matches.
+    # When llm_gateway is None (every existing caller's default, and
+    # Architecture Replay, which never passes one) this is a zero-cost
+    # no-op and `matches` is unchanged from map_structured_records's own
+    # output -- see evidence_stance_llm.apply_llm_stance_upgrade.
+    apply_llm_stance_upgrade(matches, taxonomy, llm_gateway=llm_gateway)
     return {
         "schema_version": SCHEMA_VERSION,
         "mapper_version": MAPPER_VERSION,
         "minimum_match_score": DEFAULT_MIN_MATCH_SCORE,
         "run_id": structured_payload.get("run_id"),
         "ticker": structured_payload.get("ticker"),
-        "matches": map_structured_records(
-            records,
-            taxonomy,
-            classifier=classifier,
-            classifier_enabled=classifier_enabled,
-            classifier_timeout_seconds=classifier_timeout_seconds,
-            llm_gateway=llm_gateway,
-        ),
+        "matches": matches,
     }
 
 # Save the alpha matches for a given run ID, loading structured agent outputs and saving the resulting matches payload.

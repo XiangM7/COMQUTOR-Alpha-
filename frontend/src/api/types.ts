@@ -175,6 +175,13 @@ export interface ResearchArtifacts {
   week2_pipeline_error_logs: boolean;
 }
 
+/** One entry of dominant_alphas/active_alphas/regime_level_alphas/
+ * candidate_alphas/blocked_alphas -- see
+ * alpha_level_classifier._alpha_summary. All five collections share this
+ * exact shape (the backend builds every one from the same summary
+ * function); the B4 fields below are optional only because a historical
+ * payload predating task B4_ACTIVATION_LEVEL_ALIGNMENT never carried them,
+ * never because a current backend response omits them selectively. */
 export interface DominantAlpha {
   alpha_id: string;
   alpha_name: string;
@@ -185,6 +192,23 @@ export interface DominantAlpha {
     evidence_count: number;
     distinct_supporting_agents: number;
   };
+  /** What the score alone (preferring uncapped_score) would reach, ignoring
+   * every qualification gate. Absent on a historical (pre-B4) payload --
+   * the UI must then fall back to `status`/`level`, never guess. */
+  target_level?: CanonicalAlphaLevel;
+  /** The actual final level after every qualification gate -- identical to
+   * `status` on a B4-classified entry. Absent on a historical payload. */
+  qualified_level?: CanonicalAlphaLevel;
+  /** True exactly when qualified_level < target_level. Never re-derive this
+   * by comparing the two levels yourself -- read it directly. */
+  is_blocked?: boolean;
+  /** Which level(s) were reached by score but denied by qualification, in
+   * fixed order (dominant, then regime_level). Empty when not blocked. */
+  blocked_from?: CanonicalAlphaLevel[];
+  /** Canonical, deduped, natural-language-free reasons (task section 9) --
+   * scoped to exactly the level(s) in blocked_from. Empty when not
+   * blocked. */
+  blocked_reason_codes?: CanonicalBlockedReason[];
 }
 
 // ---------------------------------------------------------------------------
@@ -229,6 +253,50 @@ export interface DataSanityNumericSemantics {
   semantic_role_counts: Record<string, number>;
 }
 
+// Sprint 3 (Unclassified Findings Control), Track A3. John's 5 canonical
+// reasons -- the only values `reason`/`reason_codes` ever carry, plus the
+// honest escape hatch for a finding no canonical reason resolves.
+export const UNCLASSIFIED_FINDING_REASONS = [
+  "no_alpha_match",
+  "low_confidence",
+  "generic_background",
+  "duplicate_supporting_text",
+  "no_ticker_specific_evidence",
+] as const;
+export type UnclassifiedFindingReason = (typeof UNCLASSIFIED_FINDING_REASONS)[number];
+export const UNCLASSIFIED_FINDING_REASON_UNRESOLVED = "UNCLASSIFIED_REASON_UNRESOLVED";
+
+/** One claim retained for audit that did not enter the normal classified/
+ * research finding display path (comqutor_alpha/api/unclassified_findings.py).
+ * Never re-judges Alpha mapping, Evidence Stance, or Evidence Fact grouping --
+ * every field here is read straight off alpha_matches.json/
+ * structured_agent_outputs.json/evidence_facts.json. */
+export interface UnclassifiedFinding {
+  run_id: string;
+  ticker: string;
+  claim_id: string;
+  claim: string | null;
+  evidence: string | null;
+  agent: string | null;
+  /** From structured_agent_outputs.json; null when genuinely absent, never
+   * a guessed 0/1. */
+  confidence: number | null;
+  matched_alpha: string | null;
+  secondary_alphas: string[];
+  direction: string | null;
+  reason: UnclassifiedFindingReason | typeof UNCLASSIFIED_FINDING_REASON_UNRESOLVED;
+  reason_codes: (UnclassifiedFindingReason | typeof UNCLASSIFIED_FINDING_REASON_UNRESOLVED)[];
+  diagnostic_reason_codes: string[];
+  ticker_specific: boolean;
+  duplicate_group_id: string | null;
+  evidence_fact_group_id: string | null;
+  representative_claim_id: string | null;
+  source_refs: string[];
+  source_agent_output_id: string | null;
+  claim_index: number | null;
+  display_rank: number;
+}
+
 export interface CanonicalResearchResponse {
   run_id: string;
   ticker: string | null;
@@ -250,6 +318,15 @@ export interface CanonicalResearchResponse {
   /** Additive; absent/null on a payload predating this field or a run with
    * no reported-price check. */
   data_sanity_numeric_semantics?: DataSanityNumericSemantics | null;
+  /** Sprint 3, Track A3. Absent/undefined only for a raw payload predating
+   * this field; a real current backend always sends all five, with
+   * unclassified_findings_status "unavailable" (never a fabricated "0
+   * findings") for a historical run lacking unclassified_findings.json. */
+  unclassified_findings_top20?: UnclassifiedFinding[];
+  unclassified_findings_total_count?: number | null;
+  unclassified_findings_reason_counts?: Record<string, number>;
+  unclassified_findings_status?: "ready" | "unavailable";
+  unclassified_findings_download_available?: boolean;
 }
 
 export type CanonicalResearchResult = CanonicalResearchResponse | SafeErrorEnvelope;
@@ -261,14 +338,42 @@ export type CanonicalResearchResult = CanonicalResearchResponse | SafeErrorEnvel
 export const GRAPH_EDGE_TYPES = ["causal", "supportive", "conflicting"] as const;
 export type GraphEdgeType = (typeof GRAPH_EDGE_TYPES)[number];
 
+/** "inactive"/"watch" are historical-payload-only (task
+ * B4_ACTIVATION_LEVEL_ALIGNMENT, Decision 3): a B4-classified run never
+ * produces either -- "candidate" is the sole new-output level below
+ * "active". Kept here only so an old saved payload still narrows/renders
+ * without a runtime type error. */
 export const ACTIVATION_STATUSES = [
   "inactive",
   "watch",
+  "candidate",
   "active",
   "dominant",
   "regime_level",
 ] as const;
 export type ActivationStatus = (typeof ACTIVATION_STATUSES)[number];
+
+/** The four canonical Alpha levels (task B4_ACTIVATION_LEVEL_ALIGNMENT,
+ * Decision 1) -- "blocked" is never a fifth level; it is qualification
+ * metadata (`is_blocked`/`blocked_from`) layered on top of one of these
+ * four. Mirrors graph_engine.alpha_level_classifier.CANONICAL_LEVELS --
+ * the frontend must never hardcode a fifth string here. */
+export const CANONICAL_ALPHA_LEVELS = ["candidate", "active", "dominant", "regime_level"] as const;
+export type CanonicalAlphaLevel = (typeof CANONICAL_ALPHA_LEVELS)[number];
+
+/** John's four canonical, product-facing blocked reasons (task
+ * B4_ACTIVATION_LEVEL_ALIGNMENT section 9) -- mirrors
+ * alpha_level_classifier.CANONICAL_BLOCKED_REASONS. The backend maps every
+ * underlying diagnostic code onto one of these before it ever reaches
+ * `blocked_reason_codes`; the frontend must never invent a fifth or
+ * re-derive one from `diagnostic_reason_codes` itself. */
+export const CANONICAL_BLOCKED_REASONS = [
+  "NO_LOCAL_STRUCTURE_SUPPORT",
+  "INSUFFICIENT_EVIDENCE",
+  "LOW_ENTITY_EXPOSURE",
+  "NO_TICKER_SPECIFIC_EVIDENCE",
+] as const;
+export type CanonicalBlockedReason = (typeof CANONICAL_BLOCKED_REASONS)[number];
 
 /** A Week 3 Structure Graph "factor" node -- see graph_builder._serialize_node. */
 export interface StructureGraphNode {
@@ -318,6 +423,14 @@ export interface AlphaEvidenceDetail {
   direction: string;
 }
 
+/** John's B3 gated seed lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES) --
+ * the product-authoritative vocabulary. `configured_status` is what the
+ * seed file declares for this ticker; `effective_status` is what actually
+ * applied after the fail-closed approval-completeness check and any
+ * (downgrade-only) override -- always read `effective_status` to decide
+ * what happened, never re-derive it from `configured_status` alone. */
+export type EntityExposureLifecycleStatus = "draft_shadow" | "approved_gating" | "disabled";
+
 export interface EntityExposure {
   historical_mapping: number | null;
   current_evidence: number;
@@ -325,7 +438,11 @@ export interface EntityExposure {
   final_exposure: number | null;
   seed_version: string;
   seed_effective_date: string;
+  /** @deprecated Backward-compatible alias of configured_status (task
+   * section 7/9) -- prefer configured_status/effective_status below. */
   seed_approval_status: string;
+  /** @deprecated Legacy off/shadow/enforced vocabulary -- prefer
+   * effective_status below. */
   mode: "off" | "shadow" | "enforced";
   exposure_status: "computed" | "missing_seed";
   would_block_dominant: boolean;
@@ -336,6 +453,14 @@ export interface EntityExposure {
   ticker_specific_fact_count: number;
   distinct_supporting_agent_count: number;
   reason_codes: string[];
+  /** Absent on historical payloads predating this field -- the UI must
+   * fall back gracefully (e.g. to the legacy `mode`/`seed_approval_status`
+   * fields above), never crash. */
+  owner?: string | null;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  configured_status?: EntityExposureLifecycleStatus | null;
+  effective_status?: EntityExposureLifecycleStatus | null;
 }
 
 export interface EntityAlphaExposureRecord extends EntityExposure {
@@ -405,6 +530,25 @@ export interface AlphaActivation {
   high_overlap_warning?: boolean | null;
   /** Draft/shadow Entity Exposure sidecar; null on historical payloads. */
   entity_exposure?: EntityExposure | null;
+  /** B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT) --
+   * the single authoritative classification, written by
+   * alpha_level_classifier.classify_and_rebuild_collections. All seven
+   * fields below are absent together on a historical payload predating
+   * B4; a current backend response always includes all seven. `status`
+   * above is always identical to `qualified_level` once these are
+   * present -- the frontend must read qualified_level/target_level/
+   * is_blocked directly and must never recompute a level from
+   * activation_score, and must never hardcode the 50/70/86 thresholds. */
+  target_level?: CanonicalAlphaLevel;
+  qualified_level?: CanonicalAlphaLevel;
+  is_blocked?: boolean;
+  blocked_from?: CanonicalAlphaLevel[];
+  blocked_reason_codes?: CanonicalBlockedReason[];
+  /** Full, unmapped diagnostic detail preserved for audit -- never shown
+   * as the primary blocked reason (use blocked_reason_codes for that);
+   * useful only in a collapsible/expanded detail view. */
+  diagnostic_reason_codes?: string[];
+  classification_version?: string;
 }
 
 /** Additive fields on components.local_structure_support (Structure
@@ -444,7 +588,20 @@ export interface StructureGraphResponse {
    * graphs. */
   activation_versions: Partial<Record<"v1" | "v2", GraphActivation>>;
   primary_activation_version: string | null;
+  /** Keeps its exact pre-existing meaning: dominant OR regime_level (task
+   * B4_ACTIVATION_LEVEL_ALIGNMENT section 12 -- an A2-frozen field name,
+   * never redefined). Prefer the four split collections below for any new
+   * UI that needs the five-way mutually-exclusive partition (task section
+   * 11); this field remains for backward compatibility. */
   dominant_alphas: DominantAlpha[];
+  /** B4 additive authoritative collections -- absent (undefined, never a
+   * fabricated empty array vs. "genuinely has none") only on a historical
+   * payload predating task B4_ACTIVATION_LEVEL_ALIGNMENT. A current
+   * backend response always includes all four, possibly empty. */
+  active_alphas?: DominantAlpha[];
+  regime_level_alphas?: DominantAlpha[];
+  candidate_alphas?: DominantAlpha[];
+  blocked_alphas?: DominantAlpha[];
   provenance: Record<string, unknown>;
 }
 
@@ -456,6 +613,133 @@ export type StructureGraphResult = StructureGraphResponse | SafeErrorEnvelope;
 
 export const CONFLICT_LEVELS = ["low", "medium", "medium_high", "high"] as const;
 export type ConflictLevel = (typeof CONFLICT_LEVELS)[number];
+
+// ---------------------------------------------------------------------------
+// B5 Conflict Radar Evidence UI (task B5_CONFLICT_RADAR_EVIDENCE_UI) -- see
+// conflict_engine.conflict_evidence_ui.build_conflict_evidence_ui. Purely a
+// presentation/audit layer over B1's already-final evidence_stance and B2's
+// already-computed admissibility detail: never re-derived here, never a
+// second stance classifier, never a second Evidence Fact dedup pass.
+// ---------------------------------------------------------------------------
+
+export const EVIDENCE_STANCE_VALUES = [
+  "supports_alpha",
+  "opposes_alpha",
+  "supports_counter_alpha",
+] as const;
+export type EvidenceStanceValue = (typeof EVIDENCE_STANCE_VALUES)[number];
+
+export const MISSING_EVIDENCE_REASON_CODES = [
+  "INSUFFICIENT_SUPPORTING_EVIDENCE",
+  "NO_TICKER_SPECIFIC_SUPPORTING_EVIDENCE",
+  "NO_ADMISSIBLE_SUPPORTING_POLARITY",
+] as const;
+export type MissingEvidenceReasonCode = (typeof MISSING_EVIDENCE_REASON_CODES)[number];
+
+/** One stance-filtered, fact-grouped Evidence item -- shared shape for
+ * bull_evidence/bear_evidence (evidence_stance always "supports_alpha") and
+ * counter_evidence (evidence_stance "opposes_alpha" or
+ * "supports_counter_alpha", plus counter_target_alpha_id). Never a raw,
+ * un-deduplicated claim -- always one entry per unique Evidence Fact group. */
+export interface ConflictEvidenceUIItem {
+  evidence_fact_group_id: string;
+  representative_claim_id: string;
+  member_claim_ids: string[];
+  evidence_text: string;
+  agents: string[];
+  source_agent_output_ids: string[];
+  target_alpha_id: string;
+  evidence_stance: EvidenceStanceValue;
+  /** "llm" | "deterministic_fallback" | null (LLM never attempted for this
+   * claim -- a plain deterministic classification, not a lesser LLM
+   * result). Always show this alongside the stance, never imply LLM
+   * provenance that was never attempted. */
+  stance_method: string | null;
+  evidence_stance_version: string | null;
+  stance_confidence_band: string | null;
+  ticker_specific: boolean;
+  representative_match_score: number;
+  /** Counter Evidence only: which conflict side this item counters. */
+  counter_target_alpha_id?: string;
+  /** Counter Evidence, Case B only (supports_counter_alpha): the alpha
+   * this evidence supports instead. */
+  supports_counter_alpha_id?: string | null;
+}
+
+export interface ConflictMissingEvidenceItem {
+  side: "bull" | "bear";
+  alpha_id: string;
+  missing_reason_code: MissingEvidenceReasonCode;
+  current_value: number;
+  required_value: number;
+  deficit: number;
+}
+
+/** Deliberately separate from missing_evidence (task section 7): an
+ * Activation-score shortfall is a qualification concern, never an
+ * evidence-content concern -- never render this inside a "Missing
+ * Evidence" section. */
+export interface ConflictQualificationGapItem {
+  side: "bull" | "bear";
+  alpha_id: string;
+  gap_reason_code: "ALPHA_SCORE_BELOW_THRESHOLD";
+  current_value: number | null;
+  required_value: number;
+}
+
+export interface AlphaInvalidationCondition {
+  condition_id: string;
+  condition_text: string;
+}
+
+/** approval_status "not_defined" means exactly that -- no Product Owner
+ * has approved invalidation content for this Alpha yet. Never render a
+ * fabricated condition list; show the honest "pending" state instead. */
+export interface AlphaInvalidationEntry {
+  alpha_id: string;
+  alpha_name: string | null;
+  approval_status: "approved" | "not_defined";
+  source: string | null;
+  version: string | null;
+  conditions: AlphaInvalidationCondition[];
+}
+
+/** The full B5 block attached to one conflict/candidate evaluation.
+ * Absent entirely (undefined) on a historical payload predating task
+ * B5_CONFLICT_RADAR_EVIDENCE_UI -- the UI must show "Not available for
+ * this historical run", never silently render empty sections that look
+ * like a verified "no evidence" result. */
+export interface ConflictEvidenceUI {
+  schema_version: string;
+  bull_evidence: ConflictEvidenceUIItem[];
+  bear_evidence: ConflictEvidenceUIItem[];
+  counter_evidence: ConflictEvidenceUIItem[];
+  missing_evidence: ConflictMissingEvidenceItem[];
+  qualification_gaps: ConflictQualificationGapItem[];
+  invalidation_conditions: {
+    bull_alpha: AlphaInvalidationEntry;
+    bear_alpha: AlphaInvalidationEntry;
+  };
+}
+
+/** John's B2 Conflict Evidence Admissibility gate detail -- see
+ * conflict_admissibility.AdmissibilityResult.to_dict(). Present on every
+ * fully-evaluated candidate (admitted or not); absent only when the pair
+ * never reached B2 evaluation at all (e.g. missing evidence, unresolved
+ * bull/bear role -- an earlier, coarser rejection). */
+export interface ConflictAdmissibility {
+  admissibility_version: string;
+  status: "admitted" | "candidate";
+  reason_codes: string[];
+  bull_score: number | null;
+  bear_score: number | null;
+  bull_supporting_evidence_count: number;
+  bear_supporting_evidence_count: number;
+  bull_ticker_specific_support_count: number;
+  bear_ticker_specific_support_count: number;
+  bull_supporting_fact_group_ids: string[];
+  bear_supporting_fact_group_ids: string[];
+}
 
 /** One Evidence Fact group attached to a conflict side (Evidence Integrity
  * Completion Sprint, Track B) -- see conflict_detector._structure_block. */
@@ -527,6 +811,14 @@ export interface AlphaConflict {
   shared_fact_group_ids?: string[];
   shared_fact_group_count?: number;
   shared_fact_resolution?: string;
+  /** John's B2 Conflict Evidence Admissibility gate -- always present on a
+   * conflict that reached this point (it must have passed B2 to be
+   * "admitted" at all), included here for the same "why did this qualify"
+   * transparency the UI already gives a candidate/suppressed pair. */
+  admissibility?: ConflictAdmissibility;
+  /** B5 Conflict Radar Evidence UI (additive; absent on a payload
+   * predating task B5_CONFLICT_RADAR_EVIDENCE_UI). */
+  evidence_ui?: ConflictEvidenceUI;
 }
 
 /** One bull/bear evidence entry for an admitted conflict -- additive fields
@@ -550,6 +842,22 @@ export interface ConflictCandidateEvaluation {
     alpha_a: ConflictAuditSide;
     alpha_b: ConflictAuditSide;
   };
+  /** Only present once bull/bear roles were actually resolved for this
+   * pair (present together with admissibility/evidence_ui) -- read these
+   * directly to label evidence sides; never guess which of alpha_a/
+   * alpha_b is bull from direction or ordering. */
+  bull_alpha_id?: string;
+  bear_alpha_id?: string;
+  /** Only present once the pair actually reached B2 evaluation -- absent
+   * for a pair rejected earlier (missing evidence, unresolved bull/bear
+   * role, below-activation-threshold). Read this directly to render the
+   * candidate's specific B2 gate failure; never re-derive it from
+   * reason_codes alone. */
+  admissibility?: ConflictAdmissibility;
+  /** B5 Conflict Radar Evidence UI (additive; present exactly when
+   * admissibility is -- both are attached together by the same
+   * conflict_detector call site). Absent on a historical payload. */
+  evidence_ui?: ConflictEvidenceUI;
 }
 
 export interface ConflictAuditSide {

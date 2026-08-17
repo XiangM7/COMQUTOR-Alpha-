@@ -1,0 +1,220 @@
+{
+  "schema_version": "comqutor.b4_activation_level_alignment_report.v1",
+  "b4_activation_level_alignment": "PASS",
+  "provider_calls": 0,
+  "implementation_complete": true,
+  "formal_acceptance_pending": false,
+  "formal_acceptance_note": "Unlike B3 (which needed John's sign-off on specific new seed values), B4's every numeric threshold (50.0/70.0/86.0), decision tree (Cases A-D), canonical reason set (4 reasons), and product-level UI partition (Decision 2) were supplied verbatim, pre-approved, and explicitly marked non-negotiable by the task specification itself (Decisions 1-3). This report certifies that specification was implemented and verified correctly -- it does not, and cannot, stand in for a Product Owner's independent review.",
+  "decisions_applied_verbatim_not_relitigated": {
+    "decision_1_blocked_is_qualification_metadata_not_a_5th_level": true,
+    "decision_2_five_way_mutually_exclusive_ui_partition": true,
+    "decision_3_score_below_50_unifies_old_inactive_watch_into_candidate": true
+  },
+  "existing_implementation_reused": {
+    "activation_v2_cap_logic_reused_unmodified": true,
+    "activation_v2_regime_gate_reused_unmodified": true,
+    "b3_exposure_would_block_signals_reused_unmodified": true,
+    "evidence_fact_index_untouched": true,
+    "new_thresholds_invented": false,
+    "second_activation_scorer_created": false
+  },
+  "single_authoritative_classifier": {
+    "module": "comqutor_alpha.graph_engine.alpha_level_classifier",
+    "entry_points": ["classify_alpha_level", "classify_and_rebuild_collections"],
+    "classification_version": "b4.alpha_level.v1",
+    "call_site": "graph_engine.pipeline.score_and_assemble_structure_graph, immediately after compute_run_entity_alpha_exposures and before _activation_block construction",
+    "old_status_writers_removed": [
+      "exposure_engine.compute_run_entity_alpha_exposures's 3x entry[\"status\"] = _cap_status(...) call sites (removed)",
+      "exposure_engine's dominant_alphas rebuild block under effective_mode == \"enforced\" (removed)",
+      "exposure_engine._cap_status / _LEVEL_RANK helper functions (removed, confirmed dead via repo-wide grep)"
+    ],
+    "now_sole_writer_of": ["status", "target_level", "qualified_level", "is_blocked", "blocked_from", "blocked_reason_codes", "diagnostic_reason_codes", "classification_version"]
+  },
+  "threshold_boundary_results": {
+    "active_threshold": 50.0,
+    "dominant_threshold": 70.0,
+    "regime_level_threshold": 86.0,
+    "comparison_operator": ">=  (half-open lower bound; never <= or >)",
+    "boundary_cases_verified": {
+      "49.999": "candidate",
+      "50.000": "active",
+      "69.999": "active",
+      "70.000": "dominant",
+      "85.999": "dominant",
+      "86.000": "regime_level"
+    },
+    "type_rejection_verified": ["NaN", "Infinity", "-Infinity", "bool True", "bool False", "string \"50\"", "None/missing", "out-of-range <0", "out-of-range >100"],
+    "pre_existing_activation_scorer_v2_band_bug": {
+      "found": true,
+      "description": "activation_status_band_v2's _V2_BAND_UPPER_BOUNDS uses inclusive <= at 30/50/70/85, and its own 85.0 cutoff does not match REGIME_GATE_MIN_SCORE=86.0",
+      "modified": false,
+      "reason_not_modified": "B4's level_for_score never consults this function; case analysis (cap floor of 60.0 in _apply_caps, and the activation_score==uncapped_score invariant when no caps trigger) proves this pre-existing inconsistency can never produce an incorrect final B4 classification -- only, in one narrow already-blocked-for-other-reasons case, an incomplete diagnostic list. Left untouched to minimize scope/risk per task's own instruction to fix only genuinely-found real differences."
+    }
+  },
+  "qualification_contract": {
+    "target_level_basis": "uncapped_score, falling back to activation_score only when uncapped_score is None",
+    "qualified_level_basis": "target_level plus dominant_cap_reason_codes (Activation v2, unmodified) plus regime_gate_passed/failures (Activation v2, unmodified) plus B3 entity_exposure (only when effective_status==approved_gating)",
+    "case_a_b_candidate_active_no_extra_gate": true,
+    "case_c_dominant_falls_back_to_active_on_cap_failure": true,
+    "case_d_regime_level_falls_back_to_dominant_if_only_regime_fails": true,
+    "case_d_regime_level_falls_back_to_active_if_both_fail": true,
+    "blocked_from_order_always_dominant_then_regime_level": true,
+    "never_skips_dominant_to_jump_from_regime_failure_straight_to_active": true,
+    "b4_never_modifies_activation_score_or_uncapped_score": true
+  },
+  "b3_exposure_interaction": {
+    "only_blocks_when_effective_status_is_approved_gating": true,
+    "draft_shadow_never_blocks_even_if_would_block_true": true,
+    "disabled_never_blocks_even_if_would_block_true": true,
+    "absent_exposure_record_never_blocks": true,
+    "missing_seed_under_approved_gating_fails_closed_for_both_dominant_and_regime": true,
+    "missing_seed_fails_closed_despite_would_block_flags_being_false": true
+  },
+  "canonical_reason_mapping": {
+    "canonical_reasons": ["NO_LOCAL_STRUCTURE_SUPPORT", "INSUFFICIENT_EVIDENCE", "LOW_ENTITY_EXPOSURE", "NO_TICKER_SPECIFIC_EVIDENCE"],
+    "no_fifth_reason_invented": true,
+    "unmapped_diagnostic_only_codes": ["SCORE_BELOW_REGIME_THRESHOLD", "EVIDENCE_INTEGRITY_WARNING"],
+    "raw_diagnostic_reason_codes_preserved_for_audit": true,
+    "deduped_and_stable_order": true
+  },
+  "collection_consistency": {
+    "dominant_alphas_keeps_pre_existing_meaning": "dominant OR regime_level (A2-frozen field, unchanged for backward compatibility)",
+    "new_collections": ["active_alphas", "regime_level_alphas", "candidate_alphas", "blocked_alphas"],
+    "new_collections_are_sibling_top_level_fields": true,
+    "new_collections_never_nested_inside_activation_block": true,
+    "ui_five_way_partition_is_mutually_exclusive": true,
+    "ui_partition_priority_order": ["is_blocked (wins first)", "qualified_level==regime_level", "qualified_level==dominant", "qualified_level==active", "else candidate"],
+    "backend_qualified_counts_independent_of_ui_partitioning": true
+  },
+  "b2_compatibility": {
+    "supports_alpha_definition_unchanged": true,
+    "evidence_fact_dedup_unchanged": true,
+    "bull_bear_evidence_counts_unchanged": true,
+    "ticker_specific_admissibility_unchanged": true,
+    "b2_50_point_threshold_unchanged": true,
+    "conflict_score_formula_unchanged": true,
+    "declared_pairs_unchanged": true,
+    "main_conflict_arbitration_unchanged": true,
+    "admissible_statuses_change": {
+      "before": ["watch", "active", "dominant", "regime_level"],
+      "after": ["watch", "candidate", "active", "dominant", "regime_level"],
+      "type": "additive only, \"watch\" never removed",
+      "reasoning": "B2's own independent score>=50 admissibility check is strictly stronger than the old status-based floor, so this change can only ever produce a more specific downstream rejection reason for an already-doomed-to-fail pair, never a different admission outcome",
+      "observed_effect_in_test_week4_golden_closure_QQQ_fixture": "A001/A501 and A003/A501 pairs no longer trip the early terse BELOW_ACTIVATION_THRESHOLD gate (their alphas now classify as candidate, which is admissible); they instead reach B2's own richer per-side check and are rejected there with more specific reasons (BULL_SCORE_BELOW_THRESHOLD / INSUFFICIENT_BULL_SUPPORTING_EVIDENCE plus BEAR_SCORE_BELOW_THRESHOLD). Outcome (suppressed) is unchanged; test updated to assert the new, more specific reason codes."
+    }
+  },
+  "real_saved_run": {
+    "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+    "ticker": "NVDA",
+    "available": true,
+    "verification_method": "classify_and_rebuild_collections applied directly to the real, unmodified saved activation payload (zero confound) -- activation_score/uncapped_score are the real production numbers, never a re-derived or replayed value",
+    "focus_alphas": {
+      "A301": {"activation_score": 84.5319, "uncapped_score": 84.5319, "target_level": "dominant", "qualified_level": "dominant", "is_blocked": false, "blocked_from": []},
+      "A101": {"activation_score": 63.1069, "uncapped_score": 63.1069, "target_level": "active", "qualified_level": "active", "is_blocked": false, "blocked_from": []},
+      "A304": {"activation_score": 61.2757, "uncapped_score": 61.2757, "target_level": "active", "qualified_level": "active", "is_blocked": false, "blocked_from": []}
+    },
+    "activation_score_and_uncapped_score_unchanged_for_all_10_alphas": true,
+    "every_non_b4_field_byte_identical_across_all_10_alphas": true,
+    "collections_after": {
+      "dominant_alphas": ["A301"],
+      "active_alphas": ["A001", "A101", "A103", "A304"],
+      "regime_level_alphas": [],
+      "candidate_alphas": ["A003", "A102", "A201", "A501", "A601"],
+      "blocked_alphas": []
+    },
+    "no_naturally_occurring_exact_boundary_score_in_this_run": "honestly reported -- none of the 10 real alphas land exactly on 50.000/70.000/86.000; exhaustive boundary correctness is covered by tests/test_b4_activation_level_alignment.py Section A instead (synthetic, exact)",
+    "b2_conflict_pair_verification": {
+      "method": "detect_alpha_conflicts run against the B4-classified payload (real, unmodified activation_score) and the run's real alpha_matches.json, compared field-by-field against the originally-persisted conflicts.json",
+      "A301__A304": {"before_and_after_identical": true, "conflict_score": 32.0131, "conflict_level": "medium", "main_conflict": true, "bull_alpha_id": "A301", "bear_alpha_id": "A304", "evidence_strength": 0.6146},
+      "A101__A304": {"before_and_after_identical": true, "conflict_score": 30.1956, "conflict_level": "medium", "main_conflict": false, "bull_alpha_id": "A101", "bear_alpha_id": "A304", "evidence_strength": 0.5475},
+      "conflicts_count_before": 2,
+      "conflicts_count_after": 2
+    },
+    "supplementary_raw_rebuild_replay_check": {
+      "purpose": "additional full-pipeline (structured->matches->graph->conflicts) end-to-end sanity check via the Provider-zero raw-rebuild diagnostic replay mode",
+      "provider_calls": 0,
+      "tradingagents_calls": 0,
+      "market_data_calls": 0,
+      "database_writes": 0,
+      "source_raw_artifact_unchanged": true,
+      "claim_factor_edge_counts_identical": true,
+      "conflict_admission_outcome_identical_despite_confound_below": true,
+      "confound_found_and_root_caused": {
+        "observation": "activation_score for every alpha shifted uniformly by exactly -5.0 under this replay mode",
+        "root_cause": "run_structure_replay does not pass the original run's run_timestamp/as_of through to score_and_assemble_structure_graph; activation_scorer_v2._recency_component then falls back to RECENCY_FALLBACK_SCORE=50.0 (contribution 5.0) instead of the original run's fresh age_days=0 (recency_raw=100, contribution 10.0) -- a difference of exactly 5.0 at the recency component's 0.10 weight",
+        "attributable_to_b4": false,
+        "attributable_to": "a pre-existing characteristic of the raw-rebuild replay tool (comqutor_alpha/replay/pipeline.py), not modified by B4 or any task in this session",
+        "why_this_does_not_undermine_the_verification": "the primary, confound-free verification (direct classify_and_rebuild_collections on the real unmodified payload, and detect_alpha_conflicts against the real unmodified alpha_matches.json) uses the true production numbers throughout and needed no replay at all; this supplementary check additionally shows the qualitative conflict outcome survives even under this unrelated numeric confound"
+      }
+    },
+    "live_end_to_end_check": {
+      "purpose": "confirm the full pipeline -> DB persistence -> Research API read path (get_persisted_structure_graph) correctly carries all B4 fields for a genuinely fresh run, since run e3eb3909 itself has zero DB rows (a pre-existing, already-documented, out-of-scope gap from the B2 diagnostic task)",
+      "method": "fresh offline NVDA run via run_research_request (w5 demo fixtures, 0 provider calls), persisted to a real in-memory SQLite DB, read back via get_persisted_structure_graph",
+      "post_status": "completed",
+      "get_graph_status": "ok",
+      "all_alphas_have_target_level_and_qualified_level": true,
+      "status_always_equals_qualified_level": true,
+      "all_five_collections_present_as_top_level_fields": true
+    }
+  },
+  "test_results": {
+    "tests/test_b4_activation_level_alignment.py": "54/54 passed (new; sections A-H)",
+    "targeted_regression_15_files": "443/443 passed (test_activation_scorer_v2, test_activation_scorer, test_exposure_engine, test_entity_alpha_exposure_productization, test_b3_entity_exposure_gated_states, test_conflict_detector, test_week4_persistence, test_week3_nvda_sanity, test_week3_qqq_sanity, test_week4_nvda_conflict_sanity, test_week4_qqq_conflict_sanity, test_week4_golden_closure, test_run_audit_v2, test_structure_correctness_sprint, test_artifact_export_and_api)",
+    "full_repository_regression": "3321 passed, 3 failed, 47 skipped, 69 subtests passed, 548.45s (0:09:08); all 3 failures verbatim-match the already-documented pre-existing/unrelated failures from this session's own B3 report (written before any B4 edit), zero new B4-caused failures",
+    "frontend_full_suite": "165/165 passed, 17 files (159 pre-B4 baseline + 6 new: 4 in AlphaCard.test.tsx, 2 in StructureGraphPage.test.tsx)",
+    "frontend_typecheck": "npx tsc --noEmit -p . clean",
+    "frontend_build": "npm run build clean",
+    "ruff_b4_touched_files": "clean on all 12 touched/new backend+test files",
+    "ruff_full_repository": "13 pre-existing findings in 6 files, none touched by B4 (alpha_library/alpha_loader.py, api/routes_alpha_library.py, adapters/tradingagents_output_writer.py, alpha_library/alpha_schema.py, research_profiles.py, structure_engine/claim_semantics.py, structure_engine/structure_schema.py, and their tests) -- left untouched, out of scope",
+    "real_bugs_found_and_fixed_during_this_task": [
+      "routes_research.py's get_persisted_structure_graph built an explicit narrow reconstruction dict that silently omitted active_alphas/regime_level_alphas/candidate_alphas/blocked_alphas -- data was correct in the persisted file/DB row, only the API read-path dropped it; fixed by adding the same graph_json.get(key, []) pattern already used for dominant_alphas",
+      "an unused local variable (score) in classify_alpha_level and an unsorted import in pipeline.py, both caught by ruff and fixed"
+    ]
+  },
+  "known_failures": {
+    "pre_existing_unrelated_carried_forward_from_b3_report": [
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ],
+    "new_b4_caused_failures_found": [],
+    "new_b4_caused_failures_remaining_after_fix": []
+  },
+  "report_created": "docs/audit_artifacts/b4_activation_level_alignment_report.md",
+  "files_modified": [
+    "comqutor_alpha/exposure_engine.py",
+    "comqutor_alpha/graph_engine/pipeline.py",
+    "comqutor_alpha/conflict_engine/conflict_schema.py",
+    "comqutor_alpha/graph_engine/graph_schema.py",
+    "comqutor_alpha/storage/db/week4_persistence.py",
+    "comqutor_alpha/api/routes_research.py",
+    "tests/test_entity_alpha_exposure_productization.py",
+    "tests/test_week4_golden_closure.py",
+    "frontend/src/api/types.ts",
+    "frontend/src/components/AlphaCard.tsx",
+    "frontend/src/components/AlphaCard.test.tsx",
+    "frontend/src/pages/StructureGraphPage.tsx",
+    "frontend/src/pages/StructureGraphPage.test.tsx"
+  ],
+  "files_created": [
+    "comqutor_alpha/graph_engine/alpha_level_classifier.py",
+    "tests/test_b4_activation_level_alignment.py",
+    "docs/audit_artifacts/b4_activation_level_alignment_report.md",
+    "docs/audit_artifacts/b4_activation_level_alignment_report.json"
+  ],
+  "not_touched": [
+    "B1 stance ontology / LLM semantic authority / deterministic fail-soft rules",
+    "B2 supporting evidence count / ticker-specific evidence requirement / admissibility thresholds / ConflictScore formula / main conflict arbitration",
+    "B3 Exposure formula / seed values / qualification-ceiling computation (would_block_dominant / would_block_regime_level themselves)",
+    "Activation v2 numeric weights / cap thresholds / regime gate thresholds",
+    "Alpha taxonomy",
+    "Evidence Fact Index deduplication algorithm",
+    "Week2LLMGateway",
+    "B5, A3, A4, J3 human review, cold-start history fix, repository cleanup, old artifact deletion, B1 semantic canary, John-20 gold audit"
+  ],
+  "explicit_non_goals_confirmed_not_done": true,
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO"
+}

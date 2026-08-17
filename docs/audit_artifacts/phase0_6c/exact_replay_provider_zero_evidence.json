@@ -1,0 +1,30 @@
+{
+  "schema_version": "phase0_6c_exact_replay_provider_zero_evidence_v1",
+  "phase": "0.6C",
+  "test": "tests/replay/test_replay_provider_zero.py::test_exact_replay_never_recomputes_semantics_or_calls_external_services",
+  "guarded_calls": {
+    "adapt_run_outputs": 0,
+    "adapt_raw_agent_outputs": 0,
+    "build_alpha_matches_payload": 0,
+    "build_extracted_structures_payload": 0,
+    "Week2LLMGateway.invoke_json": 0,
+    "Week2LLMGateway.invoke_json_with_trace": 0,
+    "TradingAgentsGraph.propagate": 0,
+    "provider_factory": 0,
+    "socket_connect": 0,
+    "http_connect": 0,
+    "http_request": 0,
+    "market_data_fetch": 0,
+    "database_engine_construction": 0,
+    "database_persist_run": 0
+  },
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "market_data_calls": 0,
+  "completed_network_connections": 0,
+  "redis_connections": 0,
+  "database_connections": 0,
+  "database_writes": 0,
+  "successful_exact_replay_under_guards": true,
+  "status": "PASS"
+}

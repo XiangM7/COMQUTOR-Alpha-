@@ -1,0 +1,36 @@
+# COMQUTOR Alpha -- Invalidation Conditions registry (task
+# B5_CONFLICT_RADAR_EVIDENCE_UI, section 8/9).
+#
+# "What would invalidate this Alpha's thesis?" -- product content, never a
+# deterministic count, never LLM-generated at runtime. Each entry must carry
+# its own approval provenance (source/version/approval_status); an Alpha
+# absent from this file (or present only with approval_status: not_defined)
+# has NO product-approved invalidation conditions yet -- the UI/API must
+# show that honestly, never fabricate content to fill the gap.
+#
+# A101: John's exact first-batch conditions (task section 9), transcribed
+# verbatim -- not reworded, not expanded, not derived from
+# alpha_taxonomy_v1.yaml's own (older, unversioned, unattributed, and
+# differently-worded) invalidation_conditions list for A101. That taxonomy
+# list predates this registry and was never carried through an explicit
+# source/version/approval_status approval step, so per task section 10 it
+# is not treated as a formal approval source here -- see this task's own
+# report for the NON_AUTHORITATIVE_DRAFT_PROPOSALS note.
+#
+# Every other Alpha: no formal Product Owner approval exists yet for this
+# task. approval_status: not_defined, conditions: [] -- never populated
+# with an Agent's own guess, regardless of how plausible a guess might seem.
+
+schema_version: alpha_invalidation_conditions.v1
+
+alphas:
+  A101:
+    alpha_name: AI Expansion
+    version: v0.1
+    source: John
+    approval_status: approved
+    conditions:
+      - hyperscaler capex slows
+      - GPU demand weakens
+      - revenue growth decelerates
+      - AI demand already priced in

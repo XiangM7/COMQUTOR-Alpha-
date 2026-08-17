@@ -1,0 +1,122 @@
+{
+  "schema_version": "comqutor.b2_conflict_evidence_admissibility_report.v1",
+  "b2_conflict_evidence_admissibility": "PASS",
+  "provider_calls": 0,
+  "admissibility_implemented": true,
+  "admissibility_version": "week4.conflict_admissibility.b2.v1",
+  "alpha_score_threshold": 50.0,
+  "min_supporting_evidence_per_side": 2,
+  "min_ticker_specific_support_per_side": 1,
+  "stance_counted_as_support": "supports_alpha",
+  "stance_method_affects_admission": false,
+  "evidence_dedup_source": "evidence_fact_index.group_evidence_candidates (shared, unmodified)",
+  "ticker_specific_signal_source": "activation_scorer_v2._is_ticker_specific",
+  "ticker_specific_signal_verified": "CASE_A_REAL_SIGNAL_REUSED",
+  "unverified_ticker_signal_fails_closed": true,
+  "unverified_ticker_signal_reason_code": "TICKER_SPECIFIC_EVIDENCE_UNVERIFIED",
+  "unverified_ticker_signal_reason_code_reachable_in_current_wiring": false,
+  "candidate_conflict_can_be_main": false,
+  "candidate_conflict_can_be_main_note": "Structural, not filtered: a CANDIDATE pair's conflict object is never returned by _evaluate_candidate, so it can never enter the list _conflict_sort_key ranks.",
+  "conflict_score_formula_changed": false,
+  "main_conflict_ranking_formula_changed": false,
+  "conflict_count_meaning_changed": false,
+  "conflict_count_now_equals": "admitted_conflict_count",
+  "new_additive_fields": [
+    "conflict.admissibility / candidate_evaluations[].admissibility",
+    "run_audit.json: admitted_conflict_count, candidate_conflict_count",
+    "run_audit.json: conflict_summary.per_pair[].admissibility, conflict_summary.admitted_conflict_count, conflict_summary.candidate_conflict_count",
+    "conflicts export: candidate_conflicts, admitted_conflict_count, candidate_conflict_count"
+  ],
+  "db_schema_change": "additive only -- week4_persistence._CANDIDATE_FIELDS/_CONFLICT_FIELDS extended with 'admissibility'; no new table",
+  "second_conflict_artifact_created": false,
+  "b1_modified": false,
+  "activation_modified": false,
+  "b3_b4_b5_a3_a4_modified": false,
+  "conflict_ui_modified": false,
+  "replay_provider_calls": 0,
+  "test_results": {
+    "test_conflict_admissibility.py": "18/18 passed (new -- 16 lettered cases + dedicated ticker-signal test)",
+    "test_b2_admissibility_integration.py": "1/1 passed (new -- required end-to-end integration test)",
+    "test_conflict_detector.py": "146/146 passed",
+    "test_week4_persistence.py": "72/72 passed",
+    "test_week4_nvda_conflict_sanity.py": "8/8 passed",
+    "test_week4_qqq_conflict_sanity.py": "8/8 passed",
+    "test_conflict_evidence_fact_integration.py": "7/7 passed",
+    "test_week4_golden_closure.py": "8/8 passed",
+    "artifact_export_and_routes_research_consumer_suites": "75/75 passed",
+    "b2_focused_regression_total": "343/343 passed",
+    "full_repository_offline_suite": "3251 passed, 3 failed, 47 skipped, 3301 collected (ran to completion, 536.86s -- slow because an unrelated pre-existing test makes real Yahoo Finance/py-yfinance network calls, independent of B2)",
+    "full_sweep_failures_pre_existing_unrelated": [
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline (documented pre-existing in b1_llm_evidence_stance_upgrade_report.md, not touched)"
+    ],
+    "full_sweep_failures_found_and_fixed": [
+      "tests/test_week4_pipeline_api.py::test_pipeline_happy_path_completes_week1_through_4",
+      "tests/test_week4_pipeline_api.py::test_conflicts_api_survives_deleted_local_run_directory",
+      "tests/test_activation_scorer_v2.py::test_mutation_conflict_formula_min_to_max_still_fails_existing_tests",
+      "tests/test_evidence_stance_integration.py::test_29_conflict_evidence_audit_carries_stance_via_used_in_conflict"
+    ],
+    "full_sweep_failures_left_failing_by_decision": [
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ]
+  },
+  "demo_seed_finding": {
+    "summary": "scripts/seed_w5_demo.py deliberately requires NVDA's local demo case to show an admitted A101__A304 main_conflict (QQQ's demo case is already allowed zero, by design). Under B2, NVDA's approved fixture no longer clears admission -- same evidence-volume root cause as real_saved_run_result below.",
+    "classification": "product_decision_not_code_correctness",
+    "action_taken": "surfaced_to_user_not_silently_resolved",
+    "user_decision": "leave_failing_report_only",
+    "files_touched": []
+  },
+  "ruff_clean": true,
+  "real_saved_run_used": true,
+  "real_saved_run_source": "tests/test_week3_nvda_sanity._nvda_offline_outputs() via test_real_nvda_w41_to_w42_persistence_sanity's real deterministic pipeline",
+  "real_saved_run_result": {
+    "declared_pair_count": 6,
+    "admitted_count": 0,
+    "suppressed_count": 3,
+    "rejected_count": 3,
+    "main_conflict": null,
+    "candidate_pairs": [
+      {
+        "pair": "A101-A304",
+        "reasons": ["INSUFFICIENT_BULL_SUPPORTING_EVIDENCE", "BEAR_SCORE_BELOW_THRESHOLD", "INSUFFICIENT_BEAR_SUPPORTING_EVIDENCE"]
+      },
+      {
+        "pair": "A304-A601",
+        "reasons": ["BULL_SCORE_BELOW_THRESHOLD", "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE", "NO_BULL_TICKER_SPECIFIC_SUPPORT", "BEAR_SCORE_BELOW_THRESHOLD", "INSUFFICIENT_BEAR_SUPPORTING_EVIDENCE"]
+      }
+    ],
+    "pairs_never_reaching_b2": ["A001-A501", "A003-A501", "A301-A304", "A501-A601"]
+  },
+  "manufactured_fixture_to_force_prettier_result": false,
+  "upstream_stages_tuned_to_force_admission": false,
+  "report_created": "docs/audit_artifacts/b2_conflict_evidence_admissibility_report.md",
+  "files_modified": [
+    "comqutor_alpha/conflict_engine/conflict_detector.py",
+    "comqutor_alpha/storage/db/week4_persistence.py",
+    "comqutor_alpha/api/artifact_export.py",
+    "comqutor_alpha/api/routes_research.py",
+    "tests/fixtures/week4_conflict_cases.py",
+    "tests/test_conflict_detector.py",
+    "tests/test_week4_persistence.py",
+    "tests/test_week4_nvda_conflict_sanity.py",
+    "tests/test_week4_qqq_conflict_sanity.py",
+    "tests/test_conflict_evidence_fact_integration.py",
+    "tests/test_week4_golden_closure.py",
+    "tests/test_week4_pipeline_api.py",
+    "tests/test_activation_scorer_v2.py",
+    "tests/test_evidence_stance_integration.py"
+  ],
+  "files_created": [
+    "comqutor_alpha/conflict_engine/conflict_admissibility.py",
+    "tests/test_conflict_admissibility.py",
+    "tests/test_b2_admissibility_integration.py",
+    "docs/audit_artifacts/b2_conflict_evidence_admissibility_report.md",
+    "docs/audit_artifacts/b2_conflict_evidence_admissibility_report.json"
+  ],
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO",
+  "next_step": "B3_ENTITY_EXPOSURE_GATED_STATES"
+}

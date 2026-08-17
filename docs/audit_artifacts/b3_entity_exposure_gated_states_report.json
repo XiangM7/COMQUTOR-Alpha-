@@ -1,0 +1,176 @@
+{
+  "schema_version": "comqutor.b3_entity_exposure_gated_states_report.v1",
+  "b3_entity_exposure_gated_states": "PASS",
+  "provider_calls": 0,
+  "implementation_complete": true,
+  "formal_acceptance_pending": false,
+  "formal_acceptance_note": "John's approval (seed_version=v0.1, approved_by=John, approved_at=2026-08-11) was supplied as this task's own input and is encoded in the seed file; any future ticker addition remains subject to the same fail-closed approval-completeness gate.",
+  "existing_implementation_reused": {
+    "exposure_formula_unchanged": true,
+    "exposure_weights": {"historical_mapping": 0.50, "current_evidence": 0.30, "agent_confidence": 0.20},
+    "evidence_fact_index_reused_not_reimplemented": true,
+    "dominant_exposure_threshold": 0.30,
+    "regime_exposure_threshold": 0.60,
+    "existing_exposure_threshold_policy_reused": true,
+    "new_thresholds_invented": false
+  },
+  "schema_change": {
+    "new_database_table": false,
+    "new_database_column": false,
+    "new_fields_persisted_via": "existing provenance_json column (nested b3_lifecycle key), because this repo's migration runner only supports CREATE TABLE IF NOT EXISTS, never ALTER TABLE",
+    "seed_yaml_schema_version": "per-ticker lifecycle block: seed_version/owner/approved_by/approved_at/status/exposures (was: flat {alpha_id: value})",
+    "manifest_schema_version_bump": "entity_alpha_exposure_seed_manifest.v1 -> v2",
+    "manifest_narrowed_to_file_level_identity_only": true
+  },
+  "john_seed_six_tickers_exact_match": true,
+  "john_seed_approved_tickers": ["NVDA", "SNDK", "TSM", "MSFT", "QQQ", "AMD"],
+  "old_eleven_ticker_draft_leaked_into_approved_seed": false,
+  "non_reissued_draft_tickers_kept_as_draft_shadow": ["GOOGL", "AMZN", "AVGO", "SMCI", "SPY"],
+  "missing_alpha_defaults_to_zero": false,
+  "unlisted_alpha_behavior": "historical_mapping=None, exposure_status=missing_seed, never coerced to 0",
+  "approval_metadata": {
+    "seed_version": "v0.1",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "required_fields_for_gating": ["seed_version", "owner", "approved_by", "approved_at"],
+    "incomplete_approval_can_be_upgraded": false,
+    "incomplete_approval_fail_closed_reason_codes": ["APPROVAL_METADATA_INCOMPLETE", "GATING_NOT_ALLOWED"]
+  },
+  "lifecycle_vocabulary": {
+    "canonical": ["draft_shadow", "approved_gating", "disabled"],
+    "legacy_internal_mode_mapping": {"draft_shadow": "shadow", "approved_gating": "enforced", "disabled": "off"},
+    "env_var_can_upgrade_draft_or_disabled": false,
+    "env_var_can_downgrade_approved_gating": true,
+    "legacy_env_var": "COMQUTOR_ENTITY_EXPOSURE_MODE",
+    "new_canonical_env_var": "COMQUTOR_ENTITY_EXPOSURE_STATUS"
+  },
+  "shadow_invariants": {
+    "exposure_computed_and_visible": true,
+    "activation_score_unchanged": true,
+    "activation_status_unchanged": true,
+    "dominant_membership_unchanged": true,
+    "conflict_outcomes_unchanged": true
+  },
+  "approved_gating_behavior": {
+    "numeric_activation_score_ever_modified": false,
+    "qualification_status_may_be_capped": true,
+    "real_run_qualification_evaluated_for_alpha_count": 7,
+    "real_run_status_actually_changed_by_capping": 0,
+    "note": "ceiling never bound below the already-computed status for this specific real evidence; a dedicated synthetic parametrized test proves the ceiling does bind and change status when final_exposure is genuinely low"
+  },
+  "disabled_invariants": {
+    "produces_per_alpha_records": false,
+    "affects_activation_score": false,
+    "affects_activation_status": false,
+    "affects_dominant_membership": false,
+    "affects_conflict": false,
+    "effective_status_still_auditable_at_artifact_top_level": true
+  },
+  "b1_b2_compatibility": {
+    "exposure_reinterprets_evidence_stance": false,
+    "exposure_reimplements_claim_dedup": false,
+    "exposure_changes_b2_supporting_evidence_count": false,
+    "exposure_changes_conflict_score": false,
+    "exposure_changes_b2_admissibility": false,
+    "verification_method": "byte-identical conflicts/main_conflict/admissibility comparison across no-exposure baseline vs draft_shadow vs approved_gating, both on a synthetic fixture and the real saved run"
+  },
+  "artifact_api_ui_consistency": {
+    "entity_alpha_exposures_json_has_full_lifecycle_provenance": true,
+    "structure_graph_embedded_exposure_matches_artifact_record": true,
+    "run_audit_entity_exposure_section_matches_artifact": true,
+    "api_endpoint_exposes_lifecycle_fields": true,
+    "frontend_types_match_backend_vocabulary": true,
+    "alphacard_displays_three_canonical_states": true,
+    "alphacard_safe_on_historical_payload_missing_new_fields": true,
+    "backward_compatible_fields_kept": ["mode", "seed_approval_status", "enforcement_allowed"],
+    "backward_compatible_field_mapping": {
+      "seed_approval_status": "now sources the ticker's configured_status string (was: global manifest approval_status)",
+      "enforcement_allowed": "now (effective_status == approved_gating) (was: global manifest boolean)"
+    }
+  },
+  "real_saved_run": {
+    "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+    "available": true,
+    "ticker": "NVDA",
+    "is_one_of_johns_approved_tickers": true,
+    "reprocess_provider_calls": 0,
+    "reprocessed_activation_matches_originally_persisted_exactly": true,
+    "reprocessed_baseline_conflicts_match_originally_persisted_conflicts_json_exactly": true,
+    "main_conflict_all_three_states": "A101__A304 and A301__A304 admitted, main=A301__A304, identical across no-exposure/draft_shadow/approved_gating/disabled",
+    "states_tested": {
+      "draft_shadow": {"records_count": 10, "scores_unchanged": true, "statuses_unchanged": true, "dominant_unchanged": true, "conflicts_identical_to_baseline": true},
+      "approved_gating": {"records_count": 10, "scores_unchanged": true, "statuses_unchanged": true, "dominant_unchanged": true, "conflicts_identical_to_baseline": true, "b2_admissibility_identical": true},
+      "disabled": {"records_count": 0, "scores_unchanged": true, "statuses_unchanged": true, "dominant_unchanged": true, "conflicts_identical_to_baseline": true}
+    }
+  },
+  "test_results": {
+    "test_exposure_engine.py": "29/29 passed (pure formula core, untouched)",
+    "test_exposure_rubric_contract.py": "unaffected, part of 659 baseline (confirmed independent of seed_loader via import-graph check)",
+    "test_entity_alpha_exposure_productization.py": "21/21 passed (rewritten for per-ticker API)",
+    "test_b3_entity_exposure_gated_states.py": "16/16 passed (new)",
+    "frontend_AlphaCard.test.tsx": "17/17 passed (3 new)",
+    "frontend_full_suite": "159/159 passed, 17 files",
+    "frontend_typecheck": "npx tsc -b clean",
+    "frontend_build": "npm run build clean",
+    "broader_exposure_adjacent_baseline": "659/659 passed, identical count to pre-B3 baseline",
+    "ruff": "clean on all 8 touched/new backend files",
+    "real_bug_found_and_fixed_during_this_task": "week4_persistence.py _whitelist_entity_exposure exact-set validator rejected the 5 new fields, breaking every real run's Week 4 conflict persistence stage silently (status: partial); found via the broader regression sweep, fixed by additively extending the whitelist (same pattern as B2's admissibility field)",
+    "full_repository_regression": "2 full runs, ~9 min each, 3317 collected (47 skipped + rest): run 1 = 4 failed/3266 passed (3 known + 1 new B3-caused false positive, found and fixed); run 2 (after fix) = 4 failed/3266 passed (3 known + 1 unrelated flaky live-network test, confirmed via isolated rerun); net zero new reproducible B3-caused failures"
+  },
+  "known_failures": {
+    "pre_existing_unrelated": [
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline"
+    ],
+    "left_failing_by_prior_explicit_user_decision_unrelated_to_b3": [
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ],
+    "flaky_unrelated_live_network_test_seen_once": {
+      "test": "tests/test_deepseek_reasoning.py::TestDeepSeekLiveStructuredOutput::test_v4_flash_returns_structured_output",
+      "evidence_it_is_not_b3_caused": "zero code relationship to any file this task touched; absent from run 1 and from this session's earlier B2 full-suite baseline; passed 14/14 when the file was re-run in isolation immediately after; opens a real HTTPS connection to api.deepseek.com per its own class name (TestDeepSeekLiveStructuredOutput)"
+    },
+    "new_b3_caused_failures_found": [
+      "tests/test_week3_nvda_sanity.py::test_graph_is_not_converted_into_a_buy_sell_hold_conclusion (naive substring check false-positived on the pre-existing EXPOSURE_BELOW_REGIME_THRESHOLD reason code once NVDA legitimately reached approved_gating for the first time; 'threshold' contains 'hold')"
+    ],
+    "new_b3_caused_failures_remaining_after_fix": []
+  },
+  "report_created": "docs/audit_artifacts/b3_entity_exposure_gated_states_report.md",
+  "files_modified": [
+    "comqutor_alpha/exposure/seed_loader.py",
+    "comqutor_alpha/exposure_engine.py",
+    "comqutor_alpha/graph_engine/pipeline.py",
+    "comqutor_alpha/api/routes_research.py",
+    "comqutor_alpha/storage/db/exposure_persistence.py",
+    "comqutor_alpha/storage/db/week4_persistence.py",
+    "comqutor_alpha/config/entity_alpha_exposure_seed_v0.1.yaml",
+    "comqutor_alpha/config/entity_alpha_exposure_seed_manifest_v0.1.yaml",
+    "tests/test_entity_alpha_exposure_productization.py",
+    "tests/test_week3_nvda_sanity.py",
+    "frontend/src/api/types.ts",
+    "frontend/src/components/AlphaCard.tsx",
+    "frontend/src/components/AlphaCard.test.tsx"
+  ],
+  "files_created": [
+    "tests/test_b3_entity_exposure_gated_states.py",
+    "docs/audit_artifacts/b3_entity_exposure_gated_states_report.md",
+    "docs/audit_artifacts/b3_entity_exposure_gated_states_report.json"
+  ],
+  "not_touched": [
+    "B1 stance ontology / LLM semantic authority / deterministic fail-soft rules",
+    "B2 supporting evidence count / ticker-specific evidence requirement / admissibility thresholds",
+    "ConflictScore formula",
+    "main conflict arbitration",
+    "Activation v2 numeric weights",
+    "Alpha taxonomy",
+    "section 5.1 evidence provenance",
+    "Week2LLMGateway",
+    "Evidence Fact Index deduplication algorithm",
+    "comqutor_alpha/exposure/rubric_contract.py (confirmed independent)",
+    "B4 Active/Dominant/Regime-level/Candidate/Blocked full UI classification"
+  ],
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO"
+}

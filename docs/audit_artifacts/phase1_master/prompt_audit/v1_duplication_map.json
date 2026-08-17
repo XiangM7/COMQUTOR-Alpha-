@@ -1,0 +1,50 @@
+{
+  "schema_version": "comqutor.phase1_master.prompt_audit.v1_duplication_map.v1",
+  "finding_A_report_reappears_in_candidates": {
+    "claim": "The full report is sent once as agent_report, then large portions of the same report text are sent again inside candidate_segments as claim_hint/evidence_hint/exact_quote.",
+    "measured": true,
+    "candidate_segment_text_chars": 37455,
+    "raw_report_chars": 13887,
+    "coverage_ratio_of_report_length": 2.6971
+  },
+  "finding_B_claim_hint_equals_evidence_hint": {
+    "claim": "claim_hint and evidence_hint are byte-identical for effectively every candidate segment, because build_candidate_segments() falls back to `evidence = claim` whenever extract_claim_segments_with_audit does not supply a distinct evidence field (it never does today).",
+    "measured": true,
+    "identical_segment_count": 163,
+    "total_segment_count": 163,
+    "identical_pct": 100.0,
+    "wasted_chars_from_this_duplication_alone": 17993
+  },
+  "finding_C_schema_explained_multiple_times": {
+    "claim": "Schema explained in prose once, JSON example once, JSON-Schema object once.",
+    "measured": true,
+    "verdict": "NOT_OBSERVED",
+    "detail": "The frozen v1 prompt has exactly one prose rules section (CLAIM RULES, 1177 chars) and exactly one JSON skeleton (OUTPUT SHAPE, 730 chars). There is no separate JSON-Schema object. This assumption is REJECTED for the fixed instruction."
+  },
+  "finding_D_factor_vocabulary_bloat": {
+    "claim": "Factor vocabulary carries description/alias/explanation/examples/metadata.",
+    "measured": true,
+    "verdict": "NOT_OBSERVED",
+    "detail": "factor_vocabulary is already the minimal id-only list FACTOR_ALIASES.keys() -- 13 short strings, 248 chars total (0.251% of the request). Aliases/descriptions exist in FACTOR_ALIASES's VALUES but are never sent to the Provider today. This assumption is REJECTED."
+  },
+  "finding_E_examples_too_long": {
+    "claim": "Examples are too long.",
+    "measured": true,
+    "examples_chars": 842,
+    "examples_pct_of_total": 0.85,
+    "verdict": "NOT_MATERIAL",
+    "detail": "Examples are 842 chars, 0.854% of the total request. Even fully removed, this would not materially change the total. Not a root-cause contributor at this report size."
+  },
+  "finding_F_unneeded_metadata": {
+    "claim": "Run audit metadata / hashes / output paths / timestamps sent to the model.",
+    "measured": true,
+    "verdict": "PARTIALLY_OBSERVED",
+    "detail": "identity_metadata includes source_report_sha256, prompt_sha256, and boundary marker strings the model is told to copy verbatim rather than compute or omit. 668 chars (0.677% of total) -- small in absolute terms but 100% deterministically reconstructable caller-side; none of it needs to round-trip through the model."
+  },
+  "finding_G_llm_asked_to_return_computable_fields": {
+    "claim": "exact_quote can be recovered from report[start:end] instead of being asked of the model.",
+    "measured": true,
+    "verdict": "CONFIRMED",
+    "detail": "validate_shadow_bundle already independently recomputes and enforces report[start:end] == exact_quote (structured_output_shadow_schema.py _validate_source_spans). The model's copy of exact_quote is therefore pure duplication with zero added authority -- the deterministic validator was already the source of truth before this audit."
+  }
+}

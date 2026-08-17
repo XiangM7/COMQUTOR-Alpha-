@@ -1,11 +1,63 @@
-import type { AlphaActivation, AlphaEvidenceDetail, LocalStructureSupportComponent } from "../api/types";
+import type {
+  AlphaActivation,
+  AlphaEvidenceDetail,
+  EntityExposure,
+  EntityExposureLifecycleStatus,
+  LocalStructureSupportComponent,
+} from "../api/types";
+
+// John's B3 gated seed lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES):
+// the frontend never recomputes or infers this status -- it only ever
+// labels whatever effective_status the backend already resolved (or, for
+// a historical payload predating that field, the legacy off/shadow/
+// enforced `mode`). Never re-derive from thresholds/qualification fields.
+const LIFECYCLE_STATUS_LABELS: Record<EntityExposureLifecycleStatus, string> = {
+  draft_shadow: "Draft shadow",
+  approved_gating: "Approved gating",
+  disabled: "Disabled",
+};
+
+const LIFECYCLE_STATUS_DESCRIPTIONS: Record<EntityExposureLifecycleStatus, string> = {
+  draft_shadow: "Displayed only — not applied to Activation",
+  approved_gating: "Participates in qualification",
+  disabled: "Seed not participating",
+};
+
+const LEGACY_MODE_TO_STATUS: Record<string, EntityExposureLifecycleStatus> = {
+  off: "disabled",
+  shadow: "draft_shadow",
+  enforced: "approved_gating",
+};
+
+function resolveLifecycleStatus(exposure: EntityExposure): EntityExposureLifecycleStatus | null {
+  if (exposure.effective_status) {
+    return exposure.effective_status;
+  }
+  // Historical payload predating effective_status -- fall back to the
+  // legacy mode field rather than crash or show nothing.
+  return LEGACY_MODE_TO_STATUS[exposure.mode] ?? null;
+}
 
 const LEVEL_ICONS: Record<string, string> = {
   inactive: "○", // hollow circle
   watch: "◐", // half circle
+  candidate: "◌", // dotted circle
   active: "●", // filled circle
   dominant: "★", // star
   regime_level: "✲", // asterisk-like
+};
+
+// John's four canonical, product-facing blocked reasons (task
+// B4_ACTIVATION_LEVEL_ALIGNMENT section 9) -- the frontend never invents
+// friendly text for anything outside this fixed set; an unrecognized code
+// (should never happen, since the backend only ever emits these four in
+// blocked_reason_codes) falls back to the raw code itself rather than
+// hiding it.
+const BLOCKED_REASON_LABELS: Record<string, string> = {
+  NO_LOCAL_STRUCTURE_SUPPORT: "No supporting Structure Graph edges",
+  INSUFFICIENT_EVIDENCE: "Insufficient independent evidence",
+  LOW_ENTITY_EXPOSURE: "Entity Exposure below required threshold",
+  NO_TICKER_SPECIFIC_EVIDENCE: "No ticker-specific evidence",
 };
 
 const ACTIVATION_V2_VERSION_PREFIX = "activation.v2.";
@@ -134,6 +186,55 @@ export function AlphaCard({
           <dt>Activation level</dt>
           <dd className={`activation-level-label activation-level-${status}`}>{status}</dd>
         </div>
+        {/* B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT):
+            qualified_level/target_level/is_blocked are read directly from the
+            backend and never recomputed here -- "blocked" is qualification
+            metadata layered on qualified_level, never a fifth level string. */}
+        {activation && activation.qualified_level != null && activation.target_level != null ? (
+          <>
+            {activation.target_level !== activation.qualified_level ? (
+              <div className="alpha-card-row">
+                <dt>Target level</dt>
+                <dd>
+                  {activation.target_level} — what the evidence alone supports, before
+                  qualification
+                </dd>
+              </div>
+            ) : null}
+            {activation.is_blocked ? (
+              <div className="alpha-card-row alpha-card-row-warning alpha-card-row-blocked">
+                <dt>Blocked</dt>
+                <dd>
+                  Held at {activation.qualified_level}, blocked from{" "}
+                  {(activation.blocked_from ?? []).join(", ") || "a higher level"}
+                  {activation.blocked_reason_codes && activation.blocked_reason_codes.length > 0 ? (
+                    <>
+                      {" — "}
+                      {activation.blocked_reason_codes
+                        .map((code) => BLOCKED_REASON_LABELS[code] ?? code)
+                        .join(", ")}
+                    </>
+                  ) : null}
+                  {activation.diagnostic_reason_codes && activation.diagnostic_reason_codes.length > 0 ? (
+                    <details className="alpha-card-diagnostic-reasons">
+                      <summary>Full diagnostic detail</summary>
+                      <ul>
+                        {activation.diagnostic_reason_codes.map((code) => (
+                          <li key={code}>{code}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
+                </dd>
+              </div>
+            ) : null}
+          </>
+        ) : activation ? (
+          <div className="alpha-card-row alpha-card-row-detail">
+            <dt>Classification</dt>
+            <dd>Legacy classification — this run predates the B4 alpha-level classifier</dd>
+          </div>
+        ) : null}
         <div className="alpha-card-row">
           <dt>Direction</dt>
           <dd>{direction ?? "Not available"}</dd>
@@ -159,10 +260,38 @@ export function AlphaCard({
         ) : null}
         {entityExposure ? (
           <>
-            {entityExposure.seed_approval_status === "draft" ? (
+            {(() => {
+              const lifecycleStatus = resolveLifecycleStatus(entityExposure);
+              return (
+                <div className="alpha-card-row alpha-card-row-detail">
+                  <dt>Seed lifecycle</dt>
+                  <dd>
+                    {lifecycleStatus ? LIFECYCLE_STATUS_LABELS[lifecycleStatus] : "Not available"}
+                    {lifecycleStatus ? ` — ${LIFECYCLE_STATUS_DESCRIPTIONS[lifecycleStatus]}` : ""}
+                  </dd>
+                </div>
+              );
+            })()}
+            {entityExposure.configured_status &&
+            entityExposure.effective_status &&
+            entityExposure.configured_status !== entityExposure.effective_status ? (
               <div className="alpha-card-row alpha-card-row-warning">
-                <dt>Seed approval</dt>
-                <dd>Draft seed — pending product-owner approval</dd>
+                <dt>Gating downgraded</dt>
+                <dd>
+                  Configured as {LIFECYCLE_STATUS_LABELS[entityExposure.configured_status]}, but{" "}
+                  {entityExposure.reason_codes.length > 0
+                    ? `fell back due to: ${entityExposure.reason_codes.join(", ")}`
+                    : "fell back for this run"}
+                </dd>
+              </div>
+            ) : null}
+            {(entityExposure.owner || entityExposure.approved_by || entityExposure.approved_at) ? (
+              <div className="alpha-card-row alpha-card-row-detail">
+                <dt>Approved by</dt>
+                <dd>
+                  {entityExposure.approved_by ?? entityExposure.owner ?? "Not available"}
+                  {entityExposure.approved_at ? ` (${entityExposure.approved_at})` : ""}
+                </dd>
               </div>
             ) : null}
             <div className="alpha-card-row alpha-card-row-detail">
@@ -185,15 +314,7 @@ export function AlphaCard({
               <dt>Seed version</dt>
               <dd>{entityExposure.seed_version}</dd>
             </div>
-            <div className="alpha-card-row alpha-card-row-detail">
-              <dt>Seed status</dt>
-              <dd>{entityExposure.seed_approval_status}</dd>
-            </div>
-            <div className="alpha-card-row alpha-card-row-detail">
-              <dt>Exposure mode</dt>
-              <dd>{entityExposure.mode}</dd>
-            </div>
-            {entityExposure.mode === "shadow" ? (
+            {resolveLifecycleStatus(entityExposure) === "draft_shadow" ? (
               <div className="alpha-card-row alpha-card-row-warning">
                 <dt>Qualification effect</dt>
                 <dd>Shadow only — Not applied to Activation</dd>

@@ -1,0 +1,611 @@
+{
+  "schema_version": "phase0_6a_worktree_start_snapshot_v1",
+  "phase": "0.6A",
+  "captured_at": "2026-08-05T18:35:25.294636+00:00",
+  "branch": "comqutor-structure-layer",
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "staged_files": [],
+  "tracked_dirty_files": [
+    {
+      "status": " M",
+      "path": "comqutor_alpha/api/routes_research.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/graph_engine/activation_scorer_v2.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/replay/pipeline.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/storage/file_store.py"
+    },
+    {
+      "status": " M",
+      "path": "comqutor_alpha/structure_engine/alpha_mapper.py"
+    },
+    {
+      "status": " M",
+      "path": "frontend/src/pages/StructureGraphPage.tsx"
+    },
+    {
+      "status": " M",
+      "path": "tests/test_ai_alpha_mapper_discrimination.py"
+    },
+    {
+      "status": " M",
+      "path": "tests/test_week3_security_hardening.py"
+    }
+  ],
+  "untracked_files": [
+    "comqutor_alpha/api/artifact_export.py",
+    "comqutor_alpha/audit/__init__.py",
+    "comqutor_alpha/audit/ticker_consistency.py",
+    "comqutor_alpha/evaluation/evidence_review_sample.py",
+    "comqutor_alpha/structure_engine/evidence_stance.py",
+    "docs/adr/ADR-001-semantic-authority.md",
+    "docs/adr/ADR-002-tradingagents-boundary.md",
+    "docs/adr/ADR-003-replay-semantics.md",
+    "docs/adr/ADR-004-evidence-stance-provenance.md",
+    "docs/audit_artifacts/alpha_mapper_gap_matrix.csv",
+    "docs/audit_artifacts/artifact_completeness_case_results.csv",
+    "docs/audit_artifacts/artifact_completeness_summary.json",
+    "docs/audit_artifacts/deterministic_core_boundary_audit.json",
+    "docs/audit_artifacts/development_plan_compliance_matrix.csv",
+    "docs/audit_artifacts/development_plan_source_inventory.json",
+    "docs/audit_artifacts/evidence_review_sample_validation.json",
+    "docs/audit_artifacts/evidence_stance_behavior_invariants.json",
+    "docs/audit_artifacts/evidence_stance_case_results.csv",
+    "docs/audit_artifacts/evidence_stance_summary.json",
+    "docs/audit_artifacts/frontend_run_switch_verification.json",
+    "docs/audit_artifacts/llm_call_site_inventory.json",
+    "docs/audit_artifacts/llm_prompt_inventory.csv",
+    "docs/audit_artifacts/phase0_5/phase0_5_completion_report.md",
+    "docs/audit_artifacts/phase0_5/phase0_5_gate_report.json",
+    "docs/audit_artifacts/phase0_5/phase0_original_file_hashes.json",
+    "docs/audit_artifacts/phase0_5/preexisting_dirty_file_manifest.json",
+    "docs/audit_artifacts/phase0_5/reconciled_compliance_matrix.csv",
+    "docs/audit_artifacts/phase0_5/source_artifact_integrity_after.json",
+    "docs/audit_artifacts/phase0_5/source_artifact_integrity_before.json",
+    "docs/audit_artifacts/phase0_5/worktree_start_snapshot.json",
+    "docs/audit_artifacts/proposed_phase_1_3_plan.json",
+    "docs/audit_artifacts/provider_call_baseline.json",
+    "docs/audit_artifacts/replay_identity_case_results.csv",
+    "docs/audit_artifacts/replay_identity_consistency.json",
+    "docs/audit_artifacts/replay_semantic_reproducibility.json",
+    "docs/audit_artifacts/semantic_pipeline_call_graph.json",
+    "docs/audit_artifacts/sndk_tsm_forensic_report.json",
+    "docs/audit_artifacts/structure_extractor_gap_matrix.csv",
+    "docs/audit_artifacts/structured_adapter_gap_matrix.csv",
+    "docs/audit_artifacts/ticker_consistency_case_results.csv",
+    "docs/audit_artifacts/ticker_consistency_summary.json",
+    "docs/audit_artifacts/tradingagents_modification_audit.csv",
+    "docs/development_plan_llm_boundary_audit.md",
+    "docs/development_plan_llm_boundary_audit_consolidated.md",
+    "docs/development_plan_llm_boundary_audit_reconciliation.md",
+    "docs/evidence_review_instructions.md",
+    "docs/evidence_review_sample.csv",
+    "docs/evidence_review_sample_manifest.json",
+    "docs/evidence_review_sample_records.json",
+    "docs/evidence_stance_and_review_sample_report.md",
+    "docs/run_identity_and_artifact_export_sprint_report.md",
+    "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+    "docs/specs/README.md",
+    "docs/specs/current_vs_target_semantic_architecture.md",
+    "docs/specs/development_plan_v1.0_manifest.json",
+    "docs/specs/development_plan_v1.0_reference_index.md",
+    "docs/specs/future_semantic_phase_contract.md",
+    "docs/specs/product_decisions_and_unknowns.md",
+    "docs/specs/semantic_authority_matrix.csv",
+    "frontend/src/pages/StructureGraphPage.test.tsx",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/alpha_activations.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/alpha_matches.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/artifact_manifest.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/conflict_results.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/conflicts.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/entity_alpha_exposures.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/evidence_facts.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/evidence_stance_audit.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/extracted_structures.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/metadata.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/run_audit.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/structure_graph.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/structured_agent_outputs.json",
+    "outputs/review_sample_replays/review-sample-0cb43bae-1a4d-4003-bb29-55d420498842/summary.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/alpha_activations.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/alpha_matches.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/artifact_manifest.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/conflict_results.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/conflicts.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/entity_alpha_exposures.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/evidence_facts.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/evidence_stance_audit.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/extracted_structures.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/metadata.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/run_audit.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/structure_graph.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/structured_agent_outputs.json",
+    "outputs/review_sample_replays/review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/summary.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/alpha_activations.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/alpha_matches.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/artifact_manifest.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/conflict_results.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/conflicts.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/entity_alpha_exposures.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/evidence_facts.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/evidence_stance_audit.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/extracted_structures.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/metadata.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/run_audit.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/structure_graph.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/structured_agent_outputs.json",
+    "outputs/review_sample_replays/review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6/summary.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/alpha_activations.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/alpha_matches.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/artifact_manifest.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/conflict_results.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/conflicts.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/entity_alpha_exposures.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/evidence_facts.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/evidence_stance_audit.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/extracted_structures.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/metadata.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/run_audit.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/structure_graph.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/structured_agent_outputs.json",
+    "outputs/review_sample_replays/review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805/summary.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/alpha_activations.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/alpha_matches.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/artifact_manifest.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/conflict_results.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/conflicts.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/entity_alpha_exposures.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/evidence_facts.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/evidence_stance_audit.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/extracted_structures.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/metadata.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/run_audit.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/structure_graph.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/structured_agent_outputs.json",
+    "outputs/review_sample_replays/review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/summary.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/alpha_activations.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/alpha_matches.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/artifact_manifest.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/conflict_results.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/conflicts.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/entity_alpha_exposures.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/evidence_facts.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/evidence_stance_audit.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/extracted_structures.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/metadata.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/run_audit.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/structure_graph.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/structured_agent_outputs.json",
+    "outputs/review_sample_replays/review-sample-e434f80b-e4d0-4b09-9471-d84532659de5/summary.json",
+    "scripts/audit_llm_boundary.py",
+    "scripts/build_development_plan_llm_boundary_audit.py",
+    "scripts/export_evidence_review_sample.py",
+    "scripts/verify_phase0_5_spec_freeze.py",
+    "tests/test_artifact_export_and_api.py",
+    "tests/test_evidence_review_sample.py",
+    "tests/test_evidence_stance_classifier.py",
+    "tests/test_evidence_stance_integration.py",
+    "tests/test_replay_identity_correction.py",
+    "tests/test_ticker_consistency_audit.py"
+  ],
+  "git_status_short": [
+    " M comqutor_alpha/api/routes_research.py",
+    " M comqutor_alpha/graph_engine/activation_scorer_v2.py",
+    " M comqutor_alpha/replay/pipeline.py",
+    " M comqutor_alpha/storage/file_store.py",
+    " M comqutor_alpha/structure_engine/alpha_mapper.py",
+    " M frontend/src/pages/StructureGraphPage.tsx",
+    " M tests/test_ai_alpha_mapper_discrimination.py",
+    " M tests/test_week3_security_hardening.py",
+    "?? comqutor_alpha/api/artifact_export.py",
+    "?? comqutor_alpha/audit/",
+    "?? comqutor_alpha/evaluation/evidence_review_sample.py",
+    "?? comqutor_alpha/structure_engine/evidence_stance.py",
+    "?? docs/adr/",
+    "?? docs/audit_artifacts/alpha_mapper_gap_matrix.csv",
+    "?? docs/audit_artifacts/artifact_completeness_case_results.csv",
+    "?? docs/audit_artifacts/artifact_completeness_summary.json",
+    "?? docs/audit_artifacts/deterministic_core_boundary_audit.json",
+    "?? docs/audit_artifacts/development_plan_compliance_matrix.csv",
+    "?? docs/audit_artifacts/development_plan_source_inventory.json",
+    "?? docs/audit_artifacts/evidence_review_sample_validation.json",
+    "?? docs/audit_artifacts/evidence_stance_behavior_invariants.json",
+    "?? docs/audit_artifacts/evidence_stance_case_results.csv",
+    "?? docs/audit_artifacts/evidence_stance_summary.json",
+    "?? docs/audit_artifacts/frontend_run_switch_verification.json",
+    "?? docs/audit_artifacts/llm_call_site_inventory.json",
+    "?? docs/audit_artifacts/llm_prompt_inventory.csv",
+    "?? docs/audit_artifacts/phase0_5/",
+    "?? docs/audit_artifacts/proposed_phase_1_3_plan.json",
+    "?? docs/audit_artifacts/provider_call_baseline.json",
+    "?? docs/audit_artifacts/replay_identity_case_results.csv",
+    "?? docs/audit_artifacts/replay_identity_consistency.json",
+    "?? docs/audit_artifacts/replay_semantic_reproducibility.json",
+    "?? docs/audit_artifacts/semantic_pipeline_call_graph.json",
+    "?? docs/audit_artifacts/sndk_tsm_forensic_report.json",
+    "?? docs/audit_artifacts/structure_extractor_gap_matrix.csv",
+    "?? docs/audit_artifacts/structured_adapter_gap_matrix.csv",
+    "?? docs/audit_artifacts/ticker_consistency_case_results.csv",
+    "?? docs/audit_artifacts/ticker_consistency_summary.json",
+    "?? docs/audit_artifacts/tradingagents_modification_audit.csv",
+    "?? docs/development_plan_llm_boundary_audit.md",
+    "?? docs/development_plan_llm_boundary_audit_consolidated.md",
+    "?? docs/development_plan_llm_boundary_audit_reconciliation.md",
+    "?? docs/evidence_review_instructions.md",
+    "?? docs/evidence_review_sample.csv",
+    "?? docs/evidence_review_sample_manifest.json",
+    "?? docs/evidence_review_sample_records.json",
+    "?? docs/evidence_stance_and_review_sample_report.md",
+    "?? docs/run_identity_and_artifact_export_sprint_report.md",
+    "?? docs/specs/",
+    "?? frontend/src/pages/StructureGraphPage.test.tsx",
+    "?? outputs/",
+    "?? scripts/audit_llm_boundary.py",
+    "?? scripts/build_development_plan_llm_boundary_audit.py",
+    "?? scripts/export_evidence_review_sample.py",
+    "?? scripts/verify_phase0_5_spec_freeze.py",
+    "?? tests/test_artifact_export_and_api.py",
+    "?? tests/test_evidence_review_sample.py",
+    "?? tests/test_evidence_stance_classifier.py",
+    "?? tests/test_evidence_stance_integration.py",
+    "?? tests/test_replay_identity_correction.py",
+    "?? tests/test_ticker_consistency_audit.py"
+  ],
+  "git_diff_name_status": [
+    "M\tcomqutor_alpha/api/routes_research.py",
+    "M\tcomqutor_alpha/graph_engine/activation_scorer_v2.py",
+    "M\tcomqutor_alpha/replay/pipeline.py",
+    "M\tcomqutor_alpha/storage/file_store.py",
+    "M\tcomqutor_alpha/structure_engine/alpha_mapper.py",
+    "M\tfrontend/src/pages/StructureGraphPage.tsx",
+    "M\ttests/test_ai_alpha_mapper_discrimination.py",
+    "M\ttests/test_week3_security_hardening.py"
+  ],
+  "git_diff_stat": [
+    " comqutor_alpha/api/routes_research.py              | 450 ++++++++++++++++++++-",
+    " .../graph_engine/activation_scorer_v2.py           |  27 ++",
+    " comqutor_alpha/replay/pipeline.py                  | 177 +++++++-",
+    " comqutor_alpha/storage/file_store.py               |  12 +",
+    " comqutor_alpha/structure_engine/alpha_mapper.py    |  65 +++",
+    " frontend/src/pages/StructureGraphPage.tsx          |  46 ++-",
+    " tests/test_ai_alpha_mapper_discrimination.py       |  10 +-",
+    " tests/test_week3_security_hardening.py             |   7 +-",
+    " 8 files changed, 775 insertions(+), 19 deletions(-)"
+  ],
+  "git_diff_check": {
+    "returncode": 0,
+    "output": []
+  },
+  "outputs_runs_summary": {
+    "file_count": 133,
+    "exists": true
+  },
+  "outputs_replays_summary": {
+    "file_count": 108,
+    "exists": true
+  },
+  "phase0_files": [
+    {
+      "relative_path": "docs/development_plan_llm_boundary_audit.md",
+      "size_bytes": 28649,
+      "sha256": "b683e875f71bd246db4cec6479bf9e42b6ddbc38c70e8f09eec61b7deb967e82",
+      "mtime": "2026-08-05T17:37:40.274516+00:00",
+      "mtime_ns": 1785951460274516350
+    },
+    {
+      "relative_path": "docs/audit_artifacts/development_plan_source_inventory.json",
+      "size_bytes": 5556,
+      "sha256": "351785f8c6ef710b3cf183043b6ee05e1d993c14962e757254e9252f8a70c9eb",
+      "mtime": "2026-08-05T17:28:10.107007+00:00",
+      "mtime_ns": 1785950890107007118
+    },
+    {
+      "relative_path": "docs/audit_artifacts/semantic_pipeline_call_graph.json",
+      "size_bytes": 9374,
+      "sha256": "1626d8b06412eeb2049a495a0838a545a5bae4d2e114be15df57928bed2d9a7c",
+      "mtime": "2026-08-05T17:28:37.525027+00:00",
+      "mtime_ns": 1785950917525027233
+    },
+    {
+      "relative_path": "docs/audit_artifacts/llm_call_site_inventory.json",
+      "size_bytes": 9604,
+      "sha256": "5e8112f693a166234b7eab73c0ba5f7440e05c822ae6813e3f6bce20e006f13e",
+      "mtime": "2026-08-05T17:29:14.473951+00:00",
+      "mtime_ns": 1785950954473950742
+    },
+    {
+      "relative_path": "docs/audit_artifacts/llm_prompt_inventory.csv",
+      "size_bytes": 5128,
+      "sha256": "3081e459f599a785deef0466ef18b37cbc305f2985f4130de64734d59616ba13",
+      "mtime": "2026-08-05T17:29:33.933459+00:00",
+      "mtime_ns": 1785950973933459130
+    },
+    {
+      "relative_path": "docs/audit_artifacts/provider_call_baseline.json",
+      "size_bytes": 6245,
+      "sha256": "df16f290c7430dff71e288f6f6131997a12b4728c80be26873aa8f11e27491ef",
+      "mtime": "2026-08-05T17:30:00.865131+00:00",
+      "mtime_ns": 1785951000865131405
+    },
+    {
+      "relative_path": "docs/audit_artifacts/structured_adapter_gap_matrix.csv",
+      "size_bytes": 2367,
+      "sha256": "af71e2b39582ad802a83db5ccd9c669d980d73eaaf765d6a8e266b24b69971d1",
+      "mtime": "2026-08-05T17:30:11.047781+00:00",
+      "mtime_ns": 1785951011047781145
+    },
+    {
+      "relative_path": "docs/audit_artifacts/alpha_mapper_gap_matrix.csv",
+      "size_bytes": 1638,
+      "sha256": "a4a09366efeb5214a5b734cb1c87516dec8871e095129d3cc1ecaf073284fcd5",
+      "mtime": "2026-08-05T17:30:18.736353+00:00",
+      "mtime_ns": 1785951018736352579
+    },
+    {
+      "relative_path": "docs/audit_artifacts/structure_extractor_gap_matrix.csv",
+      "size_bytes": 5327,
+      "sha256": "bff086e86a2b45c591b690f0a7695385eddf3d2f1a661ec6167bbb7b329deec9",
+      "mtime": "2026-08-05T17:30:38.133888+00:00",
+      "mtime_ns": 1785951038133888158
+    },
+    {
+      "relative_path": "docs/audit_artifacts/tradingagents_modification_audit.csv",
+      "size_bytes": 4676,
+      "sha256": "bd0f3777f929faa3fbf490ab99e5a421da3704430d4067ff62e53a9d5ede4ea4",
+      "mtime": "2026-08-05T17:31:01.994622+00:00",
+      "mtime_ns": 1785951061994621739
+    },
+    {
+      "relative_path": "docs/audit_artifacts/deterministic_core_boundary_audit.json",
+      "size_bytes": 8912,
+      "sha256": "7672c8af56fca497fe0ad0c6e630a87a95030c2b890769cd0e3347691d5b2480",
+      "mtime": "2026-08-05T17:31:30.277774+00:00",
+      "mtime_ns": 1785951090277774014
+    },
+    {
+      "relative_path": "docs/audit_artifacts/replay_semantic_reproducibility.json",
+      "size_bytes": 5009,
+      "sha256": "15298198df59c69b13db4d3f5a36b8d2157509f32b08819bdefa65d276a7967c",
+      "mtime": "2026-08-05T17:31:47.829161+00:00",
+      "mtime_ns": 1785951107829161188
+    },
+    {
+      "relative_path": "docs/audit_artifacts/development_plan_compliance_matrix.csv",
+      "size_bytes": 8127,
+      "sha256": "9f6a9a31e68fa2a005bfa1e1075c62872564c54c7faee0f246b467b9c6f88f37",
+      "mtime": "2026-08-05T17:32:29.872581+00:00",
+      "mtime_ns": 1785951149872580997
+    },
+    {
+      "relative_path": "docs/audit_artifacts/proposed_phase_1_3_plan.json",
+      "size_bytes": 8326,
+      "sha256": "0774acc8046ee12d1718a463b2c30781ca6f60ad00a2d179117f49f30cb9453b",
+      "mtime": "2026-08-05T17:33:01.240231+00:00",
+      "mtime_ns": 1785951181240231118
+    },
+    {
+      "relative_path": "scripts/audit_llm_boundary.py",
+      "size_bytes": 5856,
+      "sha256": "62cd92099bd825acf1c6c8dba09f6d3c55e8a72432d3039fad64a0c1911b15c7",
+      "mtime": "2026-08-05T17:33:34.344599+00:00",
+      "mtime_ns": 1785951214344599218
+    }
+  ],
+  "phase0_missing": [],
+  "phase0_5_files": [
+    {
+      "relative_path": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+      "size_bytes": 28198,
+      "sha256": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+      "mtime": "2026-08-05T18:06:12.225933+00:00",
+      "mtime_ns": 1785953172225933397
+    },
+    {
+      "relative_path": "docs/specs/development_plan_v1.0_manifest.json",
+      "size_bytes": 709,
+      "sha256": "c3e0e53863f58b63788ed90238d81fa2af232e2d8be4e8de54d22fff84e5a355",
+      "mtime": "2026-08-05T18:07:59.143626+00:00",
+      "mtime_ns": 1785953279143625654
+    },
+    {
+      "relative_path": "docs/specs/development_plan_v1.0_reference_index.md",
+      "size_bytes": 9261,
+      "sha256": "d503f7049dc81a1b0442443dc2e7ab2308f918685a5ed697999cf94ec36a6957",
+      "mtime": "2026-08-05T18:07:59.431790+00:00",
+      "mtime_ns": 1785953279431789816
+    },
+    {
+      "relative_path": "docs/specs/README.md",
+      "size_bytes": 2182,
+      "sha256": "a5fb86d5284282bdee9819ef2a61ec94560a301241de3be50aa180d7b60e5e8b",
+      "mtime": "2026-08-05T18:07:59.305171+00:00",
+      "mtime_ns": 1785953279305171248
+    },
+    {
+      "relative_path": "docs/specs/semantic_authority_matrix.csv",
+      "size_bytes": 11428,
+      "sha256": "fa256fac6f819917f17fe909b3057e5eef9264edf9bfd9473cf54fb874d04d54",
+      "mtime": "2026-08-05T18:13:16.804448+00:00",
+      "mtime_ns": 1785953596804448195
+    },
+    {
+      "relative_path": "docs/specs/current_vs_target_semantic_architecture.md",
+      "size_bytes": 4875,
+      "sha256": "351b7832dcba3252da5e3ed229f4da8df8c64202cf438c6cd9c7072ec6206ca0",
+      "mtime": "2026-08-05T18:25:54.831921+00:00",
+      "mtime_ns": 1785954354831921341
+    },
+    {
+      "relative_path": "docs/specs/future_semantic_phase_contract.md",
+      "size_bytes": 5808,
+      "sha256": "a1d171423265c186bae04a60dc98668448add1d95c966931eb0a840069f85c1f",
+      "mtime": "2026-08-05T18:13:17.072907+00:00",
+      "mtime_ns": 1785953597072906804
+    },
+    {
+      "relative_path": "docs/specs/product_decisions_and_unknowns.md",
+      "size_bytes": 4948,
+      "sha256": "41beaa19f16c5f3c21e2976bd51ebf111e5225b9e8ddd0e89fb41b326658f069",
+      "mtime": "2026-08-05T18:13:17.205515+00:00",
+      "mtime_ns": 1785953597205514895
+    },
+    {
+      "relative_path": "docs/adr/ADR-001-semantic-authority.md",
+      "size_bytes": 5457,
+      "sha256": "d78f572304d3ca016103f94075bff8ff3602bbd3979785cd9c130f4086dc7570",
+      "mtime": "2026-08-05T18:10:46.019258+00:00",
+      "mtime_ns": 1785953446019258485
+    },
+    {
+      "relative_path": "docs/adr/ADR-002-tradingagents-boundary.md",
+      "size_bytes": 2994,
+      "sha256": "b1125cc89ba2ae6b3f93916a8875748bb456883f286af548c1857e790f4b2c73",
+      "mtime": "2026-08-05T18:25:54.951757+00:00",
+      "mtime_ns": 1785954354951756685
+    },
+    {
+      "relative_path": "docs/adr/ADR-003-replay-semantics.md",
+      "size_bytes": 3482,
+      "sha256": "c8e7a781c345de7645d4c2be48b7770ed1d3211823fc90119ef105d2a0a97f35",
+      "mtime": "2026-08-05T18:25:55.071800+00:00",
+      "mtime_ns": 1785954355071799694
+    },
+    {
+      "relative_path": "docs/adr/ADR-004-evidence-stance-provenance.md",
+      "size_bytes": 1934,
+      "sha256": "9db7ec3c76f15582ce6f77a95721bd9e57663abc0a760376c61a66e7e9d1a0ef",
+      "mtime": "2026-08-05T18:25:00.058342+00:00",
+      "mtime_ns": 1785954300058342373
+    },
+    {
+      "relative_path": "docs/development_plan_llm_boundary_audit_reconciliation.md",
+      "size_bytes": 7402,
+      "sha256": "d63591bc8b99fb922464acfc5b85eba82a9fe88d2053d30b9108d5995118aea6",
+      "mtime": "2026-08-05T18:26:46.332448+00:00",
+      "mtime_ns": 1785954406332448351
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/worktree_start_snapshot.json",
+      "size_bytes": 18577,
+      "sha256": "28978a76a3dc193603a629c428ac63a3e6c5235d57a4bdda867e4215da1252d4",
+      "mtime": "2026-08-05T18:13:51.133580+00:00",
+      "mtime_ns": 1785953631133579636
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/preexisting_dirty_file_manifest.json",
+      "size_bytes": 64425,
+      "sha256": "45679f6787f636872d71eb3a00f0f0e0c2f369cad2f3ee5a409658be3065a277",
+      "mtime": "2026-08-05T18:05:38.157205+00:00",
+      "mtime_ns": 1785953138157204852
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/reconciled_compliance_matrix.csv",
+      "size_bytes": 5118,
+      "sha256": "9f77a79cf83d7f1d265dbad02be457eb9d128ddbb672ad4c9276095f5622f05d",
+      "mtime": "2026-08-05T18:09:20.302523+00:00",
+      "mtime_ns": 1785953360302522697
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/phase0_original_file_hashes.json",
+      "size_bytes": 4614,
+      "sha256": "ae048e7ac11eff1733e7301771200f721e55c2f4c9de2195ec08a77337e68399",
+      "mtime": "2026-08-05T18:05:38.158767+00:00",
+      "mtime_ns": 1785953138158767087
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/source_artifact_integrity_before.json",
+      "size_bytes": 98436,
+      "sha256": "3099f41735add357e1d28417f1b6121e35dbca0b61dfc2bef14ddd2a2211dd3c",
+      "mtime": "2026-08-05T18:05:38.158569+00:00",
+      "mtime_ns": 1785953138158569047
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/source_artifact_integrity_after.json",
+      "size_bytes": 98812,
+      "sha256": "a0cc43ab75f79ccc7dd6cdd667835043a923b3c9654b40cf2a6ca43e453c6d10",
+      "mtime": "2026-08-05T18:23:44.288733+00:00",
+      "mtime_ns": 1785954224288733223
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/phase0_5_gate_report.json",
+      "size_bytes": 3472,
+      "sha256": "8797408e31bf118a41e685dfe06a8163a4d9b7f35be4f860879f2149e8710378",
+      "mtime": "2026-08-05T18:24:44.503471+00:00",
+      "mtime_ns": 1785954284503470816
+    },
+    {
+      "relative_path": "docs/audit_artifacts/phase0_5/phase0_5_completion_report.md",
+      "size_bytes": 4234,
+      "sha256": "2f2f7a1f7c6a5b93f86a1dbd8212713f714a3a98a5cf30a26853859f1416fcf1",
+      "mtime": "2026-08-05T18:25:55.192070+00:00",
+      "mtime_ns": 1785954355192069909
+    },
+    {
+      "relative_path": "scripts/verify_phase0_5_spec_freeze.py",
+      "size_bytes": 19724,
+      "sha256": "b5d16602073bbe0d51fca7e6afb50b77becc582df74e316352ea56e4ce92dbf9",
+      "mtime": "2026-08-05T18:16:43.453505+00:00",
+      "mtime_ns": 1785953803453504520
+    }
+  ],
+  "phase0_5_missing": [],
+  "protected_runtime_files": [
+    {
+      "relative_path": "comqutor_alpha/structure_engine/week2_llm.py",
+      "size_bytes": 9828,
+      "sha256": "e6da536d6364b312a91f951923aab63ae826dd798a51ca02760ca60f8c90e8ad",
+      "mtime": "2026-07-30T17:59:39.113782+00:00",
+      "mtime_ns": 1785434379113781980
+    },
+    {
+      "relative_path": "comqutor_alpha/structure_engine/structured_output_adapter.py",
+      "size_bytes": 61657,
+      "sha256": "72bb837afedcc644dc2eedac02fd79b726d87d70cbe4f55f960b6f77bb5fd85d",
+      "mtime": "2026-07-31T19:11:16.816669+00:00",
+      "mtime_ns": 1785525076816669377
+    },
+    {
+      "relative_path": "comqutor_alpha/structure_engine/alpha_mapper.py",
+      "size_bytes": 31165,
+      "sha256": "fef6e4623a2b2ecb5f6e281f42e6376836757adba4b5b38750b06af0663d9694",
+      "mtime": "2026-08-04T23:34:30.161053+00:00",
+      "mtime_ns": 1785886470161053297
+    },
+    {
+      "relative_path": "comqutor_alpha/structure_engine/structure_extractor.py",
+      "size_bytes": 21513,
+      "sha256": "835849ebb6e58568094168bc3f653a4744cd04dd9e4fcf978f10b8b064d58cf8",
+      "mtime": "2026-07-31T19:12:02.539073+00:00",
+      "mtime_ns": 1785525122539073469
+    },
+    {
+      "relative_path": "comqutor_alpha/llm/canonical_prompt_injection.py",
+      "size_bytes": 6395,
+      "sha256": "6b64b3cc0c0e90597a2a6467e57fc94e23e9f73459b1b8beeeb4ae1cc998eed6",
+      "mtime": "2026-07-31T01:07:32.292354+00:00",
+      "mtime_ns": 1785460052292353877
+    },
+    {
+      "relative_path": "comqutor_alpha/structure_engine/canonical_relation_prompt.py",
+      "size_bytes": 8217,
+      "sha256": "f99183d4891689b75ffadafb48bf6c95830285b8060fffda3e87c87023525072",
+      "mtime": "2026-07-31T01:05:21.204618+00:00",
+      "mtime_ns": 1785459921204618387
+    },
+    {
+      "relative_path": "comqutor_alpha/replay/pipeline.py",
+      "size_bytes": 29145,
+      "sha256": "ba48c79a6429f652e33fb38366e23770bbd8026f4ba9b8c67b50bf64cea6c5c6",
+      "mtime": "2026-08-04T23:32:00.835734+00:00",
+      "mtime_ns": 1785886320835734073
+    }
+  ],
+  "protected_runtime_missing": []
+}

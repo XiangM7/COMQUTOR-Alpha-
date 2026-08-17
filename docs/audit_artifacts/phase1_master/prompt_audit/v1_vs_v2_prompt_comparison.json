@@ -1,0 +1,92 @@
+{
+  "schema_version": "comqutor.phase1_master.prompt_audit.v1_vs_v2_comparison.v1",
+  "v1_total_chars": 98633,
+  "v2_total_chars": 18874,
+  "v1_total_tokens_estimate": 24658,
+  "v2_total_tokens_estimate": 4718,
+  "reduction_pct": 80.86,
+  "v1_report_duplication_ratio": 3.6971,
+  "v2_report_duplication_ratio": 1.0,
+  "v1_candidate_text_chars": 79235,
+  "v2_candidate_text_chars": 745,
+  "v1_schema_chars": 1907,
+  "v2_schema_chars": 1391,
+  "v1_factor_vocabulary_chars": 248,
+  "v2_factor_vocabulary_chars": 248,
+  "v1_fixed_instruction_chars": 3948,
+  "v2_fixed_instruction_chars": 3315,
+  "v1_identity_metadata_chars": 668,
+  "v2_identity_metadata_chars": 372,
+  "target_max_v2_chars": 40000,
+  "meets_40k_target": true,
+  "target_max_duplication_ratio": 1.05,
+  "meets_duplication_ratio_target": true,
+  "removed_components": [
+    {
+      "removed": "evidence_hint (163/163 candidates, byte-identical to claim_hint)",
+      "chars_recovered": 17993,
+      "why_safe": "Measured 100% identical to claim_hint in the real report; carried zero incremental information.",
+      "deterministic_replacement": "none needed -- field deleted",
+      "corresponding_test": "test_v2_semantic_equivalence.py::test_claim_and_abstention_round_trip (proves evidence is still correctly reconstructed downstream from spans, not from a wire-carried evidence_hint)"
+    },
+    {
+      "removed": "claim_hint text for the 142/163 candidates with no verified location",
+      "chars_recovered": null,
+      "why_safe": "These hints are cleaned paraphrases that do not exist verbatim in the raw report (measured, not assumed); the model reads the one full report copy directly instead. ADR-008 designates candidate segments as non-authoritative hints, not a required coverage mechanism.",
+      "deterministic_replacement": "none -- semantic responsibility moves to the model's own reading of agent_report, which is unchanged Development Plan §5.1 scope",
+      "corresponding_test": "test_v2_semantic_equivalence.py::test_claim_outside_any_candidate_hint_still_accepted"
+    },
+    {
+      "removed": "claim_hint/exact_quote text for the 21/163 candidates with a verified location",
+      "chars_recovered": null,
+      "why_safe": "report[start:end] reproduces it deterministically; validate_shadow_bundle already independently recomputes and enforces the same equality regardless of what was sent.",
+      "deterministic_replacement": "normalize_v2_proposal_to_canonical_bundle._normalize_span computes report[start:end]",
+      "corresponding_test": "test_v2_provenance_safety.py::test_exact_quote_reconstructed_from_offsets"
+    },
+    {
+      "removed": "candidate_segment_id full form (163x repeats of the 75-char agent_output_id)",
+      "chars_recovered": null,
+      "why_safe": "The model only needs a short local reference to cite lineage; the caller already holds the full ID locally and maps it back after the response.",
+      "deterministic_replacement": "candidate_index int (already present) + candidate_index_to_id lookup, caller-side only",
+      "corresponding_test": "test_v2_semantic_equivalence.py::test_candidate_lineage_resolved_from_short_id"
+    },
+    {
+      "removed": "semantic_authority (163x repeats of the constant false)",
+      "chars_recovered": null,
+      "why_safe": "Unconditional invariant per ADR-008 -- never varies -- now stated once in the fixed instruction instead of once per candidate.",
+      "deterministic_replacement": "one sentence in STRUCTURED_OUTPUT_SHADOW_PROMPT_V2 ('CANDIDATE_HINTS ... have no semantic authority')",
+      "corresponding_test": "n/a -- prompt text, not a runtime code path"
+    },
+    {
+      "removed": "source_report_sha256 / prompt_version / prompt_sha256 / candidate_segment_contract_version / candidate_segment_source / allowed_source_refs / source_metadata / output_schema_version from the wire request",
+      "chars_recovered": null,
+      "why_safe": "Never read back from the model's response by validate_shadow_bundle (which takes these as caller-supplied parameters); grep-confirmed no downstream consumer reads candidate_segment_contract_version/source from the request either.",
+      "deterministic_replacement": "normalize_v2_proposal_to_canonical_bundle splices all identity fields from caller inputs",
+      "corresponding_test": "test_v2_semantic_equivalence.py::test_identity_fields_never_required_from_provider"
+    },
+    {
+      "removed": "shadow_claim_id / evidence / source_type / source_refs / extraction_status from the REQUIRED Provider response shape",
+      "chars_recovered": null,
+      "why_safe": "shadow_claim_id was already caller-generated and model values already ignored (ADR-008 §5, unchanged); evidence is a deterministic bounded join of exact_quote; source_type/source_refs default safely (Development Plan §5.1: entities/factors are best-effort, not all fields are mandated); extraction_status is always 'proposed' for a returned claim.",
+      "deterministic_replacement": "normalize_v2_proposal_to_canonical_bundle",
+      "corresponding_test": "test_v2_semantic_equivalence.py (all cases) + test_v2_provenance_safety.py"
+    }
+  ],
+  "retained_components": [
+    "agent_report (full text, sent exactly once)",
+    "fixed instruction (security/claim-rules/output-shape/examples) -- same 6 example concepts as v1",
+    "factor_vocabulary (already-minimal id list, unchanged content)",
+    "run_id/ticker/agent/agent_output_id (small, gives the model real context)",
+    "agent_report_boundary/agent_report_end_boundary (untrusted-data framing, section 18 safety)",
+    "candidate_hints for the 21/163 verified-location candidates, as {id,start,end} only (no text)"
+  ],
+  "reconstructed_deterministically": [
+    "exact_quote (report[start:end])",
+    "evidence (bounded join of exact_quote values)",
+    "shadow_claim_id (existing generate_shadow_claim_id, unchanged)",
+    "run_id/ticker/agent/agent_output_id echoed in the OUTPUT bundle (spliced from caller input, not asked of the model)",
+    "source_report_sha256/prompt_version/prompt_sha256 in the OUTPUT bundle",
+    "shadow_only=true, production_authority=false",
+    "candidate_segment_ids full lineage strings (from small int ids via candidate_index_to_id)"
+  ]
+}

@@ -1,0 +1,881 @@
+{
+  "schema_version": "week2.extracted_structures.v2",
+  "run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+  "ticker": "QQQ",
+  "nodes": [
+    {
+      "id": "ai_capex",
+      "label": "AI CapEx",
+      "canonical_factor": "AI CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:17",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:60",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:90",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:79",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:96",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:43",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:54",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan:claim:2",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan:claim:1",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:28",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:38",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision:claim:4",
+        "canrel_f2f7b71b93efced1",
+        "canrel_e316f8d019ede32c",
+        "canrel_ec4fc2fb1595a667",
+        "canrel_badebb4ef98b5f88"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:17",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:60",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:90",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:79",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:96",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:43",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:54",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan:claim:2",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan:claim:1",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:28",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:38",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision:claim:4",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history:claim:38",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history:claim:17"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "The dominant positive catalyst (Microsoft/AI CapEx) is real and powerful, but it is being actively contested by valuation warnings, Burry's bearish bets, weakening technicals, and macro slowdown concerns.",
+        "AI CapEx / AI Infrastructure boom (bullish): Microsoft's blockbuster cloud quarter is the week's defining positive catalyst, reinforcing the \"AI spending boom remains alive\" narrative.",
+        "The AI CapEx bull case is powerful and freshly validated by Microsoft's cloud beat, but it is being actively contested by valuation warnings (Burry), technical deterioration (Barrons), macro slowdown concerns (Pantheon), and a fresh geopolitical escalation that dominates the retail tape.",
+        "Massive committed AI capex ($2.4T) supporting the growth narrative.",
+        "Factor: AI CapEx Supercycle; Signal: Bullish; Evidence: $2.4T committed; AMZN $220B capex; Implication for QQQ: Supports growth narrative",
+        "AI CapEx / Datacenter CapEx: The largest QQQ constituents (hyperscalers and semiconductor leaders) are driving massive capital expenditures into AI infrastructure and data centers.",
+        "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators, which in turn drives revenue growth for the semiconductor names that dominate the index's weighting.",
+        "Structural tailwinds: Ongoing AI infrastructure spending and semiconductor demand provide fundamental support for the index's largest constituents.",
+        "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+        "These are on-the-books numbers, not promises, and they support the claim that AI CapEx is driving actual revenue growth.",
+        "Reasoning: The fundamental thesis is strong and validated by on-the-books AI earnings (AWS 37% growth, Azure $100B, Copilot 30M seats), supporting the claim that AI CapEx is driving real revenue growth.",
+        "The AI CapEx supercycle is a $2.4 trillion committed spending spree that is driving real revenue growth.",
+        "The AI CapEx supercycle is a powerful force, but it does not exist in a vacuum.",
+        "Investment Thesis: The bull wins the fundamental argument: the AI earnings validation is real and on-the-books — AWS at 37% growth (fastest in 18 quarters), Azure at $100B, Copilot at 30M paid seats, and Microsoft's $450B single-day market cap gain — supporting the claim that AI CapEx is driving actual revenue growth.",
+        "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators",
+        "This is a massive tailwind for the semiconductor names that dominate QQQ. Samsung and SK Hynix surged 27% in their largest recorded gains.",
+        "The AI earnings momentum is real, but it does not immunize QQQ from a geopolitical shock."
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "ai_demand",
+      "label": "AI Demand",
+      "canonical_factor": "AI Demand",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:48"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:48"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "evidence": [
+        "Watch for any signs of AI demand saturation or datacenter spending deceleration, which would directly pressure the fund's largest holdings.",
+        "You spin Apple's 8% plunge as \"the ultimate proof of AI demand exceeding all expectations.\" That is a creative interpretation, but it is fundamentally wrong."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "ai_infrastructure",
+      "label": "AI Infrastructure",
+      "canonical_factor": "AI Infrastructure",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:2",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:13",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:60",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:73",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:43",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:54"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:2",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:13",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:60",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:73",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:43",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:54"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "The institutional/news framing is decidedly mixed-to-cautious, with a notable split between bullish AI-infrastructure momentum and bearish technical/valuation warnings.",
+        "Apple sank 8% as traders picked tech earnings winners and losers, with the gap revealing \"where the AI infrastructure boom is creating winners and where it is quietly crushing margins.\"",
+        "AI CapEx / AI Infrastructure boom (bullish): Microsoft's blockbuster cloud quarter is the week's defining positive catalyst, reinforcing the \"AI spending boom remains alive\" narrative.",
+        "Apple's 8% decline — shows AI infrastructure boom is \"quietly crushing margins\" for some names.",
+        "AI CapEx / Datacenter CapEx: The largest QQQ constituents (hyperscalers and semiconductor leaders) are driving massive capital expenditures into AI infrastructure and data centers.",
+        "Structural tailwinds: Ongoing AI infrastructure spending and semiconductor demand provide fundamental support for the index's largest constituents."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "datacenter_capex",
+      "label": "Datacenter CapEx",
+      "canonical_factor": "Datacenter CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:43",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:54",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:43",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:54",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "AI CapEx / Datacenter CapEx: The largest QQQ constituents (hyperscalers and semiconductor leaders) are driving massive capital expenditures into AI infrastructure and data centers.",
+        "Structural tailwinds: Ongoing AI infrastructure spending and semiconductor demand provide fundamental support for the index's largest constituents.",
+        "Watch for any signs of AI demand saturation or datacenter spending deceleration, which would directly pressure the fund's largest holdings.",
+        "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "gpu_demand",
+      "label": "GPU Demand",
+      "canonical_factor": "GPU Demand",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44",
+        "canrel_f2f7b71b93efced1",
+        "canrel_bbaa99803c28bd7b"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators, which in turn drives revenue growth for the semiconductor names that dominate the index's weighting.",
+        "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators",
+        "which in turn drives revenue growth for the semiconductor names that dominate the index's weighting"
+      ],
+      "score": 0.7
+    },
+    {
+      "id": "inference_demand",
+      "label": "Inference Demand",
+      "canonical_factor": "Inference Demand",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:11"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:11"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report"
+      ],
+      "evidence": [
+        "Copilot crossed 30 million paid seats, with CEO Satya Nadella noting it's evolving into autonomous AI agents with more than double the seat additions quarter-over-quarter."
+      ],
+      "score": 0.55
+    },
+    {
+      "id": "liquidity_expansion",
+      "label": "Liquidity Expansion",
+      "canonical_factor": "Liquidity Expansion",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:50",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:50",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "Liquidity Expansion: Improved liquidity and risk appetite tend to flow disproportionately into growth assets like QQQ, supporting its premium valuation.",
+        "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "narrative_momentum",
+      "label": "Narrative Momentum",
+      "canonical_factor": "Narrative Momentum",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:26",
+        "canrel_e7e7846335385252"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:26",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:32"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "evidence": [
+        "The fund is trading near the upper end of its 52-week range, suggesting strong Narrative Momentum and positive price momentum.",
+        "When the discount rate rises—and it is rising—the present value of those future earnings falls."
+      ],
+      "score": 0.8
+    },
+    {
+      "id": "qqq_revenue_growth",
+      "label": "QQQ Revenue Growth",
+      "canonical_factor": "Revenue Growth",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history:claim:48",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan:claim:2",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan:claim:1",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:28",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision:claim:4",
+        "canrel_bbaa99803c28bd7b",
+        "canrel_f0a5c48779ecec14",
+        "canrel_8cbcfb94c8f31124",
+        "canrel_ec4fc2fb1595a667",
+        "canrel_badebb4ef98b5f88"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history:claim:48",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan:claim:2",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan:claim:1",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:28",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision:claim:4",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:51",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history:claim:17"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators, which in turn drives revenue growth for the semiconductor names that dominate the index's weighting.",
+        "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+        "This is Revenue Growth that is already on the books, not just a promise.",
+        "These are on-the-books numbers, not promises, and they support the claim that AI CapEx is driving actual revenue growth.",
+        "Reasoning: The fundamental thesis is strong and validated by on-the-books AI earnings (AWS 37% growth, Azure $100B, Copilot 30M seats), supporting the claim that AI CapEx is driving real revenue growth.",
+        "The AI CapEx supercycle is a $2.4 trillion committed spending spree that is driving real revenue growth.",
+        "Investment Thesis: The bull wins the fundamental argument: the AI earnings validation is real and on-the-books — AWS at 37% growth (fastest in 18 quarters), Azure at $100B, Copilot at 30M paid seats, and Microsoft's $450B single-day market cap gain — supporting the claim that AI CapEx is driving actual revenue growth.",
+        "which in turn drives revenue growth for the semiconductor names that dominate the index's weighting",
+        "An economic slowdown would disproportionately pressure high-multiple growth names",
+        "QQQ at 30.53x earnings is priced for perfection. Any earnings disappointment among the top-weighted names—Microsoft, Nvidia, Amazon, Apple—will trigger multiple compression.",
+        "The AI earnings momentum is real, but it does not immunize QQQ from a geopolitical shock."
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "rate_cut_cycle",
+      "label": "Rate Cut Cycle",
+      "canonical_factor": "Rate Cut Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:47",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:48",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:49",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:58",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "canrel_a210e5c5f1b3cd1c",
+        "canrel_e7e7846335385252",
+        "canrel_83afb91fe599e846"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:47",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:48",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:49",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:58",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:32",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:36"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "evidence": [
+        "Rate Cut Cycle: As a growth-heavy, long-duration asset, QQQ is highly sensitive to interest rates.",
+        "Falling rates reduce discount rates applied to future earnings, supporting higher valuations.",
+        "Conversely, a delayed easing cycle would pressure the fund's elevated multiple.",
+        "Rate sensitivity: The elevated multiple makes QQQ vulnerable to any upward repricing of interest rates or a delayed Fed easing cycle.",
+        "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+        "Falling rates reduce discount rates applied to future earnings, supporting higher valuations",
+        "When the discount rate rises—and it is rising—the present value of those future earnings falls.",
+        "rising yields increase the discount rate applied to future earnings, which mathematically pressures the valuation of long-duration assets"
+      ],
+      "score": 0.8
+    },
+    {
+      "id": "recession_risk",
+      "label": "Recession Risk",
+      "canonical_factor": "Recession Risk",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:12",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:65",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:74",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:53",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:99",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:51",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:79",
+        "canrel_f0a5c48779ecec14"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:12",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:65",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:74",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:53",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:99",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:51",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:79"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "economy — \"one powerful investment trend is masking a broader slowdown\" (GuruFocus), pointing to recession risk beneath the AI narrative.",
+        "Macro slowdown beneath the AI trend (bearish): Pantheon's \"broader slowdown\" masked by one powerful trend, plus recession-risk framing.",
+        "Macro slowdown — Pantheon's recession-risk framing beneath the AI trend.",
+        "Key takeaway: US recession risk remains low (12%) but is creeping higher.",
+        "Factor: US Recession Risk; Signal: Neutral/Low; Evidence: 12% by end-2026 (rising +2pp); Implication for QQQ: Low near-term recession risk",
+        "Recession Risk: An economic slowdown would disproportionately pressure high-multiple growth names, making QQQ more vulnerable than broad-market indices to recessionary shocks.",
+        "The primary fundamental risks are Valuation Risk (priced for perfection) and Recession Risk (growth names are most vulnerable to economic slowdowns).",
+        "An economic slowdown would disproportionately pressure high-multiple growth names"
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "semiconductor_cycle",
+      "label": "Semiconductor Cycle",
+      "canonical_factor": "Semiconductor Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:32",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:46",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "canrel_e316f8d019ede32c"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:32",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:46",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history:claim:38"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "Micron dropped 4.2% despite Amazon's AI bet, as higher interest rates and profit-taking outweighed evidence of rising memory demand.",
+        "Inventory recovery and sustained chip demand support the earnings trajectory of the index.",
+        "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+        "This is a massive tailwind for the semiconductor names that dominate QQQ. Samsung and SK Hynix surged 27% in their largest recorded gains."
+      ],
+      "score": 0.8
+    },
+    {
+      "id": "valuation_risk",
+      "label": "Valuation Risk",
+      "canonical_factor": "Valuation Risk",
+      "node_type": "factor",
+      "source_records": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:63",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:71",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:67",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:70",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:88",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:102",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:19",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:55",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:56",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:63",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:75",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:79",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:61",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:63",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:18",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:23",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:25",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:26",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:27",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:30",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history:claim:28",
+        "canrel_a210e5c5f1b3cd1c",
+        "canrel_8cbcfb94c8f31124",
+        "canrel_83afb91fe599e846"
+      ],
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:63",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:71",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:67",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:70",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:88",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report:claim:102",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:19",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:55",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:56",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:63",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:75",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:79",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:61",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:62",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:63",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:18",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:23",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:25",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:26",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:27",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:30",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history:claim:28",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:48",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:36"
+      ],
+      "source_agent_output_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:news_agent:news_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "Valuation / technical fragility (bearish): Barrons' \"selling opportunity\" call, Burry's AI downside bets, and the \"AI Memory Chips Mania vs 1999\" comparison all point to valuation risk and weakening technicals.",
+        "Valuation risk — Burry's fresh AI downside bets on NVDA/MU; \"fraud hiding behind record highs\" short-seller framing.",
+        "A research firm says big tech earnings just \"flipped valuation risk\" — profit growth is finally catching up with market dominance.",
+        "Valuation risk is being debated — some argue earnings growth is now justifying the multiples.",
+        "Valuation risk still debated; \"priced for perfection\" concerns persist.",
+        "Factor: Valuation; Signal: Mixed; Evidence: Research says earnings \"flipped\" valuation risk; Burry bearish; Implication for QQQ: Debate unresolved",
+        "This elevated multiple represents a Valuation Risk factor — the fund is priced for continued strong growth, leaving limited margin for error if earnings disappoint.",
+        "Valuation Risk: At 30.5x TTM earnings, QQQ is priced for perfection.",
+        "Any earnings disappointment among top-weighted constituents could trigger multiple compression.",
+        "Category: Valuation; Metric / Factor: PE Ratio (TTM); Value / Status: 30.53x; Implication: Premium multiple; priced for growth; elevated Valuation Risk",
+        "Category: Risk; Metric / Factor: Valuation Risk; Value / Status: Elevated; Implication: Priced for perfection; limited margin for error",
+        "The primary fundamental risks are Valuation Risk (priced for perfection) and Recession Risk (growth names are most vulnerable to economic slowdowns).",
+        "A research firm says big tech earnings just \"flipped valuation risk\" —profit growth is finally catching up with market dominance.",
+        "Valuation Risk: QQQ at 30.53x earnings is priced for perfection.",
+        "Any earnings disappointment among the top-weighted names—Microsoft, Nvidia, Amazon, Apple—will trigger multiple compression.",
+        "The \"flipped valuation risk\" research you cite is a single firm's opinion, not a market consensus.",
+        "On the \"Valuation Risk\" and \"Priced for Perfection\" Concerns",
+        "The \"valuation risk\" is being actively retired by the earnings power of the underlying holdings.",
+        "On \"Valuation Risk\" Being \"Actively Retired\"",
+        "The Aggressive Analyst claims that the 30.5x PE ratio is a \"relic of a pre-AI world\" and that valuation risk is being \"retired by the earnings power of the underlying holdings.\" This is a dangerously complacent view.",
+        "The fundamental report explicitly flags this as a \"Valuation Risk\" factor, noting the fund is \"priced for perfection, leaving limited margin for error if earnings disappoint.\" The market research report itself is split on this issue, with some analysts arguing earnings are catching up, while Michael Burry is placing fresh downside bets on Nvidia and Micron.",
+        "The index-level valuation is still stretched, and any single earnings miss from a top-weighted constituent could trigger a significant multiple compression.",
+        "The fundamental report's warning about \"Valuation Risk\" is valid, but it is a medium-term concern, not a reason to sit on the sidelines during a confirmed earnings-driven rally.",
+        "Falling rates reduce discount rates applied to future earnings, supporting higher valuations",
+        "QQQ at 30.53x earnings is priced for perfection. Any earnings disappointment among the top-weighted names—Microsoft, Nvidia, Amazon, Apple—will trigger multiple compression.",
+        "rising yields increase the discount rate applied to future earnings, which mathematically pressures the valuation of long-duration assets"
+      ],
+      "score": 0.8
+    }
+  ],
+  "edges": [
+    {
+      "source": "ai_capex",
+      "target": "gpu_demand",
+      "source_label": "AI CapEx",
+      "target_label": "GPU Demand",
+      "edge_type": "causal",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives GPU Demand.",
+      "source_record_id": "canrel_f2f7b71b93efced1",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44"
+      ],
+      "relation_id": "canrel_f2f7b71b93efced1",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+      "evidence": "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "qqq_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.84,
+      "rule_name": "forward_transitive_causal",
+      "reason": "The claim states an asserted active causal relation.",
+      "assertion_status": "asserted",
+      "source_claim": "Investment Thesis: The bull wins the fundamental argument: the AI earnings validation is real and on-the-books — AWS at 37% growth (fastest in 18 quarters), Azure at $100B, Copilot at 30M paid seats, and Microsoft's $450B single-day market cap gain — supporting the claim that AI CapEx is driving actual revenue growth.",
+      "source_record_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision:claim:4",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision:claim:4"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:portfolio_manager:final_trade_decision",
+      "evidence": "Investment Thesis: The bull wins the fundamental argument: the AI earnings validation is real and on-the-books — AWS at 37% growth (fastest in 18 quarters), Azure at $100B, Copilot at 30M paid seats, and Microsoft's $450B single-day market cap gain — supporting the claim that AI CapEx is driving actual revenue growth.",
+      "extraction_method": "deterministic_rules"
+    },
+    {
+      "source": "ai_capex",
+      "target": "qqq_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.35,
+      "rule_name": "forward_transitive_causal",
+      "reason": "The claim explicitly negates an active causal relation.",
+      "assertion_status": "negated",
+      "source_claim": "These are on-the-books numbers, not promises, and they support the claim that AI CapEx is driving actual revenue growth.",
+      "source_record_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan:claim:2",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan:claim:2"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:research_manager:investment_plan",
+      "evidence": "These are on-the-books numbers, not promises, and they support the claim that AI CapEx is driving actual revenue growth.",
+      "extraction_method": "deterministic_rules"
+    },
+    {
+      "source": "ai_capex",
+      "target": "qqq_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.84,
+      "rule_name": "forward_transitive_causal",
+      "reason": "The claim states an asserted active causal relation.",
+      "assertion_status": "asserted",
+      "source_claim": "Reasoning: The fundamental thesis is strong and validated by on-the-books AI earnings (AWS 37% growth, Azure $100B, Copilot 30M seats), supporting the claim that AI CapEx is driving real revenue growth.",
+      "source_record_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan:claim:1",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan:claim:1"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:trader:trader_investment_plan",
+      "evidence": "Reasoning: The fundamental thesis is strong and validated by on-the-books AI earnings (AWS 37% growth, Azure $100B, Copilot 30M seats), supporting the claim that AI CapEx is driving real revenue growth.",
+      "extraction_method": "deterministic_rules"
+    },
+    {
+      "source": "ai_capex",
+      "target": "qqq_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives Revenue Growth.",
+      "source_record_id": "canrel_badebb4ef98b5f88",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history:claim:17"
+      ],
+      "relation_id": "canrel_badebb4ef98b5f88",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "The AI earnings momentum is real, but it does not immunize QQQ from a geopolitical shock.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "qqq_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives Revenue Growth.",
+      "source_record_id": "canrel_ec4fc2fb1595a667",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:28"
+      ],
+      "relation_id": "canrel_ec4fc2fb1595a667",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "The AI CapEx supercycle is a $2.4 trillion committed spending spree that is driving real revenue growth.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "semiconductor_cycle",
+      "source_label": "AI CapEx",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "causal",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives Semiconductor Cycle.",
+      "source_record_id": "canrel_e316f8d019ede32c",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history:claim:38"
+      ],
+      "relation_id": "canrel_e316f8d019ede32c",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "This is a massive tailwind for the semiconductor names that dominate QQQ. Samsung and SK Hynix surged 27% in their largest recorded gains.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_83afb91fe599e846",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:36"
+      ],
+      "relation_id": "canrel_83afb91fe599e846",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "rising yields increase the discount rate applied to future earnings, which mathematically pressures the valuation of long-duration assets",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_a210e5c5f1b3cd1c",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:48"
+      ],
+      "relation_id": "canrel_a210e5c5f1b3cd1c",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+      "evidence": "Falling rates reduce discount rates applied to future earnings, supporting higher valuations",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "semiconductor_cycle",
+      "target": "qqq_revenue_growth",
+      "source_label": "Semiconductor Cycle",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.84,
+      "rule_name": "forward_transitive_causal",
+      "reason": "The claim states an asserted active causal relation.",
+      "assertion_status": "asserted",
+      "source_claim": "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+      "source_record_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+      "evidence": "The primary fundamental supports are AI CapEx / Datacenter CapEx and Semiconductor Cycle strength driving Revenue Growth among top holdings, alongside potential Rate Cut Cycle tailwinds and Liquidity Expansion supporting the premium multiple.",
+      "extraction_method": "deterministic_rules"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "narrative_momentum",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Narrative Momentum",
+      "edge_type": "conflicting",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle conflicts with Narrative Momentum.",
+      "source_record_id": "canrel_e7e7846335385252",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:32"
+      ],
+      "relation_id": "canrel_e7e7846335385252",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "When the discount rate rises—and it is rising—the present value of those future earnings falls.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "qqq_revenue_growth",
+      "source_label": "Recession Risk",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_f0a5c48779ecec14",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:51"
+      ],
+      "relation_id": "canrel_f0a5c48779ecec14",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+      "evidence": "An economic slowdown would disproportionately pressure high-multiple growth names",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "qqq_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_8cbcfb94c8f31124",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history:claim:62"
+      ],
+      "relation_id": "canrel_8cbcfb94c8f31124",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "QQQ at 30.53x earnings is priced for perfection. Any earnings disappointment among the top-weighted names—Microsoft, Nvidia, Amazon, Apple—will trigger multiple compression.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "gpu_demand",
+      "source_label": "AI CapEx",
+      "target_label": "GPU Demand",
+      "edge_type": "supportive",
+      "confidence": 0.68,
+      "rule_name": "forward_transitive_supportive",
+      "reason": "The claim states an asserted active supportive relation.",
+      "assertion_status": "asserted",
+      "source_claim": "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators, which in turn drives revenue growth for the semiconductor names that dominate the index's weighting.",
+      "source_record_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+      "evidence": "Sustained hyperscaler AI capital spending supports demand for GPUs and accelerators, which in turn drives revenue growth for the semiconductor names that dominate the index's weighting.",
+      "extraction_method": "deterministic_rules"
+    },
+    {
+      "source": "gpu_demand",
+      "target": "qqq_revenue_growth",
+      "source_label": "GPU Demand",
+      "target_label": "QQQ Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "GPU Demand supports Revenue Growth.",
+      "source_record_id": "canrel_bbaa99803c28bd7b",
+      "source_claim_ids": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:44"
+      ],
+      "relation_id": "canrel_bbaa99803c28bd7b",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report",
+      "evidence": "which in turn drives revenue growth for the semiconductor names that dominate the index's weighting",
+      "extraction_method": "tradingagents_canonical_output"
+    }
+  ],
+  "metadata": {
+    "node_count": 13,
+    "edge_count": 15,
+    "extractor": "llm_with_deterministic_validation_and_fallback",
+    "extractor_version": "week2.structure_extractor.v2",
+    "llm_enabled": false,
+    "llm_edge_count": 0,
+    "deterministic_edge_count": 5,
+    "canonical_relation_edge_count": 10
+  }
+}

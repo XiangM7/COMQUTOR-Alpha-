@@ -1,0 +1,2861 @@
+{
+  "schema_version": "structure_correctness.run_audit.v2",
+  "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+  "ticker": "MSFT",
+  "raw_agent_output_count": 0,
+  "raw_claim_count": 865,
+  "boilerplate_removed_count": 20,
+  "disclaimer_removed_count": 0,
+  "duplicate_removed_count": 1,
+  "valid_claim_count": 864,
+  "matched_alpha_count": 39,
+  "ambiguous_alpha_count": 0,
+  "no_match_count": 825,
+  "graph_node_count": 10,
+  "graph_edge_count": 7,
+  "rejected_edge_count": 0,
+  "dominant_alpha_count": 0,
+  "regime_level_alpha_count": 0,
+  "conflict_count": 2,
+  "primary_activation_version": "activation.v2.evidence_local_structure.v1",
+  "activation_v1_regime_level_count": 2,
+  "activation_v2_regime_level_count": 0,
+  "activation_v2_capped_alpha_count": 1,
+  "activation_v2_regime_gate_failure_count": 0,
+  "data_sanity_status": "not_available",
+  "data_sanity_warning_count": 0,
+  "data_sanity_critical_count": 0,
+  "market_data_row_count": 0,
+  "reported_price_check_count": 0,
+  "analytical_claim_count": 460,
+  "context_only_claim_count": 404,
+  "non_substantive_removed_count": 10,
+  "llm_claims_proposed_count": 0,
+  "llm_claims_removed_count": 0,
+  "deterministic_claims_removed_count": 10,
+  "llm_quality_fallback_count": 0,
+  "quality_reason_counts": {
+    "BARE_HEADING_OR_LABEL": 10
+  },
+  "warnings": [
+    "BOILERPLATE_REMOVED",
+    "DUPLICATES_REMOVED"
+  ],
+  "alpha_evidence_integrity": {
+    "schema_version": "week_regime_evidence_integrity.v1",
+    "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+    "ticker": "MSFT",
+    "evidence_groups": [
+      {
+        "evidence_group_id": "0154704a031598e411ea9703",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:26"
+        ],
+        "agents": [
+          "sentiment_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+        ],
+        "factor_signature": "",
+        "relation_signature": null,
+        "numeric_signature": "100|100",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A304"
+        ],
+        "primary_alpha_id": "A304",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.3923
+      },
+      {
+        "evidence_group_id": "07f7383d7fa61139639a460c",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:118"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "",
+        "assertion_status": "conditional",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.4973
+      },
+      {
+        "evidence_group_id": "0e49228dc51a5da03988d4b7",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:48"
+        ],
+        "agents": [
+          "neutral_risk_analyst"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "17.8%|17.8%|182.94|182.94|46.8%|46.8%",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "18c7e64b90c9427324b13dd4",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:121"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "-24|-24|115.95|115.95|12|12",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "23e421c0234f19c04ed96c35",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:25"
+        ],
+        "agents": [
+          "news_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+        ],
+        "factor_signature": "",
+        "relation_signature": null,
+        "numeric_signature": "2|2|25|25",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A601"
+        ],
+        "primary_alpha_id": "A601",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.3923
+      },
+      {
+        "evidence_group_id": "2964868f652f9f8f16a286e6",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:115"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "",
+        "assertion_status": "mixed",
+        "semantic_polarity": "mixed",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.6716
+      },
+      {
+        "evidence_group_id": "2df4daaba2c5d2f0c713c040",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:64"
+        ],
+        "agents": [
+          "sentiment_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+        ],
+        "factor_signature": "Valuation Risk",
+        "relation_signature": null,
+        "numeric_signature": "-464|-464|15%|15%|460|460",
+        "assertion_status": "conditional",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A304"
+        ],
+        "primary_alpha_id": "A304",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.5262
+      },
+      {
+        "evidence_group_id": "45fb78ca6b5e75d950a37bc3",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:78"
+        ],
+        "agents": [
+          "sentiment_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+        ],
+        "factor_signature": "",
+        "relation_signature": null,
+        "numeric_signature": "10|10|7.5|7.5",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A601"
+        ],
+        "primary_alpha_id": "A601",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.3923
+      },
+      {
+        "evidence_group_id": "4aabe191b0ce2ffd61315a84",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan:claim:45"
+        ],
+        "agents": [
+          "research_manager"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan"
+        ],
+        "factor_signature": "Rate Cut Cycle",
+        "relation_signature": null,
+        "numeric_signature": "",
+        "assertion_status": "conditional",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A001"
+        ],
+        "primary_alpha_id": "A001",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.6223
+      },
+      {
+        "evidence_group_id": "656088d87affb7a315a1c074",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:27"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "17.8%|17.8%|2026|2026|281.72|281.72|331.84|331.84",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "6b94e1221c1cef184483c297",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:64"
+        ],
+        "agents": [
+          "news_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+        ],
+        "factor_signature": "Recession Risk",
+        "relation_signature": null,
+        "numeric_signature": "-2026|-2026|12%|12%",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A501"
+        ],
+        "primary_alpha_id": "A501",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.8558
+      },
+      {
+        "evidence_group_id": "6dee4ff30254d2d012e5dd66",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history:claim:52"
+        ],
+        "agents": [
+          "bull_researcher"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history"
+        ],
+        "factor_signature": "Recession Risk",
+        "relation_signature": null,
+        "numeric_signature": "12%|12%",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A501"
+        ],
+        "primary_alpha_id": "A501",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.8558
+      },
+      {
+        "evidence_group_id": "75a6ba68b87adc09d7f8aca5",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:55"
+        ],
+        "agents": [
+          "neutral_risk_analyst"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history"
+        ],
+        "factor_signature": "Liquidity Expansion",
+        "relation_signature": null,
+        "numeric_signature": "12%|12%",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A003"
+        ],
+        "primary_alpha_id": "A003",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.6123
+      },
+      {
+        "evidence_group_id": "7c2e1539c69f8767f41df572",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:1"
+        ],
+        "agents": [
+          "sentiment_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+        ],
+        "factor_signature": "",
+        "relation_signature": null,
+        "numeric_signature": "10|10|7.5|7.5",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A601"
+        ],
+        "primary_alpha_id": "A601",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.3923
+      },
+      {
+        "evidence_group_id": "7fdbcd36fd87000a02fef495",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history:claim:84"
+        ],
+        "agents": [
+          "bear_researcher"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "20|20|25|25",
+        "assertion_status": "conditional",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.6896
+      },
+      {
+        "evidence_group_id": "8aabca99d7785381f95428cc",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:95"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "AI CapEx|Revenue Growth",
+        "relation_signature": "ai_capex>causal>msft_revenue_growth>asserted",
+        "numeric_signature": "",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "8f50585716b060021f712c8e",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:conservative_risk_analyst:risk_debate_state.conservative_history:claim:54"
+        ],
+        "agents": [
+          "conservative_risk_analyst"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:conservative_risk_analyst:risk_debate_state.conservative_history"
+        ],
+        "factor_signature": "Valuation Risk",
+        "relation_signature": null,
+        "numeric_signature": "",
+        "assertion_status": "mixed",
+        "semantic_polarity": "mixed",
+        "supported_alpha_ids": [
+          "A304"
+        ],
+        "primary_alpha_id": "A304",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.6716
+      },
+      {
+        "evidence_group_id": "99552e3e583842ccdda97e89",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:16"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "2026|2026",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "b229f062e3c105be497b4548",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:102"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Valuation Risk",
+        "relation_signature": "valuation_risk>conflicting>msft_revenue_growth>asserted",
+        "numeric_signature": "3.43|3.43",
+        "assertion_status": "mixed",
+        "semantic_polarity": "mixed",
+        "supported_alpha_ids": [
+          "A304"
+        ],
+        "primary_alpha_id": "A304",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.5081
+      },
+      {
+        "evidence_group_id": "b5aa881a8a4fce170a8d71b5",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:96"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "17.8%|17.8%|26|26|4|4",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "c0b2833dbe5376699df6bd6a",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history:claim:36"
+        ],
+        "agents": [
+          "bear_researcher"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "-40%|-40%|17.8%|17.8%|30|30",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7076
+      },
+      {
+        "evidence_group_id": "c412d2f66b383d786ac1d56a",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan:claim:6"
+        ],
+        "agents": [
+          "research_manager"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "17.8%|17.8%|31.3%|31.3%",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "c6f7ab1f7e8cb714e60e7dfb",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history:claim:55"
+        ],
+        "agents": [
+          "bull_researcher"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history"
+        ],
+        "factor_signature": "Valuation Risk",
+        "relation_signature": null,
+        "numeric_signature": "",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A304"
+        ],
+        "primary_alpha_id": "A304",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.5442
+      },
+      {
+        "evidence_group_id": "d1a1693f3389a2a548df7d39",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:54"
+        ],
+        "agents": [
+          "news_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+        ],
+        "factor_signature": "Valuation Risk",
+        "relation_signature": null,
+        "numeric_signature": "15%|15%",
+        "assertion_status": "conditional",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A304"
+        ],
+        "primary_alpha_id": "A304",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.5262
+      },
+      {
+        "evidence_group_id": "e1fc08e17521eef01076c967",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision:claim:10"
+        ],
+        "agents": [
+          "portfolio_manager"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "115.95|115.95|6.5%|6.5%|66.99|66.99",
+        "assertion_status": "mixed",
+        "semantic_polarity": "mixed",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.6716
+      },
+      {
+        "evidence_group_id": "efb3201e1674eb1ecd9facdd",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:trader:trader_investment_plan:claim:1"
+        ],
+        "agents": [
+          "trader"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:trader:trader_investment_plan"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "17.8%|17.8%|182.94|182.94|2026|2026|46.8%|46.8%|74|74",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "f94e5ee7281234eebba41857",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:149",
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:32"
+        ],
+        "agents": [
+          "fundamental_agent"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+        ],
+        "factor_signature": "Revenue Growth",
+        "relation_signature": null,
+        "numeric_signature": "",
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A301"
+        ],
+        "primary_alpha_id": "A301",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.7596
+      },
+      {
+        "evidence_group_id": "fef23afcc4f38d5f821fabce",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "ticker": "MSFT",
+        "claim_ids": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:75"
+        ],
+        "agents": [
+          "neutral_risk_analyst"
+        ],
+        "source_refs": [
+          "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history"
+        ],
+        "factor_signature": "Valuation Risk",
+        "relation_signature": null,
+        "numeric_signature": "",
+        "assertion_status": "conditional",
+        "semantic_polarity": "activation",
+        "supported_alpha_ids": [
+          "A304"
+        ],
+        "primary_alpha_id": "A304",
+        "secondary_alpha_ids": [],
+        "group_confidence": 0.6896
+      }
+    ],
+    "alphas": [
+      {
+        "alpha_id": "A001",
+        "production_score": 13.1999,
+        "production_status": "inactive",
+        "metrics": {
+          "alpha_id": "A001",
+          "raw_evidence_claim_count": 1,
+          "deduplicated_claim_count": 1,
+          "independent_evidence_group_count": 1,
+          "primary_evidence_group_count": 1,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 1,
+          "distinct_source_ref_count": 1,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 0.0
+        },
+        "primary_evidence_groups": [
+          {
+            "evidence_group_id": "4aabe191b0ce2ffd61315a84",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan:claim:45"
+            ],
+            "agents": [
+              "research_manager"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan"
+            ],
+            "factor_signature": "Rate Cut Cycle",
+            "relation_signature": null,
+            "numeric_signature": "",
+            "assertion_status": "conditional",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A001"
+            ],
+            "primary_alpha_id": "A001",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.6223
+          }
+        ],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A001",
+          "production_status": "inactive",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A003",
+        "production_score": 20.0243,
+        "production_status": "inactive",
+        "metrics": {
+          "alpha_id": "A003",
+          "raw_evidence_claim_count": 1,
+          "deduplicated_claim_count": 1,
+          "independent_evidence_group_count": 1,
+          "primary_evidence_group_count": 1,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 1,
+          "distinct_source_ref_count": 1,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 0.0
+        },
+        "primary_evidence_groups": [
+          {
+            "evidence_group_id": "75a6ba68b87adc09d7f8aca5",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:55"
+            ],
+            "agents": [
+              "neutral_risk_analyst"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history"
+            ],
+            "factor_signature": "Liquidity Expansion",
+            "relation_signature": null,
+            "numeric_signature": "12%|12%",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A003"
+            ],
+            "primary_alpha_id": "A003",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.6123
+          }
+        ],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A003",
+          "production_status": "inactive",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A101",
+        "production_score": 0.0,
+        "production_status": "inactive",
+        "metrics": {
+          "alpha_id": "A101",
+          "raw_evidence_claim_count": 0,
+          "deduplicated_claim_count": 0,
+          "independent_evidence_group_count": 0,
+          "primary_evidence_group_count": 0,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 0,
+          "distinct_source_ref_count": 0,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 1.0
+        },
+        "primary_evidence_groups": [],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A101",
+          "production_status": "inactive",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A102",
+        "production_score": 0.0,
+        "production_status": "inactive",
+        "metrics": {
+          "alpha_id": "A102",
+          "raw_evidence_claim_count": 0,
+          "deduplicated_claim_count": 0,
+          "independent_evidence_group_count": 0,
+          "primary_evidence_group_count": 0,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 0,
+          "distinct_source_ref_count": 0,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 1.0
+        },
+        "primary_evidence_groups": [],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A102",
+          "production_status": "inactive",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A103",
+        "production_score": 0.0,
+        "production_status": "inactive",
+        "metrics": {
+          "alpha_id": "A103",
+          "raw_evidence_claim_count": 0,
+          "deduplicated_claim_count": 0,
+          "independent_evidence_group_count": 0,
+          "primary_evidence_group_count": 0,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 0,
+          "distinct_source_ref_count": 0,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 1.0
+        },
+        "primary_evidence_groups": [],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A103",
+          "production_status": "inactive",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A201",
+        "production_score": 0.0,
+        "production_status": "inactive",
+        "metrics": {
+          "alpha_id": "A201",
+          "raw_evidence_claim_count": 0,
+          "deduplicated_claim_count": 0,
+          "independent_evidence_group_count": 0,
+          "primary_evidence_group_count": 0,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 0,
+          "distinct_source_ref_count": 0,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 1.0
+        },
+        "primary_evidence_groups": [],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A201",
+          "production_status": "inactive",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A301",
+        "production_score": 60.0,
+        "production_status": "active",
+        "metrics": {
+          "alpha_id": "A301",
+          "raw_evidence_claim_count": 15,
+          "deduplicated_claim_count": 15,
+          "independent_evidence_group_count": 14,
+          "primary_evidence_group_count": 14,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 6,
+          "distinct_source_ref_count": 6,
+          "structured_relation_group_count": 1,
+          "overlap_ratio": 0.0667
+        },
+        "primary_evidence_groups": [
+          {
+            "evidence_group_id": "07f7383d7fa61139639a460c",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:118"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "",
+            "assertion_status": "conditional",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.4973
+          },
+          {
+            "evidence_group_id": "0e49228dc51a5da03988d4b7",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:48"
+            ],
+            "agents": [
+              "neutral_risk_analyst"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "17.8%|17.8%|182.94|182.94|46.8%|46.8%",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "18c7e64b90c9427324b13dd4",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:121"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "-24|-24|115.95|115.95|12|12",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "2964868f652f9f8f16a286e6",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:115"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "",
+            "assertion_status": "mixed",
+            "semantic_polarity": "mixed",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.6716
+          },
+          {
+            "evidence_group_id": "656088d87affb7a315a1c074",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:27"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "17.8%|17.8%|2026|2026|281.72|281.72|331.84|331.84",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "7fdbcd36fd87000a02fef495",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history:claim:84"
+            ],
+            "agents": [
+              "bear_researcher"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "20|20|25|25",
+            "assertion_status": "conditional",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.6896
+          },
+          {
+            "evidence_group_id": "8aabca99d7785381f95428cc",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:95"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "AI CapEx|Revenue Growth",
+            "relation_signature": "ai_capex>causal>msft_revenue_growth>asserted",
+            "numeric_signature": "",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "99552e3e583842ccdda97e89",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:16"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "2026|2026",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "b5aa881a8a4fce170a8d71b5",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:96"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "17.8%|17.8%|26|26|4|4",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "c0b2833dbe5376699df6bd6a",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history:claim:36"
+            ],
+            "agents": [
+              "bear_researcher"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "-40%|-40%|17.8%|17.8%|30|30",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7076
+          },
+          {
+            "evidence_group_id": "c412d2f66b383d786ac1d56a",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan:claim:6"
+            ],
+            "agents": [
+              "research_manager"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:research_manager:investment_plan"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "17.8%|17.8%|31.3%|31.3%",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "e1fc08e17521eef01076c967",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision:claim:10"
+            ],
+            "agents": [
+              "portfolio_manager"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "115.95|115.95|6.5%|6.5%|66.99|66.99",
+            "assertion_status": "mixed",
+            "semantic_polarity": "mixed",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.6716
+          },
+          {
+            "evidence_group_id": "efb3201e1674eb1ecd9facdd",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:trader:trader_investment_plan:claim:1"
+            ],
+            "agents": [
+              "trader"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:trader:trader_investment_plan"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "17.8%|17.8%|182.94|182.94|2026|2026|46.8%|46.8%|74|74",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          },
+          {
+            "evidence_group_id": "f94e5ee7281234eebba41857",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:149",
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:32"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Revenue Growth",
+            "relation_signature": null,
+            "numeric_signature": "",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A301"
+            ],
+            "primary_alpha_id": "A301",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.7596
+          }
+        ],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A301",
+          "production_status": "active",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A304",
+        "production_score": 39.7525,
+        "production_status": "watch",
+        "metrics": {
+          "alpha_id": "A304",
+          "raw_evidence_claim_count": 7,
+          "deduplicated_claim_count": 7,
+          "independent_evidence_group_count": 7,
+          "primary_evidence_group_count": 7,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 6,
+          "distinct_source_ref_count": 6,
+          "structured_relation_group_count": 1,
+          "overlap_ratio": 0.0
+        },
+        "primary_evidence_groups": [
+          {
+            "evidence_group_id": "0154704a031598e411ea9703",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:26"
+            ],
+            "agents": [
+              "sentiment_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+            ],
+            "factor_signature": "",
+            "relation_signature": null,
+            "numeric_signature": "100|100",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A304"
+            ],
+            "primary_alpha_id": "A304",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.3923
+          },
+          {
+            "evidence_group_id": "2df4daaba2c5d2f0c713c040",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:64"
+            ],
+            "agents": [
+              "sentiment_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+            ],
+            "factor_signature": "Valuation Risk",
+            "relation_signature": null,
+            "numeric_signature": "-464|-464|15%|15%|460|460",
+            "assertion_status": "conditional",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A304"
+            ],
+            "primary_alpha_id": "A304",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.5262
+          },
+          {
+            "evidence_group_id": "8f50585716b060021f712c8e",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:conservative_risk_analyst:risk_debate_state.conservative_history:claim:54"
+            ],
+            "agents": [
+              "conservative_risk_analyst"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:conservative_risk_analyst:risk_debate_state.conservative_history"
+            ],
+            "factor_signature": "Valuation Risk",
+            "relation_signature": null,
+            "numeric_signature": "",
+            "assertion_status": "mixed",
+            "semantic_polarity": "mixed",
+            "supported_alpha_ids": [
+              "A304"
+            ],
+            "primary_alpha_id": "A304",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.6716
+          },
+          {
+            "evidence_group_id": "b229f062e3c105be497b4548",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:102"
+            ],
+            "agents": [
+              "fundamental_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report"
+            ],
+            "factor_signature": "Valuation Risk",
+            "relation_signature": "valuation_risk>conflicting>msft_revenue_growth>asserted",
+            "numeric_signature": "3.43|3.43",
+            "assertion_status": "mixed",
+            "semantic_polarity": "mixed",
+            "supported_alpha_ids": [
+              "A304"
+            ],
+            "primary_alpha_id": "A304",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.5081
+          },
+          {
+            "evidence_group_id": "c6f7ab1f7e8cb714e60e7dfb",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history:claim:55"
+            ],
+            "agents": [
+              "bull_researcher"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history"
+            ],
+            "factor_signature": "Valuation Risk",
+            "relation_signature": null,
+            "numeric_signature": "",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A304"
+            ],
+            "primary_alpha_id": "A304",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.5442
+          },
+          {
+            "evidence_group_id": "d1a1693f3389a2a548df7d39",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:54"
+            ],
+            "agents": [
+              "news_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+            ],
+            "factor_signature": "Valuation Risk",
+            "relation_signature": null,
+            "numeric_signature": "15%|15%",
+            "assertion_status": "conditional",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A304"
+            ],
+            "primary_alpha_id": "A304",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.5262
+          },
+          {
+            "evidence_group_id": "fef23afcc4f38d5f821fabce",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:75"
+            ],
+            "agents": [
+              "neutral_risk_analyst"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history"
+            ],
+            "factor_signature": "Valuation Risk",
+            "relation_signature": null,
+            "numeric_signature": "",
+            "assertion_status": "conditional",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A304"
+            ],
+            "primary_alpha_id": "A304",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.6896
+          }
+        ],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A304",
+          "production_status": "watch",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A501",
+        "production_score": 31.3268,
+        "production_status": "watch",
+        "metrics": {
+          "alpha_id": "A501",
+          "raw_evidence_claim_count": 2,
+          "deduplicated_claim_count": 2,
+          "independent_evidence_group_count": 2,
+          "primary_evidence_group_count": 2,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 2,
+          "distinct_source_ref_count": 2,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 0.0
+        },
+        "primary_evidence_groups": [
+          {
+            "evidence_group_id": "6b94e1221c1cef184483c297",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:64"
+            ],
+            "agents": [
+              "news_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+            ],
+            "factor_signature": "Recession Risk",
+            "relation_signature": null,
+            "numeric_signature": "-2026|-2026|12%|12%",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A501"
+            ],
+            "primary_alpha_id": "A501",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.8558
+          },
+          {
+            "evidence_group_id": "6dee4ff30254d2d012e5dd66",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history:claim:52"
+            ],
+            "agents": [
+              "bull_researcher"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history"
+            ],
+            "factor_signature": "Recession Risk",
+            "relation_signature": null,
+            "numeric_signature": "12%|12%",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A501"
+            ],
+            "primary_alpha_id": "A501",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.8558
+          }
+        ],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A501",
+          "production_status": "watch",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      },
+      {
+        "alpha_id": "A601",
+        "production_score": 32.9645,
+        "production_status": "watch",
+        "metrics": {
+          "alpha_id": "A601",
+          "raw_evidence_claim_count": 3,
+          "deduplicated_claim_count": 3,
+          "independent_evidence_group_count": 3,
+          "primary_evidence_group_count": 3,
+          "secondary_evidence_group_count": 0,
+          "distinct_agent_count": 2,
+          "distinct_source_ref_count": 2,
+          "structured_relation_group_count": 0,
+          "overlap_ratio": 0.0
+        },
+        "primary_evidence_groups": [
+          {
+            "evidence_group_id": "23e421c0234f19c04ed96c35",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:25"
+            ],
+            "agents": [
+              "news_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report"
+            ],
+            "factor_signature": "",
+            "relation_signature": null,
+            "numeric_signature": "2|2|25|25",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A601"
+            ],
+            "primary_alpha_id": "A601",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.3923
+          },
+          {
+            "evidence_group_id": "45fb78ca6b5e75d950a37bc3",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:78"
+            ],
+            "agents": [
+              "sentiment_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+            ],
+            "factor_signature": "",
+            "relation_signature": null,
+            "numeric_signature": "10|10|7.5|7.5",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A601"
+            ],
+            "primary_alpha_id": "A601",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.3923
+          },
+          {
+            "evidence_group_id": "7c2e1539c69f8767f41df572",
+            "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+            "ticker": "MSFT",
+            "claim_ids": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report:claim:1"
+            ],
+            "agents": [
+              "sentiment_agent"
+            ],
+            "source_refs": [
+              "0cb43bae-1a4d-4003-bb29-55d420498842:sentiment_agent:sentiment_report"
+            ],
+            "factor_signature": "",
+            "relation_signature": null,
+            "numeric_signature": "10|10|7.5|7.5",
+            "assertion_status": "asserted",
+            "semantic_polarity": "activation",
+            "supported_alpha_ids": [
+              "A601"
+            ],
+            "primary_alpha_id": "A601",
+            "secondary_alpha_ids": [],
+            "group_confidence": 0.3923
+          }
+        ],
+        "secondary_evidence_groups": [],
+        "shadow_regime_verdict": {
+          "alpha_id": "A601",
+          "production_status": "watch",
+          "production_regime_eligible": false,
+          "shadow_regime_eligible": null,
+          "shadow_regime_failures": [],
+          "regime_evidence_integrity_status": "NOT_REGIME_CANDIDATE"
+        }
+      }
+    ]
+  },
+  "canonical_relation_lineage": {
+    "total": 19,
+    "resolved": 19,
+    "unresolved": 0,
+    "ambiguous": 0,
+    "source_claim_links": 19,
+    "alpha_linked_relations": 8,
+    "orphan_relations": 11,
+    "rejection_reasons": {}
+  },
+  "local_structure_support": {
+    "graph_edge_count": 7,
+    "alpha_linked_edge_count": 3,
+    "qualifying_edge_count_by_alpha": {
+      "A001": 0,
+      "A003": 0,
+      "A101": 0,
+      "A102": 0,
+      "A103": 0,
+      "A201": 0,
+      "A301": 1,
+      "A304": 1,
+      "A501": 0,
+      "A601": 0
+    },
+    "exclusion_reasons": {
+      "NO_COMMITTED_ALPHA_MATCH": 10,
+      "RELATION_OR_ASSERTION_NOT_QUALIFYING": 1
+    }
+  },
+  "evidence_fact_integrity": {
+    "raw_claim_count_by_alpha": {
+      "A001": 1,
+      "A003": 1,
+      "A101": 0,
+      "A102": 0,
+      "A103": 0,
+      "A201": 0,
+      "A301": 15,
+      "A304": 7,
+      "A501": 2,
+      "A601": 3
+    },
+    "unique_fact_count_by_alpha": {
+      "A001": 1,
+      "A003": 1,
+      "A101": 0,
+      "A102": 0,
+      "A103": 0,
+      "A201": 0,
+      "A301": 14,
+      "A304": 7,
+      "A501": 2,
+      "A601": 3
+    },
+    "distinct_agent_count_by_alpha": {
+      "A001": 1,
+      "A003": 1,
+      "A101": 0,
+      "A102": 0,
+      "A103": 0,
+      "A201": 0,
+      "A301": 6,
+      "A304": 6,
+      "A501": 2,
+      "A601": 2
+    },
+    "overlap_ratio_by_alpha": {
+      "A001": 0.0,
+      "A003": 0.0,
+      "A101": 0.0,
+      "A102": 0.0,
+      "A103": 0.0,
+      "A201": 0.0,
+      "A301": 0.0667,
+      "A304": 0.0,
+      "A501": 0.0,
+      "A601": 0.0
+    },
+    "high_overlap_alphas": []
+  },
+  "numeric_semantics": {
+    "numeric_candidates": 0,
+    "daily_range_eligible": 0,
+    "skipped_by_role": 0,
+    "semantic_role_counts": {},
+    "warning_count": 0,
+    "false_positive_regression_checks": {
+      "technical_indicator_candidate_count": 0,
+      "technical_indicator_daily_range_warnings": 0
+    },
+    "extracted_numeric_candidate_count": 0,
+    "daily_range_eligible_count": 0,
+    "skipped_by_role_count": 0,
+    "daily_range_warning_count": 0,
+    "corporate_action_issue_count": 0,
+    "dividend_info_count": 0,
+    "unknown_role_count": 0,
+    "per_candidate_detail_available": false,
+    "per_candidate_detail_unavailable_reason": "raw extracted numeric candidates are not currently persisted"
+  },
+  "evidence_eligibility": {
+    "policy_version": "alpha_activation_evidence.v1",
+    "counts_by_alpha": {
+      "A001": {
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A003": {
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A101": {
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A102": {
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A103": {
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A201": {
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A301": {
+        "raw_supporting_claim_count": 15,
+        "unique_evidence_fact_count": 14,
+        "distinct_supporting_agent_count": 6,
+        "evidence_overlap_ratio": 0.0667
+      },
+      "A304": {
+        "raw_supporting_claim_count": 7,
+        "unique_evidence_fact_count": 7,
+        "distinct_supporting_agent_count": 6,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A501": {
+        "raw_supporting_claim_count": 2,
+        "unique_evidence_fact_count": 2,
+        "distinct_supporting_agent_count": 2,
+        "evidence_overlap_ratio": 0.0
+      },
+      "A601": {
+        "raw_supporting_claim_count": 3,
+        "unique_evidence_fact_count": 3,
+        "distinct_supporting_agent_count": 2,
+        "evidence_overlap_ratio": 0.0
+      }
+    },
+    "exclusion_reasons_by_alpha": {
+      "A001": {
+        "RELATION_NOT_SUPPORTING": 3,
+        "NON_ANALYTICAL_QUALITY": 2
+      },
+      "A003": {},
+      "A101": {},
+      "A102": {},
+      "A103": {},
+      "A201": {},
+      "A301": {},
+      "A304": {
+        "NON_ANALYTICAL_QUALITY": 1
+      },
+      "A501": {
+        "RELATION_NOT_SUPPORTING": 3
+      },
+      "A601": {
+        "NON_ANALYTICAL_QUALITY": 1
+      }
+    },
+    "production_shadow_consistent_count": 10,
+    "production_shadow_inconsistent_alphas": []
+  },
+  "conflict_evidence_integrity": {
+    "pair_count": 6,
+    "bull_raw_claim_count_by_pair": {
+      "A301__A304": 15,
+      "A304__A601": 3
+    },
+    "bull_unique_fact_count_by_pair": {
+      "A301__A304": 14,
+      "A304__A601": 3
+    },
+    "bear_raw_claim_count_by_pair": {
+      "A301__A304": 7,
+      "A304__A601": 7
+    },
+    "bear_unique_fact_count_by_pair": {
+      "A301__A304": 7,
+      "A304__A601": 7
+    },
+    "shared_fact_groups_by_pair": {
+      "A301__A304": [],
+      "A304__A601": []
+    },
+    "overlap_warning_pairs": []
+  },
+  "product_transparency": {
+    "activation_fields_available": [
+      "distinct_supporting_agent_count",
+      "evidence_overlap_ratio",
+      "high_overlap_warning",
+      "incident_graph_edge_count",
+      "local_edge_exclusion_reasons",
+      "nonqualifying_local_edge_count",
+      "qualifying_local_edge_count",
+      "raw_supporting_claim_count",
+      "unique_evidence_fact_count"
+    ],
+    "conflict_fields_available": [
+      "bear_distinct_agent_count",
+      "bear_fact_group_ids",
+      "bear_overlap_ratio",
+      "bear_raw_claim_count",
+      "bear_unique_fact_count",
+      "bull_distinct_agent_count",
+      "bull_fact_group_ids",
+      "bull_overlap_ratio",
+      "bull_raw_claim_count",
+      "bull_unique_fact_count",
+      "shared_fact_group_count",
+      "shared_fact_group_ids",
+      "shared_fact_resolution"
+    ],
+    "data_sanity_semantics_available": [
+      "daily_range_check_eligible",
+      "daily_range_skip_reason",
+      "semantic_role",
+      "semantic_role_reason"
+    ]
+  },
+  "run_identity": {
+    "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+    "ticker": "MSFT",
+    "analysis_date": null,
+    "created_at": null,
+    "started_at": null,
+    "completed_at": null,
+    "status": null,
+    "source_run_id": "0cb43bae-1a4d-4003-bb29-55d420498842",
+    "replay_run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+    "execution_mode": "architecture_replay",
+    "profile_id": null,
+    "provider": "deepseek",
+    "quick_model": null,
+    "deep_model": null,
+    "debate_rounds": null,
+    "risk_rounds": null,
+    "thinking_enabled": null,
+    "request_execution_mode": null
+  },
+  "code_provenance": {
+    "git_head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+    "git_dirty": true,
+    "dirty_file_count": 30,
+    "pipeline_version": "comqutor_alpha.run_audit_consolidation.v1"
+  },
+  "configuration_versions": {
+    "claim_adapter_version": {
+      "value": "week1.claim_extraction.v2",
+      "source": "metadata.json (replay lineage)"
+    },
+    "claim_quality_policy_version": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    },
+    "evidence_eligibility_policy_version": {
+      "value": "alpha_activation_evidence.v1",
+      "source": "computed live (evidence_fact_index.ALPHA_ACTIVATION_EVIDENCE_V1)"
+    },
+    "taxonomy_version": {
+      "value": "alpha_taxonomy_v1",
+      "source": "metadata.json (replay lineage)"
+    },
+    "taxonomy_sha256": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    },
+    "alias_registry_version": {
+      "value": "structure_engine.factor_aliases.v1",
+      "source": "metadata.json (replay lineage)"
+    },
+    "alias_registry_sha256": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    },
+    "relation_registry_version": {
+      "value": "structure_graph.relation_grammar.v1",
+      "source": "metadata.json (replay lineage)"
+    },
+    "relation_registry_sha256": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    },
+    "prompt_contract_version": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    },
+    "prompt_contract_sha256": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    },
+    "graph_schema_version": {
+      "value": "week3.structure_graph.v2",
+      "source": "metadata.json (replay lineage)"
+    },
+    "activation_formula_version": {
+      "value": "activation.v2.evidence_local_structure.v1",
+      "source": "metadata.json (replay lineage)"
+    },
+    "conflict_formula_version": {
+      "value": "week4.conflict_score.mvp_v1",
+      "source": "week4 conflict result (DB)"
+    },
+    "conflict_registry_version": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    },
+    "data_sanity_schema_version": {
+      "value": null,
+      "source": "not_recorded",
+      "warning": "VERSION_NOT_CAPTURED_AT_RUN_TIME"
+    }
+  },
+  "artifact_manifest": [
+    {
+      "name": "metadata.json",
+      "relative_path": "metadata.json",
+      "producer": "run submission / lifecycle",
+      "consumers": "run_audit, evaluation harness",
+      "exists": true,
+      "status": "PRESENT",
+      "size_bytes": 1608,
+      "sha256": "5c48c9c39775f9d29e0895a8cb95f603ee178e3e716e3996a36a963fc6c28846",
+      "schema_version": null,
+      "record_count": null
+    },
+    {
+      "name": "raw_agent_outputs.json",
+      "relative_path": "raw_agent_outputs.json",
+      "producer": "tradingagents_output_writer.build_raw_agent_output_record",
+      "consumers": "structured_output_adapter",
+      "exists": false,
+      "status": "NOT_PRESENT",
+      "size_bytes": null,
+      "sha256": null,
+      "schema_version": null,
+      "record_count": null
+    },
+    {
+      "name": "structured_agent_outputs.json",
+      "relative_path": "structured_agent_outputs.json",
+      "producer": "structured_output_adapter.adapt_run_outputs",
+      "consumers": "alpha_mapper, structure_extractor, run_audit",
+      "exists": true,
+      "status": "PRESENT",
+      "size_bytes": 1571554,
+      "sha256": "9b619744fa35bc2fa11a97249b43924e47677e7370553a1d7b30ee145887faa8",
+      "schema_version": "week1a.structured_agent_outputs.v2",
+      "record_count": 864
+    },
+    {
+      "name": "alpha_matches.json",
+      "relative_path": "alpha_matches.json",
+      "producer": "alpha_mapper.build_alpha_matches_payload",
+      "consumers": "graph_builder, activation_scorer_v2, conflict_detector",
+      "exists": true,
+      "status": "PRESENT",
+      "size_bytes": 7212159,
+      "sha256": "936c84cf577ce582e8d5439bd32530976192af7f2c6523c607418af9d5e90db4",
+      "schema_version": "week2.alpha_matches.v2",
+      "record_count": 864
+    },
+    {
+      "name": "extracted_structures.json",
+      "relative_path": "extracted_structures.json",
+      "producer": "structure_extractor.save_extracted_structures",
+      "consumers": "graph_builder",
+      "exists": true,
+      "status": "PRESENT",
+      "size_bytes": 45011,
+      "sha256": "4fbdc65b32d36c46a500ff5df3ce1f4f335b44d19d1ab3c3a17e98f91a2f8b8e",
+      "schema_version": "week2.extracted_structures.v2",
+      "record_count": 10
+    },
+    {
+      "name": "structure_graph.json",
+      "relative_path": "structure_graph.json",
+      "producer": "graph_engine.pipeline.score_and_assemble_structure_graph",
+      "consumers": "conflict_detector, run_audit, Structure Graph UI",
+      "exists": true,
+      "status": "PRESENT",
+      "size_bytes": 284081,
+      "sha256": "af954171fb451aa2d38cbf610e92e3b73252e7bc023793598d3eef3ab98558a9",
+      "schema_version": "week3.structure_graph.v2",
+      "record_count": 10
+    },
+    {
+      "name": "entity_alpha_exposures.json",
+      "relative_path": "entity_alpha_exposures.json",
+      "producer": "exposure_engine.compute_run_entity_alpha_exposures",
+      "consumers": "database, Research API, AlphaCard, run_audit",
+      "exists": true,
+      "status": "PRESENT",
+      "size_bytes": 11969,
+      "sha256": "3158b5b1a71450926853b9ddb212f5b1f4f247be95091abcd0c9f50b89e3b051",
+      "schema_version": "entity_alpha_exposure.run.v1",
+      "record_count": 10
+    },
+    {
+      "name": "run_audit.json",
+      "relative_path": "run_audit.json",
+      "producer": "routes_research.build_run_audit_payload",
+      "consumers": "internal audit / evaluation harness (no public GET route)",
+      "exists": false,
+      "status": "NOT_PRESENT",
+      "size_bytes": null,
+      "sha256": null,
+      "schema_version": null,
+      "record_count": null
+    },
+    {
+      "name": "data_sanity.json",
+      "relative_path": "data_sanity.json",
+      "producer": "data_sanity.pipeline.run_data_sanity_stage",
+      "consumers": "run_audit, Data Quality UI",
+      "exists": false,
+      "status": "NOT_PRESENT",
+      "size_bytes": null,
+      "sha256": null,
+      "schema_version": null,
+      "record_count": null
+    },
+    {
+      "name": "market_data_snapshot.json",
+      "relative_path": "market_data_snapshot.json",
+      "producer": "data_sanity.pipeline.run_data_sanity_stage",
+      "consumers": "data_sanity checks, run_audit",
+      "exists": false,
+      "status": "NOT_PRESENT",
+      "size_bytes": null,
+      "sha256": null,
+      "schema_version": null,
+      "record_count": null
+    },
+    {
+      "name": "week3_pipeline_status.json",
+      "relative_path": "week3_pipeline_status.json",
+      "producer": "routes_research._write_week3_pipeline_status",
+      "consumers": "readiness polling",
+      "exists": false,
+      "status": "NOT_PRESENT",
+      "size_bytes": null,
+      "sha256": null,
+      "schema_version": null,
+      "record_count": null
+    },
+    {
+      "name": "tradingagents_comqutor_vocabulary_snapshot.json",
+      "relative_path": "tradingagents_comqutor_vocabulary_snapshot.json",
+      "producer": "llm.canonical_prompt_injection.build_vocabulary_snapshot",
+      "consumers": "run_audit configuration_versions",
+      "exists": false,
+      "status": "NOT_PRESENT",
+      "size_bytes": null,
+      "sha256": null,
+      "schema_version": null,
+      "record_count": null
+    }
+  ],
+  "claims": {
+    "raw_agent_output_count": 12,
+    "candidate_segment_count": 875,
+    "retained_claim_count": 865,
+    "analytical_claim_count": 460,
+    "context_only_claim_count": 404,
+    "non_substantive_removed_count": 10,
+    "boilerplate_removed_count": 20,
+    "disclaimer_removed_count": 0,
+    "exact_duplicate_removed_count": 1,
+    "duplicate_group_count": 859
+  },
+  "relations": {
+    "canonical_relation_total": 28,
+    "canonical_relation_accepted": 19,
+    "canonical_relation_rejected": 9,
+    "rejection_reasons": {
+      "evidence_not_found": 9
+    }
+  },
+  "graph": {
+    "claim_level_edge_candidate_count": 13,
+    "merged_unique_edge_count": 7,
+    "admitted_edge_count": 7,
+    "structurally_rejected_edge_count": 0,
+    "structural_rejection_reasons": {
+      "self_loop": 0,
+      "dangling_reference": 0,
+      "invalid_edge_type": 0,
+      "invalid_weight": 0,
+      "malformed": 0
+    },
+    "duplicate_or_rejected_collapsed_count": 6,
+    "graph_node_count": 10
+  },
+  "accounting_invariants": [
+    {
+      "name": "candidate_segments_conserved",
+      "formula": "candidate_segment_count == retained_claim_count + non_substantive_removed_count",
+      "expected": 875,
+      "actual": 875,
+      "passed": true
+    },
+    {
+      "name": "valid_claim_count_after_dedup",
+      "formula": "valid_claim_count == retained_claim_count - exact_duplicate_removed_count",
+      "expected": 864,
+      "actual": 864,
+      "passed": true
+    },
+    {
+      "name": "graph_edge_candidate_conservation",
+      "formula": "claim_level_edge_candidate_count == merged_unique_edge_count + duplicate_or_rejected_collapsed_count",
+      "expected": 13,
+      "actual": 13,
+      "passed": true
+    }
+  ],
+  "graph_lineage": {
+    "edges_with_relation_ids": 6,
+    "edges_with_source_claim_ids": 7,
+    "edges_with_alpha_ids": 3,
+    "edges_without_alpha_ids": 4,
+    "alpha_link_reason_counts": {
+      "NO_COMMITTED_ALPHA_MATCH": 4
+    }
+  },
+  "activation_summary": {
+    "scored_alpha_count": 10,
+    "inactive_count": 6,
+    "watch_count": 3,
+    "active_count": 1,
+    "dominant_count": 0,
+    "regime_level_count": 0,
+    "per_alpha": {
+      "A001": {
+        "score": 13.1999,
+        "level": "inactive",
+        "direction": "negative",
+        "qualification_ceiling": 60.0,
+        "qualification_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agents": 1,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 1,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH",
+          "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+        ]
+      },
+      "A003": {
+        "score": 20.0243,
+        "level": "inactive",
+        "direction": "positive",
+        "qualification_ceiling": 60.0,
+        "qualification_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agents": 1,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 0,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A101": {
+        "score": 0.0,
+        "level": "inactive",
+        "direction": "unknown",
+        "qualification_ceiling": null,
+        "qualification_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 0,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A102": {
+        "score": 0.0,
+        "level": "inactive",
+        "direction": "unknown",
+        "qualification_ceiling": null,
+        "qualification_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 0,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A103": {
+        "score": 0.0,
+        "level": "inactive",
+        "direction": "unknown",
+        "qualification_ceiling": null,
+        "qualification_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 0,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A201": {
+        "score": 0.0,
+        "level": "inactive",
+        "direction": "unknown",
+        "qualification_ceiling": null,
+        "qualification_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 0,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A301": {
+        "score": 60.0,
+        "level": "active",
+        "direction": "positive",
+        "qualification_ceiling": 60.0,
+        "qualification_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 15,
+        "unique_evidence_fact_count": 14,
+        "distinct_supporting_agents": 6,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 1,
+        "qualifying_local_edge_count": 1,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A304": {
+        "score": 39.7525,
+        "level": "watch",
+        "direction": "negative",
+        "qualification_ceiling": 60.0,
+        "qualification_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 7,
+        "unique_evidence_fact_count": 7,
+        "distinct_supporting_agents": 6,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 1,
+        "qualifying_local_edge_count": 1,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A501": {
+        "score": 31.3268,
+        "level": "watch",
+        "direction": "positive",
+        "qualification_ceiling": 60.0,
+        "qualification_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 2,
+        "unique_evidence_fact_count": 2,
+        "distinct_supporting_agents": 2,
+        "ticker_specific_evidence_count": 0,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 0,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      },
+      "A601": {
+        "score": 32.9645,
+        "level": "watch",
+        "direction": "positive",
+        "qualification_ceiling": 70.0,
+        "qualification_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 3,
+        "unique_evidence_fact_count": 3,
+        "distinct_supporting_agents": 2,
+        "ticker_specific_evidence_count": 1,
+        "high_overlap_warning": false,
+        "incident_graph_edge_count": 0,
+        "qualifying_local_edge_count": 0,
+        "local_edge_exclusion_reasons": [
+          "NO_COMMITTED_ALPHA_MATCH"
+        ]
+      }
+    }
+  },
+  "conflict_summary": {
+    "declared_pair_count": 6,
+    "evaluated_pair_count": 6,
+    "admitted_count": 2,
+    "suppressed_count": 1,
+    "rejected_count": 3,
+    "main_conflict_id": "A301__A304",
+    "per_pair": [
+      {
+        "pair_id": "A001__A501",
+        "alpha_a": "A001",
+        "alpha_b": "A501",
+        "outcome": "suppressed",
+        "reason_codes": [
+          "BELOW_ACTIVATION_THRESHOLD"
+        ],
+        "conflict_score": null,
+        "conflict_level": null,
+        "bull_raw_claim_count": null,
+        "bull_unique_fact_count": null,
+        "bull_distinct_agent_count": null,
+        "bear_raw_claim_count": null,
+        "bear_unique_fact_count": null,
+        "bear_distinct_agent_count": null,
+        "shared_fact_group_count": null,
+        "is_main": false
+      },
+      {
+        "pair_id": "A003__A501",
+        "alpha_a": "A003",
+        "alpha_b": "A501",
+        "outcome": "rejected",
+        "reason_codes": [
+          "BELOW_ACTIVATION_THRESHOLD",
+          "DIRECTION_ROLE_UNRESOLVED"
+        ],
+        "conflict_score": null,
+        "conflict_level": null,
+        "bull_raw_claim_count": null,
+        "bull_unique_fact_count": null,
+        "bull_distinct_agent_count": null,
+        "bear_raw_claim_count": null,
+        "bear_unique_fact_count": null,
+        "bear_distinct_agent_count": null,
+        "shared_fact_group_count": null,
+        "is_main": false
+      },
+      {
+        "pair_id": "A101__A304",
+        "alpha_a": "A101",
+        "alpha_b": "A304",
+        "outcome": "rejected",
+        "reason_codes": [
+          "BELOW_ACTIVATION_THRESHOLD",
+          "MISSING_LEFT_EVIDENCE",
+          "DIRECTION_ROLE_UNRESOLVED"
+        ],
+        "conflict_score": null,
+        "conflict_level": null,
+        "bull_raw_claim_count": null,
+        "bull_unique_fact_count": null,
+        "bull_distinct_agent_count": null,
+        "bear_raw_claim_count": null,
+        "bear_unique_fact_count": null,
+        "bear_distinct_agent_count": null,
+        "shared_fact_group_count": null,
+        "is_main": false
+      },
+      {
+        "pair_id": "A301__A304",
+        "alpha_a": "A301",
+        "alpha_b": "A304",
+        "outcome": "admitted",
+        "reason_codes": [],
+        "conflict_score": 21.4691,
+        "conflict_level": "low",
+        "bull_raw_claim_count": 15,
+        "bull_unique_fact_count": 14,
+        "bull_distinct_agent_count": 6,
+        "bear_raw_claim_count": 7,
+        "bear_unique_fact_count": 7,
+        "bear_distinct_agent_count": 6,
+        "shared_fact_group_count": 0,
+        "is_main": true
+      },
+      {
+        "pair_id": "A304__A601",
+        "alpha_a": "A304",
+        "alpha_b": "A601",
+        "outcome": "admitted",
+        "reason_codes": [],
+        "conflict_score": 12.4404,
+        "conflict_level": "low",
+        "bull_raw_claim_count": 3,
+        "bull_unique_fact_count": 3,
+        "bull_distinct_agent_count": 2,
+        "bear_raw_claim_count": 7,
+        "bear_unique_fact_count": 7,
+        "bear_distinct_agent_count": 6,
+        "shared_fact_group_count": 0,
+        "is_main": false
+      },
+      {
+        "pair_id": "A501__A601",
+        "alpha_a": "A501",
+        "alpha_b": "A601",
+        "outcome": "rejected",
+        "reason_codes": [
+          "DIRECTION_ROLE_UNRESOLVED"
+        ],
+        "conflict_score": null,
+        "conflict_level": null,
+        "bull_raw_claim_count": null,
+        "bull_unique_fact_count": null,
+        "bull_distinct_agent_count": null,
+        "bear_raw_claim_count": null,
+        "bear_unique_fact_count": null,
+        "bear_distinct_agent_count": null,
+        "shared_fact_group_count": null,
+        "is_main": false
+      }
+    ]
+  },
+  "audit_validation": {
+    "generated_at": "2026-08-04T23:57:15Z",
+    "generator_version": "comqutor_alpha.run_audit_consolidation.v1",
+    "invariant_pass_count": 3,
+    "invariant_fail_count": 0,
+    "missing_required_fields": [
+      "alias_registry_sha256",
+      "claim_quality_policy_version",
+      "conflict_registry_version",
+      "data_sanity_schema_version",
+      "prompt_contract_sha256",
+      "prompt_contract_version",
+      "relation_registry_sha256",
+      "taxonomy_sha256"
+    ],
+    "warnings": [
+      "CONFIGURATION_VERSION_PROVENANCE_GAP"
+    ],
+    "overall_status": "PASS_WITH_WARNINGS"
+  },
+  "entity_exposure": {
+    "mode": "shadow",
+    "seed_version": "v0.1",
+    "seed_sha256": "97cd4510f3cc3d54965d351880346cb46c032eabd84a52e9651d1ba0029e513f",
+    "seed_approval_status": "draft",
+    "enforcement_allowed": false,
+    "ticker_seed_available": true,
+    "computed_alpha_count": 10,
+    "missing_seed_alpha_count": 0,
+    "per_alpha": {
+      "A001": {
+        "historical_mapping": 0.55,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.25,
+        "final_exposure": 0.325,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A003": {
+        "historical_mapping": 0.6,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.6,
+        "final_exposure": 0.42,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A101": {
+        "historical_mapping": 0.75,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.375,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A102": {
+        "historical_mapping": 0.9,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.45,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A103": {
+        "historical_mapping": 0.85,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.425,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A201": {
+        "historical_mapping": 0.35,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.175,
+        "would_block_dominant": true,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A301": {
+        "historical_mapping": 0.85,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.7833333333333333,
+        "final_exposure": 0.5816666666666667,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A304": {
+        "historical_mapping": 0.65,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.5666666666666667,
+        "final_exposure": 0.43833333333333335,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A501": {
+        "historical_mapping": 0.4,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.675,
+        "final_exposure": 0.335,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      },
+      "A601": {
+        "historical_mapping": 0.75,
+        "current_evidence": 0.098075,
+        "agent_confidence": 0.575,
+        "final_exposure": 0.5194225,
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": []
+      }
+    },
+    "shadow_mode_did_not_alter_activation": true,
+    "activation_scores_before_equal_after": true,
+    "activation_levels_before_equal_after": true,
+    "conflict_outcomes_before_equal_after": true,
+    "note": "shadow mode did not alter Activation"
+  },
+  "evidence_fact_count": 28,
+  "graph_nodes": 10,
+  "graph_edges": 7,
+  "active_alpha_count": 1,
+  "regime_alpha_count": 0,
+  "ticker_consistency": "pass",
+  "inconsistencies": [],
+  "ticker_consistency_audit": {
+    "ticker_consistency": "pass",
+    "expected_ticker": "MSFT",
+    "expected_ticker_source": "metadata",
+    "checked_artifact_count": 9,
+    "checked_field_count": 1775,
+    "missing_required_ticker_field_count": 0,
+    "inconsistencies": [],
+    "warnings": [
+      {
+        "code": "ARTIFACT_MISSING",
+        "artifact": "raw_agent_outputs.json",
+        "json_path": "$",
+        "expected_ticker": "MSFT",
+        "actual_ticker": null,
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "severity": "warning",
+        "detail": "artifact not supplied to this audit call (absent or not yet generated)"
+      },
+      {
+        "code": "TICKER_FIELD_MISSING",
+        "artifact": "conflicts.json",
+        "json_path": "$.conflicts[0].ticker",
+        "expected_ticker": "MSFT",
+        "actual_ticker": null,
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "severity": "warning",
+        "detail": "optional/legacy nested ticker field not present on this record"
+      },
+      {
+        "code": "TICKER_FIELD_MISSING",
+        "artifact": "conflicts.json",
+        "json_path": "$.conflicts[1].ticker",
+        "expected_ticker": "MSFT",
+        "actual_ticker": null,
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "severity": "warning",
+        "detail": "optional/legacy nested ticker field not present on this record"
+      },
+      {
+        "code": "ARTIFACT_MISSING",
+        "artifact": "run_audit.json",
+        "json_path": "$",
+        "expected_ticker": "MSFT",
+        "actual_ticker": null,
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "severity": "warning",
+        "detail": "artifact not supplied to this audit call (absent or not yet generated)"
+      }
+    ],
+    "foreign_entity_findings": [
+      {
+        "code": "FOREIGN_TICKER_ENTITY",
+        "artifact": "structured_agent_outputs.json",
+        "json_path": "$.records[862].entities",
+        "expected_ticker": "MSFT",
+        "actual_ticker": "NVDA",
+        "run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+        "severity": "warning",
+        "detail": "claim_id='0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision:claim:12' foreign_entity_context=co_mentioned_with_subject"
+      }
+    ],
+    "run_identity_diagnostics": {
+      "expected_run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "mismatch_count": 0,
+      "mismatches": []
+    }
+  },
+  "evidence_stance": {
+    "classifier_version": "evidence_stance.deterministic.v1",
+    "effect_mode": "shadow",
+    "stance_effect_applied": false,
+    "claim_alpha_pair_count": 4320,
+    "supports_alpha_count": 469,
+    "opposes_alpha_count": 53,
+    "mentions_alpha_count": 285,
+    "neutral_background_count": 3500,
+    "supports_counter_alpha_count": 13,
+    "manual_review_required_count": 1804,
+    "unknown_count": 0,
+    "stance_count_invariant_holds": true,
+    "activation_scores_unchanged": true,
+    "activation_levels_unchanged": true,
+    "conflict_outcomes_unchanged": true
+  }
+}

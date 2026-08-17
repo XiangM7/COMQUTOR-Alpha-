@@ -112,9 +112,19 @@ def test_pipeline_happy_path_completes_week1_through_4(tmp_path):
     conflict_result = repo.get_week4_conflict_result(run_id)
     assert conflict_result is not None
     assert response["main_conflict"] == conflict_result["main_conflict"]
-    assert response["main_conflict"]["conflict_id"] == "A101__A304"
+    # John's B2 Conflict Evidence Admissibility gate: this fixture's real,
+    # deterministic evidence gives A101/A304 only one unique supports_alpha
+    # fact per side (one short of B2's >=2 minimum) and A304's activation
+    # score is below B2's 50 threshold -- so main_conflict is correctly
+    # null here, never backfilled from a merely-candidate pair. See
+    # tests/test_week4_nvda_conflict_sanity.py for the full admissibility
+    # diagnostic on this exact fixture's A101/A304 pair.
+    assert response["main_conflict"] is None
 
-    assert response["summary"] == conflict_result["main_conflict"]["explanation"]
+    assert response["summary"] == (
+        "No dominant Alpha structure or admitted conflict was identified "
+        "for this research run."
+    )
     for forbidden in ("Buy", "Sell", "Hold", "position", "price target"):
         assert forbidden.lower() not in response["summary"].lower()
 
@@ -390,7 +400,15 @@ def test_conflicts_api_survives_deleted_local_run_directory(tmp_path):
 
     result = get_persisted_conflicts(run_id, output_root=tmp_path, graph_repository=repo)
     assert result["status"] == "ok"
-    assert result["main_conflict"]["conflict_id"] == "A101__A304"
+    # John's B2 Conflict Evidence Admissibility gate: this fixture's real
+    # evidence does not clear B2 for any declared pair (see
+    # test_pipeline_happy_path_completes_week1_through_4 above), so
+    # main_conflict is correctly null -- the DB reconstruction still
+    # demonstrably survived the deleted run directory, proven by the
+    # non-empty candidate_evaluations below (a broken/empty reconstruction
+    # would return an empty list, not six real per-pair diagnostics).
+    assert result["main_conflict"] is None
+    assert len(result["arbitration"]["candidate_evaluations"]) == 6
 
 
 def test_conflicts_api_default_resolution_creates_no_sqlite_file_or_migration(tmp_path, monkeypatch):

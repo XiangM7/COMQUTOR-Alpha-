@@ -1,0 +1,42 @@
+{
+  "schema_version": "comqutor.phase1b1.real_provider_smoke_result.v1",
+  "generated_at": "2026-08-06T22:26:05.289841+00:00",
+  "status": "COMPLETED_ALL_CALLS_TIMED_OUT",
+  "bundle_directory": "outputs/evaluations/phase1b1-smoke-20260806T222402Z",
+  "command_invoked": "python scripts/run_phase1b1_provider_smoke.py --research-profile comqutor_deepseek_default_v1 --max-provider-calls 4 --output-dir outputs/evaluations/phase1b1-smoke-20260806T222402Z --execute-provider-smoke",
+  "authorization": {
+    "approval_env_var_name": "COMQUTOR_PHASE1B1_PROVIDER_SMOKE_APPROVED",
+    "approval_env_var_equals_true": true,
+    "explicit_product_owner_authorization": true
+  },
+  "profile": {
+    "research_profile_id": "comqutor_deepseek_default_v1",
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "credential_present": true
+  },
+  "execution_summary": {
+    "selected_ticker": "NVDA",
+    "logical_calls_made": 4,
+    "logical_call_limit": 4,
+    "provider_attempts_total": 8,
+    "derived_max_provider_attempts": 8,
+    "retries_per_call": 1,
+    "per_report_status": [
+      {"agent_family": "fundamental", "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:fundamental_agent:fundamentals_report", "provider_status": "timeout", "error_code": "WEEK2_LLM_TIMEOUT", "attempts": 2, "shadow_status": "parser_error", "claims_accepted": 0},
+      {"agent_family": "news", "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:news_agent:news_report", "provider_status": "timeout", "error_code": "WEEK2_LLM_TIMEOUT", "attempts": 2, "shadow_status": "parser_error", "claims_accepted": 0},
+      {"agent_family": "sentiment", "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:sentiment_agent:sentiment_report", "provider_status": "timeout", "error_code": "WEEK2_LLM_TIMEOUT", "attempts": 2, "shadow_status": "parser_error", "claims_accepted": 0},
+      {"agent_family": "technical", "agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:market_agent:market_report", "provider_status": "timeout", "error_code": "WEEK2_LLM_TIMEOUT", "attempts": 2, "shadow_status": "parser_error", "claims_accepted": 0}
+    ],
+    "token_usage": "null for all 4 records -- the Provider never returned a response body within the Gateway's 15s x 2-attempt timeout policy",
+    "raw_output_text_persisted": "null for all 4 records (per contract, regardless of outcome)"
+  },
+  "explanation": "COMQUTOR_PHASE1B1_PROVIDER_SMOKE_APPROVED=true was explicitly set by the product owner. The research profile (comqutor_deepseek_default_v1) was resolved deterministically as the sole current live-route default; its credential (DEEPSEEK_API_KEY) was present and non-empty. The CLI executed exactly once (see execution_notes below for the two voided attempts) and made real network attempts to the DeepSeek Provider for all 4 logical calls, using only the Gateway's existing, unmodified retry policy (DEFAULT_MAX_RETRIES=1, DEFAULT_TIMEOUT_SECONDS=15.0). Every one of the 8 real attempts (4 calls x 2 attempts) timed out with zero response from the Provider -- 100% timeout rate, 0 successful responses, 0 tokens returned. This is a real-world manifestation of the task's own documented 'Provider不可达' (Provider unreachable) condition.",
+  "execution_notes": {
+    "voided_attempts": 2,
+    "voided_attempt_reason": "Two earlier invocations of this same authorized command were killed by the orchestrating shell's own default timeout (120s) before the CLI's internal retry/timeout logic could reach a natural terminal state for all 4 calls (worst case 4 x 30s = 120s, at the edge of the default shell timeout). Both were interrupted mid-run with no atomic promotion (only an orphaned staging directory), so neither reached a CLI-determined status. Evidence preserved at docs/audit_artifacts/phase1b1/real_smoke_interrupted_attempt_1/. The staging directories were removed (matching the CLI's own on-exception cleanup behavior) and the run was completed a third time under an adequate (300s) shell timeout -- this third, complete run is the one authorized official Smoke execution and is the only one counted against the one-run rule.",
+    "real_provider_timeout_attempts_across_all_3_shell_invocations": 18
+  },
+  "no_fabricated_provider_output": true,
+  "no_manual_retries_beyond_gateway_policy": true
+}

@@ -283,6 +283,11 @@ def _public_entity_exposure(record: Mapping[str, Any]) -> dict[str, Any]:
         "seed_version",
         "seed_effective_date",
         "seed_approval_status",
+        "owner",
+        "approved_by",
+        "approved_at",
+        "configured_status",
+        "effective_status",
         "mode",
         "exposure_status",
         "would_block_dominant",
@@ -295,15 +300,6 @@ def _public_entity_exposure(record: Mapping[str, Any]) -> dict[str, Any]:
         "reason_codes",
     )
     return {field: deepcopy(record.get(field)) for field in fields}
-
-
-_LEVEL_RANK = {"inactive": 0, "watch": 1, "active": 2, "dominant": 3, "regime_level": 4}
-
-
-def _cap_status(status: str, ceiling: str) -> str:
-    if status not in _LEVEL_RANK or ceiling not in _LEVEL_RANK:
-        return status
-    return ceiling if _LEVEL_RANK[status] > _LEVEL_RANK[ceiling] else status
 
 
 def compute_run_entity_alpha_exposures(
@@ -327,6 +323,12 @@ def compute_run_entity_alpha_exposures(
         raise ExposureInputError("INVALID_EXPOSURE_INPUT")
 
     manifest = seed_bundle.manifest
+    # John's B3 gated lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES):
+    # per-ticker lifecycle metadata, never a single global approval status.
+    # ``lifecycle`` is None for a ticker absent from the seed entirely --
+    # mode_decision already resolved that to draft_shadow/shadow safely;
+    # every field read from it below is optional (None) in that case.
+    lifecycle = seed_bundle.ticker_lifecycle(ticker)
     effective_mode = mode_decision.effective_mode
     before_scores = {str(entry.get("alpha_id")): entry.get("activation_score") for entry in entries}
     before_levels = {str(entry.get("alpha_id")): entry.get("status") for entry in entries}
@@ -367,13 +369,21 @@ def compute_run_entity_alpha_exposures(
         )
         qualification_applied = False
 
+        # John's B4 alpha-level classifier (task B4_ACTIVATION_LEVEL_
+        # ALIGNMENT) is now the sole writer of `status` -- this module
+        # computes and reports whether Exposure *would* constrain
+        # qualification (would_block_dominant/would_block_regime_level
+        # above, plus qualification_applied/reasons here), but never
+        # mutates entry["status"] itself anymore. B4 consults this same
+        # record (via its `entity_exposure` field) as one qualification
+        # input among several, exactly as Evidence/Graph/ticker-specific
+        # qualification already were, so a single classifier -- not two
+        # independent status writers -- produces the final level.
         if effective_mode == "enforced":
             if final_exposure is None:
-                entry["status"] = _cap_status(str(entry.get("status") or ""), "active")
                 reasons.extend([EXPOSURE_SEED_MISSING, EXPOSURE_QUALIFICATION_APPLIED])
                 qualification_applied = True
             elif final_exposure < DOMINANT_EXPOSURE_THRESHOLD:
-                entry["status"] = _cap_status(str(entry.get("status") or ""), "active")
                 reasons.extend(
                     [
                         EXPOSURE_BELOW_DOMINANT_THRESHOLD,
@@ -383,7 +393,6 @@ def compute_run_entity_alpha_exposures(
                 )
                 qualification_applied = True
             elif final_exposure < REGIME_EXPOSURE_THRESHOLD:
-                entry["status"] = _cap_status(str(entry.get("status") or ""), "dominant")
                 reasons.extend(
                     [EXPOSURE_BELOW_REGIME_THRESHOLD, EXPOSURE_QUALIFICATION_APPLIED]
                 )
@@ -393,9 +402,22 @@ def compute_run_entity_alpha_exposures(
             "run_id": run_id,
             "ticker": ticker,
             "alpha_id": alpha_id,
-            "seed_version": manifest.seed_version,
-            "seed_effective_date": manifest.effective_date,
-            "seed_approval_status": manifest.approval_status,
+            # Backward-compatible fields: seed_version/seed_effective_date
+            # are now sourced from THIS ticker's own lifecycle metadata
+            # (never a single global manifest value -- see John's B3 gated
+            # lifecycle, task B3_ENTITY_EXPOSURE_GATED_STATES).
+            # seed_approval_status now carries the per-ticker canonical
+            # status string (draft_shadow/approved_gating/disabled) --
+            # still a non-empty string, same DB column, same JSON key.
+            "seed_version": lifecycle.seed_version if lifecycle else None,
+            "seed_effective_date": lifecycle.approved_at if lifecycle else None,
+            "seed_approval_status": mode_decision.configured_status,
+            # New, explicit lifecycle provenance (task section 9).
+            "owner": lifecycle.owner if lifecycle else None,
+            "approved_by": lifecycle.approved_by if lifecycle else None,
+            "approved_at": lifecycle.approved_at if lifecycle else None,
+            "configured_status": mode_decision.configured_status,
+            "effective_status": mode_decision.effective_status,
             "historical_mapping": historical,
             "current_evidence": runtime["current_evidence"],
             "agent_confidence": runtime["agent_confidence"],
@@ -428,20 +450,32 @@ def compute_run_entity_alpha_exposures(
         entry["entity_exposure"] = _public_entity_exposure(record)
         records.append(record)
 
-    if effective_mode == "enforced":
-        by_alpha = {str(entry.get("alpha_id")): entry for entry in entries}
-        dominant = []
-        for original in activation.get("dominant_alphas") or []:
-            alpha_id = str(original.get("alpha_id") or "")
-            entry = by_alpha.get(alpha_id)
-            if entry and entry.get("status") in {"dominant", "regime_level"}:
-                updated = deepcopy(original)
-                updated["status"] = entry["status"]
-                dominant.append(updated)
-        activation["dominant_alphas"] = dominant
+    # dominant_alphas is no longer rebuilt here: B4's alpha-level
+    # classifier (task B4_ACTIVATION_LEVEL_ALIGNMENT) is the sole,
+    # single-pass rebuilder of dominant_alphas/active_alphas/
+    # regime_level_alphas/candidate_alphas/blocked_alphas, run once after
+    # every qualification input (including this function's own
+    # would_block_dominant/would_block_regime_level/exposure_status) is
+    # available -- see graph_engine.pipeline. activation["dominant_alphas"]
+    # is therefore left exactly as Activation v2 produced it; B4 replaces
+    # it wholesale immediately afterward.
 
     after_scores = {str(entry.get("alpha_id")): entry.get("activation_score") for entry in entries}
     after_levels = {str(entry.get("alpha_id")): entry.get("status") for entry in entries}
+    # seed_manifest stays additive/backward-compatible in shape (same key
+    # name every existing reader already looks for) but is now enriched
+    # with this run's ticker's own resolved lifecycle -- never a second,
+    # differently-shaped provenance object. configured_status/
+    # effective_status are also duplicated at the artifact's own top level
+    # (task section 6, "disabled"): when effective_mode == "off", records
+    # is deliberately empty, so this is the only place a "disabled" run's
+    # lifecycle status remains auditable.
+    enriched_seed_manifest = {
+        **manifest.to_dict(),
+        **(lifecycle.to_dict() if lifecycle else {}),
+        "configured_status": mode_decision.configured_status,
+        "effective_status": mode_decision.effective_status,
+    }
     artifact = {
         "schema_version": ENTITY_EXPOSURE_ARTIFACT_SCHEMA_VERSION,
         "run_id": run_id,
@@ -449,7 +483,9 @@ def compute_run_entity_alpha_exposures(
         "requested_mode": mode_decision.requested_mode,
         "mode": effective_mode,
         "mode_reason_codes": list(mode_decision.reason_codes),
-        "seed_manifest": manifest.to_dict(),
+        "configured_status": mode_decision.configured_status,
+        "effective_status": mode_decision.effective_status,
+        "seed_manifest": enriched_seed_manifest,
         "records": records,
         "activation_invariants": {
             "scores_unchanged": before_scores == after_scores,

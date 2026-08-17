@@ -1,7 +1,10 @@
-"""Core Historical Architecture Replay service (Track D).
+"""Raw Rebuild Diagnostic Replay service (Track D).
 
-``run_structure_replay`` is the single, real (non-scratch-script) service
-both the CLI (``cli.py``) and the historical-learning audit (Track C) call.
+``run_structure_replay`` preserves the historical architecture-diagnostic
+service used by the CLI and historical-learning audit. It is explicitly
+not Exact Semantic Replay: it reinterprets raw text through the current
+deterministic parser/fallback path and does not claim equivalence to the
+semantic decisions made by the source live run.
 It reprocesses one completed run's ``raw_agent_outputs.json`` -- the only
 allowed canonical replay input (never a prior ``structured_agent_outputs.
 json``, since that would silently freeze in whatever the *old* architecture
@@ -27,6 +30,7 @@ any change flips ``status`` to ``"blocked"`` rather than claiming success.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import subprocess
@@ -37,6 +41,16 @@ from typing import Any
 from uuid import uuid4
 
 from comqutor_alpha.alpha_library.alpha_loader import TAXONOMY_PATH
+from comqutor_alpha.api.artifact_export import (
+    REPLAY_REQUIRED_ARTIFACT_FILENAMES,
+    build_and_write_artifact_manifest,
+    finalize_completed_run_artifacts,
+)
+from comqutor_alpha.audit.ticker_consistency import (
+    REASON_REPLAY_ARTIFACT_IDENTITY_MISMATCH,
+    STATUS_PASS,
+    build_replay_identity_consistency,
+)
 from comqutor_alpha.conflict_engine.conflict_detector import detect_alpha_conflicts
 from comqutor_alpha.graph_engine.graph_schema import (
     ACTIVATION_FORMULA_VERSION,
@@ -46,6 +60,7 @@ from comqutor_alpha.graph_engine.pipeline import (
     build_structure_graph_stage,
     score_and_assemble_structure_graph,
 )
+from comqutor_alpha.replay.modes import ReplayMode
 from comqutor_alpha.storage.file_store import (
     load_json_record,
     run_dir_for,
@@ -69,7 +84,9 @@ from comqutor_alpha.structure_engine.structured_output_adapter import (
 DEFAULT_SOURCE_OUTPUT_ROOT = "outputs/runs"
 DEFAULT_REPLAY_OUTPUT_ROOT = "outputs/replays"
 RUN_TYPE = "architecture_replay"
-REPLAY_MODE_STRUCTURE_ONLY = "structure_only"
+# Backward-compatible constant name; the value is the explicit contract
+# identity for the existing raw-rebuild diagnostic path.
+REPLAY_MODE_STRUCTURE_ONLY = ReplayMode.RAW_REBUILD_DIAGNOSTIC.value
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -125,6 +142,13 @@ class ReplayResult:
     database_writes: int
     comparison: dict[str, Any] | None
     error: str | None = None
+    # Sprint 1 Replay Identity Correction: additive, optional (never
+    # required by any existing caller/test -- defaults to None so this
+    # dataclass's existing keyword-constructed call sites are unaffected).
+    identity_consistency: dict[str, Any] | None = None
+    replay_mode: str = ReplayMode.RAW_REBUILD_DIAGNOSTIC.value
+    semantic_source: str = "raw_rebuild"
+    provider_zero: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -145,6 +169,10 @@ class ReplayResult:
             "database_writes": self.database_writes,
             "comparison": self.comparison,
             "error": self.error,
+            "identity_consistency": self.identity_consistency,
+            "replay_mode": self.replay_mode,
+            "semantic_source": self.semantic_source,
+            "provider_zero": self.provider_zero,
         }
 
 
@@ -286,6 +314,64 @@ def _build_comparison(
     }
 
 
+# Sprint 1 Replay Identity Correction: fields that identify a claim/relation
+# record's own THIS-ARTIFACT run identity -- rewritten to the replay's own
+# run_id. Every other field (claim_id, source_agent_output_id, relation_id,
+# evidence, claim, ticker, source_refs, ...) is left completely untouched;
+# this is a targeted field rewrite, never a blanket recursive string
+# replace.
+_REPLAY_IDENTITY_FIELD = "run_id"
+
+
+def _rebase_structured_payload_for_replay(
+    structured_payload: dict[str, Any], *, replay_run_id: str
+) -> dict[str, Any]:
+    """Returns a deep copy of ``structured_payload`` (the output of
+    ``adapt_run_outputs`` against the *source* run's raw agent outputs)
+    with every field that identifies *this artifact's own* run identity
+    rewritten from the source run's id to ``replay_run_id``:
+
+    - top-level ``run_id``
+    - every ``records[*].run_id``
+    - every ``canonical_relations[*].run_id`` (when the field is present)
+
+    This is the correct fix for Architecture Replay's identity contract:
+    ``source_run_id`` names the original research run whose raw agent
+    outputs were reprocessed; ``replay_run_id`` names *this* newly
+    recomputed architecture run, and every replay-local regenerated
+    artifact -- including the structured claims this function rebases --
+    must consistently carry the latter. Downstream builders
+    (``build_alpha_matches_payload``, ``build_extracted_structures_payload``,
+    ``score_and_assemble_structure_graph``) all derive their own top-level
+    and nested ``run_id`` fields directly from the structured records they
+    are given (see ``alpha_mapper.py``/``structure_extractor.py``), so
+    rebasing here -- once, before those builders ever run -- is sufficient
+    to make every downstream artifact consistently carry
+    ``replay_run_id`` without touching any of those builders themselves.
+
+    Never mutates the input (the source-derived payload) in place, and
+    never touches ``claim_id``, ``source_agent_output_id``, ``relation_id``,
+    ``evidence``, ``claim``, ``ticker``, ``source_refs``, or any other
+    content field.
+    """
+    rebased = copy.deepcopy(structured_payload)
+    rebased[_REPLAY_IDENTITY_FIELD] = replay_run_id
+
+    records = rebased.get("records")
+    if isinstance(records, list):
+        for record in records:
+            if isinstance(record, dict) and _REPLAY_IDENTITY_FIELD in record:
+                record[_REPLAY_IDENTITY_FIELD] = replay_run_id
+
+    canonical_relations = rebased.get("canonical_relations")
+    if isinstance(canonical_relations, list):
+        for relation in canonical_relations:
+            if isinstance(relation, dict) and _REPLAY_IDENTITY_FIELD in relation:
+                relation[_REPLAY_IDENTITY_FIELD] = replay_run_id
+
+    return rebased
+
+
 def run_structure_replay(
     source_run_id: str,
     *,
@@ -295,7 +381,7 @@ def run_structure_replay(
     persist: bool = True,
     comparison: bool = True,
 ) -> ReplayResult:
-    """Reprocess ``source_run_id`` through the current structure pipeline.
+    """Rebuild from raw text for architecture diagnosis only.
 
     Raises ``ReplaySourceIncompleteError`` if the source run has no
     ``raw_agent_outputs.json``. Never mutates anything under
@@ -319,7 +405,19 @@ def run_structure_replay(
 
     resolved_replay_run_id = validate_run_id_for_path(replay_run_id or new_replay_run_id())
 
-    structured = adapt_run_outputs(source_run_dir, llm_gateway=None)
+    # Sprint 1 Replay Identity Correction: `adapt_run_outputs` reads
+    # `raw_agent_outputs.json` from the *source* run directory, so its
+    # direct output genuinely (and correctly, for a *source* artifact)
+    # embeds the source run's own run_id throughout. But every artifact
+    # THIS replay regenerates is a new, replay-local architecture run --
+    # its own identity is `resolved_replay_run_id`, never
+    # `source_run_id`. Rebasing here (once) is what lets
+    # `detect_alpha_conflicts` be called with its correct, real identity
+    # below -- never bypassed by handing it the wrong run_id instead.
+    source_structured = adapt_run_outputs(source_run_dir, llm_gateway=None)
+    structured = _rebase_structured_payload_for_replay(
+        source_structured, replay_run_id=resolved_replay_run_id
+    )
     alpha_matches = build_alpha_matches_payload(structured)
     extracted = build_extracted_structures_payload(structured)
     graph_stage = build_structure_graph_stage(alpha_matches, extracted)
@@ -330,12 +428,66 @@ def run_structure_replay(
         structured_records=structured.get("records"),
         exposure_run_id=resolved_replay_run_id,
     )
+    # Correct identity, not a bypass: every input above (alpha_matches,
+    # graph/activation) now genuinely embeds resolved_replay_run_id (via
+    # the rebase above), so this is the run_id conflict_detector's own
+    # defensive `_embedded_identity_mismatch` guard actually expects to
+    # see -- RUN_ID_MISMATCH no longer fires because the identity is
+    # correct, not because the check was routed around.
     conflicts = detect_alpha_conflicts(
         run_id=resolved_replay_run_id,
         ticker=str(graph.get("ticker") or ""),
         activation_payload=graph.get("activation") or {},
         alpha_matches=alpha_matches.get("matches") or [],
     )
+
+    # Sprint 1 Replay Identity Correction, section 5: a defensive
+    # regression guard, not the primary fix (the rebase above is). Checked
+    # against the five core regenerated payloads plus a minimal synthetic
+    # metadata stand-in built from the exact values `lineage` below will
+    # also use -- never a guess, since this function already controls
+    # both values directly at this point. If this ever fails (e.g. a
+    # future edit reintroduces the old bypass), the replay is blocked
+    # before any file is written -- never partially persisted, never
+    # reported "completed", and artifact_manifest.json is never even
+    # created (so it can never dishonestly read "pass").
+    identity_consistency = build_replay_identity_consistency(
+        source_run_id=source_run_id,
+        replay_run_id=resolved_replay_run_id,
+        artifacts={
+            "metadata.json": {
+                "run_id": resolved_replay_run_id,
+                "replay_run_id": resolved_replay_run_id,
+                "source_run_id": source_run_id,
+            },
+            "structured_agent_outputs.json": structured,
+            "alpha_matches.json": alpha_matches,
+            "extracted_structures.json": extracted,
+            "structure_graph.json": graph,
+            "conflict_results.json": conflicts,
+        },
+    )
+    if identity_consistency["identity_consistency"] != STATUS_PASS:
+        return ReplayResult(
+            source_run_id=source_run_id,
+            replay_run_id=resolved_replay_run_id,
+            run_type=RUN_TYPE,
+            status="blocked",
+            output_dir=None,
+            source_raw_sha256_before=sha_before,
+            source_raw_sha256_after=_sha256_file(raw_path),
+            source_raw_size_before=stat_before.st_size,
+            source_raw_size_after=raw_path.stat().st_size,
+            source_raw_mtime_before=stat_before.st_mtime,
+            source_raw_mtime_after=raw_path.stat().st_mtime,
+            tradingagents_calls=0,
+            llm_provider_calls=0,
+            market_data_provider_calls=0,
+            database_writes=0,
+            comparison=None,
+            error=REASON_REPLAY_ARTIFACT_IDENTITY_MISMATCH,
+            identity_consistency=identity_consistency,
+        )
 
     sha_after = _sha256_file(raw_path)
     stat_after = raw_path.stat()
@@ -364,12 +516,20 @@ def run_structure_replay(
             database_writes=0,
             comparison=None,
             error="REPLAY_SOURCE_INTEGRITY_VIOLATION",
+            identity_consistency=identity_consistency,
         )
 
     raw_config = metadata.get("config")
     config: dict[str, Any] = raw_config if isinstance(raw_config, dict) else {}
     lineage = {
         "run_id": resolved_replay_run_id,
+        # Sprint 1 (Run Identity Integrity and Complete Artifact Export):
+        # a real, top-level "ticker" field, same as every other artifact's
+        # own contract -- the replay's authoritative ticker is always the
+        # *source* run's own ticker (this replay never re-derives or
+        # guesses a different one), matching the sprint's stated rule:
+        # "对于 replay: expected ticker 来自 source run 的权威 ticker".
+        "ticker": metadata.get("ticker"),
         "run_type": RUN_TYPE,
         "replay_run_id": resolved_replay_run_id,
         "source_run_id": source_run_id,
@@ -389,6 +549,8 @@ def run_structure_replay(
         "source_created_at": metadata.get("created_at"),
         "replay_created_at": _utc_now_iso(),
         "replay_mode": REPLAY_MODE_STRUCTURE_ONLY,
+        "semantic_source": "raw_rebuild",
+        "provider_zero": True,
         "pipeline_git_head": _git("rev-parse", "HEAD") or "unknown",
         "pipeline_worktree_dirty": bool(_git("status", "--porcelain") or ""),
         "pipeline_version": ADAPTER_VERSION,
@@ -431,6 +593,23 @@ def run_structure_replay(
         _write_json(target_dir / "conflict_results.json", conflicts)
         if comparison_payload is not None:
             _write_json(target_dir / "replay_comparison.json", comparison_payload)
+
+        # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+        # Track A2: the replay bundle must be artifact-complete too, via
+        # the exact same finalizer a live run uses (extraction only --
+        # never a second Activation/Conflict/Evidence-Fact computation;
+        # `graph` and `conflicts` above are already the complete
+        # in-memory payloads). Same offline guarantee as everything else
+        # in this function: no Provider/DB call anywhere in this branch.
+        finalize_completed_run_artifacts(
+            run_id=resolved_replay_run_id,
+            ticker=str(graph.get("ticker") or ""),
+            output_root=replay_output_root,
+            graph_payload=graph,
+            conflict_payload=conflicts,
+            alpha_matches_payload=alpha_matches,
+        )
+
         # Same additive Run Audit producer as a live run. It is strictly
         # offline here (repository=None) and therefore performs no DB or
         # Provider calls.
@@ -442,6 +621,15 @@ def run_structure_replay(
             conflict_count=len(conflicts.get("conflicts") or []),
             conflict_payload=conflicts,
             repository=None,
+        )
+
+        # Written last so it can honestly report on run_audit.json's own
+        # presence too.
+        build_and_write_artifact_manifest(
+            run_id=resolved_replay_run_id,
+            ticker=str(graph.get("ticker") or ""),
+            output_root=replay_output_root,
+            required_filenames=REPLAY_REQUIRED_ARTIFACT_FILENAMES,
         )
         output_dir_str = str(target_dir)
 
@@ -463,6 +651,7 @@ def run_structure_replay(
         database_writes=0,
         comparison=comparison_payload,
         error=None,
+        identity_consistency=identity_consistency,
     )
 
 

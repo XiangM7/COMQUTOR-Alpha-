@@ -1,0 +1,4691 @@
+{
+  "schema_version": "week3.structure_graph.v2",
+  "graph_builder_version": "week3.graph_builder.v1",
+  "activation_scorer_version": "week3.activation_scorer.v1",
+  "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+  "ticker": "SNDK",
+  "nodes": [
+    {
+      "id": "ai_capex",
+      "node_type": "factor",
+      "label": "AI CapEx",
+      "canonical_factor": "AI CapEx",
+      "original_labels": [
+        "AI CapEx"
+      ],
+      "alpha_ids": [],
+      "ambiguous_alpha_ids": [],
+      "score": 0.75,
+      "claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:402",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:166",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:69",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:103",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:11",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:117",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:91"
+      ],
+      "source_claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:402",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:166",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:69",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:103",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:11",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:117",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:91"
+      ],
+      "source_agent_output_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report"
+      ],
+      "agents": [
+        "bear_researcher",
+        "bull_researcher",
+        "news_agent",
+        "sentiment_agent"
+      ],
+      "evidence": [
+        "$42B backlog and AI capex: If hyperscaler demand for NAND remains robust, the supply shortage thesis could reassert itself.",
+        "Category: AI CapEx; Data Point: Hyperscaler spend $750B in 2026; Signal: 🟢 Positive; Implication for SNDK: Structural NAND/DRAM demand driver intact",
+        "In a world where the AI memory supercycle is real, where hyperscaler CapEx is $750 billion, where the order backlog is $42 billion, that $816 scenario requires a catastrophic simultaneous collapse of every positive fundamental driver.",
+        "Insider Monkey noted SNDK's $42 billion backlog as a bullish fundamental counterpoint, tying it to the AI memory supercycle and hyperscaler capex of $750B in 2026.",
+        "Signal: $42B backlog / AI capex supercycle; Direction: 🟢 Bullish (LT); Source: News (Insider Monkey); Supporting Evidence: $750B hyperscaler capex in 2026; Goldman $7.6T through 2031 — demand structural thesis intact",
+        "The $42B backlog story and hyperscaler capex data ($750B in 2026) sustain a bull case, but this thesis is being stress-tested by competitive supply expansion.",
+        "The demand side — hyperscaler AI capex — is real, but AI NAND demand is concentrated in enterprise SSD, not commodity NAND."
+      ]
+    },
+    {
+      "id": "ai_demand",
+      "node_type": "factor",
+      "label": "AI Demand",
+      "canonical_factor": "AI Demand",
+      "original_labels": [
+        "AI Demand"
+      ],
+      "alpha_ids": [
+        "A601"
+      ],
+      "ambiguous_alpha_ids": [],
+      "score": 0.4,
+      "claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:neutral_risk_analyst:risk_debate_state.neutral_history:claim:54",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60"
+      ],
+      "source_claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:neutral_risk_analyst:risk_debate_state.neutral_history:claim:54",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60"
+      ],
+      "source_agent_output_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report"
+      ],
+      "agents": [
+        "neutral_risk_analyst",
+        "news_agent"
+      ],
+      "evidence": [
+        "AI demand narrative increasingly contested and subject to sentiment shifts",
+        "But the balance sheet quality, the FCF generation, and the genuine AI demand backdrop mean that this is not a stock that needs to be eliminated entirely from a portfolio with any medium-term horizon."
+      ]
+    },
+    {
+      "id": "ai_infrastructure",
+      "node_type": "factor",
+      "label": "AI Infrastructure",
+      "canonical_factor": "AI Infrastructure",
+      "original_labels": [
+        "AI Infrastructure"
+      ],
+      "alpha_ids": [],
+      "ambiguous_alpha_ids": [],
+      "score": 0.75,
+      "claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:77"
+      ],
+      "source_claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:77"
+      ],
+      "source_agent_output_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "agents": [
+        "bull_researcher"
+      ],
+      "evidence": [
+        "Morgan, and so does the Goldman Sachs AI infrastructure thesis, and so do the institutional buyers who will be waiting at the Bollinger lower band with $1.1 billion buy orders."
+      ]
+    },
+    {
+      "id": "recession_risk",
+      "node_type": "factor",
+      "label": "Recession Risk",
+      "canonical_factor": "Recession Risk",
+      "original_labels": [
+        "Recession Risk"
+      ],
+      "alpha_ids": [
+        "A501"
+      ],
+      "ambiguous_alpha_ids": [],
+      "score": 0.75,
+      "claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:72",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81"
+      ],
+      "source_claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:72",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81"
+      ],
+      "source_agent_output_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report"
+      ],
+      "agents": [
+        "bull_researcher",
+        "news_agent"
+      ],
+      "evidence": [
+        "Category: Polymarket: Recession; Data Point: US 12%; UK 18%; Japan 10%; Signal: 🟢 Mildly Positive; Implication for SNDK: Low global recession risk backdrop",
+        "Category: Recession Risk; Data Point: 12% US recession probability by end of 2026; Signal: 🟢 Mildly Positive; Implication for SNDK: Low recession risk supports demand environment",
+        "Low global recession risk across US, UK, and Japan."
+      ]
+    },
+    {
+      "id": "semiconductor_cycle",
+      "node_type": "factor",
+      "label": "Semiconductor Cycle",
+      "canonical_factor": "Semiconductor Cycle",
+      "original_labels": [
+        "Semiconductor Cycle"
+      ],
+      "alpha_ids": [],
+      "ambiguous_alpha_ids": [],
+      "score": 0.4,
+      "claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:101",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:70"
+      ],
+      "source_claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:101",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:70"
+      ],
+      "source_agent_output_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "agents": [
+        "bear_researcher",
+        "bull_researcher"
+      ],
+      "evidence": [
+        "The AI memory supercycle is structural, not cyclical — we are not in a world where memory demand is about to fall off a cliff.",
+        "You're not collecting cash until the AR converts — and in a semiconductor cycle turn, customers sometimes slow pay or dispute pricing on large contracts."
+      ]
+    },
+    {
+      "id": "sndk_revenue_growth",
+      "node_type": "factor",
+      "label": "SNDK Revenue Growth",
+      "canonical_factor": "Revenue Growth",
+      "original_labels": [
+        "SNDK Revenue Growth"
+      ],
+      "alpha_ids": [
+        "A301"
+      ],
+      "ambiguous_alpha_ids": [],
+      "score": 0.4,
+      "claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359"
+      ],
+      "source_claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359"
+      ],
+      "source_agent_output_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "agents": [
+        "bear_researcher"
+      ],
+      "evidence": [
+        "Management sets discount rates, revenue growth assumptions, and terminal value assumptions in those models."
+      ]
+    },
+    {
+      "id": "valuation_risk",
+      "node_type": "factor",
+      "label": "Valuation Risk",
+      "canonical_factor": "Valuation Risk",
+      "original_labels": [
+        "Valuation Risk"
+      ],
+      "alpha_ids": [
+        "A304"
+      ],
+      "ambiguous_alpha_ids": [],
+      "score": 0.4,
+      "claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324"
+      ],
+      "source_claim_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324"
+      ],
+      "source_agent_output_ids": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "agents": [
+        "bear_researcher",
+        "bull_researcher"
+      ],
+      "evidence": [
+        "But here's the critical nuance they missed entirely: multiple compression and earnings compression are different phenomena.",
+        "The bull's own \"stress test\" produces a catastrophic outcome once you apply the correct multiple compression that always accompanies earnings compression in cyclical hardware.",
+        "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack."
+      ]
+    }
+  ],
+  "edges": [],
+  "graph_metrics": {
+    "node_count": 7,
+    "edge_count": 0,
+    "valid_edges": 0,
+    "connected_components": 7,
+    "longest_causal_chain": 0,
+    "duplicate_nodes_merged": 0,
+    "duplicate_edges_merged": 0,
+    "rejected_edges": {
+      "self_loop": 0,
+      "dangling_reference": 0,
+      "invalid_edge_type": 0,
+      "invalid_weight": 0,
+      "malformed": 0
+    }
+  },
+  "graph_coherence": {
+    "formula_version": "week3.graph_coherence.mvp_v1",
+    "valid_edges": 0,
+    "alpha_covered_count": 4,
+    "edge_contribution": 0,
+    "coverage_contribution": 40,
+    "unclamped_score": 40,
+    "score": 40.0
+  },
+  "activation": {
+    "formula_version": "activation.v2.evidence_local_structure.v1",
+    "weights": {
+      "evidence_quality": 0.35,
+      "agent_independence": 0.2,
+      "local_structure_support": 0.2,
+      "ticker_specificity": 0.1,
+      "recency": 0.1,
+      "direction_consistency": 0.05
+    },
+    "run_timestamp": null,
+    "as_of": null,
+    "alphas": [
+      {
+        "alpha_id": "A001",
+        "alpha_name": "Rate Cut Cycle",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "inactive",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.45,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.225,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": true,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A003",
+        "alpha_name": "Liquidity Expansion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 18.0993,
+        "uncapped_score": 18.0993,
+        "eligible_cap": 60.0,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "inactive",
+        "direction": "positive",
+        "components": {
+          "evidence_quality": {
+            "raw": 9.8075,
+            "weight": 0.35,
+            "contribution": 3.4326,
+            "unique_semantic_groups": 1,
+            "unique_contribution_sum": 0.3923,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 23.3333,
+            "weight": 0.2,
+            "contribution": 4.6667,
+            "distinct_agents": 1,
+            "agents": [
+              "fundamental_agent"
+            ],
+            "agent_coverage": 33.3333,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 1
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "evidence_gated": false,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 100.0,
+            "weight": 0.05,
+            "contribution": 5.0,
+            "qualifying_group_count": 1,
+            "weighted_signed_average": 1.0
+          }
+        },
+        "evidence_count": 1,
+        "unique_evidence_count": 1,
+        "distinct_supporting_agents": 1,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129"
+        ],
+        "evidence": [
+          "Category: Balance Sheet; Metric: Current Ratio; Value: 4.78x; Signal: 🟢 Strong liquidity"
+        ],
+        "reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [
+          {
+            "evidence_fact_group_id": "3abe7706a8c0f2b066089b13",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129"
+            ],
+            "supporting_agents": [
+              "fundamental_agent"
+            ]
+          }
+        ],
+        "evidence_detail": [
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129",
+            "claim": "Category: Balance Sheet; Metric: Current Ratio; Value: 4.78x; Signal: 🟢 Strong liquidity",
+            "agent": "fundamental_agent",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report",
+            "match_score": 0.3923,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "liquidity"
+            ],
+            "matched_factors": []
+          }
+        ],
+        "entity_exposure": {
+          "historical_mapping": 0.55,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.65,
+          "final_exposure": 0.405,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 1,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 1,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A101",
+        "alpha_name": "AI Expansion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "inactive",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.35,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.175,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": true,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A102",
+        "alpha_name": "Inference Explosion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "inactive",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.25,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.125,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": true,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A103",
+        "alpha_name": "AI Infrastructure",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "inactive",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.45,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.225,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": true,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A201",
+        "alpha_name": "Semiconductor Supercycle",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 21.5319,
+        "uncapped_score": 21.5319,
+        "eligible_cap": 60.0,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "inactive",
+        "direction": "positive",
+        "components": {
+          "evidence_quality": {
+            "raw": 19.615,
+            "weight": 0.35,
+            "contribution": 6.8652,
+            "unique_semantic_groups": 2,
+            "unique_contribution_sum": 0.7846,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 23.3333,
+            "weight": 0.2,
+            "contribution": 4.6667,
+            "distinct_agents": 1,
+            "agents": [
+              "bear_researcher"
+            ],
+            "agent_coverage": 33.3333,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 2
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "evidence_gated": false,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 100.0,
+            "weight": 0.05,
+            "contribution": 5.0,
+            "qualifying_group_count": 2,
+            "weighted_signed_average": 1.0
+          }
+        },
+        "evidence_count": 2,
+        "unique_evidence_count": 2,
+        "distinct_supporting_agents": 1,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85"
+        ],
+        "evidence": [
+          "In a zero-rate environment, a 6x P/E on a semiconductor growth company is genuinely cheap.",
+          "Show me the institutional buy orders."
+        ],
+        "reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 2,
+        "unique_evidence_fact_count": 2,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [
+          {
+            "evidence_fact_group_id": "a31e5474214b88ea7fa3bdcd",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85"
+            ],
+            "supporting_agents": [
+              "bear_researcher"
+            ]
+          },
+          {
+            "evidence_fact_group_id": "d81c4f4d2fe66bb970f05411",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261"
+            ],
+            "supporting_agents": [
+              "bear_researcher"
+            ]
+          }
+        ],
+        "evidence_detail": [
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+            "claim": "In a zero-rate environment, a 6x P/E on a semiconductor growth company is genuinely cheap.",
+            "agent": "bear_researcher",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+            "match_score": 0.3923,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "semiconductor"
+            ],
+            "matched_factors": []
+          },
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85",
+            "claim": "Show me the institutional buy orders.",
+            "agent": "bear_researcher",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+            "match_score": 0.3923,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "orders"
+            ],
+            "matched_factors": []
+          }
+        ],
+        "entity_exposure": {
+          "historical_mapping": 0.8,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.55,
+          "final_exposure": 0.51,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 2,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 1,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A301",
+        "alpha_name": "Revenue Expansion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 21.3132,
+        "uncapped_score": 21.3132,
+        "eligible_cap": 60.0,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "inactive",
+        "direction": "positive",
+        "components": {
+          "evidence_quality": {
+            "raw": 18.99,
+            "weight": 0.35,
+            "contribution": 6.6465,
+            "unique_semantic_groups": 1,
+            "unique_contribution_sum": 0.7596,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 23.3333,
+            "weight": 0.2,
+            "contribution": 4.6667,
+            "distinct_agents": 1,
+            "agents": [
+              "bear_researcher"
+            ],
+            "agent_coverage": 33.3333,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 1
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "evidence_gated": false,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 100.0,
+            "weight": 0.05,
+            "contribution": 5.0,
+            "qualifying_group_count": 1,
+            "weighted_signed_average": 1.0
+          }
+        },
+        "evidence_count": 1,
+        "unique_evidence_count": 1,
+        "distinct_supporting_agents": 1,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359"
+        ],
+        "evidence": [
+          "Management sets discount rates, revenue growth assumptions, and terminal value assumptions in those models."
+        ],
+        "reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 1,
+        "unique_evidence_fact_count": 1,
+        "distinct_supporting_agent_count": 1,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [
+          {
+            "evidence_fact_group_id": "3aca46fa88f5dc7181015d24",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359"
+            ],
+            "supporting_agents": [
+              "bear_researcher"
+            ]
+          }
+        ],
+        "evidence_detail": [
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359",
+            "claim": "Management sets discount rates, revenue growth assumptions, and terminal value assumptions in those models.",
+            "agent": "bear_researcher",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+            "match_score": 0.7596,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "revenue",
+              "revenue growth"
+            ],
+            "matched_factors": [
+              "Revenue Growth"
+            ]
+          }
+        ],
+        "entity_exposure": {
+          "historical_mapping": 0.7,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.4,
+          "final_exposure": 0.43,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 1,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 1,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A304",
+        "alpha_name": "Multiple Compression",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 30.5204,
+        "uncapped_score": 30.5204,
+        "eligible_cap": 60.0,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "watch",
+        "direction": "negative",
+        "components": {
+          "evidence_quality": {
+            "raw": 24.8342,
+            "weight": 0.35,
+            "contribution": 8.692,
+            "unique_semantic_groups": 2,
+            "unique_contribution_sum": 0.9934,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 61.6667,
+            "weight": 0.2,
+            "contribution": 12.3333,
+            "distinct_agents": 2,
+            "agents": [
+              "bear_researcher",
+              "bull_researcher"
+            ],
+            "agent_coverage": 66.6667,
+            "cross_agent_confirmed_groups": 1,
+            "cross_agent_confirmation": 50.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 2
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "evidence_gated": false,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 89.9024,
+            "weight": 0.05,
+            "contribution": 4.4951,
+            "qualifying_group_count": 3,
+            "weighted_signed_average": 0.798
+          }
+        },
+        "evidence_count": 2,
+        "unique_evidence_count": 2,
+        "distinct_supporting_agents": 2,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324"
+        ],
+        "evidence": [
+          "But here's the critical nuance they missed entirely: multiple compression and earnings compression are different phenomena.",
+          "The bull's own \"stress test\" produces a catastrophic outcome once you apply the correct multiple compression that always accompanies earnings compression in cyclical hardware.",
+          "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack."
+        ],
+        "reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 3,
+        "unique_evidence_fact_count": 2,
+        "distinct_supporting_agent_count": 2,
+        "evidence_overlap_ratio": 0.3333,
+        "high_overlap_warning": true,
+        "evidence_fact_groups": [
+          {
+            "evidence_fact_group_id": "4bca38d1fff2c79d7e57b672",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193"
+            ],
+            "supporting_agents": [
+              "bull_researcher"
+            ]
+          },
+          {
+            "evidence_fact_group_id": "9cfb7dfd6655cb0accb464dd",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324"
+            ],
+            "supporting_agents": [
+              "bear_researcher",
+              "bull_researcher"
+            ]
+          }
+        ],
+        "evidence_detail": [
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+            "claim": "The bull's own \"stress test\" produces a catastrophic outcome once you apply the correct multiple compression that always accompanies earnings compression in cyclical hardware.",
+            "agent": "bear_researcher",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+            "match_score": 0.6796,
+            "assertion_status": "asserted",
+            "direction": "unknown",
+            "relation": "activation",
+            "matched_keywords": [
+              "multiple compression"
+            ],
+            "matched_factors": [
+              "Valuation Risk"
+            ]
+          },
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+            "claim": "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack.",
+            "agent": "bull_researcher",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+            "match_score": 0.6896,
+            "assertion_status": "conditional",
+            "direction": "unknown",
+            "relation": "conditional",
+            "matched_keywords": [
+              "multiple compression"
+            ],
+            "matched_factors": [
+              "Valuation Risk"
+            ]
+          },
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324",
+            "claim": "But here's the critical nuance they missed entirely: multiple compression and earnings compression are different phenomena.",
+            "agent": "bull_researcher",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+            "match_score": 0.6796,
+            "assertion_status": "asserted",
+            "direction": "unknown",
+            "relation": "activation",
+            "matched_keywords": [
+              "multiple compression"
+            ],
+            "matched_factors": [
+              "Valuation Risk"
+            ]
+          }
+        ],
+        "entity_exposure": {
+          "historical_mapping": 0.75,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.4,
+          "final_exposure": 0.455,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 2,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 2,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A501",
+        "alpha_name": "Recession Risk",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 37.6588,
+        "uncapped_score": 37.6588,
+        "eligible_cap": 70.0,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "watch",
+        "direction": "negative",
+        "components": {
+          "evidence_quality": {
+            "raw": 42.79,
+            "weight": 0.35,
+            "contribution": 14.9765,
+            "unique_semantic_groups": 2,
+            "unique_contribution_sum": 1.7116,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 46.6667,
+            "weight": 0.2,
+            "contribution": 9.3333,
+            "distinct_agents": 2,
+            "agents": [
+              "bull_researcher",
+              "news_agent"
+            ],
+            "agent_coverage": 66.6667,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "ticker_specific_evidence_count": 1,
+            "total_unique_evidence_count": 2
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "evidence_gated": false,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 66.9797,
+            "weight": 0.05,
+            "contribution": 3.349,
+            "qualifying_group_count": 3,
+            "weighted_signed_average": 0.3396
+          }
+        },
+        "evidence_count": 2,
+        "unique_evidence_count": 2,
+        "distinct_supporting_agents": 2,
+        "ticker_specific_evidence_count": 1,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81"
+        ],
+        "evidence": [
+          "Category: Polymarket: Recession; Data Point: US 12%; UK 18%; Japan 10%; Signal: 🟢 Mildly Positive; Implication for SNDK: Low global recession risk backdrop",
+          "Low global recession risk across US, UK, and Japan."
+        ],
+        "reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 2,
+        "unique_evidence_fact_count": 2,
+        "distinct_supporting_agent_count": 2,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [
+          {
+            "evidence_fact_group_id": "e6b62eae511cc2a24ea46824",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189"
+            ],
+            "supporting_agents": [
+              "bull_researcher"
+            ]
+          },
+          {
+            "evidence_fact_group_id": "f75a2905d84a5cc2b0f871ad",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81"
+            ],
+            "supporting_agents": [
+              "news_agent"
+            ]
+          }
+        ],
+        "evidence_detail": [
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+            "claim": "Low global recession risk across US, UK, and Japan.",
+            "agent": "bull_researcher",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+            "match_score": 0.8558,
+            "assertion_status": "asserted",
+            "direction": "negative",
+            "relation": "activation",
+            "matched_keywords": [
+              "recession",
+              "recession risk"
+            ],
+            "matched_factors": [
+              "Recession Risk"
+            ]
+          },
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81",
+            "claim": "Category: Polymarket: Recession; Data Point: US 12%; UK 18%; Japan 10%; Signal: 🟢 Mildly Positive; Implication for SNDK: Low global recession risk backdrop",
+            "agent": "news_agent",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+            "match_score": 0.8558,
+            "assertion_status": "asserted",
+            "direction": "negative",
+            "relation": "activation",
+            "matched_keywords": [
+              "recession",
+              "recession risk"
+            ],
+            "matched_factors": [
+              "Recession Risk"
+            ]
+          }
+        ],
+        "entity_exposure": {
+          "historical_mapping": 0.6,
+          "current_evidence": 0.21395,
+          "agent_confidence": 0.5,
+          "final_exposure": 0.46418499999999996,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 2,
+          "ticker_specific_fact_count": 1,
+          "distinct_supporting_agent_count": 2,
+          "reason_codes": []
+        }
+      },
+      {
+        "alpha_id": "A601",
+        "alpha_name": "Narrative Momentum",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 39.2116,
+        "uncapped_score": 39.2116,
+        "eligible_cap": 60.0,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "watch",
+        "direction": "positive",
+        "components": {
+          "evidence_quality": {
+            "raw": 45.9125,
+            "weight": 0.35,
+            "contribution": 16.0694,
+            "unique_semantic_groups": 4,
+            "unique_contribution_sum": 1.8365,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 70.0,
+            "weight": 0.2,
+            "contribution": 14.0,
+            "distinct_agents": 3,
+            "agents": [
+              "aggressive_risk_analyst",
+              "news_agent",
+              "sentiment_agent"
+            ],
+            "agent_coverage": 100.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": []
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 4
+          },
+          "recency": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "evidence_gated": false,
+            "age_days": null,
+            "fallback": true,
+            "reason": "missing or unparseable run_timestamp/as_of"
+          },
+          "direction_consistency": {
+            "raw": 82.8446,
+            "weight": 0.05,
+            "contribution": 4.1422,
+            "qualifying_group_count": 5,
+            "weighted_signed_average": 0.6569
+          }
+        },
+        "evidence_count": 4,
+        "unique_evidence_count": 4,
+        "distinct_supporting_agents": 3,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+          "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90"
+        ],
+        "evidence": [
+          "AI demand narrative increasingly contested and subject to sentiment shifts",
+          "AI memory supercycle remains a bullish counter-narrative.",
+          "Labeled sentiment ratio: 7 Bullish (23%) vs.",
+          "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade."
+        ],
+        "reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "raw_supporting_claim_count": 4,
+        "unique_evidence_fact_count": 4,
+        "distinct_supporting_agent_count": 3,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [
+          {
+            "evidence_fact_group_id": "04eb817439d52ac067b0de90",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22"
+            ],
+            "supporting_agents": [
+              "sentiment_agent"
+            ]
+          },
+          {
+            "evidence_fact_group_id": "41aca6d010ebc88fb2236523",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60"
+            ],
+            "supporting_agents": [
+              "news_agent"
+            ]
+          },
+          {
+            "evidence_fact_group_id": "7accbf948fcdd428049954da",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32"
+            ],
+            "supporting_agents": [
+              "aggressive_risk_analyst"
+            ]
+          },
+          {
+            "evidence_fact_group_id": "87c28c265ba869c77bb45260",
+            "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90",
+            "member_claim_ids": [
+              "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90"
+            ],
+            "supporting_agents": [
+              "sentiment_agent"
+            ]
+          }
+        ],
+        "evidence_detail": [
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+            "claim": "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+            "agent": "aggressive_risk_analyst",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+            "match_score": 0.3923,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "narrative"
+            ],
+            "matched_factors": []
+          },
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+            "claim": "AI demand narrative increasingly contested and subject to sentiment shifts",
+            "agent": "news_agent",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+            "match_score": 0.6596,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "narrative",
+              "sentiment"
+            ],
+            "matched_factors": [
+              "AI Demand"
+            ]
+          },
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+            "claim": "Labeled sentiment ratio: 7 Bullish (23%) vs.",
+            "agent": "sentiment_agent",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report",
+            "match_score": 0.3923,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "sentiment"
+            ],
+            "matched_factors": []
+          },
+          {
+            "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90",
+            "claim": "AI memory supercycle remains a bullish counter-narrative.",
+            "agent": "sentiment_agent",
+            "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report",
+            "match_score": 0.3923,
+            "assertion_status": "asserted",
+            "direction": "positive",
+            "relation": "activation",
+            "matched_keywords": [
+              "narrative"
+            ],
+            "matched_factors": []
+          }
+        ],
+        "entity_exposure": {
+          "historical_mapping": 0.6,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.5666666666666667,
+          "final_exposure": 0.41333333333333333,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-07-31",
+          "seed_approval_status": "draft",
+          "mode": "shadow",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "unique_evidence_fact_count": 4,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 3,
+          "reason_codes": []
+        }
+      }
+    ]
+  },
+  "activation_versions": {
+    "v1": {
+      "formula_version": "week3.activation.mvp_v1",
+      "weights": {
+        "matched_evidence": 0.35,
+        "agent_agreement": 0.2,
+        "graph_coherence": 0.25,
+        "recency": 0.1,
+        "direction_strength": 0.1
+      },
+      "run_timestamp": null,
+      "as_of": null,
+      "alphas": [
+        {
+          "alpha_id": "A001",
+          "alpha_name": "Rate Cut Cycle",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A003",
+          "alpha_name": "Liquidity Expansion",
+          "activation_score": 38.5319,
+          "status": "watch",
+          "direction": "positive",
+          "components": {
+            "matched_evidence": {
+              "raw": 19.615,
+              "weight": 0.35,
+              "contribution": 6.8652,
+              "unique_committed_claims": 1,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.3923,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 33.3333,
+              "weight": 0.2,
+              "contribution": 6.6667,
+              "distinct_agents": 1,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": [
+                "fundamental_agent"
+              ]
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 10.0,
+              "scope": "global_run_level",
+              "evidence_gated": false
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 10.0,
+              "qualifying_claim_count": 1,
+              "average_signed_strength": 1.0,
+              "mixed_direction_evidence": false
+            }
+          },
+          "evidence_count": 1,
+          "distinct_supporting_agents": 1,
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129"
+          ],
+          "evidence": [
+            "Category: Balance Sheet; Metric: Current Ratio; Value: 4.78x; Signal: 🟢 Strong liquidity"
+          ],
+          "reason_codes": [
+            "SINGLE_AGENT_ONLY"
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129",
+              "claim": "Category: Balance Sheet; Metric: Current Ratio; Value: 4.78x; Signal: 🟢 Strong liquidity",
+              "agent": "fundamental_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "liquidity"
+              ],
+              "matched_factors": []
+            }
+          ]
+        },
+        {
+          "alpha_id": "A101",
+          "alpha_name": "AI Expansion",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A102",
+          "alpha_name": "Inference Explosion",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A103",
+          "alpha_name": "AI Infrastructure",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A201",
+          "alpha_name": "Semiconductor Supercycle",
+          "activation_score": 45.3972,
+          "status": "watch",
+          "direction": "positive",
+          "components": {
+            "matched_evidence": {
+              "raw": 39.23,
+              "weight": 0.35,
+              "contribution": 13.7305,
+              "unique_committed_claims": 2,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.7846,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 33.3333,
+              "weight": 0.2,
+              "contribution": 6.6667,
+              "distinct_agents": 1,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": [
+                "bear_researcher"
+              ]
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 10.0,
+              "scope": "global_run_level",
+              "evidence_gated": false
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 10.0,
+              "qualifying_claim_count": 2,
+              "average_signed_strength": 1.0,
+              "mixed_direction_evidence": false
+            }
+          },
+          "evidence_count": 2,
+          "distinct_supporting_agents": 1,
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85"
+          ],
+          "evidence": [
+            "In a zero-rate environment, a 6x P/E on a semiconductor growth company is genuinely cheap.",
+            "Show me the institutional buy orders."
+          ],
+          "reason_codes": [
+            "SINGLE_AGENT_ONLY"
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+              "claim": "In a zero-rate environment, a 6x P/E on a semiconductor growth company is genuinely cheap.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "semiconductor"
+              ],
+              "matched_factors": []
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85",
+              "claim": "Show me the institutional buy orders.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "orders"
+              ],
+              "matched_factors": []
+            }
+          ]
+        },
+        {
+          "alpha_id": "A301",
+          "alpha_name": "Revenue Expansion",
+          "activation_score": 48.293,
+          "status": "watch",
+          "direction": "positive",
+          "components": {
+            "matched_evidence": {
+              "raw": 37.98,
+              "weight": 0.35,
+              "contribution": 13.293,
+              "unique_committed_claims": 1,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.7596,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 50.0,
+              "weight": 0.2,
+              "contribution": 10.0,
+              "distinct_agents": 1,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": [
+                "bear_researcher"
+              ]
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 10.0,
+              "scope": "global_run_level",
+              "evidence_gated": false
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 10.0,
+              "qualifying_claim_count": 1,
+              "average_signed_strength": 1.0,
+              "mixed_direction_evidence": false
+            }
+          },
+          "evidence_count": 1,
+          "distinct_supporting_agents": 1,
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359"
+          ],
+          "evidence": [
+            "Management sets discount rates, revenue growth assumptions, and terminal value assumptions in those models."
+          ],
+          "reason_codes": [
+            "SINGLE_AGENT_ONLY"
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359",
+              "claim": "Management sets discount rates, revenue growth assumptions, and terminal value assumptions in those models.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.7596,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "revenue",
+                "revenue growth"
+              ],
+              "matched_factors": [
+                "Revenue Growth"
+              ]
+            }
+          ]
+        },
+        {
+          "alpha_id": "A304",
+          "alpha_name": "Multiple Compression",
+          "activation_score": 68.9635,
+          "status": "active",
+          "direction": "negative",
+          "components": {
+            "matched_evidence": {
+              "raw": 90.372,
+              "weight": 0.35,
+              "contribution": 31.6302,
+              "unique_committed_claims": 3,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 1.8074,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 66.6667,
+              "weight": 0.2,
+              "contribution": 13.3333,
+              "distinct_agents": 2,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": [
+                "bear_researcher",
+                "bull_researcher"
+              ]
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 10.0,
+              "scope": "global_run_level",
+              "evidence_gated": false
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 90.0,
+              "weight": 0.1,
+              "contribution": 9.0,
+              "qualifying_claim_count": 3,
+              "average_signed_strength": 0.8,
+              "mixed_direction_evidence": true
+            }
+          },
+          "evidence_count": 3,
+          "distinct_supporting_agents": 2,
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324"
+          ],
+          "evidence": [
+            "But here's the critical nuance they missed entirely: multiple compression and earnings compression are different phenomena.",
+            "The bull's own \"stress test\" produces a catastrophic outcome once you apply the correct multiple compression that always accompanies earnings compression in cyclical hardware.",
+            "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack."
+          ],
+          "reason_codes": [
+            "MIXED_DIRECTION_EVIDENCE"
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+              "claim": "The bull's own \"stress test\" produces a catastrophic outcome once you apply the correct multiple compression that always accompanies earnings compression in cyclical hardware.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.6796,
+              "assertion_status": "asserted",
+              "direction": "unknown",
+              "relation": "activation",
+              "matched_keywords": [
+                "multiple compression"
+              ],
+              "matched_factors": [
+                "Valuation Risk"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+              "claim": "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack.",
+              "agent": "bull_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+              "match_score": 0.6896,
+              "assertion_status": "conditional",
+              "direction": "unknown",
+              "relation": "conditional",
+              "matched_keywords": [
+                "multiple compression"
+              ],
+              "matched_factors": [
+                "Valuation Risk"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324",
+              "claim": "But here's the critical nuance they missed entirely: multiple compression and earnings compression are different phenomena.",
+              "agent": "bull_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+              "match_score": 0.6796,
+              "assertion_status": "asserted",
+              "direction": "unknown",
+              "relation": "activation",
+              "matched_keywords": [
+                "multiple compression"
+              ],
+              "matched_factors": [
+                "Valuation Risk"
+              ]
+            }
+          ]
+        },
+        {
+          "alpha_id": "A501",
+          "alpha_name": "Recession Risk",
+          "activation_score": 71.6197,
+          "status": "dominant",
+          "direction": "negative",
+          "components": {
+            "matched_evidence": {
+              "raw": 85.58,
+              "weight": 0.35,
+              "contribution": 29.953,
+              "unique_committed_claims": 3,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 1.7116,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 100.0,
+              "weight": 0.2,
+              "contribution": 20.0,
+              "distinct_agents": 2,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": [
+                "bull_researcher",
+                "news_agent"
+              ]
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 10.0,
+              "scope": "global_run_level",
+              "evidence_gated": false
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 66.6667,
+              "weight": 0.1,
+              "contribution": 6.6667,
+              "qualifying_claim_count": 3,
+              "average_signed_strength": 0.3333,
+              "mixed_direction_evidence": true
+            }
+          },
+          "evidence_count": 3,
+          "distinct_supporting_agents": 2,
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:72",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81"
+          ],
+          "evidence": [
+            "Category: Polymarket: Recession; Data Point: US 12%; UK 18%; Japan 10%; Signal: 🟢 Mildly Positive; Implication for SNDK: Low global recession risk backdrop",
+            "Category: Recession Risk; Data Point: 12% US recession probability by end of 2026; Signal: 🟢 Mildly Positive; Implication for SNDK: Low recession risk supports demand environment",
+            "Low global recession risk across US, UK, and Japan."
+          ],
+          "reason_codes": [
+            "MIXED_DIRECTION_EVIDENCE"
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+              "claim": "Low global recession risk across US, UK, and Japan.",
+              "agent": "bull_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+              "match_score": 0.8558,
+              "assertion_status": "asserted",
+              "direction": "negative",
+              "relation": "activation",
+              "matched_keywords": [
+                "recession",
+                "recession risk"
+              ],
+              "matched_factors": [
+                "Recession Risk"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:72",
+              "claim": "Category: Recession Risk; Data Point: 12% US recession probability by end of 2026; Signal: 🟢 Mildly Positive; Implication for SNDK: Low recession risk supports demand environment",
+              "agent": "news_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+              "match_score": 0.8438,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "risk_relief",
+              "matched_keywords": [
+                "recession",
+                "recession risk"
+              ],
+              "matched_factors": [
+                "Recession Risk"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81",
+              "claim": "Category: Polymarket: Recession; Data Point: US 12%; UK 18%; Japan 10%; Signal: 🟢 Mildly Positive; Implication for SNDK: Low global recession risk backdrop",
+              "agent": "news_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+              "match_score": 0.8558,
+              "assertion_status": "asserted",
+              "direction": "negative",
+              "relation": "activation",
+              "matched_keywords": [
+                "recession",
+                "recession risk"
+              ],
+              "matched_factors": [
+                "Recession Risk"
+              ]
+            }
+          ]
+        },
+        {
+          "alpha_id": "A601",
+          "alpha_name": "Narrative Momentum",
+          "activation_score": 75.1388,
+          "status": "dominant",
+          "direction": "positive",
+          "components": {
+            "matched_evidence": {
+              "raw": 91.825,
+              "weight": 0.35,
+              "contribution": 32.1388,
+              "unique_committed_claims": 5,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 1.8365,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 100.0,
+              "weight": 0.2,
+              "contribution": 20.0,
+              "distinct_agents": 3,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": [
+                "aggressive_risk_analyst",
+                "news_agent",
+                "sentiment_agent"
+              ]
+            },
+            "graph_coherence": {
+              "raw": 40.0,
+              "weight": 0.25,
+              "contribution": 10.0,
+              "scope": "global_run_level",
+              "evidence_gated": false
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_strength": {
+              "raw": 80.0,
+              "weight": 0.1,
+              "contribution": 8.0,
+              "qualifying_claim_count": 5,
+              "average_signed_strength": 0.6,
+              "mixed_direction_evidence": true
+            }
+          },
+          "evidence_count": 5,
+          "distinct_supporting_agents": 3,
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:22",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90"
+          ],
+          "evidence": [
+            "AI demand narrative increasingly contested and subject to sentiment shifts",
+            "AI memory supercycle remains a bullish counter-narrative.",
+            "Labeled sentiment ratio: 7 Bullish (23%) vs.",
+            "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+            "This is a headwind for any premium multiple attached to SNDK's AI supercycle narrative."
+          ],
+          "reason_codes": [
+            "MIXED_DIRECTION_EVIDENCE"
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+              "claim": "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+              "agent": "aggressive_risk_analyst",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "narrative"
+              ],
+              "matched_factors": []
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:22",
+              "claim": "This is a headwind for any premium multiple attached to SNDK's AI supercycle narrative.",
+              "agent": "news_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+              "match_score": 0.3803,
+              "assertion_status": "asserted",
+              "direction": "negative",
+              "relation": "invalidation",
+              "matched_keywords": [
+                "narrative"
+              ],
+              "matched_factors": []
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+              "claim": "AI demand narrative increasingly contested and subject to sentiment shifts",
+              "agent": "news_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+              "match_score": 0.6596,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "narrative",
+                "sentiment"
+              ],
+              "matched_factors": [
+                "AI Demand"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+              "claim": "Labeled sentiment ratio: 7 Bullish (23%) vs.",
+              "agent": "sentiment_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "sentiment"
+              ],
+              "matched_factors": []
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90",
+              "claim": "AI memory supercycle remains a bullish counter-narrative.",
+              "agent": "sentiment_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "narrative"
+              ],
+              "matched_factors": []
+            }
+          ]
+        }
+      ]
+    },
+    "v2": {
+      "formula_version": "activation.v2.evidence_local_structure.v1",
+      "weights": {
+        "evidence_quality": 0.35,
+        "agent_independence": 0.2,
+        "local_structure_support": 0.2,
+        "ticker_specificity": 0.1,
+        "recency": 0.1,
+        "direction_consistency": 0.05
+      },
+      "run_timestamp": null,
+      "as_of": null,
+      "alphas": [
+        {
+          "alpha_id": "A001",
+          "alpha_name": "Rate Cut Cycle",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.45,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.225,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": true,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A003",
+          "alpha_name": "Liquidity Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 18.0993,
+          "uncapped_score": 18.0993,
+          "eligible_cap": 60.0,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "positive",
+          "components": {
+            "evidence_quality": {
+              "raw": 9.8075,
+              "weight": 0.35,
+              "contribution": 3.4326,
+              "unique_semantic_groups": 1,
+              "unique_contribution_sum": 0.3923,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 23.3333,
+              "weight": 0.2,
+              "contribution": 4.6667,
+              "distinct_agents": 1,
+              "agents": [
+                "fundamental_agent"
+              ],
+              "agent_coverage": 33.3333,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 1
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 100.0,
+              "weight": 0.05,
+              "contribution": 5.0,
+              "qualifying_group_count": 1,
+              "weighted_signed_average": 1.0
+            }
+          },
+          "evidence_count": 1,
+          "unique_evidence_count": 1,
+          "distinct_supporting_agents": 1,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129"
+          ],
+          "evidence": [
+            "Category: Balance Sheet; Metric: Current Ratio; Value: 4.78x; Signal: 🟢 Strong liquidity"
+          ],
+          "reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "raw_supporting_claim_count": 1,
+          "unique_evidence_fact_count": 1,
+          "distinct_supporting_agent_count": 1,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [
+            {
+              "evidence_fact_group_id": "3abe7706a8c0f2b066089b13",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129"
+              ],
+              "supporting_agents": [
+                "fundamental_agent"
+              ]
+            }
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report:claim:129",
+              "claim": "Category: Balance Sheet; Metric: Current Ratio; Value: 4.78x; Signal: 🟢 Strong liquidity",
+              "agent": "fundamental_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:fundamental_agent:fundamentals_report",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "liquidity"
+              ],
+              "matched_factors": []
+            }
+          ],
+          "entity_exposure": {
+            "historical_mapping": 0.55,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.65,
+            "final_exposure": 0.405,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 1,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 1,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A101",
+          "alpha_name": "AI Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.35,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.175,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": true,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A102",
+          "alpha_name": "Inference Explosion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.25,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.125,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": true,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A103",
+          "alpha_name": "AI Infrastructure",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.45,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.225,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": true,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A201",
+          "alpha_name": "Semiconductor Supercycle",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 21.5319,
+          "uncapped_score": 21.5319,
+          "eligible_cap": 60.0,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "positive",
+          "components": {
+            "evidence_quality": {
+              "raw": 19.615,
+              "weight": 0.35,
+              "contribution": 6.8652,
+              "unique_semantic_groups": 2,
+              "unique_contribution_sum": 0.7846,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 23.3333,
+              "weight": 0.2,
+              "contribution": 4.6667,
+              "distinct_agents": 1,
+              "agents": [
+                "bear_researcher"
+              ],
+              "agent_coverage": 33.3333,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 2
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 100.0,
+              "weight": 0.05,
+              "contribution": 5.0,
+              "qualifying_group_count": 2,
+              "weighted_signed_average": 1.0
+            }
+          },
+          "evidence_count": 2,
+          "unique_evidence_count": 2,
+          "distinct_supporting_agents": 1,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85"
+          ],
+          "evidence": [
+            "In a zero-rate environment, a 6x P/E on a semiconductor growth company is genuinely cheap.",
+            "Show me the institutional buy orders."
+          ],
+          "reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "raw_supporting_claim_count": 2,
+          "unique_evidence_fact_count": 2,
+          "distinct_supporting_agent_count": 1,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [
+            {
+              "evidence_fact_group_id": "a31e5474214b88ea7fa3bdcd",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85"
+              ],
+              "supporting_agents": [
+                "bear_researcher"
+              ]
+            },
+            {
+              "evidence_fact_group_id": "d81c4f4d2fe66bb970f05411",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261"
+              ],
+              "supporting_agents": [
+                "bear_researcher"
+              ]
+            }
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:261",
+              "claim": "In a zero-rate environment, a 6x P/E on a semiconductor growth company is genuinely cheap.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "semiconductor"
+              ],
+              "matched_factors": []
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:85",
+              "claim": "Show me the institutional buy orders.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "orders"
+              ],
+              "matched_factors": []
+            }
+          ],
+          "entity_exposure": {
+            "historical_mapping": 0.8,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.55,
+            "final_exposure": 0.51,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 2,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 1,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A301",
+          "alpha_name": "Revenue Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 21.3132,
+          "uncapped_score": 21.3132,
+          "eligible_cap": 60.0,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "positive",
+          "components": {
+            "evidence_quality": {
+              "raw": 18.99,
+              "weight": 0.35,
+              "contribution": 6.6465,
+              "unique_semantic_groups": 1,
+              "unique_contribution_sum": 0.7596,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 23.3333,
+              "weight": 0.2,
+              "contribution": 4.6667,
+              "distinct_agents": 1,
+              "agents": [
+                "bear_researcher"
+              ],
+              "agent_coverage": 33.3333,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 1
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 100.0,
+              "weight": 0.05,
+              "contribution": 5.0,
+              "qualifying_group_count": 1,
+              "weighted_signed_average": 1.0
+            }
+          },
+          "evidence_count": 1,
+          "unique_evidence_count": 1,
+          "distinct_supporting_agents": 1,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359"
+          ],
+          "evidence": [
+            "Management sets discount rates, revenue growth assumptions, and terminal value assumptions in those models."
+          ],
+          "reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "raw_supporting_claim_count": 1,
+          "unique_evidence_fact_count": 1,
+          "distinct_supporting_agent_count": 1,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [
+            {
+              "evidence_fact_group_id": "3aca46fa88f5dc7181015d24",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359"
+              ],
+              "supporting_agents": [
+                "bear_researcher"
+              ]
+            }
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:359",
+              "claim": "Management sets discount rates, revenue growth assumptions, and terminal value assumptions in those models.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.7596,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "revenue",
+                "revenue growth"
+              ],
+              "matched_factors": [
+                "Revenue Growth"
+              ]
+            }
+          ],
+          "entity_exposure": {
+            "historical_mapping": 0.7,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.4,
+            "final_exposure": 0.43,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 1,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 1,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A304",
+          "alpha_name": "Multiple Compression",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 30.5204,
+          "uncapped_score": 30.5204,
+          "eligible_cap": 60.0,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "watch",
+          "direction": "negative",
+          "components": {
+            "evidence_quality": {
+              "raw": 24.8342,
+              "weight": 0.35,
+              "contribution": 8.692,
+              "unique_semantic_groups": 2,
+              "unique_contribution_sum": 0.9934,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 61.6667,
+              "weight": 0.2,
+              "contribution": 12.3333,
+              "distinct_agents": 2,
+              "agents": [
+                "bear_researcher",
+                "bull_researcher"
+              ],
+              "agent_coverage": 66.6667,
+              "cross_agent_confirmed_groups": 1,
+              "cross_agent_confirmation": 50.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 2
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 89.9024,
+              "weight": 0.05,
+              "contribution": 4.4951,
+              "qualifying_group_count": 3,
+              "weighted_signed_average": 0.798
+            }
+          },
+          "evidence_count": 2,
+          "unique_evidence_count": 2,
+          "distinct_supporting_agents": 2,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324"
+          ],
+          "evidence": [
+            "But here's the critical nuance they missed entirely: multiple compression and earnings compression are different phenomena.",
+            "The bull's own \"stress test\" produces a catastrophic outcome once you apply the correct multiple compression that always accompanies earnings compression in cyclical hardware.",
+            "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack."
+          ],
+          "reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "raw_supporting_claim_count": 3,
+          "unique_evidence_fact_count": 2,
+          "distinct_supporting_agent_count": 2,
+          "evidence_overlap_ratio": 0.3333,
+          "high_overlap_warning": true,
+          "evidence_fact_groups": [
+            {
+              "evidence_fact_group_id": "4bca38d1fff2c79d7e57b672",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193"
+              ],
+              "supporting_agents": [
+                "bull_researcher"
+              ]
+            },
+            {
+              "evidence_fact_group_id": "9cfb7dfd6655cb0accb464dd",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324"
+              ],
+              "supporting_agents": [
+                "bear_researcher",
+                "bull_researcher"
+              ]
+            }
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:334",
+              "claim": "The bull's own \"stress test\" produces a catastrophic outcome once you apply the correct multiple compression that always accompanies earnings compression in cyclical hardware.",
+              "agent": "bear_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history",
+              "match_score": 0.6796,
+              "assertion_status": "asserted",
+              "direction": "unknown",
+              "relation": "activation",
+              "matched_keywords": [
+                "multiple compression"
+              ],
+              "matched_factors": [
+                "Valuation Risk"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+              "claim": "The multiple compression argument proves too much — it would apply equally to every semiconductor company, yet SanDisk's fundamental earnings generation separates it from the pack.",
+              "agent": "bull_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+              "match_score": 0.6896,
+              "assertion_status": "conditional",
+              "direction": "unknown",
+              "relation": "conditional",
+              "matched_keywords": [
+                "multiple compression"
+              ],
+              "matched_factors": [
+                "Valuation Risk"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:324",
+              "claim": "But here's the critical nuance they missed entirely: multiple compression and earnings compression are different phenomena.",
+              "agent": "bull_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+              "match_score": 0.6796,
+              "assertion_status": "asserted",
+              "direction": "unknown",
+              "relation": "activation",
+              "matched_keywords": [
+                "multiple compression"
+              ],
+              "matched_factors": [
+                "Valuation Risk"
+              ]
+            }
+          ],
+          "entity_exposure": {
+            "historical_mapping": 0.75,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.4,
+            "final_exposure": 0.455,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 2,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 2,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A501",
+          "alpha_name": "Recession Risk",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 37.6588,
+          "uncapped_score": 37.6588,
+          "eligible_cap": 70.0,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "watch",
+          "direction": "negative",
+          "components": {
+            "evidence_quality": {
+              "raw": 42.79,
+              "weight": 0.35,
+              "contribution": 14.9765,
+              "unique_semantic_groups": 2,
+              "unique_contribution_sum": 1.7116,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 46.6667,
+              "weight": 0.2,
+              "contribution": 9.3333,
+              "distinct_agents": 2,
+              "agents": [
+                "bull_researcher",
+                "news_agent"
+              ],
+              "agent_coverage": 66.6667,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "ticker_specific_evidence_count": 1,
+              "total_unique_evidence_count": 2
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 66.9797,
+              "weight": 0.05,
+              "contribution": 3.349,
+              "qualifying_group_count": 3,
+              "weighted_signed_average": 0.3396
+            }
+          },
+          "evidence_count": 2,
+          "unique_evidence_count": 2,
+          "distinct_supporting_agents": 2,
+          "ticker_specific_evidence_count": 1,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81"
+          ],
+          "evidence": [
+            "Category: Polymarket: Recession; Data Point: US 12%; UK 18%; Japan 10%; Signal: 🟢 Mildly Positive; Implication for SNDK: Low global recession risk backdrop",
+            "Low global recession risk across US, UK, and Japan."
+          ],
+          "reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "raw_supporting_claim_count": 2,
+          "unique_evidence_fact_count": 2,
+          "distinct_supporting_agent_count": 2,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [
+            {
+              "evidence_fact_group_id": "e6b62eae511cc2a24ea46824",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189"
+              ],
+              "supporting_agents": [
+                "bull_researcher"
+              ]
+            },
+            {
+              "evidence_fact_group_id": "f75a2905d84a5cc2b0f871ad",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81"
+              ],
+              "supporting_agents": [
+                "news_agent"
+              ]
+            }
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:189",
+              "claim": "Low global recession risk across US, UK, and Japan.",
+              "agent": "bull_researcher",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history",
+              "match_score": 0.8558,
+              "assertion_status": "asserted",
+              "direction": "negative",
+              "relation": "activation",
+              "matched_keywords": [
+                "recession",
+                "recession risk"
+              ],
+              "matched_factors": [
+                "Recession Risk"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:81",
+              "claim": "Category: Polymarket: Recession; Data Point: US 12%; UK 18%; Japan 10%; Signal: 🟢 Mildly Positive; Implication for SNDK: Low global recession risk backdrop",
+              "agent": "news_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+              "match_score": 0.8558,
+              "assertion_status": "asserted",
+              "direction": "negative",
+              "relation": "activation",
+              "matched_keywords": [
+                "recession",
+                "recession risk"
+              ],
+              "matched_factors": [
+                "Recession Risk"
+              ]
+            }
+          ],
+          "entity_exposure": {
+            "historical_mapping": 0.6,
+            "current_evidence": 0.21395,
+            "agent_confidence": 0.5,
+            "final_exposure": 0.46418499999999996,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 2,
+            "ticker_specific_fact_count": 1,
+            "distinct_supporting_agent_count": 2,
+            "reason_codes": []
+          }
+        },
+        {
+          "alpha_id": "A601",
+          "alpha_name": "Narrative Momentum",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 39.2116,
+          "uncapped_score": 39.2116,
+          "eligible_cap": 60.0,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "watch",
+          "direction": "positive",
+          "components": {
+            "evidence_quality": {
+              "raw": 45.9125,
+              "weight": 0.35,
+              "contribution": 16.0694,
+              "unique_semantic_groups": 4,
+              "unique_contribution_sum": 1.8365,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 70.0,
+              "weight": 0.2,
+              "contribution": 14.0,
+              "distinct_agents": 3,
+              "agents": [
+                "aggressive_risk_analyst",
+                "news_agent",
+                "sentiment_agent"
+              ],
+              "agent_coverage": 100.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 4
+            },
+            "recency": {
+              "raw": 50.0,
+              "weight": 0.1,
+              "contribution": 5.0,
+              "evidence_gated": false,
+              "age_days": null,
+              "fallback": true,
+              "reason": "missing or unparseable run_timestamp/as_of"
+            },
+            "direction_consistency": {
+              "raw": 82.8446,
+              "weight": 0.05,
+              "contribution": 4.1422,
+              "qualifying_group_count": 5,
+              "weighted_signed_average": 0.6569
+            }
+          },
+          "evidence_count": 4,
+          "unique_evidence_count": 4,
+          "distinct_supporting_agents": 3,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+            "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90"
+          ],
+          "evidence": [
+            "AI demand narrative increasingly contested and subject to sentiment shifts",
+            "AI memory supercycle remains a bullish counter-narrative.",
+            "Labeled sentiment ratio: 7 Bullish (23%) vs.",
+            "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade."
+          ],
+          "reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "raw_supporting_claim_count": 4,
+          "unique_evidence_fact_count": 4,
+          "distinct_supporting_agent_count": 3,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [
+            {
+              "evidence_fact_group_id": "04eb817439d52ac067b0de90",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22"
+              ],
+              "supporting_agents": [
+                "sentiment_agent"
+              ]
+            },
+            {
+              "evidence_fact_group_id": "41aca6d010ebc88fb2236523",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60"
+              ],
+              "supporting_agents": [
+                "news_agent"
+              ]
+            },
+            {
+              "evidence_fact_group_id": "7accbf948fcdd428049954da",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32"
+              ],
+              "supporting_agents": [
+                "aggressive_risk_analyst"
+              ]
+            },
+            {
+              "evidence_fact_group_id": "87c28c265ba869c77bb45260",
+              "representative_claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90",
+              "member_claim_ids": [
+                "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90"
+              ],
+              "supporting_agents": [
+                "sentiment_agent"
+              ]
+            }
+          ],
+          "evidence_detail": [
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+              "claim": "Some people are going to look at the $42 billion backlog and the AI supercycle narrative and say this is the buy of the decade.",
+              "agent": "aggressive_risk_analyst",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "narrative"
+              ],
+              "matched_factors": []
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+              "claim": "AI demand narrative increasingly contested and subject to sentiment shifts",
+              "agent": "news_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report",
+              "match_score": 0.6596,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "narrative",
+                "sentiment"
+              ],
+              "matched_factors": [
+                "AI Demand"
+              ]
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:22",
+              "claim": "Labeled sentiment ratio: 7 Bullish (23%) vs.",
+              "agent": "sentiment_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "sentiment"
+              ],
+              "matched_factors": []
+            },
+            {
+              "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report:claim:90",
+              "claim": "AI memory supercycle remains a bullish counter-narrative.",
+              "agent": "sentiment_agent",
+              "source_agent_output_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:sentiment_agent:sentiment_report",
+              "match_score": 0.3923,
+              "assertion_status": "asserted",
+              "direction": "positive",
+              "relation": "activation",
+              "matched_keywords": [
+                "narrative"
+              ],
+              "matched_factors": []
+            }
+          ],
+          "entity_exposure": {
+            "historical_mapping": 0.6,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.5666666666666667,
+            "final_exposure": 0.41333333333333333,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-07-31",
+            "seed_approval_status": "draft",
+            "mode": "shadow",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": false,
+            "unique_evidence_fact_count": 4,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 3,
+            "reason_codes": []
+          }
+        }
+      ]
+    }
+  },
+  "primary_activation_version": "activation.v2.evidence_local_structure.v1",
+  "dominant_alphas": [],
+  "entity_alpha_exposures": {
+    "schema_version": "entity_alpha_exposure.run.v1",
+    "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+    "ticker": "SNDK",
+    "requested_mode": "shadow",
+    "mode": "shadow",
+    "mode_reason_codes": [],
+    "seed_manifest": {
+      "schema_version": "entity_alpha_exposure_seed_manifest.v1",
+      "seed_version": "v0.1",
+      "methodology_version": "exposure_methodology.v0.1",
+      "effective_date": "2026-07-31",
+      "approval_status": "draft",
+      "approved_by": null,
+      "enforcement_allowed": false,
+      "seed_sha256": "97cd4510f3cc3d54965d351880346cb46c032eabd84a52e9651d1ba0029e513f",
+      "review_csv_sha256": "7df401f99911ac46d173b068ef4bfda47d082c165f71e896461499f44b63afc3",
+      "methodology_sha256": "d951082f6d57cec906424787668636b4e19b0465be5207283e8fdb2ee775b189",
+      "formal_plan_tickers": [
+        "NVDA",
+        "AMD",
+        "MSFT",
+        "GOOGL",
+        "AMZN",
+        "AVGO",
+        "TSM",
+        "SMCI",
+        "QQQ",
+        "SPY"
+      ],
+      "extension_tickers": [
+        "SNDK"
+      ]
+    },
+    "records": [
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A001",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.45,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.225,
+        "unique_evidence_fact_count": 0,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": true,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A003",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.55,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.65,
+        "final_exposure": 0.405,
+        "unique_evidence_fact_count": 1,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 1,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A101",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.35,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.175,
+        "unique_evidence_fact_count": 0,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": true,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A102",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.25,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.125,
+        "unique_evidence_fact_count": 0,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": true,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A103",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.45,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.0,
+        "final_exposure": 0.225,
+        "unique_evidence_fact_count": 0,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": true,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A201",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.8,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.55,
+        "final_exposure": 0.51,
+        "unique_evidence_fact_count": 2,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 1,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A301",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.7,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.4,
+        "final_exposure": 0.43,
+        "unique_evidence_fact_count": 1,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 1,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A304",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.75,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.4,
+        "final_exposure": 0.455,
+        "unique_evidence_fact_count": 2,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 2,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A501",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.6,
+        "current_evidence": 0.21395,
+        "agent_confidence": 0.5,
+        "final_exposure": 0.46418499999999996,
+        "unique_evidence_fact_count": 2,
+        "ticker_specific_fact_count": 1,
+        "distinct_supporting_agent_count": 2,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [
+            "f75a2905d84a5cc2b0f871ad"
+          ],
+          "mean_representative_match_score": 0.8558,
+          "ticker_specific_fact_ratio": 0.25,
+          "qualifying_local_edge_count": 0
+        }
+      },
+      {
+        "run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "ticker": "SNDK",
+        "alpha_id": "A601",
+        "seed_version": "v0.1",
+        "seed_effective_date": "2026-07-31",
+        "seed_approval_status": "draft",
+        "historical_mapping": 0.6,
+        "current_evidence": 0.0,
+        "agent_confidence": 0.5666666666666667,
+        "final_exposure": 0.41333333333333333,
+        "unique_evidence_fact_count": 4,
+        "ticker_specific_fact_count": 0,
+        "distinct_supporting_agent_count": 3,
+        "mode": "shadow",
+        "exposure_status": "computed",
+        "would_block_dominant": false,
+        "would_block_regime_level": true,
+        "override_candidate": false,
+        "qualification_effect_applied": false,
+        "reason_codes": [],
+        "provenance": {
+          "formula_version": "week4.exposure_score.mvp_v1",
+          "evidence_fact_index_version": "evidence_fact_index.v1",
+          "representative_fact_group_ids": [],
+          "mean_representative_match_score": 0.0,
+          "ticker_specific_fact_ratio": 0.0,
+          "qualifying_local_edge_count": 0
+        }
+      }
+    ],
+    "activation_invariants": {
+      "scores_unchanged": true,
+      "levels_unchanged": true,
+      "shadow_mode_did_not_alter_activation": true
+    }
+  },
+  "provenance": {
+    "source_artifacts": {
+      "alpha_matches_schema_version": "week2.alpha_matches.v2",
+      "extracted_structures_schema_version": "week2.extracted_structures.v2"
+    },
+    "committed_match_count": 19,
+    "ambiguous_match_count": 0,
+    "no_match_count": 1933,
+    "total_claim_count": 1952
+  }
+}

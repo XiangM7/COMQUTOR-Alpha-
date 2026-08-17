@@ -1,0 +1,31 @@
+{
+  "schema_version": "comqutor.phase1b1.shadow_validation_summary.v1",
+  "note": "The real, authorized Provider smoke executed (bundle: outputs/evaluations/phase1b1-smoke-20260806T222402Z) but every one of the 4 real Provider calls timed out (0 responses received) -- there is no real Provider OUTPUT to validate, only 4 parser_error fail-soft outcomes produced entirely by the invoker's own timeout handling (no data ever reached validate_shadow_bundle). This artifact reports both that real outcome and the validation PATH's proof, exercised end-to-end offline with a FakeModel in tests/structured_output_shadow/test_shadow_provider_invoker.py and test_shadow_provider_smoke_cli.py.",
+  "real_provider_outcome": {
+    "providers_outputs_received": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "abstained": 0,
+    "valid_empty": 0,
+    "parser_error_timeout": 4,
+    "reason": "All 4 real Provider calls timed out (WEEK2_LLM_TIMEOUT, 8/8 attempts against the derived limit) -- the Provider never returned a response body, so no candidate output ever existed to admit, reject, or abstain on."
+  },
+  "offline_fake_model_proof": {
+    "accepted_valid_output": "test_accepted_real_output_flows_through_to_shadow_bundle -- PASS",
+    "malformed_json_failsoft": "test_malformed_json_never_crashes_and_produces_failsoft_bundle -- PASS",
+    "schema_invalid_output_rejected": "test_schema_invalid_json_is_rejected_not_admitted -- PASS",
+    "empty_valid_output_and_abstention": "test_review_csv_has_blank_judgment_columns_for_real_invoker_output (abstained bundle) -- PASS",
+    "accepted_claim_with_real_span_and_identity": "test_accepted_claim_review_rows_reference_real_shadow_claim_ids -- PASS",
+    "full_4_report_authorized_run_with_fake_client": "test_fully_authorized_run_with_fake_client_writes_complete_bundle -- PASS (4/4 logical calls, all accepted, complete bundle written, replay PASS)"
+  },
+  "safety_gates": {
+    "admitted_claim_provenance_validation": "100% (validate_shadow_bundle is the sole admission authority for every accepted claim, exercised in all fake-model tests)",
+    "admitted_evidence_span_validity": "100%",
+    "schema_valid_admitted_output": "100%",
+    "identity_mismatch_admitted": 0,
+    "fabricated_source_reference_admitted": 0,
+    "malformed_json_propagation": 0,
+    "production_behavior_changes_during_smoke": 0
+  },
+  "semantic_quality_status": "UNPROVEN -- this artifact proves the pipeline mechanically works and admits nothing invalid; it proves nothing about real-model semantic accuracy. A real Provider call DID occur this session (4/4 logical calls, 8/8 attempts), but the Provider never returned a response, so zero real semantic output was ever produced or evaluated."
+}

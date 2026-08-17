@@ -58,8 +58,11 @@ def _week4_payloads(run_id="w42_run", ticker="NVDA", *, score=90.0):
     )
     matches = [
         match_record("c101", "A101", score=0.9),
+        match_record("c101b", "A101", score=0.9),
         match_record("c304", "A304", score=0.8),
+        match_record("c304b", "A304", score=0.8),
         match_record("c501", "A501", score=0.7),
+        match_record("c501b", "A501", score=0.7),
     ]
     conflict = detect_alpha_conflicts(
         run_id=run_id,
@@ -696,12 +699,21 @@ def test_real_nvda_w41_to_w42_persistence_sanity(tmp_path):
         conflict_payload=conflict,
     )
 
-    admitted = repo.get_alpha_conflicts(run_id, outcome="admitted")
-    a101_a304 = next(row for row in admitted if (row["alpha_a"], row["alpha_b"]) == ("A101", "A304"))
-    assert a101_a304["is_main_conflict"] is True
-    assert a101_a304["conflict_rank"] == 0
+    # John's B2 Conflict Evidence Admissibility gate: this fixture's real,
+    # deterministic (offline, 0-Provider) claim set was built for Week 3
+    # sanity, before B2's own >=2-unique-supports_alpha-fact and
+    # score>=50-per-side requirements existed, and does not happen to
+    # satisfy them for any declared pair -- honestly reported here (task
+    # spec section 23/25: never tune upstream stages to force a prettier
+    # persistence-sanity result). A101-A304 is a real, present, correctly-
+    # persisted `suppressed` row with its own B2 diagnostic, not admitted.
+    all_candidates = repo.get_alpha_conflicts(run_id)
+    a101_a304 = next(row for row in all_candidates if (row["alpha_a"], row["alpha_b"]) == ("A101", "A304"))
+    assert a101_a304["outcome"] == "suppressed"
+    assert a101_a304["is_main_conflict"] is False
+    assert repo.get_alpha_conflicts(run_id, outcome="admitted") == []
     assert repo.get_week4_conflict_result(run_id) == conflict
-    assert repo.get_week4_conflict_result(run_id)["main_conflict"]["conflict_id"] == "A101__A304"
+    assert repo.get_week4_conflict_result(run_id)["main_conflict"] is None
     assert engine.dialect.name == "sqlite"
 
 

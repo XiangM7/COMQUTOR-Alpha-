@@ -1,0 +1,112 @@
+{
+  "schema_version": "evidence_review_sample_manifest.v1",
+  "sampling_version": "evidence_review_sample.v1",
+  "classifier_version": "evidence_stance.deterministic.v1",
+  "requested_count": 50,
+  "actual_count": 50,
+  "verdict": "PASS",
+  "ticker_distribution": {
+    "NVDA": 10,
+    "QQQ": 10,
+    "MSFT": 10,
+    "SNDK": 6,
+    "TSM": 6,
+    "AMD": 8
+  },
+  "stance_distribution": {
+    "supports_alpha": 18,
+    "opposes_alpha": 10,
+    "mentions_alpha": 8,
+    "neutral_background": 8,
+    "supports_counter_alpha": 6
+  },
+  "requested_quotas": {
+    "supports_alpha": 18,
+    "opposes_alpha": 10,
+    "mentions_alpha": 8,
+    "neutral_background": 8,
+    "supports_counter_alpha": 6
+  },
+  "actual_quotas": {
+    "supports_alpha": 18,
+    "opposes_alpha": 10,
+    "mentions_alpha": 8,
+    "neutral_background": 8,
+    "supports_counter_alpha": 6
+  },
+  "quota_shortfalls": {
+    "supports_alpha": 0,
+    "opposes_alpha": 0,
+    "mentions_alpha": 0,
+    "neutral_background": 0,
+    "supports_counter_alpha": 0
+  },
+  "manual_review_count": 34,
+  "activation_evidence_count": 43,
+  "conflict_evidence_count": 43,
+  "negation_rebuttal_count": 10,
+  "conditional_mixed_count": 24,
+  "non_ticker_specific_count": 0,
+  "duplicate_paraphrase_count": 7,
+  "johns_example_included": true,
+  "source_runs": [
+    {
+      "ticker": "NVDA",
+      "status": "selected",
+      "source_run_id": "e434f80b-e4d0-4b09-9471-d84532659de5",
+      "replay_run_id": "review-sample-e434f80b-e4d0-4b09-9471-d84532659de5",
+      "analysis_date": "2026-07-30",
+      "reason_codes": []
+    },
+    {
+      "ticker": "QQQ",
+      "status": "selected",
+      "source_run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "replay_run_id": "review-sample-a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "analysis_date": "2026-07-31",
+      "reason_codes": []
+    },
+    {
+      "ticker": "MSFT",
+      "status": "selected",
+      "source_run_id": "0cb43bae-1a4d-4003-bb29-55d420498842",
+      "replay_run_id": "review-sample-0cb43bae-1a4d-4003-bb29-55d420498842",
+      "analysis_date": "2026-07-31",
+      "reason_codes": []
+    },
+    {
+      "ticker": "SNDK",
+      "status": "selected",
+      "source_run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "replay_run_id": "review-sample-183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "analysis_date": "2026-07-27",
+      "reason_codes": []
+    },
+    {
+      "ticker": "TSM",
+      "status": "selected",
+      "source_run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "replay_run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "analysis_date": "2026-08-03",
+      "reason_codes": []
+    },
+    {
+      "ticker": "AMD",
+      "status": "selected",
+      "source_run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "replay_run_id": "review-sample-b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "analysis_date": "2026-07-31",
+      "reason_codes": []
+    }
+  ],
+  "artifact_hashes": {
+    "NVDA:raw_agent_outputs.json": "d8e0e3f566362b92503f0aaca9d1ab4bba17b8e34b63dfa3a79286de9f6cae7e",
+    "QQQ:raw_agent_outputs.json": "a9fb5a6e1db21784bba998084c70d354546a8fa0a334f7bf7a1953626eea478d",
+    "MSFT:raw_agent_outputs.json": "2ee44e1d485fcef1a54b06df8e28cfa4ed5023744770ffaa853b08e632e31a9e",
+    "SNDK:raw_agent_outputs.json": "12b6d5818e8cd29822c5a85aa3cf8caaefb161d3120ede69b98922d177ffbc32",
+    "TSM:raw_agent_outputs.json": "5b5160b10a5d2bb0ca6bc8c6cbec17a84475c7762ab8e7ef7866d4146ecb7713",
+    "AMD:raw_agent_outputs.json": "314d74108eaf76d983cba68242a70f88e6b0d5d7d59877a6d58c6d0beabf773a"
+  },
+  "csv_sha256": "1bcd2e3e949f1773a4cf8ce29e62785e42ec0c6ae5a01fd6fce003b927bd23fe",
+  "generated_at": "2026-08-04T23:58:25.026509+00:00"
+}

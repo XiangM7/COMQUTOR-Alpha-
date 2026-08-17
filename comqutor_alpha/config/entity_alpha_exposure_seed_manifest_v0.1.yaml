@@ -1,23 +1,13 @@
-schema_version: entity_alpha_exposure_seed_manifest.v1
-seed_version: v0.1
+# File-level identity and integrity for the Entity Alpha Exposure seed
+# (task B3_ENTITY_EXPOSURE_GATED_STATES). Approval/lifecycle status is no
+# longer recorded here -- it moved to each ticker's own block in
+# entity_alpha_exposure_seed_v0.1.yaml (seed_version/owner/approved_by/
+# approved_at/status), since a single global status cannot express
+# "NVDA=approved_gating, GOOGL=draft_shadow" simultaneously. This manifest
+# now only pins the methodology version and the three source files' exact
+# SHA256 hashes -- unchanged mechanism from schema.v1, just narrower scope.
+schema_version: entity_alpha_exposure_seed_manifest.v2
 methodology_version: exposure_methodology.v0.1
-effective_date: 2026-07-31
-approval_status: draft
-approved_by: null
-enforcement_allowed: false
-seed_sha256: 97cd4510f3cc3d54965d351880346cb46c032eabd84a52e9651d1ba0029e513f
+seed_sha256: 6330f9175593b52cbc4a3b33c0a30ec909d3b91d854af964ca01b2af338134bf
 review_csv_sha256: 7df401f99911ac46d173b068ef4bfda47d082c165f71e896461499f44b63afc3
 methodology_sha256: d951082f6d57cec906424787668636b4e19b0465be5207283e8fdb2ee775b189
-formal_plan_tickers:
-  - NVDA
-  - AMD
-  - MSFT
-  - GOOGL
-  - AMZN
-  - AVGO
-  - TSM
-  - SMCI
-  - QQQ
-  - SPY
-extension_tickers:
-  - SNDK

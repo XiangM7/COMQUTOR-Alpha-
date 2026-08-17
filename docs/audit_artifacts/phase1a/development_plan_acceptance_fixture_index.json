@@ -1,0 +1,52 @@
+{
+  "schema_version": "comqutor.phase1a.development_plan_fixture_index.v1",
+  "canonical_document": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+  "canonical_sha256": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+  "reference_index_location": "Development Plan v1.0 §5.1, canonical reference-index paragraphs 206-222",
+  "fixtures": [
+    {
+      "fixture_id": "dp-v1-s5.1-purpose",
+      "classification": "SOURCE_FROZEN",
+      "document_location": "§5.1 opening sentence",
+      "exact_text": "Converts each agent's natural-language output into the standard claim schema. Downstream modules consume only this JSON.",
+      "expected_regression_use": "traceability of the natural-language-to-structured-JSON boundary"
+    },
+    {
+      "fixture_id": "dp-v1-s5.1-schema-example",
+      "classification": "SOURCE_FROZEN",
+      "document_location": "§5.1 example JSON",
+      "exact_record": {
+        "run_id": "uuid",
+        "ticker": "NVDA",
+        "agent": "news_agent",
+        "timestamp": "2026-01-01T10:00:00Z",
+        "claim": "AI capex remains strong and is supporting GPU demand.",
+        "evidence": "Recent cloud capex commentary indicates continued AI infra spending.",
+        "entities": ["NVDA", "GPU", "AI CapEx", "Datacenter"],
+        "factors": ["AI demand", "GPU demand", "datacenter capex"],
+        "direction": "positive | negative | neutral",
+        "confidence": 0.82,
+        "source_type": "news | filing | price | analyst | social | technical | unknown",
+        "source_refs": []
+      },
+      "expected_regression_use": "field-presence and example-value traceability only; it is not a source-span fixture"
+    },
+    {
+      "fixture_id": "dp-v1-s5.1-required-fields",
+      "classification": "SOURCE_FROZEN",
+      "document_location": "§5.1 mandatory-field paragraph",
+      "exact_text": "Mandatory fields: run_id, ticker, agent, claim, evidence. factors must be extracted best-effort; entities may be an empty array; confidence ∈ [0,1].",
+      "expected_regression_use": "required/bounded field contract"
+    },
+    {
+      "fixture_id": "dp-v1-s5.1-safe-failure",
+      "classification": "SOURCE_FROZEN",
+      "document_location": "§5.1 safe-failure paragraph",
+      "exact_text": "On LLM parse failure return the safe default {direction:\"unknown\", confidence:0, factors:[], entities:[], source_type:\"unknown\"} — never propagate malformed JSON, never crash the run.",
+      "expected_regression_use": "fail-soft/no-malformed-propagation traceability"
+    }
+  ],
+  "additional_engineering_examples_classification": "APPROVED_PROJECT_DECISION_TEST_FIXTURE",
+  "invented_source_frozen_examples": 0,
+  "status": "PASS"
+}

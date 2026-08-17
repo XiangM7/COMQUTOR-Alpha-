@@ -1,0 +1,23 @@
+{
+  "schema_version": "comqutor.phase1b1.prompt_immutability_report.v1",
+  "frozen_prompt_version": "structured_adapter.claim_extraction_shadow.v1",
+  "frozen_prompt_sha256": "c60f1526fd927e4593ab5913bc3c653cd2a05f6d24dc5fdf3e258a3e62128d1e",
+  "current_prompt_sha256_recomputed_from_source": "c60f1526fd927e4593ab5913bc3c653cd2a05f6d24dc5fdf3e258a3e62128d1e",
+  "hash_matches": true,
+  "guard_mechanism": "comqutor_alpha/structure_engine/structured_output_shadow_prompt.py raises RuntimeError at import time if STRUCTURED_OUTPUT_SHADOW_PROMPT_SHA256 != FROZEN_STRUCTURED_OUTPUT_SHADOW_PROMPT_SHA256 -- this phase never touched that module, so the guard's own presence is proof of no silent drift.",
+  "phase1b1_prompt_text_modifications": 0,
+  "phase1b1_example_modifications": 0,
+  "phase1b1_instruction_modifications": 0,
+  "dynamic_fields_that_vary_per_call": [
+    "run_id", "ticker", "agent", "agent_output_id", "source_report_sha256",
+    "candidate_segments", "factor_vocabulary", "allowed_source_refs",
+    "source_metadata", "agent_report"
+  ],
+  "fixed_instruction_text_byte_identical_to_phase1a": true,
+  "verified_by": [
+    "scripts/verify_phase1b1.py::check_phase1a_prompt_version_unchanged",
+    "scripts/verify_phase1b1.py::check_phase1a_prompt_sha_unchanged",
+    "scripts/verify_phase1a.py check [05] prompt_version_and_hash_frozen"
+  ],
+  "conclusion": "No v2 required. PHASE1B1_BLOCKED_PROMPT_CHANGE_REQUIRED did not trigger."
+}

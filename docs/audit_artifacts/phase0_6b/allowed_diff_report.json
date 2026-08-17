@@ -1,0 +1,40 @@
+{
+  "schema_version": "phase0_6b_allowed_diff_report_v1",
+  "phase": "0.6B",
+  "captured_at": "2026-08-06T17:30:00Z",
+  "baseline_preexisting_file_count": 194,
+  "phase_additions_before_final_audit_files": 15,
+  "expected_phase_additions_after_final_audit_files": 23,
+  "actual_phase_additions_after_final_audit_files": 23,
+  "disallowed_additions_or_modifications": [],
+  "allowed_path_check": "PASS",
+  "production_files_changed_by_phase0_6b": [
+    "comqutor_alpha/llm_runtime/__init__.py",
+    "comqutor_alpha/llm_runtime/manifest.py",
+    "comqutor_alpha/llm_runtime/recorder.py",
+    "comqutor_alpha/llm_runtime/session.py",
+    "comqutor_alpha/structure_engine/week2_llm.py",
+    "comqutor_alpha/structure_engine/structured_output_adapter.py",
+    "comqutor_alpha/structure_engine/alpha_mapper.py",
+    "comqutor_alpha/structure_engine/structure_extractor.py",
+    "comqutor_alpha/api/routes_research.py"
+  ],
+  "production_files_explicitly_not_changed": [
+    "tradingagents/**",
+    "comqutor_alpha/replay/pipeline.py",
+    "comqutor_alpha/graph_engine/**",
+    "comqutor_alpha/conflict_engine/**",
+    "comqutor_alpha/exposure_engine.py",
+    "comqutor_alpha/llm/canonical_prompt_injection.py",
+    "comqutor_alpha/structure_engine/canonical_relation_prompt.py",
+    "taxonomy/registry files",
+    "migrations/**",
+    "database schema",
+    "frontend/**",
+    "outputs/runs/**",
+    "outputs/replays/**"
+  ],
+  "commit_performed": false,
+  "push_performed": false,
+  "reset_restore_clean_stash_performed": false
+}

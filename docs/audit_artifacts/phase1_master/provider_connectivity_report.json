@@ -1,0 +1,26 @@
+{
+  "schema_version": "comqutor.phase1_master.provider_connectivity_report.v1",
+  "generated_at": "2026-08-06T23:03:25.796024+00:00",
+  "profile_id": "comqutor_deepseek_default_v1",
+  "provider": "deepseek",
+  "sanitized_hostname": "api.deepseek.com",
+  "port": 443,
+  "checks": {
+    "dns_lookup": {
+      "status": "PASS",
+      "resolved_address_count": 1
+    },
+    "tcp_connect_443": {
+      "status": "PASS"
+    },
+    "tls_handshake": {
+      "status": "PASS"
+    },
+    "proxy_env_vars_present": false
+  },
+  "prior_smoke_timeout_evidence": {
+    "source": "docs/audit_artifacts/phase1b1/real_provider_smoke_result.json",
+    "summary": "All 8 real attempts (4 logical calls x 2) timed out at the Gateway's own 15s read-timeout layer -- consistent with either a network-level failure (no TCP/TLS reachability) or a reachable-but-non-responding endpoint. This diagnostic determines which."
+  },
+  "overall": "PASS"
+}

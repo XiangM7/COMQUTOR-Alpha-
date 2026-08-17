@@ -7,6 +7,7 @@ import { RunNavigation } from "../components/RunNavigation";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
 import { EmptyState } from "../components/EmptyState";
+import { CandidateConflictCard } from "../components/CandidateConflictCard";
 import { ConflictCard } from "../components/ConflictCard";
 import { EvidenceList, type EvidenceItem } from "../components/EvidenceList";
 
@@ -198,6 +199,25 @@ export function ConflictRadarPage() {
           </div>
         </dl>
       </section>
+
+      {/* Task B5_CONFLICT_RADAR_EVIDENCE_UI section 12: candidate/rejected
+          pairs are never displayed as admitted conflicts, but a candidate
+          conflict score -- however high -- must never be hidden entirely
+          either; each shows exactly which B2 gate it failed. */}
+      {conflicts.arbitration.candidate_evaluations.some((item) => item.outcome !== "admitted") ? (
+        <section className="panel candidate-conflicts-panel">
+          <h2>Candidate and rejected pairs</h2>
+          <ul className="conflict-list">
+            {conflicts.arbitration.candidate_evaluations
+              .filter((item) => item.outcome !== "admitted")
+              .map((item) => (
+                <li key={`${item.alpha_a}__${item.alpha_b}`}>
+                  <CandidateConflictCard evaluation={item} />
+                </li>
+              ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }

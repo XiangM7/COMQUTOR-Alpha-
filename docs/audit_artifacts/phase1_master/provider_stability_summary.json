@@ -1,0 +1,44 @@
+{
+  "schema_version": "comqutor.phase1_master.provider_stability_summary.v1",
+  "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "report_count": 24,
+  "provider_completed_response_count": 24,
+  "provider_completed_response_rate": 1.0,
+  "timeout_count": 0,
+  "timeout_rate": 0.0,
+  "transport_error_count": 0,
+  "timeout_plus_transport_error_rate": 0.0,
+  "http_429_attempt_count": 0,
+  "http_5xx_attempt_count": 0,
+  "transient_retry_report_count": 0,
+  "transient_retry_rate": 0.0,
+  "median_latency_ms": 49532.91093709413,
+  "p95_latency_ms": 64783.54020882398,
+  "token_usage": {
+    "input_tokens": 150618,
+    "output_tokens": 80645,
+    "total_tokens": 231263
+  },
+  "cost": null,
+  "accepted_count": 21,
+  "rejected_count": 3,
+  "abstained_count": 0,
+  "valid_empty_count": 0,
+  "agent_family_completed_response_rates": {
+    "fundamental": 1.0,
+    "news": 1.0,
+    "sentiment": 1.0,
+    "technical": 1.0
+  },
+  "operational_gate": {
+    "provider_completed_response_rate_pass": true,
+    "timeout_plus_transport_error_rate_pass": true,
+    "all_agent_family_response_rates_pass": true,
+    "no_silent_retry_pass": true,
+    "no_duplicate_logical_calls_pass": true,
+    "accepted_output_replay_pass": true
+  },
+  "operational_gate_pass": true
+}

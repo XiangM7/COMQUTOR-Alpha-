@@ -15,6 +15,14 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "metadata.json",
     "raw_agent_outputs.json",
     "structured_agent_outputs.json",
+    # Phase 1 Stage E: non-authoritative v4 Structured Adapter sidecars.
+    "structured_agent_outputs_shadow.json",
+    "structured_adapter_shadow_validation.json",
+    "structured_adapter_shadow_comparison.json",
+    # Phase 1 Stage G: explicit, single-source-of-truth authority routing
+    # decision (never large Provider payloads -- see select_primary_
+    # authority's PrimaryAuthorityDecision, which this file mirrors).
+    "structured_adapter_authority_routing.json",
     "alpha_matches.json",
     "extracted_structures.json",
     "structure_graph.json",
@@ -26,6 +34,20 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "market_data_snapshot.json",
     "data_sanity.json",
     "tradingagents_comqutor_vocabulary_snapshot.json",
+    # Sprint 1 -- Run Identity Integrity and Complete Artifact Export,
+    # Track A2: additive canonical export artifacts. Each is built by
+    # extracting an already-computed payload -- never a second
+    # computation of Activation/Conflict/Evidence Fact grouping/summary
+    # language.
+    "evidence_facts.json",
+    "alpha_activations.json",
+    "conflicts.json",
+    "summary.json",
+    "artifact_manifest.json",
+    # Sprint 2 -- Alpha-Relative Evidence Stance Classification, Track B1.
+    "evidence_stance_audit.json",
+    # Sprint 3 -- Unclassified Findings Control, Track A3.
+    "unclassified_findings.json",
 }
 ALLOWED_ARTIFACT_PATHS = {
     *ALLOWED_ARTIFACT_FILENAMES,
@@ -33,6 +55,10 @@ ALLOWED_ARTIFACT_PATHS = {
     "error_logs/week2_llm_errors.jsonl",
     "error_logs/week2_pipeline_errors.jsonl",
     "error_logs/week3_pipeline_errors.jsonl",
+    # Phase 1 live Shadow diagnostics. These must never share the canonical
+    # Week2 error-log path because canonical artifact presence is part of the
+    # authoritative research API response.
+    "structured_adapter_shadow_runtime/error_logs/week2_llm_errors.jsonl",
 }
 
 # Validate and normalize a request run_id.

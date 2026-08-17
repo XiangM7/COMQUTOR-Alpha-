@@ -1,0 +1,71 @@
+{
+  "audit": "phase_0_development_plan_llm_boundary_audit",
+  "generated_at": "2026-08-05T00:00:00Z",
+  "search_commands": [
+    "find . -iname '*COMQUTOR*Development*Plan*' -o -iname '*development_plan*' -o -iname '*Development_Plan*'",
+    "grep -rl \"COMQUTOR Alpha Development Plan\" . --include=*.md --include=*.txt --include=*.pdf",
+    "grep -rl \"Development Plan\" . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv"
+  ],
+  "canonical_document_found": false,
+  "verdict": "DEVELOPMENT_PLAN_SOURCE_NOT_FOUND_IN_REPOSITORY",
+  "notes": [
+    "No file named or titled 'COMQUTOR Alpha Development Plan v1.0' (PDF, DOCX, or Markdown) exists anywhere in this repository as a standalone document. This is not a multi-version-ambiguity case (no two differing copies were found) -- it is a zero-canonical-copy case, so DEVELOPMENT_PLAN_VERSION_AMBIGUITY does not apply; the correct flag is that the source itself is absent from the repo.",
+    "The Development Plan is referenced extensively, by name, as an external source-of-truth document across many in-repo artifacts, alongside two other named external documents: 'Helix Quantum Intelligence Operating System White Paper v2.0' and 'SIC Omnibus Provisional Draft v2' (see docs/week4_spec_freeze_audit.md section 3, 'Source-of-Truth Hierarchy').",
+    "Because the source document itself is not in the repo, every Development Plan requirement cited in this audit (including the frozen §5.1/§5.2/§5.3 wording given verbatim in the task instructions) is treated as authoritative task input, cross-checked wherever possible against independent paraphrases/quotations of the plan already committed to this repository in prior sprints (see corroborating_fragments below). Where the task's own quoted wording and the repo's independent paraphrase agree, confidence is high; where a plan requirement has no in-repo corroboration at all, it is marked evidence_basis: 'task_instructions_only'."
+  ],
+  "corroborating_fragments_found_in_repo": [
+    {
+      "file": "docs/week2_completion_report.md",
+      "line": 21,
+      "quote": "初始 match threshold 与 Development Plan 对齐为 `0.35`。",
+      "corroborates": "§5.2 Alpha Mapper minimum match score = 0.35"
+    },
+    {
+      "file": "docs/week2_completion_report.md",
+      "line": 24,
+      "quote": "deterministic logic 决定 admissibility。LLM 只能在最多三个 admissible candidates 中 select 或 defer，不能创建 Alpha、恢复非法候选或改写 deterministic no-match。",
+      "corroborates": "§5.2 Tier 2 LLM classifier: select-or-defer only, over deterministic-admissible candidates, top-3 cap"
+    },
+    {
+      "file": "docs/week2_completion_report.md",
+      "line": 78,
+      "quote": "Development Plan 中的 `alpha_matches` 和 `structure_graphs` 数据库表仍然推迟，不能视为已完成。",
+      "corroborates": "Development Plan specifies alpha_matches / structure_graphs as eventual DB tables"
+    },
+    {
+      "file": "docs/week3_completion_report.md",
+      "line": 121,
+      "quote": "Development Plan 原始方案使用单一 `agent_output_id` 外键字段。",
+      "corroborates": "Structured Output Adapter's original identity model (agent_output_id)"
+    },
+    {
+      "file": "comqutor_alpha/exposure_engine.py",
+      "line": 3,
+      "quote": "Implements exactly the Development Plan's Exposure formula:: exposure = historical_mapping * 0.50 + current_evidence * 0.30 + agent_confidence * 0.20",
+      "corroborates": "Exposure formula is Development-Plan-sourced (not a §5.1/5.2/5.3 item, cited for source-hierarchy context only)"
+    },
+    {
+      "file": "comqutor_alpha/conflict_engine/conflict_schema.py",
+      "line": 3,
+      "quote": "Every rule here is either SOURCE-FROZEN (Development Plan v1.0) or APPROVED -- SPEC-FROZEN FOR W4.1",
+      "corroborates": "Conflict formula is Development-Plan-sourced (not a §5.1/5.2/5.3 item, cited for source-hierarchy context only)"
+    }
+  ],
+  "task_instruction_frozen_llm_boundaries_treated_as_authoritative_for_this_audit": {
+    "module_scope": [
+      "All new code lives in comqutor_alpha/",
+      "TradingAgents source is modified only minimally",
+      "TradingAgents modifications are output capture hooks"
+    ],
+    "section_5_1_structured_output_adapter": "Converts each agent's natural-language output into standard claim schema; downstream modules consume only this JSON; required fields run_id/ticker/agent/timestamp/claim/evidence/entities/factors/direction/confidence/source_type/source_refs; safe default on LLM parse failure; malformed JSON must not propagate; parsing failure must not crash the run; NVDA acceptance includes fundamental/news/sentiment/technical agents.",
+    "section_5_2_alpha_mapper": "Three-tier matching in priority order: (1) keyword+factor match, (2) LLM classification, (3) rule-based fallback if LLM fails; claim+evidence+factors combined; first version threshold 0.35; top-3 Alpha output; John's 20 labeled claims; overall accuracy target >= 80%.",
+    "section_5_3_structure_extractor": "LLM extracts cause-effect relations; outputs StructureNode/StructureEdge; strict JSON; fallback on empty result; duplicate/synonym merging; minimum edge types causal/supportive/conflicting."
+  },
+  "explicitly_not_development_plan_content": [
+    "Evidence Stance (supports_alpha/opposes_alpha/mentions_alpha/neutral_background/supports_counter_alpha)",
+    "ticker specificity gating",
+    "Clause Graph",
+    "Counter-Alpha stance",
+    "dynamic invalidation conditions"
+  ]
+}

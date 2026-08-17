@@ -1,0 +1,95 @@
+{
+  "schema_version": "comqutor.phase1_v4.live_shadow_canary_failure_diagnosis.v1",
+  "phase": "Phase 1 §5.1",
+  "stage": "LIVE_SHADOW_CANARY_FAILURE_DIAGNOSIS_AND_REPAIR",
+  "completed_at": "2026-08-10T22:12:11Z",
+  "original_live_shadow_canary": "FAIL",
+  "quality_gate": "PASS_V4",
+  "semantic_quality": "PASS_V4",
+  "external_provider_calls": 0,
+  "subagents_spawned": 0,
+  "FAILURE_A_ROOT_CAUSE": {
+    "classification": "SHADOW_ISOLATION_IMPLEMENTATION_DEFECT",
+    "call_path": [
+      "run_live_shadow_sidecar",
+      "_DefaultV4ShadowExecutor",
+      "build_phase1_master_provider_gateway",
+      "Week2LLMGateway.invoke_prebuilt_json_prompt",
+      "Week2LLMGateway._log",
+      "append_jsonl_record"
+    ],
+    "finding": "The Shadow semantic recorder was already isolated under structured_adapter_shadow_runtime, but the shared Week2LLMGateway still used its default canonical error_logs/week2_llm_errors.jsonl path. The technical validation rejection therefore created a canonical run-root error artifact.",
+    "api_effect": {
+      "field": "artifacts.week2_llm_error_logs",
+      "legacy_only": false,
+      "legacy_plus_shadow": true,
+      "mechanism": "build_research_response reports the existence of the canonical Week2 error-log file."
+    }
+  },
+  "FAILURE_A_FIX": {
+    "description": "Week2LLMGateway now accepts a validated error-log artifact path while retaining the canonical path as its default. Both Phase 1 Shadow gateway builders explicitly select structured_adapter_shadow_runtime/error_logs/week2_llm_errors.jsonl. Canonical live Week2 callers keep their prior default unchanged.",
+    "shadow_error_log_path": "structured_adapter_shadow_runtime/error_logs/week2_llm_errors.jsonl",
+    "canonical_error_log_path": "error_logs/week2_llm_errors.jsonl",
+    "api_hiding_used": false,
+    "legacy_week2_default_changed": false
+  },
+  "FAILURE_A_OFFLINE_VERIFICATION": {
+    "status": "PASS",
+    "cases": [
+      "validation_rejected",
+      "provider_exception",
+      "malformed_output"
+    ],
+    "invariant": "Legacy-only and Legacy-plus-Shadow API responses are equal; canonical week2_llm_error_logs remains false; Shadow diagnostics contain the error.",
+    "canonical_week2_error_log_changed_by_shadow_after_fix": false
+  },
+  "FAILURE_B_CLASSIFICATION": "B1_EXPECTED_SAFE_AMBIGUOUS_REJECTION",
+  "FAILURE_B_ROOT_CAUSE": {
+    "known_persisted_facts": {
+      "call_id": "phase1-v4-canary-20260810t213811z:semantic:3:ac7a66b60bb34f749ec4de5b564e0f55",
+      "claim_index": 0,
+      "quote_index": 0,
+      "resolver_status": "AMBIGUOUS_MULTIPLE_MATCH",
+      "exact_match_count": 2,
+      "request_level_candidate_hint_count": 26,
+      "validation_reason": "SHADOW_SOURCE_SPAN_INVALID",
+      "provider_status": "success",
+      "validation_status": "rejected"
+    },
+    "technical_claim": "UNRECOVERABLE_NOT_PERSISTED",
+    "supporting_quote": "UNRECOVERABLE_NOT_PERSISTED",
+    "exact_match_offsets": [],
+    "occurrence_contexts": [],
+    "provider_claim_candidate_ids": "UNKNOWN_NOT_PERSISTED",
+    "candidate_hint_present": "YES_REQUEST_LEVEL_ONLY",
+    "candidate_hint_sufficient": false,
+    "resolver_mechanism_received_available_hint_data": true,
+    "why_rejected": "The exact quote had two source occurrences and the claim-linked deterministic hint set did not reduce them to one. The resolver returned no span; normalization emitted an invalid placeholder span; the unchanged validator rejected the whole bundle with SHADOW_SOURCE_SPAN_INVALID.",
+    "forensic_limitation": "The rejected semantic call record persisted raw_output_text=null, raw_output_sha256=null, validated_output=null, and the sidecar retained only the aggregate resolver record. Consequently the exact Provider claim, quote text, claim-level candidate_ids, occurrence offsets, and contexts cannot be reconstructed from the immutable artifacts. Reporting guessed text or offsets would fabricate evidence."
+  },
+  "FAILURE_B_FIX_OR_NO_FIX": {
+    "fix": "NONE",
+    "resolver_behavior": "CORRECT_FAIL_CLOSED",
+    "resolver_strictness_weakened": false,
+    "prompt_v4_changed": false,
+    "technical_recorded_response_offline_revalidation": "NOT_APPLICABLE_RESPONSE_NOT_PERSISTED",
+    "product_decision_required": "Decide whether to improve duplicate-quote protocol/location binding and rejected-response forensic persistence before authorizing a new Canary."
+  },
+  "positive_evidence_preserved": {
+    "accepted_slots": 3,
+    "accepted_claims": 57,
+    "fabricated_or_unresolved_evidence_admitted": 0,
+    "identity_failure_admitted": 0,
+    "exact_replay": "3/3 PASS",
+    "exact_replay_provider_calls": 0,
+    "shadow_output_reached_authoritative_downstream": false
+  },
+  "original_canary_artifacts_modified": false,
+  "original_artifact_sha256": {
+    "phase1_v4_live_shadow_canary_report.md": "309d7fb617ac2f1a119ec97406633b7864eb1823411e9bb6ee343b4bb713aed6",
+    "phase1_v4_live_shadow_canary_report.json": "000ff457c54d8e9e90ed370f0cd7f25d3090bf355ff9445bc843f44946e01850",
+    "phase1_v4_live_shadow_canary_execution_contract.json": "b2bd316a8ba1b7c957d1b89add98a5e5cc099dadf282b6d039b94089c6d6e7ce",
+    "phase1_v4_live_shadow_canary_runtime_result.json": "b141e64a858c02906ba15327f069bccca87981fe8a894c4d153833040b62b5e9",
+    "phase1_v4_live_shadow_canary_pre_provider_incident.json": "10f17c9cd4fb1576be3b72b10fb70acf14fd217eda0268bce2d9a2ecaebb8943"
+  }
+}

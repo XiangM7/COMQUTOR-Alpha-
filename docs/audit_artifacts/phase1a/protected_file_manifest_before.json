@@ -1,0 +1,27 @@
+{
+  "schema_version": "comqutor.phase1a.protected_manifest.v1",
+  "phase": "1A",
+  "stage": "before",
+  "captured_at": "2026-08-06T19:02:14Z",
+  "base_manifest": {
+    "path": "docs/audit_artifacts/phase0_6c/protected_file_manifest_before.json",
+    "sha256": "65534037e4b2b3ecab9e736f54aff1e1b7567f839dc9a65c8a502a5f3546c926"
+  },
+  "phase0_6c_verified_after": {
+    "path": "docs/audit_artifacts/phase0_6c/protected_file_manifest_after.json",
+    "sha256": "572f9e7a2033d2a718e3e1c578abc197212f04af18adb91f7a6a507d43718985",
+    "strict_file_count": 377,
+    "verified_unchanged_count": 377
+  },
+  "additional_phase1a_protected_scope": [
+    "docs/adr/ADR-007-exact-semantic-replay-integration.md",
+    "docs/specs/exact_semantic_replay_integration_contract_v1.md",
+    "docs/audit_artifacts/phase0_6c/**",
+    "comqutor_alpha/replay/**",
+    "tests/replay/**",
+    "scripts/verify_phase0_6c.py",
+    "outputs/runs/**",
+    "outputs/replays/**"
+  ],
+  "comparison_rule": "Every regular file in base and additional protected scope is compared by path, size, SHA-256, and mtime_ns."
+}

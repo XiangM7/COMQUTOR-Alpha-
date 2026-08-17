@@ -1,0 +1,35 @@
+{
+  "schema_version": "sprint1.frontend_run_switch_verification.v1",
+  "file_fixed": "frontend/src/pages/StructureGraphPage.tsx",
+  "test_file": "frontend/src/pages/StructureGraphPage.test.tsx",
+  "tests": [
+    {
+      "name": "never continues to display a previous run's graph while the newly-selected run is still loading",
+      "verifies": "TSM -> SNDK switch clears stale graph",
+      "result": "pass"
+    },
+    {
+      "name": "an out-of-order (late-resolving) previous request cannot overwrite the current run's graph",
+      "verifies": "out-of-order response cannot overwrite current run",
+      "result": "pass"
+    },
+    {
+      "name": "shows a Data Integrity Warning and refuses to render when the payload's run_id disagrees with the current route",
+      "verifies": "run/ticker mismatch payload shows warning, never rendered as normal page",
+      "result": "pass"
+    },
+    {
+      "name": "renders normally when the payload's run_id matches the current route",
+      "verifies": "no false positives on a normal, consistent load",
+      "result": "pass"
+    }
+  ],
+  "test_count": 4,
+  "all_passed": true,
+  "frontend_suite_total": {
+    "test_files": 17,
+    "tests": 156,
+    "failed": 0
+  },
+  "build": "clean (tsc -b && vite build, 0 errors)"
+}

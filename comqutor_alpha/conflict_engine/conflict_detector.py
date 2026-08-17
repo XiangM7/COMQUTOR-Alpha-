@@ -34,6 +34,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
+from comqutor_alpha.conflict_engine.conflict_admissibility import (
+    ADMITTED as B2_ADMITTED,
+    evaluate_conflict_admissibility,
+)
+from comqutor_alpha.conflict_engine.conflict_evidence_ui import build_conflict_evidence_ui
 from comqutor_alpha.conflict_engine.conflict_schema import (
     ADMISSIBLE_STATUSES,
     CONFLICT_FORMULA_VERSION,
@@ -890,7 +895,80 @@ def _evaluate_candidate(
         "_sort_evidence_strength": evidence_strength_raw,
         "_sort_minimum_activation": minimum_activation,
     }
-    return _audit_item(alpha_a, alpha_b, "admitted", [], evidence_audit), conflict
+
+    # John's B2 Conflict Evidence Admissibility gate: a further, stricter
+    # deterministic question layered onto this ALREADY-fully-evaluated
+    # candidate -- never a re-derivation of bull/bear identity, activation
+    # score, qualifying evidence, or Evidence Fact grouping (all reused
+    # exactly as already computed above). Only a candidate that also passes
+    # B2 may be returned as an admitted conflict (eligible for
+    # ``conflicts``/``main_conflict``); one that does not is reported as a
+    # ``suppressed`` candidate instead -- still fully visible in
+    # ``arbitration.candidate_evaluations`` via its own ``admissibility``
+    # detail, never silently dropped, and never eligible to become the main
+    # conflict regardless of its (still-computed, still-displayed)
+    # conflict_score.
+    group_into_facts = lambda claims: _group_qualifying_claims_into_facts(  # noqa: E731
+        claims, run_id=run_id, ticker=ticker
+    )
+    admissibility = evaluate_conflict_admissibility(
+        bull_alpha_id=bull_id,
+        bear_alpha_id=bear_id,
+        bull_score=bull_fields.score,
+        bear_score=bear_fields.score,
+        bull_qualifying_claims=bull_qualifying,
+        bear_qualifying_claims=bear_qualifying,
+        alpha_matches=alpha_matches,
+        ticker=ticker,
+        group_into_facts=group_into_facts,
+    )
+    conflict["admissibility"] = admissibility.to_dict()
+
+    # John's B5 Conflict Radar Evidence UI gate (task
+    # B5_CONFLICT_RADAR_EVIDENCE_UI): a pure presentation/audit layer over
+    # this SAME already-computed evidence and admissibility detail -- never
+    # a re-derivation of Evidence semantics, qualifying evidence, or B2's
+    # own gate outcome. Computed once, unconditionally (exactly like
+    # ``admissibility`` above), so both an admitted conflict and a
+    # B2-suppressed candidate carry the identical, fully-transparent
+    # Bull/Bear/Counter/Missing Evidence detail -- a candidate pair is
+    # never left unable to show *why* it failed.
+    evidence_ui = build_conflict_evidence_ui(
+        run_id=run_id,
+        ticker=ticker,
+        bull_alpha_id=bull_id,
+        bear_alpha_id=bear_id,
+        bull_alpha_name=bull_fields.name,
+        bear_alpha_name=bear_fields.name,
+        bull_qualifying=bull_qualifying,
+        bear_qualifying=bear_qualifying,
+        alpha_matches=alpha_matches,
+        admissibility=admissibility,
+        group_into_facts=group_into_facts,
+    )
+    conflict["evidence_ui"] = evidence_ui
+
+    # bull_alpha_id/bear_alpha_id: attached to the audit item too (not only
+    # the full conflict dict) -- without this, a UI rendering a suppressed
+    # candidate's evidence_ui has no reliable way to label which side is
+    # bull vs. bear whenever both bull_evidence and bear_evidence (and
+    # counter_evidence) happen to be empty for that pair.
+    if admissibility.status != B2_ADMITTED:
+        audit_item = _audit_item(
+            alpha_a, alpha_b, "suppressed", list(admissibility.reason_codes), evidence_audit
+        )
+        audit_item["bull_alpha_id"] = bull_id
+        audit_item["bear_alpha_id"] = bear_id
+        audit_item["admissibility"] = admissibility.to_dict()
+        audit_item["evidence_ui"] = evidence_ui
+        return audit_item, None
+
+    audit_item = _audit_item(alpha_a, alpha_b, "admitted", [], evidence_audit)
+    audit_item["bull_alpha_id"] = bull_id
+    audit_item["bear_alpha_id"] = bear_id
+    audit_item["admissibility"] = admissibility.to_dict()
+    audit_item["evidence_ui"] = evidence_ui
+    return audit_item, conflict
 
 
 def _structure_block(
@@ -1128,6 +1206,8 @@ def evaluate_conflict_pair(
     activation_payload: Mapping[str, Any],
     alpha_matches: Sequence[Mapping[str, Any]],
     taxonomy: Mapping[str, Any] | None = None,
+    run_id: str = "",
+    ticker: str = "",
 ) -> dict[str, Any]:
     """Optional single-pair evaluation helper.
 
@@ -1136,6 +1216,14 @@ def evaluate_conflict_pair(
     ``rejected`` audit item with ``PAIR_NOT_DECLARED`` -- the one situation
     that reason code exists for, since ``detect_alpha_conflicts`` itself
     never evaluates an undeclared pair in the first place.
+
+    ``run_id``/``ticker`` default to ``""`` -- exactly ``_evaluate_candidate``'s
+    own existing defaults -- so any pre-existing caller that omits them sees
+    unchanged behavior for everything except John's B2 ticker-specificity
+    check, which (correctly, per that gate's own fail-closed design) can
+    never be satisfied without a real ticker. Callers that need a
+    B2-admitted result back from this helper must supply the real ticker,
+    exactly as ``detect_alpha_conflicts`` itself always requires one.
     """
     if taxonomy is None:
         taxonomy = load_alpha_taxonomy()
@@ -1165,6 +1253,8 @@ def evaluate_conflict_pair(
         activations_by_id=activations_by_id,
         alpha_matches=canonical_matches,
         duplicate_counts=duplicate_counts,
+        run_id=run_id,
+        ticker=ticker,
     )
     if conflict is not None:
         return {**audit_item, "conflict": _finalize_conflict(conflict)}

@@ -8,11 +8,14 @@ import { EmptyState } from "../components/EmptyState";
 import { useRunPolling } from "../hooks/useRunPolling";
 import { useResearchRun } from "../hooks/useResearchRun";
 import { describeApiError } from "../api/errors";
+import { getApiBaseUrl } from "../api/client";
+import { UNCLASSIFIED_FINDING_REASONS } from "../api/types";
 import type {
   CanonicalResearchResponse,
   DataSanityNumericSemantics,
   DataSanityWarning,
   StructuredAgentOutputRecord,
+  UnclassifiedFinding,
 } from "../api/types";
 
 function shortenRunId(runId: string): string {
@@ -21,15 +24,6 @@ function shortenRunId(runId: string): string {
 
 function isTerminalStatus(status: string | undefined): boolean {
   return status === "completed" || status === "partial" || status === "failed";
-}
-
-// The Research page's directional panels only ever show a clear positive or
-// negative call -- "unknown"/"mixed"/missing findings are still valid claims
-// (kept in artifacts/API/DB unchanged) but are a presentation-layer
-// distraction here. This is display-only filtering; it must never mutate the
-// API response.
-function isDirectionalFinding(direction: string): boolean {
-  return direction === "positive" || direction === "negative";
 }
 
 // Section G1: deterministic, reproducible sort -- no importance score, no
@@ -127,41 +121,140 @@ function DirectionalFindingsPanel({
   );
 }
 
-// Section 19 (Product Transparency, low priority): a low-risk entry point
-// onto the neutral/unclassified findings the two directional panels
-// deliberately exclude -- reuses the SAME analytical claims the API already
-// returns (never mixes in context-only claims, never deletes the
-// positive/negative panels, never renders all hidden findings at once).
-function NeutralFindingsPanel({ records }: { records: StructuredAgentOutputRecord[] }) {
-  const [expanded, setExpanded] = useState(false);
-  const hidden = records.filter((record) => !isDirectionalFinding(record.direction));
-  if (hidden.length === 0) return null;
-  const sorted = [...hidden].sort(compareFindings);
-  const shown = sorted.slice(0, MAX_FINDINGS_PER_DIRECTION);
-  const truncatedCount = hidden.length - shown.length;
+// Sprint 3 (Unclassified Findings Control), Track A3. John's exact
+// friendly-text mapping (task section 15) -- machine-readable
+// `reason`/`reason_codes` values stay snake_case everywhere else; this
+// map is presentation-only. UNCLASSIFIED_REASON_UNRESOLVED is the honest
+// escape hatch the backend emits when none of the five canonical reasons
+// applies -- never silently hidden, never guessed into one of the five.
+const UNCLASSIFIED_FINDING_REASON_LABELS: Record<string, string> = {
+  no_alpha_match: "No canonical Alpha match",
+  low_confidence: "Below the current confidence requirement",
+  generic_background: "Generic or background-only finding",
+  duplicate_supporting_text: "Duplicate supporting text",
+  no_ticker_specific_evidence: "No ticker-specific Evidence",
+  UNCLASSIFIED_REASON_UNRESOLVED: "Reason not yet resolved",
+};
+
+function unclassifiedFindingReasonLabel(reason: string): string {
+  return UNCLASSIFIED_FINDING_REASON_LABELS[reason] ?? reason;
+}
+
+// One unclassified finding. A claim with only a mention/background role is
+// never worded as if it supports its matched Alpha -- "Alpha match" only
+// ever names the Alpha, never a support/opposition verdict.
+function UnclassifiedFindingCard({ finding }: { finding: UnclassifiedFinding }) {
+  const isDuplicate = Boolean(
+    finding.representative_claim_id && finding.representative_claim_id !== finding.claim_id
+  );
+  return (
+    <li className="analyst-output-card unclassified-finding-card">
+      <dl className="analyst-output-meta-list">
+        <div className="analyst-output-meta-row">
+          <dt>Agent</dt>
+          <dd>{finding.agent ?? "Unknown"}</dd>
+        </div>
+        <div className="analyst-output-meta-row">
+          <dt>Reason</dt>
+          <dd>{unclassifiedFindingReasonLabel(finding.reason)}</dd>
+        </div>
+        <div className="analyst-output-meta-row">
+          <dt>Alpha match</dt>
+          <dd>{finding.matched_alpha ?? "No canonical Alpha match"}</dd>
+        </div>
+        <div className="analyst-output-meta-row">
+          <dt>Ticker-specific</dt>
+          <dd>{finding.ticker_specific ? "Yes" : "No"}</dd>
+        </div>
+      </dl>
+      <p className="analyst-output-claim">{finding.claim}</p>
+      {finding.evidence && finding.evidence !== finding.claim ? (
+        <p className="analyst-output-evidence">{finding.evidence}</p>
+      ) : null}
+      <p className="analyst-output-confidence">
+        {finding.confidence !== null ? `Confidence ${(finding.confidence * 100).toFixed(0)}% · ` : ""}
+        <code>{finding.claim_id}</code>
+      </p>
+      {isDuplicate ? (
+        <p className="unclassified-finding-representative-note">
+          Representative finding: <code>{finding.representative_claim_id}</code>
+        </p>
+      ) : null}
+    </li>
+  );
+}
+
+// Section 19 (Unclassified Findings Control, task A3): every claim the
+// pipeline retains (never deletes) but that carries one of John's 5
+// canonical reasons for not entering the normal classified/research
+// finding display path. Driven entirely by the backend's already-computed
+// unclassified_findings artifact (Top 20 + total + reason counts) -- this
+// panel never re-derives direction, re-groups claims, or re-sorts the
+// backend's own deterministic order.
+function UnclassifiedFindingsPanel({
+  runId,
+  response,
+}: {
+  runId: string;
+  response: CanonicalResearchResponse | null;
+}) {
+  const status = response?.unclassified_findings_status;
+  if (status !== "ready") {
+    return (
+      <section className="panel unclassified-findings-panel">
+        <h3>Unclassified findings</h3>
+        <p className="unclassified-findings-unavailable-text">
+          Unclassified finding audit is not available for this historical run.
+        </p>
+      </section>
+    );
+  }
+
+  const top20 = response?.unclassified_findings_top20 ?? [];
+  const totalCount = response?.unclassified_findings_total_count ?? top20.length;
+  const reasonCounts = response?.unclassified_findings_reason_counts ?? {};
+  const downloadAvailable = response?.unclassified_findings_download_available ?? false;
+  const downloadUrl = `${getApiBaseUrl()}/api/research/${encodeURIComponent(runId)}/artifacts/unclassified_findings.json`;
+
+  if (totalCount === 0) {
+    return (
+      <section className="panel unclassified-findings-panel">
+        <h3>Unclassified findings</h3>
+        <EmptyState title="No unclassified findings for this run." />
+      </section>
+    );
+  }
 
   return (
-    <details
-      className="panel neutral-findings-panel"
-      open={expanded}
-      onToggle={(event) => setExpanded((event.target as HTMLDetailsElement).open)}
-    >
-      <summary>Neutral and unclassified findings ({hidden.length})</summary>
-      {expanded ? (
-        <>
-          <ul className="analyst-output-list">
-            {shown.map((record) => (
-              <FindingCard key={record.claim_id} record={record} />
-            ))}
-          </ul>
-          {truncatedCount > 0 ? (
-            <p className="analyst-output-hidden-note">
-              {truncatedCount} more neutral or unclassified finding(s) are not shown here.
-            </p>
-          ) : null}
-        </>
+    <section className="panel unclassified-findings-panel">
+      <h3>Unclassified findings ({totalCount})</h3>
+      <p className="unclassified-findings-count-note">
+        Showing {top20.length} of {totalCount}
+      </p>
+      <ul className="unclassified-findings-reason-summary">
+        {UNCLASSIFIED_FINDING_REASONS.map((reason) =>
+          reasonCounts[reason] ? (
+            <li key={reason}>
+              {unclassifiedFindingReasonLabel(reason)}: {reasonCounts[reason]}
+            </li>
+          ) : null
+        )}
+      </ul>
+      <ul className="analyst-output-list">
+        {top20.map((finding) => (
+          <UnclassifiedFindingCard key={finding.claim_id} finding={finding} />
+        ))}
+      </ul>
+      {downloadAvailable ? (
+        <a
+          className="button button-secondary unclassified-findings-download"
+          href={downloadUrl}
+          download={`${runId}_unclassified_findings_audit.json`}
+        >
+          Download full audit ({totalCount})
+        </a>
       ) : null}
-    </details>
+    </section>
   );
 }
 
@@ -426,26 +519,28 @@ export function ResearchRunPage() {
               allRecords.length === 0 ? (
                 <EmptyState title="No structured analyst outputs yet" />
               ) : (
-                <>
-                  <div className="directional-findings-columns">
-                    <DirectionalFindingsPanel
-                      direction="positive"
-                      title="Positive findings"
-                      emptyMessage="No eligible positive findings were identified."
-                      records={allRecords}
-                    />
-                    <DirectionalFindingsPanel
-                      direction="negative"
-                      title="Negative findings"
-                      emptyMessage="No eligible negative findings were identified."
-                      records={allRecords}
-                    />
-                  </div>
-                  <NeutralFindingsPanel records={allRecords} />
-                </>
+                <div className="directional-findings-columns">
+                  <DirectionalFindingsPanel
+                    direction="positive"
+                    title="Positive findings"
+                    emptyMessage="No eligible positive findings were identified."
+                    records={allRecords}
+                  />
+                  <DirectionalFindingsPanel
+                    direction="negative"
+                    title="Negative findings"
+                    emptyMessage="No eligible negative findings were identified."
+                    records={allRecords}
+                  />
+                </div>
               )
             ) : null}
           </section>
+
+          <UnclassifiedFindingsPanel
+            runId={runId}
+            response={research && "summary" in research ? research : null}
+          />
         </>
       ) : null}
 

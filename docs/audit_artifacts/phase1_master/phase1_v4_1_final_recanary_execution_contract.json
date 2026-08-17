@@ -1,0 +1,89 @@
+{
+  "schema_version": "comqutor.phase1_v4_1.final_recanary_execution_contract.v1",
+  "status": "PRE_REGISTERED_BEFORE_PROVIDER_CALLS",
+  "registered_at": "2026-08-10T23:02:24Z",
+  "task": "FINAL_V4_1_LIVE_SHADOW_RECANARY_AND_CONDITIONAL_PRODUCTION_CUTOVER",
+  "canary_id": "phase1-v4-1-final-recanary-20260810T230224Z",
+  "canary_run_id": "phase1-v4-1-final-recanary-nvda",
+  "artifact_root": "outputs/canaries/phase1-v4-1-final-recanary-20260810T230224Z",
+  "source_run_id": "0e044e37-862c-43be-871c-31012cd660e7",
+  "source_artifact": "outputs/runs/0e044e37-862c-43be-871c-31012cd660e7/raw_agent_outputs.json",
+  "ticker": "NVDA",
+  "candidate": "STRUCTURED_LLM_ADAPTER_V4_1",
+  "prompt_version": "structured_adapter.claim_extraction_shadow.v4.1",
+  "prompt_sha256": "c5ac3a9b44df24970d27ebd5670cb7f09eb934b01a0d99d7cd4ff93e5f225c6b",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+  "timeout_seconds": 180.0,
+  "execution_order": "STRICTLY_SEQUENTIAL_FIXED_SLOT_ORDER",
+  "logical_call_cap": 4,
+  "provider_attempt_cap": 4,
+  "retry_count": 0,
+  "subagents": 0,
+  "budget": {
+    "logical_calls_before": 95,
+    "provider_attempts_before": 102,
+    "authorized_additive_logical_calls": 4,
+    "authorized_additive_provider_attempts": 4,
+    "logical_calls_after_ceiling": 99,
+    "provider_attempts_after_ceiling": 106,
+    "phase1_provider_attempt_hard_cap": 130
+  },
+  "production_authority_before_execution": "LEGACY_ADAPTER",
+  "cutover_policy": {
+    "authorized_only_if": "ALL_4_SLOTS_STRICT_PASS",
+    "on_any_failure": "COMPLETE_REMAINING_REGISTERED_SAFE_SLOTS_THEN_STOP_WITH_LEGACY_AUTHORITY",
+    "post_canary_provider_calls": 0,
+    "code_fixes_after_failure": false
+  },
+  "strict_slot_gates": [
+    "provider_response_received",
+    "v4_1_parse_accepted",
+    "candidate_binding_valid",
+    "exact_provenance_valid",
+    "schema_valid",
+    "source_identity_valid",
+    "legacy_isolation_valid",
+    "sidecar_persistence_valid",
+    "accepted_exact_replay_provider_zero"
+  ],
+  "slots": [
+    {
+      "slot": 1,
+      "family": "fundamental",
+      "agent": "fundamental_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:fundamental_agent:fundamentals_report",
+      "source_report_sha256": "6e745b7c192eab1d111c26c9f259b97ddf6b86de5b88a4c03ae67cdf8f7954f1"
+    },
+    {
+      "slot": 2,
+      "family": "news",
+      "agent": "news_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:news_agent:news_report",
+      "source_report_sha256": "96196ee35f327eca1db0013e341cdbdcd14aa4c5225e93a7dfc28f456a485599"
+    },
+    {
+      "slot": 3,
+      "family": "sentiment",
+      "agent": "sentiment_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:sentiment_agent:sentiment_report",
+      "source_report_sha256": "65fc72c02d4e06b033e7f9dc8bb4b4362fa6bdc2f9d3ea0e0358c88e2357c157"
+    },
+    {
+      "slot": 4,
+      "family": "technical",
+      "agent": "market_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:market_agent:market_report",
+      "source_report_sha256": "1b70321eabdaafb19d497adf656b3bfb12610d988a92c95de8c65b697a6ac3d5"
+    }
+  ],
+  "forbidden_scope": [
+    "PROMPT_CHANGES",
+    "MAPPER_OR_EXTRACTOR_SEMANTIC_CHANGES",
+    "GRAPH_ACTIVATION_CONFLICT_EXPOSURE_CHANGES",
+    "TRADINGAGENTS_CHANGES",
+    "PHASE_5_2_OR_LATER_WORK",
+    "MORE_THAN_FOUR_PROVIDER_ATTEMPTS"
+  ]
+}

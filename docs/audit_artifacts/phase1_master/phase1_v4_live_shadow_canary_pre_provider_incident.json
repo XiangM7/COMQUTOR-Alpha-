@@ -1,0 +1,25 @@
+{
+  "schema_version": "comqutor.phase1_v4.live_shadow_canary_pre_provider_incident.v1",
+  "canary_id": "phase1-v4-live-shadow-canary-20260810T213811Z",
+  "status": "PRE_PROVIDER_RUNNER_CONFIGURATION_REJECTED",
+  "reason_code": "RECORDER_MODE_INVALID",
+  "reason": "The Canary-only runner supplied execution_mode=shadow_canary, while the existing semantic recorder accepts the canonical shadow mode.",
+  "remediation": "Use the existing canonical execution_mode=shadow in the non-production Canary runner.",
+  "production_code_changed": false,
+  "prompt_changed": false,
+  "provider_changed": false,
+  "source_slots_changed": false,
+  "logical_calls_used": 0,
+  "provider_attempts_used": 0,
+  "retries_used": 0,
+  "data_egressed": false,
+  "state_counters_before": {
+    "cumulative_logical_calls": 91,
+    "cumulative_provider_attempts": 98
+  },
+  "state_counters_after": {
+    "cumulative_logical_calls": 91,
+    "cumulative_provider_attempts": 98
+  },
+  "preserved_runtime_directory": "outputs/canaries/phase1-v4-live-shadow-canary-20260810T213811Z-pre-provider-recorder-mode-invalid"
+}

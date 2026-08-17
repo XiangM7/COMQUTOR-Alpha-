@@ -41,7 +41,7 @@ VALID_ASSERTION_STATUSES = frozenset({"asserted", "conditional", "negated", "mix
 VALID_MATCH_STATUSES = frozenset({"matched", "ambiguous", "no_match"})
 
 VALID_ACTIVATION_STATUSES = frozenset(
-    {"inactive", "watch", "active", "dominant", "regime_level"}
+    {"inactive", "watch", "active", "dominant", "regime_level", "candidate"}
 )
 
 # (upper_bound_inclusive, status) evaluated in order; the first band whose

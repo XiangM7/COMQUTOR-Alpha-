@@ -1,0 +1,51 @@
+{
+  "schema_version": "comqutor.phase1_stage_g_primary_authority_routing_report.v1",
+  "phase_1_stage": "STAGE_G_PRIMARY_AUTHORITY_ROUTING_IMPLEMENTED",
+  "stage_g_primary_routing": "PASS",
+  "real_primary_mode_implemented": true,
+  "primary_degrades_to_legacy_unconditionally": false,
+  "legacy_mode_authority": "LEGACY_ADAPTER",
+  "shadow_mode_authority": "LEGACY_ADAPTER",
+  "primary_success_authority": "structured_adapter.claim_extraction_shadow.v4.2",
+  "primary_failure_authority": "LEGACY_ADAPTER",
+  "primary_fail_soft": true,
+  "blanket_exception_swallowing": false,
+  "downstream_uses_selected_authority": true,
+  "single_authority_per_request": true,
+  "v4_2_execution_path_reused": true,
+  "v4_2_execution_path_duplicated": false,
+  "v4_2_provenance_logic_changed": false,
+  "candidate_binding_active": false,
+  "real_stored_v4_2_primary_integration": "PASS",
+  "real_provider_calls": 0,
+  "subagents": 0,
+  "production_cutover": "MECHANISM_COMPLETE_DEFAULT_NOT_FLIPPED",
+  "production_cutover_note": "Explicit primary mode fully implemented, tested, and proven with real stored Canary data. The shared hard-coded fallback default (used when neither an explicit mode nor COMQUTOR_STRUCTURED_ADAPTER_MODE is set) was deliberately left at 'legacy' because 19 existing test files call the pipeline with no explicit mode and rely on that default constructing zero Provider gateways; flipping it would have silently broken that invariant. Activating this in production is a deployment-level environment-variable change (COMQUTOR_STRUCTURED_ADAPTER_MODE=primary), not a further code change.",
+  "production_authority": "LEGACY_ADAPTER",
+  "legacy_rollback_available": true,
+  "section_5_1": "STAGE_G_ROUTING_COMPLETE_DEFAULT_ACTIVATION_DEFERRED",
+  "phase1_verifier": "20/22 (2 pre-existing FINAL_V4_1_RECANARY bookkeeping failures, unchanged, out of scope for this task)",
+  "ruff": "clean on all touched files",
+  "git_diff_check": "clean",
+  "test_results": {
+    "new_stage_g_tests": "23/23 passed",
+    "existing_stage_e_tests": "13/13 passed (1 updated to reflect Stage G supersession)",
+    "other_focused_v4_x_tests": "77/77 passed",
+    "spot_checked_unrelated_default_mode_tests": "35/35 passed"
+  },
+  "files_modified": [
+    "comqutor_alpha/structure_engine/structured_output_live_shadow.py",
+    "comqutor_alpha/api/routes_research.py",
+    "comqutor_alpha/storage/file_store.py",
+    "tests/structured_output_shadow/test_live_shadow_integration.py"
+  ],
+  "artifacts_created": [
+    "tests/structured_output_shadow/test_stage_g_primary_authority_routing.py",
+    "docs/audit_artifacts/phase1_master/phase1_stage_g_primary_authority_routing_report.md",
+    "docs/audit_artifacts/phase1_master/phase1_stage_g_primary_authority_routing_report.json"
+  ],
+  "head": "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f",
+  "branch": "comqutor-structure-layer",
+  "commit": "NO",
+  "push": "NO"
+}

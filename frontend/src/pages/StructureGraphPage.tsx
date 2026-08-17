@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getResearchConflicts, getResearchGraph } from "../api/client";
 import { ApiError, describeApiError } from "../api/errors";
-import type { ConflictsResult, StructureGraphResult } from "../api/types";
+import type { AlphaActivation, ConflictsResult, StructureGraphResult } from "../api/types";
 import { RunNavigation } from "../components/RunNavigation";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
@@ -11,16 +11,65 @@ import { AlphaCard } from "../components/AlphaCard";
 import { StructureGraphView } from "../graph/StructureGraphView";
 import type { SelectableGraphNode } from "../graph/graphTypes";
 
+// John's five-way, mutually-exclusive UI partition (task
+// B4_ACTIVATION_LEVEL_ALIGNMENT, Decision 2). Priority order matters:
+// is_blocked always wins first (an alpha that reached e.g. "active" only
+// because it was blocked from "dominant" is shown as Blocked, not Active),
+// then regime_level, then dominant, then active; everything else
+// (candidate, or -- Decision 3 -- a historical inactive/watch payload) is
+// Candidate. Backend qualified counts (run_audit's
+// active_alpha_count/dominant_alpha_count/etc.) are computed independently
+// and are not required to match this display-only partition's bucket
+// sizes -- see comment on ADMISSIBLE_STATUSES/qualified counts.
+type AlphaLevelBucket = "active" | "dominant" | "regime_level" | "candidate" | "blocked";
+
+const ALPHA_LEVEL_BUCKETS: { key: AlphaLevelBucket; title: string }[] = [
+  { key: "active", title: "Active alphas" },
+  { key: "dominant", title: "Dominant alphas" },
+  { key: "regime_level", title: "Regime-level alphas" },
+  { key: "candidate", title: "Candidate alphas" },
+  { key: "blocked", title: "Blocked alphas" },
+];
+
+function bucketForAlpha(alpha: AlphaActivation): AlphaLevelBucket {
+  if (alpha.is_blocked === true) return "blocked";
+  // qualified_level is always identical to `status` once B4 has run;
+  // falling back to `status` here is what makes a historical payload
+  // (predating qualified_level entirely) partition safely instead of
+  // every alpha silently landing in "candidate".
+  const level = alpha.qualified_level ?? alpha.status;
+  if (level === "regime_level") return "regime_level";
+  if (level === "dominant") return "dominant";
+  if (level === "active") return "active";
+  return "candidate";
+}
+
 function useGraphAndConflicts(runId: string | undefined) {
   const [graph, setGraph] = useState<StructureGraphResult | null>(null);
   const [conflicts, setConflicts] = useState<ConflictsResult | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
+  // Sprint 1 (Run Identity Integrity and Complete Artifact Export), Track
+  // A1/frontend: a defensive data-integrity flag, distinct from `error`.
+  // The AbortController below already prevents a *stale* (superseded)
+  // request from ever overwriting newer state; this instead guards
+  // against a response whose own embedded run_id disagrees with the
+  // run_id it was actually requested for -- never silently rendered.
+  const [runMismatch, setRunMismatch] = useState(false);
 
   useEffect(() => {
     if (!runId) return;
     const controller = new AbortController();
+    // Clear the previous run's Graph/Conflict data immediately, before
+    // the new fetch even starts -- otherwise a run switch (e.g. TSM ->
+    // SNDK) keeps rendering the *previous* run's graph (including its
+    // own ticker-labeled nodes, such as "TSM Revenue Growth") for the
+    // entire loading window, which is exactly what `isLoading && !graph`
+    // below is meant to prevent but cannot if `graph` is left stale.
+    setGraph(null);
+    setConflicts(null);
+    setRunMismatch(false);
     setIsLoading(true);
     setError(null);
     Promise.all([
@@ -29,6 +78,13 @@ function useGraphAndConflicts(runId: string | undefined) {
     ])
       .then(([graphResult, conflictsResult]) => {
         if (controller.signal.aborted) return;
+        const graphRunId = "run_id" in graphResult ? graphResult.run_id : null;
+        const conflictsRunId = "run_id" in conflictsResult ? conflictsResult.run_id : null;
+        if ((graphRunId && graphRunId !== runId) || (conflictsRunId && conflictsRunId !== runId)) {
+          setRunMismatch(true);
+          setIsLoading(false);
+          return;
+        }
         setGraph(graphResult);
         setConflicts(conflictsResult);
       })
@@ -43,12 +99,19 @@ function useGraphAndConflicts(runId: string | undefined) {
     return () => controller.abort();
   }, [runId, reloadToken]);
 
-  return { graph, conflicts, error, isLoading, reload: () => setReloadToken((token) => token + 1) };
+  return {
+    graph,
+    conflicts,
+    error,
+    isLoading,
+    runMismatch,
+    reload: () => setReloadToken((token) => token + 1),
+  };
 }
 
 export function StructureGraphPage() {
   const { runId } = useParams<{ runId: string }>();
-  const { graph, conflicts, error, isLoading, reload } = useGraphAndConflicts(runId);
+  const { graph, conflicts, error, isLoading, runMismatch, reload } = useGraphAndConflicts(runId);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const conflictAlphaIds = useMemo(() => {
@@ -86,6 +149,36 @@ export function StructureGraphPage() {
     return new Set(graph.dominant_alphas.map((alpha) => alpha.alpha_id));
   }, [graph]);
 
+  // The five-way partition itself (see bucketForAlpha above) -- built once
+  // from the full, authoritative per-alpha activation list (never the
+  // narrower dominant_alphas/active_alphas/etc. summary collections, which
+  // are allowed to overlap with each other and are not a valid source for
+  // a mutually-exclusive partition).
+  const alphasByBucket = useMemo(() => {
+    const buckets: Record<AlphaLevelBucket, AlphaActivation[]> = {
+      active: [],
+      dominant: [],
+      regime_level: [],
+      candidate: [],
+      blocked: [],
+    };
+    if (!graph || !("activation" in graph)) return buckets;
+    for (const alpha of graph.activation.alphas) {
+      buckets[bucketForAlpha(alpha)].push(alpha);
+    }
+    return buckets;
+  }, [graph]);
+
+  // True when every scored alpha in this run predates task
+  // B4_ACTIVATION_LEVEL_ALIGNMENT (no qualified_level anywhere) -- used to
+  // label the whole partition as a legacy classification rather than
+  // implying these five sections are B4-authoritative for an old run.
+  const isLegacyClassification = useMemo(() => {
+    if (!graph || !("activation" in graph)) return false;
+    const alphas = graph.activation.alphas;
+    return alphas.length > 0 && alphas.every((alpha) => alpha.qualified_level == null);
+  }, [graph]);
+
   const selectableNodes: SelectableGraphNode[] = useMemo(() => {
     if (!graph || !("nodes" in graph)) return [];
     return graph.nodes.map((node) => ({
@@ -104,6 +197,18 @@ export function StructureGraphPage() {
       <div className="structure-graph-page">
         <RunNavigation runId={runId} />
         <LoadingPanel label="Loading structure graph…" />
+      </div>
+    );
+  }
+
+  if (runMismatch) {
+    return (
+      <div className="structure-graph-page">
+        <RunNavigation runId={runId} />
+        <ErrorPanel
+          message="Data Integrity Warning: the server returned data for a different run than the one currently selected. Refusing to render it."
+          onRetry={reload}
+        />
       </div>
     );
   }
@@ -156,8 +261,29 @@ export function StructureGraphPage() {
             </dd>
           </div>
           <div>
-            <dt>Dominant alphas</dt>
+            {/* Backward-compatible, pre-existing meaning: dominant OR
+                regime_level (task B4_ACTIVATION_LEVEL_ALIGNMENT section 12
+                -- an A2-frozen field, never redefined). Labeled explicitly
+                to avoid ambiguity with the exclusive "Dominant alphas"
+                section below, which counts dominant only. */}
+            <dt>Dominant or regime-level alphas</dt>
             <dd>{graph.dominant_alphas.length}</dd>
+          </div>
+          <div>
+            <dt>Active alphas</dt>
+            <dd>{alphasByBucket.active.length}</dd>
+          </div>
+          <div>
+            <dt>Regime-level alphas</dt>
+            <dd>{alphasByBucket.regime_level.length}</dd>
+          </div>
+          <div>
+            <dt>Candidate alphas</dt>
+            <dd>{alphasByBucket.candidate.length}</dd>
+          </div>
+          <div>
+            <dt>Blocked alphas</dt>
+            <dd>{alphasByBucket.blocked.length}</dd>
           </div>
           <div>
             <dt>Nodes</dt>
@@ -168,6 +294,13 @@ export function StructureGraphPage() {
             <dd>{graph.edges.length}</dd>
           </div>
         </dl>
+        {isLegacyClassification ? (
+          <p className="graph-overview-legacy-note" role="note">
+            Legacy classification — this run predates the B4 alpha-level
+            classifier; the sections below use each alpha's pre-existing
+            activation status only.
+          </p>
+        ) : null}
       </section>
 
       {graph.nodes.length === 0 ? (
@@ -255,37 +388,41 @@ export function StructureGraphPage() {
         )}
       </section>
 
-      <section className="panel dominant-alphas-panel">
-        <h2>Dominant alphas</h2>
-        {graph.dominant_alphas.length === 0 ? (
-          <EmptyState title="No dominant alphas for this run" />
-        ) : (
-          <div className="alpha-card-grid">
-            {graph.dominant_alphas.map((alpha) => (
-              <AlphaCard
-                key={alpha.alpha_id}
-                alphaId={alpha.alpha_id}
-                alphaName={alpha.alpha_name}
-                activationScore={alpha.activation_score}
-                status={alpha.status}
-                direction={alpha.direction}
-                evidenceCount={alpha.evidence_summary.evidence_count}
-                distinctSupportingAgents={alpha.evidence_summary.distinct_supporting_agents}
-                relatedConflicts={relatedConflictsFor(alpha.alpha_id)}
-                evidenceDetail={
-                  graph.activation.alphas.find((entry) => entry.alpha_id === alpha.alpha_id)
-                    ?.evidence_detail ?? null
-                }
-                activation={
-                  graph.activation.alphas.find((entry) => entry.alpha_id === alpha.alpha_id) ??
-                  null
-                }
-                isDominant
-              />
-            ))}
-          </div>
-        )}
-      </section>
+      {/* John's five-way, mutually-exclusive Alpha partition (task
+          B4_ACTIVATION_LEVEL_ALIGNMENT, Decision 2) -- one section per
+          bucket, each alpha appearing in exactly one via bucketForAlpha
+          above. Each alpha here is the full activation entry already, so
+          no separate lookup against graph.activation.alphas is needed. */}
+      {ALPHA_LEVEL_BUCKETS.map(({ key, title }) => {
+        const alphas = alphasByBucket[key];
+        return (
+          <section key={key} className={`panel alpha-level-panel alpha-level-panel-${key}`}>
+            <h2>{title}</h2>
+            {alphas.length === 0 ? (
+              <EmptyState title={`No ${title.toLowerCase()} for this run`} />
+            ) : (
+              <div className="alpha-card-grid">
+                {alphas.map((alpha) => (
+                  <AlphaCard
+                    key={alpha.alpha_id}
+                    alphaId={alpha.alpha_id}
+                    alphaName={alpha.alpha_name}
+                    activationScore={alpha.activation_score}
+                    status={alpha.status}
+                    direction={alpha.direction}
+                    evidenceCount={alpha.evidence_count}
+                    distinctSupportingAgents={alpha.distinct_supporting_agents}
+                    relatedConflicts={relatedConflictsFor(alpha.alpha_id)}
+                    evidenceDetail={alpha.evidence_detail}
+                    activation={alpha}
+                    isDominant={key === "dominant"}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }

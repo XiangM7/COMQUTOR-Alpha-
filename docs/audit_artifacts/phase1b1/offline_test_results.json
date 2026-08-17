@@ -1,0 +1,60 @@
+{
+  "schema_version": "comqutor.phase1b1.offline_test_results.v1",
+  "targeted_shadow_suite": {
+    "command": "pytest -q tests/structured_output_shadow",
+    "result": "101 passed, 1 failed (see forward_scope_failures below)"
+  },
+  "targeted_regression_suite": {
+    "command": "pytest -q tests/test_structured_output_adapter.py tests/test_week2_llm.py tests/test_alpha_mapper.py tests/test_ai_alpha_mapper_discrimination.py tests/test_structure_extractor.py tests/test_replay_identity_correction.py",
+    "result": "287 passed, 1 skipped (pre-existing provider-smoke opt-in gate), 0 failed"
+  },
+  "audit_llm_boundary": "4/4 PASS",
+  "phase1a_verifier": {
+    "command": "python scripts/verify_phase1a.py",
+    "result": "29/35 PASS",
+    "unmodified": true,
+    "note": "Old verifier from Phase 1A, run unmodified. Every one of its 6 failures traces to this phase's own explicitly-authorized additive changes -- see forward_scope_failures."
+  },
+  "phase1b1_verifier": {
+    "command": "python scripts/verify_phase1b1.py --evaluation-dir outputs/evaluations/phase1b1-smoke-20260806T222402Z",
+    "result_against_real_authorized_bundle": "34/35 PASS, 1 FAIL (shadow_replay_provider_zero_pass -- genuine, see shadow_exact_replay_summary.json), 0 SKIP",
+    "verifier_bug_found_and_fixed_this_session": "no_secrets_or_hidden_reasoning used a naive case-insensitive substring match for 'sk-', which matched the common word 'risk-off' (financial term appearing throughout the real report text) and produced 6 false-positive offenders. This is the assistant's own new verifier script (not a frozen old-phase one), so it was fixed: replaced with a regex requiring 'sk-' followed by >=20 contiguous key-like characters (re.compile(r'sk-[A-Za-z0-9_-]{20,}')). Rerun after the fix: no_secrets_or_hidden_reasoning PASS, clean. No actual secret was ever present in any persisted artifact."
+  },
+  "ruff": "PASS on every new/modified file (structured_output_shadow_provider.py, structured_output_shadow_replay.py, week2_llm.py, llm_runtime/contracts.py, tests/structured_output_shadow/*, scripts/run_phase1b1_provider_smoke.py, scripts/verify_phase1b1.py)",
+  "guarded_full_offline_suite": {
+    "command": "COMQUTOR_WEEK2_LLM_ENABLED=false .venv/bin/python -m pytest -q -m \"not integration\"",
+    "phase1a_baseline": "2790 passed, 1 skipped, 47 deselected, 69 subtests passed, 0 failed",
+    "pre_real_smoke_result_this_session": "2791 passed, 1 skipped, 47 deselected, 69 subtests passed, 3 failed, 38 errors",
+    "post_real_smoke_result_this_session": "2791 passed, 1 skipped, 47 deselected, 69 subtests passed, 3 failed, 38 errors (314.18s) -- node-ID-identical to the pre-real-smoke run: same 3 FAILED node IDs (test_current_semantic_components_match_phase1a_start, test_manifest_counts_hash_and_fallback_closes_exact_readiness, test_only_phase0_6b_integration_points_import_runtime) and the same 38 ERROR node IDs under tests/replay/. Zero new node IDs, zero new root causes.",
+    "new_test_count_added_this_session": 42,
+    "classification": {
+      "A_NEW_UNEXPLAINED_FAILURE": [],
+      "B_EXPECTED_RETROSPECTIVE_SCOPE_FAILURE": "all 41 items (3 failed + 38 errored) -- see forward_scope_failures below",
+      "C_REAL_PROVIDER_SMOKE_FAILURE": [],
+      "D_UNRELATED_PREEXISTING_FAILURE": []
+    }
+  },
+  "forward_scope_failures": {
+    "summary": "Every one of the 3 failed + 38 errored pytest items (41 total, across 4 files) traces to exactly 3 distinct root causes, all of which are frozen-exact-baseline assertions written in earlier phases (0.6A, 0.6B, 1A) that predate -- and cannot anticipate -- this phase's own explicitly-authorized additive changes. None are unexplained regressions or defects. None were fixed by editing the old test/verifier, per the task's explicit instruction not to modify old verifiers to force them green.",
+    "root_cause_1": {
+      "test": "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_phase1a_start",
+      "cause": "Hardcodes week2_llm.py's exact sha256 from Phase 1A's start. This phase's authorized invoke_prebuilt_json_prompt() addition (Task section 4) changes that hash by design.",
+      "affected_tests": 1
+    },
+    "root_cause_2": {
+      "test": "tests/llm_runtime/test_no_production_importers.py::test_only_phase0_6b_integration_points_import_runtime",
+      "cause": "Hardcodes the exact list of files allowed to import comqutor_alpha.llm_runtime (2 files, from Phase 0.6B). This phase's two new, explicitly-authorized files (structured_output_shadow_provider.py, structured_output_shadow_replay.py) are new, expected importers.",
+      "affected_tests": 1
+    },
+    "root_cause_3": {
+      "test_1": "tests/llm_runtime/test_manifest.py::test_manifest_counts_hash_and_fallback_closes_exact_readiness",
+      "shared_fixture": "tests/replay/conftest.py:169 (consumed by 38 tests in tests/replay/test_semantic_call_artifact_binding.py and tests/replay/test_semantic_source_bundle_validation.py, reported by pytest as ERROR since the fixture itself raises)",
+      "cause": "Hardcodes manifest['tasks'] as an exact 3-key dict. build_semantic_manifest's own frozen, unmodified contract (comqutor_alpha/llm_runtime/manifest.py, untouched this session) already zero-fills EVERY registered SEMANTIC_TASKS entry by design (dict.fromkeys(sorted(SEMANTIC_TASKS), 0)) -- this behavior predates and is unrelated to this phase. Adding 'structured_claim_shadow' to SEMANTIC_TASKS (Task section 4, explicitly authorized) correctly and automatically produces a 4th zero-filled key, which these two pre-existing exact-equality assertions were never written to expect.",
+      "affected_tests": 39
+    },
+    "total_affected": 41,
+    "why_not_fixed": "Task instructions: '旧Phase verifier出现forward-scope failure时：如实记录. 不得修改旧verifier使其变绿.' Applied consistently to every pre-existing test/fixture asserting a frozen exact baseline that this phase's own explicitly-authorized changes legitimately extend.",
+    "why_not_a_regression": "In every case the underlying production code (manifest.py's task-counting logic, the importer-boundary concept, week2_llm.py's three existing tasks) is unchanged and still behaves correctly -- verified directly by tests/structured_output_shadow/test_shadow_semantic_runtime.py::test_existing_three_task_prompt_identity_unaffected_by_new_task and tests/phase1b1_boundaries.py::test_existing_three_task_instructions_text_unchanged, both passing."
+  },
+  "net_new_failures_beyond_explained_forward_scope": 0
+}

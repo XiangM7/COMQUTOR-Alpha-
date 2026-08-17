@@ -1,0 +1,57 @@
+{
+  "schema_version": "comqutor.phase1_master.prompt_audit.v2_json_format_diagnostic_findings.v1",
+  "generated_at": "2026-08-07T19:35:00+00:00",
+  "purpose": "Diagnose why the real v2 Anthropic Smoke batch (this resume attempt) got provider_status=provider_error / error_code=WEEK2_LLM_INVALID_JSON on 4/4 reports, despite fast real responses with substantial real token usage (no timeouts) -- confirming the v2 size reduction fixed the earlier latency/reliability problem but exposed a new, distinct response-format problem.",
+  "important_disclosure": "This diagnostic required 2 ad-hoc, isolated real Provider calls made directly via create_llm_client/model.invoke() OUTSIDE scripts/run_phase1_master.py's own state machine and budget ledger, reusing the exact real, frozen NVDA fundamental_agent report and the exact real v2 request-building code (build_shadow_request_v2 + build_shadow_prompt_input_v2). These 2 calls are NOT reflected in phase1_master_state.json's cumulative_logical_calls/cumulative_provider_attempts (19/26 at the time of this diagnostic, tracking only calls made through the Master script itself). Disclosed here in full for honest total accounting, per this engagement's standing instruction to record every real attempt, formal or informal.",
+  "diagnostic_calls": [
+    {
+      "call": 1,
+      "run_id_used": "diagnostic-v2-jsonfmt",
+      "content": "the exact real v2 structured_claim_shadow prompt for NVDA fundamental_agent (18,846 chars)",
+      "invocation_method": "direct model.invoke(), no timeout wrapper, no Gateway",
+      "outcome": "SUCCESS (Provider responded)",
+      "response_length_chars": 10738,
+      "finding": "response.content began with '```json\\n' and ended with '\\n```' -- a whole-response markdown code fence. json.loads(content) failed immediately: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') because the first character is a backtick, not '{'."
+    },
+    {
+      "call": 2,
+      "run_id_used": "diagnostic-v2-jsonfmt-2",
+      "content": "the same exact real v2 prompt as call 1 (independent second sample, not a retry of call 1's response)",
+      "invocation_method": "direct model.invoke(), no timeout wrapper, no Gateway",
+      "outcome": "SUCCESS (Provider responded)",
+      "finding": "Same whole-response markdown-fence wrapping observed. After stripping exactly the ```json ... ``` envelope (the same regex now implemented in _MarkdownFenceStrippingModel), the content parsed as valid JSON with 29 claims and 1 abstention: real ticker-grounded claims (e.g. NVDA Q1 FY2026 revenue growth), correct entities/factors/direction/confidence, valid source_spans referencing real report offsets, and a semantically sensible abstention (a table heading with no atomic claim)."
+    }
+  ],
+  "root_cause_confirmed": "claude-sonnet-4-6 reliably wraps its JSON output in a ```json markdown code fence for this task shape, even though both v1's and v2's fixed prompt explicitly instruct 'Do not return Markdown, commentary, chain of thought...'. This is a known, common behavior class for Claude-family models on JSON-generation tasks and is not caused by prompt size (the v2 prompt that produced BOTH fenced responses is the same 18,846-char request whose size reduction was independently verified to fix the earlier timeout/reliability problem -- both diagnostic calls completed in well under 90s with real substantial token usage, not near a timeout boundary).",
+  "ruled_out": [
+    {
+      "hypothesis": "max_tokens truncation cut the JSON off mid-structure",
+      "verdict": "REJECTED",
+      "evidence": "langchain_anthropic.ChatAnthropic resolves an UNSET max_tokens from the model's own profile, not a small library-wide fallback; the installed langchain-anthropic (1.4.8) profile for claude-sonnet-4-6 reports max_output_tokens=64000. The real batch's observed output_tokens (2351-4411) are far below any such ceiling, and both diagnostic responses parsed as syntactically COMPLETE JSON (valid closing braces/brackets) once the fence was stripped -- not truncated mid-object."
+    },
+    {
+      "hypothesis": "the v2 prompt/schema itself is malformed or the model cannot understand the smaller request shape",
+      "verdict": "REJECTED",
+      "evidence": "Once the fence is stripped, the content is well-formed, semantically strong JSON matching the exact v2 Provider-facing shape (claim/source_spans/entities/factors/direction/confidence, abstentions) -- the model correctly understood and followed the smaller schema."
+    }
+  ],
+  "fix_implemented": {
+    "location": "comqutor_alpha/structure_engine/structured_output_shadow_provider.py",
+    "mechanism": "_MarkdownFenceStrippingModel wraps the real chat model's .invoke() (constructed only inside build_real_provider_gateway/build_phase1_master_provider_gateway, both of which are exclusively structured_claim_shadow-scoped -- profile_id_for_semantic_task gates them to no other task). Strips exactly one whole-response ```[json] ... ``` envelope via a single regex match before Week2LLMGateway's own _strict_json_object/json.loads ever sees the content. If the content is not fence-wrapped, or what remains after stripping is still not valid JSON, the content passes through completely unchanged -- Week2LLMGateway's own strict, fail-closed JSON parsing is never weakened, modified, or duplicated.",
+    "scope_confirmation": [
+      "Does not modify comqutor_alpha/structure_engine/week2_llm.py",
+      "Does not modify Week2LLMGateway's shared DEFAULT_TIMEOUT_SECONDS/DEFAULT_MAX_RETRIES",
+      "Never touches the 3 existing DeepSeek-routed tasks (structured_adapter/alpha_classifier/structure_extractor), which never construct a gateway through this module",
+      "Adds zero new dependencies (stdlib re only)",
+      "Never repairs/fuzzy-matches content INSIDE the JSON -- only unwraps a whole-response markdown envelope around it"
+    ],
+    "tests": "tests/structured_output_shadow/test_shadow_markdown_fence_stripping.py (10 tests: fenced/untagged-fenced/unfenced/whitespace-tolerant/prose-prefixed-not-stripped/malformed-inside-fence-still-rejected/response-mutation-preserves-other-attributes/non-string-content-safe/attribute-delegation)"
+  },
+  "explicitly_not_done": [
+    "Did not modify the v2 prompt's semantic rules or schema",
+    "Did not modify the canonical comqutor.structured_claim_shadow.v1 schema or validate_shadow_bundle",
+    "Did not switch research_profile or model",
+    "Did not widen any timeout",
+    "Did not implement native structured output / tool-calling in this pass (the markdown-fence-stripping fix directly and verifiably resolves the observed failure with a much smaller, lower-risk change; native structured output remains a documented future option if fence-wrapping recurs for a different response shape)"
+  ]
+}

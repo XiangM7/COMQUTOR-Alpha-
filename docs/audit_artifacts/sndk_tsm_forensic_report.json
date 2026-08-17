@@ -1,0 +1,70 @@
+{
+  "schema_version": "sprint1.sndk_tsm_forensic_report.v1",
+  "generated_at": "2026-08-04",
+  "question": "SNDK 页面曾出现 'TSM Revenue Growth' 的问题",
+  "runs_inspected": [
+    {
+      "ticker": "SNDK",
+      "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "source": "outputs/runs",
+      "artifact_grep_for_TSM_hits": 0
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "8d21c047-fc0a-4d94-957d-3787f353a544",
+      "source": "outputs/runs",
+      "artifact_grep_for_TSM_hits": 0
+    },
+    {
+      "ticker": "TSM",
+      "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "source": "outputs/runs",
+      "note": "real run legitimately contains a 'TSM Revenue Growth' graph node"
+    }
+  ],
+  "artifact_level_findings": {
+    "sndk_run_183b04dd_grep_TSM": {
+      "structured_agent_outputs.json": 0,
+      "alpha_matches.json": 0,
+      "structure_graph.json": 0,
+      "raw_agent_outputs.json": 0,
+      "extracted_structures.json": 0,
+      "run_audit.json": 0
+    },
+    "sndk_run_8d21c047_grep_TSM": {
+      "structured_agent_outputs.json": 0,
+      "alpha_matches.json": 0,
+      "structure_graph.json": 0,
+      "raw_agent_outputs.json": 0,
+      "extracted_structures.json": 0
+    },
+    "conclusion": "Zero occurrences of the string 'TSM' in any artifact belonging to either real, on-disk SNDK run. Re-confirmed via a fresh Architecture Replay of both SNDK source runs and a full Ticker Consistency Audit: ticker_consistency=pass, inconsistencies=0, foreign_entity_findings with actual_ticker=TSM=0 for both."
+  },
+  "node_label_mechanism": {
+    "source_file": "comqutor_alpha/structure_engine/structure_extractor.py:60-61",
+    "code": "if factor == 'Revenue Growth' and ticker: return f'{str(ticker).upper()} Revenue Growth'",
+    "explanation": "Every ticker's own Structure Graph legitimately labels its 'Revenue Growth' factor node with that run's own ticker prefix -- confirmed on the real TSM run (1a338ced-118e-44d2-b3f6-2444bfb9d7e6), whose graph genuinely contains a node labeled 'TSM Revenue Growth' (id=tsm_revenue_growth). This is by-design, deterministic, per-run behavior, not a data quality defect -- the label 'TSM Revenue Growth' is only ever produced inside a run whose own ticker is TSM."
+  },
+  "frontend_investigation": {
+    "file": "frontend/src/pages/StructureGraphPage.tsx",
+    "defect_found": true,
+    "defect_description": "useGraphAndConflicts's fetch effect correctly depended on [runId, reloadToken] and used an AbortController to cancel superseded requests (so a stale response could never overwrite newer state) -- but it never cleared `graph`/`conflicts` React state when `runId` changed. Combined with the render guard `isLoading && !graph`, switching from one run to another (e.g. a TSM run to a SNDK run) via client-side navigation continued rendering the PREVIOUS run's full Structure Graph -- including its own ticker-labeled node names such as 'TSM Revenue Growth' -- for the entire loading window of the newly-selected run.",
+    "reproduced": true,
+    "reproduction_method": "New test: 'never continues to display a previous run's graph while the newly-selected run is still loading' in frontend/src/pages/StructureGraphPage.test.tsx -- fails against the pre-fix code, passes after the fix.",
+    "fix_applied": "1) Clear graph/conflicts state immediately on runId change, before the new fetch starts. 2) Added a defensive check: if the fetched payload's own embedded run_id disagrees with the currently-selected runId, show a 'Data Integrity Warning' and refuse to render, rather than ever silently mixing runs.",
+    "regression_tests_added": 4
+  },
+  "verdict": [
+    "FRONTEND_STALE_CACHE",
+    "LEGITIMATE_PEER_COMPARISON"
+  ],
+  "verdict_explanation": "A real, reproducible frontend defect (FRONTEND_STALE_CACHE) was found and fixed: switching from a TSM run to a SNDK run via client-side navigation could display the TSM run's Structure Graph -- including its 'TSM Revenue Growth' node label -- for the duration of the SNDK run's loading window. This is sufficient on its own to produce exactly the reported symptom. ARTIFACT_TICKER_MISMATCH and FOREIGN_TICKER_EVIDENCE_CONTAMINATION are explicitly RULED OUT: both real, on-disk SNDK runs (183b04dd-..., 8d21c047-...) were re-verified via a fresh Architecture Replay plus the full Ticker Consistency Audit and contain zero TSM-related artifact contamination. Separately, LEGITIMATE_PEER_COMPARISON is confirmed as the mechanism if 'TSM Revenue Growth' was instead seen while genuinely viewing the real TSM run (1a338ced-...) -- that run's own graph correctly and legitimately contains that node.",
+  "ruled_out": [
+    "ARTIFACT_TICKER_MISMATCH",
+    "FOREIGN_TICKER_EVIDENCE_CONTAMINATION",
+    "RUN_ID_LOOKUP_MIXUP (backend)"
+  ],
+  "not_applicable": [
+    "SCREENSHOT_OR_LABEL_MISUNDERSTANDING (cannot be confirmed or excluded without the original screenshot/session; not required given a real code-level cause was found and fixed)"
+  ]
+}

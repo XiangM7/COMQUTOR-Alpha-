@@ -86,16 +86,79 @@ function makeExposure(overrides: Partial<EntityExposure> = {}): EntityExposure {
 }
 
 describe("AlphaCard", () => {
-  it("shows draft shadow Entity Exposure components and would-block fields", () => {
+  it("shows draft shadow Entity Exposure components and would-block fields (legacy payload, no effective_status)", () => {
+    // makeExposure()'s default (mode: "shadow", no configured_status/
+    // effective_status) is deliberately shaped like a historical payload
+    // predating John's B3 lifecycle fields -- the card must fall back to
+    // the legacy `mode` field and label it correctly, never crash (task
+    // section 9/24).
     renderCard({ activation: makeActivation({ entity_exposure: makeExposure() }) });
     expect(screen.getByText("Entity Exposure").closest("div")?.textContent).toContain("0.785");
-    expect(screen.getByText("Draft seed — pending product-owner approval")).toBeInTheDocument();
+    expect(
+      screen.getByText("Draft shadow — Displayed only — not applied to Activation")
+    ).toBeInTheDocument();
     expect(screen.getByText("Shadow only — Not applied to Activation")).toBeInTheDocument();
     expect(screen.getByText("Historical mapping").closest("div")?.textContent).toContain("0.950");
     expect(screen.getByText("Current evidence").closest("div")?.textContent).toContain("0.500");
     expect(screen.getByText("Agent confidence").closest("div")?.textContent).toContain("0.800");
     expect(screen.getByText("Would block dominant").closest("div")?.textContent).toContain("No");
     expect(screen.getByText("Would block regime level").closest("div")?.textContent).toContain("No");
+  });
+
+  it("shows Approved gating status and approver identity for a gated seed", () => {
+    renderCard({
+      activation: makeActivation({
+        entity_exposure: makeExposure({
+          configured_status: "approved_gating",
+          effective_status: "approved_gating",
+          seed_approval_status: "approved_gating",
+          mode: "enforced",
+          owner: "John",
+          approved_by: "John",
+          approved_at: "2026-08-11",
+        }),
+      }),
+    });
+    expect(
+      screen.getByText("Approved gating — Participates in qualification")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Approved by").closest("div")?.textContent).toContain("John");
+    expect(screen.getByText("Approved by").closest("div")?.textContent).toContain("2026-08-11");
+    // approved_gating must never show the shadow-only warning.
+    expect(screen.queryByText("Shadow only — Not applied to Activation")).not.toBeInTheDocument();
+  });
+
+  it("shows Disabled status for a disabled seed", () => {
+    renderCard({
+      activation: makeActivation({
+        entity_exposure: makeExposure({
+          configured_status: "disabled",
+          effective_status: "disabled",
+          mode: "off",
+        }),
+      }),
+    });
+    expect(screen.getByText("Disabled — Seed not participating")).toBeInTheDocument();
+  });
+
+  it("shows the fail-closed gating-downgraded warning with the backend's own reason codes, never re-derived", () => {
+    renderCard({
+      activation: makeActivation({
+        entity_exposure: makeExposure({
+          configured_status: "approved_gating",
+          effective_status: "draft_shadow",
+          mode: "shadow",
+          reason_codes: ["APPROVAL_METADATA_INCOMPLETE", "GATING_NOT_ALLOWED"],
+        }),
+      }),
+    });
+    expect(
+      screen.getByText("Draft shadow — Displayed only — not applied to Activation")
+    ).toBeInTheDocument();
+    const downgradeRow = screen.getByText("Gating downgraded").closest("div");
+    expect(downgradeRow?.textContent).toContain("Approved gating");
+    expect(downgradeRow?.textContent).toContain("APPROVAL_METADATA_INCOMPLETE");
+    expect(downgradeRow?.textContent).toContain("GATING_NOT_ALLOWED");
   });
 
   it("shows an explicit missing-seed fallback", () => {
@@ -306,5 +369,69 @@ describe("AlphaCard", () => {
     expect(screen.getByText("run1:news_agent:news_report:claim:1")).toBeInTheDocument();
     // Supporting agents surfaced from evidence provenance.
     expect(screen.getByText("news_agent")).toBeInTheDocument();
+  });
+
+  // B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT).
+  it("shows target level, blocked-from, and canonical blocked reason for a blocked alpha", () => {
+    renderCard({
+      status: "active",
+      activation: makeActivation({
+        status: "active",
+        target_level: "dominant",
+        qualified_level: "active",
+        is_blocked: true,
+        blocked_from: ["dominant"],
+        blocked_reason_codes: ["NO_LOCAL_STRUCTURE_SUPPORT"],
+        diagnostic_reason_codes: ["NO_LOCAL_STRUCTURE_SUPPORT"],
+        classification_version: "b4.alpha_level.v1",
+      }),
+    });
+    expect(screen.getByText("Target level").closest("div")?.textContent).toContain("dominant");
+    const blockedRow = screen.getByText("Blocked").closest("div");
+    expect(blockedRow?.textContent).toContain("active");
+    expect(blockedRow?.textContent).toContain("dominant");
+    // Canonical reason rendered with friendly text, not the raw code alone.
+    expect(blockedRow?.textContent).toContain("No supporting Structure Graph edges");
+    // Raw diagnostic detail is present but collapsed behind a <details>.
+    expect(screen.getByText("Full diagnostic detail")).toBeInTheDocument();
+  });
+
+  it("never shows a Blocked row for a qualified (non-blocked) alpha", () => {
+    renderCard({
+      status: "dominant",
+      activation: makeActivation({
+        status: "dominant",
+        target_level: "dominant",
+        qualified_level: "dominant",
+        is_blocked: false,
+        blocked_from: [],
+        blocked_reason_codes: [],
+        diagnostic_reason_codes: [],
+        classification_version: "b4.alpha_level.v1",
+      }),
+    });
+    expect(screen.queryByText("Blocked")).not.toBeInTheDocument();
+    // target_level == qualified_level here, so the Target level row (only
+    // shown when the two diverge) must not render either.
+    expect(screen.queryByText("Target level")).not.toBeInTheDocument();
+  });
+
+  it("falls back to a legacy-classification note for a historical payload predating B4", () => {
+    // makeActivation()'s own defaults never set target_level/
+    // qualified_level -- exactly a payload saved before task
+    // B4_ACTIVATION_LEVEL_ALIGNMENT shipped. Must not crash, must not
+    // fabricate a level, must label it explicitly.
+    renderCard({ status: "active", activation: makeActivation() });
+    expect(
+      screen.getByText("Legacy classification — this run predates the B4 alpha-level classifier")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Blocked")).not.toBeInTheDocument();
+  });
+
+  it("renders nothing B4-specific when no activation entry is supplied at all", () => {
+    renderCard({ status: "active", activation: null });
+    expect(screen.queryByText("Legacy classification — this run predates the B4 alpha-level classifier")).not.toBeInTheDocument();
+    expect(screen.queryByText("Blocked")).not.toBeInTheDocument();
+    expect(screen.queryByText("Target level")).not.toBeInTheDocument();
   });
 });

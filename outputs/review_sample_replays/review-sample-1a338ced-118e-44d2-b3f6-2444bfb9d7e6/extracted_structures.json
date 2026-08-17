@@ -1,0 +1,997 @@
+{
+  "schema_version": "week2.extracted_structures.v2",
+  "run_id": "review-sample-1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+  "ticker": "TSM",
+  "nodes": [
+    {
+      "id": "ai_capex",
+      "label": "AI CapEx",
+      "canonical_factor": "AI CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:10",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:44",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:55",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:63",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:119",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:91",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:research_manager:investment_plan:claim:4",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:trader:trader_investment_plan:claim:2",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:portfolio_manager:final_trade_decision:claim:7",
+        "canrel_6cef4f268382d8a0",
+        "canrel_2058e2abc3db47f3",
+        "canrel_bc999717f36666e7",
+        "canrel_9a314b579d1039e8",
+        "canrel_88b79359c57d06d5"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:10",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:44",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:55",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:63",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:119",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:91",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:research_manager:investment_plan:claim:4",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:trader:trader_investment_plan:claim:2",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:portfolio_manager:final_trade_decision:claim:7",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:15",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:35",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:46"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:research_manager:investment_plan",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:trader:trader_investment_plan",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:portfolio_manager:final_trade_decision",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "Amazon gained 15% on strong earnings, spending $220B+ AI capex",
+        "Massive AI Capex: Amazon is spending $220B+ in AI capex this year and gained 15% on strong earnings.",
+        "Bullish drivers: Record earnings, $2T market cap at 20x forward earnings (reasonable multiple), massive AI capex from hyperscalers (Amazon $220B+), Morgan Stanley's dip-buying call, low US recession probability (8%), low Taiwan invasion probability (4%), and the $100B Arizona reshoring investment.",
+        "Net assessment: The fundamental AI demand story for TSM remains intact and is supported by record earnings and massive hyperscaler capex.",
+        "Theme: AI Capex; Signal: Amazon $220B+; MSFT/AMZN strong; Evidence: 24/7 Wall St., ETF Trends; Implication for TSM: Supports advanced-node demand",
+        "Semiconductor Cycle: After the 2023 downcycle, TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "The Growth is Real: AI capex is exploding, and TSM's capacity is sold out.",
+        "Any hiccup—a slowdown in AI capex, a loss of Apple business, a geopolitical scare—will result in a significant de-rating.",
+        "Revenue is up 36% and net income up 77% over six quarters, capacity is sold out, and hyperscaler capex (Amazon alone at $220B+) is exploding.",
+        "The bull case is compelling on fundamentals: TSM is the sole leading-edge 3nm manufacturer ramping 2nm, with 67%+ gross margins, 40% ROE, revenue up 36% and net income up 77% over six quarters, sold-out capacity, and exploding hyperscaler capex (Amazon alone at $220B+).",
+        "The Aggressive Analyst is correct that TSM is the monopoly bottleneck of the AI revolution: sole leading-edge 3nm manufacturer ramping 2nm, revenue up 36% and net income up 77% over six quarters, sold-out capacity through 2026, and hyperscaler capex exploding (Amazon alone at $220B+).",
+        "The fundamental AI demand story for TSM remains intact and is supported by record earnings and massive hyperscaler capex.",
+        "TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "This capital is not evaporating; it is being converted into orders for advanced chips — chips that only TSM can manufacture at scale.",
+        "The AI demand story is not dependent on a single customer; it is a tidal wave of hyperscaler capex, with Amazon alone spending $220B+."
+      ],
+      "score": 0.9
+    },
+    {
+      "id": "ai_demand",
+      "label": "AI Demand",
+      "canonical_factor": "AI Demand",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:20",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:47",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:61",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:48",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:27",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:52",
+        "canrel_167b2f3ea08d3a56",
+        "canrel_11421283e8eb7a75"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:20",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:47",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:61",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:48",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:27",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:52",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:63",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:34"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "evidence": [
+        "Overall news tone: Mildly Bullish, anchored on valuation reasonableness, Arizona capex, and AI demand, with a few notable contrarian/risk threads.",
+        "AI demand / capacity expansion: The single strongest recurring theme across both news and StockTwits — TSM's 3nm capacity hitting 180k wafers/month, 2nm ramping, and NVDA/AMD/AVGO locking in supply.",
+        "Signal: AI demand / capacity expansion; Direction: Bullish; Source: News + StockTwits; Supporting Evidence: 3nm → 180k wafers/mo, 2nm ramp, NVDA/AMD/AVGO securing supply",
+        "Nvidia: Data center sales make up 92% of Nvidia's revenue — the AI demand engine feeding TSM's advanced-node orders remains robust.",
+        "Net assessment: The fundamental AI demand story for TSM remains intact and is supported by record earnings and massive hyperscaler capex.",
+        "Net income in 2025 grew 47% year-over-year, driven by AI demand for advanced nodes.",
+        "Semiconductor Cyclicality: The industry is inherently cyclical; a downturn in AI demand or a broader economic slowdown could compress earnings.",
+        "This isn't a cyclical peak; this is a structural shift in profitability driven by AI demand for leading-edge nodes.",
+        "The surge in revenue and margins directly correlates with AI-driven demand for leading-edge nodes.",
+        "TSM’s capacity is sold out through 2026, with NVIDIA, AMD, and Broadcom aggressively securing 3nm and 2nm wafers."
+      ],
+      "score": 0.8
+    },
+    {
+      "id": "ai_infrastructure",
+      "label": "AI Infrastructure",
+      "canonical_factor": "AI Infrastructure",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:6",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:46",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:93",
+        "canrel_e3137df9fa69ed9c",
+        "canrel_57c0572e12231fd7"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:6",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:46",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:93",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:21",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:76"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "Morgan Stanley says buy the AI infrastructure dip",
+        "AI Infrastructure Dip-Buying: Morgan Stanley explicitly recommends buying the AI infrastructure dip, citing a major remaining opportunity.",
+        "Semiconductor Cycle: After the 2023 downcycle, TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "Bull: \"But the AI infrastructure buildout is a multi-trillion-dollar cycle.",
+        "TSM is a core beneficiary of the AI infrastructure buildout",
+        "The AI infrastructure buildout is a multi-year, multi-trillion-dollar cycle, and TSM is the toll booth on the information superhighway."
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "datacenter_capex",
+      "label": "Datacenter CapEx",
+      "canonical_factor": "Datacenter CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "canrel_4ea0bc23922ba323",
+        "canrel_9255c10258d6ef86"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:61"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "Semiconductor Cycle: After the 2023 downcycle, TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "The macro environment is not signaling a demand collapse; it's signaling continued growth."
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "narrative_momentum",
+      "label": "Narrative Momentum",
+      "canonical_factor": "Narrative Momentum",
+      "node_type": "factor",
+      "source_records": [
+        "canrel_5178b6d568804d88",
+        "canrel_aa8b7e89608809ac",
+        "canrel_decddf569c53b5a7",
+        "canrel_b45f337b393bd4a8"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:56",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:72",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:16",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:56"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "evidence": [
+        "AI-anxiety sector pullback entering August, China-competition fears",
+        "\"AI anxiety\" is a sentiment indicator, not a fundamental one.",
+        "When the market starts questioning the AI trade's invincibility, the highest-flying names—like TSM—get hit the hardest.",
+        "When retail is uniformly bullish and institutions are hedging, it often signals that the easy money has been made."
+      ],
+      "score": 0.7
+    },
+    {
+      "id": "rate_cut_cycle",
+      "label": "Rate Cut Cycle",
+      "canonical_factor": "Rate Cut Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:34",
+        "canrel_1ce6bf64eb8b5daf",
+        "canrel_0bdf973af1f74bcf",
+        "canrel_d995461f38289888",
+        "canrel_214688f16569378e"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:34",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:22",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:40",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:31"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "This is a hawkish backdrop — no easing cycle is expected, which keeps discount rates elevated and is a mild headwind for high-multiple growth names.",
+        "High interest rates keep discount rates elevated, which puts downward pressure on the valuations of long-duration growth assets like TSM.",
+        "The 89% probability of no rate cuts in 2026 means the risk-free rate stays elevated, which increases the discount rate applied to TSM's future cash flows. This directly compresses the multiple investors are willing to pay."
+      ],
+      "score": 0.8
+    },
+    {
+      "id": "recession_risk",
+      "label": "Recession Risk",
+      "canonical_factor": "Recession Risk",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:58",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:38",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+        "canrel_007e37387202d3ba"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:58",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:38",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:37"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "Macro headwinds: KOSPI selloff, Japan intervention, BOJ hawkishness, potential recession risk.",
+        "Japan recession risk jumped to 34% (+25pp), and UK at 16% — regional divergence, but the US core remains resilient.",
+        "Semiconductor Cyclicality: The industry is inherently cyclical; a downturn in AI demand or a broader economic slowdown could compress earnings.",
+        "The macro backdrop is not signaling imminent contraction, which supports cyclical/semis demand."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "semiconductor_cycle",
+      "label": "Semiconductor Cycle",
+      "canonical_factor": "Semiconductor Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "canrel_007e37387202d3ba",
+        "canrel_5178b6d568804d88",
+        "canrel_2058e2abc3db47f3",
+        "canrel_9255c10258d6ef86",
+        "canrel_aa8b7e89608809ac",
+        "canrel_decddf569c53b5a7",
+        "canrel_b45f337b393bd4a8"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:37",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:56",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:61",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:72",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:16",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:56"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "evidence": [
+        "Semiconductor Cycle: After the 2023 downcycle, TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "The macro backdrop is not signaling imminent contraction, which supports cyclical/semis demand.",
+        "AI-anxiety sector pullback entering August, China-competition fears",
+        "TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "The macro environment is not signaling a demand collapse; it's signaling continued growth.",
+        "\"AI anxiety\" is a sentiment indicator, not a fundamental one.",
+        "When the market starts questioning the AI trade's invincibility, the highest-flying names—like TSM—get hit the hardest.",
+        "When retail is uniformly bullish and institutions are hedging, it often signals that the easy money has been made."
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "tsm_revenue_growth",
+      "label": "TSM Revenue Growth",
+      "canonical_factor": "Revenue Growth",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:7",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:15",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:71",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:83",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:19",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:130",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:16",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:49",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:42",
+        "canrel_6cef4f268382d8a0",
+        "canrel_e3137df9fa69ed9c",
+        "canrel_167b2f3ea08d3a56",
+        "canrel_4ea0bc23922ba323",
+        "canrel_0d036dfffb6e3b75",
+        "canrel_bc999717f36666e7",
+        "canrel_57c0572e12231fd7",
+        "canrel_9a314b579d1039e8",
+        "canrel_11421283e8eb7a75",
+        "canrel_6c541901ef9c3985",
+        "canrel_88b79359c57d06d5"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:7",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:15",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:71",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:83",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:19",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:130",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:16",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:49",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:42",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:21",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:63",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:67",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:15",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:76",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:35",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:34",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:8",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:46"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "evidence": [
+        "Intel up 302% over past year, strong revenue growth",
+        "Revenue growth is accelerating.",
+        "TSM is exhibiting exceptional fundamental strength: accelerating revenue growth, expanding margins, record profitability, a fortress balance sheet, and robust free cash flow despite a massive capacity expansion program.",
+        "Metric: QoQ Revenue Growth; Value: 12% (Q2'26); Assessment: Strong",
+        "Revenue Acceleration is Unmistakable: Look at the quarterly numbers.",
+        "Metric: Revenue Growth (6Q); Value (2026-08-03): +36%; Bull Signal: Accelerating",
+        "TSM's revenue growth of 36% over six quarters is extraordinary, but it is also unprecedented.",
+        "If Apple even signals a willingness to dual-source, TSM's revenue growth narrative is immediately called into question.",
+        "The fundamental AI demand story for TSM remains intact and is supported by record earnings and massive hyperscaler capex.",
+        "TSM is a core beneficiary of the AI infrastructure buildout",
+        "The surge in revenue and margins directly correlates with AI-driven demand for leading-edge nodes.",
+        "TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+        "At 35x trailing earnings and 84x book value, the stock carries a rich valuation that leaves little room for disappointment.",
+        "This capital is not evaporating; it is being converted into orders for advanced chips — chips that only TSM can manufacture at scale.",
+        "The AI infrastructure buildout is a multi-year, multi-trillion-dollar cycle, and TSM is the toll booth on the information superhighway.",
+        "The AI demand story is not dependent on a single customer; it is a tidal wave of hyperscaler capex, with Amazon alone spending $220B+.",
+        "TSM’s capacity is sold out through 2026, with NVIDIA, AMD, and Broadcom aggressively securing 3nm and 2nm wafers.",
+        "The forward P/E of 18.6x and a PEG ratio of 0.98 tell you everything you need to know: the market is pricing in the earnings explosion that is already underway."
+      ],
+      "score": 0.9
+    },
+    {
+      "id": "valuation_risk",
+      "label": "Valuation Risk",
+      "canonical_factor": "Valuation Risk",
+      "node_type": "factor",
+      "source_records": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:59",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:67",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:56",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:research_manager:investment_plan:claim:16",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:41",
+        "canrel_1ce6bf64eb8b5daf",
+        "canrel_0d036dfffb6e3b75",
+        "canrel_0bdf973af1f74bcf",
+        "canrel_6c541901ef9c3985",
+        "canrel_d995461f38289888",
+        "canrel_214688f16569378e"
+      ],
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:59",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:67",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:56",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:research_manager:investment_plan:claim:16",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:41",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:34",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:22",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:8",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:40",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:31"
+      ],
+      "source_agent_output_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:research_manager:investment_plan",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "Valuation risk if the 335% run has priced in expectations (though sources call it reasonable).",
+        "Valuation Risk: At 35x trailing earnings and 84x book value, the stock carries a rich valuation that leaves little room for disappointment.",
+        "The risk of a multiple compression is far greater than the potential for multiple expansion.",
+        "When the strongest arguments on both sides are this balanced — exceptional fundamentals versus a deteriorating technical picture and rich valuation — the disciplined call is to hold the position rather than add aggressively or exit.",
+        "The Aggressive Analyst is correct that TSM is profitable, but that does not immunize it from multiple compression.",
+        "This is a hawkish backdrop — no easing cycle is expected, which keeps discount rates elevated and is a mild headwind for high-multiple growth names.",
+        "At 35x trailing earnings and 84x book value, the stock carries a rich valuation that leaves little room for disappointment.",
+        "High interest rates keep discount rates elevated, which puts downward pressure on the valuations of long-duration growth assets like TSM.",
+        "The forward P/E of 18.6x and a PEG ratio of 0.98 tell you everything you need to know: the market is pricing in the earnings explosion that is already underway.",
+        "The 89% probability of no rate cuts in 2026 means the risk-free rate stays elevated, which increases the discount rate applied to TSM's future cash flows. This directly compresses the multiple investors are willing to pay."
+      ],
+      "score": 0.8
+    }
+  ],
+  "edges": [
+    {
+      "source": "ai_capex",
+      "target": "semiconductor_cycle",
+      "source_label": "AI CapEx",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "causal",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives Semiconductor Cycle.",
+      "source_record_id": "canrel_2058e2abc3db47f3",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65"
+      ],
+      "relation_id": "canrel_2058e2abc3db47f3",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+      "evidence": "TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.9,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives Revenue Growth.",
+      "source_record_id": "canrel_9a314b579d1039e8",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:35"
+      ],
+      "relation_id": "canrel_9a314b579d1039e8",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "The AI demand story is not dependent on a single customer; it is a tidal wave of hyperscaler capex, with Amazon alone spending $220B+.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.85,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives Revenue Growth.",
+      "source_record_id": "canrel_bc999717f36666e7",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:15"
+      ],
+      "relation_id": "canrel_bc999717f36666e7",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "This capital is not evaporating; it is being converted into orders for advanced chips — chips that only TSM can manufacture at scale.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_demand",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI Demand",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Demand drives Revenue Growth.",
+      "source_record_id": "canrel_167b2f3ea08d3a56",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:63"
+      ],
+      "relation_id": "canrel_167b2f3ea08d3a56",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+      "evidence": "The surge in revenue and margins directly correlates with AI-driven demand for leading-edge nodes.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "semiconductor_cycle",
+      "source_label": "Narrative Momentum",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.5,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_5178b6d568804d88",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:56"
+      ],
+      "relation_id": "canrel_5178b6d568804d88",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+      "evidence": "AI-anxiety sector pullback entering August, China-competition fears",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "semiconductor_cycle",
+      "source_label": "Narrative Momentum",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_aa8b7e89608809ac",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:72"
+      ],
+      "relation_id": "canrel_aa8b7e89608809ac",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "\"AI anxiety\" is a sentiment indicator, not a fundamental one.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "semiconductor_cycle",
+      "source_label": "Narrative Momentum",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_b45f337b393bd4a8",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:56"
+      ],
+      "relation_id": "canrel_b45f337b393bd4a8",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "When retail is uniformly bullish and institutions are hedging, it often signals that the easy money has been made.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "semiconductor_cycle",
+      "source_label": "Narrative Momentum",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_decddf569c53b5a7",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:16"
+      ],
+      "relation_id": "canrel_decddf569c53b5a7",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "When the market starts questioning the AI trade's invincibility, the highest-flying names—like TSM—get hit the hardest.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "conflicting",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle conflicts with Valuation Risk.",
+      "source_record_id": "canrel_0bdf973af1f74bcf",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:22"
+      ],
+      "relation_id": "canrel_0bdf973af1f74bcf",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "High interest rates keep discount rates elevated, which puts downward pressure on the valuations of long-duration growth assets like TSM.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle conflicts with Valuation Risk.",
+      "source_record_id": "canrel_1ce6bf64eb8b5daf",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:34"
+      ],
+      "relation_id": "canrel_1ce6bf64eb8b5daf",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+      "evidence": "This is a hawkish backdrop — no easing cycle is expected, which keeps discount rates elevated and is a mild headwind for high-multiple growth names.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "conflicting",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle conflicts with Valuation Risk.",
+      "source_record_id": "canrel_214688f16569378e",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:31"
+      ],
+      "relation_id": "canrel_214688f16569378e",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "The 89% probability of no rate cuts in 2026 means the risk-free rate stays elevated, which increases the discount rate applied to TSM's future cash flows. This directly compresses the multiple investors are willing to pay.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "conflicting",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle conflicts with Valuation Risk.",
+      "source_record_id": "canrel_d995461f38289888",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:40"
+      ],
+      "relation_id": "canrel_d995461f38289888",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "The 89% probability of no rate cuts in 2026 means the risk-free rate stays elevated, which increases the discount rate applied to TSM's future cash flows. This directly compresses the multiple investors are willing to pay.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "semiconductor_cycle",
+      "source_label": "Recession Risk",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_007e37387202d3ba",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:37"
+      ],
+      "relation_id": "canrel_007e37387202d3ba",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+      "evidence": "The macro backdrop is not signaling imminent contraction, which supports cyclical/semis demand.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "tsm_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_0d036dfffb6e3b75",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:67"
+      ],
+      "relation_id": "canrel_0d036dfffb6e3b75",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+      "evidence": "At 35x trailing earnings and 84x book value, the stock carries a rich valuation that leaves little room for disappointment.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "tsm_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_6c541901ef9c3985",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:8"
+      ],
+      "relation_id": "canrel_6c541901ef9c3985",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "The forward P/E of 18.6x and a PEG ratio of 0.98 tell you everything you need to know: the market is pricing in the earnings explosion that is already underway.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "ai_demand",
+      "source_label": "AI CapEx",
+      "target_label": "AI Demand",
+      "edge_type": "supportive",
+      "confidence": 0.68,
+      "rule_name": "reverse_passive_relation",
+      "reason": "The claim states an asserted passive supportive relation.",
+      "assertion_status": "asserted",
+      "source_claim": "Net assessment: The fundamental AI demand story for TSM remains intact and is supported by record earnings and massive hyperscaler capex.",
+      "source_record_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+      "evidence": "Net assessment: The fundamental AI demand story for TSM remains intact and is supported by record earnings and massive hyperscaler capex.",
+      "extraction_method": "deterministic_rules"
+    },
+    {
+      "source": "ai_capex",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx supports Revenue Growth.",
+      "source_record_id": "canrel_6cef4f268382d8a0",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:57"
+      ],
+      "relation_id": "canrel_6cef4f268382d8a0",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+      "evidence": "The fundamental AI demand story for TSM remains intact and is supported by record earnings and massive hyperscaler capex.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_capex",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI CapEx",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx supports Revenue Growth.",
+      "source_record_id": "canrel_88b79359c57d06d5",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:46"
+      ],
+      "relation_id": "canrel_88b79359c57d06d5",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "The AI demand story is not dependent on a single customer; it is a tidal wave of hyperscaler capex, with Amazon alone spending $220B+.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_demand",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI Demand",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Demand supports Revenue Growth.",
+      "source_record_id": "canrel_11421283e8eb7a75",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:34"
+      ],
+      "relation_id": "canrel_11421283e8eb7a75",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "TSM’s capacity is sold out through 2026, with NVIDIA, AMD, and Broadcom aggressively securing 3nm and 2nm wafers.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_infrastructure",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI Infrastructure",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.75,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Infrastructure supports Revenue Growth.",
+      "source_record_id": "canrel_57c0572e12231fd7",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:76"
+      ],
+      "relation_id": "canrel_57c0572e12231fd7",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "The AI infrastructure buildout is a multi-year, multi-trillion-dollar cycle, and TSM is the toll booth on the information superhighway.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_infrastructure",
+      "target": "tsm_revenue_growth",
+      "source_label": "AI Infrastructure",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Infrastructure supports Revenue Growth.",
+      "source_record_id": "canrel_e3137df9fa69ed9c",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report:claim:21"
+      ],
+      "relation_id": "canrel_e3137df9fa69ed9c",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:news_agent:news_report",
+      "evidence": "TSM is a core beneficiary of the AI infrastructure buildout",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "datacenter_capex",
+      "target": "semiconductor_cycle",
+      "source_label": "Datacenter CapEx",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "supportive",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Datacenter CapEx supports Semiconductor Cycle.",
+      "source_record_id": "canrel_9255c10258d6ef86",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history:claim:61"
+      ],
+      "relation_id": "canrel_9255c10258d6ef86",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "The macro environment is not signaling a demand collapse; it's signaling continued growth.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "datacenter_capex",
+      "target": "tsm_revenue_growth",
+      "source_label": "Datacenter CapEx",
+      "target_label": "TSM Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Datacenter CapEx supports Revenue Growth.",
+      "source_record_id": "canrel_4ea0bc23922ba323",
+      "source_claim_ids": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:65"
+      ],
+      "relation_id": "canrel_4ea0bc23922ba323",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report",
+      "evidence": "TSM has entered a strong upcycle driven by AI infrastructure spending, datacenter buildouts, and advanced-node demand.",
+      "extraction_method": "tradingagents_canonical_output"
+    }
+  ],
+  "metadata": {
+    "node_count": 10,
+    "edge_count": 23,
+    "extractor": "llm_with_deterministic_validation_and_fallback",
+    "extractor_version": "week2.structure_extractor.v2",
+    "llm_enabled": false,
+    "llm_edge_count": 0,
+    "deterministic_edge_count": 1,
+    "canonical_relation_edge_count": 22
+  }
+}

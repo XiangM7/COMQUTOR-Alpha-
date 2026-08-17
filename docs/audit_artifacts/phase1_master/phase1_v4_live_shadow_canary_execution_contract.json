@@ -1,0 +1,65 @@
+{
+  "schema_version": "comqutor.phase1_v4.live_shadow_canary_execution_contract.v1",
+  "registered_at": "2026-08-10T21:38:11Z",
+  "canary_id": "phase1-v4-live-shadow-canary-20260810T213811Z",
+  "canary_run_id": "phase1-v4-canary-20260810t213811z",
+  "stage": "LIVE_SHADOW_CANARY",
+  "candidate": "STRUCTURED_LLM_ADAPTER_V4",
+  "prompt_version": "structured_adapter.claim_extraction_shadow.v4",
+  "prompt_sha256": "1de0d3dad615946b4670cc7458a75fccbeffdbdcb3cefe54d00097c3d4478b3a",
+  "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "timeout_seconds": 180.0,
+  "logical_call_cap": 4,
+  "provider_attempt_cap": 4,
+  "retry_count": 0,
+  "execution_order": "sequential",
+  "source_run_id": "0e044e37-862c-43be-871c-31012cd660e7",
+  "source_artifact": "outputs/runs/0e044e37-862c-43be-871c-31012cd660e7/raw_agent_outputs.json",
+  "ticker": "NVDA",
+  "slots": [
+    {
+      "slot": 1,
+      "family": "fundamental",
+      "agent": "fundamental_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:fundamental_agent:fundamentals_report",
+      "source_report_sha256": "6e745b7c192eab1d111c26c9f259b97ddf6b86de5b88a4c03ae67cdf8f7954f1"
+    },
+    {
+      "slot": 2,
+      "family": "news",
+      "agent": "news_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:news_agent:news_report",
+      "source_report_sha256": "96196ee35f327eca1db0013e341cdbdcd14aa4c5225e93a7dfc28f456a485599"
+    },
+    {
+      "slot": 3,
+      "family": "sentiment",
+      "agent": "sentiment_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:sentiment_agent:sentiment_report",
+      "source_report_sha256": "65fc72c02d4e06b033e7f9dc8bb4b4362fa6bdc2f9d3ea0e0358c88e2357c157"
+    },
+    {
+      "slot": 4,
+      "family": "technical",
+      "agent": "market_agent",
+      "source_agent_output_id": "0e044e37-862c-43be-871c-31012cd660e7:market_agent:market_report",
+      "source_report_sha256": "1b70321eabdaafb19d497adf656b3bfb12610d988a92c95de8c65b697a6ac3d5"
+    }
+  ],
+  "master_budget_before": {
+    "cumulative_logical_calls": 91,
+    "cumulative_provider_attempts": 98,
+    "logical_call_hard_cap": 95,
+    "provider_attempt_hard_cap": 130
+  },
+  "production_authority": "LEGACY_ADAPTER",
+  "shadow_mode_explicit": true,
+  "cutover_authorized": false,
+  "subagents_authorized": false,
+  "replacement_slots_authorized": false,
+  "provider_fallback_authorized": false,
+  "artifact_root": "outputs/canaries/phase1-v4-live-shadow-canary-20260810T213811Z",
+  "status": "PRE_REGISTERED_BEFORE_PROVIDER_CALLS"
+}

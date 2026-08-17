@@ -1,0 +1,102 @@
+{
+  "schema_version": "comqutor.phase1.v4_duplicate_quote_protocol_hardening.v1",
+  "phase": "Phase 1 §5.1",
+  "stage": "DUPLICATE_QUOTE_PROTOCOL_AND_REJECTED_FORENSICS_HARDENING",
+  "completed_at": "2026-08-10T22:37:44Z",
+  "original_live_shadow_canary": "FAIL",
+  "canary_failure_repair": "PARTIAL",
+  "quality_gate": "PASS_V4",
+  "semantic_quality_baseline": "PASS_V4",
+  "current_location_protocol_inspection": {
+    "provider_request_location_data_v4": "candidate_hints with numeric id/start/end only",
+    "stable_internal_candidate_id_v4": true,
+    "deterministic_internal_source_offsets_v4": true,
+    "prompt_v4_required_claim_level_candidate_binding": false,
+    "provider_response_contract_v4_exposed_claim_level_binding": false,
+    "parser_v4_read_optional_candidate_ids": true,
+    "resolver_v4_received_candidate_spans": true,
+    "resolver_v4_had_optional_candidate_disambiguation": true,
+    "binding_v4_was_mandatory_for_duplicate_quote": false,
+    "rejected_candidate_payload_v4_persisted": false,
+    "conclusion": "CASE_B"
+  },
+  "prompt_v4_already_had_claim_level_candidate_binding": false,
+  "versioning_case": "B_V4_1_PROTOCOL_HARDENING",
+  "prompt_v4_changed": false,
+  "prompt_v4_sha256": "1de0d3dad615946b4670cc7458a75fccbeffdbdcb3cefe54d00097c3d4478b3a",
+  "new_prompt_or_protocol_id": "structured_adapter.claim_extraction_shadow.v4.1",
+  "new_prompt_sha256": "c5ac3a9b44df24970d27ebd5670cb7f09eb934b01a0d99d7cd4ff93e5f225c6b",
+  "parent_prompt": "structured_adapter.claim_extraction_shadow.v4",
+  "semantic_rule_delta": "NONE",
+  "location_protocol_delta": "CANDIDATE_BINDING",
+  "duplicate_quote_protocol": "DETERMINISTIC_CANDIDATE_BINDING",
+  "global_exact_match_required": true,
+  "candidate_local_unique_match_required": true,
+  "fuzzy_matching": false,
+  "semantic_disambiguation": false,
+  "first_match_fallback": false,
+  "candidate_identity_binding": [
+    "run_id",
+    "ticker",
+    "agent",
+    "agent_output_id",
+    "source_report_sha256",
+    "source_span",
+    "candidate_text_sha256"
+  ],
+  "rejected_parsed_payload_persisted": true,
+  "rejected_match_offsets_persisted": true,
+  "rejected_candidate_binding_persisted": true,
+  "rejected_deterministic_replay": "PASS",
+  "duplicate_fixture_tests": "PASS",
+  "duplicate_fixture_case_count": 7,
+  "shadow_isolation_regression": "PASS",
+  "validated_or_admitted_claims_from_rejected_fixture": 0,
+  "provider_calls": 0,
+  "subagents_spawned": 0,
+  "historical_technical_response_recovered": false,
+  "historical_technical_revalidation": "NOT_APPLICABLE_RESPONSE_NOT_PERSISTED",
+  "historical_canary_artifacts_modified": false,
+  "provider_ledgers_modified": false,
+  "provider_ledger_counters": {
+    "cumulative_logical_calls": 95,
+    "cumulative_provider_attempts": 102
+  },
+  "protocol_hardening": "PASS",
+  "ready_for_recanary": false,
+  "next_required_stage": "V4_1_LIMITED_PROVIDER_QUALIFICATION",
+  "v4_1_protocol_delta_validation": "PENDING_LIVE_QUALIFICATION",
+  "production_authority": "LEGACY_ADAPTER",
+  "production_cutover": "NOT_RUN",
+  "tests": [
+    {
+      "scope": "v4.1 duplicate binding and rejected forensic replay",
+      "result": "13 passed within 99-test focused Shadow suite"
+    },
+    {
+      "scope": "semantic runtime contracts/session and Week2 integration",
+      "result": "122 passed, 1 Provider smoke skipped by explicit gate"
+    },
+    {
+      "scope": "live-shadow persistence and isolation",
+      "result": "PASS within 99-test focused Shadow suite"
+    },
+    {
+      "scope": "v3/v4 resolver and Provider-path regression",
+      "result": "99 passed total focused Shadow suite"
+    },
+    {
+      "scope": "Phase 1 and historical Canary verifiers",
+      "result": "hardening 9/9; repair 9/9; Canary 14/14; Phase 1 Master 22/22"
+    },
+    {
+      "scope": "exact semantic replay regression",
+      "result": "40 passed"
+    }
+  ],
+  "artifacts": [
+    "docs/audit_artifacts/phase1_master/phase1_v4_duplicate_quote_protocol_hardening_report.json",
+    "docs/audit_artifacts/phase1_master/phase1_v4_duplicate_quote_protocol_hardening_report.md",
+    "docs/audit_artifacts/phase1_master/phase1_v4_1_location_protocol_manifest.json"
+  ]
+}

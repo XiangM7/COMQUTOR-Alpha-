@@ -1,0 +1,28 @@
+{
+  "schema_version": "comqutor.phase1b1.shadow_exact_replay_summary.v1",
+  "real_bundle_replay": {
+    "bundle_directory": "outputs/evaluations/phase1b1-smoke-20260806T222402Z",
+    "status": "FAIL",
+    "reason_codes": ["PHASE1B1_REPLAY_VALIDATION_NOT_REPRODUCIBLE"],
+    "reason": "The real smoke executed and a full 4-report bundle was written, so this is a genuine (non-SKIP) replay verification, not an artifact-missing case. All 4 persisted validation_summary.status values are 'parser_error' -- a Shadow-parser-level fail-soft state assigned when the injected invoker itself raises (here: real Provider timeout) BEFORE validate_shadow_bundle is ever called. Re-running validate_shadow_bundle() against the persisted (empty) claims/abstentions during replay produces a different status than the persisted 'parser_error', because 'parser_error' was never actually a validate_shadow_bundle() outcome to begin with -- there is nothing genuine to reproduce. report_identity_valid=true, prompt_version_stable=true, prompt_hash_stable=true, stable_identity=true, and comparison_reproducible=true for all 4 reports (confirmed independently); only validation_reproducible is false, and only because there was never a real validation outcome behind the persisted status. This is an honest FAIL, not a bug in the replay verifier -- verified by reading structured_output_shadow_replay.py's validation_reproducible check directly."
+  },
+  "offline_replay_validator_proof": {
+    "module": "comqutor_alpha/structure_engine/structured_output_shadow_replay.py",
+    "tests": "tests/structured_output_shadow/test_shadow_exact_replay.py (9 tests, all passing)",
+    "valid_bundle_pass": "test_valid_bundle_replays_pass_with_zero_external_calls -- PASS, socket.create_connection patched to raise if called (never triggered)",
+    "missing_artifact_fails_closed": "test_missing_manifest_fails_closed -- PASS",
+    "tampered_report_hash_fails_closed": "test_tampered_report_text_fails_hash_check -- PASS",
+    "tampered_comparison_fails_closed": "test_tampered_comparison_file_fails_reproducibility_check -- PASS",
+    "no_gateway_provider_or_network_imports": "test_replay_module_imports_no_gateway_provider_or_network_code -- PASS (AST-verified)",
+    "empty_directory_fails_closed": "test_empty_bundle_directory_reports_missing_artifacts -- PASS",
+    "authorized_fake_model_full_run_replay": "test_shadow_provider_smoke_cli.py::test_fully_authorized_run_with_fake_client_writes_complete_bundle asserts replay_audit['final_status'] == 'PASS' for a complete 4-report bundle -- PASS"
+  },
+  "provider_zero_evidence": {
+    "provider_calls_made_during_any_replay_verification": 0,
+    "gateway_calls_made": 0,
+    "network_calls_made": 0,
+    "redis_calls_made": 0,
+    "database_writes_made": 0
+  },
+  "conclusion": "The Provider-zero Shadow exact replay mechanism is proven correct end-to-end offline (9/9 tests) AND was exercised against the real (all-timeout) bundle this session with zero Provider/Gateway/network/Redis/DB calls during verification. It correctly reported FAIL rather than a fabricated PASS or an incorrect SKIP, because a real bundle was produced but contains no genuine validate_shadow_bundle() outcome to certify as reproducible. Per task section 25, PASS requires Shadow Exact Replay to pass -- it did not, so the overall Phase 1B.1 gate cannot be PASS this run."
+}

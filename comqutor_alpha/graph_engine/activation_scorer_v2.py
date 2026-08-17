@@ -901,6 +901,27 @@ def score_alpha_v2(
     )
     run_id = alpha_matches_payload.get("run_id") if isinstance(alpha_matches_payload, Mapping) else None
     groups = _group_evidence(qualifying, ticker, run_id)
+    # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+    # Track A2: a pure, additive extraction of the SAME grouping `groups`
+    # already computed above for scoring -- never a second grouping pass,
+    # never touching the EvidenceQuality/AgentIndependence formula inputs
+    # below. Exists so evidence_facts.json can be built by extraction
+    # only (comqutor_alpha.api.artifact_export), since this grouping
+    # detail was previously discarded after scoring rather than exposed.
+    evidence_fact_groups = sorted(
+        (
+            {
+                "evidence_fact_group_id": group_key,
+                "representative_claim_id": max(
+                    members, key=lambda m: (float(m.get("match_score") or 0.0), str(m["claim_id"]))
+                )["claim_id"],
+                "member_claim_ids": sorted(str(m["claim_id"]) for m in members),
+                "supporting_agents": sorted({str(m["agent"]) for m in members if m.get("agent")}),
+            }
+            for group_key, members in groups.items()
+        ),
+        key=lambda g: g["evidence_fact_group_id"],
+    )
 
     evidence_quality_raw, evidence_quality_meta = _evidence_quality_component(groups)
     agent_independence_raw, agent_meta = _agent_independence_component(groups)
@@ -1084,6 +1105,12 @@ def score_alpha_v2(
             raw_supporting_claim_count > unique_evidence_fact_count
             and unique_evidence_fact_count < REGIME_GATE_MIN_UNIQUE_EVIDENCE
         ),
+        # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
+        # Track A2: permanent, public extraction of this alpha's Evidence
+        # Fact groups (see evidence_fact_groups above) -- makes
+        # evidence_facts.json exportable by extraction only, never a
+        # second grouping computation.
+        "evidence_fact_groups": evidence_fact_groups,
         # Transient canonical representatives consumed by the Exposure
         # productization seam. The graph pipeline removes this internal
         # helper after attaching the public entity_exposure record.

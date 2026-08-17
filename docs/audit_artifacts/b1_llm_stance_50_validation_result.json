@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "sample_path": "docs/evidence_review_sample_records.json",
+  "sample_record_count": 50,
+  "batch_count": 5,
+  "logical_provider_calls": 5,
+  "real_provider_attempts": 5,
+  "retries_used": 0,
+  "llm_result_count": 20,
+  "deterministic_fallback_count": 30,
+  "fallback_reason_counts": {
+    "duplicate_result": 0,
+    "identity_mismatch": 0,
+    "invalid_counter_alpha": 0,
+    "invalid_stance": 0,
+    "malformed_response": 30,
+    "missing_result": 0,
+    "provider_error": 0,
+    "timeout": 0
+  },
+  "invalid_llm_output_admitted": 0,
+  "final_stance_distribution": {
+    "supports_alpha": 22,
+    "neutral_background": 6,
+    "supports_counter_alpha": 4,
+    "opposes_alpha": 12,
+    "mentions_alpha": 6
+  },
+  "llm_vs_deterministic_disagreement_count": 12,
+  "review_gold_available": false,
+  "provider": "anthropic",
+  "model_name": "claude-sonnet-4-6",
+  "output_csv": "docs/audit_artifacts/b1_llm_stance_50_validation.csv"
+}

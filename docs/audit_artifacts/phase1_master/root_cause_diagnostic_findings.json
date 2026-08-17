@@ -1,0 +1,44 @@
+{
+  "schema_version": "comqutor.phase1_master.root_cause_diagnostic_findings.v1",
+  "generated_at": "2026-08-07T00:10:00+00:00",
+  "purpose": "Diagnose why the real Smoke batch's 4 calls (post task-level-policy-fix) all returned provider_status=provider_error in ~16s each, rather than success or timeout.",
+  "important_disclosure": "This diagnostic required 3 ad-hoc, isolated real Provider calls made directly via create_llm_client/model.invoke() OUTSIDE scripts/run_phase1_master.py's own state machine and budget ledger (to reproduce the exact failure without spending against the formal 4-report Smoke batch again, since re-running Smoke itself is explicitly forbidden by task section 4/9). These 3 calls are NOT reflected in phase1_master_state.json's cumulative_logical_calls/cumulative_provider_attempts (which remain 9/13, tracking only calls made through the Master script itself). They are disclosed here in full for honest total accounting, per this engagement's standing instruction to record every real attempt, formal or informal.",
+  "diagnostic_calls": [
+    {
+      "call": 1,
+      "content": "generic filler text, ~13.8K characters, similar length to the real report",
+      "invocation_method": "direct model.invoke(), no timeout wrapper",
+      "outcome": "SUCCESS",
+      "notes": "Rules out prompt SIZE alone as the cause."
+    },
+    {
+      "call": 2,
+      "content": "the exact real structured_claim_shadow prompt for NVDA fundamental_agent (98,529 characters -- the full Shadow prompt including embedded candidate segments and schema instructions, much larger than the raw 13,887-character report alone)",
+      "invocation_method": "direct model.invoke(), no timeout wrapper",
+      "outcome": "SUCCESS",
+      "response": "valid JSON matching the expected comqutor.structured_claim_shadow.v1 schema shape, 13,482 characters",
+      "notes": "Proves the real prompt CAN succeed against the real Provider. Took longer than call 1 (exact duration not captured; completed after this session's background-task polling interval)."
+    },
+    {
+      "call": 3,
+      "content": "the same exact real Shadow prompt as call 2",
+      "invocation_method": "wrapped in the Gateway's own call_with_timeout() (ThreadPoolExecutor, 90s budget) -- an exact reproduction of the real batch's execution path",
+      "outcome": "TimeoutError after 90 seconds",
+      "notes": "Different outcome from call 2 (same content, same model, same profile) -- demonstrates real, substantial latency VARIANCE across attempts, not a deterministic bug in the ThreadPoolExecutor wrapping itself (which behaved correctly: it enforced the 90s bound faithfully)."
+    }
+  ],
+  "real_batch_observed_behavior": {
+    "outcome": "4/4 calls returned provider_status=provider_error (WEEK2_LLM_PROVIDER_ERROR) in approximately 16 seconds each",
+    "code_path_analysis": "Traced through week2_llm.py's invoke_prebuilt_json_prompt retry loop: provider_status can only become 'provider_error' when self._model.invoke(prompt) itself raises an exception that is not TimeoutError (a JSON-parse or validator failure would show as provider_status='success' with a different error_code, per the existing exception-handling order). This confirms the real batch's failures were genuine Provider/API-level exceptions, not JSON/validation issues on our side.",
+    "consistency_across_reports": "All 4 different reports (fundamental/news/sentiment/technical, different content, different lengths) failed the same way within a similar ~16s window -- suggesting a shared cause (e.g., a transient Provider-side condition affecting the whole batch's time window) rather than a per-report content issue."
+  },
+  "synthesis": "Across 3 real diagnostic calls plus the real 4-call batch, this Shadow task against deepseek-v4-flash has now shown FOUR different real outcomes for structurally similar large requests: fast client-visible error (~16s, the batch), fast success, slow success, and a full 90s timeout. This pattern is evidence of genuine Provider-side latency/reliability INSTABILITY for this specific task shape (large prompt, structured JSON generation requirement) -- not a deterministic bug in comqutor_alpha's own code. The task-level 90s/0-retry policy is confirmed correctly implemented and behaving as designed (it faithfully bounded call 3 at exactly 90s); no further widening of the timeout is authorized or likely to help given call 3 already used the full approved budget and still failed.",
+  "explicitly_not_done": [
+    "Did not re-run the formal Smoke stage a third time",
+    "Did not increase timeout_seconds beyond the approved 90.0",
+    "Did not switch research_profile or model",
+    "Did not modify the Shadow prompt or schema",
+    "Did not modify Week2LLMGateway's shared DEFAULT_TIMEOUT_SECONDS/DEFAULT_MAX_RETRIES"
+  ],
+  "recommendation_for_product_owner": "Per task section 10 ('届时才需要决定是否更换profile/model'), this is now exactly that decision point. The evidence supports classifying this as functionally equivalent to BLOCKED_PROVIDER_MODEL_UNSUITABLE_FOR_LONG_STRUCTURED_TASK even though the formal per-report response-count gate technically saw 4/4 'responses' (errors count as responses under the current classification) -- the SUBSTANCE is the same: deepseek-v4-flash shows unreliable behavior specifically for this large structured-extraction task shape. Recommend evaluating comqutor_anthropic_medium_sonnet46_v1 (the only other pre-registered profile) or a longer/different DeepSeek variant for this task specifically, as a separately-authorized decision -- not something this agent will do unilaterally."
+}

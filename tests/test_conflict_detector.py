@@ -229,6 +229,12 @@ class TestTaxonomyPairEnumeration:
 
 class TestQualifyingEvidence:
     def _pair(self, score_a=1.0, score_b=1.0, relation_a="activation", relation_b="activation", **kw):
+        # B2 Conflict Evidence Admissibility requires >=2 unique
+        # supports_alpha Evidence Facts per side; a second claim per side
+        # (cA2/cB2) is added purely to satisfy that count -- it carries the
+        # same relation/score as the primary claim so it never changes
+        # what THIS class's own tests (qualifying-evidence admission logic)
+        # are actually exercising.
         return _detect(
             activation_payload(
                 activation_entry("A101", score=90, direction="positive"),
@@ -236,7 +242,9 @@ class TestQualifyingEvidence:
             ),
             [
                 match_record("cA", "A101", score=score_a, relation=relation_a),
+                match_record("cA2", "A101", score=score_a, relation=relation_a),
                 match_record("cB", "A304", score=score_b, relation=relation_b),
+                match_record("cB2", "A304", score=score_b, relation=relation_b),
             ],
             **kw,
         )
@@ -244,8 +252,8 @@ class TestQualifyingEvidence:
     def test_qualifying_committed_evidence_reaches_bull_bear_structures(self):
         result = self._pair()
         conflict = result["main_conflict"]
-        assert conflict["bull_structure"]["claim_ids"] == ["cA"]
-        assert conflict["bear_structure"]["claim_ids"] == ["cB"]
+        assert conflict["bull_structure"]["claim_ids"] == ["cA", "cA2"]
+        assert conflict["bear_structure"]["claim_ids"] == ["cB", "cB2"]
 
     def test_ambiguous_is_excluded_from_evidence(self):
         result = _detect(
@@ -303,15 +311,21 @@ class TestQualifyingEvidence:
             [
                 duplicate,
                 dict(duplicate),
+                # A second, genuinely distinct claim on each side so this
+                # pair also satisfies B2's >=2-unique-supporting-fact
+                # minimum -- the duplicate-detection assertions below are
+                # otherwise unchanged.
+                match_record("cA2", "A101", score=0.9),
                 match_record("cB", "A304", score=0.9),
+                match_record("cB2", "A304", score=0.9),
             ],
         )
         conflict = result["main_conflict"]
-        assert conflict["bull_structure"]["claim_ids"] == ["cA"]
+        assert conflict["bull_structure"]["claim_ids"] == ["cA", "cA2"]
         assert conflict["components"]["alpha_a_evidence_strength"] == 0.9
         audit = _audit_for_alpha(_outcome_for(result, "A101", "A304"), "A101")
-        assert audit["qualifying_claim_ids"] == ["cA"]
-        assert audit["excluded"] == [{"claim_id": "cA", "reason_code": "DUPLICATE_CLAIM"}]
+        assert audit["qualifying_claim_ids"] == ["cA", "cA2"]
+        assert {"claim_id": "cA", "reason_code": "DUPLICATE_CLAIM"} in audit["excluded"]
 
     def test_missing_claim_id_is_excluded(self):
         result = _detect(
@@ -462,18 +476,24 @@ class TestDuplicateClaimCorrectness:
         original = match_record("cA", "A101", score=0.9)
         duplicate_with_reordered_keys = dict(reversed(list(original.items())))
         duplicate_with_reordered_keys["claim_id"] = "  cA  "
-        matches = [original, duplicate_with_reordered_keys, match_record("cB", "A304")]
+        matches = [
+            original,
+            duplicate_with_reordered_keys,
+            match_record("cA2", "A101", score=0.9),
+            match_record("cB", "A304"),
+            match_record("cB2", "A304"),
+        ]
 
         forward = _detect(self._activation(), matches)
         reverse = _detect(self._activation(), list(reversed(matches)))
 
         assert json.dumps(forward, sort_keys=True) == json.dumps(reverse, sort_keys=True)
-        assert forward["main_conflict"]["bull_structure"]["claim_ids"] == ["cA"]
+        assert forward["main_conflict"]["bull_structure"]["claim_ids"] == ["cA", "cA2"]
         audit = _audit_for_alpha(_outcome_for(forward, "A101", "A304"), "A101")
         assert audit == {
             "alpha_id": "A101",
-            "qualifying_claim_ids": ["cA"],
-            "qualifying_count": 1,
+            "qualifying_claim_ids": ["cA", "cA2"],
+            "qualifying_count": 2,
             "excluded": [{"claim_id": "cA", "reason_code": "DUPLICATE_CLAIM"}],
             "excluded_count": 1,
         }
@@ -552,7 +572,19 @@ class TestEvidenceAuditContract:
         assert audit["excluded"] == [{"claim_id": "cA", "reason_code": "WRONG_ALPHA"}]
 
     def test_admitted_suppressed_and_rejected_candidates_all_include_audit(self):
-        admitted = self._item(match_record("cA", "A101"))
+        admitted_result = _detect(
+            activation_payload(
+                activation_entry("A101", score=90, direction="positive"),
+                activation_entry("A304", score=90, direction="negative"),
+            ),
+            [
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
+        )
+        admitted = _outcome_for(admitted_result, "A101", "A304")
         suppressed = self._item(match_record("cA", "A101", relation="mention"))
         rejected_result = _detect(
             activation_payload(activation_entry("A101", score=90, direction="positive")),
@@ -620,14 +652,16 @@ class TestEvidenceStrengthCalculation:
             ),
             [
                 match_record("cA", "A101", score=5.0),  # out of range, must clamp to 1.0
+                match_record("cA2", "A101", score=5.0),
                 match_record("cB", "A304", score=-3.0),  # out of range, must clamp to 0.0
+                match_record("cB2", "A304", score=-3.0),
             ],
         )
         conflict = result["main_conflict"]
         # side B clamps to 0.0 -> evidence_strength becomes 0.5, still > 0,
         # so the pair can still be admitted; the clamp itself is the point.
-        assert conflict["bull_structure"]["match_scores"] == [1.0]
-        assert conflict["bear_structure"]["match_scores"] == [0.0]
+        assert conflict["bull_structure"]["match_scores"] == [1.0, 1.0]
+        assert conflict["bear_structure"]["match_scores"] == [0.0, 0.0]
 
     def test_non_finite_match_score_is_excluded_not_treated_as_strong(self):
         result = _detect(
@@ -690,7 +724,12 @@ class TestEvidenceStrengthCalculation:
                 activation_entry("A101", score=90, direction="positive"),
                 activation_entry("A304", score=90, direction="negative"),
             ),
-            [match_record("cA", "A101", score=1.0), match_record("cB", "A304", score=1.0)],
+            [
+                match_record("cA", "A101", score=1.0),
+                match_record("cA2", "A101", score=1.0),
+                match_record("cB", "A304", score=1.0),
+                match_record("cB2", "A304", score=1.0),
+            ],
         )
         assert result["main_conflict"]["components"]["evidence_strength"] == 1.0
 
@@ -721,12 +760,22 @@ class TestAdmissibility:
         assert "BELOW_ACTIVATION_THRESHOLD" in item["reason_codes"]
 
     def test_watch_status_on_both_sides_can_be_admitted(self):
+        # status="watch" alone must not block the (earlier, unchanged)
+        # activation-status gate -- score=50 additionally satisfies B2's
+        # own, independent, stricter score>=50 admissibility threshold, so
+        # this test still proves what it always proved (watch status is not
+        # rejected) without being confused with a B2 failure.
         result = _detect(
             activation_payload(
-                activation_entry("A101", score=35, status="watch", direction="positive"),
-                activation_entry("A304", score=35, status="watch", direction="negative"),
+                activation_entry("A101", score=50, status="watch", direction="positive"),
+                activation_entry("A304", score=50, status="watch", direction="negative"),
             ),
-            [match_record("cA", "A101"), match_record("cB", "A304")],
+            [
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
         )
         assert result["main_conflict"] is not None
 
@@ -737,7 +786,12 @@ class TestAdmissibility:
                 activation_entry("A101", score=90, status=status, direction="positive"),
                 activation_entry("A304", score=90, status=status, direction="negative"),
             ),
-            [match_record("cA", "A101"), match_record("cB", "A304")],
+            [
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
         )
         assert result["main_conflict"] is not None
 
@@ -856,7 +910,12 @@ class TestDirectionRoleResolution:
                 activation_entry("A101", score=90, direction="positive"),
                 activation_entry("A304", score=90, direction="negative"),
             ),
-            [match_record("cA", "A101"), match_record("cB", "A304")],
+            [
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
         )
         conflict = result["main_conflict"]
         assert conflict["bull_alpha_id"] == "A101"
@@ -872,7 +931,12 @@ class TestDirectionRoleResolution:
                 activation_entry("A101", score=90, direction="negative"),
                 activation_entry("A304", score=90, direction="positive"),
             ),
-            [match_record("cA", "A101"), match_record("cB", "A304")],
+            [
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
         )
         conflict = result["main_conflict"]
         assert conflict["alpha_a"] == "A101"  # canonical order unchanged
@@ -887,7 +951,12 @@ class TestFormulaAndLevels:
                 activation_entry("A101", score=80.0, direction="positive"),
                 activation_entry("A304", score=60.0, direction="negative"),
             ),
-            [match_record("cA", "A101", score=1.0), match_record("cB", "A304", score=1.0)],
+            [
+                match_record("cA", "A101", score=1.0),
+                match_record("cA2", "A101", score=1.0),
+                match_record("cB", "A304", score=1.0),
+                match_record("cB2", "A304", score=1.0),
+            ],
         )
         conflict = result["main_conflict"]
         expected = min(80.0, 60.0) * 0.90 * 1.0  # A101-A304 taxonomy weight is 0.90
@@ -899,7 +968,12 @@ class TestFormulaAndLevels:
                 activation_entry("A101", score=80.0, direction="positive"),
                 activation_entry("A304", score=60.0, direction="negative"),
             ),
-            [match_record("cA", "A101", score=0.8), match_record("cB", "A304", score=0.6)],
+            [
+                match_record("cA", "A101", score=0.8),
+                match_record("cA2", "A101", score=0.8),
+                match_record("cB", "A304", score=0.6),
+                match_record("cB2", "A304", score=0.6),
+            ],
         )
         components = result["main_conflict"]["components"]
         for key in (
@@ -925,7 +999,12 @@ class TestFormulaAndLevels:
                 activation_entry("A101", score=100.0, direction="positive"),
                 activation_entry("A304", score=100.0, direction="negative"),
             ),
-            [match_record("cA", "A101", score=1.0), match_record("cB", "A304", score=1.0)],
+            [
+                match_record("cA", "A101", score=1.0),
+                match_record("cA2", "A101", score=1.0),
+                match_record("cB", "A304", score=1.0),
+                match_record("cB2", "A304", score=1.0),
+            ],
         )
         score = result["main_conflict"]["conflict_score"]
         assert 0.0 <= score <= 100.0
@@ -965,18 +1044,27 @@ class TestMainConflictArbitration:
             activation_payload(
                 activation_entry("A101", score=95, direction="positive"),
                 activation_entry("A304", score=95, direction="negative"),
-                activation_entry("A301", score=40, direction="positive"),
-                activation_entry("A601", score=40, direction="negative"),
+                # >=50 (B2's own score threshold) so this second pair also
+                # reaches B2-admitted -- otherwise only one conflict would
+                # ever be in play and this test could no longer prove
+                # "highest-ranked wins among several admitted conflicts".
+                activation_entry("A301", score=55, direction="positive"),
+                activation_entry("A601", score=55, direction="negative"),
             ),
             [
                 match_record("cA1", "A101", score=1.0),
+                match_record("cA1b", "A101", score=1.0),
                 match_record("cB1", "A304", score=1.0),
+                match_record("cB1b", "A304", score=1.0),
                 match_record("cA2", "A301", score=0.3),
+                match_record("cA2b", "A301", score=0.3),
                 match_record("cB2", "A601", score=0.3),
+                match_record("cB2b", "A601", score=0.3),
             ],
         )
         assert result["main_conflict"]["conflict_id"] == "A101__A304"
         scores = [c["conflict_score"] for c in result["conflicts"]]
+        assert len(scores) == 2
         assert scores == sorted(scores, reverse=True)
 
     def test_tie_break_uses_canonical_pair_id_ascending(self):
@@ -994,9 +1082,13 @@ class TestMainConflictArbitration:
         )
         matches = [
             match_record("c1", "A101", score=1.0),
+            match_record("c1b", "A101", score=1.0),
             match_record("c2", "A304", score=1.0),
+            match_record("c2b", "A304", score=1.0),
             match_record("c3", "A301", score=1.0),
+            match_record("c3b", "A301", score=1.0),
             match_record("c4", "A601", score=1.0),
+            match_record("c4b", "A601", score=1.0),
         ]
         result = _detect(activation, matches, taxonomy=taxonomy)
         assert len(result["conflicts"]) == 2
@@ -1018,9 +1110,13 @@ class TestMainConflictArbitration:
         )
         matches = [
             match_record("c1", "A101", score=1.0),
+            match_record("c1b", "A101", score=1.0),
             match_record("c2", "A304", score=1.0),
+            match_record("c2b", "A304", score=1.0),
             match_record("c3", "A301", score=1.0),
+            match_record("c3b", "A301", score=1.0),
             match_record("c4", "A601", score=1.0),
+            match_record("c4b", "A601", score=1.0),
         ]
         result = _detect(activation, matches, taxonomy=taxonomy)
         # A101-A304's true score is fractionally higher even though both
@@ -1231,13 +1327,16 @@ class TestInputValidation:
             assert item["reason_codes"] == ["TICKER_MISMATCH"]
 
     def test_match_record_with_matching_embedded_run_id_is_unaffected(self):
-        matches = [{**match_record("cA", "A101"), "run_id": RUN_ID}]
+        matches = [
+            {**match_record("cA", "A101"), "run_id": RUN_ID},
+            {**match_record("cA2", "A101"), "run_id": RUN_ID},
+        ]
         result = _detect(
             activation_payload(
                 activation_entry("A101", score=90, direction="positive"),
                 activation_entry("A304", score=90, direction="negative"),
             ),
-            [*matches, match_record("cB", "A304")],
+            [*matches, match_record("cB", "A304"), match_record("cB2", "A304")],
         )
         assert result["main_conflict"] is not None
 
@@ -1268,7 +1367,12 @@ class TestExplanationLanguageGuard:
                 activation_entry("A101", score=90, direction="positive", name="AI Expansion"),
                 activation_entry("A304", score=90, direction="negative", name="Multiple Compression"),
             ),
-            [match_record("cA", "A101"), match_record("cB", "A304")],
+            [
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
         )
         return result["main_conflict"]["explanation"]
 
@@ -1325,7 +1429,13 @@ class TestSinglePairHelper:
                 activation_entry("A101", score=90, direction="positive"),
                 activation_entry("A304", score=90, direction="negative"),
             ),
-            alpha_matches=[match_record("cA", "A101"), match_record("cB", "A304")],
+            alpha_matches=[
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
+            ticker=TICKER,
         )
         assert result["outcome"] == "admitted"
         assert result["conflict"]["conflict_id"] == "A101__A304"
