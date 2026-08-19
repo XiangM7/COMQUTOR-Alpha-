@@ -427,6 +427,20 @@ a {
   border-width: 2px;
 }
 
+/* QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): a
+   qualification-capped Alpha must be visually distinguishable from a
+   genuinely uncapped Active one, never color alone (the "capped_active"
+   text label and the dedicated "Cap reason" row already convey this
+   without color) -- this is an additional, non-exclusive signal. */
+.alpha-card-capped_active {
+  border-color: var(--color-warning);
+  border-style: dashed;
+}
+
+.activation-level-capped_active {
+  color: var(--color-warning);
+}
+
 .alpha-card-header {
   display: flex;
   align-items: flex-start;
@@ -596,6 +610,16 @@ a {
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+/* QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): a
+   qualification-capped side (e.g. Conflict Radar's bull/bear structure)
+   must be visually distinguishable from a genuinely uncapped Active one --
+   the "capped_active" text label already conveys this without color; this
+   is an additional, non-exclusive signal, never color alone. */
+.conflict-side-activation-capped {
+  color: var(--color-warning);
+  font-weight: 600;
 }
 
 /* -- Evidence list -----------------------------------------------------------*/

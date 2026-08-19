@@ -513,6 +513,10 @@ _V2_ONLY_ACTIVATION_FIELDS = frozenset(
         "blocked_reason_codes",
         "diagnostic_reason_codes",
         "classification_version",
+        # QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment):
+        # additive presentation-only field owned by the same classifier,
+        # same v2-only treatment as every field above.
+        "activation_level",
     }
 )
 
@@ -704,6 +708,12 @@ def _whitelist_activation(entry: Mapping[str, Any]) -> dict[str, Any]:
             activation[field] = _string_list(entry[field], reason)
     if "classification_version" in entry:
         activation["classification_version"] = _text(entry["classification_version"], reason)
+    # QA Closure v0.1.2 Item 4: additive, same "if present" pattern -- a
+    # row persisted before this task shipped legitimately has none of
+    # this, and must round-trip unchanged rather than fail or synthesize
+    # a fabricated display level.
+    if "activation_level" in entry:
+        activation["activation_level"] = _text(entry["activation_level"], reason)
     return _json_copy(activation, reason)
 
 
@@ -909,6 +919,13 @@ def _whitelist_structure(value: Any) -> dict[str, Any]:
                 }
             )
         structure["evidence_facts"] = facts
+    # QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): additive,
+    # optional -- a legacy conflict payload predating B4/this task simply
+    # has neither field.
+    if "activation_level" in value:
+        structure["activation_level"] = _text(value.get("activation_level"), reason)
+    if "blocked_reason_codes" in value:
+        structure["blocked_reason_codes"] = _string_list(value.get("blocked_reason_codes"), reason)
     return _json_copy(structure, reason)
 
 
@@ -1356,6 +1373,13 @@ def _validate_week4_snapshot(
             or bull_structure["status"] != bull_activation["status"]
             or bull_structure["direction"] != bull_activation["direction"]
             or bull_structure["direction"] != "positive"
+            # QA Closure v0.1.2 Item 4: same cross-payload snapshot check,
+            # extended to the new additive field. Unlike the top-level
+            # columns above, activation_level lives only inside the row's
+            # activation_json catch-all (same place every other v2-only
+            # field lives) -- both sides absent (legacy payload) is a
+            # valid match too.
+            or bull_structure.get("activation_level") != bull_activation["activation_json"].get("activation_level")
         ):
             _fail(reason)
 
@@ -1367,6 +1391,7 @@ def _validate_week4_snapshot(
             or bear_structure["status"] != bear_activation["status"]
             or bear_structure["direction"] != bear_activation["direction"]
             or bear_structure["direction"] != "negative"
+            or bear_structure.get("activation_level") != bear_activation["activation_json"].get("activation_level")
         ):
             _fail(reason)
 

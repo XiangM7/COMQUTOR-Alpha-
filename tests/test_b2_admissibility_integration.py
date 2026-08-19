@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from comqutor_alpha.alpha_library.alpha_schema import ConflictAlpha
 from comqutor_alpha.api.artifact_export import extract_conflicts_export
-from comqutor_alpha.api.routes_research import _conflict_summary_section
+from comqutor_alpha.api.routes_research import _build_research_summary, _conflict_summary_section
 from comqutor_alpha.conflict_engine.conflict_admissibility import ADMITTED, CANDIDATE
 from comqutor_alpha.conflict_engine.conflict_detector import detect_alpha_conflicts
 from comqutor_alpha.storage.db.engine import build_engine
@@ -186,3 +186,12 @@ def test_b2_result_is_computed_once_and_identical_across_detector_db_and_export(
     assert summary_by_pair[("C", "D")]["admissibility"] == cd_admissibility
     assert summary_by_pair[("A", "B")]["is_main"] is True
     assert summary_by_pair[("C", "D")]["is_main"] is False
+
+    # 5. Research Summary text (routes_research._build_research_summary,
+    # the same function ResearchRunPage's "Research summary" panel
+    # displays verbatim): must describe the admitted A__B main conflict,
+    # never the denied candidate C__D pair, however evidence-rich C__D's
+    # own diagnostic looks (QA Closure v0.1.2 Item 3, Invariant 1).
+    summary_text = _build_research_summary("ready", db_result["main_conflict"], dominant_alphas=[])
+    assert summary_text == db_result["main_conflict"]["explanation"]
+    assert "C" not in summary_text.split() and "D" not in summary_text.split()

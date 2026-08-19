@@ -565,6 +565,34 @@ class TestReconstruction:
         assert exc_info.value.reason_code == "DB_DATA_CORRUPTED"
         assert str(exc_info.value) == "DB_DATA_CORRUPTED"
 
+    # QA Closure v0.1.2 Item 3 (Candidate Conflict vs Main Conflict Strict
+    # Separation): the mirror image of test_corrupted_database_rows_fail_closed
+    # above -- that test corrupts an already-admitted row; this one corrupts
+    # a SUPPRESSED (candidate) row to impersonate the main conflict
+    # (task section 5, Case A: status=candidate, is_main=true). Must fail
+    # closed exactly like the admitted-row case, never silently reconstruct
+    # a candidate as main_conflict.
+    def test_candidate_row_faking_is_main_conflict_fails_closed(self):
+        engine, repo = _engine_and_repo()
+        _persist(repo)
+        with engine.begin() as conn:
+            suppressed_pair = conn.execute(
+                sa.select(alpha_conflicts.c.alpha_a, alpha_conflicts.c.alpha_b)
+                .where(alpha_conflicts.c.outcome == "suppressed")
+                .limit(1)
+            ).one()
+            conn.execute(
+                sa.update(alpha_conflicts)
+                .where(
+                    (alpha_conflicts.c.alpha_a == suppressed_pair.alpha_a)
+                    & (alpha_conflicts.c.alpha_b == suppressed_pair.alpha_b)
+                )
+                .values(is_main_conflict=True, conflict_rank=0)
+            )
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            repo.get_week4_conflict_result("w42_run")
+        assert exc_info.value.reason_code == "DB_DATA_CORRUPTED"
+
 
 class TestAtomicReplaceAndIsolation:
     def test_identical_retry_is_idempotent_and_changed_retry_replaces(self):

@@ -43,6 +43,10 @@ const LEVEL_ICONS: Record<string, string> = {
   watch: "◐", // half circle
   candidate: "◌", // dotted circle
   active: "●", // filled circle
+  // QA Closure v0.1.2 Item 4: deliberately distinct from both "active"
+  // (filled circle) and "watch" (half circle, a different legacy status)
+  // -- a capped Alpha is neither.
+  capped_active: "◒", // half-filled circle, lower half
   dominant: "★", // star
   regime_level: "✲", // asterisk-like
 };
@@ -99,7 +103,13 @@ export function AlphaCard({
   activation,
   isDominant,
 }: AlphaCardProps) {
-  const icon = LEVEL_ICONS[status] ?? "•";
+  // QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): the single
+  // display-facing level, read directly from the backend -- never
+  // recomputed from activationScore/status/is_blocked here. Falls back to
+  // the legacy `status` prop on a historical payload predating this task.
+  const displayLevel = activation?.activation_level ?? status;
+  const isCappedActive = displayLevel === "capped_active";
+  const icon = LEVEL_ICONS[displayLevel] ?? LEVEL_ICONS[status] ?? "•";
   const supportingAgents =
     evidenceDetail && evidenceDetail.length > 0
       ? Array.from(new Set(evidenceDetail.map((item) => item.agent).filter(Boolean)))
@@ -130,7 +140,7 @@ export function AlphaCard({
     localStructure.qualifying_local_edge_count != null;
   const entityExposure = activation?.entity_exposure ?? null;
   return (
-    <article className={`alpha-card alpha-card-${status}${isDominant ? " alpha-card-dominant" : ""}`} tabIndex={0}>
+    <article className={`alpha-card alpha-card-${displayLevel}${isDominant ? " alpha-card-dominant" : ""}`} tabIndex={0}>
       <header className="alpha-card-header">
         <span className="alpha-card-icon" aria-hidden="true">
           {icon}
@@ -184,8 +194,24 @@ export function AlphaCard({
         ) : null}
         <div className="alpha-card-row">
           <dt>Activation level</dt>
-          <dd className={`activation-level-label activation-level-${status}`}>{status}</dd>
+          <dd className={`activation-level-label activation-level-${displayLevel}`}>{displayLevel}</dd>
         </div>
+        {/* QA Closure v0.1.2 Item 4: capped_active is a display-only
+            refinement of qualified_level=="active" -- never implies the
+            same qualification as a genuinely uncapped Active Alpha, and
+            never hides the underlying score (still shown above). Cap
+            reason comes straight from the existing B4 blocked_reason_codes,
+            never a frontend-invented text. */}
+        {isCappedActive && activation?.blocked_reason_codes && activation.blocked_reason_codes.length > 0 ? (
+          <div className="alpha-card-row alpha-card-row-warning alpha-card-row-capped">
+            <dt>Cap reason{activation.blocked_reason_codes.length > 1 ? "s" : ""}</dt>
+            <dd>
+              {activation.blocked_reason_codes
+                .map((code) => `${BLOCKED_REASON_LABELS[code] ?? code} (${code})`)
+                .join("; ")}
+            </dd>
+          </div>
+        ) : null}
         {/* B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT):
             qualified_level/target_level/is_blocked are read directly from the
             backend and never recomputed here -- "blocked" is qualification

@@ -1,0 +1,140 @@
+{
+  "alpha_correct_count": 36,
+  "alpha_match_accuracy": 0.72,
+  "alpha_match_target": 0.75,
+  "alpha_match_target_met": false,
+  "b1_fallback_count": 0,
+  "b1_fallback_only_agreement": null,
+  "b1_llm_count": 50,
+  "b1_llm_only_agreement": {
+    "accuracy": 0.78,
+    "correct_count": 39,
+    "total_count": 50
+  },
+  "correct_count": 39,
+  "critical_support_opposition_reversal_count": 0,
+  "critical_support_opposition_reversal_sample_ids": [],
+  "deterministic_v1_baseline": {
+    "accuracy": 0.44,
+    "confusion_matrix": {
+      "axes": "rows=deterministic.v1 evidence_stance, columns=independent_reviewed_stance",
+      "matrix": {
+        "mentions_alpha": {
+          "mentions_alpha": 1,
+          "neutral_background": 0,
+          "opposes_alpha": 0,
+          "supports_alpha": 7,
+          "supports_counter_alpha": 0
+        },
+        "neutral_background": {
+          "mentions_alpha": 1,
+          "neutral_background": 1,
+          "opposes_alpha": 1,
+          "supports_alpha": 5,
+          "supports_counter_alpha": 0
+        },
+        "opposes_alpha": {
+          "mentions_alpha": 0,
+          "neutral_background": 0,
+          "opposes_alpha": 8,
+          "supports_alpha": 1,
+          "supports_counter_alpha": 1
+        },
+        "supports_alpha": {
+          "mentions_alpha": 0,
+          "neutral_background": 0,
+          "opposes_alpha": 7,
+          "supports_alpha": 11,
+          "supports_counter_alpha": 0
+        },
+        "supports_counter_alpha": {
+          "mentions_alpha": 3,
+          "neutral_background": 0,
+          "opposes_alpha": 0,
+          "supports_alpha": 2,
+          "supports_counter_alpha": 1
+        }
+      }
+    },
+    "correct_count": 22,
+    "description": "old deterministic.v1 evidence_stance (docs/evidence_review_sample_records.json) vs independent J3 reviewer -- historical figure, NOT current B1 polarity_accuracy",
+    "wrong_count": 28
+  },
+  "duplicate_count": 14,
+  "human_review_performed": false,
+  "john_approved": false,
+  "not_ticker_specific_count": 13,
+  "polarity_accuracy": 0.78,
+  "polarity_correct_count": 39,
+  "polarity_system_source": "current_b1_authoritative",
+  "polarity_target": 0.8,
+  "polarity_target_met": false,
+  "review_source": "independent_llm_provisional",
+  "reviewed_count": 50,
+  "sample_count": 50,
+  "source_files": {
+    "b1_current_stance": "docs/audit_artifacts/b1_llm_stance_50_validation_after_parser_fix.csv",
+    "llm_provisional_review": "docs/audit_artifacts/evidence_review_llm_provisional.csv",
+    "system_sample": "docs/evidence_review_sample_records.json"
+  },
+  "stance_confusion_matrix": {
+    "axes": "rows=current_b1_final_stance, columns=independent_reviewed_stance",
+    "matrix": {
+      "mentions_alpha": {
+        "mentions_alpha": 3,
+        "neutral_background": 1,
+        "opposes_alpha": 1,
+        "supports_alpha": 4,
+        "supports_counter_alpha": 0
+      },
+      "neutral_background": {
+        "mentions_alpha": 0,
+        "neutral_background": 0,
+        "opposes_alpha": 0,
+        "supports_alpha": 0,
+        "supports_counter_alpha": 0
+      },
+      "opposes_alpha": {
+        "mentions_alpha": 2,
+        "neutral_background": 0,
+        "opposes_alpha": 14,
+        "supports_alpha": 0,
+        "supports_counter_alpha": 2
+      },
+      "supports_alpha": {
+        "mentions_alpha": 0,
+        "neutral_background": 0,
+        "opposes_alpha": 0,
+        "supports_alpha": 22,
+        "supports_counter_alpha": 0
+      },
+      "supports_counter_alpha": {
+        "mentions_alpha": 0,
+        "neutral_background": 0,
+        "opposes_alpha": 1,
+        "supports_alpha": 0,
+        "supports_counter_alpha": 0
+      }
+    }
+  },
+  "system_duplicate_or_paraphrase_member_count": 7,
+  "too_generic_count": 11,
+  "wrong_alpha_count": 14,
+  "wrong_alpha_sample_ids": [
+    "evrs-002",
+    "evrs-007",
+    "evrs-011",
+    "evrs-016",
+    "evrs-017",
+    "evrs-023",
+    "evrs-030",
+    "evrs-031",
+    "evrs-041",
+    "evrs-042",
+    "evrs-043",
+    "evrs-044",
+    "evrs-045",
+    "evrs-049"
+  ],
+  "wrong_polarity_count": 11
+}

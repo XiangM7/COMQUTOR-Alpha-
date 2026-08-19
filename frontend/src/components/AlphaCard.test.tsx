@@ -396,6 +396,132 @@ describe("AlphaCard", () => {
     expect(screen.getByText("Full diagnostic detail")).toBeInTheDocument();
   });
 
+  // QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment).
+  it("shows capped_active (not plain active) and a Cap reason row for a qualification-capped Alpha", () => {
+    // Real A301 shape, run 5ffe121a-68fd-473b-82b5-c9465332d8a2.
+    renderCard({
+      status: "active",
+      activationScore: 70.0,
+      activation: makeActivation({
+        status: "active",
+        activation_score: 70.0,
+        uncapped_score: 71.8756,
+        target_level: "dominant",
+        qualified_level: "active",
+        is_blocked: true,
+        blocked_from: ["dominant"],
+        blocked_reason_codes: ["NO_LOCAL_STRUCTURE_SUPPORT"],
+        diagnostic_reason_codes: ["NO_LOCAL_STRUCTURE_SUPPORT"],
+        classification_version: "b4.alpha_level.v1",
+        activation_level: "capped_active",
+      }),
+    });
+    const levelRow = screen.getByText("Activation level").closest("div");
+    expect(levelRow?.textContent).toContain("capped_active");
+    // Never silently shown as plain "active" once activation_level says
+    // otherwise.
+    expect(levelRow?.querySelector("dd")?.textContent).toBe("capped_active");
+    const capReasonRow = screen.getByText("Cap reason").closest("div");
+    expect(capReasonRow?.textContent).toContain("NO_LOCAL_STRUCTURE_SUPPORT");
+    expect(capReasonRow?.textContent).toContain("No supporting Structure Graph edges");
+    // The underlying score is never hidden.
+    expect(screen.getByText("Activation score").closest("div")?.textContent).toContain("70.0");
+    // The existing, richer "Blocked" row is preserved alongside the new
+    // Cap reason row -- never removed.
+    expect(screen.getByText("Blocked")).toBeInTheDocument();
+  });
+
+  it("shows plain active (no Cap reason row) for a genuinely uncapped Active Alpha", () => {
+    renderCard({
+      status: "active",
+      activationScore: 63.1,
+      activation: makeActivation({
+        status: "active",
+        activation_score: 63.1,
+        uncapped_score: 63.1,
+        target_level: "active",
+        qualified_level: "active",
+        is_blocked: false,
+        blocked_from: [],
+        blocked_reason_codes: [],
+        diagnostic_reason_codes: [],
+        classification_version: "b4.alpha_level.v1",
+        activation_level: "active",
+      }),
+    });
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("active");
+    expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
+    expect(screen.queryByText("Blocked")).not.toBeInTheDocument();
+  });
+
+  it("shows plain dominant, never capped_active, for a genuinely qualified Dominant Alpha", () => {
+    renderCard({
+      status: "dominant",
+      activationScore: 84.5,
+      activation: makeActivation({
+        status: "dominant",
+        activation_score: 84.5,
+        uncapped_score: 84.5,
+        target_level: "dominant",
+        qualified_level: "dominant",
+        is_blocked: false,
+        blocked_from: [],
+        blocked_reason_codes: [],
+        diagnostic_reason_codes: [],
+        classification_version: "b4.alpha_level.v1",
+        activation_level: "dominant",
+      }),
+    });
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("dominant");
+    expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
+  });
+
+  it("shows plain regime_level, never capped_active, for a genuinely qualified Regime-level Alpha", () => {
+    renderCard({
+      status: "regime_level",
+      activationScore: 86.9,
+      activation: makeActivation({
+        status: "regime_level",
+        activation_score: 86.9,
+        uncapped_score: 86.9,
+        target_level: "regime_level",
+        qualified_level: "regime_level",
+        is_blocked: false,
+        blocked_from: [],
+        blocked_reason_codes: [],
+        diagnostic_reason_codes: [],
+        classification_version: "b4.alpha_level.v1",
+        activation_level: "regime_level",
+        regime_gate_passed: true,
+      }),
+    });
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("regime_level");
+    expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
+  });
+
+  it("falls back to the legacy status for Activation level on a payload predating activation_level, but still shows the existing Blocked row", () => {
+    // Same fixture as the pre-existing "shows target level, blocked-from..."
+    // test above, which never sets activation_level -- confirms the
+    // fallback (activation?.activation_level ?? status) degrades exactly
+    // to prior behavior, never crashes, never fabricates "capped_active".
+    renderCard({
+      status: "active",
+      activation: makeActivation({
+        status: "active",
+        target_level: "dominant",
+        qualified_level: "active",
+        is_blocked: true,
+        blocked_from: ["dominant"],
+        blocked_reason_codes: ["NO_LOCAL_STRUCTURE_SUPPORT"],
+        diagnostic_reason_codes: ["NO_LOCAL_STRUCTURE_SUPPORT"],
+        classification_version: "b4.alpha_level.v1",
+      }),
+    });
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("active");
+    expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
+    expect(screen.getByText("Blocked")).toBeInTheDocument();
+  });
+
   it("never shows a Blocked row for a qualified (non-blocked) alpha", () => {
     renderCard({
       status: "dominant",

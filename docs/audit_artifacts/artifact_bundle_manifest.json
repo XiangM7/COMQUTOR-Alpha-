@@ -1,0 +1,169 @@
+{
+  "schema_version": "artifact_bundle_manifest.v1",
+  "generated_at": "2026-08-19T19:49:50Z",
+  "regression_report_path": "outputs/regression/regression_report.json",
+  "tickers": {
+    "NVDA": {
+      "schema_version": "artifact_bundle_audit.v1",
+      "ticker": "NVDA",
+      "run_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "bundle_status": "complete_original",
+      "required_count": 9,
+      "present_count": 9,
+      "original_artifacts": [
+        "alpha_activations.json",
+        "alpha_matches.json",
+        "conflicts.json",
+        "evidence_facts.json",
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "run_audit.json",
+        "structure_graph.json",
+        "structured_agent_outputs.json"
+      ],
+      "reconstructed_artifacts": [],
+      "missing_artifacts": [],
+      "blocked_artifacts": {},
+      "provider_calls": 0,
+      "tradingagents_calls": 0
+    },
+    "QQQ": {
+      "schema_version": "artifact_bundle_audit.v1",
+      "ticker": "QQQ",
+      "run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "bundle_status": "complete_reconstructed",
+      "required_count": 9,
+      "present_count": 9,
+      "original_artifacts": [
+        "alpha_matches.json",
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "run_audit.json",
+        "structure_graph.json",
+        "structured_agent_outputs.json"
+      ],
+      "reconstructed_artifacts": [
+        "alpha_activations.json",
+        "conflicts.json",
+        "evidence_facts.json"
+      ],
+      "missing_artifacts": [],
+      "blocked_artifacts": {},
+      "provider_calls": 0,
+      "tradingagents_calls": 0,
+      "content_limitations": [
+        "This run's own structure_graph.json (an ORIGINAL, never-touched artifact) predates the Evidence Fact Index embedding (Structure Integrity Repair Sprint, Track 2) and the B4 Activation Level Alignment classifier (target_level/qualified_level/is_blocked/activation_level). The reconstructed evidence_facts.json is schema-valid but reports 0 Evidence Fact groups (a faithful, honest extraction of what the source graph actually contains -- not a fabrication of emptiness). The reconstructed alpha_activations.json reflects this same older per-alpha schema (no qualified_level/activation_level fields). Re-computing structure_graph.json itself to add this newer data is out of scope for Item 6 (would require re-scoring, explicitly forbidden) and was not performed."
+      ]
+    },
+    "MSFT": {
+      "schema_version": "artifact_bundle_audit.v1",
+      "ticker": "MSFT",
+      "run_id": "07ddc074-9ab2-4b16-8957-acbf94012144",
+      "bundle_status": "complete_original",
+      "required_count": 9,
+      "present_count": 9,
+      "original_artifacts": [
+        "alpha_activations.json",
+        "alpha_matches.json",
+        "conflicts.json",
+        "evidence_facts.json",
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "run_audit.json",
+        "structure_graph.json",
+        "structured_agent_outputs.json"
+      ],
+      "reconstructed_artifacts": [],
+      "missing_artifacts": [],
+      "blocked_artifacts": {},
+      "provider_calls": 0,
+      "tradingagents_calls": 0
+    },
+    "SNDK": {
+      "schema_version": "artifact_bundle_audit.v1",
+      "ticker": "SNDK",
+      "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "bundle_status": "complete_reconstructed",
+      "required_count": 9,
+      "present_count": 9,
+      "original_artifacts": [
+        "alpha_matches.json",
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "run_audit.json",
+        "structure_graph.json",
+        "structured_agent_outputs.json"
+      ],
+      "reconstructed_artifacts": [
+        "alpha_activations.json",
+        "conflicts.json",
+        "evidence_facts.json"
+      ],
+      "missing_artifacts": [],
+      "blocked_artifacts": {},
+      "provider_calls": 0,
+      "tradingagents_calls": 0,
+      "content_limitations": [
+        "This run's own structure_graph.json (an ORIGINAL, never-touched artifact) predates the Evidence Fact Index embedding (Structure Integrity Repair Sprint, Track 2) and the B4 Activation Level Alignment classifier (target_level/qualified_level/is_blocked/activation_level). The reconstructed evidence_facts.json is schema-valid but reports 0 Evidence Fact groups (a faithful, honest extraction of what the source graph actually contains -- not a fabrication of emptiness). The reconstructed alpha_activations.json reflects this same older per-alpha schema (no qualified_level/activation_level fields). Re-computing structure_graph.json itself to add this newer data is out of scope for Item 6 (would require re-scoring, explicitly forbidden) and was not performed."
+      ]
+    },
+    "TSM": {
+      "schema_version": "artifact_bundle_audit.v1",
+      "ticker": "TSM",
+      "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "bundle_status": "complete_reconstructed",
+      "required_count": 9,
+      "present_count": 9,
+      "original_artifacts": [
+        "alpha_matches.json",
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "structure_graph.json",
+        "structured_agent_outputs.json"
+      ],
+      "reconstructed_artifacts": [
+        "alpha_activations.json",
+        "conflicts.json",
+        "evidence_facts.json",
+        "run_audit.json"
+      ],
+      "missing_artifacts": [],
+      "blocked_artifacts": {},
+      "provider_calls": 0,
+      "tradingagents_calls": 0,
+      "content_limitations": [
+        "This run's own structure_graph.json (an ORIGINAL, never-touched artifact) predates the Evidence Fact Index embedding (Structure Integrity Repair Sprint, Track 2) and the B4 Activation Level Alignment classifier (target_level/qualified_level/is_blocked/activation_level). The reconstructed evidence_facts.json is schema-valid but reports 0 Evidence Fact groups (a faithful, honest extraction of what the source graph actually contains -- not a fabrication of emptiness). The reconstructed alpha_activations.json reflects this same older per-alpha schema (no qualified_level/activation_level fields). Re-computing structure_graph.json itself to add this newer data is out of scope for Item 6 (would require re-scoring, explicitly forbidden) and was not performed."
+      ]
+    },
+    "AMD": {
+      "schema_version": "artifact_bundle_audit.v1",
+      "ticker": "AMD",
+      "run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "bundle_status": "complete_reconstructed",
+      "required_count": 9,
+      "present_count": 9,
+      "original_artifacts": [
+        "alpha_matches.json",
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "run_audit.json",
+        "structure_graph.json",
+        "structured_agent_outputs.json"
+      ],
+      "reconstructed_artifacts": [
+        "alpha_activations.json",
+        "conflicts.json",
+        "evidence_facts.json"
+      ],
+      "missing_artifacts": [],
+      "blocked_artifacts": {},
+      "provider_calls": 0,
+      "tradingagents_calls": 0,
+      "content_limitations": [
+        "This run's own structure_graph.json (an ORIGINAL, never-touched artifact) predates the Evidence Fact Index embedding (Structure Integrity Repair Sprint, Track 2) and the B4 Activation Level Alignment classifier (target_level/qualified_level/is_blocked/activation_level). The reconstructed evidence_facts.json is schema-valid but reports 0 Evidence Fact groups (a faithful, honest extraction of what the source graph actually contains -- not a fabrication of emptiness). The reconstructed alpha_activations.json reflects this same older per-alpha schema (no qualified_level/activation_level fields). Re-computing structure_graph.json itself to add this newer data is out of scope for Item 6 (would require re-scoring, explicitly forbidden) and was not performed."
+      ]
+    }
+  },
+  "provider_calls": 0,
+  "tradingagents_calls": 0
+}

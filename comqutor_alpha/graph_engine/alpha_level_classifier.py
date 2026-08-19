@@ -57,6 +57,36 @@ REGIME_LEVEL = "regime_level"
 CANONICAL_LEVELS = (CANDIDATE, ACTIVE, DOMINANT, REGIME_LEVEL)
 _LEVEL_RANK = {CANDIDATE: 0, ACTIVE: 1, DOMINANT: 2, REGIME_LEVEL: 3}
 
+# QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): a presentation-
+# only, additive refinement layered on top of the four canonical levels
+# above -- never a fifth canonical level, never a change to qualified_level/
+# target_level/is_blocked/blocked_from/blocked_reason_codes themselves (all
+# unchanged, still exactly as this module already computed them). John's
+# own report for this module explicitly declined to gate Active any
+# further ("Case A/B: candidate/active have no qualification gate beyond
+# the score itself"); this task asks specifically for a *display* label
+# distinguishing an Alpha that only reads "active" because a qualification
+# ceiling held back a genuinely higher (dominant-or-above) raw signal, from
+# one that is genuinely, natively active. Reuses is_blocked/blocked_from/
+# blocked_reason_codes verbatim -- never a new qualification check, never a
+# new threshold.
+CAPPED_ACTIVE = "capped_active"
+
+
+def _activation_level_for(qualified_level: str, is_blocked: bool, blocked_from: tuple[str, ...]) -> str:
+    """``capped_active`` applies exactly when the Alpha landed at ``active``
+    but was blocked down from ``dominant`` (whether or not ``regime_level``
+    was also in play -- both land at the same qualified_level=active, and
+    John's vocabulary has no separate "capped_dominant"/"double-capped"
+    label). A genuinely-qualified ``dominant``/``regime_level`` Alpha is
+    never touched here, even if it was itself blocked down from a still
+    higher target (e.g. dominant-blocked-from-regime_level) -- John's own
+    Case D says a currently-dominant Alpha must never be downgraded by this
+    presentation layer, and no "capped_dominant" vocabulary was requested."""
+    if qualified_level == ACTIVE and is_blocked and DOMINANT in blocked_from:
+        return CAPPED_ACTIVE
+    return qualified_level
+
 # John's four canonical, product-facing blocked reasons (task section 9).
 # Never invent a fifth; a diagnostic condition with no clean match among
 # these four is still recorded in diagnostic_reason_codes, just omitted
@@ -191,6 +221,10 @@ class AlphaLevelClassification:
     blocked_reason_codes: tuple[str, ...]
     diagnostic_reason_codes: tuple[str, ...]
     classification_version: str = CLASSIFICATION_VERSION
+    # QA Closure v0.1.2 Item 4: additive presentation-only field -- see
+    # _activation_level_for. Never consumed by qualification logic itself;
+    # a display-facing refinement of qualified_level only.
+    activation_level: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -201,6 +235,7 @@ class AlphaLevelClassification:
             "blocked_reason_codes": list(self.blocked_reason_codes),
             "diagnostic_reason_codes": list(self.diagnostic_reason_codes),
             "classification_version": self.classification_version,
+            "activation_level": self.activation_level,
         }
 
 
@@ -287,6 +322,7 @@ def classify_alpha_level(
         blocked_from=tuple(blocked_from),
         blocked_reason_codes=tuple(blocked_reason_codes),
         diagnostic_reason_codes=tuple(diagnostic_reason_codes),
+        activation_level=_activation_level_for(qualified_level, is_blocked, tuple(blocked_from)),
     )
 
 
@@ -306,6 +342,7 @@ def _alpha_summary(entry: Mapping[str, Any]) -> dict[str, Any]:
         "is_blocked": entry.get("is_blocked"),
         "blocked_from": entry.get("blocked_from"),
         "blocked_reason_codes": entry.get("blocked_reason_codes"),
+        "activation_level": entry.get("activation_level"),
     }
 
 
@@ -380,6 +417,7 @@ __all__ = [
     "ACTIVE_THRESHOLD",
     "APPROVED_GATING",
     "CANDIDATE",
+    "CAPPED_ACTIVE",
     "CANONICAL_BLOCKED_REASONS",
     "CANONICAL_LEVELS",
     "CLASSIFICATION_VERSION",

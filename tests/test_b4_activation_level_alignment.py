@@ -19,6 +19,8 @@ Section map:
     F - collection consistency / five-way UI-partition exclusivity
     G - persistence whitelist consistency (old and new payloads)
     H - B2 Conflict Core compatibility (byte-identical inputs, unaffected admission)
+    I - QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment):
+        activation_level presentation field, Conflict Detector pass-through
 """
 
 from __future__ import annotations
@@ -35,6 +37,7 @@ from comqutor_alpha.graph_engine.alpha_level_classifier import (
     ACTIVE_THRESHOLD,
     CANDIDATE,
     CANONICAL_BLOCKED_REASONS,
+    CAPPED_ACTIVE,
     CLASSIFICATION_VERSION,
     DOMINANT,
     DOMINANT_THRESHOLD,
@@ -526,6 +529,62 @@ def test_g_new_b4_fields_round_trip_through_real_persistence():
     assert stored["blocked_reason_codes"] == list(entry["blocked_reason_codes"])
     assert stored["diagnostic_reason_codes"] == list(entry["diagnostic_reason_codes"])
     assert stored["classification_version"] == CLASSIFICATION_VERSION
+    # QA Closure v0.1.2 Item 4: the new additive field round-trips exactly
+    # like every field above.
+    assert stored["activation_level"] == entry["activation_level"] == DOMINANT
+
+
+def test_i_capped_active_conflict_structure_round_trips_through_real_db_persistence():
+    # The real A301 shape (run 5ffe121a-68fd-473b-82b5-c9465332d8a2): a
+    # dominant-scored Alpha capped to active by NO_LOCAL_STRUCTURE_SUPPORT,
+    # in an admitted conflict, persisted to and reconstructed from a real
+    # SQLite DB -- confirms bull_structure/bear_structure's own new
+    # additive field survives the full week4_persistence round trip, not
+    # only the in-memory Conflict Detector output.
+    repo = _repo()
+    run_id, ticker = "b4_i_db", "NVDA"
+
+    bull = _entry(
+        "A301", score=70.0, uncapped=71.8756, cap_reason_codes=["NO_LOCAL_STRUCTURE_SUPPORT"],
+        regime_gate_passed=False,
+    )
+    bear = _entry("A304", score=70.1, uncapped=70.1, cap_reason_codes=[], regime_gate_passed=False)
+    for entry, direction in ((bull, "positive"), (bear, "negative")):
+        entry["formula_version"] = ACTIVATION_V2_FORMULA_VERSION
+        entry["direction"] = direction
+        entry["claim_ids"] = []
+        entry["evidence"] = []
+        entry["reason_codes"] = []
+        entry["components"] = {}
+
+    payload = {"formula_version": ACTIVATION_V2_FORMULA_VERSION, "alphas": [bull, bear]}
+    classified = classify_and_rebuild_collections(payload)
+    bull_entry = next(e for e in classified["alphas"] if e["alpha_id"] == "A301")
+    assert bull_entry["activation_level"] == CAPPED_ACTIVE
+
+    activation = activation_payload(*classified["alphas"])
+    conflict = detect_alpha_conflicts(
+        run_id=run_id,
+        ticker=ticker,
+        activation_payload=activation,
+        alpha_matches=[
+            match_record("cA", "A301"),
+            match_record("cA2", "A301"),
+            match_record("cB", "A304"),
+            match_record("cB2", "A304"),
+        ],
+    )
+    assert conflict["main_conflict"] is not None
+    repo.persist_week4_results(
+        run_id=run_id, ticker=ticker, activation_payload=activation, conflict_payload=conflict
+    )
+
+    reconstructed = repo.get_week4_conflict_result(run_id)
+    main = reconstructed["main_conflict"]
+    by_alpha = {main["bull_structure"]["alpha_id"]: main["bull_structure"], main["bear_structure"]["alpha_id"]: main["bear_structure"]}
+    assert by_alpha["A301"]["activation_level"] == CAPPED_ACTIVE
+    assert by_alpha["A301"]["blocked_reason_codes"] == ["NO_LOCAL_STRUCTURE_SUPPORT"]
+    assert by_alpha["A304"]["activation_level"] == "dominant"
 
 
 def test_g_old_v2_payload_predating_b4_persists_and_reads_back_without_fabricating_fields():
@@ -602,6 +661,9 @@ _B4_OWNED_FIELDS = frozenset(
         "blocked_reason_codes",
         "diagnostic_reason_codes",
         "classification_version",
+        # QA Closure v0.1.2 Item 4: additive presentation-only field, owned
+        # by this same classifier alongside the others above.
+        "activation_level",
     }
 )
 
@@ -657,3 +719,188 @@ def test_h_every_new_admissible_status_can_still_be_admitted_by_b2(status):
         ],
     )
     assert result["main_conflict"] is not None
+
+
+# ---------------------------------------------------------------------------
+# Section I -- QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment).
+# ``activation_level`` is a presentation-only refinement of
+# ``qualified_level`` -- these tests never touch score/threshold/
+# qualification logic, only the new additive field's own derivation and its
+# pass-through into the Conflict Detector's bull/bear structure blocks.
+# ---------------------------------------------------------------------------
+
+
+def test_i_active_qualified_no_cap_shows_plain_active():
+    result = classify_alpha_level(activation_score=63.0, uncapped_score=63.0, dominant_cap_reason_codes=())
+    assert result.qualified_level == ACTIVE
+    assert result.activation_level == ACTIVE
+    assert result.is_blocked is False
+
+
+def test_i_active_score_capped_by_ticker_specific_evidence_shows_capped_active():
+    # Real shape: a genuinely dominant-or-above raw signal (uncapped_score
+    # >= 70) held down to an active-band activation_score by B4's own
+    # existing NO_TICKER_SPECIFIC_EVIDENCE cap (activation_scorer_v2.
+    # CAP_NO_TICKER_SPECIFIC_EVIDENCE = 60.0) -- never an invented reason.
+    result = classify_alpha_level(
+        activation_score=60.0,
+        uncapped_score=82.0,
+        dominant_cap_reason_codes=["NO_TICKER_SPECIFIC_EVIDENCE"],
+    )
+    assert result.qualified_level == ACTIVE
+    assert result.activation_level == CAPPED_ACTIVE
+    assert result.is_blocked is True
+    assert result.blocked_from == (DOMINANT,)
+    assert result.blocked_reason_codes == (REASON_NO_TICKER_SPECIFIC_EVIDENCE,)
+    # Case B's own real number, byte-identical -- this task never touches it.
+    assert result.blocked_reason_codes[0] == "NO_TICKER_SPECIFIC_EVIDENCE"
+
+
+def test_i_active_score_capped_by_local_structure_shows_capped_active():
+    # Real A301 shape (run 5ffe121a-68fd-473b-82b5-c9465332d8a2): uncapped
+    # 71.8756 -> capped to exactly 70.0 by CAP_NO_LOCAL_STRUCTURE_SUPPORT.
+    result = classify_alpha_level(
+        activation_score=70.0,
+        uncapped_score=71.8756,
+        dominant_cap_reason_codes=["NO_LOCAL_STRUCTURE_SUPPORT"],
+    )
+    assert result.qualified_level == ACTIVE
+    assert result.activation_level == CAPPED_ACTIVE
+    assert result.blocked_reason_codes == (REASON_NO_LOCAL_STRUCTURE_SUPPORT,)
+    # Score/uncapped_score themselves are never touched by this presentation
+    # layer -- they are simply the caller's own already-computed inputs,
+    # passed straight through to the dataclass's own well-established
+    # qualified_level/target_level fields (unchanged behavior), not
+    # re-derived here.
+    assert result.target_level == DOMINANT
+
+
+def test_i_genuinely_dominant_never_downgraded_to_capped_active():
+    result = classify_alpha_level(activation_score=84.5, uncapped_score=84.5, dominant_cap_reason_codes=())
+    assert result.qualified_level == DOMINANT
+    assert result.activation_level == DOMINANT
+    assert result.is_blocked is False
+
+
+def test_i_genuinely_regime_level_never_downgraded():
+    result = classify_alpha_level(
+        activation_score=90.0, uncapped_score=90.0, dominant_cap_reason_codes=(), regime_gate_passed=True
+    )
+    assert result.qualified_level == REGIME_LEVEL
+    assert result.activation_level == REGIME_LEVEL
+
+
+def test_i_dominant_blocked_from_regime_shows_plain_dominant_never_capped_active():
+    # An Alpha whose qualified_level is genuinely "dominant" right now (per
+    # John's own Case D: "if current B4 fully qualifies the Alpha as
+    # Dominant... do not downgrade") must display "dominant" even though
+    # is_blocked is True here (blocked from regime_level, not from
+    # dominant) -- John's six-value vocabulary has no separate
+    # "capped_dominant" label, and this task does not invent one.
+    result = classify_alpha_level(
+        activation_score=90.0,
+        uncapped_score=90.0,
+        dominant_cap_reason_codes=(),
+        regime_gate_passed=False,
+        regime_gate_failures=["SCORE_BELOW_REGIME_THRESHOLD"],
+    )
+    assert result.qualified_level == DOMINANT
+    assert result.is_blocked is True
+    assert result.blocked_from == (REGIME_LEVEL,)
+    assert result.activation_level == DOMINANT
+
+
+def test_i_double_blocked_from_dominant_and_regime_still_shows_capped_active():
+    result = classify_alpha_level(
+        activation_score=60.0,
+        uncapped_score=95.0,
+        dominant_cap_reason_codes=["NO_TICKER_SPECIFIC_EVIDENCE"],
+        regime_gate_passed=False,
+        regime_gate_failures=["SCORE_BELOW_REGIME_THRESHOLD"],
+    )
+    assert result.qualified_level == ACTIVE
+    assert result.blocked_from == (DOMINANT, REGIME_LEVEL)
+    assert result.activation_level == CAPPED_ACTIVE
+
+
+def test_i_candidate_shows_plain_candidate_no_authoritative_candidate_active_definition():
+    # Task section 4.2: no existing B4/Product Owner definition for
+    # "candidate_active" was found -- candidate stays exactly "candidate",
+    # never relabeled.
+    result = classify_alpha_level(activation_score=25.0, uncapped_score=25.0, dominant_cap_reason_codes=())
+    assert result.qualified_level == CANDIDATE
+    assert result.activation_level == CANDIDATE
+
+
+def test_i_activation_level_present_in_rebuilt_collection_summaries():
+    payload = activation_payload(
+        {**activation_entry("A301", score=70.0), "uncapped_score": 71.8756, "cap_reason_codes": ["NO_LOCAL_STRUCTURE_SUPPORT"]},
+    )
+    result = classify_and_rebuild_collections(payload)
+    assert result["alphas"][0]["activation_level"] == CAPPED_ACTIVE
+    # The rebuilt active_alphas collection summary carries it too -- not
+    # only the raw per-alpha entries list.
+    active_summaries = {e["alpha_id"]: e for e in result["active_alphas"]}
+    assert active_summaries["A301"]["activation_level"] == CAPPED_ACTIVE
+
+
+def test_i_conflict_detector_structure_block_carries_activation_level_and_cap_reason():
+    # Real shape: the Conflict Detector's own bull/bear structure summary
+    # must show the SAME capped_active + reason AlphaCard already shows for
+    # the exact same Alpha elsewhere -- the concrete gap this task closes.
+    a301 = activation_entry("A301", score=70.0, direction="positive")
+    a301["activation_level"] = CAPPED_ACTIVE
+    a301["blocked_reason_codes"] = ["NO_LOCAL_STRUCTURE_SUPPORT"]
+    a304 = activation_entry("A304", score=70.1, direction="negative")
+    a304["activation_level"] = "dominant"
+
+    result = detect_alpha_conflicts(
+        run_id="b4_i_conflict",
+        ticker="NVDA",
+        activation_payload=activation_payload(a301, a304),
+        alpha_matches=[
+            match_record("cA", "A301"),
+            match_record("cA2", "A301"),
+            match_record("cB", "A304"),
+            match_record("cB2", "A304"),
+        ],
+    )
+    assert result["main_conflict"] is not None
+    bull = result["main_conflict"]["bull_structure"]
+    bear = result["main_conflict"]["bear_structure"]
+    by_alpha = {bull["alpha_id"]: bull, bear["alpha_id"]: bear}
+    assert by_alpha["A301"]["activation_level"] == CAPPED_ACTIVE
+    assert by_alpha["A301"]["blocked_reason_codes"] == ["NO_LOCAL_STRUCTURE_SUPPORT"]
+    assert by_alpha["A304"]["activation_level"] == "dominant"
+    assert "blocked_reason_codes" not in by_alpha["A304"]
+    # Never re-derives activation_score/status from activation_level --
+    # both stay exactly the already-computed values.
+    assert by_alpha["A301"]["activation_score"] == 70.0
+    assert by_alpha["A301"]["status"] == "active"
+
+
+def test_i_conflict_detector_structure_block_omits_activation_level_on_historical_entry():
+    # No activation_level/blocked_reason_codes at all (a payload predating
+    # this task) -- fails gracefully (field simply absent), never
+    # fabricates a classification that was never computed.
+    a101 = activation_entry("A101", score=65.0, direction="positive")
+    a304 = activation_entry("A304", score=65.0, direction="negative")
+
+    result = detect_alpha_conflicts(
+        run_id="b4_i_historical",
+        ticker="NVDA",
+        activation_payload=activation_payload(a101, a304),
+        alpha_matches=[
+            match_record("cA", "A101"),
+            match_record("cA2", "A101"),
+            match_record("cB", "A304"),
+            match_record("cB2", "A304"),
+        ],
+    )
+    assert result["main_conflict"] is not None
+    bull = result["main_conflict"]["bull_structure"]
+    bear = result["main_conflict"]["bear_structure"]
+    assert "activation_level" not in bull
+    assert "blocked_reason_codes" not in bull
+    assert "activation_level" not in bear
+    assert "blocked_reason_codes" not in bear

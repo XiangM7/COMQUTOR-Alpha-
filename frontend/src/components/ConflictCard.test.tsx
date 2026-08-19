@@ -188,6 +188,72 @@ describe("ConflictCard", () => {
     expect(screen.getByText("No B2 evidence gaps identified.")).toBeInTheDocument();
   });
 
+  // QA Closure v0.1.2 Item 3 (Candidate Conflict vs Main Conflict Strict
+  // Separation), Invariant 2: the badge text itself, not just the CSS
+  // class, must reflect the authoritative isMain prop -- ConflictCard
+  // never reads any field off `conflict` itself to decide this (see the
+  // component's own comment: "Main is a strict subset of Admitted, never
+  // a separate/competing status").
+  it("shows the Admitted conflict badge, never Main conflict, when isMain is not set", () => {
+    render(<ConflictCard conflict={makeConflict()} />);
+    expect(screen.getByText("Admitted conflict")).toBeInTheDocument();
+    expect(screen.queryByText("Main conflict")).not.toBeInTheDocument();
+  });
+
+  it("shows the Main conflict badge only when isMain is explicitly true", () => {
+    render(<ConflictCard conflict={makeConflict()} isMain />);
+    expect(screen.getByText("Main conflict")).toBeInTheDocument();
+    expect(screen.queryByText("Admitted conflict")).not.toBeInTheDocument();
+  });
+
+  // QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment).
+  it("shows capped_active + cap reason on the bull side, instead of plain active, when the backend provides it", () => {
+    // Real A301/A304 shape, run 5ffe121a-68fd-473b-82b5-c9465332d8a2.
+    render(
+      <ConflictCard
+        conflict={makeConflict({
+          bull_structure: {
+            ...makeConflict().bull_structure,
+            status: "active",
+            activation_score: 70.0,
+            activation_level: "capped_active",
+            blocked_reason_codes: ["NO_LOCAL_STRUCTURE_SUPPORT"],
+          },
+        })}
+      />
+    );
+    const activationLine = screen.getByText(/^Activation: 70\.0/);
+    expect(activationLine.textContent).toContain("capped_active");
+    expect(activationLine.textContent).toContain("No supporting Structure Graph edges");
+    // Never silently shown as plain "active".
+    expect(activationLine.textContent).not.toMatch(/\(active\)/);
+  });
+
+  it("shows plain status (e.g. dominant) with no cap reason when activation_level is not capped_active", () => {
+    render(
+      <ConflictCard
+        conflict={makeConflict({
+          bear_structure: {
+            ...makeConflict().bear_structure,
+            status: "dominant",
+            activation_score: 84.5,
+            activation_level: "dominant",
+          },
+        })}
+      />
+    );
+    const activationLine = screen.getByText(/^Activation: 84\.5/);
+    expect(activationLine.textContent).toBe("Activation: 84.5 (dominant)");
+  });
+
+  it("falls back to the legacy status on a conflict payload predating activation_level", () => {
+    render(<ConflictCard conflict={makeConflict()} />);
+    // makeConflict()'s bull_structure.status defaults to "active" with no
+    // activation_level field at all -- must render exactly as before,
+    // never crash, never fabricate "capped_active".
+    expect(screen.getByText(/^Activation: 66\.5/).textContent).toBe("Activation: 66.5 (active)");
+  });
+
   // Product-language guardrails scoped to this card's own authored copy
   // (badges, headers, static labels) -- never asserted against real
   // quoted evidence text, which is backend data shown verbatim and is not

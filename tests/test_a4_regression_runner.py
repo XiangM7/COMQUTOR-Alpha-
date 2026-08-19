@@ -15,6 +15,9 @@ Section map:
     D - Conflict comparison (admitted/candidate/main_conflict)
     E - Evidence polarity (contract-integrity only, never semantic accuracy)
     F - Safety (Provider=0, TradingAgents=0, hash-identical, determinism, CLI)
+    G - QA Closure v0.1.2 Item 1 (six-ticker regression_report.json contract:
+        detected_positive/negative_alphas, unexpected_dominant_alphas,
+        expected/detected_conflicts, evidence_fact_count, overall_status)
 """
 
 from __future__ import annotations
@@ -33,12 +36,19 @@ from comqutor_alpha.regression.evaluator import (
     STANCE_SOURCE_LLM_SEMANTIC,
     STANCE_SOURCE_MIXED,
     STANCE_SOURCE_UNAVAILABLE,
+    STATUS_FAIL,
+    STATUS_PASS,
+    STATUS_WARNING,
     alpha_comparison,
     conflict_comparison,
     detected_alpha_sets,
     dominance_guard_flags,
     evaluate_ticker,
     evidence_polarity_errors,
+    six_ticker_qa_alpha_fields,
+    six_ticker_qa_conflict_fields,
+    six_ticker_qa_evidence_fact_count,
+    six_ticker_qa_overall_status,
     stance_source,
 )
 from comqutor_alpha.regression.labels import (
@@ -541,6 +551,240 @@ class TestSectionFSafety:
 # ---------------------------------------------------------------------------
 # Report assembly (stance_source classification + top-level assembly)
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Section G -- QA Closure v0.1.2 Item 1 (six-ticker regression_report.json
+# contract). Every field here is derived from alpha_comparison/
+# conflict_comparison/detected_alpha_sets' own already-computed output, or
+# from a graph payload's own already-persisted per-alpha
+# unique_evidence_fact_count -- never a new classification/grouping/
+# admissibility judgment.
+# ---------------------------------------------------------------------------
+
+
+class TestSectionGSixTickerQAContract:
+    def test_g34_detected_positive_and_negative_alphas_are_intersections_with_detected_set(self):
+        label = {"expected_positive_alphas": ["A101"], "expected_negative_alphas": ["A304"], "conditional_alphas": []}
+        graph = {
+            "active_alphas": [_alpha_entry("A101"), _alpha_entry("A601")],
+            "dominant_alphas": [],
+            "regime_level_alphas": [],
+            "candidate_alphas": [],
+            "blocked_alphas": [],
+        }
+        detected = detected_alpha_sets(graph)
+        fields = six_ticker_qa_alpha_fields(label, detected)
+        assert fields["detected_positive_alphas"] == ["A101"]
+        # A304 (expected negative) never showed up in this graph at all --
+        # it is absent from detected_negative_alphas, not fabricated.
+        assert fields["detected_negative_alphas"] == []
+
+    def test_g35_unexpected_dominant_alphas_excludes_positive_negative_and_conditional(self):
+        label = {"expected_positive_alphas": ["A101"], "expected_negative_alphas": [], "conditional_alphas": ["A601"]}
+        graph = {
+            "active_alphas": [],
+            "dominant_alphas": [_alpha_entry("A101"), _alpha_entry("A102"), _alpha_entry("A601")],
+            "regime_level_alphas": [],
+            "candidate_alphas": [],
+            "blocked_alphas": [],
+        }
+        detected = detected_alpha_sets(graph)
+        fields = six_ticker_qa_alpha_fields(label, detected)
+        # A101 expected, A601 conditional -- neither counts as unexpected;
+        # A102 was never declared anywhere in the label -> unexpected.
+        assert fields["unexpected_dominant_alphas"] == ["A102"]
+
+    def test_g36_unexpected_dominant_alphas_never_flags_a_merely_active_alpha(self):
+        # A dominant-only check: an undeclared alpha that is merely
+        # "active" (not dominant) must never appear here -- that is what
+        # the existing, separate unexpected_alphas field is for.
+        label = {"expected_positive_alphas": [], "expected_negative_alphas": [], "conditional_alphas": []}
+        graph = {
+            "active_alphas": [_alpha_entry("A999")],
+            "dominant_alphas": [],
+            "regime_level_alphas": [],
+            "candidate_alphas": [],
+            "blocked_alphas": [],
+        }
+        detected = detected_alpha_sets(graph)
+        fields = six_ticker_qa_alpha_fields(label, detected)
+        assert fields["unexpected_dominant_alphas"] == []
+
+    def test_g37_expected_conflicts_is_the_same_j2_set_as_allowed_main_conflicts(self):
+        conflict_cmp = {"allowed_main_conflicts": ["A101__A304"], "admitted_conflicts": [], "candidate_conflicts": []}
+        fields = six_ticker_qa_conflict_fields(conflict_cmp)
+        assert fields["expected_conflicts"] == ["A101__A304"]
+
+    def test_g38_detected_conflicts_is_the_union_of_admitted_and_candidate_never_a_reclassification(self):
+        conflict_cmp = {
+            "allowed_main_conflicts": [],
+            "admitted_conflicts": ["A101__A304"],
+            "candidate_conflicts": ["A301__A304"],
+        }
+        fields = six_ticker_qa_conflict_fields(conflict_cmp)
+        assert fields["detected_conflicts"] == ["A101__A304", "A301__A304"]
+        # The union view never mutates B2's own separate collections.
+        assert conflict_cmp["admitted_conflicts"] == ["A101__A304"]
+        assert conflict_cmp["candidate_conflicts"] == ["A301__A304"]
+
+    def test_g39_evidence_fact_count_sums_unique_facts_never_raw_claims(self):
+        graph = {
+            "activation_versions": {
+                "v2": {
+                    "alphas": [
+                        {"alpha_id": "A101", "raw_supporting_claim_count": 7, "unique_evidence_fact_count": 3},
+                        {"alpha_id": "A301", "raw_supporting_claim_count": 2, "unique_evidence_fact_count": 2},
+                    ]
+                }
+            }
+        }
+        # 3 + 2 = 5 (unique facts), never 7 + 2 = 9 (raw claims).
+        assert six_ticker_qa_evidence_fact_count(graph) == 5
+
+    def test_g40_evidence_fact_count_is_zero_when_no_v2_alphas(self):
+        assert six_ticker_qa_evidence_fact_count({}) == 0
+
+    def test_g41_overall_status_pass_when_fully_evaluated_and_every_expectation_matches(self):
+        result = {
+            "run_selection_status": "selected",
+            "offline_reprocess_status": "completed",
+            "artifact_completeness": "pass",
+            "ticker_consistency": "pass",
+            "missing_expected_alphas": [],
+            "unexpected_dominant_alphas": [],
+            "main_conflict_match": True,
+            "evidence_polarity_errors": 0,
+        }
+        status, reasons = six_ticker_qa_overall_status(result, label_available=True)
+        assert (status, reasons) == (STATUS_PASS, [])
+
+    def test_g42_overall_status_fail_when_label_not_available_regardless_of_other_fields(self):
+        result = {
+            "run_selection_status": "selected",
+            "offline_reprocess_status": "completed",
+            "artifact_completeness": "pass",
+            "ticker_consistency": "pass",
+        }
+        status, reasons = six_ticker_qa_overall_status(result, label_available=False)
+        assert (status, reasons) == (STATUS_FAIL, ["LABEL_NOT_AVAILABLE"])
+
+    def test_g43_overall_status_fail_when_saved_run_not_available(self):
+        result = {"run_selection_status": STATUS_RUN_ARTIFACT_NOT_AVAILABLE}
+        status, reasons = six_ticker_qa_overall_status(result, label_available=True)
+        assert (status, reasons) == (STATUS_FAIL, ["SAVED_RUN_NOT_AVAILABLE"])
+
+    def test_g44_overall_status_distinguishes_artifact_not_available_from_execution_failed(self):
+        no_error = {"run_selection_status": "selected", "offline_reprocess_status": "OFFLINE_REPROCESS_PATH_UNAVAILABLE"}
+        status, reasons = six_ticker_qa_overall_status(no_error, label_available=True)
+        assert (status, reasons) == (STATUS_FAIL, ["ARTIFACT_NOT_AVAILABLE"])
+
+        with_error = {
+            "run_selection_status": "selected",
+            "offline_reprocess_status": "OFFLINE_REPROCESS_PATH_UNAVAILABLE",
+            "offline_reprocess_error": "boom",
+        }
+        status, reasons = six_ticker_qa_overall_status(with_error, label_available=True)
+        assert (status, reasons) == (STATUS_FAIL, ["REGRESSION_EXECUTION_FAILED"])
+
+    def test_g45_overall_status_fail_when_ticker_consistency_fails(self):
+        result = {
+            "run_selection_status": "selected",
+            "offline_reprocess_status": "completed",
+            "artifact_completeness": "pass",
+            "ticker_consistency": "fail",
+        }
+        status, reasons = six_ticker_qa_overall_status(result, label_available=True)
+        assert (status, reasons) == (STATUS_FAIL, ["TICKER_CONSISTENCY_FAILED"])
+
+    def test_g46_overall_status_warning_never_fail_for_a_provisional_label_mismatch_alone(self):
+        # Matches run_regression.py's own documented exit-code philosophy:
+        # "A J2 provisional expected-vs-detected mismatch alone NEVER
+        # changes the exit code." A mismatch must be reported (never
+        # silently "pass") but must never be conflated with a genuine
+        # infra/data failure.
+        result = {
+            "run_selection_status": "selected",
+            "offline_reprocess_status": "completed",
+            "artifact_completeness": "pass",
+            "ticker_consistency": "pass",
+            "missing_expected_alphas": ["A101"],
+            "unexpected_dominant_alphas": [],
+            "main_conflict_match": None,
+            "evidence_polarity_errors": 0,
+        }
+        status, reasons = six_ticker_qa_overall_status(result, label_available=True)
+        assert (status, reasons) == (STATUS_WARNING, ["MISSING_EXPECTED_ALPHAS"])
+
+    def test_g47_overall_status_warning_accumulates_every_applicable_reason_code(self):
+        result = {
+            "run_selection_status": "selected",
+            "offline_reprocess_status": "completed",
+            "artifact_completeness": "pass",
+            "ticker_consistency": "pass",
+            "missing_expected_alphas": ["A101"],
+            "unexpected_dominant_alphas": ["A102"],
+            "main_conflict_match": False,
+            "evidence_polarity_errors": 1,
+        }
+        status, reasons = six_ticker_qa_overall_status(result, label_available=True)
+        assert status == STATUS_WARNING
+        assert reasons == [
+            "MISSING_EXPECTED_ALPHAS",
+            "UNEXPECTED_DOMINANT_ALPHAS",
+            "MAIN_CONFLICT_MISMATCH",
+            "EVIDENCE_POLARITY_ERRORS_PRESENT",
+        ]
+
+    def test_g48_evaluate_ticker_no_label_reports_label_not_available_and_every_contract_field_present(self):
+        selection = {
+            "run_selection_status": STATUS_RUN_ARTIFACT_NOT_AVAILABLE,
+            "run_id": None,
+            "analysis_date": None,
+            "file_artifact_completeness": None,
+            "database_record_status": "not_applicable",
+        }
+        result = evaluate_ticker("ZZZZ", selection, None, replay_output_root="/tmp/should-not-be-used")
+        required_fields = (
+            "ticker", "expected_positive_alphas", "detected_positive_alphas", "missing_expected_alphas",
+            "unexpected_dominant_alphas", "expected_negative_alphas", "detected_negative_alphas",
+            "expected_conflicts", "detected_conflicts", "candidate_conflicts", "admitted_conflicts",
+            "ticker_consistency", "graph_nodes", "graph_edges", "evidence_fact_count", "overall_status",
+        )
+        missing_keys = [f for f in required_fields if f not in result]
+        assert missing_keys == [], f"contract fields missing from evaluate_ticker result: {missing_keys}"
+        assert result["overall_status"] == STATUS_FAIL
+        assert result["overall_status_reason_codes"] == ["LABEL_NOT_AVAILABLE"]
+
+    def test_g49_evaluate_ticker_no_saved_run_with_label_present_reports_saved_run_not_available_never_pass(self):
+        selection = {
+            "run_selection_status": STATUS_RUN_ARTIFACT_NOT_AVAILABLE,
+            "run_id": None,
+            "analysis_date": None,
+            "file_artifact_completeness": None,
+            "database_record_status": "not_applicable",
+        }
+        label = {"expected_positive_alphas": ["A101"], "expected_negative_alphas": ["A304"], "conditional_alphas": []}
+        result = evaluate_ticker("NVDA", selection, label, replay_output_root="/tmp/should-not-be-used")
+        assert result["overall_status"] == STATUS_FAIL
+        assert result["overall_status_reason_codes"] == ["SAVED_RUN_NOT_AVAILABLE"]
+        assert result["overall_status"] != STATUS_PASS
+
+    def test_g50_artifact_missing_files_reports_run_selections_own_list_verbatim_never_recomputed(self):
+        selection = {
+            "run_selection_status": STATUS_RUN_ARTIFACT_NOT_AVAILABLE,
+            "run_id": None,
+            "analysis_date": None,
+            "file_artifact_completeness": None,
+            "file_artifact_missing": [],
+            "database_record_status": "not_applicable",
+        }
+        result = evaluate_ticker("ZZZZ", selection, None, replay_output_root="/tmp/should-not-be-used")
+        assert result["artifact_missing_files"] == []
+
+        selection_with_gap = dict(selection, file_artifact_missing=["conflicts.json", "run_audit.json"])
+        result_with_gap = evaluate_ticker("ZZZZ", selection_with_gap, None, replay_output_root="/tmp/should-not-be-used")
+        assert result_with_gap["artifact_missing_files"] == ["conflicts.json", "run_audit.json"]
 
 
 class TestReportAssemblyAndStanceSource:

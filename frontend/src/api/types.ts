@@ -209,6 +209,10 @@ export interface DominantAlpha {
    * scoped to exactly the level(s) in blocked_from. Empty when not
    * blocked. */
   blocked_reason_codes?: CanonicalBlockedReason[];
+  /** QA Closure v0.1.2 Item 4: the single display-facing level (see
+   * ActivationDisplayLevel). Absent on a historical payload predating
+   * this task -- the UI must then fall back to `status`/`qualified_level`. */
+  activation_level?: ActivationDisplayLevel;
 }
 
 // ---------------------------------------------------------------------------
@@ -374,6 +378,24 @@ export const CANONICAL_BLOCKED_REASONS = [
   "NO_TICKER_SPECIFIC_EVIDENCE",
 ] as const;
 export type CanonicalBlockedReason = (typeof CANONICAL_BLOCKED_REASONS)[number];
+
+/** QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): a
+ * presentation-only refinement of CanonicalAlphaLevel -- "capped_active"
+ * is never a fifth qualified_level/target_level/blocked_from value (those
+ * stay exactly the four CANONICAL_ALPHA_LEVELS above); it is this
+ * dedicated display field's own value, read directly from the backend
+ * (alpha_level_classifier.CAPPED_ACTIVE), never recomputed from score/
+ * is_blocked/blocked_from in the frontend. "candidate_active" is
+ * deliberately absent: no authoritative existing B4 definition for it was
+ * found (task section 4.2) -- never invented here either. */
+export const ACTIVATION_DISPLAY_LEVELS = [
+  "candidate",
+  "active",
+  "capped_active",
+  "dominant",
+  "regime_level",
+] as const;
+export type ActivationDisplayLevel = (typeof ACTIVATION_DISPLAY_LEVELS)[number];
 
 /** A Week 3 Structure Graph "factor" node -- see graph_builder._serialize_node. */
 export interface StructureGraphNode {
@@ -549,6 +571,10 @@ export interface AlphaActivation {
    * useful only in a collapsible/expanded detail view. */
   diagnostic_reason_codes?: string[];
   classification_version?: string;
+  /** QA Closure v0.1.2 Item 4: the single display-facing level (see
+   * ActivationDisplayLevel). Absent on a historical payload predating
+   * this task -- the UI must then fall back to `status`/`qualified_level`. */
+  activation_level?: ActivationDisplayLevel;
 }
 
 /** Additive fields on components.local_structure_support (Structure
@@ -765,6 +791,14 @@ export interface ConflictSideStructure {
   match_scores: number[];
   /** Additive; absent on a payload predating this field. */
   evidence_facts?: ConflictEvidenceFactGroup[];
+  /** QA Closure v0.1.2 Item 4: the same display-facing level AlphaCard
+   * shows for this Alpha elsewhere (see ActivationDisplayLevel). Absent
+   * on a payload predating this task -- the UI must then fall back to
+   * `status`. */
+  activation_level?: ActivationDisplayLevel;
+  /** Populated exactly when activation_level is "capped_active" -- the
+   * existing B4 reason code(s) the qualification ceiling came from. */
+  blocked_reason_codes?: CanonicalBlockedReason[];
 }
 
 /** One admitted conflict -- see week4_persistence._whitelist_conflict /

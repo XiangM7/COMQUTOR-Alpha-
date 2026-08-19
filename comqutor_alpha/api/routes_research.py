@@ -549,12 +549,21 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     # Track A2: "completed" additionally requires the Ticker Consistency
     # Audit and artifact completeness (both written by
     # _run_week3_graph_pipeline's finalizer, synchronously, before this
-    # function is ever called) to not have explicitly failed. A run whose
-    # run_audit.json/artifact_manifest.json were never generated at all
-    # (a historical run predating this sprint, or a context that never
-    # calls the finalizer) reports these fields as ``None`` here -- never
-    # treated as a failure, only an explicit "fail" ever degrades status,
-    # so no pre-existing run is retroactively downgraded.
+    # function is ever called) to have *explicitly* passed. Fail-closed by
+    # design (A2 Final Hardening): a run whose run_audit.json/
+    # artifact_manifest.json were never generated at all -- because the
+    # finalizer/manifest step itself raised, not merely because it found a
+    # missing artifact -- reports these fields as ``None`` here, and
+    # ``None`` is NOT eligible for "completed". Only an explicit "pass"
+    # (``ticker_consistency``/``artifact_completeness`` are strict
+    # pass/fail binaries -- see audit.ticker_consistency.STATUS_PASS/
+    # STATUS_FAIL and artifact_export.ARTIFACT_COMPLETENESS_PASS/FAIL, no
+    # third state) ever qualifies. This intentionally also downgrades any
+    # historical run whose run_audit.json/artifact_manifest.json predates
+    # this sprint (or was never generated for any other reason) to
+    # "partial" the next time its status is recomputed -- a deliberate
+    # trade-off: correctness of the "completed" guarantee outweighs
+    # preserving a stale historical label.
     run_audit_for_gate = load_json_record_if_exists(run_id, "run_audit.json", output_root=output_root)
     ticker_consistency_value = (
         run_audit_for_gate.get("ticker_consistency") if isinstance(run_audit_for_gate, dict) else None
@@ -567,8 +576,8 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         if isinstance(artifact_manifest_for_gate, dict)
         else None
     )
-    ticker_consistency_ok = ticker_consistency_value != "fail"
-    artifact_completeness_ok = artifact_completeness_value != "fail"
+    ticker_consistency_ok = ticker_consistency_value == "pass"
+    artifact_completeness_ok = artifact_completeness_value == "pass"
 
     # "completed" now requires Week 3 (graph build + activation scoring +
     # persistence) *and* Week 4 (conflict detection + persistence) to have

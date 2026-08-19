@@ -242,14 +242,33 @@ def _index_activations(
 
 
 class _ActivationFields:
-    __slots__ = ("score", "status", "direction", "name", "reason_codes")
+    __slots__ = (
+        "score",
+        "status",
+        "direction",
+        "name",
+        "reason_codes",
+        "activation_level",
+        "blocked_reason_codes",
+    )
 
-    def __init__(self, score, status, direction, name, reason_codes: list[str]) -> None:
+    def __init__(
+        self,
+        score,
+        status,
+        direction,
+        name,
+        reason_codes: list[str],
+        activation_level: str | None = None,
+        blocked_reason_codes: list[str] | None = None,
+    ) -> None:
         self.score = score
         self.status = status
         self.direction = direction
         self.name = name
         self.reason_codes = reason_codes
+        self.activation_level = activation_level
+        self.blocked_reason_codes = blocked_reason_codes or []
 
 
 def _extract_activation_fields(entry: Mapping[str, Any], alpha_id: str) -> _ActivationFields:
@@ -273,7 +292,22 @@ def _extract_activation_fields(entry: Mapping[str, Any], alpha_id: str) -> _Acti
     name = entry.get("alpha_name")
     name = str(name) if isinstance(name, str) and name else alpha_id
 
-    return _ActivationFields(score, status, direction, name, reason_codes)
+    # QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): the same
+    # B4 alpha_level_classifier output every other consumer already reads
+    # verbatim -- absent (None/[]) on a historical entry predating B4,
+    # never fabricated. Never re-derived from score/status here.
+    activation_level = entry.get("activation_level")
+    activation_level = str(activation_level) if isinstance(activation_level, str) and activation_level else None
+    raw_blocked_reasons = entry.get("blocked_reason_codes")
+    blocked_reason_codes = (
+        [str(code) for code in raw_blocked_reasons if isinstance(code, str)]
+        if isinstance(raw_blocked_reasons, list)
+        else []
+    )
+
+    return _ActivationFields(
+        score, status, direction, name, reason_codes, activation_level, blocked_reason_codes
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -992,6 +1026,15 @@ def _structure_block(
         "evidence": [c["evidence"] for c in qualifying],
         "match_scores": [c["match_score"] for c in qualifying],
     }
+    # QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): additive;
+    # None/[] on a historical entry predating B4 -- never fabricated. Lets
+    # Conflict Radar show "capped_active" + cap reason instead of just
+    # "active", matching what AlphaCard already shows elsewhere for the
+    # exact same Alpha.
+    if fields.activation_level is not None:
+        block["activation_level"] = fields.activation_level
+    if fields.blocked_reason_codes:
+        block["blocked_reason_codes"] = fields.blocked_reason_codes
     if fact_summary is not None:
         block["evidence_facts"] = [
             {

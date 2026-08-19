@@ -186,6 +186,132 @@ def conflict_comparison(label_block: dict[str, Any] | None, conflict_payload: di
 
 
 # ---------------------------------------------------------------------------
+# QA Closure v0.1.2 Item 1 (six-ticker regression contract) -- additive
+# fields only, derived exclusively from alpha_comparison/conflict_comparison/
+# detected_alpha_sets' own already-computed output and the graph payload's
+# own already-persisted per-alpha ``unique_evidence_fact_count`` (Structure
+# Integrity Repair Sprint, Track 2). Never a new classification, grouping,
+# stance recomputation, or admissibility judgment. Existing keys
+# (``missing_expected``, ``unexpected_alphas``, ``allowed_main_conflicts``,
+# ...) are read by name in tests/test_a4_regression_runner.py and are never
+# renamed -- these are added alongside them.
+# ---------------------------------------------------------------------------
+
+
+def six_ticker_qa_alpha_fields(
+    label_block: dict[str, Any] | None, detected: dict[str, list[str]]
+) -> dict[str, Any]:
+    positive = set(label_block.get("expected_positive_alphas") or ()) if label_block else set()
+    negative = set(label_block.get("expected_negative_alphas") or ()) if label_block else set()
+    conditional = set(label_block.get("conditional_alphas") or ()) if label_block else set()
+    detected_set = set(detected["detected_alphas"])
+    dominant_set = set(detected["dominant_alphas"])
+    return {
+        "detected_positive_alphas": sorted(positive & detected_set),
+        "detected_negative_alphas": sorted(negative & detected_set),
+        # John's contract calls the existing "missing_expected" comparison
+        # result "missing_expected_alphas" -- same value, additive alias.
+        "unexpected_dominant_alphas": sorted(dominant_set - positive - negative - conditional),
+    }
+
+
+def six_ticker_qa_conflict_fields(conflict_cmp: dict[str, Any]) -> dict[str, Any]:
+    admitted = set(conflict_cmp.get("admitted_conflicts") or ())
+    candidate = set(conflict_cmp.get("candidate_conflicts") or ())
+    return {
+        # John's contract's "expected_conflicts" is the same J2-authoritative
+        # set already exposed as "allowed_main_conflicts" -- additive alias.
+        "expected_conflicts": list(conflict_cmp.get("allowed_main_conflicts") or ()),
+        # "any pair detected at all, admitted or candidate" -- a pure union
+        # of the two already-computed, already-separate B2 collections.
+        # candidate_conflicts and admitted_conflicts themselves stay exactly
+        # as B2 computed them, never merged or reclassified.
+        "detected_conflicts": sorted(admitted | candidate),
+    }
+
+
+def six_ticker_qa_evidence_fact_count(graph_payload: dict[str, Any]) -> int:
+    """Sums each Alpha's own already-computed, already-persisted
+    ``unique_evidence_fact_count`` (Structure Integrity Repair Sprint,
+    Track 2 -- Evidence Facts after near-paraphrase dedup, contrasted with
+    ``raw_supporting_claim_count`` in that same per-alpha entry) across
+    every Alpha in the ticker's structure graph. This is a sum of per-alpha
+    counts: a single Evidence Fact independently supporting more than one
+    Alpha is counted once per Alpha it supports. No cross-alpha grouping
+    mechanism exists anywhere in the pipeline to reuse for a single
+    ticker-wide deduplicated total, and this function never invents one --
+    it only sums an already-frozen field, never re-groups raw claims."""
+    total = 0
+    for entry in _v2_alpha_entries(graph_payload).values():
+        value = entry.get("unique_evidence_fact_count")
+        if isinstance(value, int):
+            total += value
+    return total
+
+
+STATUS_PASS = "pass"
+STATUS_WARNING = "warning"
+STATUS_FAIL = "fail"
+
+REASON_LABEL_NOT_AVAILABLE = "LABEL_NOT_AVAILABLE"
+REASON_SAVED_RUN_NOT_AVAILABLE = "SAVED_RUN_NOT_AVAILABLE"
+REASON_ARTIFACT_NOT_AVAILABLE = "ARTIFACT_NOT_AVAILABLE"
+REASON_REGRESSION_EXECUTION_FAILED = "REGRESSION_EXECUTION_FAILED"
+REASON_TICKER_CONSISTENCY_FAILED = "TICKER_CONSISTENCY_FAILED"
+REASON_MISSING_EXPECTED_ALPHAS = "MISSING_EXPECTED_ALPHAS"
+REASON_UNEXPECTED_DOMINANT_ALPHAS = "UNEXPECTED_DOMINANT_ALPHAS"
+REASON_MAIN_CONFLICT_MISMATCH = "MAIN_CONFLICT_MISMATCH"
+REASON_EVIDENCE_POLARITY_ERRORS = "EVIDENCE_POLARITY_ERRORS_PRESENT"
+
+
+def six_ticker_qa_overall_status(
+    result: dict[str, Any], *, label_available: bool
+) -> tuple[str, list[str]]:
+    """Minimal, deterministic per-ticker ``overall_status`` arbitration
+    (task section 4 -- no such arbitration existed before this). Pure
+    function over an already-fully-populated ``evaluate_ticker`` result
+    dict; never re-reads artifacts, never re-derives Alpha/Conflict data.
+
+    Infra/data problems (no label, no saved run, replay failure, incomplete
+    artifacts, ticker-consistency failure) -> ``fail``. A provisional J2
+    label mismatch alone -> ``warning``, matching this CLI's own existing
+    exit-code philosophy (module docstring of ``scripts/run_regression.py``:
+    "A J2 provisional expected-vs-detected mismatch alone NEVER changes the
+    exit code") -- label mismatches are real, reportable signals, never
+    silently hidden, but not treated as hard pipeline failures. Never
+    loosened to force a ``pass``."""
+    if not label_available:
+        return STATUS_FAIL, [REASON_LABEL_NOT_AVAILABLE]
+    if result.get("run_selection_status") != "selected":
+        return STATUS_FAIL, [REASON_SAVED_RUN_NOT_AVAILABLE]
+    if result.get("offline_reprocess_status") != "completed":
+        reason = (
+            REASON_REGRESSION_EXECUTION_FAILED
+            if result.get("offline_reprocess_error")
+            else REASON_ARTIFACT_NOT_AVAILABLE
+        )
+        return STATUS_FAIL, [reason]
+    if result.get("artifact_completeness") != "pass":
+        return STATUS_FAIL, [REASON_ARTIFACT_NOT_AVAILABLE]
+    if result.get("ticker_consistency") == "fail":
+        return STATUS_FAIL, [REASON_TICKER_CONSISTENCY_FAILED]
+
+    reasons: list[str] = []
+    if result.get("missing_expected_alphas"):
+        reasons.append(REASON_MISSING_EXPECTED_ALPHAS)
+    if result.get("unexpected_dominant_alphas"):
+        reasons.append(REASON_UNEXPECTED_DOMINANT_ALPHAS)
+    if result.get("main_conflict_match") is False:
+        reasons.append(REASON_MAIN_CONFLICT_MISMATCH)
+    if (result.get("evidence_polarity_errors") or 0) > 0:
+        reasons.append(REASON_EVIDENCE_POLARITY_ERRORS)
+
+    if reasons:
+        return STATUS_WARNING, reasons
+    return STATUS_PASS, []
+
+
+# ---------------------------------------------------------------------------
 # Dominance guard (task section 10) -- human-review flag only, never an
 # automatic semantic judgment, never a B4 classification change.
 # ---------------------------------------------------------------------------
@@ -361,6 +487,55 @@ def stance_source(alpha_matches_payload: dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _qa_contract_empty_defaults(label_block: dict[str, Any] | None) -> dict[str, Any]:
+    """Safe empty defaults for every field task section 4's
+    ``regression_report.json`` contract requires, used whenever a ticker
+    never reaches the point where Alpha/Conflict/graph data actually
+    exists (no saved run, or a replay that never completed) -- so every
+    ticker in the report always carries every required key (section 4:
+    "每个 ticker 至少包含"), never a silently-absent field."""
+    positive = sorted((label_block or {}).get("expected_positive_alphas") or ())
+    negative = sorted((label_block or {}).get("expected_negative_alphas") or ())
+    allowed = sorted((label_block or {}).get("allowed_main_conflicts") or ())
+    return {
+        "expected_positive_alphas": positive,
+        "expected_negative_alphas": negative,
+        "conditional_alphas": sorted((label_block or {}).get("conditional_alphas") or ()),
+        "expected_alphas": sorted({*positive, *negative}),
+        "detected_alphas": [],
+        "active_alphas": [],
+        "dominant_alphas": [],
+        "regime_level_alphas": [],
+        "candidate_alphas": [],
+        "blocked_alphas": [],
+        "missing_expected": [],
+        "missing_expected_alphas": [],
+        "unexpected_alphas": [],
+        "detected_positive_alphas": [],
+        "detected_negative_alphas": [],
+        "unexpected_dominant_alphas": [],
+        "allowed_main_conflicts": allowed,
+        "expected_conflicts": allowed,
+        "detected_conflicts": [],
+        "admitted_conflicts": [],
+        "candidate_conflicts": [],
+        "main_conflict": None,
+        "main_conflict_match": None,
+        "dominance_guard_review_required": [],
+        "graph_nodes": 0,
+        "graph_edges": 0,
+        "evidence_fact_count": 0,
+        "evidence_polarity_errors": 0,
+        "evidence_polarity_error_scope": "contract_integrity_only",
+        "semantic_polarity_accuracy": None,
+        "semantic_polarity_review_status": "PENDING_J3_HUMAN_REVIEW",
+        "ticker_consistency": "not_available",
+        "stance_source": STANCE_SOURCE_UNAVAILABLE,
+        "artifact_hashes": {},
+        "evaluation_authority": "provisional",
+    }
+
+
 def evaluate_ticker(
     ticker: str,
     selection: dict[str, Any],
@@ -382,45 +557,22 @@ def evaluate_ticker(
         "analysis_date": selection.get("analysis_date"),
         "run_selection_status": selection.get("run_selection_status"),
         "artifact_completeness": selection.get("file_artifact_completeness"),
+        # Additive transparency (QA Closure v0.1.2 Item 1, task section 6:
+        # "必须记录具体缺失项"): which of A2's 9 required artifact
+        # filenames this ticker's selected source run is actually missing,
+        # straight from run_selection's own already-computed check --
+        # never re-derived. Empty when complete or when no run was ever
+        # selected.
+        "artifact_missing_files": selection.get("file_artifact_missing") or [],
         "database_record_status": selection.get("database_record_status"),
     }
 
     if selection.get("run_selection_status") != "selected":
-        base.update(
-            {
-                "offline_reprocess_status": "not_attempted",
-                "expected_positive_alphas": sorted((label_block or {}).get("expected_positive_alphas") or ()),
-                "expected_negative_alphas": sorted((label_block or {}).get("expected_negative_alphas") or ()),
-                "conditional_alphas": sorted((label_block or {}).get("conditional_alphas") or ()),
-                "expected_alphas": sorted(
-                    {*((label_block or {}).get("expected_positive_alphas") or ()), *((label_block or {}).get("expected_negative_alphas") or ())}
-                ),
-                "detected_alphas": [],
-                "active_alphas": [],
-                "dominant_alphas": [],
-                "regime_level_alphas": [],
-                "candidate_alphas": [],
-                "blocked_alphas": [],
-                "missing_expected": [],
-                "unexpected_alphas": [],
-                "allowed_main_conflicts": sorted((label_block or {}).get("allowed_main_conflicts") or ()),
-                "admitted_conflicts": [],
-                "candidate_conflicts": [],
-                "main_conflict": None,
-                "main_conflict_match": None,
-                "dominance_guard_review_required": [],
-                "graph_nodes": 0,
-                "graph_edges": 0,
-                "evidence_polarity_errors": 0,
-                "evidence_polarity_error_scope": "contract_integrity_only",
-                "semantic_polarity_accuracy": None,
-                "semantic_polarity_review_status": "PENDING_J3_HUMAN_REVIEW",
-                "ticker_consistency": "not_available",
-                "stance_source": STANCE_SOURCE_UNAVAILABLE,
-                "artifact_hashes": {},
-                "evaluation_authority": "provisional",
-            }
-        )
+        base["offline_reprocess_status"] = "not_attempted"
+        base.update(_qa_contract_empty_defaults(label_block))
+        status, reasons = six_ticker_qa_overall_status(base, label_available=label_block is not None)
+        base["overall_status"] = status
+        base["overall_status_reason_codes"] = reasons
         return base
 
     source_run_id = selection["run_id"]
@@ -433,11 +585,19 @@ def evaluate_ticker(
         )
     except ReplaySourceIncompleteError:
         base["offline_reprocess_status"] = OFFLINE_REPROCESS_PATH_UNAVAILABLE
+        base.update(_qa_contract_empty_defaults(label_block))
+        status, reasons = six_ticker_qa_overall_status(base, label_available=label_block is not None)
+        base["overall_status"] = status
+        base["overall_status_reason_codes"] = reasons
         return base
 
     if replay_result.status != "completed":
         base["offline_reprocess_status"] = OFFLINE_REPROCESS_PATH_UNAVAILABLE
         base["offline_reprocess_error"] = replay_result.error
+        base.update(_qa_contract_empty_defaults(label_block))
+        status, reasons = six_ticker_qa_overall_status(base, label_available=label_block is not None)
+        base["overall_status"] = status
+        base["overall_status_reason_codes"] = reasons
         return base
 
     base["offline_reprocess_status"] = "completed"
@@ -495,22 +655,29 @@ def evaluate_ticker(
     base.update(
         {
             **alpha_cmp,
+            "missing_expected_alphas": alpha_cmp["missing_expected"],
             "detected_alphas": detected["detected_alphas"],
             "active_alphas": detected["active_alphas"],
             "dominant_alphas": detected["dominant_alphas"],
             "regime_level_alphas": detected["regime_level_alphas"],
             "candidate_alphas": detected["candidate_alphas"],
             "blocked_alphas": detected["blocked_alphas"],
+            **six_ticker_qa_alpha_fields(label_block, detected),
             **conflict_cmp,
+            **six_ticker_qa_conflict_fields(conflict_cmp),
             "dominance_guard_review_required": dominance_flags,
             "graph_nodes": int(graph_metrics.get("node_count") or len(graph_payload.get("nodes") or ())),
             "graph_edges": int(graph_metrics.get("edge_count") or len(graph_payload.get("edges") or ())),
+            "evidence_fact_count": six_ticker_qa_evidence_fact_count(graph_payload),
             **polarity,
             "ticker_consistency": ticker_audit.get("ticker_consistency"),
             "stance_source": stance_source(alpha_matches_payload),
             "evaluation_authority": "provisional",
         }
     )
+    status, reasons = six_ticker_qa_overall_status(base, label_available=label_block is not None)
+    base["overall_status"] = status
+    base["overall_status_reason_codes"] = reasons
     return base
 
 
@@ -520,11 +687,27 @@ __all__ = [
     "STANCE_SOURCE_MIXED",
     "STANCE_SOURCE_UNAVAILABLE",
     "OFFLINE_REPROCESS_PATH_UNAVAILABLE",
+    "STATUS_PASS",
+    "STATUS_WARNING",
+    "STATUS_FAIL",
+    "REASON_LABEL_NOT_AVAILABLE",
+    "REASON_SAVED_RUN_NOT_AVAILABLE",
+    "REASON_ARTIFACT_NOT_AVAILABLE",
+    "REASON_REGRESSION_EXECUTION_FAILED",
+    "REASON_TICKER_CONSISTENCY_FAILED",
+    "REASON_MISSING_EXPECTED_ALPHAS",
+    "REASON_UNEXPECTED_DOMINANT_ALPHAS",
+    "REASON_MAIN_CONFLICT_MISMATCH",
+    "REASON_EVIDENCE_POLARITY_ERRORS",
     "detected_alpha_sets",
     "alpha_comparison",
     "conflict_comparison",
     "dominance_guard_flags",
     "evidence_polarity_errors",
     "stance_source",
+    "six_ticker_qa_alpha_fields",
+    "six_ticker_qa_conflict_fields",
+    "six_ticker_qa_evidence_fact_count",
+    "six_ticker_qa_overall_status",
     "evaluate_ticker",
 ]

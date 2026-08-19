@@ -1,4 +1,9 @@
-import type { AlphaConflict, ConflictEvidenceFactGroup, ConflictEvidenceItem } from "../api/types";
+import type {
+  AlphaConflict,
+  ConflictEvidenceFactGroup,
+  ConflictEvidenceItem,
+  ConflictSideStructure,
+} from "../api/types";
 import { ConflictEvidenceSections } from "./ConflictEvidenceSections";
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -7,6 +12,33 @@ const LEVEL_LABELS: Record<string, string> = {
   medium_high: "Medium-high",
   high: "High",
 };
+
+// QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): mirrors
+// AlphaCard's own BLOCKED_REASON_LABELS verbatim -- the same John-approved
+// canonical reason vocabulary, not redefined here. Kept as a small local
+// copy (rather than a shared import) since this component otherwise has no
+// dependency on AlphaCard.
+const CONFLICT_SIDE_CAP_REASON_LABELS: Record<string, string> = {
+  NO_LOCAL_STRUCTURE_SUPPORT: "No supporting Structure Graph edges",
+  INSUFFICIENT_EVIDENCE: "Insufficient independent evidence",
+  LOW_ENTITY_EXPOSURE: "Entity Exposure below required threshold",
+  NO_TICKER_SPECIFIC_EVIDENCE: "No ticker-specific evidence",
+};
+
+/** The same display-facing level AlphaCard shows for this Alpha elsewhere
+ * -- read directly from the backend, never recomputed from
+ * activation_score/status here. Falls back to `status` on a payload
+ * predating this task (or a historical conflict record). */
+function activationLevelText(structure: ConflictSideStructure): string {
+  const level = structure.activation_level ?? structure.status;
+  if (level !== "capped_active" || !structure.blocked_reason_codes || structure.blocked_reason_codes.length === 0) {
+    return level;
+  }
+  const reasons = structure.blocked_reason_codes
+    .map((code) => CONFLICT_SIDE_CAP_REASON_LABELS[code] ?? code)
+    .join(", ");
+  return `${level} — ${reasons}`;
+}
 
 interface ConflictCardProps {
   conflict: AlphaConflict;
@@ -177,8 +209,12 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
           <p className="conflict-side-alpha">
             {conflict.bull_structure.alpha_id} &mdash; {conflict.bull_structure.alpha_name}
           </p>
-          <p className="conflict-side-activation">
-            Activation: {conflict.bull_structure.activation_score.toFixed(1)} ({conflict.bull_structure.status})
+          <p
+            className={`conflict-side-activation${
+              conflict.bull_structure.activation_level === "capped_active" ? " conflict-side-activation-capped" : ""
+            }`}
+          >
+            Activation: {conflict.bull_structure.activation_score.toFixed(1)} ({activationLevelText(conflict.bull_structure)})
           </p>
           <ConflictSideFactStats
             rawCount={conflict.bull_raw_claim_count}
@@ -199,8 +235,12 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
           <p className="conflict-side-alpha">
             {conflict.bear_structure.alpha_id} &mdash; {conflict.bear_structure.alpha_name}
           </p>
-          <p className="conflict-side-activation">
-            Activation: {conflict.bear_structure.activation_score.toFixed(1)} ({conflict.bear_structure.status})
+          <p
+            className={`conflict-side-activation${
+              conflict.bear_structure.activation_level === "capped_active" ? " conflict-side-activation-capped" : ""
+            }`}
+          >
+            Activation: {conflict.bear_structure.activation_score.toFixed(1)} ({activationLevelText(conflict.bear_structure)})
           </p>
           <ConflictSideFactStats
             rawCount={conflict.bear_raw_claim_count}

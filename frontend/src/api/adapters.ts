@@ -11,11 +11,14 @@
  */
 
 import type {
+  ActivationDisplayLevel,
   AgentOutputsResponse,
   AlphaConflict,
   AlphaEvidenceDetail,
   AlphaInvalidationCondition,
   AlphaInvalidationEntry,
+  CanonicalAlphaLevel,
+  CanonicalBlockedReason,
   ConflictAdmissibility,
   ConflictAuditSide,
   ConflictCandidateEvaluation,
@@ -285,6 +288,38 @@ function adaptArtifacts(payload: unknown): AdaptResult<ResearchArtifacts> {
   return ok(artifacts);
 }
 
+// B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT) +
+// QA Closure v0.1.2 Item 4: shared extraction for the classifier's own
+// fields, reused by every adapter that carries a scored Alpha (dominant
+// summary, full activation entry, Conflict Radar bull/bear structure) --
+// was previously missing from all three (a real, pre-existing bug: the
+// "Blocked"/target_level UI in AlphaCard, and the analogous
+// activation_level display, never actually received this data from a real
+// API response, only from hand-built test fixtures that bypassed this
+// adapter entirely). All fields optional/absent together on a historical
+// payload predating B4 -- never fabricated, never re-derived from score.
+function adaptB4ClassificationFields(payload: Record<string, unknown>) {
+  return {
+    target_level: isString(payload.target_level) ? (payload.target_level as CanonicalAlphaLevel) : undefined,
+    qualified_level: isString(payload.qualified_level)
+      ? (payload.qualified_level as CanonicalAlphaLevel)
+      : undefined,
+    is_blocked: isBoolean(payload.is_blocked) ? payload.is_blocked : undefined,
+    blocked_from: isStringArray(payload.blocked_from) ? (payload.blocked_from as CanonicalAlphaLevel[]) : undefined,
+    blocked_reason_codes: isStringArray(payload.blocked_reason_codes)
+      ? (payload.blocked_reason_codes as CanonicalBlockedReason[])
+      : undefined,
+    diagnostic_reason_codes: isStringArray(payload.diagnostic_reason_codes)
+      ? payload.diagnostic_reason_codes
+      : undefined,
+    classification_version: optionalString(payload.classification_version),
+    // QA Closure v0.1.2 Item 4's own new field.
+    activation_level: isString(payload.activation_level)
+      ? (payload.activation_level as ActivationDisplayLevel)
+      : undefined,
+  };
+}
+
 function adaptDominantAlpha(payload: unknown): AdaptResult<DominantAlpha> {
   if (!isRecord(payload)) return fail("dominant alpha is not an object");
   const { alpha_id, alpha_name, activation_score, status, direction } = payload;
@@ -304,6 +339,7 @@ function adaptDominantAlpha(payload: unknown): AdaptResult<DominantAlpha> {
         ? summary.distinct_supporting_agents
         : 0,
     },
+    ...adaptB4ClassificationFields(payload),
   });
 }
 
@@ -332,6 +368,16 @@ function adaptConflictSideStructure(payload: unknown): AdaptResult<ConflictSideS
     // Fact rendering has never actually activated in production). Fixed
     // additively here alongside the B5 fields below.
     evidence_facts: adaptConflictEvidenceFactGroups(payload.evidence_facts),
+    // QA Closure v0.1.2 Item 4: activation_level/blocked_reason_codes only
+    // (this type never carries target_level/qualified_level/is_blocked/
+    // blocked_from/diagnostic_reason_codes/classification_version -- see
+    // ConflictSideStructure's own narrower field set).
+    activation_level: isString(payload.activation_level)
+      ? (payload.activation_level as ActivationDisplayLevel)
+      : undefined,
+    blocked_reason_codes: isStringArray(payload.blocked_reason_codes)
+      ? (payload.blocked_reason_codes as CanonicalBlockedReason[])
+      : undefined,
   });
 }
 
@@ -1037,6 +1083,7 @@ function adaptAlphaActivation(payload: unknown): AdaptResult<AlphaActivation> {
       ? payload.regime_gate_failures
       : [],
     entity_exposure: exposure.ok ? exposure.value : null,
+    ...adaptB4ClassificationFields(payload),
   });
 }
 

@@ -1,0 +1,233 @@
+{
+  "schema_version": "neutral_unclassified_audit.v1",
+  "run_id": "07ddc074-9ab2-4b16-8957-acbf94012144",
+  "ticker": "MSFT",
+  "source_artifact_total_count": 699,
+  "audited_count": 699,
+  "audited_count_matches_source_artifact": true,
+  "unclassified_by_agent": {
+    "counts": {
+      "fundamental_agent": 140,
+      "bear_researcher": 93,
+      "market_agent": 91,
+      "sentiment_agent": 67,
+      "news_agent": 65,
+      "neutral_risk_analyst": 54,
+      "aggressive_risk_analyst": 52,
+      "bull_researcher": 52,
+      "conservative_risk_analyst": 51,
+      "portfolio_manager": 15,
+      "research_manager": 13,
+      "trader": 6
+    },
+    "percentage_of_total": {
+      "fundamental_agent": 20.03,
+      "bear_researcher": 13.3,
+      "market_agent": 13.02,
+      "sentiment_agent": 9.59,
+      "news_agent": 9.3,
+      "neutral_risk_analyst": 7.73,
+      "aggressive_risk_analyst": 7.44,
+      "bull_researcher": 7.44,
+      "conservative_risk_analyst": 7.3,
+      "portfolio_manager": 2.15,
+      "research_manager": 1.86,
+      "trader": 0.86
+    },
+    "sum_equals_audited_count": true
+  },
+  "unclassified_by_reason": {
+    "finding_count": {
+      "no_alpha_match": 675,
+      "no_ticker_specific_evidence": 20,
+      "generic_background": 3,
+      "duplicate_supporting_text": 1
+    },
+    "reason_occurrence_count": {
+      "no_alpha_match": 675,
+      "no_ticker_specific_evidence": 24,
+      "generic_background": 3,
+      "duplicate_supporting_text": 1
+    },
+    "finding_count_sum_equals_audited_count": true,
+    "multi_reason_finding_count": 4
+  },
+  "unclassified_by_agent_and_reason": {
+    "fundamental_agent": {
+      "no_alpha_match": 132,
+      "no_ticker_specific_evidence": 7,
+      "generic_background": 1
+    },
+    "bear_researcher": {
+      "no_alpha_match": 92,
+      "no_ticker_specific_evidence": 1
+    },
+    "market_agent": {
+      "no_alpha_match": 90,
+      "no_ticker_specific_evidence": 1
+    },
+    "sentiment_agent": {
+      "no_alpha_match": 63,
+      "no_ticker_specific_evidence": 4
+    },
+    "news_agent": {
+      "no_alpha_match": 62,
+      "no_ticker_specific_evidence": 2,
+      "generic_background": 1
+    },
+    "neutral_risk_analyst": {
+      "no_alpha_match": 53,
+      "no_ticker_specific_evidence": 1
+    },
+    "aggressive_risk_analyst": {
+      "no_alpha_match": 50,
+      "no_ticker_specific_evidence": 2
+    },
+    "bull_researcher": {
+      "no_alpha_match": 49,
+      "no_ticker_specific_evidence": 2,
+      "generic_background": 1
+    },
+    "conservative_risk_analyst": {
+      "no_alpha_match": 50,
+      "duplicate_supporting_text": 1
+    },
+    "portfolio_manager": {
+      "no_alpha_match": 15
+    },
+    "research_manager": {
+      "no_alpha_match": 13
+    },
+    "trader": {
+      "no_alpha_match": 6
+    }
+  },
+  "pattern_summary": {
+    "total_findings": 699,
+    "total_distinct_normalized_patterns": 696,
+    "total_repeated_pattern_count": 3,
+    "findings_within_a_repeated_pattern": 6,
+    "findings_fully_unique": 693
+  },
+  "top_20_repeated_patterns": [
+    {
+      "rank": 1,
+      "normalized_pattern": "that convergence, combined with real fundamental strength and non-extreme forward valuation, supports a constructive but disciplined stance rather than aggressive chasing or outright avoidance",
+      "count": 2,
+      "agents": {
+        "portfolio_manager": 1,
+        "research_manager": 1
+      },
+      "reason_codes": {
+        "no_alpha_match": 2
+      },
+      "example_findings": [
+        "That convergence, combined with real fundamental strength and non-extreme forward valuation, supports a constructive but disciplined stance rather than aggressive chasing or outright avoidance."
+      ],
+      "example_claim_ids": [
+        "07ddc074-9ab2-4b16-8957-acbf94012144:portfolio_manager:final_trade_decision:claim:13",
+        "07ddc074-9ab2-4b16-8957-acbf94012144:research_manager:investment_plan:claim:8"
+      ],
+      "classification": "unclear"
+    },
+    {
+      "rank": 2,
+      "normalized_pattern": "the prediction markets show an 85% probability of no fed rate cuts in 2026",
+      "count": 2,
+      "agents": {
+        "conservative_risk_analyst": 1,
+        "neutral_risk_analyst": 1
+      },
+      "reason_codes": {
+        "no_alpha_match": 2
+      },
+      "example_findings": [
+        "The prediction markets show an 85% probability of no Fed rate cuts in 2026."
+      ],
+      "example_claim_ids": [
+        "07ddc074-9ab2-4b16-8957-acbf94012144:conservative_risk_analyst:risk_debate_state.conservative_history:claim:32",
+        "07ddc074-9ab2-4b16-8957-acbf94012144:neutral_risk_analyst:risk_debate_state.neutral_history:claim:33"
+      ],
+      "classification": "unclear"
+    },
+    {
+      "rank": 3,
+      "normalized_pattern": "they differ only on timing",
+      "count": 2,
+      "agents": {
+        "portfolio_manager": 1,
+        "research_manager": 1
+      },
+      "reason_codes": {
+        "no_alpha_match": 2
+      },
+      "example_findings": [
+        "They differ only on timing."
+      ],
+      "example_claim_ids": [
+        "07ddc074-9ab2-4b16-8957-acbf94012144:portfolio_manager:final_trade_decision:claim:12",
+        "07ddc074-9ab2-4b16-8957-acbf94012144:research_manager:investment_plan:claim:7"
+      ],
+      "classification": "unclear"
+    }
+  ],
+  "ticker_specificity_audit": {
+    "count": 20,
+    "percentage_of_total": 2.86,
+    "top_source_agents": {
+      "fundamental_agent": 7,
+      "sentiment_agent": 4,
+      "aggressive_risk_analyst": 2,
+      "bull_researcher": 2,
+      "news_agent": 2,
+      "bear_researcher": 1,
+      "market_agent": 1,
+      "neutral_risk_analyst": 1
+    },
+    "top_repeated_patterns": []
+  },
+  "duplicate_audit": {
+    "duplicate_finding_count": 1,
+    "percentage_of_total": 0.14,
+    "unique_duplicate_patterns": 1,
+    "largest_duplicate_cluster": {
+      "evidence_fact_group_id": "34732088e916bd857e5cf524",
+      "member_count": 1,
+      "example_claim_ids": [
+        "07ddc074-9ab2-4b16-8957-acbf94012144:conservative_risk_analyst:risk_debate_state.conservative_history:claim:22"
+      ]
+    },
+    "top_duplicate_generating_agents": {
+      "conservative_risk_analyst": 1
+    }
+  },
+  "possible_taxonomy_gaps": [],
+  "healthy_vs_avoidable": {
+    "method": "Sampled from up to 3 example claim_ids per Top-N repeated pattern only (never the full population) -- a deterministic lower bound, not a claimed split of all findings. The remaining majority of findings (the long tail outside the Top-N patterns, and any Top-N member beyond the first 3 examples) is honestly left unclear rather than force-classified.",
+    "healthy_uncertainty_sample_count": 0,
+    "potentially_avoidable_sample_count": 0,
+    "unclear": "A safe, deterministic full-population split could not be established from Top-N pattern membership alone; see reason/pattern breakdowns above for the complete, exact accounting."
+  },
+  "suggested_prompt_fixes": [
+    {
+      "target_agent": "fundamental_agent",
+      "observed_problem": "Repeated findings lacking ticker-specific language (no_ticker_specific_evidence).",
+      "supporting_pattern_count": 7,
+      "suggested_change": "Prompt the agent to name the specific ticker/company explicitly in each extracted finding rather than relying on implicit context from the surrounding report.",
+      "expected_effect": "Reduce avoidable no_ticker_specific_evidence findings from this agent.",
+      "risk": "May produce repetitive ticker-naming boilerplate if over-applied.",
+      "status": "recommendation_only"
+    }
+  ],
+  "canonical_reason_priority": [
+    "duplicate_supporting_text",
+    "generic_background",
+    "low_confidence",
+    "no_alpha_match",
+    "no_ticker_specific_evidence"
+  ],
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "generated_at": "2026-08-19T19:21:33Z",
+  "source_artifact_path": "outputs/runs/07ddc074-9ab2-4b16-8957-acbf94012144/unclassified_findings.json"
+}

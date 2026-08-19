@@ -473,3 +473,99 @@ def test_audit_endpoint_includes_ticker_consistency(real_completed_run):
     assert response.status_code == 200
     assert "error_code" in response.json()
     del client
+
+
+# ---------------------------------------------------------------------------
+# 43. A2 permanent contract (QA Closure v0.1.2, Item 7): a genuine
+#     finalizer failure, injected through the real production
+#     run_research_request path -- not called in isolation like test 24
+#     above -- must never let a run reach status "completed" while
+#     evidence_facts.json/alpha_activations.json/conflicts.json are
+#     missing. This is the end-to-end proof that the routes_research.py
+#     comments above finalize_completed_run_artifacts's call site ("the
+#     resulting gap ... gates 'completed' in build_research_response") are
+#     actually true, not just asserted in a comment.
+# ---------------------------------------------------------------------------
+
+
+def test_finalizer_failure_through_real_pipeline_blocks_completed_status(monkeypatch, tmp_path):
+    import comqutor_alpha.api.routes_research as routes_research_module
+
+    def _raising_finalizer(**_kwargs):
+        raise RuntimeError("SIMULATED_FINALIZER_FAILURE")
+
+    monkeypatch.setattr(routes_research_module, "finalize_completed_run_artifacts", _raising_finalizer)
+
+    engine = build_engine("sqlite:///:memory:")
+    apply_migrations(engine)
+    repo = GraphPersistenceRepository(engine)
+    payload = {
+        "ticker": "NVDA",
+        "analysis_date": DEMO_ANALYSIS_DATE,
+        "selected_analysts": list(DEMO_SELECTED_ANALYSTS),
+        "offline_raw_agent_outputs": approved_demo_outputs("NVDA"),
+    }
+    response = run_research_request(payload, output_root=tmp_path, graph_repository=repo)
+
+    # The core safety property: a finalizer crash can never masquerade as
+    # a clean "completed" run.
+    assert response["status"] != "completed", response
+    assert response["status"] == "partial", response
+
+    run_dir = tmp_path / response["run_id"]
+    for filename in ("evidence_facts.json", "alpha_activations.json", "conflicts.json"):
+        assert not (run_dir / filename).exists(), filename
+
+    manifest = _load(run_dir, "artifact_manifest.json")
+    assert manifest["artifact_completeness"] == ARTIFACT_COMPLETENESS_FAIL
+    for filename in ("evidence_facts.json", "alpha_activations.json", "conflicts.json"):
+        assert filename in manifest["missing_required_artifacts"]
+
+
+# ---------------------------------------------------------------------------
+# 44. A2 Final Hardening: fail-closed completion gating. The test above
+#     (43) covers the case where artifact_manifest.json IS written and
+#     explicitly says "fail". This test covers the previously fail-open
+#     case: artifact-manifest generation itself raises (so
+#     artifact_manifest.json is never written at all) and run-audit
+#     generation also raises (so run_audit.json is never written either)
+#     -- both gate inputs read back as None, not an explicit "fail". Before
+#     the fail-closed fix (build_research_response comparing
+#     `value == "pass"` instead of `value != "fail"`), None would have
+#     satisfied the old `!= "fail"` check and silently reached "completed".
+# ---------------------------------------------------------------------------
+
+
+def test_absent_validation_state_blocks_completed_status(monkeypatch, tmp_path):
+    import comqutor_alpha.api.routes_research as routes_research_module
+
+    def _raising_manifest(**_kwargs):
+        raise RuntimeError("SIMULATED_MANIFEST_FAILURE")
+
+    def _raising_run_audit(*_args, **_kwargs):
+        raise RuntimeError("SIMULATED_RUN_AUDIT_FAILURE")
+
+    monkeypatch.setattr(routes_research_module, "build_and_write_artifact_manifest", _raising_manifest)
+    monkeypatch.setattr(routes_research_module, "write_run_audit_artifact", _raising_run_audit)
+
+    engine = build_engine("sqlite:///:memory:")
+    apply_migrations(engine)
+    repo = GraphPersistenceRepository(engine)
+    payload = {
+        "ticker": "NVDA",
+        "analysis_date": DEMO_ANALYSIS_DATE,
+        "selected_analysts": list(DEMO_SELECTED_ANALYSTS),
+        "offline_raw_agent_outputs": approved_demo_outputs("NVDA"),
+    }
+    response = run_research_request(payload, output_root=tmp_path, graph_repository=repo)
+
+    run_dir = tmp_path / response["run_id"]
+    # Confirms this test actually exercises the None/absent path, not the
+    # explicit-"fail" path test 43 already covers.
+    assert not (run_dir / "run_audit.json").exists()
+    assert not (run_dir / "artifact_manifest.json").exists()
+
+    # The fail-closed invariant: absent validation state is never
+    # "acceptable by default" -- only an explicit "pass" is.
+    assert response["status"] != "completed", response
+    assert response["status"] == "partial", response
