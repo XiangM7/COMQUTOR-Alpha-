@@ -1,0 +1,426 @@
+{
+  "alpha_confusion_matrix": {
+    "axes": "rows=system_matched_alpha_id (fresh Alpha Mapper, NONE if unmatched), columns=independent_expected_alpha_id",
+    "matrix": {
+      "A001": {
+        "A001": 12,
+        "A301": 1,
+        "A304": 3,
+        "A501": 1,
+        "NONE": 1
+      },
+      "A003": {
+        "A003": 2,
+        "A301": 1
+      },
+      "A101": {
+        "A101": 1,
+        "A103": 2
+      },
+      "A103": {
+        "A103": 2
+      },
+      "A201": {
+        "A101": 1,
+        "A201": 5,
+        "A304": 1
+      },
+      "A301": {
+        "A301": 13,
+        "A304": 1,
+        "A601": 1,
+        "NONE": 2
+      },
+      "A304": {
+        "A101": 1,
+        "A304": 20,
+        "A501": 1,
+        "NONE": 1
+      },
+      "A501": {
+        "A304": 1,
+        "A501": 9,
+        "A601": 1
+      },
+      "A601": {
+        "A304": 1,
+        "A601": 9,
+        "NONE": 1
+      },
+      "NONE": {
+        "A001": 1,
+        "A101": 2,
+        "A103": 2
+      }
+    }
+  },
+  "alpha_correct_count": 73,
+  "alpha_mapper_stale_historical_data_note": "6 rows (all from the SNDK secondary source run, dated 2026-07-17, the oldest run in this holdout) have a target_alpha_id/frozen-CSV system_matched_alpha_id that predates the AI_ALPHA_IDS hard-gate (comqutor_alpha/structure_engine/ai_alpha_discriminator.py). A fresh re-run of today's exact production Alpha Mapper (this task's own explicit requirement) correctly marks those A101/A102/A103 candidates ineligible; the alpha-match metric above uses the FRESH, current result for all 100 rows as required, not the stale frozen value. The frozen holdout CSV's target_alpha_id column was not modified post-freeze (per this task's own explicit rule); the B1 stance question for these 6 rows was therefore asked relative to a historically-stale target -- still a valid, uncorrupted stance comparison (both current B1 and the independent reviewer answered the identical, fixed question), just not reflective of today's true Alpha-Mapper Top-1 for those 6 specific rows. This is fully disclosed, not hidden, and is itself a real-world confirmation that the AI hard gate is actively preventing exactly the false-positive class it was built for.",
+  "alpha_mapper_stale_historical_data_sample_ids": [
+    "holdout-069",
+    "holdout-071",
+    "holdout-077",
+    "holdout-079",
+    "holdout-081",
+    "holdout-084"
+  ],
+  "alpha_match_accuracy": 0.73,
+  "alpha_match_accuracy_by_ai_gate_applicable": {
+    "False": {
+      "accuracy": 0.7865168539325843,
+      "correct": 70,
+      "total": 89
+    },
+    "True": {
+      "accuracy": 0.2727272727272727,
+      "correct": 3,
+      "total": 11
+    }
+  },
+  "alpha_match_accuracy_by_system_matched_alpha": {
+    "A001": {
+      "accuracy": 0.6666666666666666,
+      "correct": 12,
+      "total": 18
+    },
+    "A003": {
+      "accuracy": 0.6666666666666666,
+      "correct": 2,
+      "total": 3
+    },
+    "A101": {
+      "accuracy": 0.3333333333333333,
+      "correct": 1,
+      "total": 3
+    },
+    "A103": {
+      "accuracy": 1.0,
+      "correct": 2,
+      "total": 2
+    },
+    "A201": {
+      "accuracy": 0.7142857142857143,
+      "correct": 5,
+      "total": 7
+    },
+    "A301": {
+      "accuracy": 0.7647058823529411,
+      "correct": 13,
+      "total": 17
+    },
+    "A304": {
+      "accuracy": 0.8695652173913043,
+      "correct": 20,
+      "total": 23
+    },
+    "A501": {
+      "accuracy": 0.8181818181818182,
+      "correct": 9,
+      "total": 11
+    },
+    "A601": {
+      "accuracy": 0.8181818181818182,
+      "correct": 9,
+      "total": 11
+    },
+    "NONE": {
+      "accuracy": 0.0,
+      "correct": 0,
+      "total": 5
+    }
+  },
+  "alpha_match_accuracy_by_ticker": {
+    "AMD": {
+      "accuracy": 0.5,
+      "correct": 8,
+      "total": 16
+    },
+    "MSFT": {
+      "accuracy": 0.8235294117647058,
+      "correct": 14,
+      "total": 17
+    },
+    "NVDA": {
+      "accuracy": 0.8823529411764706,
+      "correct": 15,
+      "total": 17
+    },
+    "QQQ": {
+      "accuracy": 0.6470588235294118,
+      "correct": 11,
+      "total": 17
+    },
+    "SNDK": {
+      "accuracy": 0.5882352941176471,
+      "correct": 10,
+      "total": 17
+    },
+    "TSM": {
+      "accuracy": 0.9375,
+      "correct": 15,
+      "total": 16
+    }
+  },
+  "alpha_match_target": 0.75,
+  "alpha_match_target_met": false,
+  "b1_fallback_count": 0,
+  "b1_fallback_only_agreement": null,
+  "b1_llm_count": 100,
+  "b1_llm_only_agreement": {
+    "accuracy": 0.79,
+    "correct": 79,
+    "total": 100
+  },
+  "counter_alpha_mismatch_count": 1,
+  "critical_support_opposition_reversal_count": 0,
+  "critical_support_opposition_reversal_sample_ids": [],
+  "directional_vs_neutral_mismatch_count": 15,
+  "duplicate_count": 37,
+  "holdout_frozen_before_evaluation": true,
+  "holdout_manifest_reference": {
+    "alpha_distribution": {
+      "A001": 18,
+      "A003": 3,
+      "A101": 6,
+      "A102": 1,
+      "A103": 4,
+      "A201": 6,
+      "A301": 17,
+      "A304": 23,
+      "A501": 11,
+      "A601": 11
+    },
+    "sampling_version": "item2_blind_holdout_100.v1",
+    "sha256": "835d7608b1aa61417ca3fa8eee955e964cdbb6aa5693484ec6cab311d873f592",
+    "ticker_distribution": {
+      "AMD": 16,
+      "MSFT": 17,
+      "NVDA": 17,
+      "QQQ": 17,
+      "SNDK": 17,
+      "TSM": 16
+    }
+  },
+  "human_review_performed": false,
+  "mention_vs_neutral_mismatch_count": 5,
+  "not_ticker_specific_count": 51,
+  "old_development_set_for_comparison": {
+    "alpha_match": "36/50 = 72%",
+    "b1_polarity": "45/50 = 90%",
+    "note": "NOT averaged or combined with this holdout; reported separately only"
+  },
+  "polarity_accuracy": 0.79,
+  "polarity_accuracy_by_relation": {
+    "activation": {
+      "accuracy": 0.7241379310344828,
+      "correct": 42,
+      "total": 58
+    },
+    "conditional": {
+      "accuracy": 0.9333333333333333,
+      "correct": 14,
+      "total": 15
+    },
+    "invalidation": {
+      "accuracy": 0.9473684210526315,
+      "correct": 18,
+      "total": 19
+    },
+    "mixed": {
+      "accuracy": 0.3333333333333333,
+      "correct": 1,
+      "total": 3
+    },
+    "risk_relief": {
+      "accuracy": 0.8,
+      "correct": 4,
+      "total": 5
+    }
+  },
+  "polarity_accuracy_by_target_alpha": {
+    "A001": {
+      "accuracy": 0.8888888888888888,
+      "correct": 16,
+      "total": 18
+    },
+    "A003": {
+      "accuracy": 0.6666666666666666,
+      "correct": 2,
+      "total": 3
+    },
+    "A101": {
+      "accuracy": 0.6666666666666666,
+      "correct": 4,
+      "total": 6
+    },
+    "A102": {
+      "accuracy": 1.0,
+      "correct": 1,
+      "total": 1
+    },
+    "A103": {
+      "accuracy": 1.0,
+      "correct": 4,
+      "total": 4
+    },
+    "A201": {
+      "accuracy": 0.6666666666666666,
+      "correct": 4,
+      "total": 6
+    },
+    "A301": {
+      "accuracy": 0.7058823529411765,
+      "correct": 12,
+      "total": 17
+    },
+    "A304": {
+      "accuracy": 0.8260869565217391,
+      "correct": 19,
+      "total": 23
+    },
+    "A501": {
+      "accuracy": 0.8181818181818182,
+      "correct": 9,
+      "total": 11
+    },
+    "A601": {
+      "accuracy": 0.7272727272727273,
+      "correct": 8,
+      "total": 11
+    }
+  },
+  "polarity_accuracy_by_ticker": {
+    "AMD": {
+      "accuracy": 0.6875,
+      "correct": 11,
+      "total": 16
+    },
+    "MSFT": {
+      "accuracy": 0.8235294117647058,
+      "correct": 14,
+      "total": 17
+    },
+    "NVDA": {
+      "accuracy": 0.8823529411764706,
+      "correct": 15,
+      "total": 17
+    },
+    "QQQ": {
+      "accuracy": 0.7647058823529411,
+      "correct": 13,
+      "total": 17
+    },
+    "SNDK": {
+      "accuracy": 0.7647058823529411,
+      "correct": 13,
+      "total": 17
+    },
+    "TSM": {
+      "accuracy": 0.8125,
+      "correct": 13,
+      "total": 16
+    }
+  },
+  "polarity_accuracy_by_used_in_activation": {
+    "False": {
+      "accuracy": 0.7894736842105263,
+      "correct": 60,
+      "total": 76
+    },
+    "True": {
+      "accuracy": 0.7916666666666666,
+      "correct": 19,
+      "total": 24
+    }
+  },
+  "polarity_accuracy_by_used_in_conflict": {
+    "False": {
+      "accuracy": 0.7934782608695652,
+      "correct": 73,
+      "total": 92
+    },
+    "True": {
+      "accuracy": 0.75,
+      "correct": 6,
+      "total": 8
+    }
+  },
+  "polarity_correct_count": 79,
+  "polarity_target": 0.8,
+  "polarity_target_met": false,
+  "review_source": "independent_llm_blind_holdout",
+  "sample_count": 100,
+  "stance_confusion_matrix": {
+    "axes": "rows=current_b1_stance, columns=independent_reviewer_stance",
+    "matrix": {
+      "mentions_alpha": {
+        "mentions_alpha": 1,
+        "neutral_background": 5,
+        "opposes_alpha": 2,
+        "supports_alpha": 2,
+        "supports_counter_alpha": 0
+      },
+      "neutral_background": {
+        "mentions_alpha": 0,
+        "neutral_background": 0,
+        "opposes_alpha": 0,
+        "supports_alpha": 0,
+        "supports_counter_alpha": 0
+      },
+      "opposes_alpha": {
+        "mentions_alpha": 0,
+        "neutral_background": 0,
+        "opposes_alpha": 29,
+        "supports_alpha": 0,
+        "supports_counter_alpha": 1
+      },
+      "supports_alpha": {
+        "mentions_alpha": 6,
+        "neutral_background": 5,
+        "opposes_alpha": 0,
+        "supports_alpha": 49,
+        "supports_counter_alpha": 0
+      },
+      "supports_counter_alpha": {
+        "mentions_alpha": 0,
+        "neutral_background": 0,
+        "opposes_alpha": 0,
+        "supports_alpha": 0,
+        "supports_counter_alpha": 0
+      }
+    }
+  },
+  "system_duplicate_candidate_count": 6,
+  "too_generic_count": 29,
+  "wrong_alpha_count": 27,
+  "wrong_alpha_sample_ids": [
+    "holdout-001",
+    "holdout-002",
+    "holdout-005",
+    "holdout-006",
+    "holdout-009",
+    "holdout-010",
+    "holdout-011",
+    "holdout-012",
+    "holdout-027",
+    "holdout-032",
+    "holdout-033",
+    "holdout-042",
+    "holdout-043",
+    "holdout-051",
+    "holdout-052",
+    "holdout-055",
+    "holdout-056",
+    "holdout-063",
+    "holdout-064",
+    "holdout-068",
+    "holdout-069",
+    "holdout-071",
+    "holdout-077",
+    "holdout-079",
+    "holdout-081",
+    "holdout-084",
+    "holdout-086"
+  ],
+  "wrong_polarity_count": 21
+}

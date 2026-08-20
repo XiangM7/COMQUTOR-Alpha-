@@ -67,14 +67,26 @@ _TASK_INSTRUCTIONS = {
         "toward any other Alpha. Distinguish genuinely endorsing or rebutting the target Alpha's "
         "thesis from merely mentioning its subject matter, and read negation, rebuttal, "
         "qualification, conditional language, risk relief, and already-priced-in arguments on their "
-        "actual meaning. Only report supports_counter_alpha when the Evidence itself materially "
+        "actual meaning. When the Evidence contains both a positive and a negative element (for "
+        "example 'X remains strong, but Y creates risk', 'although X, Y', 'if X, then Y'), do not "
+        "classify it as mentions_alpha or neutral_background merely because it is mixed: first "
+        "identify which part of the Evidence actually bears on target_alpha_id's own thesis, then "
+        "resolve the stance from that part alone -- supports_alpha if it is a net endorsement of the "
+        "target thesis, opposes_alpha if it is a net rebuttal or material weakening of it, and "
+        "mentions_alpha or neutral_background only when target_alpha_id's own thesis genuinely "
+        "cannot be resolved either way from the Evidence, not merely because other, target-irrelevant "
+        "content is also present. Conditional language ('if', 'could', 'may', 'would') affects how "
+        "certain the claim is, not whether it has a stance: a clearly conditional endorsement of the "
+        "target thesis is still supports_alpha, and a clearly conditional rebuttal is still "
+        "opposes_alpha. Only report supports_counter_alpha when the Evidence itself materially "
         "supports one of the supplied counter_alphas' own thesis -- never merely because it opposes "
-        "target_alpha_id. Return one JSON object with an items array containing exactly one result "
-        "per input item, matched by claim_id and target_alpha_id, each with stance set to exactly "
-        "one of supports_alpha, opposes_alpha, mentions_alpha, neutral_background, or "
-        "supports_counter_alpha, and counter_alpha_id set to the supported counter Alpha's id only "
-        "when stance is supports_counter_alpha, omitted otherwise. Use only the supplied claim_id, "
-        "target_alpha_id, and counter Alpha ids -- never invent one."
+        "target_alpha_id, and never merely because the Evidence is mixed. Return one JSON object with "
+        "an items array containing exactly one result per input item, matched by claim_id and "
+        "target_alpha_id, each with stance set to exactly one of supports_alpha, opposes_alpha, "
+        "mentions_alpha, neutral_background, or supports_counter_alpha, and counter_alpha_id set to "
+        "the supported counter Alpha's id only when stance is supports_counter_alpha, omitted "
+        "otherwise. Use only the supplied claim_id, target_alpha_id, and counter Alpha ids -- never "
+        "invent one."
     ),
 }
 
@@ -108,7 +120,17 @@ _TASK_RUNTIME_METADATA = {
     },
     "evidence_stance_classifier": {
         "semantic_task": "evidence_stance_classifier",
-        "prompt_version": "evidence_stance.llm_classifier.v1",
+        # v2: B1 Mixed/Contrastive Language Improvement (QA Closure v0.1.2) --
+        # added target-relative resolution guidance for mixed/conditional
+        # Evidence so it is no longer resolved to mentions_alpha/
+        # neutral_background merely because both a positive and a negative
+        # element are present. No stance value added or removed; counter-
+        # Alpha handling unchanged. Bumped because the prompt's semantic
+        # instructions changed (ADR-005: a versioned prompt identifier must
+        # change with the instructions it identifies, so any old cached
+        # semantic-call result under v1 is never silently reused as if it
+        # reflected this behavior).
+        "prompt_version": "evidence_stance.llm_classifier.v2",
         "input_schema_version": "evidence_stance.llm_classifier.input.v1",
         "output_schema_version": "evidence_stance.llm_classifier.output.v1",
         "taxonomy_version": "alpha_taxonomy_v1",

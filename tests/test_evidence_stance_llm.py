@@ -657,3 +657,124 @@ def test_build_evidence_stance_audit_reports_llm_and_fallback_counts():
     methods = {r["claim_id"]: r["stance_method"] for r in audit["records"]}
     assert methods["c1"] == esl.STANCE_METHOD_LLM
     assert methods["c2"] == esl.STANCE_METHOD_DETERMINISTIC_FALLBACK
+
+
+# ---------------------------------------------------------------------------
+# B1 Mixed/Contrastive Language Improvement (QA Closure v0.1.2): the ten
+# general patterns from the task spec section 9. Like every other test in
+# this file, these use the fake gateway double -- no network, no Provider,
+# no LLM call -- so they verify the CONTRACT layer correctly threads each
+# pattern's correct answer through unchanged, never a claim that the real
+# prompt reliably produces that answer. That empirical claim is verified
+# separately, with real Provider calls, by the 50-row regression against the
+# frozen J3 reviewer (docs/audit_artifacts/b1_mixed_language_50_regression.csv)
+# -- these are two different, complementary kinds of evidence, not
+# duplicates of each other. Evidence text here is deliberately synthetic and
+# general (not copied from any benchmark row).
+# ---------------------------------------------------------------------------
+
+
+def test_case1_mixed_sentence_net_supports_target_thesis():
+    match = _match("mix1", "A301", claim="Revenue growth remains strong this quarter, though rising input costs are a modest headwind.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A301", es.SUPPORTS_ALPHA)]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A301")
+    assert candidate["evidence_stance"] == es.SUPPORTS_ALPHA
+    assert candidate["stance_method"] == esl.STANCE_METHOD_LLM
+
+
+def test_case2_mixed_sentence_net_opposes_target_thesis():
+    match = _match("mix2", "A301", claim="Despite a modest uptick in bookings, the core revenue growth story has clearly stalled this quarter.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A301", es.OPPOSES_ALPHA)]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A301")
+    assert candidate["evidence_stance"] == es.OPPOSES_ALPHA
+    assert candidate["stance_method"] == esl.STANCE_METHOD_LLM
+
+
+def test_case3_conditional_positive_evidence_still_supports():
+    match = _match("cond1", "A101", claim="If hyperscaler capex continues accelerating through the year, GPU demand should remain very strong.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A101", es.SUPPORTS_ALPHA)]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A101")
+    assert candidate["evidence_stance"] == es.SUPPORTS_ALPHA
+
+
+def test_case4_conditional_negative_evidence_still_opposes():
+    match = _match("cond2", "A101", claim="If AI demand slows from here, revenue growth for accelerator suppliers would decelerate sharply.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A101", es.OPPOSES_ALPHA)]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A101")
+    assert candidate["evidence_stance"] == es.OPPOSES_ALPHA
+
+
+def test_case5_genuinely_balanced_evidence_resolves_to_neutral_or_mentions():
+    match = _match("bal1", "A601", claim="The bull case rests on continued narrative momentum; the bear case rests on narrative fatigue -- neither side has a clear edge yet.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A601", es.NEUTRAL_BACKGROUND)]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A601")
+    assert candidate["evidence_stance"] in (es.NEUTRAL_BACKGROUND, es.MENTIONS_ALPHA)
+
+
+def test_case6_topic_present_but_no_directional_claim_is_mentions():
+    match = _match("men1", "A201", claim="Analysts discussed the semiconductor cycle at length on today's call.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A201", es.MENTIONS_ALPHA)]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A201")
+    assert candidate["evidence_stance"] == es.MENTIONS_ALPHA
+
+
+def test_case7_mixed_language_legal_counter_alpha_genuinely_supported():
+    # A304's canonical conflict_alphas include A101 (see alpha_taxonomy_v1.yaml).
+    match = _match("counter1", "A101", claim="AI demand remains robust, but the stock's rich multiple already prices in years of that growth.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A101", es.SUPPORTS_COUNTER_ALPHA, "A304")]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A101")
+    assert candidate["evidence_stance"] == es.SUPPORTS_COUNTER_ALPHA
+    assert candidate["counter_alpha_id"] == "A304"
+
+
+def test_case8_mixed_language_non_counter_alpha_mention_never_fabricates_counter():
+    # A201 is NOT a canonical conflict partner of A101 -- a scripted
+    # (buggy/hallucinated) supports_counter_alpha naming it must still fall
+    # back, even for evidence that is itself mixed/contrastive.
+    match = _match("counter2", "A101", claim="AI demand remains robust, though broader semiconductor inventory trends are worth watching.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A101", es.SUPPORTS_COUNTER_ALPHA, "A201")]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A101")
+    assert candidate["stance_method"] == esl.STANCE_METHOD_DETERMINISTIC_FALLBACK
+    assert candidate["stance_fallback_reason"] == esl.FALLBACK_INVALID_COUNTER_ALPHA
+
+
+def test_case9_direct_unambiguous_cases_are_unaffected():
+    match = _match("direct1", "A304", claim="The stock trades at a rich 40x forward multiple with no clear path to justify it.")
+    gateway = FakeStanceGateway([{"items": [_llm_item(match, "A304", es.SUPPORTS_ALPHA)]}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A304")
+    assert candidate["evidence_stance"] == es.SUPPORTS_ALPHA
+    assert candidate["stance_method"] == esl.STANCE_METHOD_LLM
+
+
+def test_case10_malformed_response_to_a_mixed_language_item_still_falls_back_soft():
+    match = _match("malformed1", "A301", claim="Revenue growth remains strong this quarter, though rising input costs are a modest headwind.", deterministic_stance=es.MENTIONS_ALPHA)
+    gateway = FakeStanceGateway([{"not_items": "malformed"}])
+    esl.apply_llm_stance_upgrade([match], TAXONOMY, llm_gateway=gateway)
+    candidate = _candidate_for(match, "A301")
+    assert candidate["stance_method"] == esl.STANCE_METHOD_DETERMINISTIC_FALLBACK
+    assert candidate["stance_fallback_reason"] == esl.FALLBACK_MALFORMED_RESPONSE
+    # The already-correct deterministic.v1 value is preserved untouched, per
+    # _apply_fallback's own contract -- never recomputed here.
+    assert candidate["evidence_stance"] == es.MENTIONS_ALPHA
+
+
+def test_prompt_identity_changed_and_was_deliberately_reversioned():
+    """The prompt text itself changed (this task's whole point) -- confirms
+    the version label was bumped alongside it, so no old cached v1 semantic
+    result can ever be silently reused as if it reflected this behavior
+    (ADR-005)."""
+    from comqutor_alpha.structure_engine.week2_llm import _TASK_RUNTIME_METADATA, Week2LLMGateway
+
+    assert "mentions_alpha or neutral_background merely because it is mixed" in Week2LLMGateway.prompt_identity_text(
+        esl.LLM_TASK_NAME
+    )
+    assert _TASK_RUNTIME_METADATA[esl.LLM_TASK_NAME]["prompt_version"] == "evidence_stance.llm_classifier.v2"

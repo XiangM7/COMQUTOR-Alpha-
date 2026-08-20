@@ -1,0 +1,332 @@
+{
+  "alpha_by_reviewer_expected_alpha": {
+    "A001": {
+      "accuracy": 0.9230769230769231,
+      "correct": 12,
+      "total": 13
+    },
+    "A003": {
+      "accuracy": 1.0,
+      "correct": 2,
+      "total": 2
+    },
+    "A101": {
+      "accuracy": 0.2,
+      "correct": 1,
+      "total": 5
+    },
+    "A103": {
+      "accuracy": 0.3333333333333333,
+      "correct": 2,
+      "total": 6
+    },
+    "A201": {
+      "accuracy": 1.0,
+      "correct": 5,
+      "total": 5
+    },
+    "A301": {
+      "accuracy": 0.8666666666666667,
+      "correct": 13,
+      "total": 15
+    },
+    "A304": {
+      "accuracy": 0.7407407407407407,
+      "correct": 20,
+      "total": 27
+    },
+    "A501": {
+      "accuracy": 0.8181818181818182,
+      "correct": 9,
+      "total": 11
+    },
+    "A601": {
+      "accuracy": 0.8181818181818182,
+      "correct": 9,
+      "total": 11
+    },
+    "NONE": {
+      "accuracy": 0.0,
+      "correct": 0,
+      "total": 5
+    }
+  },
+  "alpha_by_ticker": {
+    "AMD": {
+      "accuracy": 0.5,
+      "correct": 8,
+      "total": 16
+    },
+    "MSFT": {
+      "accuracy": 0.8235294117647058,
+      "correct": 14,
+      "total": 17
+    },
+    "NVDA": {
+      "accuracy": 0.8823529411764706,
+      "correct": 15,
+      "total": 17
+    },
+    "QQQ": {
+      "accuracy": 0.6470588235294118,
+      "correct": 11,
+      "total": 17
+    },
+    "SNDK": {
+      "accuracy": 0.5882352941176471,
+      "correct": 10,
+      "total": 17
+    },
+    "TSM": {
+      "accuracy": 0.9375,
+      "correct": 15,
+      "total": 16
+    }
+  },
+  "alpha_quality_conditioned": {
+    "ai_gate_involved": {
+      "accuracy": 0.2727272727272727,
+      "correct": 3,
+      "total": 11
+    },
+    "ai_gate_not_involved": {
+      "accuracy": 0.7865168539325843,
+      "correct": 70,
+      "total": 89
+    },
+    "duplicate_false": {
+      "accuracy": 0.6666666666666666,
+      "correct": 42,
+      "total": 63
+    },
+    "duplicate_true": {
+      "accuracy": 0.8378378378378378,
+      "correct": 31,
+      "total": 37
+    },
+    "generic_or_non_ticker_specific": {
+      "accuracy": 0.660377358490566,
+      "correct": 35,
+      "total": 53
+    },
+    "not_generic_and_ticker_specific": {
+      "accuracy": 0.8085106382978723,
+      "correct": 38,
+      "total": 47
+    },
+    "reviewer_expected_ai_alpha": {
+      "accuracy": 0.2727272727272727,
+      "correct": 3,
+      "total": 11
+    },
+    "reviewer_expected_non_ai_alpha": {
+      "accuracy": 0.7865168539325843,
+      "correct": 70,
+      "total": 89
+    },
+    "system_matched_ai_alpha": {
+      "accuracy": 0.6,
+      "correct": 3,
+      "total": 5
+    },
+    "system_matched_non_ai_alpha": {
+      "accuracy": 0.7368421052631579,
+      "correct": 70,
+      "total": 95
+    },
+    "ticker_specific_false": {
+      "accuracy": 0.6470588235294118,
+      "correct": 33,
+      "total": 51
+    },
+    "ticker_specific_true": {
+      "accuracy": 0.8163265306122449,
+      "correct": 40,
+      "total": 49
+    },
+    "too_generic_false": {
+      "accuracy": 0.8028169014084507,
+      "correct": 57,
+      "total": 71
+    },
+    "too_generic_true": {
+      "accuracy": 0.5517241379310345,
+      "correct": 16,
+      "total": 29
+    }
+  },
+  "note": "DIAGNOSTICS ONLY. Official metrics remain polarity=79/100=79%% and alpha_match=73/100=73%%, both FAIL -- no subgroup accuracy here replaces or is averaged into the official acceptance metric.",
+  "polarity_by_relation": {
+    "activation": {
+      "accuracy": 0.7241379310344828,
+      "correct": 42,
+      "total": 58
+    },
+    "conditional": {
+      "accuracy": 0.9333333333333333,
+      "correct": 14,
+      "total": 15
+    },
+    "invalidation": {
+      "accuracy": 0.9473684210526315,
+      "correct": 18,
+      "total": 19
+    },
+    "mixed": {
+      "accuracy": 0.3333333333333333,
+      "correct": 1,
+      "total": 3
+    },
+    "risk_relief": {
+      "accuracy": 0.8,
+      "correct": 4,
+      "total": 5
+    }
+  },
+  "polarity_by_target_alpha": {
+    "A001": {
+      "accuracy": 0.8888888888888888,
+      "correct": 16,
+      "total": 18
+    },
+    "A003": {
+      "accuracy": 0.6666666666666666,
+      "correct": 2,
+      "total": 3
+    },
+    "A101": {
+      "accuracy": 0.6666666666666666,
+      "correct": 4,
+      "total": 6
+    },
+    "A102": {
+      "accuracy": 1.0,
+      "correct": 1,
+      "total": 1
+    },
+    "A103": {
+      "accuracy": 1.0,
+      "correct": 4,
+      "total": 4
+    },
+    "A201": {
+      "accuracy": 0.6666666666666666,
+      "correct": 4,
+      "total": 6
+    },
+    "A301": {
+      "accuracy": 0.7058823529411765,
+      "correct": 12,
+      "total": 17
+    },
+    "A304": {
+      "accuracy": 0.8260869565217391,
+      "correct": 19,
+      "total": 23
+    },
+    "A501": {
+      "accuracy": 0.8181818181818182,
+      "correct": 9,
+      "total": 11
+    },
+    "A601": {
+      "accuracy": 0.7272727272727273,
+      "correct": 8,
+      "total": 11
+    }
+  },
+  "polarity_by_ticker": {
+    "AMD": {
+      "accuracy": 0.6875,
+      "correct": 11,
+      "total": 16
+    },
+    "MSFT": {
+      "accuracy": 0.8235294117647058,
+      "correct": 14,
+      "total": 17
+    },
+    "NVDA": {
+      "accuracy": 0.8823529411764706,
+      "correct": 15,
+      "total": 17
+    },
+    "QQQ": {
+      "accuracy": 0.7647058823529411,
+      "correct": 13,
+      "total": 17
+    },
+    "SNDK": {
+      "accuracy": 0.7647058823529411,
+      "correct": 13,
+      "total": 17
+    },
+    "TSM": {
+      "accuracy": 0.8125,
+      "correct": 13,
+      "total": 16
+    }
+  },
+  "polarity_quality_conditioned": {
+    "duplicate_false": {
+      "accuracy": 0.7777777777777778,
+      "correct": 49,
+      "total": 63
+    },
+    "duplicate_true": {
+      "accuracy": 0.8108108108108109,
+      "correct": 30,
+      "total": 37
+    },
+    "generic_or_non_ticker_specific": {
+      "accuracy": 0.7169811320754716,
+      "correct": 38,
+      "total": 53
+    },
+    "not_generic_and_ticker_specific": {
+      "accuracy": 0.8723404255319149,
+      "correct": 41,
+      "total": 47
+    },
+    "ticker_specific_false": {
+      "accuracy": 0.7254901960784313,
+      "correct": 37,
+      "total": 51
+    },
+    "ticker_specific_true": {
+      "accuracy": 0.8571428571428571,
+      "correct": 42,
+      "total": 49
+    },
+    "too_generic_false": {
+      "accuracy": 0.8450704225352113,
+      "correct": 60,
+      "total": 71
+    },
+    "too_generic_true": {
+      "accuracy": 0.6551724137931034,
+      "correct": 19,
+      "total": 29
+    },
+    "used_in_activation_false": {
+      "accuracy": 0.7894736842105263,
+      "correct": 60,
+      "total": 76
+    },
+    "used_in_activation_true": {
+      "accuracy": 0.7916666666666666,
+      "correct": 19,
+      "total": 24
+    },
+    "used_in_conflict_false": {
+      "accuracy": 0.7934782608695652,
+      "correct": 73,
+      "total": 92
+    },
+    "used_in_conflict_true": {
+      "accuracy": 0.75,
+      "correct": 6,
+      "total": 8
+    }
+  }
+}

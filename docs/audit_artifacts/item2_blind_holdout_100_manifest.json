@@ -1,0 +1,115 @@
+{
+  "ai_gate_alpha_count": 11,
+  "alpha_distribution": {
+    "A001": 18,
+    "A003": 3,
+    "A101": 6,
+    "A102": 1,
+    "A103": 4,
+    "A201": 6,
+    "A301": 17,
+    "A304": 23,
+    "A501": 11,
+    "A601": 11
+  },
+  "alpha_soft_cap_fraction": 0.35,
+  "csv_path": "docs/audit_artifacts/item2_blind_holdout_100.csv",
+  "csv_sha256": "835d7608b1aa61417ca3fa8eee955e964cdbb6aa5693484ec6cab311d873f592",
+  "duplicate_exclusion_method": "claim_id exact match + normalize_claim_for_dedupe(evidence) text-identity match against all 50 old development rows",
+  "generated_at": "2026-08-20T17:24:26Z",
+  "old50_exclusion_proof": {
+    "old50_excluded_claim_id_count": 45,
+    "old50_excluded_normalized_text_count": 44,
+    "pool_sizes_after_exclusion": {
+      "AMD": 53,
+      "MSFT": 27,
+      "NVDA": 60,
+      "QQQ": 54,
+      "SNDK": 36,
+      "TSM": 39
+    },
+    "sources_used": {
+      "AMD": [
+        "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6"
+      ],
+      "MSFT": [
+        "07ddc074-9ab2-4b16-8957-acbf94012144"
+      ],
+      "NVDA": [
+        "5ffe121a-68fd-473b-82b5-c9465332d8a2"
+      ],
+      "QQQ": [
+        "a364e0ee-3bb4-4032-88b7-5cd82e379805"
+      ],
+      "SNDK": [
+        "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "8d21c047-fc0a-4d94-957d-3787f353a544"
+      ],
+      "TSM": [
+        "1a338ced-118e-44d2-b3f6-2444bfb9d7e6"
+      ]
+    }
+  },
+  "random_seed": "item2_blind_holdout_100_v1_deterministic_seed",
+  "relation_distribution": {
+    "activation": 58,
+    "conditional": 15,
+    "invalidation": 19,
+    "mixed": 3,
+    "risk_relief": 5
+  },
+  "reviewer_labels_used_for_selection": false,
+  "sample_count": 100,
+  "sampling_version": "item2_blind_holdout_100.v1",
+  "schema_version": "item2_blind_holdout_100_manifest.v1",
+  "source_runs": {
+    "AMD": [
+      "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6"
+    ],
+    "MSFT": [
+      "07ddc074-9ab2-4b16-8957-acbf94012144"
+    ],
+    "NVDA": [
+      "5ffe121a-68fd-473b-82b5-c9465332d8a2"
+    ],
+    "QQQ": [
+      "a364e0ee-3bb4-4032-88b7-5cd82e379805"
+    ],
+    "SNDK": [
+      "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "8d21c047-fc0a-4d94-957d-3787f353a544"
+    ],
+    "TSM": [
+      "1a338ced-118e-44d2-b3f6-2444bfb9d7e6"
+    ]
+  },
+  "stratification_signals_used": [
+    "relation (activation/invalidation/risk_relief/conditional/mixed/mention)",
+    "match_score tier (high >=0.6 / medium 0.35-0.6)",
+    "direction",
+    "used_in_activation",
+    "used_in_conflict",
+    "duplicate_group_size (evidence_fact_group membership)",
+    "ai_gate_alpha (matched_alpha_id in AI_ALPHA_IDS)",
+    "matched_alpha_id (soft-capped per ticker to avoid A101/A301/A304 domination)"
+  ],
+  "system_duplicate_candidate_count": 6,
+  "ticker_distribution": {
+    "AMD": 16,
+    "MSFT": 17,
+    "NVDA": 17,
+    "QQQ": 17,
+    "SNDK": 17,
+    "TSM": 16
+  },
+  "ticker_targets": {
+    "AMD": 16,
+    "MSFT": 17,
+    "NVDA": 17,
+    "QQQ": 17,
+    "SNDK": 17,
+    "TSM": 16
+  },
+  "used_in_activation_count": 24,
+  "used_in_conflict_count": 8
+}

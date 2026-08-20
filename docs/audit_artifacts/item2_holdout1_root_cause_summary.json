@@ -1,0 +1,101 @@
+{
+  "ai_gate_investigation": {
+    "concentration_by_ticker": {
+      "MSFT": 1,
+      "SNDK": 5
+    },
+    "directly_caused_mismatch_count": 6,
+    "verdict": "MIXED_INCONCLUSIVE",
+    "verdict_reasoning": "4 of 6 fixable-by-gate-removal rows (holdout-069/071/079/084) show reviewer's own too_generic=True and/or low confidence, matching the gate's documented target (generic AI/cloud/capex mentions without specific engagement) -- the gate is plausibly protective for these. 2 of 6 (holdout-027/077) show high reviewer confidence with specific, substantive content (named figures, named companies) that the gate still rejects -- a narrow, genuine over-strictness tail. Net: plausibly protective for the majority, with a real but low-volume (2/100 = 2%) over-strict cost.",
+    "would_be_top1_without_gate_count": 6,
+    "would_be_top1_without_gate_sample_ids": [
+      "holdout-027",
+      "holdout-069",
+      "holdout-071",
+      "holdout-077",
+      "holdout-079",
+      "holdout-084"
+    ]
+  },
+  "alpha": {
+    "mismatch_count": 27,
+    "plausibility_breakdown": {
+      "GENUINELY_AMBIGUOUS": 14,
+      "REVIEWER_MORE_PLAUSIBLE": 13
+    },
+    "root_cause_breakdown": {
+      "AI_HARD_GATE_EXCLUSION": 6,
+      "CANDIDATE_RECALL_ERROR": 5,
+      "EXPECTED_NONE_GENERIC": 5,
+      "TAXONOMY_OVERLAP": 7,
+      "THRESHOLD_EXCLUSION": 3,
+      "TOP1_RANKING_ERROR": 1
+    },
+    "root_cause_systematic": {
+      "AI_HARD_GATE_EXCLUSION": "SYSTEMATIC",
+      "CANDIDATE_RECALL_ERROR": "SYSTEMATIC",
+      "EXPECTED_NONE_GENERIC": "SYSTEMATIC",
+      "TAXONOMY_OVERLAP": "SYSTEMATIC",
+      "THRESHOLD_EXCLUSION": "SYSTEMATIC",
+      "TOP1_RANKING_ERROR": "ISOLATED"
+    }
+  },
+  "duplicate_effective_sample_size": {
+    "exact_text_duplicate_groups_within_holdout": 1,
+    "llm_duplicate_count": 37,
+    "note": "LLM duplicate judgment is genuine semantic/paraphrase clustering (e.g. holdout-005/holdout-010's near-identical trading-plan wording), materially broader than the system's narrow structural evidence_fact_group signal. Exact-text duplication within the 100-row holdout is rare (1 pair). Precise per-cluster membership was not persisted at the row level by this evaluation's own artifacts (only the boolean llm_duplicate survived into the CSV) and cannot be reconstructed without a new Provider call, which this diagnosis-only task does not make -- reported as a disclosed limitation, not fabricated. Duplicate-flagged rows do NOT score worse than non-duplicate rows (81% vs 78% polarity, 84% vs 67% alpha) -- duplication is not a driver of the metric shortfall.",
+    "overlap_count": 5,
+    "system_duplicate_count": 6
+  },
+  "polarity": {
+    "downstream_b2_support_count_rows": [
+      "holdout-031",
+      "holdout-032",
+      "holdout-033",
+      "holdout-042",
+      "holdout-050"
+    ],
+    "downstream_conflict_admission_rows": [
+      "holdout-042",
+      "holdout-050"
+    ],
+    "mismatch_count": 21,
+    "plausibility_breakdown": {
+      "GENUINELY_AMBIGUOUS": 9,
+      "REVIEWER_MORE_PLAUSIBLE": 12
+    },
+    "root_cause_breakdown": {
+      "B1_PROMPT_INTERPRETATION_ERROR": 1,
+      "COUNTER_ALPHA_BOUNDARY": 1,
+      "LOW_INFORMATION_OR_GENERIC": 5,
+      "MIXED_OR_CONDITIONAL_LANGUAGE": 5,
+      "OTHER": 4,
+      "REVIEWER_AMBIGUITY": 1,
+      "TARGET_ALPHA_AMBIGUITY": 2,
+      "TICKER_CONTEXT_MISSING": 2
+    },
+    "root_cause_systematic": {
+      "B1_PROMPT_INTERPRETATION_ERROR": "ISOLATED",
+      "COUNTER_ALPHA_BOUNDARY": "ISOLATED",
+      "LOW_INFORMATION_OR_GENERIC": "SYSTEMATIC",
+      "MIXED_OR_CONDITIONAL_LANGUAGE": "SYSTEMATIC",
+      "OTHER": "SYSTEMATIC",
+      "REVIEWER_AMBIGUITY": "ISOLATED",
+      "TARGET_ALPHA_AMBIGUITY": "REPEATED_BUT_WEAK",
+      "TICKER_CONTEXT_MISSING": "REPEATED_BUT_WEAK"
+    },
+    "severity_breakdown": {
+      "HIGH": 1,
+      "LOW": 5,
+      "MEDIUM": 15
+    }
+  },
+  "primary_result_preserved": {
+    "alpha_match": "73/100=73% FAIL",
+    "critical_reversals": 0,
+    "polarity": "79/100=79% FAIL"
+  },
+  "production_code_changes": "NONE",
+  "provider_calls": 0,
+  "schema_version": "item2_holdout1_root_cause_summary.v1"
+}

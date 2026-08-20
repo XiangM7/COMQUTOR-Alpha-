@@ -1,0 +1,61 @@
+{
+  "alpha_mismatches": {
+    "count": 14,
+    "expected_alpha_absent_count": 5,
+    "expected_alpha_ai_gate_eligibility_excluded_count": 3,
+    "expected_alpha_rank2_count": 4,
+    "expected_alpha_rank3plus_count": 3,
+    "plausibility_breakdown": {
+      "GENUINELY_AMBIGUOUS": 9,
+      "REVIEWER_MORE_PLAUSIBLE": 2,
+      "SYSTEM_MORE_PLAUSIBLE": 3
+    },
+    "root_cause_breakdown": {
+      "ALPHA_DEFINITION_AMBIGUITY": 1,
+      "CANDIDATE_RECALL_ERROR": 1,
+      "OTHER": 1,
+      "TAXONOMY_OVERLAP": 6,
+      "TOP1_RANKING_ERROR": 5
+    },
+    "root_cause_systematic_vs_isolated": {
+      "ALPHA_DEFINITION_AMBIGUITY": "ISOLATED",
+      "CANDIDATE_RECALL_ERROR": "ISOLATED",
+      "OTHER": "ISOLATED",
+      "TAXONOMY_OVERLAP": "SYSTEMATIC",
+      "TOP1_RANKING_ERROR": "SYSTEMATIC"
+    }
+  },
+  "current_metrics": {
+    "alpha_match": "36/50 = 72%",
+    "b1_polarity": "39/50 = 78%"
+  },
+  "note": "All root_cause/severity/plausibility fields are this analysis's own explicit judgments (see scripts/build_item2_mismatch_root_cause_analysis.py POLARITY_JUDGMENTS/ALPHA_JUDGMENTS and the accompanying .md report's row-by-row reasoning) -- never mechanically derived from the labels themselves.",
+  "polarity_mismatches": {
+    "count": 11,
+    "critical_reversal_count": 0,
+    "critical_reversal_sample_ids": [],
+    "plausibility_breakdown": {
+      "GENUINELY_AMBIGUOUS": 5,
+      "REVIEWER_MORE_PLAUSIBLE": 4,
+      "SYSTEM_MORE_PLAUSIBLE": 2
+    },
+    "root_cause_breakdown": {
+      "COUNTER_ALPHA_BOUNDARY": 3,
+      "MIXED_OR_CONDITIONAL_LANGUAGE": 6,
+      "OPPOSE_VS_MENTION_BOUNDARY": 1,
+      "TARGET_ALPHA_AMBIGUITY": 1
+    },
+    "root_cause_systematic_vs_isolated": {
+      "COUNTER_ALPHA_BOUNDARY": "SYSTEMATIC",
+      "MIXED_OR_CONDITIONAL_LANGUAGE": "SYSTEMATIC",
+      "OPPOSE_VS_MENTION_BOUNDARY": "ISOLATED",
+      "TARGET_ALPHA_AMBIGUITY": "ISOLATED"
+    },
+    "severity_breakdown": {
+      "HIGH": 3,
+      "LOW": 1,
+      "MEDIUM": 7
+    }
+  },
+  "schema_version": "item2_mismatch_root_cause_summary.v1"
+}

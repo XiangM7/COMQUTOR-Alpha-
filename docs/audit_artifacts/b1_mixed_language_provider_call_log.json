@@ -1,0 +1,24 @@
+{
+  "provider": "anthropic",
+  "model_name": "claude-sonnet-4-6",
+  "temperature": "production default (Week2LLMGateway does not override temperature; provider/model default applies, identical setting used by the original 50-row validation and its parser-fix rerun)",
+  "prompt_version": "evidence_stance.llm_classifier.v2",
+  "batch_count": 5,
+  "logical_provider_calls": 5,
+  "real_provider_attempts": 5,
+  "retries_used": 0,
+  "llm_result_count": 50,
+  "deterministic_fallback_count": 0,
+  "fallback_reason_counts": {
+    "duplicate_result": 0,
+    "identity_mismatch": 0,
+    "invalid_counter_alpha": 0,
+    "invalid_stance": 0,
+    "malformed_response": 0,
+    "missing_result": 0,
+    "provider_error": 0,
+    "timeout": 0
+  },
+  "invalid_llm_output_admitted": 0,
+  "elapsed_seconds": 48.11
+}

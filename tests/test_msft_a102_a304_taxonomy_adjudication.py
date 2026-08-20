@@ -14,7 +14,6 @@ Section map (matches the task's own checklist):
 from __future__ import annotations
 
 import re
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -39,13 +38,37 @@ J3_BENCHMARK_PATH = REPO_ROOT / "comqutor_alpha" / "config" / "j3_provisional_se
 # Frozen SHA-256 baselines captured immediately before this adjudication's
 # own edits (git-status-confirmed clean beforehand); these modules must
 # never be touched by a taxonomy content decision.
+#
+# week2_llm.py was deliberately removed from this set (QA Closure v0.1.2, B1
+# v2 freeze/test-cleanup): it holds only the generic, alpha-agnostic Week 2
+# LLM prompt templates and gateway plumbing -- grep confirms zero references
+# to conflict_alphas, A102, A304, or any conflict-pair logic anywhere in the
+# file. The actual mechanism that DOES depend on the taxonomy's declared
+# conflict pairs (canonical_conflict_partners / conflict_alphas, used to
+# build each request's counter-Alpha context and to validate a returned
+# supports_counter_alpha result) lives entirely in evidence_stance_llm.py,
+# which was never part of this guard. A legitimate, separately-scoped B1
+# prompt-text change (e.g. the mixed/contrastive-language resolution
+# guidance added in week2_llm.py's evidence_stance_classifier instructions)
+# is therefore not a taxonomy-content-decision leak and should not trip this
+# specific adjudication's own invariant check.
 FROZEN_HASHES = {
     TAXONOMY_PATH: "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
-    REPO_ROOT / "comqutor_alpha/structure_engine/week2_llm.py": "a190fb9be805ae458d80d03c5aca3c5897e684683cd885594808ccd6973b6acd",
     REPO_ROOT / "comqutor_alpha/structure_engine/alpha_mapper.py": "138af8eb20531a31b71e31bcda3fa4194ba4eae5b974da8251c3cd8afa53ec1a",
     REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_schema.py": "58466213a20810a062d98551866d4e4895f97771792ccaf6d08991655f28969e",
     REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_admissibility.py": "0b795d4b2ee36fe11496b6766a83196b81d8afaec6c83f15cae2dbd0699b1f41",
-    REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_detector.py": "eea8055e07c23c90f53c500c5c4952d2a7d78541429d9acf0a13a941a1c88a55",
+    # Re-pinned (QA Closure v0.1.2, B1 v2 freeze/test-cleanup) to the current,
+    # fully-committed value. The old pinned hash predates QA Closure v0.1.2
+    # Item 4's already-completed, already-documented, unrelated-to-A102/A304
+    # edit (added activation_level/blocked_reason_codes to _structure_block's
+    # output, needed to surface B4's capped_active classification on the
+    # Conflict Radar page) -- that edit is fully committed history (`git log`
+    # shows no uncommitted diff on this file), not something introduced by
+    # this or the B1 v2 task. The prior pinned value was simply never
+    # refreshed after it landed; refreshing it now does not weaken this
+    # test's actual protection (a genuinely unauthorized future edit to this
+    # file will still trip it against this new baseline).
+    REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_detector.py": "e2be3f229c02ddd1d4859c402ab8f3675270ff00cc01eff4a8a49f8e0c7e18a1",
     # Development Plan v1.0 is PD-001 SOURCE_FROZEN; its own recorded hash.
     DEVELOPMENT_PLAN_DOCX_PATH: "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
     J3_BENCHMARK_PATH: "0a021feff423ae075dd55d27c77f8e063826caf0046a1756fb92768ab6698ca6",
@@ -248,6 +271,13 @@ def real_evaluated_msft(real_saved_msft_run_id, tmp_path_factory):
     return evaluate_ticker("MSFT", selection, label_block, replay_output_root=str(replay_root))
 
 
-def test_head_unchanged_from_session_frozen_starting_commit():
-    proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(REPO_ROOT), capture_output=True, text=True, check=True)
-    assert proc.stdout.strip() == "b5837e80a4550fc35165d0013a8ef0f27ccb4c8f"
+# A freestanding `test_head_unchanged_from_session_frozen_starting_commit`
+# (asserting `git rev-parse HEAD` equals the literal commit the original
+# adjudication task happened to start from) was removed here (QA Closure
+# v0.1.2, B1 v2 freeze/test-cleanup). It protected no part of the "resulting,
+# observable system behavior" this module's own docstring says the file
+# exists to lock in (PD-017 / the MSFT A102__A304 decision) -- it was pure
+# session bookkeeping for whoever ran that task, with a lifetime of exactly
+# one commit. Replacing the hardcoded hash with the new current HEAD would
+# only recreate the identical brittleness against the next legitimate
+# commit; the check added no ongoing regression protection either way.

@@ -1,0 +1,502 @@
+[
+  {
+    "sample_id": "evrs-001",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:62",
+    "ticker": "AMD",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-002",
+    "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+    "ticker": "TSM",
+    "target_alpha_id": "A101",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-003",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:49",
+    "ticker": "QQQ",
+    "target_alpha_id": "A001",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-004",
+    "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+    "ticker": "SNDK",
+    "target_alpha_id": "A102",
+    "after_b1_stance": "mentions_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-005",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:conservative_risk_analyst:risk_debate_state.conservative_history:claim:54",
+    "ticker": "MSFT",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-006",
+    "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+    "ticker": "SNDK",
+    "target_alpha_id": "A003",
+    "after_b1_stance": "neutral_background",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-007",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:portfolio_manager:final_trade_decision:claim:10",
+    "ticker": "MSFT",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-008",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:12",
+    "ticker": "QQQ",
+    "target_alpha_id": "A601",
+    "after_b1_stance": "supports_counter_alpha",
+    "after_b1_counter_alpha_id": "A501",
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-009",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:102",
+    "ticker": "MSFT",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-010",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:51",
+    "ticker": "QQQ",
+    "target_alpha_id": "A501",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-011",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:58",
+    "ticker": "NVDA",
+    "target_alpha_id": "A101",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-012",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:32",
+    "ticker": "NVDA",
+    "target_alpha_id": "A501",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-013",
+    "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:60",
+    "ticker": "SNDK",
+    "target_alpha_id": "A101",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-014",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:23",
+    "ticker": "NVDA",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-015",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:27",
+    "ticker": "QQQ",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-016",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:sentiment_agent:sentiment_report:claim:60",
+    "ticker": "QQQ",
+    "target_alpha_id": "A103",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-017",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:79",
+    "ticker": "QQQ",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-018",
+    "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:72",
+    "ticker": "SNDK",
+    "target_alpha_id": "A501",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-019",
+    "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:bear_researcher:investment_debate_state.bear_history:claim:56",
+    "ticker": "TSM",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-020",
+    "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:sentiment_agent:sentiment_report:claim:59",
+    "ticker": "TSM",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "mentions_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-021",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:news_agent:news_report:claim:79",
+    "ticker": "AMD",
+    "target_alpha_id": "A001",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-022",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:sentiment_agent:sentiment_report:claim:13",
+    "ticker": "NVDA",
+    "target_alpha_id": "A101",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-023",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+    "ticker": "QQQ",
+    "target_alpha_id": "A001",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-024",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:fundamental_agent:fundamentals_report:claim:90",
+    "ticker": "NVDA",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-025",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:neutral_risk_analyst:risk_debate_state.neutral_history:claim:75",
+    "ticker": "MSFT",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-026",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report:claim:66",
+    "ticker": "AMD",
+    "target_alpha_id": "A601",
+    "after_b1_stance": "mentions_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-027",
+    "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bull_researcher:investment_debate_state.bull_history:claim:193",
+    "ticker": "SNDK",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-028",
+    "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:fundamental_agent:fundamentals_report:claim:70",
+    "ticker": "TSM",
+    "target_alpha_id": "A501",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-029",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report:claim:66",
+    "ticker": "AMD",
+    "target_alpha_id": "A101",
+    "after_b1_stance": "mentions_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-030",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:80",
+    "ticker": "QQQ",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-031",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:research_manager:investment_plan:claim:5",
+    "ticker": "AMD",
+    "target_alpha_id": "A101",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-032",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:44",
+    "ticker": "MSFT",
+    "target_alpha_id": "A501",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-033",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:54",
+    "ticker": "MSFT",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-034",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:fundamental_agent:fundamentals_report:claim:115",
+    "ticker": "MSFT",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-035",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:7",
+    "ticker": "NVDA",
+    "target_alpha_id": "A001",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-036",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:bull_researcher:investment_debate_state.bull_history:claim:20",
+    "ticker": "AMD",
+    "target_alpha_id": "A601",
+    "after_b1_stance": "mentions_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-037",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:fundamental_agent:fundamentals_report:claim:77",
+    "ticker": "AMD",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-038",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:7",
+    "ticker": "NVDA",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-039",
+    "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:42",
+    "ticker": "TSM",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-040",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:6",
+    "ticker": "NVDA",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-041",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:trader:trader_investment_plan:claim:1",
+    "ticker": "MSFT",
+    "target_alpha_id": "A001",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-042",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:bear_researcher:investment_debate_state.bear_history:claim:84",
+    "ticker": "MSFT",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "supports_counter_alpha",
+    "after_b1_counter_alpha_id": "A304",
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-043",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:research_manager:investment_plan:claim:24",
+    "ticker": "NVDA",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-044",
+    "claim_id": "e434f80b-e4d0-4b09-9471-d84532659de5:news_agent:news_report:claim:15",
+    "ticker": "NVDA",
+    "target_alpha_id": "A103",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-045",
+    "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:news_agent:news_report:claim:22",
+    "ticker": "SNDK",
+    "target_alpha_id": "A601",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-046",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:conservative_risk_analyst:risk_debate_state.conservative_history:claim:30",
+    "ticker": "QQQ",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-047",
+    "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:49",
+    "ticker": "TSM",
+    "target_alpha_id": "A301",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-048",
+    "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:news_agent:news_report:claim:50",
+    "ticker": "MSFT",
+    "target_alpha_id": "A501",
+    "after_b1_stance": "opposes_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-049",
+    "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:sentiment_agent:sentiment_report:claim:36",
+    "ticker": "AMD",
+    "target_alpha_id": "A101",
+    "after_b1_stance": "mentions_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  },
+  {
+    "sample_id": "evrs-050",
+    "claim_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805:fundamental_agent:fundamentals_report:claim:56",
+    "ticker": "QQQ",
+    "target_alpha_id": "A304",
+    "after_b1_stance": "supports_alpha",
+    "after_b1_counter_alpha_id": null,
+    "after_b1_stance_method": "llm",
+    "after_b1_fallback_reason": null
+  }
+]

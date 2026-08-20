@@ -1,0 +1,180 @@
+{
+  "acceptance_criteria": {
+    "A_mixed_conditional_issue_improved": true,
+    "B_no_critical_reversals_introduced": true,
+    "C_no_broad_collateral_regression": true,
+    "D_no_benchmark_specific_hardcoding": "prompt change is a general target-relative resolution principle, not keyed to any sample_id or exact phrase -- see comqutor_alpha/structure_engine/week2_llm.py diff",
+    "E_b1_architecture_still_llm_primary": true,
+    "F_b2_semantics_unchanged": "conflict_admissibility.py / conflict_detector.py / alpha_mapper.py not modified by this task"
+  },
+  "after": {
+    "accuracy": 0.9,
+    "correct_count": 45,
+    "critical_reversal_count": 0,
+    "critical_reversal_sample_ids": []
+  },
+  "b2_impacting_rows_before": [
+    "evrs-020",
+    "evrs-026",
+    "evrs-034",
+    "evrs-040"
+  ],
+  "b2_impacting_rows_improved_count": 2,
+  "before": {
+    "accuracy": 0.78,
+    "correct_count": 39,
+    "critical_reversal_count": 0,
+    "critical_reversal_sample_ids": []
+  },
+  "collateral_check": {
+    "FIXED_DISAGREEMENT": {
+      "count": 6,
+      "sample_ids": [
+        "evrs-006",
+        "evrs-007",
+        "evrs-008",
+        "evrs-034",
+        "evrs-036",
+        "evrs-040"
+      ]
+    },
+    "NEW_DISAGREEMENT": {
+      "count": 0,
+      "sample_ids": []
+    },
+    "UNCHANGED_CORRECT": {
+      "count": 39,
+      "sample_ids": [
+        "evrs-001",
+        "evrs-002",
+        "evrs-003",
+        "evrs-004",
+        "evrs-005",
+        "evrs-009",
+        "evrs-010",
+        "evrs-011",
+        "evrs-012",
+        "evrs-014",
+        "evrs-015",
+        "evrs-016",
+        "evrs-017",
+        "evrs-018",
+        "evrs-019",
+        "evrs-021",
+        "evrs-022",
+        "evrs-023",
+        "evrs-024",
+        "evrs-025",
+        "evrs-027",
+        "evrs-028",
+        "evrs-029",
+        "evrs-030",
+        "evrs-031",
+        "evrs-032",
+        "evrs-033",
+        "evrs-035",
+        "evrs-037",
+        "evrs-038",
+        "evrs-039",
+        "evrs-041",
+        "evrs-043",
+        "evrs-044",
+        "evrs-046",
+        "evrs-047",
+        "evrs-048",
+        "evrs-049",
+        "evrs-050"
+      ]
+    },
+    "UNCHANGED_DISAGREEMENT": {
+      "count": 5,
+      "sample_ids": [
+        "evrs-013",
+        "evrs-020",
+        "evrs-026",
+        "evrs-042",
+        "evrs-045"
+      ]
+    }
+  },
+  "confusion_transitions_before_to_after": {
+    "mentions_alpha -> neutral_background": 1,
+    "mentions_alpha -> opposes_alpha": 1,
+    "mentions_alpha -> supports_alpha": 2,
+    "opposes_alpha -> mentions_alpha": 1,
+    "opposes_alpha -> supports_counter_alpha": 1
+  },
+  "mixed_or_conditional_fixed_count": 4,
+  "mixed_or_conditional_root_cause_rows": [
+    {
+      "after_b1_stance": "opposes_alpha",
+      "b2_impact_after": "no B2 count impact",
+      "b2_impact_before": "no B2 count impact",
+      "before_b1_stance": "mentions_alpha",
+      "changed": true,
+      "independent_reviewer_stance": "opposes_alpha",
+      "now_agrees": true,
+      "sample_id": "evrs-007"
+    },
+    {
+      "after_b1_stance": "mentions_alpha",
+      "b2_impact_after": "no B2 count impact",
+      "b2_impact_before": "no B2 count impact",
+      "before_b1_stance": "mentions_alpha",
+      "changed": false,
+      "independent_reviewer_stance": "supports_alpha",
+      "now_agrees": false,
+      "sample_id": "evrs-020"
+    },
+    {
+      "after_b1_stance": "mentions_alpha",
+      "b2_impact_after": "no B2 count impact",
+      "b2_impact_before": "no B2 count impact",
+      "before_b1_stance": "mentions_alpha",
+      "changed": false,
+      "independent_reviewer_stance": "supports_alpha",
+      "now_agrees": false,
+      "sample_id": "evrs-026"
+    },
+    {
+      "after_b1_stance": "supports_alpha",
+      "b2_impact_after": "counts toward B2 supporting_evidence_count",
+      "b2_impact_before": "no B2 count impact",
+      "before_b1_stance": "mentions_alpha",
+      "changed": true,
+      "independent_reviewer_stance": "supports_alpha",
+      "now_agrees": true,
+      "sample_id": "evrs-034"
+    },
+    {
+      "after_b1_stance": "mentions_alpha",
+      "b2_impact_after": "no B2 count impact",
+      "b2_impact_before": "no B2 count impact",
+      "before_b1_stance": "opposes_alpha",
+      "changed": true,
+      "independent_reviewer_stance": "mentions_alpha",
+      "now_agrees": true,
+      "sample_id": "evrs-036"
+    },
+    {
+      "after_b1_stance": "supports_alpha",
+      "b2_impact_after": "counts toward B2 supporting_evidence_count",
+      "b2_impact_before": "no B2 count impact",
+      "before_b1_stance": "mentions_alpha",
+      "changed": true,
+      "independent_reviewer_stance": "supports_alpha",
+      "now_agrees": true,
+      "sample_id": "evrs-040"
+    }
+  ],
+  "mixed_or_conditional_unchanged_count": 2,
+  "mixed_or_conditional_worsened_count": 0,
+  "new_blind_holdout_required": true,
+  "old_50_is_development_set": true,
+  "schema_version": "b1_mixed_language_regression_summary.v1",
+  "source_files": {
+    "after_raw": "docs/audit_artifacts/b1_mixed_language_50_regression_raw.json",
+    "before": "docs/audit_artifacts/b1_llm_stance_50_validation_after_parser_fix.csv",
+    "independent_reviewer": "comqutor_alpha/config/j3_provisional_semantic_benchmark_v0.1.json"
+  }
+}
