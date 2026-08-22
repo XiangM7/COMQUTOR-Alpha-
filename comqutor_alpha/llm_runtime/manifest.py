@@ -28,6 +28,18 @@ from comqutor_alpha.llm_runtime.recorder import SEMANTIC_CALLS_FILENAME
 SEMANTIC_MANIFEST_SCHEMA_VERSION = "comqutor.semantic_manifest.v1"
 SEMANTIC_MANIFEST_FILENAME = "llm_semantic_manifest.json"
 
+# The manifest's own "tasks" dict always includes these three (the
+# pre-Phase-1 task set) with a 0 default even when a given run never
+# actually called one of them; every later-added task (the evaluation-only
+# Shadow task, evidence_stance_classifier, ...) appears only when at least
+# one such record is actually present -- never a fabricated 0 entry for a
+# task this run's manifest schema predates. Exposed as a named constant
+# (not a local literal) so source_bundle.py's independent tamper-detection
+# recomputation (_derived_manifest) can reproduce this SAME shape exactly,
+# rather than drifting to a different "include every canonical task"
+# convention as new semantic tasks are registered over time.
+MANIFEST_ORIGINAL_TASKS = frozenset({"structured_adapter", "alpha_classifier", "structure_extractor"})
+
 _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _MANIFEST_FIELDS = frozenset(
     {
@@ -180,9 +192,8 @@ def build_semantic_manifest(
     # Preserve the exact pre-Phase-1 manifest shape for live runs that use
     # only the original three tasks. The evaluation-only Shadow task appears
     # only when at least one such record is actually present.
-    original_tasks = {"structured_adapter", "alpha_classifier", "structure_extractor"}
     observed_tasks = {str(record["task"]) for record in records}
-    manifest_tasks = original_tasks | (observed_tasks - original_tasks)
+    manifest_tasks = MANIFEST_ORIGINAL_TASKS | (observed_tasks - MANIFEST_ORIGINAL_TASKS)
     task_counts = dict.fromkeys(sorted(manifest_tasks), 0)
     for record in records:
         task_counts[record["task"]] += 1

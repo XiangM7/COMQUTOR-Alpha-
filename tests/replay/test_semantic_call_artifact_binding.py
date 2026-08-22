@@ -135,7 +135,13 @@ def test_alpha_selected_result_mismatch_fails_closed(
     bundle = _bundle(eligible_live_source)
     calls = _calls(bundle)
     record = _call(calls, "alpha_classifier")
-    selected = record["input_payload"]["allowed_alpha_ids"][0]
+    # Alpha Mapper Authority Migration: the request payload carries the
+    # full canonical taxonomy (alpha_taxonomy), not a restricted
+    # allowed_alpha_ids list. The live fixture's mock always selects
+    # alpha_taxonomy[0] (see tests/replay/conftest.py), so index -1 is a
+    # real, legal, but genuinely DIFFERENT Alpha ID -- a selection that
+    # disagrees with what was actually persisted.
+    selected = record["input_payload"]["alpha_taxonomy"][-1]["alpha_id"]
     record["validated_output"] = {
         "decision": "select",
         "selected_alpha_id": selected,
@@ -148,6 +154,46 @@ def test_alpha_selected_result_mismatch_fails_closed(
         verify_semantic_bindings(_replace_calls(bundle, calls))
 
     assert caught.value.reason_code == EXACT_REPLAY_SEMANTIC_OUTPUT_MISMATCH
+
+
+def test_alpha_none_decision_binds_successfully(eligible_live_source: Path) -> None:
+    """Pure-LLM Alpha semantic authority (task spec section 16.N): decision=
+    none is a genuine, successful LLM semantic outcome (matched_alpha=None
+    IS the semantic answer, not an unbound/fallback state) -- a call/artifact
+    pair that both agree on "none" must bind and PASS exactly like a
+    "select" pair, never landing in artifact_decision_mismatches."""
+    bundle = _bundle(eligible_live_source)
+    calls = _calls(bundle)
+    record = _call(calls, "alpha_classifier")
+    record["validated_output"] = {"decision": "none", "selected_alpha_id": None}
+    record["validated_output_sha256"] = sha256_canonical_json(
+        record["validated_output"]
+    )
+
+    alpha_matches = deepcopy(bundle.alpha_matches)
+    request = record["input_payload"]
+    match = next(
+        item
+        for item in alpha_matches["matches"]
+        if item.get("claim") == request.get("claim")
+        and item.get("evidence") == request.get("evidence")
+        and item.get("factors") == request.get("factors")
+        and item.get("direction") == request.get("direction")
+    )
+    match["matched_alpha"] = None
+    match["matched_alpha_name"] = None
+    match["match_status"] = "no_match"
+    match["alpha_match_method"] = "llm"
+    match["alpha_match_fallback_reason"] = None
+    match["classifier"] = {"enabled": True, "used": True, "status": "llm_none"}
+
+    audit = build_semantic_binding_audit(
+        _replace_calls(replace(bundle, alpha_matches=alpha_matches), calls)
+    )
+
+    assert audit["final_status"] == "PASS"
+    assert record["call_id"] in audit["bound_call_ids"]
+    assert not audit["artifact_decision_mismatches"]
 
 
 def test_edge_result_mismatch_fails_closed(eligible_live_source: Path) -> None:

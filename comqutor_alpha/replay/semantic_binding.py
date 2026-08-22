@@ -12,44 +12,76 @@ import re
 from collections import Counter, defaultdict
 from typing import Any
 
+from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.replay.source_bundle import (
     EXACT_REPLAY_SEMANTIC_BINDING_MISSING,
     EXACT_REPLAY_SEMANTIC_BINDING_ORPHAN,
     EXACT_REPLAY_SEMANTIC_CALL_AMBIGUOUS,
     EXACT_REPLAY_SEMANTIC_INPUT_MISMATCH,
     EXACT_REPLAY_SEMANTIC_OUTPUT_MISMATCH,
+    EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED,
     EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH,
     ExactReplayError,
     ExactSemanticSourceBundle,
     sha256_canonical_json,
 )
+from comqutor_alpha.structure_engine.evidence_stance_llm import (
+    FALLBACK_DUPLICATE_RESULT,
+    FALLBACK_MISSING_RESULT,
+    LLM_CLASSIFIER_VERSION,
+    LLM_TASK_NAME as EVIDENCE_STANCE_TASK_NAME,
+    STANCE_METHOD_DETERMINISTIC_FALLBACK,
+    STANCE_METHOD_LLM,
+    StanceRequestItem,
+    _validate_response_item,
+)
+from comqutor_alpha.structure_engine.week2_llm import (
+    _TASK_RUNTIME_METADATA,
+    Week2LLMGateway,
+)
 
 BINDING_AUDIT_SCHEMA_VERSION = "comqutor.semantic_binding_audit.v1"
 BINDING_STATUS_PASS = "PASS"
 BINDING_STATUS_FAIL = "FAIL"
+
+
+def _live_identity(task: str, taxonomy_version: str | None) -> tuple[str, str, str, str, str | None]:
+    """Reads the CURRENT canonical identity from week2_llm.py's own runtime
+    metadata / prompt hashing -- never a hand-copied literal that can drift
+    from the real, live production values."""
+    metadata = _TASK_RUNTIME_METADATA[task]
+    return (
+        metadata["prompt_version"],
+        Week2LLMGateway.prompt_identity_sha256(task),
+        metadata["input_schema_version"],
+        metadata["output_schema_version"],
+        taxonomy_version,
+    )
+
+
 _TASK_BINDING_VERSIONS = {
-    "structured_adapter": (
-        "week2.claim_batch_enrichment.v1",
-        "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
-        "week2.claim_batch_enrichment.input.v1",
-        "week2.claim_batch_enrichment.output.v1",
-        None,
-    ),
-    "alpha_classifier": (
-        "week2.alpha_classifier.v1",
-        "f21a9a14007e7b1e5d60cba99671c9daa68f0a8dba4e539930782913c88a3e30",
-        "week2.alpha_classifier.input.v1",
-        "week2.alpha_classifier.output.v1",
-        "alpha_taxonomy_v1",
-    ),
-    "structure_extractor": (
-        "week2.structure_extractor.v1",
-        "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
-        "week2.structure_extractor.input.v1",
-        "week2.structure_extractor.output.v1",
-        None,
-    ),
+    "structured_adapter": _live_identity("claim_batch_enrichment", None),
+    # Re-derived live (Exact Semantic Replay B1 Binding Support task): the
+    # prior hand-copied week2.alpha_classifier.v1 identity predates the
+    # separately Product-Owner-authorized Alpha Mapper Authority Migration
+    # (full-taxonomy LLM semantic primary, prompt_version bumped to v2).
+    # Reading it live means this entry can never again silently drift from
+    # the real production prompt the way the old literal did.
+    "alpha_classifier": _live_identity("alpha_classifier", "alpha_taxonomy_v1"),
+    "structure_extractor": _live_identity("structure_extractor", None),
+    # Added (Exact Semantic Replay B1 Binding Support task): B1 Evidence
+    # Stance's own LLM upgrade task, registered in the runtime task registry
+    # by the prior Post-Alpha-Authority-Migration Cleanup task -- this entry
+    # gives it real Exact Replay version-identity checking for the first
+    # time, using its current, unmodified v3 identity.
+    "evidence_stance_classifier": _live_identity(EVIDENCE_STANCE_TASK_NAME, "alpha_taxonomy_v1"),
 }
+# Version validation and task-binding support are deliberately separate
+# concepts (task spec section 9): this is the sole source of truth for
+# "does Exact Replay have a binding implementation for this task at all" --
+# a task absent here is EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED, never
+# silently reported as a version mismatch.
+_SUPPORTED_BINDING_TASKS = frozenset(_TASK_BINDING_VERSIONS)
 
 
 def _slug(value: str) -> str:
@@ -85,9 +117,7 @@ def _adapter_segment_id(record: dict[str, Any]) -> str | None:
 
 
 def _new_audit(bundle: ExactSemanticSourceBundle) -> dict[str, Any]:
-    records_by_task = dict.fromkeys(
-        ("structured_adapter", "alpha_classifier", "structure_extractor"), 0
-    )
+    records_by_task = dict.fromkeys(sorted(_SUPPORTED_BINDING_TASKS), 0)
     for record in bundle.semantic_calls:
         task = str(record.get("task") or "")
         if task in records_by_task:
@@ -112,6 +142,9 @@ def _new_audit(bundle: ExactSemanticSourceBundle) -> dict[str, Any]:
         "output_hash_mismatches": [],
         "artifact_decision_mismatches": [],
         "version_mismatches": [],
+        # Separate from version_mismatches: a task identity with no binding
+        # implementation at all (task spec section 9).
+        "unsupported_tasks": [],
         "final_status": BINDING_STATUS_FAIL,
     }
 
@@ -258,40 +291,24 @@ def _bind_adapter(
         _append_unique(audit, "orphan_records", call_id)
 
 
-def _candidate_identity_matches(
-    request_candidate: dict[str, Any], artifact_candidate: dict[str, Any]
-) -> bool:
-    if any(
-        request_candidate.get(key) != artifact_candidate.get(key)
-        for key in (
-            "alpha_id",
-            "alpha_name",
-            "score",
-            "relation",
-            "matched_keywords",
-            "matched_factors",
-        )
-    ):
-        return False
-    components = request_candidate.get("score_components")
-    if not isinstance(components, dict):
-        return False
-    return components == {
-        "keyword": artifact_candidate.get("keyword_score"),
-        "factor": artifact_candidate.get("factor_score"),
-        "direction": artifact_candidate.get("direction_score"),
-        "semantic": artifact_candidate.get("semantic_score"),
-    }
-
-
 def _bind_alpha(
     record: dict[str, Any],
     *,
     audit: dict[str, Any],
     structured_by_claim_id: dict[str, list[dict[str, Any]]],
     alpha_matches: list[dict[str, Any]],
+    taxonomy: dict[str, Any],
     decision_owners: dict[str, list[str]],
 ) -> None:
+    """Alpha Mapper Authority Migration note: the request payload is now the
+    FULL canonical taxonomy (alpha_taxonomy), never a deterministically
+    pre-restricted candidate/allowed_alpha_ids subset -- there is no
+    eligibility-derived content left in the request to compare against
+    eligible_candidates. The meaningful request-side check under the new
+    architecture is instead "was the exact, unmodified, live taxonomy sent"
+    (task spec section 13: never reintroduce an eligible-candidates
+    assumption -- a matched Alpha may be entirely absent from deterministic
+    eligible_candidates now)."""
     call_id = str(record.get("call_id") or "")
     request = record.get("input_payload")
     output = record.get("validated_output")
@@ -319,17 +336,12 @@ def _bind_alpha(
         _append_unique(audit, "ambiguous_bindings", call_id)
         return
 
-    artifact_candidates = _as_dict_list(artifact_match.get("eligible_candidates"))
-    request_candidates = _as_dict_list(request.get("candidates"))
-    allowed = sorted(str(value) for value in request.get("allowed_alpha_ids") or [])
-    if (
-        allowed != sorted(str(item.get("alpha_id") or "") for item in artifact_candidates)
-        or len(request_candidates) != len(artifact_candidates)
-        or not all(
-            _candidate_identity_matches(left, right)
-            for left, right in zip(request_candidates, artifact_candidates, strict=True)
-        )
-    ):
+    expected_taxonomy = [
+        {"alpha_id": alpha.alpha_id, "alpha_name": alpha.name_en, "definition": alpha.core_thesis}
+        for alpha in sorted(taxonomy.values(), key=lambda item: item.alpha_id)
+    ]
+    known_alpha_ids = {entry["alpha_id"] for entry in expected_taxonomy}
+    if _as_dict_list(request.get("alpha_taxonomy")) != expected_taxonomy:
         _append_unique(audit, "artifact_decision_mismatches", call_id)
         return
 
@@ -338,19 +350,29 @@ def _bind_alpha(
     selected = output.get("selected_alpha_id")
     output_matches = False
     if isinstance(classifier, dict) and classifier.get("used") is True:
-        if decision == "select":
+        if decision == "select" and selected in known_alpha_ids:
             output_matches = (
-                selected in allowed
-                and artifact_match.get("matched_alpha") == selected
+                artifact_match.get("matched_alpha") == selected
                 and artifact_match.get("match_status") == "matched"
-                and classifier.get("status") == "applied"
+                and classifier.get("status") == "llm_selected"
+                and artifact_match.get("alpha_match_method") == "llm"
+                and artifact_match.get("alpha_match_fallback_reason") is None
             )
-        elif decision == "defer":
+        elif decision == "none":
+            # Pure-LLM Alpha semantic authority: "none" is a genuine,
+            # successful LLM semantic decision (matched_alpha=None is the
+            # semantic answer, not a fallback) -- alpha_match_method is
+            # "llm" here exactly as it is for "select", never
+            # "deterministic_fallback"/"llm_unavailable" (those belong only
+            # to a call that was never accepted, and per Exact Replay's own
+            # upstream readiness gate never reaches bundle.semantic_calls).
             output_matches = (
                 selected in (None, "")
                 and artifact_match.get("matched_alpha") is None
-                and artifact_match.get("match_status") == "ambiguous"
-                and classifier.get("status") == "confirmed_ambiguous"
+                and artifact_match.get("match_status") == "no_match"
+                and classifier.get("status") == "llm_none"
+                and artifact_match.get("alpha_match_method") == "llm"
+                and artifact_match.get("alpha_match_fallback_reason") is None
             )
     if not output_matches:
         _append_unique(audit, "artifact_decision_mismatches", call_id)
@@ -362,6 +384,164 @@ def _bind_alpha(
         decision_keys=[f"alpha:{claim_id}"],
         decision_owners=decision_owners,
     )
+
+
+def _bind_evidence_stance(
+    record: dict[str, Any],
+    *,
+    audit: dict[str, Any],
+    alpha_matches_by_claim_id: dict[str, list[dict[str, Any]]],
+    taxonomy: dict[str, Any],
+    decision_owners: dict[str, list[str]],
+) -> None:
+    """A B1 evidence_stance_classifier call does not produce its own
+    artifact -- it mutates candidate diagnostic dicts already inside
+    alpha_matches.json's matches[].candidate_scores. One call may bind to
+    several (claim_id, target_alpha_id) artifact locations (task spec
+    section 7); every requested item must bind for the call itself to
+    register as bound (section 7/8), matching _bind_adapter's existing
+    multi-segment-per-call pattern.
+
+    Candidate lookup uses candidate_scores exclusively -- the same, and
+    only, surface evidence_stance_llm._candidate_for_alpha itself reads
+    (never eligible_candidates/top_candidates, and never an assumption that
+    the target Alpha was deterministically admitted -- task spec section
+    13: the Alpha Mapper is LLM-primary now, so a bound target_alpha_id may
+    be absent from deterministic eligible_candidates entirely).
+
+    Per-item expected outcome is derived by re-applying
+    evidence_stance_llm's own contract-only validator
+    (_validate_response_item) to the persisted response item -- never a
+    semantic re-judgment, never a Provider call, never deterministic B1
+    recomputation (task spec section 15): purely replaying the same
+    structural/vocabulary/counter-Alpha-legality check production already
+    applied to this exact persisted (request, response) pair.
+    """
+    call_id = str(record.get("call_id") or "")
+    request = record.get("input_payload")
+    output = record.get("validated_output")
+    if not isinstance(request, dict) or not isinstance(output, dict):
+        _append_unique(audit, "artifact_decision_mismatches", call_id)
+        return
+    requested_items = _as_dict_list(request.get("items"))
+    returned_items = _as_dict_list(output.get("items"))
+    if not requested_items:
+        _append_unique(audit, "artifact_decision_mismatches", call_id)
+        return
+
+    requested_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for item in requested_items:
+        key = (str(item.get("claim_id") or ""), str(item.get("target_alpha_id") or ""))
+        if key == ("", "") or key in requested_by_key:
+            _append_unique(audit, "artifact_decision_mismatches", call_id)
+            return
+        requested_by_key[key] = item
+
+    returned_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    duplicate_keys: set[tuple[str, str]] = set()
+    for item in returned_items:
+        if not isinstance(item, dict):
+            continue
+        key = (str(item.get("claim_id") or ""), str(item.get("target_alpha_id") or ""))
+        if key not in requested_by_key:
+            continue  # extra unrequested result -- never admitted, mirrors production's own rule
+        if key in returned_by_key:
+            duplicate_keys.add(key)
+        else:
+            returned_by_key[key] = item
+
+    decision_keys: list[str] = []
+    for claim_id, target_alpha_id in requested_by_key:
+        item_label = f"{call_id}:{claim_id}:{target_alpha_id}"
+        match_candidates = alpha_matches_by_claim_id.get(claim_id, [])
+        if not match_candidates:
+            _append_unique(audit, "missing_bindings", item_label)
+            continue
+        if len(match_candidates) != 1:
+            _append_unique(audit, "ambiguous_bindings", item_label)
+            continue
+        artifact_match = match_candidates[0]
+
+        candidate_hits = [
+            candidate
+            for candidate in _as_dict_list(artifact_match.get("candidate_scores"))
+            if str(candidate.get("alpha_id") or "") == target_alpha_id
+        ]
+        if not candidate_hits:
+            _append_unique(audit, "missing_bindings", item_label)
+            continue
+        if len(candidate_hits) != 1:
+            _append_unique(audit, "ambiguous_bindings", item_label)
+            continue
+        artifact_candidate = candidate_hits[0]
+
+        key = (claim_id, target_alpha_id)
+        if key in duplicate_keys:
+            expected_llm = False
+            expected_reason = FALLBACK_DUPLICATE_RESULT
+            expected_stance = expected_counter = None
+        else:
+            returned = returned_by_key.get(key)
+            if returned is None:
+                expected_llm = False
+                expected_reason = FALLBACK_MISSING_RESULT
+                expected_stance = expected_counter = None
+            else:
+                # payload/candidate are unused by _validate_response_item
+                # (identity/vocabulary/counter-Alpha legality only) --
+                # empty placeholders satisfy the real production type
+                # without fabricating request/artifact content.
+                pseudo_requested = StanceRequestItem(claim_id, target_alpha_id, {}, {})
+                stance, counter_alpha_id, fallback_reason = _validate_response_item(
+                    pseudo_requested, returned, taxonomy
+                )
+                if fallback_reason is not None:
+                    expected_llm = False
+                    expected_reason = fallback_reason
+                    expected_stance = expected_counter = None
+                else:
+                    expected_llm = True
+                    expected_reason = None
+                    expected_stance, expected_counter = stance, counter_alpha_id
+
+        if expected_llm:
+            # Direct semantic decision (evidence_stance, counter_alpha_id)
+            # plus the deterministic provenance/side-effect fields
+            # _apply_llm_result always stamps on acceptance -- never a
+            # second independent semantic judgment (task spec section 6).
+            item_matches = (
+                artifact_candidate.get("stance_method") == STANCE_METHOD_LLM
+                and artifact_candidate.get("evidence_stance") == expected_stance
+                and artifact_candidate.get("counter_alpha_id") == expected_counter
+                and artifact_candidate.get("stance_fallback_reason") is None
+                and artifact_candidate.get("evidence_stance_version") == LLM_CLASSIFIER_VERSION
+                and artifact_candidate.get("stance_reason_codes") == []
+                and artifact_candidate.get("stance_confidence_band") is None
+                and artifact_candidate.get("requires_manual_review") is False
+            )
+        else:
+            # Provenance only -- the fallback evidence_stance value itself
+            # was produced by the earlier, separate deterministic.v1 pass,
+            # not recomputed here (task spec section 15).
+            item_matches = (
+                artifact_candidate.get("stance_method") == STANCE_METHOD_DETERMINISTIC_FALLBACK
+                and artifact_candidate.get("stance_fallback_reason") == expected_reason
+            )
+        if not item_matches:
+            _append_unique(audit, "artifact_decision_mismatches", item_label)
+            continue
+        decision_keys.append(f"evidence_stance:{claim_id}:{target_alpha_id}")
+
+    if len(decision_keys) == len(requested_by_key):
+        _register_binding(
+            audit=audit,
+            call_id=call_id,
+            task="evidence_stance_classifier",
+            decision_keys=decision_keys,
+            decision_owners=decision_owners,
+        )
+    elif not any(call_id in str(value) for value in audit["missing_bindings"]):
+        _append_unique(audit, "orphan_records", call_id)
 
 
 def _bind_extractor(
@@ -454,6 +634,7 @@ def build_semantic_binding_audit(
     structured = _as_dict_list(bundle.structured_agent_outputs.get("records"))
     alpha_matches = _as_dict_list(bundle.alpha_matches.get("matches"))
     extracted_edges = _as_dict_list(bundle.extracted_structures.get("edges"))
+    taxonomy = load_alpha_taxonomy()
 
     structured_by_segment: dict[str, list[dict[str, Any]]] = defaultdict(list)
     structured_by_claim_id: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -464,15 +645,27 @@ def build_semantic_binding_audit(
         if _claim_id(item):
             structured_by_claim_id[_claim_id(item)].append(item)
 
+    alpha_matches_by_claim_id: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for item in alpha_matches:
+        if _claim_id(item):
+            alpha_matches_by_claim_id[_claim_id(item)].append(item)
+
     decision_owners: dict[str, list[str]] = {}
     for record in bundle.semantic_calls:
         call_id = str(record.get("call_id") or "")
+        task = str(record.get("task") or "")
+        # Task-support and version-identity validation are separate checks
+        # (task spec section 9): an unrecognized task is never reported as
+        # a version mismatch, and its version/hash is never even compared
+        # against a nonexistent expected identity.
+        if task not in _SUPPORTED_BINDING_TASKS:
+            _append_unique(audit, "unsupported_tasks", call_id)
+            continue
         if not _verify_binding_version(record, bundle):
             _append_unique(audit, "version_mismatches", call_id)
             continue
         if not _verify_record_hashes(record, audit):
             continue
-        task = record.get("task")
         if task == "structured_adapter":
             _bind_adapter(
                 record,
@@ -487,6 +680,7 @@ def build_semantic_binding_audit(
                 audit=audit,
                 structured_by_claim_id=structured_by_claim_id,
                 alpha_matches=alpha_matches,
+                taxonomy=taxonomy,
                 decision_owners=decision_owners,
             )
         elif task == "structure_extractor":
@@ -498,8 +692,14 @@ def build_semantic_binding_audit(
                 extracted_edges=extracted_edges,
                 decision_owners=decision_owners,
             )
-        else:
-            _append_unique(audit, "version_mismatches", call_id)
+        elif task == "evidence_stance_classifier":
+            _bind_evidence_stance(
+                record,
+                audit=audit,
+                alpha_matches_by_claim_id=alpha_matches_by_claim_id,
+                taxonomy=taxonomy,
+                decision_owners=decision_owners,
+            )
 
     for decision_key, owners in sorted(decision_owners.items()):
         if len(owners) > 1:
@@ -515,17 +715,39 @@ def build_semantic_binding_audit(
         for item in structured
         if item.get("extraction_method") == "llm_strict_json"
     }
+    # Pre-existing staleness fixed in passing (same class as the FROZEN_HASHES
+    # cleanup precedent): this status set still read the pre-Authority-
+    # Migration "applied"/"confirmed_ambiguous" names, which no classifier
+    # status value has produced since that migration shipped -- the set was
+    # silently vacuous (never matched any real alpha_matches record, so a
+    # genuinely missing alpha_classifier call binding could never be
+    # flagged). Updated to the current Pure-LLM vocabulary's two successful,
+    # accepted-decision status values.
     expected_decisions.update(
         f"alpha:{_claim_id(item)}"
         for item in alpha_matches
         if isinstance(item.get("classifier"), dict)
         and item["classifier"].get("used") is True
-        and item["classifier"].get("status") in {"applied", "confirmed_ambiguous"}
+        and item["classifier"].get("status") in {"llm_selected", "llm_none"}
     )
     expected_decisions.update(
         f"structure:{str(item.get('source_record_id') or '')}"
         for item in extracted_edges
         if item.get("extraction_method") == "llm_strict_json"
+    )
+    # A candidate's stance_method is only ever "llm" as a direct, unambiguous
+    # consequence of a real, accepted evidence_stance_classifier item (task
+    # spec sections 4/6) -- mirrors the alpha_classifier expected-decision
+    # rule above exactly. stance_method == "deterministic_fallback" is
+    # deliberately excluded: a whole-batch fallback never reaches
+    # bundle.semantic_calls at all (Exact Replay's own upstream readiness
+    # gate requires every persisted call to be accepted), so requiring a
+    # decision key for it here would always incorrectly report it missing.
+    expected_decisions.update(
+        f"evidence_stance:{_claim_id(match)}:{str(candidate.get('alpha_id') or '')}"
+        for match in alpha_matches
+        for candidate in _as_dict_list(match.get("candidate_scores"))
+        if candidate.get("stance_method") == STANCE_METHOD_LLM
     )
     for missing in sorted(expected_decisions - covered):
         _append_unique(audit, "missing_bindings", missing)
@@ -542,6 +764,7 @@ def build_semantic_binding_audit(
                 "output_hash_mismatches",
                 "artifact_decision_mismatches",
                 "version_mismatches",
+                "unsupported_tasks",
             )
             for value in audit[field]
         ):
@@ -559,6 +782,7 @@ def build_semantic_binding_audit(
         "output_hash_mismatches",
         "artifact_decision_mismatches",
         "version_mismatches",
+        "unsupported_tasks",
     )
     audit["final_status"] = (
         BINDING_STATUS_PASS
@@ -577,6 +801,8 @@ def verify_semantic_bindings(bundle: ExactSemanticSourceBundle) -> dict[str, Any
         return audit
     if audit["input_hash_mismatches"]:
         code = EXACT_REPLAY_SEMANTIC_INPUT_MISMATCH
+    elif audit["unsupported_tasks"]:
+        code = EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED
     elif audit["output_hash_mismatches"] or audit["artifact_decision_mismatches"]:
         code = EXACT_REPLAY_SEMANTIC_OUTPUT_MISMATCH
     elif audit["version_mismatches"]:

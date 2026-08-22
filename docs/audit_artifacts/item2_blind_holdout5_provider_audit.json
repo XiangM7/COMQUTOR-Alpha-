@@ -1,0 +1,187 @@
+{
+  "holdout5_production_alpha_inference": {
+    "cache_hit_count": 0,
+    "chunk_count": 2,
+    "chunk_size": 100,
+    "elapsed_seconds": 300.03,
+    "logical_provider_calls": 200,
+    "model_name": "claude-sonnet-4-6",
+    "output_schema_version": "week2.alpha_classifier.output.v2",
+    "phase": "holdout5_production_alpha_inference",
+    "prompt_version": "week2.alpha_classifier.v3",
+    "provider": "anthropic",
+    "real_provider_attempts": 200,
+    "retries_used": 0,
+    "rows_evaluated": 200,
+    "rows_total": 200,
+    "rows_unevaluated": 0,
+    "rows_with_missing_structured_record": [],
+    "semantic_none_count": 124,
+    "semantic_select_count": 76,
+    "temperature": "production default (unmodified)",
+    "unavailable_count": 0,
+    "unavailable_fallback_reason_counts": {}
+  },
+  "holdout5_production_polarity_inference": {
+    "batch_count": 7,
+    "deterministic_fallback_count": 0,
+    "elapsed_seconds": 54.23,
+    "fallback_reason_counts": {
+      "duplicate_result": 0,
+      "identity_mismatch": 0,
+      "invalid_counter_alpha": 0,
+      "invalid_stance": 0,
+      "malformed_response": 0,
+      "missing_result": 0,
+      "provider_error": 0,
+      "timeout": 0
+    },
+    "invalid_llm_output_admitted": 0,
+    "llm_result_count": 62,
+    "logical_provider_calls": 7,
+    "model_name": "claude-sonnet-4-6",
+    "phase": "holdout5_production_polarity_inference",
+    "polarity_evaluable_count": 62,
+    "prompt_version": "evidence_stance.llm_classifier.v3",
+    "provider": "anthropic",
+    "real_provider_attempts": 7,
+    "retries_used": 0,
+    "temperature": "production default (unmodified)"
+  },
+  "item2_blind_holdout5_review": {
+    "batch_size": 10,
+    "calls": [
+      {
+        "attempt": 1,
+        "batch": 0,
+        "elapsed_seconds": 13.45,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 1,
+        "elapsed_seconds": 14.04,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 2,
+        "elapsed_seconds": 12.44,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 3,
+        "elapsed_seconds": 11.68,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 4,
+        "elapsed_seconds": 11.58,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 5,
+        "elapsed_seconds": 13.28,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 6,
+        "elapsed_seconds": 11.62,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 7,
+        "elapsed_seconds": 14.03,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 8,
+        "elapsed_seconds": 12.16,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 9,
+        "elapsed_seconds": 11.02,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 10,
+        "elapsed_seconds": 11.47,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 11,
+        "elapsed_seconds": 14.3,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 12,
+        "elapsed_seconds": 11.98,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 13,
+        "elapsed_seconds": 11.87,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 14,
+        "elapsed_seconds": 11.93,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 15,
+        "elapsed_seconds": 13.16,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 16,
+        "elapsed_seconds": 12.54,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 17,
+        "elapsed_seconds": 10.2,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 18,
+        "elapsed_seconds": 12.13,
+        "status": "OK"
+      },
+      {
+        "attempt": 1,
+        "batch": 19,
+        "elapsed_seconds": 12.01,
+        "status": "OK"
+      }
+    ],
+    "human_review_performed": false,
+    "malformed_batches": [],
+    "model_name": "claude-sonnet-4-6",
+    "phase": "item2_blind_holdout5_review",
+    "provider": "anthropic",
+    "review_source": "independent_model_review",
+    "reviewed_count": 200,
+    "reviewer_prompt_version": "item2_blind_holdout5.material_fit_alpha_and_polarity_reviewer.v1",
+    "temperature": 0,
+    "total_logical_calls": 20,
+    "total_provider_attempts": 20
+  }
+}

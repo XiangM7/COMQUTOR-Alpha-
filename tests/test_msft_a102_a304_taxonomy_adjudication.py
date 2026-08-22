@@ -54,7 +54,22 @@ J3_BENCHMARK_PATH = REPO_ROOT / "comqutor_alpha" / "config" / "j3_provisional_se
 # specific adjudication's own invariant check.
 FROZEN_HASHES = {
     TAXONOMY_PATH: "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
-    REPO_ROOT / "comqutor_alpha/structure_engine/alpha_mapper.py": "138af8eb20531a31b71e31bcda3fa4194ba4eae5b974da8251c3cd8afa53ec1a",
+    # Re-pinned (Post-Alpha-Authority-Migration Cleanup task) to the current,
+    # fully-authorized value. alpha_mapper.py genuinely does read taxonomy
+    # conflict-pair content (_conflict_ids/_directions_oppose, used for
+    # ambiguity resolution) -- unlike week2_llm.py below, it was correctly
+    # included in this guard, and remains here so a genuinely unauthorized
+    # future taxonomy-content-driven edit still trips it. The prior pinned
+    # hash predates the separately, formally Product-Owner-authorized Alpha
+    # Mapper Authority Migration (LLM semantic primary over the full
+    # canonical taxonomy; deterministic scoring/AI-gate/threshold survive
+    # only as fallback + diagnostics) -- an intentional, in-scope semantic
+    # authority change wholly unrelated to any A102/A304 taxonomy-content
+    # decision. That migration is uncommitted, product-owner-authorized,
+    # already-implemented-and-reported work already present in this
+    # worktree before this cleanup task began (verify via `git status`) --
+    # not something this cleanup task itself performs or reverts.
+    REPO_ROOT / "comqutor_alpha/structure_engine/alpha_mapper.py": "33ab39f0c76c4ceda84d96fdf57295a9abd69aa1c631d146b9fcb2707c253c1c",
     REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_schema.py": "58466213a20810a062d98551866d4e4895f97771792ccaf6d08991655f28969e",
     REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_admissibility.py": "0b795d4b2ee36fe11496b6766a83196b81d8afaec6c83f15cae2dbd0699b1f41",
     # Re-pinned (QA Closure v0.1.2, B1 v2 freeze/test-cleanup) to the current,

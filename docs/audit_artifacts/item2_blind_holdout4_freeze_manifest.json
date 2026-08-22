@@ -1,0 +1,65 @@
+{
+  "task": "QA Closure v0.1.2 -- Item 2 Blind Holdout #4 -- Formal Acceptance of Pure-LLM Alpha Mapper",
+  "freeze_timestamp_utc": "2026-08-21T00:00:00Z",
+  "repository": {
+    "branch": "comqutor-structure-layer",
+    "head": "8ecf6bfdf7fd8203e223b220be8ca244da92d1f1",
+    "worktree_state": "not clean -- intentionally dirty from prior authorized tasks (Alpha Mapper Authority Migration, Post-Migration Registry Cleanup, Exact Semantic Replay B1 Binding Support, Blind Holdouts #1-#3, Pure-LLM Semantic Authority + H3 Development Re-Evaluation, Production Boundary Hardening); preserved unchanged, nothing reset/restored/checked-out/cleaned/stashed",
+    "verified_before_sampling": true
+  },
+  "production_changes_allowed_during_evaluation": false,
+  "architecture_verification_from_current_source": {
+    "full_canonical_taxonomy_shown_to_llm": "CONFIRMED -- _alpha_taxonomy_request_block(taxonomy) iterates ALL taxonomy.values() (10 Alphas), sorted by alpha_id, unfiltered by deterministic eligibility/AI-gate/threshold (alpha_mapper.py _classify_alpha_with_llm)",
+    "alpha_prompt_is_v3": "CONFIRMED -- week2_llm.py _TASK_RUNTIME_METADATA['alpha_classifier']['prompt_version'] == 'week2.alpha_classifier.v3'",
+    "successful_decisions_are_select_none_only": "CONFIRMED -- _classify_alpha_with_llm's validate_response only accepts decision in {'select','none'}; any other value (including the retired 'defer') raises ValueError and resolves to outcome='unavailable'/fallback_reason='invalid_output'",
+    "deterministic_semantic_fallback_does_not_exist": "CONFIRMED -- map_claim_to_alpha's llm_outcome branch (selected/none/else) is the SOLE source of top-level status/matched_alpha/matched_alpha_name/alpha_match_method/alpha_match_fallback_reason; the deterministic computation above it only ever writes to deterministic_top_alpha/deterministic_match_status, captured BEFORE the LLM outcome is applied and never referenced again",
+    "deterministic_top_alpha_is_diagnostics_only": "CONFIRMED -- deterministic_top_alpha/deterministic_match_status are captured as local variables from the pure deterministic computation, then persisted into the result dict as additive fields; no code path assigns them back into matched_alpha/match_status",
+    "matched_none_unavailable_remain_distinct": "CONFIRMED -- three disjoint match_status values (matched/no_match/unavailable) with distinct alpha_match_method (llm/llm/llm_unavailable) and alpha_match_fallback_reason (null/null/<code>) combinations; verified again this task via tests/test_alpha_production_boundary_hardening.py's own test suite (12/12 passing, re-run below)",
+    "ai_gate_cannot_veto_llm_semantic_alpha": "CONFIRMED -- llm_outcome['selected'] branch does `alpha = taxonomy[llm_outcome['alpha_id']]; matched_alpha = llm_outcome['alpha_id']` unconditionally; ai_gate_results/eligible_candidates are computed earlier and never consulted in this branch",
+    "default_min_match_score_cannot_veto_llm_semantic_alpha": "CONFIRMED -- same as above; min_score is used only in the deterministic eligible_candidates computation, which never gates the llm_outcome['selected'] branch",
+    "b1_b2_b4_semantics_unchanged": "CONFIRMED via git diff --stat against HEAD: comqutor_alpha/structure_engine/evidence_stance.py (B1), comqutor_alpha/conflict_engine/conflict_admissibility.py + conflict_detector.py (B2), comqutor_alpha/graph_engine/activation_scorer_v2.py (B4) all show ZERO diff -- byte-identical to HEAD, no modification this task or any task since the last commit"
+  },
+  "critical_source_sha256": {
+    "comqutor_alpha/structure_engine/alpha_mapper.py": "6af75be557a217ce6a74ee497ccbeb439e35f25887985a336b113a49dfe181bc",
+    "comqutor_alpha/structure_engine/week2_llm.py": "15ed38db5b13dc691f480b7cfb6f61a57514f2cb0a6fbd83be457813500ad87a",
+    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    "comqutor_alpha/structure_engine/ai_alpha_discriminator.py": "9d6b2c1abb968750a5dc19cae6b74afd154bde30c2fa4e78e359bed4b00efb69",
+    "comqutor_alpha/llm_runtime/contracts.py": "c662c1e15fa4aedef7706f50e7daeca2971bf7cb1033eccae24abcb403cd6e58",
+    "comqutor_alpha/replay/semantic_binding.py": "edc58c7e5a08e67a6a09db2713264a9db54090fca416b7a34ff3ef565fdfa0bc",
+    "comqutor_alpha/replay/source_bundle.py": "542910e31ea4c46979ac35c0e4ca4e4a0d2cddb47ac5582fc7fdeb550b2d1be3",
+    "comqutor_alpha/api/routes_research.py": "b52c102593c8b4cc51c55679c70a1ea5d95000c2b5c67b8d723dcdeca35b7820",
+    "comqutor_alpha/llm_runtime/manifest.py": "973da07004039043ff533b8e4654d535a242ed725d29d381fea3e6952765b92f",
+    "comqutor_alpha/replay/pipeline.py": "11bb5d5a53b2ff849eb8ab8d6bbea307ba2b4baf4a18714171724a39ac2ba489",
+    "comqutor_alpha/conflict_engine/conflict_admissibility.py": "0b795d4b2ee36fe11496b6766a83196b81d8afaec6c83f15cae2dbd0699b1f41",
+    "comqutor_alpha/conflict_engine/conflict_detector.py": "e2be3f229c02ddd1d4859c402ab8f3675270ff00cc01eff4a8a49f8e0c7e18a1",
+    "comqutor_alpha/graph_engine/activation_scorer_v2.py": "b7915a438354d67f39d5e1bf987306cd32d98ca63faa24dc57c817b11514165c",
+    "comqutor_alpha/structure_engine/evidence_stance.py": "9ae3aaeb14b453672445eeb6db6dccc6f526e3bc84bfec2776625436c27e14a6"
+  },
+  "alpha_mapper_constants": {
+    "MAPPER_VERSION": "week2.alpha_mapper.v2",
+    "SCHEMA_VERSION": "week2.alpha_matches.v2",
+    "DEFAULT_MIN_MATCH_SCORE": 0.35,
+    "DEFAULT_AMBIGUITY_DELTA": 0.14,
+    "DEFAULT_SECONDARY_DELTA": 0.25,
+    "AI_ALPHA_IDS": ["A101", "A102", "A103"],
+    "canonical_taxonomy_alpha_ids": ["A001", "A003", "A101", "A102", "A103", "A201", "A301", "A304", "A501", "A601"],
+    "canonical_taxonomy_alpha_count": 10
+  },
+  "alpha_classifier_runtime_metadata": {
+    "semantic_task": "alpha_classifier",
+    "prompt_version": "week2.alpha_classifier.v3",
+    "input_schema_version": "week2.alpha_classifier.input.v2",
+    "output_schema_version": "week2.alpha_classifier.output.v2",
+    "taxonomy_version": "alpha_taxonomy_v1",
+    "prompt_identity_sha256": "04b255de7e2f73872bf6431eea9a908465bde685923d0f0f37687d5dffcc8f83"
+  },
+  "alpha_classifier_prompt_text": "Classify the Evidence against the FULL supplied Alpha taxonomy (alpha_taxonomy) -- every canonical Alpha is a legitimate candidate, none has been pre-filtered or pre-admitted by any other program logic. Select the single Alpha whose core thesis and causal/economic mechanism the Evidence most directly and substantively supports or opposes -- never an Alpha that merely shares surface words or a topic with the Evidence. Several Alphas can share overlapping keywords (for example AI capex, GPU demand, or data center activity can each relate to more than one Alpha); when more than one Alpha looks plausible, compare them directly against each other and select whichever one's own stated mechanism the Evidence engages with more closely and substantively -- never by keyword overlap alone, and never by declining to choose merely because the comparison is close. A difficult or close classification is still a classification task: decision=none is not a way to avoid choosing between two or more plausible Alphas. For example, if both A101 and A103 seem plausible, deciding decision=none because 'both are plausible' is WRONG; if A103 is the closer, more substantive fit, the required answer is decision=select with selected_alpha_id=A103. Use decision=none with selected_alpha_id=null only when no single canonical Alpha materially fits the Evidence at all -- when the Evidence does not substantively engage any Alpha's thesis, or is generic or background market commentary with no specific Alpha-relevant mechanism. Judge only from the claim, the evidence, and each Alpha's own definition. Return one JSON object with decision set to select or none and selected_alpha_id set to exactly one alpha_id from the supplied alpha_taxonomy when decision is select, or null when decision is none. Never invent an Alpha ID that is not in the supplied taxonomy, never select more than one Alpha, and never provide a trading decision or recommendation.",
+  "alpha_classifier_prompt_char_length": 1942,
+  "production_provider_profile": {
+    "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+    "llm_provider": "anthropic",
+    "quick_think_llm": "claude-sonnet-4-6"
+  },
+  "prior_holdout3_dev_freeze_manifest_reference": "docs/audit_artifacts/item2_holdout3_pure_llm_dev_freeze_manifest.json (all values above verified identical to that freeze -- zero architecture drift between the H3 development re-evaluation and this H4 formal acceptance)",
+  "verified_not_trusted_blindly": true
+}

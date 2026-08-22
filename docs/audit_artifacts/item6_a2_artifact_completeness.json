@@ -1,0 +1,136 @@
+{
+  "task": "QA Closure v0.1.2 Item 6 -- A2 Nine-Core-Artifact Completeness Verification",
+  "authoritative_source": "comqutor_alpha/api/artifact_export.py: REQUIRED_ARTIFACT_FILENAMES (imported and used by comqutor_alpha/regression/run_selection.py:_file_artifact_completeness, the current v0.1.2 six-ticker regression selection path)",
+  "required_artifact_count_per_ticker": 9,
+  "required_artifacts": [
+    "metadata.json",
+    "raw_agent_outputs.json",
+    "structured_agent_outputs.json",
+    "evidence_facts.json",
+    "alpha_matches.json",
+    "structure_graph.json",
+    "alpha_activations.json",
+    "conflicts.json",
+    "run_audit.json"
+  ],
+  "verification_method": "read-only filesystem check: pathlib.Path.is_file() per required filename under outputs/runs/<run_id>/ -- directories never counted as artifacts, nothing regenerated, no Provider call",
+  "tickers": {
+    "NVDA": {
+      "run_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "run_dir": "outputs/runs/5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "present": 9,
+      "required": 9,
+      "missing": [],
+      "artifacts_present": [
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "structured_agent_outputs.json",
+        "evidence_facts.json",
+        "alpha_matches.json",
+        "structure_graph.json",
+        "alpha_activations.json",
+        "conflicts.json",
+        "run_audit.json"
+      ],
+      "complete": true
+    },
+    "QQQ": {
+      "run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "run_dir": "outputs/runs/a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "present": 9,
+      "required": 9,
+      "missing": [],
+      "artifacts_present": [
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "structured_agent_outputs.json",
+        "evidence_facts.json",
+        "alpha_matches.json",
+        "structure_graph.json",
+        "alpha_activations.json",
+        "conflicts.json",
+        "run_audit.json"
+      ],
+      "complete": true
+    },
+    "MSFT": {
+      "run_id": "07ddc074-9ab2-4b16-8957-acbf94012144",
+      "run_dir": "outputs/runs/07ddc074-9ab2-4b16-8957-acbf94012144",
+      "present": 9,
+      "required": 9,
+      "missing": [],
+      "artifacts_present": [
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "structured_agent_outputs.json",
+        "evidence_facts.json",
+        "alpha_matches.json",
+        "structure_graph.json",
+        "alpha_activations.json",
+        "conflicts.json",
+        "run_audit.json"
+      ],
+      "complete": true
+    },
+    "SNDK": {
+      "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "run_dir": "outputs/runs/183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "present": 9,
+      "required": 9,
+      "missing": [],
+      "artifacts_present": [
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "structured_agent_outputs.json",
+        "evidence_facts.json",
+        "alpha_matches.json",
+        "structure_graph.json",
+        "alpha_activations.json",
+        "conflicts.json",
+        "run_audit.json"
+      ],
+      "complete": true
+    },
+    "TSM": {
+      "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "run_dir": "outputs/runs/1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "present": 9,
+      "required": 9,
+      "missing": [],
+      "artifacts_present": [
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "structured_agent_outputs.json",
+        "evidence_facts.json",
+        "alpha_matches.json",
+        "structure_graph.json",
+        "alpha_activations.json",
+        "conflicts.json",
+        "run_audit.json"
+      ],
+      "complete": true
+    },
+    "AMD": {
+      "run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "run_dir": "outputs/runs/b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "present": 9,
+      "required": 9,
+      "missing": [],
+      "artifacts_present": [
+        "metadata.json",
+        "raw_agent_outputs.json",
+        "structured_agent_outputs.json",
+        "evidence_facts.json",
+        "alpha_matches.json",
+        "structure_graph.json",
+        "alpha_activations.json",
+        "conflicts.json",
+        "run_audit.json"
+      ],
+      "complete": true
+    }
+  },
+  "total_present": 54,
+  "total_required": 54,
+  "all_complete": true
+}

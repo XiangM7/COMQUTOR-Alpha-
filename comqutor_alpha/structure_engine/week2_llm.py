@@ -51,10 +51,29 @@ _TASK_INSTRUCTIONS = {
         "invent one that was not supplied."
     ),
     "alpha_classifier": (
-        "Select at most one alpha from allowed_alpha_ids, or defer when the supplied admissible "
-        "candidates cannot be distinguished. Return one JSON object with decision set to select "
-        "or defer and selected_alpha_id set to an allowed ID or null. Do not create candidates, "
-        "change admissibility, or provide a trading decision."
+        "Classify the Evidence against the FULL supplied Alpha taxonomy (alpha_taxonomy) -- every "
+        "canonical Alpha is a legitimate candidate, none has been pre-filtered or pre-admitted by "
+        "any other program logic. Select the single Alpha whose core thesis and causal/economic "
+        "mechanism the Evidence most directly and substantively supports or opposes -- never an "
+        "Alpha that merely shares surface words or a topic with the Evidence. Several Alphas can "
+        "share overlapping keywords (for example AI capex, GPU demand, or data center activity can "
+        "each relate to more than one Alpha); when more than one Alpha looks plausible, compare "
+        "them directly against each other and select whichever one's own stated mechanism the "
+        "Evidence engages with more closely and substantively -- never by keyword overlap alone, "
+        "and never by declining to choose merely because the comparison is close. A difficult or "
+        "close classification is still a classification task: decision=none is not a way to avoid "
+        "choosing between two or more plausible Alphas. For example, if both A101 and A103 seem "
+        "plausible, deciding decision=none because 'both are plausible' is WRONG; if A103 is the "
+        "closer, more substantive fit, the required answer is decision=select with "
+        "selected_alpha_id=A103. Use decision=none with selected_alpha_id=null only when no single "
+        "canonical Alpha materially fits the Evidence at all -- when the Evidence does not "
+        "substantively engage any Alpha's thesis, or is generic or background market commentary "
+        "with no specific Alpha-relevant mechanism. Judge only from the claim, the evidence, and "
+        "each Alpha's own definition. Return one JSON object with decision set to select or none "
+        "and selected_alpha_id set to exactly one alpha_id from the supplied alpha_taxonomy when "
+        "decision is select, or null when decision is none. Never invent an Alpha ID that is not "
+        "in the supplied taxonomy, never select more than one Alpha, and never provide a trading "
+        "decision or recommendation."
     ),
     "structure_extractor": (
         "Extract only evidence-backed relations between supplied allowed_factors. Return one JSON "
@@ -64,29 +83,45 @@ _TASK_INSTRUCTIONS = {
     ),
     "evidence_stance_classifier": (
         "For each item, classify only the Evidence's stance toward its own target_alpha_id -- never "
-        "toward any other Alpha. Distinguish genuinely endorsing or rebutting the target Alpha's "
-        "thesis from merely mentioning its subject matter, and read negation, rebuttal, "
-        "qualification, conditional language, risk relief, and already-priced-in arguments on their "
-        "actual meaning. When the Evidence contains both a positive and a negative element (for "
-        "example 'X remains strong, but Y creates risk', 'although X, Y', 'if X, then Y'), do not "
-        "classify it as mentions_alpha or neutral_background merely because it is mixed: first "
-        "identify which part of the Evidence actually bears on target_alpha_id's own thesis, then "
-        "resolve the stance from that part alone -- supports_alpha if it is a net endorsement of the "
-        "target thesis, opposes_alpha if it is a net rebuttal or material weakening of it, and "
-        "mentions_alpha or neutral_background only when target_alpha_id's own thesis genuinely "
-        "cannot be resolved either way from the Evidence, not merely because other, target-irrelevant "
-        "content is also present. Conditional language ('if', 'could', 'may', 'would') affects how "
-        "certain the claim is, not whether it has a stance: a clearly conditional endorsement of the "
-        "target thesis is still supports_alpha, and a clearly conditional rebuttal is still "
-        "opposes_alpha. Only report supports_counter_alpha when the Evidence itself materially "
-        "supports one of the supplied counter_alphas' own thesis -- never merely because it opposes "
-        "target_alpha_id, and never merely because the Evidence is mixed. Return one JSON object with "
-        "an items array containing exactly one result per input item, matched by claim_id and "
-        "target_alpha_id, each with stance set to exactly one of supports_alpha, opposes_alpha, "
-        "mentions_alpha, neutral_background, or supports_counter_alpha, and counter_alpha_id set to "
-        "the supported counter Alpha's id only when stance is supports_counter_alpha, omitted "
-        "otherwise. Use only the supplied claim_id, target_alpha_id, and counter Alpha ids -- never "
-        "invent one."
+        "toward any other Alpha. First ask whether the Evidence contains a substantive, "
+        "independently interpretable assertion relevant to evaluating the target Alpha's thesis -- "
+        "judge this from the actual content, never from length: not every short sentence is "
+        "non-substantive, and not every long one is substantive. Evidence that is a heading, a bare "
+        "label or score, an isolated topic name, a fragment, an instruction, a watch-item note, or "
+        "otherwise formatting-like, with no assertion that can be evaluated on its own, has no stance "
+        "to assign beyond neutral_background. When the Evidence does contain a substantive assertion, "
+        "distinguish two further cases relative to target_alpha_id: use mentions_alpha when the "
+        "assertion directly concerns the target thesis, mechanism, or subject matter but does not "
+        "materially support or materially weaken it; use supports_alpha when it is a material, net "
+        "endorsement of the target thesis, and opposes_alpha when it is a material, net rebuttal or "
+        "weakening of it. Reserve neutral_background for Evidence that is contextual, generic, or "
+        "otherwise makes no sufficiently direct substantive assertion about the target thesis at all "
+        "-- not for Evidence that does directly concern the target thesis without taking a side, "
+        "which is mentions_alpha. Read negation, rebuttal, qualification, conditional language, risk "
+        "relief, and already-priced-in arguments on their actual meaning. When the Evidence contains "
+        "more than one clause that materially bears on target_alpha_id's own thesis (for example 'X "
+        "remains strong, but Y creates risk', 'although X, Y', 'if X, then Y'), identify every such "
+        "clause -- not only the first one found -- and resolve the stance from their combined, net "
+        "implication for the target thesis: supports_alpha if the material clauses net to "
+        "endorsement, opposes_alpha if they net to rebuttal or material weakening, and mentions_alpha "
+        "when the material clauses directly concern the target thesis but their combined implication "
+        "is genuinely non-directional or cannot be resolved as net support or opposition -- never by "
+        "selecting one clause and discarding a second, equally target-relevant one. Use "
+        "neutral_background here only under the earlier rule, where no sufficiently direct "
+        "substantive target-relative assertion exists in the first place: an unresolved or "
+        "non-directional net implication among clauses that do directly bear on the target thesis is "
+        "mentions_alpha, not neutral_background. Conditional language ('if', 'could', 'may', 'would') "
+        "affects how certain the claim is, not whether it has a stance: a clearly conditional endorsement of the target thesis is still "
+        "supports_alpha, and a clearly conditional rebuttal is still opposes_alpha. Only report "
+        "supports_counter_alpha when the Evidence itself materially supports one of the supplied "
+        "counter_alphas' own thesis -- never merely because it opposes target_alpha_id, never merely "
+        "because the Evidence is mixed, and never merely because another Alpha is mentioned. Return "
+        "one JSON object with an items array containing exactly one result per input item, matched by "
+        "claim_id and target_alpha_id, each with stance set to exactly one of supports_alpha, "
+        "opposes_alpha, mentions_alpha, neutral_background, or supports_counter_alpha, and "
+        "counter_alpha_id set to the supported counter Alpha's id only when stance is "
+        "supports_counter_alpha, omitted otherwise. Use only the supplied claim_id, target_alpha_id, "
+        "and counter Alpha ids -- never invent one."
     ),
 }
 
@@ -106,9 +141,28 @@ _TASK_RUNTIME_METADATA = {
     },
     "alpha_classifier": {
         "semantic_task": "alpha_classifier",
-        "prompt_version": "week2.alpha_classifier.v1",
-        "input_schema_version": "week2.alpha_classifier.input.v1",
-        "output_schema_version": "week2.alpha_classifier.output.v1",
+        # v3: Pure-LLM Alpha semantic authority -- the LLM is now the SOLE
+        # source of the semantic Alpha result (deterministic logic is a
+        # diagnostic/counterfactual only, never a semantic fallback), and
+        # the decision vocabulary itself changed: v2's decision=defer (a
+        # successful "cannot decide" outcome that deterministic scoring was
+        # allowed to resolve) is retired entirely and replaced by
+        # decision=none (a successful, first-class "no canonical Alpha
+        # materially fits" semantic answer -- semantic ambiguity between two
+        # plausible Alphas is explicitly NOT grounds for none; the prompt
+        # now requires selecting the closer of two plausible Alphas rather
+        # than deferring). This is a genuine output-contract/vocabulary
+        # change, not a wording patch, so both prompt_version and
+        # output_schema_version bump (ADR-005: a versioned identifier must
+        # change with the instructions/contract it identifies, so no old
+        # cached v2 defer-vocabulary semantic-call result is ever silently
+        # reused as if it reflected v3 select/none behavior). input_schema_
+        # version is unchanged: the request payload shape itself (claim,
+        # evidence, ticker, factors, direction, alpha_taxonomy) did not
+        # change -- only the response contract and how callers interpret it.
+        "prompt_version": "week2.alpha_classifier.v3",
+        "input_schema_version": "week2.alpha_classifier.input.v2",
+        "output_schema_version": "week2.alpha_classifier.output.v2",
         "taxonomy_version": "alpha_taxonomy_v1",
     },
     "structure_extractor": {
@@ -120,17 +174,40 @@ _TASK_RUNTIME_METADATA = {
     },
     "evidence_stance_classifier": {
         "semantic_task": "evidence_stance_classifier",
-        # v2: B1 Mixed/Contrastive Language Improvement (QA Closure v0.1.2) --
-        # added target-relative resolution guidance for mixed/conditional
-        # Evidence so it is no longer resolved to mentions_alpha/
-        # neutral_background merely because both a positive and a negative
-        # element are present. No stance value added or removed; counter-
-        # Alpha handling unchanged. Bumped because the prompt's semantic
-        # instructions changed (ADR-005: a versioned prompt identifier must
-        # change with the instructions it identifies, so any old cached
-        # semantic-call result under v1 is never silently reused as if it
-        # reflected this behavior).
-        "prompt_version": "evidence_stance.llm_classifier.v2",
+        # v3: B1 substantive-assertion gate + mentions_alpha/neutral_background
+        # boundary clarification (QA Closure v0.1.2, following Blind Holdout
+        # #1 root-cause analysis) -- adds an explicit pre-check for whether
+        # the Evidence contains a substantive, independently interpretable
+        # assertion at all (headings/labels/bare scores/fragments/watch-items
+        # now explicitly route to neutral_background, never merely because
+        # they are short), explicit definitions distinguishing mentions_alpha
+        # (on-thesis, non-directional) from neutral_background (not
+        # sufficiently on-thesis), and refines mixed-clause handling to
+        # consider ALL target-relevant clauses' combined net implication
+        # rather than only the first one found.
+        #
+        # v3 ontology consistency fix (same v3, applied before this prompt
+        # was ever frozen/evaluated on a blind holdout -- not a new
+        # version): the mixed-clause paragraph originally still allowed an
+        # unresolved/non-directional net implication to fall back to
+        # neutral_background, contradicting the mentions_alpha/
+        # neutral_background definitions immediately above it -- clauses
+        # already established as directly, substantively target-relevant
+        # cannot un-clear the earlier substantive-assertion gate merely by
+        # being hard to net out. That case now resolves to mentions_alpha;
+        # neutral_background remains reserved solely for the earlier gate
+        # (no sufficiently direct substantive target-relative assertion at
+        # all).
+        #
+        # supports_alpha/opposes_alpha/
+        # supports_counter_alpha semantics and the conditional-affects-
+        # certainty-not-existence rule are unchanged in substance. No stance
+        # value added or removed. Bumped from v2 because the prompt's
+        # semantic instructions changed (ADR-005: a versioned prompt
+        # identifier must change with the instructions it identifies, so any
+        # old cached semantic-call result under v1/v2 is never silently
+        # reused as if it reflected this behavior).
+        "prompt_version": "evidence_stance.llm_classifier.v3",
         "input_schema_version": "evidence_stance.llm_classifier.input.v1",
         "output_schema_version": "evidence_stance.llm_classifier.output.v1",
         "taxonomy_version": "alpha_taxonomy_v1",

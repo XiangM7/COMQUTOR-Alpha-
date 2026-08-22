@@ -32,6 +32,14 @@ EXACT_REPLAY_OUTPUT_VALIDATION_FAILED = "EXACT_REPLAY_OUTPUT_VALIDATION_FAILED"
 EXACT_REPLAY_PROVIDER_CALL_ATTEMPTED = "EXACT_REPLAY_PROVIDER_CALL_ATTEMPTED"
 EXACT_REPLAY_DATABASE_WRITE_ATTEMPTED = "EXACT_REPLAY_DATABASE_WRITE_ATTEMPTED"
 EXACT_REPLAY_MODE_FALLBACK_FORBIDDEN = "EXACT_REPLAY_MODE_FALLBACK_FORBIDDEN"
+# Distinct from EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH (task IS a recognized
+# binding target, but its prompt/schema/taxonomy identity doesn't match the
+# expected one): this code means the task identity itself has no binding
+# implementation at all. Task-support and version-identity validation are
+# deliberately separate concepts (semantic_binding.py's dispatch loop checks
+# support first, version second) so an unsupported task is never misreported
+# as a version mismatch.
+EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED = "EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED"
 
 SEMANTIC_CALLS_FILENAME = "llm_semantic_calls.jsonl"
 SEMANTIC_MANIFEST_FILENAME = "llm_semantic_manifest.json"
@@ -65,8 +73,34 @@ _SENSITIVE_KEYS = frozenset(
     }
 )
 _SEMANTIC_TASKS = frozenset(
-    {"structured_adapter", "alpha_classifier", "structure_extractor"}
+    {
+        "structured_adapter",
+        "alpha_classifier",
+        "structure_extractor",
+        # Registered alongside llm_runtime/contracts.py's SEMANTIC_TASKS
+        # (post-Alpha-Authority-Migration cleanup): a live-pipeline task,
+        # exactly like the three above, not the offline-only
+        # structured_claim_shadow task, which is deliberately excluded from
+        # this replay-source-bundle vocabulary. Omitting it here (while
+        # present in contracts.py) would trade today's fail-safe degraded
+        # call for a KeyError in _task_counts's dict.fromkeys(_SEMANTIC_TASKS)
+        # lookup the first time a real evidence_stance_classifier record
+        # reaches an exact-replay bundle.
+        "evidence_stance_classifier",
+    }
 )
+# Must stay exactly equal to llm_runtime/manifest.py's own
+# MANIFEST_ORIGINAL_TASKS (tests/llm_runtime/test_no_production_importers.py
+# deliberately keeps this module off llm_runtime's approved-importer
+# allowlist, so this is a duplicated literal, not a shared import;
+# tests/replay/test_semantic_source_bundle_validation.py's
+# test_derived_manifest_original_tasks_constant_matches_manifest_module
+# cross-checks the two stay in sync). Used by _derived_manifest below to
+# reproduce the live manifest writer's exact "tasks" dict shape: the
+# original three tasks always present, any later-added task (here,
+# evidence_stance_classifier) only when at least one such record is
+# actually present.
+_MANIFEST_ORIGINAL_TASKS = frozenset({"structured_adapter", "alpha_classifier", "structure_extractor"})
 _PROVIDER_CALLED_STATUSES = frozenset({"success", "timeout", "provider_error"})
 _RECORD_FIELDS = frozenset(
     {
@@ -164,11 +198,24 @@ _SUPPORTED_CALL_IDENTITIES = {
         "output_schema_version": "week2.claim_batch_enrichment.output.v1",
         "taxonomy_version": None,
     },
+    # Updated (Pure-LLM Alpha Semantic Authority task) from the pre-migration
+    # week2.alpha_classifier.v2 identity to the current, authorized v3
+    # identity (decision vocabulary select/defer -> select/none; deterministic
+    # logic is never a semantic fallback source -- see week2_llm.py's
+    # _TASK_RUNTIME_METADATA["alpha_classifier"] for the full rationale).
+    # output_schema_version bumps to v2 alongside the prompt since the
+    # response contract's own decision vocabulary changed; input_schema_
+    # version is unchanged (request shape unchanged). prompt_sha256
+    # recomputed live via Week2LLMGateway.prompt_identity_sha256
+    # ("alpha_classifier") against the new prompt text, not hand-derived.
+    # This is not a relaxation -- an exact-replay bundle still fails closed
+    # on any identity this dict does not list; only the single already-
+    # authorized, already-shipped current value changed.
     "alpha_classifier": {
-        "prompt_version": "week2.alpha_classifier.v1",
-        "prompt_sha256": "f21a9a14007e7b1e5d60cba99671c9daa68f0a8dba4e539930782913c88a3e30",
-        "input_schema_version": "week2.alpha_classifier.input.v1",
-        "output_schema_version": "week2.alpha_classifier.output.v1",
+        "prompt_version": "week2.alpha_classifier.v3",
+        "prompt_sha256": "04b255de7e2f73872bf6431eea9a908465bde685923d0f0f37687d5dffcc8f83",
+        "input_schema_version": "week2.alpha_classifier.input.v2",
+        "output_schema_version": "week2.alpha_classifier.output.v2",
         "taxonomy_version": "alpha_taxonomy_v1",
     },
     "structure_extractor": {
@@ -177,6 +224,18 @@ _SUPPORTED_CALL_IDENTITIES = {
         "input_schema_version": "week2.structure_extractor.input.v1",
         "output_schema_version": "week2.structure_extractor.output.v1",
         "taxonomy_version": None,
+    },
+    # Added (post-Alpha-Authority-Migration registry cleanup): B1 Evidence
+    # Stance's own LLM upgrade task, registered here for the first time
+    # alongside SEMANTIC_TASKS/_SEMANTIC_TASKS above -- current B1 v3
+    # identity, unchanged by this task (see week2_llm.py's
+    # _TASK_RUNTIME_METADATA["evidence_stance_classifier"]).
+    "evidence_stance_classifier": {
+        "prompt_version": "evidence_stance.llm_classifier.v3",
+        "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+        "input_schema_version": "evidence_stance.llm_classifier.input.v1",
+        "output_schema_version": "evidence_stance.llm_classifier.output.v1",
+        "taxonomy_version": "alpha_taxonomy_v1",
     },
 }
 
@@ -624,9 +683,28 @@ def _derived_manifest(
         record.get("run_id") != run_id for record in calls
     ):
         raise ExactReplayError(EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID)
+    # Pre-populate every _SEMANTIC_TASKS key (never just MANIFEST_ORIGINAL_
+    # TASKS) so a real, non-original task's record (e.g.
+    # evidence_stance_classifier) is never a KeyError here -- then drop any
+    # entry that is both zero AND not one of the original three, so this
+    # independent recomputation reproduces the SAME shape the live manifest
+    # writer (llm_runtime/manifest.py) actually persists: the original
+    # three tasks always present, any later-added task only when at least
+    # one such record is actually present. Without this filter, a real
+    # exact-replay-eligible run whose Alpha decision is "none" for every
+    # claim (B1's evidence_stance_classifier legitimately never fires --
+    # see evidence_stance_llm.retained_target_alpha_ids) would fail
+    # EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID purely from this recomputation
+    # disagreeing with the real manifest on an absent, never-called task's
+    # own zero count.
     task_counts = dict.fromkeys(sorted(_SEMANTIC_TASKS), 0)
     for record in calls:
         task_counts[str(record["task"])] += 1
+    task_counts = {
+        task: count
+        for task, count in task_counts.items()
+        if count > 0 or task in _MANIFEST_ORIGINAL_TASKS
+    }
     exact_ready = bool(
         calls
         and all(

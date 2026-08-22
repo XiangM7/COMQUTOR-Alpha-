@@ -714,9 +714,21 @@ class TestSectionEInvariants:
         # this session's earlier B1-B5 segments (legitimate, pre-existing
         # before this J3/J2 segment began) -- what this segment must never
         # do is layer any further *unstaged* edit on top of them.
+        #
+        # week2_llm.py and alpha_mapper.py removed from this list (Post-
+        # Alpha-Authority-Migration Cleanup task): this guard was always
+        # scoped to the J3/J2 segment's own historical execution window
+        # ("this segment must never touch") -- a segment-local, task-
+        # completion assertion, not a permanent product invariant (see
+        # this file's own module docstring: sections map to that task's
+        # own 43-item checklist). The later, separately Product-Owner-
+        # authorized Alpha Mapper Authority Migration explicitly modified
+        # both files (LLM semantic primary over the full canonical
+        # taxonomy; see comqutor_alpha/structure_engine/alpha_mapper.py
+        # and week2_llm.py's alpha_classifier v2 prompt) -- an intentional,
+        # in-scope, unrelated-to-J3/J2 change. The remaining three paths
+        # are untouched by that migration and stay covered here unchanged.
         frozen_paths = [
-            "comqutor_alpha/structure_engine/week2_llm.py",
-            "comqutor_alpha/structure_engine/alpha_mapper.py",
             "comqutor_alpha/conflict_engine/conflict_schema.py",
             "comqutor_alpha/conflict_engine/conflict_admissibility.py",
             "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",

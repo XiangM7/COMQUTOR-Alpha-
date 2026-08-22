@@ -1,0 +1,82 @@
+{
+  "task": "Alpha Mapper Pure-LLM Semantic Authority + Holdout #3 Development Re-Evaluation",
+  "freeze_timestamp_utc": "2026-08-21T00:00:00Z",
+  "branch": "comqutor-structure-layer",
+  "head": "8ecf6bfdf7fd8203e223b220be8ca244da92d1f1",
+  "head_unchanged_from_prior_holdout3_freeze": true,
+  "prior_holdout3_freeze_manifest": "docs/audit_artifacts/item2_blind_holdout3_freeze_manifest.json",
+  "worktree_state_at_freeze": "not clean -- pre-existing modifications and untracked files from prior tasks in this session are present and preserved unchanged; production diff for THIS task is scoped to exactly 5 files (see production_files_changed_this_task), 4 of which are this task's own edits and one (comqutor_alpha/llm_runtime/contracts.py) is an untouched pre-existing modification from an earlier segment (evidence_stance_classifier SEMANTIC_TASKS registration). See git status --short / git diff --stat in the final report.",
+  "production_changes_allowed_during_evaluation": false,
+  "production_files_changed_this_task": [
+    "comqutor_alpha/structure_engine/alpha_mapper.py",
+    "comqutor_alpha/structure_engine/week2_llm.py",
+    "comqutor_alpha/replay/semantic_binding.py",
+    "comqutor_alpha/replay/source_bundle.py"
+  ],
+  "source_sha256": {
+    "comqutor_alpha/structure_engine/alpha_mapper.py": "6af75be557a217ce6a74ee497ccbeb439e35f25887985a336b113a49dfe181bc",
+    "comqutor_alpha/structure_engine/week2_llm.py": "15ed38db5b13dc691f480b7cfb6f61a57514f2cb0a6fbd83be457813500ad87a",
+    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    "comqutor_alpha/structure_engine/ai_alpha_discriminator.py": "9d6b2c1abb968750a5dc19cae6b74afd154bde30c2fa4e78e359bed4b00efb69"
+  },
+  "source_sha256_prior_holdout3_freeze": {
+    "comqutor_alpha/structure_engine/alpha_mapper.py": "33ab39f0c76c4ceda84d96fdf57295a9abd69aa1c631d146b9fcb2707c253c1c",
+    "comqutor_alpha/structure_engine/week2_llm.py": "cb89e57f943e223dc45dd987c1067f78aafdf72a0ff3a61eb005fc4a8053fdc6",
+    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    "comqutor_alpha/structure_engine/ai_alpha_discriminator.py": "9d6b2c1abb968750a5dc19cae6b74afd154bde30c2fa4e78e359bed4b00efb69"
+  },
+  "alpha_taxonomy_v1_yaml_unchanged": true,
+  "ai_alpha_discriminator_unchanged": true,
+  "alpha_mapper_constants": {
+    "SCHEMA_VERSION": "week2.alpha_matches.v2",
+    "MAPPER_VERSION": "week2.alpha_mapper.v2",
+    "SCHEMA_VERSION_note": "unchanged -- additive fields only (deterministic_top_alpha, deterministic_match_status); new match_status/alpha_match_method vocabulary values, no shape change",
+    "DEFAULT_MIN_MATCH_SCORE": 0.35,
+    "DEFAULT_AMBIGUITY_DELTA": 0.14,
+    "DEFAULT_SECONDARY_DELTA": 0.25,
+    "AI_ALPHA_IDS": ["A101", "A102", "A103"]
+  },
+  "alpha_classifier_runtime_metadata": {
+    "semantic_task": "alpha_classifier",
+    "prompt_version": "week2.alpha_classifier.v3",
+    "input_schema_version": "week2.alpha_classifier.input.v2",
+    "output_schema_version": "week2.alpha_classifier.output.v2",
+    "taxonomy_version": "alpha_taxonomy_v1",
+    "prompt_identity_sha256": "04b255de7e2f73872bf6431eea9a908465bde685923d0f0f37687d5dffcc8f83"
+  },
+  "alpha_classifier_runtime_metadata_prior_holdout3_freeze": {
+    "prompt_version": "week2.alpha_classifier.v2",
+    "input_schema_version": "week2.alpha_classifier.input.v2",
+    "output_schema_version": "week2.alpha_classifier.output.v1",
+    "prompt_identity_sha256": "5afa31274bf0e32cdbca60ab149dfe57f9b51110366a8d9e73e6092771c685c6"
+  },
+  "version_bump_rationale": "prompt_version v2->v3: decision vocabulary changed (select/defer -> select/none), a genuine semantic-contract change, not a wording patch. output_schema_version v1->v2: the response contract's own vocabulary changed (defer retired, none added as a first-class successful outcome). input_schema_version unchanged: request shape (claim, evidence, ticker, factors, direction, alpha_taxonomy) did not change.",
+  "alpha_classifier_prompt_text": "Classify the Evidence against the FULL supplied Alpha taxonomy (alpha_taxonomy) -- every canonical Alpha is a legitimate candidate, none has been pre-filtered or pre-admitted by any other program logic. Select the single Alpha whose core thesis and causal/economic mechanism the Evidence most directly and substantively supports or opposes -- never an Alpha that merely shares surface words or a topic with the Evidence. Several Alphas can share overlapping keywords (for example AI capex, GPU demand, or data center activity can each relate to more than one Alpha); when more than one Alpha looks plausible, compare them directly against each other and select whichever one's own stated mechanism the Evidence engages with more closely and substantively -- never by keyword overlap alone, and never by declining to choose merely because the comparison is close. A difficult or close classification is still a classification task: decision=none is not a way to avoid choosing between two or more plausible Alphas. For example, if both A101 and A103 seem plausible, deciding decision=none because 'both are plausible' is WRONG; if A103 is the closer, more substantive fit, the required answer is decision=select with selected_alpha_id=A103. Use decision=none with selected_alpha_id=null only when no single canonical Alpha materially fits the Evidence at all -- when the Evidence does not substantively engage any Alpha's thesis, or is generic or background market commentary with no specific Alpha-relevant mechanism. Judge only from the claim, the evidence, and each Alpha's own definition. Return one JSON object with decision set to select or none and selected_alpha_id set to exactly one alpha_id from the supplied alpha_taxonomy when decision is select, or null when decision is none. Never invent an Alpha ID that is not in the supplied taxonomy, never select more than one Alpha, and never provide a trading decision or recommendation.",
+  "alpha_classifier_prompt_char_length": 1942,
+  "production_provider_profile": {
+    "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+    "llm_provider": "anthropic",
+    "quick_think_llm": "claude-sonnet-4-6",
+    "unchanged_from_prior_holdout3_freeze": true
+  },
+  "architecture_summary": "Pure-LLM Alpha semantic authority: the LLM is the SOLE source of the semantic Alpha result (matched_alpha/matched_alpha_name/match_status). It sees the FULL canonical taxonomy (unrestricted) and resolves to exactly one of two successful outcomes: select (exactly one canonical Alpha, match_status=matched) or none (no canonical Alpha materially fits, match_status=no_match). There is no successful defer/cannot-decide outcome. On any operational failure (classifier disabled/no gateway, provider timeout/error, malformed/invalid output, unknown Alpha ID) the result is match_status=unavailable, alpha_match_method=llm_unavailable, matched_alpha=null -- the deterministic scorer's own conclusion is NEVER substituted as the semantic answer, on any path, including when the classifier is simply disabled (this differs from the prior Holdout #3 architecture, where a disabled/failed classifier silently fell back to the deterministic top candidate as alpha_match_method=deterministic_fallback). Deterministic scoring/AI-gate/0.35-threshold logic is preserved unmodified and continues to compute candidate_scores/eligible_candidates/ai_alpha_matches as diagnostics, plus two new fields (deterministic_top_alpha, deterministic_match_status) that expose the deterministic scorer's own conclusion as a counterfactual, never as the semantic result.",
+  "known_disclosed_consequence_live_default": "COMQUTOR_WEEK2_LLM_ENABLED is unset in this repo's .env/shell (confirmed empirically at freeze time) and PD-006 (Evidence Stance/B1 LLM tier) is NOT_APPROVED for default/live use -- meaning the CURRENTLY-DEPLOYED DEFAULT configuration (classifier disabled) now reports match_status=unavailable/matched_alpha=null for every claim, where the prior architecture silently used the deterministic result. This is an explicit, product-owner-confirmed consequence of this task (confirmed twice via AskUserQuestion during implementation), not an oversight -- flagged here for a human to act on (enable the LLM tier, or accept unavailable-by-default) before any live/production deployment of this change.",
+  "known_disclosed_consequence_architecture_replay": "comqutor_alpha/replay/pipeline.py's run_structure_replay (Architecture Replay) is hardcoded llm_gateway=None by design (\"for architecture diagnosis only\", never a real or offline-double LLM). Under Pure-LLM authority this means Architecture Replay now always recomputes matched_alpha=null for every claim, producing zero Activation/Conflict evidence on replay -- a structural consequence, not a bug, and out of this task's scope to change (would require either giving Architecture Replay a way to reuse historical Alpha decisions or an offline LLM double, both explicit follow-up candidates for a human to decide on).",
+  "pre_evaluation_regression_results": {
+    "test_alpha_mapper_llm_authority_py": "19/19 PASS (tests A-M, Pure-LLM authority acceptance suite; N covered in tests/replay/test_semantic_call_artifact_binding.py)",
+    "full_offline_suite_command": "python -m pytest tests/ -q",
+    "full_offline_suite_result": "3697 passed, 8 failed, 47 skipped, 69 subtests passed",
+    "failures_are_pre_existing_or_structural_not_new_regressions": true,
+    "failure_breakdown": [
+      "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_fully_authorized_run_with_fake_client_writes_complete_bundle -- pre-existing, environment-specific (.DS_Store in outputs/evaluations/, unrelated to any code)",
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline -- pre-existing FROZEN-baseline guard, expected to drift on any legitimate alpha_mapper.py/week2_llm.py change per established precedent (not silently re-pinned)",
+      "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e42_head_unchanged_from_session_frozen_starting_commit -- pre-existing HEAD-pin drift, unrelated to any code change (HEAD unchanged by this task)",
+      "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical -- same FROZEN_HASHES pattern as test_source_integrity.py, third confirmed instance of an established precedent (report honestly, do not silently re-pin)",
+      "tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch -- Architecture Replay structural consequence (see known_disclosed_consequence_architecture_replay)",
+      "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence -- same Architecture Replay structural consequence",
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider -- pre-existing B2 evidence-volume gap in the NVDA demo fixture (predates this task; same fixture's A101/A304 pair is confirmed 'suppressed' not 'admitted' under real B1/B2 in tests/test_week4_golden_closure.py, unrelated to Alpha LLM authority); this task's own scripts/deterministic_echo_llm.py fix was applied to scripts/seed_w5_demo.py so the demo seed no longer ALSO fails for the new unavailable-classifier reason on top of this pre-existing one",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded -- same as above"
+    ]
+  },
+  "verified_not_trusted_blindly": true
+}

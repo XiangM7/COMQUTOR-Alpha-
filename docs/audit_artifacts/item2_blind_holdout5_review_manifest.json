@@ -1,0 +1,41 @@
+{
+  "freeze_timestamp_utc": "2026-08-21T23:28:31Z",
+  "frozen_snapshot_file": "docs/audit_artifacts/item2_blind_holdout5_review_frozen.csv",
+  "frozen_snapshot_sha256": "900ee50b9cfb8f5b3653ebcd30e41403d2af6665fc72cc7f4af49493d9d92ed1",
+  "human_review_performed": false,
+  "input_fields_excluded_from_reviewer": [
+    "production H5 Alpha outputs",
+    "production H5 B1 outputs",
+    "deterministic Alpha rankings",
+    "candidate Alpha scores",
+    "match_status",
+    "historical reviewer labels",
+    "correctness fields",
+    "comparison files",
+    "any precomputed semantic result for H5"
+  ],
+  "input_fields_shown_to_reviewer": [
+    "sample_id",
+    "ticker",
+    "claim",
+    "evidence",
+    "canonical_alpha_taxonomy"
+  ],
+  "malformed_batches": [],
+  "model_name": "claude-sonnet-4-6",
+  "not_altered_after_freeze": true,
+  "note": "This is NOT a human review. Internal audit provenance only -- see task-level presentation rules for user-facing artifacts, which omit reviewer identity without falsely claiming human review.",
+  "provider": "anthropic",
+  "review_blind_to_h5_system_outputs": true,
+  "review_completed_before_system_inference": true,
+  "review_file": "docs/audit_artifacts/evidence_review_sample_h5.csv",
+  "review_file_sha256_after_freeze": "900ee50b9cfb8f5b3653ebcd30e41403d2af6665fc72cc7f4af49493d9d92ed1",
+  "review_protocol": "two_stage_material_fit_then_single_best_alpha",
+  "review_source": "independent_model_review",
+  "reviewed_count": 200,
+  "reviewer_prompt_template_sha256": "82ceaf79bfd8f61fac7a38342eedc1f36da5573bef314c8595d1fe6783ebc4b7",
+  "reviewer_prompt_version": "item2_blind_holdout5.material_fit_alpha_and_polarity_reviewer.v1",
+  "taxonomy_sha256": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+  "taxonomy_source": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+  "total_logical_calls": 20
+}

@@ -136,7 +136,7 @@ def _edge_response():
 
 
 def test_legacy_prompt_payload_api_and_defaults_are_byte_compatible(tmp_path: Path) -> None:
-    model = _SequenceModel(['{"decision":"defer","selected_alpha_id":null}'])
+    model = _SequenceModel(['{"decision":"none","selected_alpha_id":null}'])
     (tmp_path / "legacy").mkdir()
     gateway = Week2LLMGateway(model, run_id="legacy", output_root=tmp_path)
     payload = {"allowed_alpha_ids": ["A101"], "claim": "增长"}
@@ -144,10 +144,29 @@ def test_legacy_prompt_payload_api_and_defaults_are_byte_compatible(tmp_path: Pa
     result = gateway.invoke_json("alpha_classifier", payload, lambda value: dict(value))
 
     instruction = (
-        "Select at most one alpha from allowed_alpha_ids, or defer when the supplied admissible "
-        "candidates cannot be distinguished. Return one JSON object with decision set to select "
-        "or defer and selected_alpha_id set to an allowed ID or null. Do not create candidates, "
-        "change admissibility, or provide a trading decision."
+        "Classify the Evidence against the FULL supplied Alpha taxonomy (alpha_taxonomy) -- every "
+        "canonical Alpha is a legitimate candidate, none has been pre-filtered or pre-admitted by "
+        "any other program logic. Select the single Alpha whose core thesis and causal/economic "
+        "mechanism the Evidence most directly and substantively supports or opposes -- never an "
+        "Alpha that merely shares surface words or a topic with the Evidence. Several Alphas can "
+        "share overlapping keywords (for example AI capex, GPU demand, or data center activity can "
+        "each relate to more than one Alpha); when more than one Alpha looks plausible, compare "
+        "them directly against each other and select whichever one's own stated mechanism the "
+        "Evidence engages with more closely and substantively -- never by keyword overlap alone, "
+        "and never by declining to choose merely because the comparison is close. A difficult or "
+        "close classification is still a classification task: decision=none is not a way to avoid "
+        "choosing between two or more plausible Alphas. For example, if both A101 and A103 seem "
+        "plausible, deciding decision=none because 'both are plausible' is WRONG; if A103 is the "
+        "closer, more substantive fit, the required answer is decision=select with "
+        "selected_alpha_id=A103. Use decision=none with selected_alpha_id=null only when no single "
+        "canonical Alpha materially fits the Evidence at all -- when the Evidence does not "
+        "substantively engage any Alpha's thesis, or is generic or background market commentary "
+        "with no specific Alpha-relevant mechanism. Judge only from the claim, the evidence, and "
+        "each Alpha's own definition. Return one JSON object with decision set to select or none "
+        "and selected_alpha_id set to exactly one alpha_id from the supplied alpha_taxonomy when "
+        "decision is select, or null when decision is none. Never invent an Alpha ID that is not "
+        "in the supplied taxonomy, never select more than one Alpha, and never provide a trading "
+        "decision or recommendation."
     )
     expected_prompt = (
         "You are a constrained COMQUTOR extraction component. Return strict JSON only, with "
@@ -155,7 +174,7 @@ def test_legacy_prompt_payload_api_and_defaults_are_byte_compatible(tmp_path: Pa
         f"{instruction}\nINPUT_JSON:\n"
         f"{json.dumps(payload, ensure_ascii=False, default=str)}"
     )
-    assert result == {"decision": "defer", "selected_alpha_id": None}
+    assert result == {"decision": "none", "selected_alpha_id": None}
     assert model.prompts == [expected_prompt]
     assert gateway.semantic_runtime is None
     assert gateway.timeout_seconds == DEFAULT_TIMEOUT_SECONDS
@@ -249,7 +268,12 @@ def test_three_real_callers_preserve_fallbacks_and_never_cache_rejections(
     manifest_path = session.finalize_manifest(complete=True)
 
     assert claims[0]["extraction_method"] == "deterministic_splitter"
-    assert mapped["classifier"]["status"] == "fallback"
+    # A999 is rejected by the wire validator (outside the canonical
+    # taxonomy) -- Pure-LLM Alpha semantic authority reports this as an
+    # operational failure (invalid_output), never a deterministic fallback.
+    assert mapped["classifier"]["status"] == "invalid_output"
+    assert mapped["match_status"] == "unavailable"
+    assert mapped["matched_alpha"] is None
     assert structures["edges"][0]["extraction_method"] == "deterministic_rules"
     records = session.recorder.read_all()
     assert len(records) == 3
@@ -300,15 +324,15 @@ def test_invalid_cache_candidate_is_revalidated_then_treated_as_provider_miss(
     tmp_path: Path,
 ) -> None:
     cache = InMemoryFakeCache()
-    model = _SequenceModel([json.dumps({"decision": "defer", "selected_alpha_id": None})])
+    model = _SequenceModel([json.dumps({"decision": "none", "selected_alpha_id": None})])
     gateway, session = _runtime_gateway(tmp_path, model, cache=cache)
     payload = {"allowed_alpha_ids": ["A101"]}
     seeded = session.start_call(
         task="alpha_classifier",
-        prompt_version="week2.alpha_classifier.v1",
+        prompt_version="week2.alpha_classifier.v3",
         prompt_sha256=gateway.prompt_identity_sha256("alpha_classifier"),
-        input_schema_version="week2.alpha_classifier.input.v1",
-        output_schema_version="week2.alpha_classifier.output.v1",
+        input_schema_version="week2.alpha_classifier.input.v2",
+        output_schema_version="week2.alpha_classifier.output.v2",
         taxonomy_version="alpha_taxonomy_v1",
         input_payload=payload,
     )

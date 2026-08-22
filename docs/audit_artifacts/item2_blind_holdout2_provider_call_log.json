@@ -1,0 +1,230 @@
+{
+  "phase3_b1_evaluation": {
+    "provider": "anthropic",
+    "model_name": "claude-sonnet-4-6",
+    "temperature": "production default (unmodified)",
+    "prompt_version": "evidence_stance.llm_classifier.v3",
+    "batch_count": 15,
+    "logical_provider_calls": 15,
+    "real_provider_attempts": 15,
+    "retries_used": 0,
+    "llm_result_count": 141,
+    "deterministic_fallback_count": 0,
+    "fallback_reason_counts": {
+      "duplicate_result": 0,
+      "identity_mismatch": 0,
+      "invalid_counter_alpha": 0,
+      "invalid_stance": 0,
+      "malformed_response": 0,
+      "missing_result": 0,
+      "provider_error": 0,
+      "timeout": 0
+    },
+    "invalid_llm_output_admitted": 0,
+    "elapsed_seconds": 116.34
+  },
+  "phase4_stance_review": {
+    "provider": "anthropic",
+    "model_name": "claude-sonnet-4-6",
+    "temperature": 0,
+    "total_logical_calls": 15,
+    "total_provider_attempts": 15,
+    "calls": [
+      {
+        "call_tag": "stance_review_batch_0",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 25.58
+      },
+      {
+        "call_tag": "stance_review_batch_1",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 62.51
+      },
+      {
+        "call_tag": "stance_review_batch_2",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 49.66
+      },
+      {
+        "call_tag": "stance_review_batch_3",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 26.94
+      },
+      {
+        "call_tag": "stance_review_batch_4",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 25.21
+      },
+      {
+        "call_tag": "stance_review_batch_5",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 24.36
+      },
+      {
+        "call_tag": "stance_review_batch_6",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 22.75
+      },
+      {
+        "call_tag": "stance_review_batch_7",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 26.19
+      },
+      {
+        "call_tag": "stance_review_batch_8",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 20.67
+      },
+      {
+        "call_tag": "stance_review_batch_9",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 26.36
+      },
+      {
+        "call_tag": "stance_review_batch_10",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 17.0
+      },
+      {
+        "call_tag": "stance_review_batch_11",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 18.25
+      },
+      {
+        "call_tag": "stance_review_batch_12",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 20.34
+      },
+      {
+        "call_tag": "stance_review_batch_13",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 29.21
+      },
+      {
+        "call_tag": "stance_review_batch_14",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 3.96
+      }
+    ]
+  },
+  "phase6_alpha_review": {
+    "provider": "anthropic",
+    "model_name": "claude-sonnet-4-6",
+    "temperature": 0,
+    "total_logical_calls": 16,
+    "total_provider_attempts": 16,
+    "calls": [
+      {
+        "call_tag": "alpha_review_batch_0",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 23.11
+      },
+      {
+        "call_tag": "alpha_review_batch_1",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 28.67
+      },
+      {
+        "call_tag": "alpha_review_batch_2",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 22.3
+      },
+      {
+        "call_tag": "alpha_review_batch_3",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 22.94
+      },
+      {
+        "call_tag": "alpha_review_batch_4",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 25.79
+      },
+      {
+        "call_tag": "alpha_review_batch_5",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 97.56
+      },
+      {
+        "call_tag": "alpha_review_batch_6",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 25.23
+      },
+      {
+        "call_tag": "alpha_review_batch_7",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 22.69
+      },
+      {
+        "call_tag": "alpha_review_batch_8",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 21.36
+      },
+      {
+        "call_tag": "alpha_review_batch_9",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 26.55
+      },
+      {
+        "call_tag": "alpha_review_batch_10",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 19.29
+      },
+      {
+        "call_tag": "alpha_review_batch_11",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 20.61
+      },
+      {
+        "call_tag": "alpha_review_batch_12",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 20.05
+      },
+      {
+        "call_tag": "alpha_review_batch_13",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 19.31
+      },
+      {
+        "call_tag": "alpha_review_batch_14",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 3.82
+      },
+      {
+        "call_tag": "duplicate_clustering",
+        "attempt": 1,
+        "status": "OK",
+        "elapsed_seconds": 5.12
+      }
+    ]
+  }
+}

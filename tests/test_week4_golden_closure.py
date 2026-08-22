@@ -52,6 +52,7 @@ from comqutor_alpha.storage.db.engine import build_engine
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
 from scripts.w5_demo_fixtures import approved_demo_outputs
+from scripts.deterministic_echo_llm import build_deterministic_echo_gateway
 
 _BARE_TRADING_TERMS = re.compile(r"\b(buy|sell|hold)\b", re.IGNORECASE)
 _FORBIDDEN_SUMMARY_PHRASES = (
@@ -132,7 +133,10 @@ def _qqq_payload():
 def test_nvda_golden_closure_full_week1_through_4_path(tmp_path):
     repo = _repo()
 
-    post_response = run_research_request(_nvda_payload(), output_root=tmp_path, graph_repository=repo)
+    gateway = build_deterministic_echo_gateway("week4-golden-closure-nvda", tmp_path)
+    post_response = run_research_request(
+        _nvda_payload(), output_root=tmp_path, graph_repository=repo, week2_llm_gateway=gateway
+    )
     run_id = post_response["run_id"]
 
     assert post_response["status"] == "completed"
@@ -219,7 +223,10 @@ def test_qqq_golden_closure_full_week1_through_4_path(tmp_path):
     """
     repo = _repo()
 
-    post_response = run_research_request(_qqq_payload(), output_root=tmp_path, graph_repository=repo)
+    gateway = build_deterministic_echo_gateway("week4-golden-closure-qqq", tmp_path)
+    post_response = run_research_request(
+        _qqq_payload(), output_root=tmp_path, graph_repository=repo, week2_llm_gateway=gateway
+    )
     run_id = post_response["run_id"]
 
     assert post_response["status"] == "completed"

@@ -1,0 +1,32 @@
+{
+  "task": "QA Closure v0.1.2 -- Item 2 Blind Holdout #4 -- Independent Blind Alpha Reviewer freeze",
+  "freeze_timestamp_utc": "2026-08-21T00:00:00Z",
+  "purpose": "Freeze the reviewer prompt/schema/batching strategy BEFORE any reviewer Provider call, per task spec section 13. Not altered after this point.",
+  "reviewer_prompt_version": "item2_blind_holdout4.independent_alpha_reviewer.v1",
+  "reviewer_prompt_template_sha256": "8f657980f662dbb235cd5cf09ca7eda581354889f49dce87dfdccd9f1574cdb9",
+  "taxonomy_file": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+  "taxonomy_sha256": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "temperature": 0,
+  "batch_size": 10,
+  "max_attempts_per_batch": 3,
+  "timeout_seconds": 120.0,
+  "reviewer_input_fields_per_item": ["sample_id", "ticker", "claim", "evidence"],
+  "reviewer_input_excludes": [
+    "current system matched_alpha", "historical matched_alpha", "target_alpha_id",
+    "deterministic_top_alpha", "scores", "ranks", "eligible candidates", "gate results",
+    "threshold results", "match_status", "alpha_match_method", "fallback reason",
+    "B1 stance", "previous Holdout labels", "H3 reviewer answers"
+  ],
+  "reviewer_output_schema": {
+    "sample_id": "echoed back exactly as given",
+    "expected_alpha_id": "one canonical alpha_id, or the literal string NONE",
+    "confidence": "one of high/medium/low",
+    "reason": "one or two sentences"
+  },
+  "session_isolation": "Independent client construction (comqutor_alpha.research_profiles.get_research_profile + tradingagents.llm_clients.create_llm_client), no shared conversation/session state with the production Pure-LLM Alpha inference phase's own gateway/client instance.",
+  "deviation_from_holdout3_reviewer_prompt": "One deliberate wording addition versus the proven Holdout #3 reviewer prompt: an explicit 'select the single best Alpha rather than abstaining merely because more than one plausibly fits, a difficult/close classification is still a classification task' instruction (task spec section 12), matching the precision the production alpha_classifier v3 prompt itself already has (bumped in the Pure-LLM Alpha Semantic Authority task, prior to this evaluation) -- ensures the reviewer is held to the same semantic standard as the system being measured, avoiding a systematic bias where the reviewer defers to NONE on close calls more (or less) readily than production now does. No other semantic change from the Holdout #3 reviewer prompt.",
+  "frozen_before_any_h4_reviewer_provider_call": true,
+  "not_altered_after_seeing_any_result": true
+}

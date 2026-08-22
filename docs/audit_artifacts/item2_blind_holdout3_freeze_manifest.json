@@ -1,0 +1,40 @@
+{
+  "task": "QA Closure v0.1.2 -- Item 2 Blind Holdout #3 -- Formal Acceptance of LLM-Primary Alpha Mapper",
+  "freeze_timestamp_utc": "2026-08-21T00:14:26Z",
+  "branch": "comqutor-structure-layer",
+  "head": "8ecf6bfdf7fd8203e223b220be8ca244da92d1f1",
+  "worktree_state_at_freeze": "not clean -- pre-existing modifications and untracked files from prior tasks in this session (Alpha Mapper Authority Migration, Post-Migration Registry Cleanup, Exact Semantic Replay B1 Binding Support, Blind Holdout #2) are present and preserved unchanged; see git status --short in the final report",
+  "production_changes_allowed_during_evaluation": false,
+  "source_sha256": {
+    "comqutor_alpha/structure_engine/alpha_mapper.py": "33ab39f0c76c4ceda84d96fdf57295a9abd69aa1c631d146b9fcb2707c253c1c",
+    "comqutor_alpha/structure_engine/week2_llm.py": "cb89e57f943e223dc45dd987c1067f78aafdf72a0ff3a61eb005fc4a8053fdc6",
+    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    "comqutor_alpha/structure_engine/ai_alpha_discriminator.py": "9d6b2c1abb968750a5dc19cae6b74afd154bde30c2fa4e78e359bed4b00efb69"
+  },
+  "alpha_mapper_constants": {
+    "SCHEMA_VERSION": "week2.alpha_matches.v2",
+    "MAPPER_VERSION": "week2.alpha_mapper.v2",
+    "DEFAULT_MIN_MATCH_SCORE": 0.35,
+    "DEFAULT_AMBIGUITY_DELTA": 0.14,
+    "DEFAULT_SECONDARY_DELTA": 0.25,
+    "AI_ALPHA_IDS": ["A101", "A102", "A103"]
+  },
+  "alpha_classifier_runtime_metadata": {
+    "semantic_task": "alpha_classifier",
+    "prompt_version": "week2.alpha_classifier.v2",
+    "input_schema_version": "week2.alpha_classifier.input.v2",
+    "output_schema_version": "week2.alpha_classifier.output.v1",
+    "taxonomy_version": "alpha_taxonomy_v1",
+    "prompt_identity_sha256": "5afa31274bf0e32cdbca60ab149dfe57f9b51110366a8d9e73e6092771c685c6"
+  },
+  "alpha_classifier_prompt_text": "Classify the Evidence against the FULL supplied Alpha taxonomy (alpha_taxonomy) -- every canonical Alpha is a legitimate candidate, none has been pre-filtered or pre-admitted by any other program logic. Choose the single Alpha whose core thesis and causal/economic mechanism the Evidence most directly and substantively supports or opposes -- never an Alpha that merely shares surface words or a topic with the Evidence. Several Alphas can share overlapping keywords (for example AI capex, GPU demand, or data center activity can each relate to more than one Alpha); distinguish them strictly by which Alpha's own stated mechanism the Evidence actually engages with, never by keyword overlap alone. Use decision=defer with selected_alpha_id=null when the Evidence does not materially fit any one Alpha's thesis well enough to justify a specific claim, when it is generic or background market commentary, or when two or more Alphas fit so similarly that no single one is the better semantic choice -- do not force a selection onto generic or background Evidence merely because a related Alpha exists in the taxonomy. Ignore any deterministic score, ranking, or eligibility signal -- none is supplied to you, and none should be assumed; judge only from the claim, the evidence, and each Alpha's own definition. Return one JSON object with decision set to select or defer and selected_alpha_id set to exactly one alpha_id from the supplied alpha_taxonomy when decision is select, or null when decision is defer. Never invent an Alpha ID that is not in the supplied taxonomy, never select more than one Alpha, and never provide a trading decision or recommendation.",
+  "alpha_classifier_prompt_char_length": 1661,
+  "production_provider_profile": {
+    "profile_id": "comqutor_anthropic_medium_sonnet46_v1",
+    "llm_provider": "anthropic",
+    "quick_think_llm": "claude-sonnet-4-6"
+  },
+  "architecture_summary": "LLM is semantic authority over the full canonical Alpha taxonomy (all 10 Alphas, unrestricted). A valid LLM select unconditionally becomes matched_alpha, overriding deterministic scoring/AI-gate/threshold. Deterministic logic (keyword/factor scoring, 0.35 threshold, AI hard gate) survives only as fallback (disabled/unavailable/timeout/error/malformed/unknown-ID/explicit-defer) and as downstream diagnostics on candidate_scores. Confirmed by direct source read at freeze time, not assumed from prior task reports.",
+  "pre_evaluation_smoke_test": "tests/test_alpha_mapper_llm_authority.py: 14/14 PASS at freeze time",
+  "verified_not_trusted_blindly": true
+}

@@ -1,0 +1,40 @@
+{
+  "alpha_prompt_source": "comqutor_alpha/structure_engine/week2_llm.py:_TASK_RUNTIME_METADATA[\"alpha_classifier\"][\"prompt_version\"]",
+  "alpha_prompt_version": "week2.alpha_classifier.v3",
+  "b1_prompt_source": "comqutor_alpha/structure_engine/week2_llm.py:_TASK_RUNTIME_METADATA[esl.LLM_TASK_NAME][\"prompt_version\"]",
+  "b1_prompt_version": "evidence_stance.llm_classifier.v3",
+  "critical_source_sha256": {
+    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    "comqutor_alpha/api/routes_research.py": "b52c102593c8b4cc51c55679c70a1ea5d95000c2b5c67b8d723dcdeca35b7820",
+    "comqutor_alpha/conflict_engine/conflict_admissibility.py": "0b795d4b2ee36fe11496b6766a83196b81d8afaec6c83f15cae2dbd0699b1f41",
+    "comqutor_alpha/conflict_engine/conflict_detector.py": "e2be3f229c02ddd1d4859c402ab8f3675270ff00cc01eff4a8a49f8e0c7e18a1",
+    "comqutor_alpha/graph_engine/activation_scorer_v2.py": "b7915a438354d67f39d5e1bf987306cd32d98ca63faa24dc57c817b11514165c",
+    "comqutor_alpha/llm_runtime/contracts.py": "c662c1e15fa4aedef7706f50e7daeca2971bf7cb1033eccae24abcb403cd6e58",
+    "comqutor_alpha/llm_runtime/manifest.py": "973da07004039043ff533b8e4654d535a242ed725d29d381fea3e6952765b92f",
+    "comqutor_alpha/replay/pipeline.py": "11bb5d5a53b2ff849eb8ab8d6bbea307ba2b4baf4a18714171724a39ac2ba489",
+    "comqutor_alpha/replay/semantic_binding.py": "edc58c7e5a08e67a6a09db2713264a9db54090fca416b7a34ff3ef565fdfa0bc",
+    "comqutor_alpha/replay/source_bundle.py": "542910e31ea4c46979ac35c0e4ca4e4a0d2cddb47ac5582fc7fdeb550b2d1be3",
+    "comqutor_alpha/structure_engine/ai_alpha_discriminator.py": "9d6b2c1abb968750a5dc19cae6b74afd154bde30c2fa4e78e359bed4b00efb69",
+    "comqutor_alpha/structure_engine/alpha_mapper.py": "6af75be557a217ce6a74ee497ccbeb439e35f25887985a336b113a49dfe181bc",
+    "comqutor_alpha/structure_engine/evidence_stance.py": "9ae3aaeb14b453672445eeb6db6dccc6f526e3bc84bfec2776625436c27e14a6",
+    "comqutor_alpha/structure_engine/evidence_stance_llm.py": "282577a54c97e1bd8d962eb793f41baf2cf30930ba0ce178000834eed3307a58",
+    "comqutor_alpha/structure_engine/week2_llm.py": "15ed38db5b13dc691f480b7cfb6f61a57514f2cb0a6fbd83be457813500ad87a"
+  },
+  "freeze_timestamp_utc": "2026-08-21T23:04:58Z",
+  "human_reviewer": "the human user -- NOT Codex, NOT any LLM",
+  "no_semantic_file_may_change_after_this_freeze": true,
+  "production_changes_allowed_during_evaluation": false,
+  "repository": {
+    "branch": "comqutor-structure-layer",
+    "head": "8ecf6bfdf7fd8203e223b220be8ca244da92d1f1",
+    "verified_before_sampling": true,
+    "worktree_state": "not clean -- intentionally dirty from prior authorized segments (same state documented in item2_blind_holdout4_freeze_manifest.json and item2_h4_reviewer_v2_dev_freeze.json); preserved unchanged, nothing reset/restored/checked-out/cleaned/stashed"
+  },
+  "task": "Blind Holdout #5 -- Human-Reviewed Semantic QA (Alpha Match + Evidence Polarity), Final v0.1.2 Item 2 Validation",
+  "taxonomy_file": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+  "taxonomy_sha256": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+  "thresholds": {
+    "alpha_match_accuracy_target_percent": 75.0,
+    "evidence_polarity_accuracy_target_percent": 80.0
+  }
+}

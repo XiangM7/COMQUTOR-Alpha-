@@ -1571,10 +1571,32 @@ def build_run_audit_payload(
     matches = matches_payload.get("matches")
     matches = matches if isinstance(matches, list) else []
     matched_alpha_count = sum(1 for m in matches if isinstance(m, dict) and m.get("match_status") == "matched")
+    # "ambiguous" is retired from map_claim_to_alpha's own output under
+    # Pure-LLM Alpha semantic authority (a real historical run predating
+    # that migration can still legitimately have it persisted, so this
+    # counter stays for backward-compatible counting -- it is simply
+    # always 0 on any run produced by the current code).
     ambiguous_alpha_count = sum(
         1 for m in matches if isinstance(m, dict) and m.get("match_status") == "ambiguous"
     )
     no_match_count = sum(1 for m in matches if isinstance(m, dict) and m.get("match_status") == "no_match")
+    # Pure-LLM Alpha Production Boundary Hardening: match_status="unavailable"
+    # means no valid LLM semantic decision was obtained (disabled, no
+    # gateway, provider timeout/error, malformed output, invalid Alpha ID)
+    # -- operationally and semantically distinct from a genuine "no_match"
+    # (the LLM ran and determined no Alpha fits). Without this counter an
+    # operator reading run_audit.json cannot tell "the classifier decided
+    # NONE for every claim" apart from "the classifier never ran at all",
+    # since both leave matched_alpha_count/no_match_count looking identical
+    # (no_match_count only counts genuine semantic NONE, never unavailable).
+    unavailable_alpha_count = sum(
+        1 for m in matches if isinstance(m, dict) and m.get("match_status") == "unavailable"
+    )
+    alpha_unavailable_reason_counts: dict[str, int] = {}
+    for m in matches:
+        if isinstance(m, dict) and m.get("match_status") == "unavailable":
+            reason = str(m.get("alpha_match_fallback_reason") or "unknown")
+            alpha_unavailable_reason_counts[reason] = alpha_unavailable_reason_counts.get(reason, 0) + 1
 
     graph_metrics = graph_payload.get("graph_metrics")
     graph_metrics = graph_metrics if isinstance(graph_metrics, dict) else {}
@@ -1658,6 +1680,20 @@ def build_run_audit_payload(
         warnings.append("NO_GRAPH_EDGES")
     if high_activation_count > 0 and graph_edge_count == 0:
         warnings.append("HIGH_ACTIVATION_WITHOUT_GRAPH_SUPPORT")
+    # Pure-LLM Alpha Production Boundary Hardening: "disabled" is the only
+    # unavailable reason that reflects a deliberate configuration choice
+    # (the Alpha LLM tier was never turned on for this run) -- every other
+    # reason (no gateway configured, provider timeout/error, malformed/
+    # invalid output, invalid Alpha ID) means an LLM call was actually
+    # attempted and failed, a genuinely degraded run state that must be
+    # visibly distinguishable from "the classifier was never expected to
+    # run here" rather than silently blending into the same warning (or no
+    # warning at all).
+    if unavailable_alpha_count > 0:
+        if set(alpha_unavailable_reason_counts) - {"disabled"}:
+            warnings.append("ALPHA_SEMANTIC_DEGRADED")
+        else:
+            warnings.append("ALPHA_SEMANTIC_DISABLED")
 
     ticker = metadata.get("ticker") or structured_payload.get("ticker") or graph_payload.get("ticker")
 
@@ -2333,6 +2369,18 @@ def build_run_audit_payload(
         "matched_alpha_count": matched_alpha_count,
         "ambiguous_alpha_count": ambiguous_alpha_count,
         "no_match_count": no_match_count,
+        # Pure-LLM Alpha Production Boundary Hardening: unavailable_alpha_
+        # count is claims for which no valid LLM semantic decision was
+        # obtained -- distinct from no_match_count (a real LLM decision
+        # that no Alpha fits). alpha_unavailable_reason_counts breaks it
+        # down by stable reason code (disabled/unavailable/provider_timeout/
+        # provider_error/invalid_output/invalid_alpha_id -- see
+        # alpha_mapper._classify_alpha_with_llm), so an operator can tell a
+        # deliberately-disabled run apart from a genuinely degraded one
+        # (see the ALPHA_SEMANTIC_DISABLED/ALPHA_SEMANTIC_DEGRADED warnings
+        # below) without guessing.
+        "unavailable_alpha_count": unavailable_alpha_count,
+        "alpha_unavailable_reason_counts": alpha_unavailable_reason_counts,
         "graph_node_count": graph_node_count,
         "graph_edge_count": graph_edge_count,
         "rejected_edge_count": rejected_edge_count,

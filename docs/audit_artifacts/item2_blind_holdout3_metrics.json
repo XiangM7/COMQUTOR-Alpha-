@@ -1,0 +1,402 @@
+{
+  "acceptance_threshold": 0.75,
+  "accuracy_by_reviewer_expected_alpha": {
+    "A001": {
+      "accuracy": 1.0,
+      "correct": 12,
+      "total": 12
+    },
+    "A003": {
+      "accuracy": 1.0,
+      "correct": 1,
+      "total": 1
+    },
+    "A101": {
+      "accuracy": 0.3333333333333333,
+      "correct": 2,
+      "total": 6
+    },
+    "A102": {
+      "accuracy": 0.5714285714285714,
+      "correct": 4,
+      "total": 7
+    },
+    "A103": {
+      "accuracy": 0.34615384615384615,
+      "correct": 9,
+      "total": 26
+    },
+    "A201": {
+      "accuracy": 0.8333333333333334,
+      "correct": 5,
+      "total": 6
+    },
+    "A301": {
+      "accuracy": 0.9523809523809523,
+      "correct": 20,
+      "total": 21
+    },
+    "A304": {
+      "accuracy": 0.78125,
+      "correct": 25,
+      "total": 32
+    },
+    "A501": {
+      "accuracy": 0.8823529411764706,
+      "correct": 15,
+      "total": 17
+    },
+    "A601": {
+      "accuracy": 0.6111111111111112,
+      "correct": 11,
+      "total": 18
+    },
+    "NONE": {
+      "accuracy": 0.16666666666666666,
+      "correct": 1,
+      "total": 6
+    }
+  },
+  "accuracy_by_system_matched_alpha": {
+    "A001": {
+      "accuracy": 0.75,
+      "correct": 12,
+      "total": 16
+    },
+    "A003": {
+      "accuracy": 0.2,
+      "correct": 1,
+      "total": 5
+    },
+    "A101": {
+      "accuracy": 0.4,
+      "correct": 2,
+      "total": 5
+    },
+    "A102": {
+      "accuracy": 1.0,
+      "correct": 4,
+      "total": 4
+    },
+    "A103": {
+      "accuracy": 1.0,
+      "correct": 9,
+      "total": 9
+    },
+    "A201": {
+      "accuracy": 0.38461538461538464,
+      "correct": 5,
+      "total": 13
+    },
+    "A301": {
+      "accuracy": 0.625,
+      "correct": 20,
+      "total": 32
+    },
+    "A304": {
+      "accuracy": 0.9615384615384616,
+      "correct": 25,
+      "total": 26
+    },
+    "A501": {
+      "accuracy": 0.8823529411764706,
+      "correct": 15,
+      "total": 17
+    },
+    "A601": {
+      "accuracy": 0.7333333333333333,
+      "correct": 11,
+      "total": 15
+    },
+    "NONE": {
+      "accuracy": 0.1,
+      "correct": 1,
+      "total": 10
+    }
+  },
+  "accuracy_by_ticker": {
+    "AMD": {
+      "accuracy": 0.7142857142857143,
+      "correct": 20,
+      "total": 28
+    },
+    "GOOGL": {
+      "accuracy": 0.8214285714285714,
+      "correct": 23,
+      "total": 28
+    },
+    "MSFT": {
+      "accuracy": 0.8214285714285714,
+      "correct": 23,
+      "total": 28
+    },
+    "MU": {
+      "accuracy": 0.32142857142857145,
+      "correct": 9,
+      "total": 28
+    },
+    "NVDA": {
+      "accuracy": 0.6785714285714286,
+      "correct": 19,
+      "total": 28
+    },
+    "QQQ": {
+      "accuracy": 0.9166666666666666,
+      "correct": 11,
+      "total": 12
+    }
+  },
+  "ai_family_accuracy": 0.38461538461538464,
+  "ai_family_reviewer_expected_count": 39,
+  "alpha_match_accuracy": 0.6907894736842105,
+  "confusion_matrix": {
+    "axes": "rows=system_matched_alpha_id, columns=reviewer_expected_alpha_id",
+    "matrix": {
+      "A001": {
+        "A001": 12,
+        "A003": 0,
+        "A101": 0,
+        "A102": 0,
+        "A103": 0,
+        "A201": 0,
+        "A301": 0,
+        "A304": 3,
+        "A501": 1,
+        "A601": 0,
+        "NONE": 0
+      },
+      "A003": {
+        "A001": 0,
+        "A003": 1,
+        "A101": 0,
+        "A102": 0,
+        "A103": 0,
+        "A201": 0,
+        "A301": 0,
+        "A304": 0,
+        "A501": 1,
+        "A601": 2,
+        "NONE": 1
+      },
+      "A101": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 2,
+        "A102": 0,
+        "A103": 2,
+        "A201": 1,
+        "A301": 0,
+        "A304": 0,
+        "A501": 0,
+        "A601": 0,
+        "NONE": 0
+      },
+      "A102": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 0,
+        "A102": 4,
+        "A103": 0,
+        "A201": 0,
+        "A301": 0,
+        "A304": 0,
+        "A501": 0,
+        "A601": 0,
+        "NONE": 0
+      },
+      "A103": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 0,
+        "A102": 0,
+        "A103": 9,
+        "A201": 0,
+        "A301": 0,
+        "A304": 0,
+        "A501": 0,
+        "A601": 0,
+        "NONE": 0
+      },
+      "A201": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 1,
+        "A102": 1,
+        "A103": 3,
+        "A201": 5,
+        "A301": 0,
+        "A304": 0,
+        "A501": 0,
+        "A601": 3,
+        "NONE": 0
+      },
+      "A301": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 1,
+        "A102": 1,
+        "A103": 5,
+        "A201": 0,
+        "A301": 20,
+        "A304": 2,
+        "A501": 0,
+        "A601": 1,
+        "NONE": 2
+      },
+      "A304": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 1,
+        "A102": 0,
+        "A103": 0,
+        "A201": 0,
+        "A301": 0,
+        "A304": 25,
+        "A501": 0,
+        "A601": 0,
+        "NONE": 0
+      },
+      "A501": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 0,
+        "A102": 0,
+        "A103": 1,
+        "A201": 0,
+        "A301": 0,
+        "A304": 1,
+        "A501": 15,
+        "A601": 0,
+        "NONE": 0
+      },
+      "A601": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 1,
+        "A102": 1,
+        "A103": 0,
+        "A201": 0,
+        "A301": 0,
+        "A304": 0,
+        "A501": 0,
+        "A601": 11,
+        "NONE": 2
+      },
+      "NONE": {
+        "A001": 0,
+        "A003": 0,
+        "A101": 0,
+        "A102": 0,
+        "A103": 6,
+        "A201": 0,
+        "A301": 1,
+        "A304": 1,
+        "A501": 0,
+        "A601": 1,
+        "NONE": 1
+      }
+    }
+  },
+  "counterfactual_diagnostic": {
+    "both_wrong_differently_count": 7,
+    "both_wrong_differently_sample_ids": [
+      "holdout3-001",
+      "holdout3-087",
+      "holdout3-089",
+      "holdout3-103",
+      "holdout3-112",
+      "holdout3-121",
+      "holdout3-123"
+    ],
+    "changed_row_sample_ids": [
+      "holdout3-001",
+      "holdout3-002",
+      "holdout3-009",
+      "holdout3-019",
+      "holdout3-041",
+      "holdout3-044",
+      "holdout3-053",
+      "holdout3-078",
+      "holdout3-085",
+      "holdout3-086",
+      "holdout3-087",
+      "holdout3-089",
+      "holdout3-094",
+      "holdout3-096",
+      "holdout3-103",
+      "holdout3-105",
+      "holdout3-112",
+      "holdout3-121",
+      "holdout3-123",
+      "holdout3-127",
+      "holdout3-139",
+      "holdout3-141",
+      "holdout3-144"
+    ],
+    "description": "Section 17: final LLM-primary system answer vs the same real production function's deterministic-only counterfactual (classifier_enabled=False), both compared against the same reviewer label. Offline diagnostic only; does not alter PASS/FAIL.",
+    "deterministic_counterfactual_accuracy_vs_reviewer": 0.6118421052631579,
+    "equivalent_count": 0,
+    "equivalent_count_note": "Mathematically unreachable under exact-Top-1 comparison for a row where llm_alpha != det_alpha by definition (a 'changed' row) -- both-correct would require det_alpha == reviewer == llm_alpha, contradicting the change. Reported as 0, not omitted.",
+    "llm_corrected_deterministic_count": 14,
+    "llm_corrected_sample_ids": [
+      "holdout3-009",
+      "holdout3-019",
+      "holdout3-041",
+      "holdout3-044",
+      "holdout3-053",
+      "holdout3-078",
+      "holdout3-085",
+      "holdout3-086",
+      "holdout3-094",
+      "holdout3-096",
+      "holdout3-105",
+      "holdout3-139",
+      "holdout3-141",
+      "holdout3-144"
+    ],
+    "llm_primary_accuracy_vs_reviewer": 0.6907894736842105,
+    "llm_worsened_deterministic_count": 2,
+    "llm_worsened_sample_ids": [
+      "holdout3-002",
+      "holdout3-127"
+    ],
+    "rows_where_llm_changed_deterministic_answer": 23
+  },
+  "deterministic_fallback_accuracy_within_fallback_rows": 0.4074074074074074,
+  "deterministic_fallback_count": 54,
+  "holdout2_comparison": {
+    "holdout2_alpha_match_accuracy": 0.5957446808510638,
+    "holdout2_numerator_denominator": "84/141",
+    "holdout3_alpha_match_accuracy": 0.6907894736842105,
+    "holdout3_numerator_denominator": "105/152",
+    "warning": "Holdout #2 and Holdout #3 use different, non-overlapping samples (different rows, different tickers in part, different evaluation protocol architecture -- Holdout #2 predates the Exact Semantic Replay B1 binding work and used a combined single-track reviewer for some fields). This comparison is NOT a controlled before/after causal claim; it only checks whether the CURRENT frozen architecture clears the CURRENT >=75% threshold on genuinely new data."
+  },
+  "llm_primary_accuracy_within_llm_rows": 0.8469387755102041,
+  "llm_primary_count": 98,
+  "non_ai_accuracy": 0.8317757009345794,
+  "non_ai_reviewer_expected_count": 107,
+  "official_denominator": 152,
+  "official_numerator": 105,
+  "pass": false,
+  "reviewer_confidence_agreement": {
+    "high": {
+      "accuracy": 0.7468354430379747,
+      "correct": 59,
+      "total": 79
+    },
+    "low": {
+      "accuracy": 0.7142857142857143,
+      "correct": 5,
+      "total": 7
+    },
+    "medium": {
+      "accuracy": 0.6212121212121212,
+      "correct": 41,
+      "total": 66
+    }
+  },
+  "reviewer_none_count": 6,
+  "sample_count": 152,
+  "system_none_accuracy": 0.1,
+  "system_none_count": 10
+}

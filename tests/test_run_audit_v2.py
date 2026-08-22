@@ -537,3 +537,83 @@ def test_audit_generation_does_not_mutate_source_artifacts(tmp_path):
         if path.name != "run_audit.json"
     }
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# Pure-LLM Alpha Production Boundary Hardening: run_audit.json must let an
+# operator distinguish A) matched, B) semantic NONE, C) the Alpha
+# classifier not successfully running at all -- see
+# comqutor_alpha/structure_engine/alpha_mapper.py's match_status="unavailable"
+# state and tests/test_alpha_production_boundary_hardening.py for the
+# per-claim contract this run-level rollup is built from.
+# ---------------------------------------------------------------------------
+
+
+def _seed_run_with_alpha_matches(tmp_path, run_id, matches):
+    run_dir = tmp_path / run_id
+    run_dir.mkdir()
+    _write_json(run_dir, "metadata.json", {"run_id": run_id, "ticker": "SNDK"})
+    _write_json(run_dir, "raw_agent_outputs.json", {"agent_outputs": []})
+    _write_json(
+        run_dir,
+        "structured_agent_outputs.json",
+        {"records": [], "metadata": {"raw_claim_count": 0}},
+    )
+    _write_json(run_dir, "alpha_matches.json", {"matches": matches})
+    _write_json(run_dir, "structure_graph.json", {"graph_metrics": {}})
+    return run_dir
+
+
+def test_unavailable_alpha_count_and_reason_breakdown_are_computed(tmp_path):
+    _seed_run_with_alpha_matches(
+        tmp_path,
+        "run_unavail",
+        [
+            {"match_status": "matched"},
+            {"match_status": "no_match"},
+            {"match_status": "unavailable", "alpha_match_fallback_reason": "provider_timeout"},
+            {"match_status": "unavailable", "alpha_match_fallback_reason": "provider_timeout"},
+            {"match_status": "unavailable", "alpha_match_fallback_reason": "invalid_alpha_id"},
+        ],
+    )
+    audit = build_run_audit_payload("run_unavail", tmp_path)
+    assert audit["matched_alpha_count"] == 1
+    assert audit["no_match_count"] == 1
+    assert audit["unavailable_alpha_count"] == 3
+    assert audit["alpha_unavailable_reason_counts"] == {
+        "provider_timeout": 2,
+        "invalid_alpha_id": 1,
+    }
+    # A genuine operational failure (not merely "disabled") is a degraded
+    # run state, not just informational.
+    assert "ALPHA_SEMANTIC_DEGRADED" in audit["warnings"]
+    assert "ALPHA_SEMANTIC_DISABLED" not in audit["warnings"]
+
+
+def test_purely_disabled_alpha_classifier_warns_disabled_not_degraded(tmp_path):
+    _seed_run_with_alpha_matches(
+        tmp_path,
+        "run_disabled",
+        [
+            {"match_status": "unavailable", "alpha_match_fallback_reason": "disabled"},
+            {"match_status": "unavailable", "alpha_match_fallback_reason": "disabled"},
+        ],
+    )
+    audit = build_run_audit_payload("run_disabled", tmp_path)
+    assert audit["unavailable_alpha_count"] == 2
+    assert audit["alpha_unavailable_reason_counts"] == {"disabled": 2}
+    assert "ALPHA_SEMANTIC_DISABLED" in audit["warnings"]
+    assert "ALPHA_SEMANTIC_DEGRADED" not in audit["warnings"]
+
+
+def test_no_unavailable_claims_means_no_alpha_semantic_warning(tmp_path):
+    _seed_run_with_alpha_matches(
+        tmp_path,
+        "run_all_matched",
+        [{"match_status": "matched"}, {"match_status": "no_match"}],
+    )
+    audit = build_run_audit_payload("run_all_matched", tmp_path)
+    assert audit["unavailable_alpha_count"] == 0
+    assert audit["alpha_unavailable_reason_counts"] == {}
+    assert "ALPHA_SEMANTIC_DISABLED" not in audit["warnings"]
+    assert "ALPHA_SEMANTIC_DEGRADED" not in audit["warnings"]

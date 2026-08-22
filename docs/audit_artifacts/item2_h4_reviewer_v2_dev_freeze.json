@@ -1,0 +1,78 @@
+{
+  "task": "H4 Reviewer-v2 Development Re-Review -- Correct Material-Fit Reviewer Semantics + Alpha Match + B1 Polarity Joint Evaluation",
+  "status": "DEVELOPMENT RE-EVALUATION -- NOT A NEW BLIND HOLDOUT. Does not change the formal H4 verdict (148/200 = 74.00%, FAIL).",
+  "freeze_timestamp_utc": "2026-08-21T00:00:00Z",
+  "purpose": "Freeze the reviewer-v2 Alpha prompt/schema/batching strategy BEFORE any reviewer-v2 Provider call, per task spec section 11. Not altered after this point.",
+  "h4_frozen_csv_path": "docs/audit_artifacts/item2_blind_holdout4_frozen.csv",
+  "h4_frozen_csv_sha256_verified": "20100402208b97ef0b0a2cbd6010e1bd6132031283acc84fda53437df3e17639",
+  "h4_n": 200,
+  "original_h4_system_alpha_artifact_verified": {
+    "path": "docs/audit_artifacts/item2_blind_holdout4_system_alpha.json",
+    "rows": 200,
+    "semantic_select_count": 78,
+    "semantic_none_count": 122,
+    "unavailable_count": 0,
+    "cache_hit_count": 0,
+    "reused_without_rerun": true
+  },
+  "reviewer_v2_prompt_version": "item2_h4_reviewer_v2_dev.material_fit_alpha_reviewer.v1",
+  "reviewer_v2_prompt_template_sha256": "cccccc542f42bcde8f2d245344978d2d70c5c9933dc594a6f0d8f37883592751",
+  "taxonomy_file": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+  "taxonomy_sha256": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "temperature": 0,
+  "batch_size": 10,
+  "max_attempts_per_batch": 3,
+  "timeout_seconds": 120.0,
+  "reviewer_v2_input_fields_per_item": ["sample_id", "ticker", "claim", "evidence"],
+  "reviewer_v2_input_excludes": [
+    "original reviewer_expected_alpha_id", "original reviewer confidence", "system matched_alpha",
+    "deterministic_top_alpha", "correct/incorrect status", "old confusion matrix", "H4 official result",
+    "the fact H4 missed threshold by only two rows", "candidate scores", "eligible candidates",
+    "AI gate", "threshold results", "B1 stance", "match_status", "alpha_match_method", "fallback reason"
+  ],
+  "reviewer_v2_output_schema": {
+    "sample_id": "echoed back exactly as given",
+    "reviewer_v2_material_fit": "boolean -- Stage 1 result",
+    "reviewer_v2_expected_alpha_id": "one canonical alpha_id (material_fit=true) or the literal string NONE (material_fit=false)",
+    "reviewer_v2_alpha_confidence": "one of high/medium/low",
+    "reviewer_v2_alpha_reason": "one or two sentences"
+  },
+  "reviewer_v2_invariant": "material_fit=false <=> expected_alpha_id=NONE; material_fit=true <=> expected_alpha_id is a real canonical Alpha ID. Enforced by hard validation (INVARIANT_VIOLATION_* errors) in the reviewer script, not just prompted.",
+  "reviewer_v2_two_stage_procedure_summary": "STAGE 1 (material-fit gate): does the Evidence materially express/support/oppose/instantiate/reason about at least one canonical Alpha's own core causal/economic mechanism? Shared words, generic bullish/bearish language, a technical indicator alone, a stock-specific recommendation alone, a catalyst alone, or a price move alone are explicitly insufficient. Core thesis has semantic priority over trigger/confirmation signals and keywords -- signals help recognize a thesis, they never substitute for it (worked example: technical momentum alone does not establish A601 Narrative Momentum, which requires the attention/narrative/crowding/flow mechanism itself). No material fit => material_fit=false, expected_alpha_id=NONE (a valid, complete, non-penalized result). STAGE 2 (single best, only if Stage 1 found >=1 materially-fitting Alpha): compare all materially-fitting Alphas and select the single best one; NONE is never used merely because the choice between two-or-more valid Alphas is close (uncertainty about WHICH Alpha != uncertainty about WHETHER any Alpha exists). Explicit anti-bias instruction included: clearly-expressed short/plain-worded evidence must not become NONE merely because it is brief.",
+  "session_isolation": "Independent client construction (comqutor_alpha.research_profiles.get_research_profile + tradingagents.llm_clients.create_llm_client), no shared conversation/session state with the original H4 reviewer, the original H4 system inference, or the polarity reviewer/system phases of this same task.",
+  "frozen_before_any_reviewer_v2_provider_call": true,
+  "not_altered_after_seeing_any_result": true,
+  "production_source_changes_planned": 0,
+  "polarity_phase_freeze": {
+    "purpose": "Freeze the polarity reviewer prompt/schema/target-Alpha rule BEFORE any polarity Provider call, per task spec section 19. Written after reviewer_v2_expected_alpha_id/material_fit became known (required, since the polarity-evaluable row set depends on it) but BEFORE any polarity reviewer or B1 system Provider call -- not altered after this point.",
+    "target_alpha_rule": "reviewer_v2_expected_alpha_id used as target_alpha_id ONLY when reviewer_v2_material_fit=true (task spec section 17). No target Alpha is invented for material_fit=false/NONE rows.",
+    "polarity_evaluable_count": 47,
+    "polarity_evaluable_denominator_source": "count(reviewer_v2_material_fit == true) over the 200 frozen H4 rows",
+    "existing_b1_contract_reused_from": "scripts/run_item2_blind_holdout2_stance_review.py (reviewer) and scripts/run_item2_blind_holdout2_b1.py (production system) -- the exact scripts that produced the historical formal B1 result 123/141=87.23% PASS. No new stance vocabulary invented; five classes only: supports_alpha/opposes_alpha/mentions_alpha/neutral_background/supports_counter_alpha.",
+    "existing_b1_contract_none_target_precedent": "NONE -- Holdout #2's own dataset never contained a NONE-target row (it was built exclusively around rows with a real system-matched Alpha), so its metric script (build_item2_blind_holdout2_summary.py) has no NONE-target handling at all (reviewed_count = len(ids), always the full row count). This confirms task spec section 17's fallback: rows where reviewer-v2 Alpha = NONE are NOT polarity-evaluable; no NONE-target convention is invented here.",
+    "polarity_reviewer_prompt_template_sha256": "a93b8932a158dad24363738b9ab06460f818e26d3c6c318ecfcf4fb8a9028592",
+    "polarity_reviewer_output_schema": {
+      "sample_id": "echoed back exactly as given",
+      "reviewer_v2_b1_stance": "one of supports_alpha/opposes_alpha/mentions_alpha/neutral_background/supports_counter_alpha",
+      "reviewer_v2_b1_counter_alpha_id": "a legal counter Alpha id when stance=supports_counter_alpha, else null",
+      "reviewer_v2_b1_confidence": "one of high/medium/low",
+      "reviewer_v2_b1_reason": "one or two sentences"
+    },
+    "polarity_reviewer_input_fields_per_item": ["sample_id", "ticker", "claim", "evidence", "target_alpha_id (name + core_thesis)", "legal_counter_alphas (name + core_thesis)"],
+    "polarity_reviewer_input_excludes": [
+      "current/system B1 stance", "old B1 output", "candidate score", "deterministic Alpha", "system Alpha match",
+      "whether Alpha match was correct", "original H4 reviewer label", "any metric result"
+    ],
+    "polarity_reviewer_may_see": "reviewer_v2_expected_alpha_id (as target_alpha_id) -- explicitly authorized by task spec section 19 since it is the target being judged, not a system output being evaluated.",
+    "b1_system_invocation": "Real production evidence_stance_llm.apply_llm_stance_upgrade (unmodified), called via synthetic single-candidate match records carrying target_alpha_id as matched_alpha -- same pattern as scripts/run_item2_blind_holdout2_b1.py. Never a hand-rolled/manual B1 evaluator.",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "temperature": 0,
+    "batch_size_reviewer": 10,
+    "batch_size_b1_system": "evidence_stance_llm.BATCH_SIZE (production default, unmodified)",
+    "frozen_before_any_polarity_provider_call": true,
+    "not_altered_after_seeing_any_result": true
+  }
+}

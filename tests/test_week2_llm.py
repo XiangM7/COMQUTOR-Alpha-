@@ -227,7 +227,13 @@ def test_structured_adapter_falls_back_after_invalid_llm_fields(tmp_path):
     assert records[0]["claim"] == raw_text
 
 
-def test_mapper_llm_selects_only_from_admissible_candidates(tmp_path):
+def test_mapper_applies_a_valid_llm_selection(tmp_path):
+    """Alpha Mapper authority migration: a valid LLM select unconditionally
+    becomes the semantic matched_alpha (classifier status "llm_selected",
+    not the pre-migration "applied"). See
+    tests/test_alpha_mapper_llm_authority.py for the full acceptance suite,
+    including the case where the LLM's choice is entirely absent from
+    deterministic Tier-1 candidates."""
     model = _SequenceModel(
         [json.dumps({"decision": "select", "selected_alpha_id": "A101"})]
     )
@@ -241,7 +247,8 @@ def test_mapper_llm_selects_only_from_admissible_candidates(tmp_path):
 
     assert result["match_status"] == "matched"
     assert result["matched_alpha"] == "A101"
-    assert result["classifier"]["status"] == "applied"
+    assert result["classifier"]["status"] == "llm_selected"
+    assert result["alpha_match_method"] == "llm"
 
 
 def test_mapper_invalid_llm_candidate_falls_back_without_response_leak(tmp_path):
@@ -260,8 +267,12 @@ def test_mapper_invalid_llm_candidate_falls_back_without_response_leak(tmp_path)
 
     result = map_claim_to_alpha(record, llm_gateway=gateway)
 
-    assert result["match_status"] == "ambiguous"
-    assert result["classifier"]["status"] == "fallback"
+    # Pure-LLM Alpha semantic authority: an unrecognized-shape/unknown-Alpha
+    # response is an operational failure (unavailable), never a
+    # deterministic fallback -- see tests/test_alpha_mapper_llm_authority.py.
+    assert result["match_status"] == "unavailable"
+    assert result["matched_alpha"] is None
+    assert result["classifier"]["status"] == "invalid_output"
     assert "provider-private-text" not in json.dumps(result)
     assert "A999" not in json.dumps(result)
 

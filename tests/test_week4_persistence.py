@@ -38,6 +38,7 @@ from tests.fixtures.week4_conflict_cases import (
     match_record,
 )
 from tests.test_week3_nvda_sanity import _nvda_offline_outputs
+from scripts.deterministic_echo_llm import build_deterministic_echo_gateway
 
 
 def _engine_and_repo():
@@ -710,7 +711,10 @@ def test_real_nvda_w41_to_w42_persistence_sanity(tmp_path):
         "selected_analysts": ["market", "news", "fundamentals", "sentiment"],
         "offline_raw_agent_outputs": _nvda_offline_outputs(),
     }
-    response = run_research_request(payload, output_root=tmp_path, graph_repository=repo)
+    gateway = build_deterministic_echo_gateway("week4-persistence-sanity", tmp_path)
+    response = run_research_request(
+        payload, output_root=tmp_path, graph_repository=repo, week2_llm_gateway=gateway
+    )
     run_id = response["run_id"]
     graph = get_persisted_structure_graph(run_id, output_root=tmp_path, graph_repository=repo)
     matches = json.loads((tmp_path / run_id / "alpha_matches.json").read_text(encoding="utf-8"))

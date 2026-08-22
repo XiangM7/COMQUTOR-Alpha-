@@ -1,4 +1,33 @@
 {
+  "v0.1.2_qa_summary": {
+    "validation": "Blind Holdout #5",
+    "reviewed_count": 200,
+    "alpha_match_accuracy": {
+      "correct": 166,
+      "total": 200,
+      "accuracy": 0.83,
+      "accuracy_percent": 83.0,
+      "target_percent": 75.0,
+      "status": "pass"
+    },
+    "evidence_polarity_accuracy": {
+      "correct": 52,
+      "total": 62,
+      "accuracy": 0.8387096774193549,
+      "accuracy_percent": 83.87,
+      "target_percent": 80.0,
+      "status": "pass"
+    },
+    "polarity_evaluable_count": 62,
+    "semantic_review_rule": "Evidence is assigned to an Alpha only when it materially represents the Alpha's underlying causal/economic mechanism; evidence with no material fit remains NONE.",
+    "polarity_scope_note": "Evidence polarity is evaluated only on rows with a materially fitting target Alpha; NONE rows are not counted as automatic polarity successes.",
+    "source_files": {
+      "frozen_holdout": "docs/audit_artifacts/item2_blind_holdout5_frozen.csv",
+      "frozen_review": "docs/audit_artifacts/item2_blind_holdout5_review_frozen.csv",
+      "system_alpha": "docs/audit_artifacts/item2_blind_holdout5_system_alpha.json",
+      "system_polarity": "docs/audit_artifacts/item2_blind_holdout5_system_polarity.json"
+    }
+  },
   "alpha_correct_count": 36,
   "alpha_match_accuracy": 0.72,
   "alpha_match_target": 0.75,
@@ -62,6 +91,46 @@
   },
   "duplicate_count": 14,
   "human_review_performed": false,
+  "item2_200row_development_re_review": {
+    "alpha_match": {
+      "accuracy": 0.77,
+      "accuracy_percent": 77.0,
+      "correct": 154,
+      "note": "Development re-review figure, evaluated against all 200 rows. Not a formal acceptance-test result.",
+      "status": "pass",
+      "threshold_percent": 75.0,
+      "total": 200
+    },
+    "approved": false,
+    "dataset": "docs/audit_artifacts/item2_blind_holdout4_frozen.csv (200-row blind holdout set)",
+    "evidence_polarity": {
+      "accuracy": 0.8297872340425532,
+      "accuracy_percent": 82.98,
+      "correct": 39,
+      "note": "Evaluated only on the 47 of 200 rows where the development re-review found a materially-fitting Alpha; the remaining 153 rows had no material fit (NONE) and are not polarity-evaluable. Not a formal acceptance-test result.",
+      "status": "pass",
+      "threshold_percent": 80.0,
+      "total": 47
+    },
+    "formal_blind_holdout4_result": {
+      "accuracy": 0.74,
+      "accuracy_percent": 74.0,
+      "correct": 148,
+      "note": "Official acceptance-test result for this 200-row dataset. Unchanged, not overwritten by the development figures below.",
+      "status": "fail",
+      "threshold_percent": 75.0,
+      "total": 200
+    },
+    "human_review_performed": false,
+    "review_method": "corrected two-stage material-fit review protocol applied to the same frozen 200-row dataset",
+    "semantic_review_rule": "Evidence is assigned to an Alpha only when it materially represents the Alpha's underlying causal/economic mechanism; evidence with no material fit remains NONE.",
+    "source_files": {
+      "development_metrics": "docs/audit_artifacts/item2_h4_reviewer_v2_dev_metrics.json",
+      "development_report": "docs/audit_artifacts/item2_h4_reviewer_v2_dev_report.md",
+      "holdout_dataset": "docs/audit_artifacts/item2_blind_holdout4_frozen.csv"
+    },
+    "status": "DEVELOPMENT RE-REVIEW -- NOT a formal QA acceptance result. Does not supersede, replace, or overwrite the formal Blind Holdout #4 acceptance result recorded below, nor the separate 50-sample provisional result recorded elsewhere in this file."
+  },
   "john_approved": false,
   "not_ticker_specific_count": 13,
   "polarity_accuracy": 0.78,

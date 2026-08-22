@@ -1,0 +1,212 @@
+{
+  "ai_family_analysis": {
+    "confusion_into_a201_a301_a601_a304": {
+      "A101->A201": 1,
+      "A101->A304": 1,
+      "A102->A201": 1,
+      "A102->A301": 2,
+      "A103->A201": 4,
+      "A103->A301": 2
+    },
+    "confusion_within_ai_family": {
+      "A101->A103": 1,
+      "A102->A103": 1,
+      "A103->A101": 2
+    },
+    "new_accuracy_by_alpha": {
+      "A101": {
+        "accuracy": 0.5,
+        "correct": 3,
+        "total": 6
+      },
+      "A102": {
+        "accuracy": 0.42857142857142855,
+        "correct": 3,
+        "total": 7
+      },
+      "A103": {
+        "accuracy": 0.6538461538461539,
+        "correct": 17,
+        "total": 26
+      }
+    },
+    "new_accuracy_combined": {
+      "accuracy": 0.5897435897435898,
+      "correct": 23,
+      "total": 39
+    },
+    "now_none_count": 1,
+    "now_selected_count": 38,
+    "original_ai_family_accuracy": 0.38461538461538464,
+    "previously_deferred_count": 19,
+    "reviewer_expected_ai_family_count": 39
+  },
+  "development_alpha_match_accuracy": 0.7828947368421053,
+  "development_denominator": 152,
+  "development_numerator": 119,
+  "development_target": 0.75,
+  "development_target_met": true,
+  "is_blind_acceptance_result": false,
+  "mu_ticker_analysis": {
+    "dominant_reviewer_alpha_families": [
+      [
+        "A103",
+        12
+      ],
+      [
+        "A601",
+        4
+      ],
+      [
+        "A201",
+        4
+      ],
+      [
+        "A304",
+        3
+      ],
+      [
+        "A301",
+        2
+      ],
+      [
+        "NONE",
+        1
+      ],
+      [
+        "A101",
+        1
+      ],
+      [
+        "A102",
+        1
+      ]
+    ],
+    "dominant_system_alpha_families": [
+      [
+        "A201",
+        14
+      ],
+      [
+        "A103",
+        8
+      ],
+      [
+        "A304",
+        2
+      ],
+      [
+        "NONE",
+        1
+      ],
+      [
+        "A001",
+        1
+      ],
+      [
+        "A301",
+        1
+      ],
+      [
+        "A601",
+        1
+      ]
+    ],
+    "mu_row_count": 28,
+    "new_accuracy": {
+      "accuracy": 0.5,
+      "correct": 14,
+      "total": 28
+    },
+    "new_none_count": 1,
+    "original_mu_accuracy": 0.32142857142857145,
+    "previous_defer_count": 15
+  },
+  "none_analysis": {
+    "none_none_correct_count": 4,
+    "note": "NONE is a genuine semantic decision (no canonical Alpha materially fits), never a stand-in name for classifier uncertainty -- a high rate here is a semantic-behavior finding to analyze, not itself a defect.",
+    "reviewer_none_count": 6,
+    "system_alpha_but_reviewer_none_count": 2,
+    "system_none_but_reviewer_alpha_count": 1,
+    "system_none_count": 5
+  },
+  "original_54_defer_rows_analysis": {
+    "both_correct_count": 18,
+    "both_wrong_count": 13,
+    "defer_row_count": 54,
+    "fallback_correct_now_wrong_count": 4,
+    "fallback_wrong_now_correct_count": 19,
+    "new_accuracy": 0.6851851851851852,
+    "new_correct_count": 37,
+    "now_none_count": 5,
+    "now_selected_count": 49,
+    "now_unavailable_count": 0,
+    "old_deterministic_fallback_accuracy": 0.4074074074074074,
+    "old_deterministic_fallback_correct_count": 22
+  },
+  "original_98_committed_rows_analysis": {
+    "both_correct_count": 79,
+    "both_wrong_count": 12,
+    "committed_row_count": 98,
+    "correct_now_wrong_count": 4,
+    "new_accuracy": 0.8367346938775511,
+    "new_correct_count": 82,
+    "old_accuracy": 0.8469387755102041,
+    "old_correct_count": 83,
+    "wrong_now_correct_count": 3
+  },
+  "original_holdout3_comparison": {
+    "absolute_percentage_point_change_vs_deterministic_counterfactual": 17.105263157894747,
+    "absolute_percentage_point_change_vs_original": 9.21052631578948,
+    "deterministic_counterfactual_accuracy": 0.6118421052631579,
+    "new_pure_llm_accuracy": 0.7828947368421053,
+    "original_alpha_match_accuracy": 0.6907894736842105,
+    "original_denominator": 152,
+    "original_numerator": 105
+  },
+  "row_transitions": {
+    "correct_to_wrong_count": 8,
+    "correct_to_wrong_sample_ids": [
+      "holdout3-108",
+      "holdout3-086",
+      "holdout3-105",
+      "holdout3-031",
+      "holdout3-013",
+      "holdout3-135",
+      "holdout3-053",
+      "holdout3-009"
+    ],
+    "unchanged_correct_count": 97,
+    "unchanged_wrong_count": 18,
+    "wrong_to_correct_count": 22,
+    "wrong_to_correct_sample_ids": [
+      "holdout3-110",
+      "holdout3-097",
+      "holdout3-035",
+      "holdout3-111",
+      "holdout3-001",
+      "holdout3-104",
+      "holdout3-113",
+      "holdout3-081",
+      "holdout3-136",
+      "holdout3-090",
+      "holdout3-006",
+      "holdout3-011",
+      "holdout3-151",
+      "holdout3-026",
+      "holdout3-117",
+      "holdout3-121",
+      "holdout3-073",
+      "holdout3-091",
+      "holdout3-102",
+      "holdout3-068",
+      "holdout3-131",
+      "holdout3-099"
+    ],
+    "wrong_to_different_wrong_count": 7
+  },
+  "sample_count": 152,
+  "task": "Alpha Mapper Pure-LLM Semantic Authority -- Holdout #3 Development Re-Evaluation",
+  "unavailable_count": 0,
+  "unavailable_counts_as_wrong_for_accuracy": true
+}

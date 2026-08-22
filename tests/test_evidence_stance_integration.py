@@ -34,6 +34,7 @@ from scripts.w5_demo_fixtures import (
     DEMO_SELECTED_ANALYSTS,
     approved_demo_outputs,
 )
+from scripts.deterministic_echo_llm import build_deterministic_echo_gateway
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -50,7 +51,10 @@ def real_completed_run(tmp_path_factory):
         "selected_analysts": list(DEMO_SELECTED_ANALYSTS),
         "offline_raw_agent_outputs": approved_demo_outputs("NVDA"),
     }
-    response = run_research_request(payload, output_root=tmp_path, graph_repository=repo)
+    gateway = build_deterministic_echo_gateway("evidence-stance-integration", tmp_path)
+    response = run_research_request(
+        payload, output_root=tmp_path, graph_repository=repo, week2_llm_gateway=gateway
+    )
     assert response["status"] == "completed", response
     run_id = response["run_id"]
     run_dir = tmp_path / run_id

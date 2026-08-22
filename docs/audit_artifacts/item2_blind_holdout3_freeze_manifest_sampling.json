@@ -1,0 +1,119 @@
+{
+  "agent_distribution": {
+    "aggressive_risk_analyst": 8,
+    "bear_researcher": 13,
+    "bull_researcher": 15,
+    "conservative_risk_analyst": 7,
+    "fundamental_agent": 28,
+    "market_agent": 2,
+    "neutral_risk_analyst": 9,
+    "news_agent": 42,
+    "portfolio_manager": 5,
+    "research_manager": 8,
+    "sentiment_agent": 15
+  },
+  "alpha_soft_cap_fraction": 0.35,
+  "current_system_prediction_used_for_selection": false,
+  "duplicate_exclusion_method": "claim_id exact match + normalize_claim_for_dedupe(evidence) text-identity match against ALL rows from the historical 50-row development set, Blind Holdout #1 (100 rows), AND Blind Holdout #2 (141 rows); also deduplicated within Holdout #3 itself by the same normalized-text key",
+  "exclusion": {
+    "exhausted_tickers_excluded": {
+      "SNDK": "0 eligible rows after exclusion (Holdout #2 already used the complete available pool)",
+      "TSM": "0 eligible rows after exclusion (Holdout #2 already used the complete available pool)"
+    },
+    "holdout1_excluded_row_count": 100,
+    "holdout2_excluded_row_count": 141,
+    "old50_excluded_row_count": 50,
+    "pool_sizes_after_exclusion_and_dedup": {
+      "AMD": 35,
+      "GOOGL": 96,
+      "MSFT": 32,
+      "MU": 32,
+      "NVDA": 242,
+      "QQQ": 12
+    },
+    "target_vs_actual_shortfall": {},
+    "total_exclusion_claim_id_count": 286,
+    "total_exclusion_normalized_text_count": 284
+  },
+  "frozen_csv_fields": [
+    "sample_id",
+    "run_id",
+    "ticker",
+    "claim_id",
+    "agent",
+    "claim",
+    "evidence"
+  ],
+  "frozen_csv_path": "docs/audit_artifacts/item2_blind_holdout3_frozen.csv",
+  "frozen_csv_sha256": "e6c778d3bbfb65e7bf9e6a72580d499424f1371c69f2027f477faae15ab82bc6",
+  "generated_at": "2026-08-21T00:18:00Z",
+  "historical_alpha_distribution_not_official_label": {
+    "A001": 15,
+    "A003": 5,
+    "A101": 15,
+    "A102": 4,
+    "A103": 16,
+    "A201": 7,
+    "A301": 36,
+    "A304": 22,
+    "A501": 18,
+    "A601": 14
+  },
+  "random_seed": "item2_blind_holdout3_deterministic_seed",
+  "relation_distribution": {
+    "activation": 112,
+    "conditional": 20,
+    "invalidation": 12,
+    "risk_relief": 8
+  },
+  "reviewer_labels_used_for_selection": false,
+  "sample_count": 152,
+  "sampling_metadata_note": "Historical matched_alpha_id used ONLY for internal stratification diversity during sampling (Section 6) -- NOT the official expected Alpha, NOT exposed to the reviewer, NOT part of the frozen evaluation file.",
+  "sampling_metadata_path": "docs/audit_artifacts/item2_blind_holdout3_sampling_metadata.json",
+  "sampling_version": "item2_blind_holdout3.v1",
+  "schema_version": "item2_blind_holdout3_manifest.v1",
+  "source_runs": {
+    "AMD": [
+      "66794ad5-b3a9-4fcc-aa5f-7a6d7957b7c1",
+      "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6"
+    ],
+    "GOOGL": [
+      "299bb6af-5217-422e-bd47-1b3b07c57192",
+      "fadaa93c-8cd5-40df-a1bb-53ac4ccd1fb3"
+    ],
+    "MSFT": [
+      "61f3e019-63a8-4c56-b763-057208d5efae",
+      "0cb43bae-1a4d-4003-bb29-55d420498842",
+      "07ddc074-9ab2-4b16-8957-acbf94012144"
+    ],
+    "MU": [
+      "0ba23540-0623-4d05-a670-098fbbfec1d1"
+    ],
+    "NVDA": [
+      "4ca7dafa-6ac1-4d94-add0-f6f93b1af150",
+      "0e044e37-862c-43be-871c-31012cd660e7",
+      "e434f80b-e4d0-4b09-9471-d84532659de5",
+      "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "5ffe121a-68fd-473b-82b5-c9465332d8a2"
+    ],
+    "QQQ": [
+      "a364e0ee-3bb4-4032-88b7-5cd82e379805"
+    ]
+  },
+  "ticker_distribution": {
+    "AMD": 28,
+    "GOOGL": 28,
+    "MSFT": 28,
+    "MU": 28,
+    "NVDA": 28,
+    "QQQ": 12
+  },
+  "ticker_targets": {
+    "AMD": 28,
+    "GOOGL": 28,
+    "MSFT": 28,
+    "MU": 28,
+    "NVDA": 28,
+    "QQQ": 12
+  }
+}

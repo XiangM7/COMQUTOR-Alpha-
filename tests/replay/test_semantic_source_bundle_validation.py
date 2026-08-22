@@ -192,3 +192,18 @@ def test_path_traversal_and_symlink_escape_are_rejected(
     with pytest.raises(ExactReplayError) as escaped:
         load_exact_semantic_source_bundle(eligible_live_source)
     assert escaped.value.reason_code == EXACT_REPLAY_SOURCE_ARTIFACT_INVALID
+
+
+def test_derived_manifest_original_tasks_constant_matches_manifest_module() -> None:
+    """source_bundle.py deliberately duplicates (never imports -- see
+    tests/llm_runtime/test_no_production_importers.py's closed allowlist)
+    llm_runtime/manifest.py's MANIFEST_ORIGINAL_TASKS, so _derived_manifest
+    can reproduce the live manifest writer's exact "tasks" dict shape (the
+    original three tasks always present, any later-added task only when at
+    least one such record is actually present). This test is the guard
+    against the two copies silently drifting apart -- a production test
+    file may import from llm_runtime even though production code may not."""
+    from comqutor_alpha.llm_runtime.manifest import MANIFEST_ORIGINAL_TASKS
+    from comqutor_alpha.replay.source_bundle import _MANIFEST_ORIGINAL_TASKS
+
+    assert _MANIFEST_ORIGINAL_TASKS == MANIFEST_ORIGINAL_TASKS

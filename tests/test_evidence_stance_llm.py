@@ -618,6 +618,16 @@ def test_build_alpha_matches_payload_with_gateway_upgrades_the_real_wiring():
         ],
     }
 
+    # Pure-LLM Alpha semantic authority: the SAME gateway is now genuinely
+    # consulted for the Alpha classifier too (matched_alpha is an LLM-only
+    # result), one call before B1's own stance-upgrade call -- this fixture
+    # must script both, in order, or the Alpha call alone (a stance-shaped
+    # response fails the alpha_classifier validator) makes matched_alpha
+    # null and starves B1's upgrade of anything to request.
+    def _alpha_responder(payload):
+        del payload
+        return {"decision": "select", "selected_alpha_id": "A304"}
+
     def _responder(payload):
         return {
             "items": [
@@ -626,14 +636,21 @@ def test_build_alpha_matches_payload_with_gateway_upgrades_the_real_wiring():
             ]
         }
 
-    gateway = FakeStanceGateway([_responder])
+    gateway = FakeStanceGateway([_alpha_responder, _responder])
+    # _classify_alpha_with_llm only takes the invoke_json_with_trace path
+    # (the one FakeStanceGateway implements) when semantic_runtime is set --
+    # B1's own evidence_stance_llm._process_batch calls invoke_json_with_
+    # trace unconditionally, so FakeStanceGateway never needed this for its
+    # other (B1-only) uses in this file; this test alone also exercises the
+    # Alpha classifier through the same gateway, so it needs the attribute.
+    gateway.semantic_runtime = True
     payload = build_alpha_matches_payload(structured, llm_gateway=gateway)
     match = payload["matches"][0]
-    assert match["matched_alpha"] is not None
+    assert match["matched_alpha"] == "A304"
     candidate = _candidate_for(match, match["matched_alpha"])
     assert candidate["stance_method"] == esl.STANCE_METHOD_LLM
     assert candidate["evidence_stance"] == es.MENTIONS_ALPHA
-    assert len(gateway.calls) == 1
+    assert len(gateway.calls) == 2
 
 
 def test_build_evidence_stance_audit_reports_llm_and_fallback_counts():
@@ -769,12 +786,169 @@ def test_case10_malformed_response_to_a_mixed_language_item_still_falls_back_sof
 
 def test_prompt_identity_changed_and_was_deliberately_reversioned():
     """The prompt text itself changed (this task's whole point) -- confirms
-    the version label was bumped alongside it, so no old cached v1 semantic
-    result can ever be silently reused as if it reflected this behavior
-    (ADR-005)."""
+    the version label was bumped alongside it, so no old cached v1/v2
+    semantic result can ever be silently reused as if it reflected this
+    behavior (ADR-005)."""
     from comqutor_alpha.structure_engine.week2_llm import _TASK_RUNTIME_METADATA, Week2LLMGateway
 
-    assert "mentions_alpha or neutral_background merely because it is mixed" in Week2LLMGateway.prompt_identity_text(
+    assert "resolve the stance from their combined, net implication" in Week2LLMGateway.prompt_identity_text(
         esl.LLM_TASK_NAME
     )
-    assert _TASK_RUNTIME_METADATA[esl.LLM_TASK_NAME]["prompt_version"] == "evidence_stance.llm_classifier.v2"
+    assert _TASK_RUNTIME_METADATA[esl.LLM_TASK_NAME]["prompt_version"] == "evidence_stance.llm_classifier.v3"
+
+
+# ---------------------------------------------------------------------------
+# B1 prompt v3 (QA Closure v0.1.2, following Blind Holdout #1 root-cause
+# analysis): substantive-assertion gate + mentions_alpha/neutral_background
+# boundary clarification. These are PROMPT-CONTRACT tests only -- they check
+# that the production prompt text explicitly communicates each required
+# semantic distinction (cases A-F of this task's spec), not that a real LLM
+# call obeys it (no Provider call anywhere in this file). Deliberately check
+# for specific semantic clauses rather than one brittle giant string match.
+# ---------------------------------------------------------------------------
+
+
+def _v3_prompt_text() -> str:
+    from comqutor_alpha.structure_engine.week2_llm import Week2LLMGateway
+
+    return Week2LLMGateway.prompt_identity_text(esl.LLM_TASK_NAME)
+
+
+def test_case_a_prompt_defines_non_substantive_evidence_as_neutral_background():
+    text = _v3_prompt_text()
+    assert "substantive, independently interpretable assertion" in text
+    for example in ("heading", "bare label or score", "fragment", "watch-item"):
+        assert example in text
+    assert "has no stance to assign beyond neutral_background" in text
+
+
+def test_case_b_prompt_defines_mentions_alpha_as_on_thesis_non_directional():
+    text = _v3_prompt_text()
+    assert (
+        "use mentions_alpha when the assertion directly concerns the target thesis, mechanism, or "
+        "subject matter but does not materially support or materially weaken it" in text
+    )
+
+
+def test_case_c_prompt_defines_supports_alpha_as_material_net_endorsement():
+    text = _v3_prompt_text()
+    assert "use supports_alpha when it is a material, net endorsement of the target thesis" in text
+
+
+def test_case_d_prompt_defines_opposes_alpha_as_material_net_rebuttal():
+    text = _v3_prompt_text()
+    assert "opposes_alpha when it is a material, net rebuttal or weakening of it" in text
+
+
+def test_case_e_prompt_requires_considering_all_target_relevant_clauses_together():
+    text = _v3_prompt_text()
+    assert "identify every such clause -- not only the first one found" in text
+    assert "combined, net implication" in text
+    assert "never by selecting one clause and discarding a second, equally target-relevant one" in text
+
+
+def test_case_f_prompt_explicitly_rejects_length_as_a_substantiveness_signal():
+    text = _v3_prompt_text()
+    assert "judge this from the actual content, never from length" in text
+    assert "not every short sentence is non-substantive" in text
+
+
+def test_neutral_background_boundary_explicitly_distinguished_from_mentions_alpha():
+    """The specific boundary clarification this task exists for: neutral_background
+    must not be defined so broadly that it swallows mentions_alpha."""
+    text = _v3_prompt_text()
+    assert (
+        "not for Evidence that does directly concern the target thesis without taking a side, "
+        "which is mentions_alpha" in text
+    )
+
+
+def test_v3_preserves_conditional_and_counter_alpha_semantics_unchanged_in_substance():
+    text = _v3_prompt_text()
+    assert "conditional endorsement of the target thesis is still supports_alpha" in text
+    assert "conditional rebuttal is still opposes_alpha" in text
+    assert "never merely because it opposes target_alpha_id" in text
+    assert "never merely because the Evidence is mixed" in text
+    assert "never merely because another Alpha is mentioned" in text
+
+
+# ---------------------------------------------------------------------------
+# B1 prompt v3 ontology consistency fix (QA Closure v0.1.2, same v3, applied
+# before this prompt was ever frozen/evaluated on a blind holdout -- version
+# string intentionally unchanged, still evidence_stance.llm_classifier.v3).
+# The mixed-clause paragraph originally allowed an unresolved/non-directional
+# net implication among already-established target-relevant clauses to fall
+# back to neutral_background, contradicting the mentions_alpha/
+# neutral_background definitions stated earlier in the same prompt. These
+# tests verify the corrected wording is internally consistent -- prompt-
+# contract checks only, no Provider call.
+# ---------------------------------------------------------------------------
+
+
+def test_unresolved_directional_clauses_that_are_target_relevant_resolve_to_mentions_alpha():
+    """Requirement 1: direct substantive target relevance + unresolved/
+    non-directional net stance => mentions_alpha (not neutral_background)."""
+    text = _v3_prompt_text()
+    assert (
+        "mentions_alpha when the material clauses directly concern the target thesis but their "
+        "combined implication is genuinely non-directional or cannot be resolved as net support or "
+        "opposition" in text
+    )
+
+
+def test_neutral_background_reserved_for_the_earlier_substantive_gate_only():
+    """Requirement 2: neutral_background is reserved for absence of
+    sufficiently direct, substantive target-relative assertion -- restated
+    explicitly at the point where the old contradiction used to live."""
+    text = _v3_prompt_text()
+    assert (
+        "Use neutral_background here only under the earlier rule, where no sufficiently direct "
+        "substantive target-relative assertion exists in the first place" in text
+    )
+
+
+def test_mixed_clauses_must_not_fall_back_to_neutral_background_merely_because_unresolved():
+    """Requirement 3: the specific contradiction this task fixes -- mixed
+    target-relevant clauses must not resolve to neutral_background merely
+    because their net direction is unresolved. Stated as an explicit,
+    unambiguous closing rule, not left implicit."""
+    text = _v3_prompt_text()
+    assert (
+        "an unresolved or non-directional net implication among clauses that do directly bear on "
+        "the target thesis is mentions_alpha, not neutral_background" in text
+    )
+    # The old contradictory phrasing must be fully gone, not merely
+    # supplemented -- otherwise the ontology is still self-contradictory.
+    assert "mentions_alpha or neutral_background only when that net implication genuinely cannot be resolved" not in text
+
+
+def test_substantive_assertion_gate_still_present_after_the_ontology_fix():
+    """Requirement 4: the v3 substantive-assertion gate (this task's
+    non-goal list explicitly says it must not change) is still intact."""
+    text = _v3_prompt_text()
+    assert "substantive, independently interpretable assertion" in text
+    assert "has no stance to assign beyond neutral_background" in text
+    assert "not every short sentence is non-substantive" in text
+
+
+def test_counter_alpha_and_conditional_semantics_still_present_after_the_ontology_fix():
+    """Requirement 5: supports_counter_alpha and conditional-language
+    semantics are unaffected by this fix."""
+    text = _v3_prompt_text()
+    assert "conditional endorsement of the target thesis is still supports_alpha" in text
+    assert "conditional rebuttal is still opposes_alpha" in text
+    assert (
+        "Only report supports_counter_alpha when the Evidence itself materially supports one of the "
+        "supplied counter_alphas' own thesis" in text
+    )
+    assert "never merely because another Alpha is mentioned" in text
+
+
+def test_prompt_version_unchanged_at_v3_after_ontology_fix():
+    """This is a within-v3 correction, not a new version (task's explicit
+    instruction) -- the prompt text changed again, so re-confirm the
+    version string was deliberately NOT bumped, and the identity hash
+    reflects the new text (never silently stale)."""
+    from comqutor_alpha.structure_engine.week2_llm import _TASK_RUNTIME_METADATA
+
+    assert _TASK_RUNTIME_METADATA[esl.LLM_TASK_NAME]["prompt_version"] == "evidence_stance.llm_classifier.v3"

@@ -36,6 +36,7 @@ from comqutor_alpha.storage.file_store import (
     run_dir_for,
     save_json_record,
 )
+from scripts.deterministic_echo_llm import build_deterministic_echo_gateway
 
 _fixtures = importlib.import_module(
     "scripts.w5_demo_fixtures" if __package__ else "w5_demo_fixtures"
@@ -329,11 +330,19 @@ def seed_demo_case(
         "run_id": run_id,
         "offline_raw_agent_outputs": approved_demo_outputs(ticker),
     }
+    # Pure-LLM Alpha semantic authority: matched_alpha is now exclusively an
+    # LLM decision, so the demo (which must stay live_provider_used=False,
+    # see expected_metadata above) needs a real, zero-Provider-call Alpha
+    # classifier to keep producing a genuine, evidence-differentiated demo
+    # dataset -- the same deterministic-echo double the pipeline sanity
+    # tests use, never a real Provider call.
+    gateway = build_deterministic_echo_gateway(f"w5-demo-seed-{ticker.lower()}", output_root)
     with _offline_only_environment():
         pipeline_response = run_research_request(
             payload,
             output_root=output_root,
             graph_repository=repository,
+            week2_llm_gateway=gateway,
         )
     if (
         pipeline_response.get("status") != "completed"

@@ -41,6 +41,7 @@ from comqutor_alpha.storage.db.engine import build_engine
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
 from tests.test_week3_qqq_sanity import _SYNTHETIC_QQQ_OFFLINE_OUTPUTS
+from scripts.deterministic_echo_llm import build_deterministic_echo_gateway
 
 
 def _run_qqq_conflict_fixture(tmp_path):
@@ -53,7 +54,10 @@ def _run_qqq_conflict_fixture(tmp_path):
         "selected_analysts": ["market", "news", "fundamentals", "sentiment"],
         "offline_raw_agent_outputs": _SYNTHETIC_QQQ_OFFLINE_OUTPUTS,
     }
-    response = run_research_request(payload, output_root=tmp_path, graph_repository=repo)
+    gateway = build_deterministic_echo_gateway("week4-qqq-conflict-sanity", tmp_path)
+    response = run_research_request(
+        payload, output_root=tmp_path, graph_repository=repo, week2_llm_gateway=gateway
+    )
     assert response["status"] == "completed"
     run_id = response["run_id"]
 

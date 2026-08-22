@@ -26,6 +26,21 @@ to a brand-new ``replay-<timestamp>-<uuid>`` directory under
 ``outputs/replays/`` (never the source run's own directory), and the
 source raw artifact's sha256/size/mtime are checked before and after --
 any change flips ``status`` to ``"blocked"`` rather than claiming success.
+
+Pure-LLM Alpha Production Boundary Hardening: under Pure-LLM Alpha semantic
+authority (alpha_mapper.py), a claim's semantic ``matched_alpha`` can only
+ever come from a real LLM decision. ``llm_gateway=None`` here is therefore
+not merely "no live Provider call" -- every claim in every Architecture
+Replay now deterministically reports ``match_status="unavailable"``,
+``alpha_match_method="llm_unavailable"``, ``alpha_match_fallback_reason=
+"disabled"``, ``matched_alpha=None``. This is intentional and correct, not
+a degraded bug: Architecture Replay is a deterministic structural/diagnostic
+replay only, never a claim of semantic equivalence to the source run's own
+LLM decisions (see the second paragraph above) -- its Alpha semantic state
+is UNAVAILABLE, never a fabricated NONE and never the deterministic
+scorer's own top candidate standing in as a real semantic answer.
+Deterministic diagnostics (``deterministic_top_alpha``, candidate scores,
+AI gate, threshold) remain fully computed and inspectable regardless.
 """
 
 from __future__ import annotations
@@ -418,6 +433,12 @@ def run_structure_replay(
     structured = _rebase_structured_payload_for_replay(
         source_structured, replay_run_id=resolved_replay_run_id
     )
+    # No classifier_enabled/llm_gateway (see module docstring): under
+    # Pure-LLM Alpha semantic authority every claim here deterministically
+    # resolves to match_status="unavailable" -- Architecture Replay's Alpha
+    # semantic state is UNAVAILABLE by design, never NONE, never the
+    # deterministic scorer's own conclusion masquerading as a real
+    # semantic decision.
     alpha_matches = build_alpha_matches_payload(structured)
     extracted = build_extracted_structures_payload(structured)
     graph_stage = build_structure_graph_stage(alpha_matches, extracted)

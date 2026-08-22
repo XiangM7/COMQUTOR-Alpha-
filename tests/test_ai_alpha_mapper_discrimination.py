@@ -551,8 +551,12 @@ class TestNonAiAlphaRegression:
         ids=[f"{b['alpha_id']}_{i}" for i, b in enumerate(NON_AI_REGRESSION_BASELINE)],
     )
     def test_non_ai_alpha_matching_is_byte_for_byte_unchanged(self, baseline):
+        # No classifier_enabled/llm_gateway: matched_alpha is the Pure-LLM
+        # semantic result (always "unavailable" here) -- this regression
+        # baseline is about the DETERMINISTIC scorer, asserted via
+        # deterministic_top_alpha. See tests/test_alpha_mapper_llm_authority.py.
         result = map_claim_to_alpha(_record(baseline["text"], direction="positive"))
-        assert result["matched_alpha"] == baseline["alpha_id"]
+        assert result["deterministic_top_alpha"] == baseline["alpha_id"]
         candidate = next(c for c in result["candidate_scores"] if c["alpha_id"] == baseline["alpha_id"])
         assert candidate["score"] == baseline["score"]
         assert candidate["matched_keywords"] == baseline["matched_keywords"]
@@ -586,6 +590,11 @@ class TestArtifactSchemaCompatibility:
         # New fields are additive, not replacements.
         assert "ai_alpha_matches" in result
         assert isinstance(result["ai_alpha_matches"], list)
+        # Pure-LLM Alpha semantic authority: the deterministic
+        # counterfactual is additive too -- matched_alpha/match_status
+        # remain the (now LLM-only) semantic result.
+        assert "deterministic_top_alpha" in result
+        assert "deterministic_match_status" in result
         for candidate in result["candidate_scores"]:
             assert "ai_gate_passed" in candidate
 
@@ -613,7 +622,7 @@ class TestDownstreamInputFieldsUnchanged:
 
     def test_matched_alpha_and_score_fields_still_drive_downstream_shape(self):
         result = map_claim_to_alpha(_record("Revenue guidance was raised due to strong customer demand.", direction="positive"))
-        assert result["matched_alpha"] == "A301"
+        assert result["deterministic_top_alpha"] == "A301"
         assert isinstance(result["score"], float)
         assert isinstance(result["direction"], str)
         assert isinstance(result["factors"], list)

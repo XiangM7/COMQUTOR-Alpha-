@@ -26,17 +26,22 @@ def measure_labeled_accuracy():
             "confidence": 0.8,
             "source_agent_output_id": f"week2:{case['id']}",
         }
+        # No classifier_enabled/llm_gateway: this is the DETERMINISTIC
+        # scoring gate, asserted via deterministic_top_alpha/
+        # deterministic_match_status -- matched_alpha/match_status are now
+        # always the (unavailable, since unconsulted) Pure-LLM semantic
+        # result. See tests/test_alpha_mapper_llm_authority.py.
         mapped = map_claim_to_alpha(record)
         correct = (
-            mapped["match_status"] == "matched"
-            and mapped["matched_alpha"] == case["expected_alpha"]
+            mapped["deterministic_match_status"] == "matched"
+            and mapped["deterministic_top_alpha"] == case["expected_alpha"]
         )
         results.append(
             {
                 "id": case["id"],
                 "expected_alpha": case["expected_alpha"],
-                "actual_status": mapped["match_status"],
-                "actual_alpha": mapped["matched_alpha"],
+                "actual_status": mapped["deterministic_match_status"],
+                "actual_alpha": mapped["deterministic_top_alpha"],
                 "correct": correct,
                 "top_candidates": mapped["candidate_scores"][:3],
             }

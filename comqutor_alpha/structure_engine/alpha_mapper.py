@@ -44,7 +44,6 @@ DEFAULT_MIN_MATCH_SCORE = 0.35
 DEFAULT_AMBIGUITY_DELTA = 0.14
 DEFAULT_SECONDARY_DELTA = 0.25
 DEFAULT_CLASSIFIER_TIMEOUT_SECONDS = 5.0
-MAX_CLASSIFIER_CANDIDATES = 3
 
 POSITIVE_ALPHA_IDS = OPPORTUNITY_ALPHA_IDS
 
@@ -328,8 +327,28 @@ def _classifier_metadata(enabled: bool, status: str, used: bool = False) -> dict
     return {"enabled": bool(enabled), "used": bool(used), "status": status}
 
 
-def _apply_optional_classifier(
-    result: dict[str, Any],
+def _alpha_taxonomy_request_block(taxonomy: Mapping[str, AlphaDefinition]) -> list[dict[str, Any]]:
+    return [
+        {"alpha_id": alpha.alpha_id, "alpha_name": alpha.name_en, "definition": alpha.core_thesis}
+        for alpha in sorted(taxonomy.values(), key=lambda item: item.alpha_id)
+    ]
+
+
+# Pure-LLM Alpha semantic authority (Alpha Mapper Pure-LLM Semantic Authority
+# task): the LLM is the ONLY source of the semantic Alpha result. It sees the
+# FULL canonical taxonomy, unrestricted by deterministic candidate
+# generation/eligibility/score threshold/AI hard gate, and must resolve to
+# exactly one of two successful outcomes -- "selected" (exactly one
+# canonical Alpha) or "none" (no canonical Alpha materially fits). There is
+# no successful "cannot decide"/"defer" outcome: semantic ambiguity between
+# two plausible Alphas is not itself grounds for "none" (see the prompt).
+# Deterministic logic is NEVER a fallback source for the semantic result --
+# it remains a diagnostic/counterfactual only (map_claim_to_alpha's
+# deterministic_top_alpha/deterministic_match_status fields). Every
+# operational failure (disabled, unavailable, timeout, malformed/invalid
+# output, unknown Alpha ID, provider error) returns outcome="unavailable",
+# never a deterministic Alpha standing in as the semantic answer.
+def _classify_alpha_with_llm(
     record: Mapping[str, Any],
     taxonomy: Mapping[str, AlphaDefinition],
     classifier: Callable[..., Mapping[str, Any]] | None,
@@ -337,50 +356,22 @@ def _apply_optional_classifier(
     timeout_seconds: float,
     llm_gateway: Any = None,
 ) -> dict[str, Any]:
-    """Apply selection only after deterministic candidate admissibility."""
-    if not classifier_enabled:
-        result["classifier"] = _classifier_metadata(False, "disabled")
-        return result
-    if result["match_status"] == "no_match":
-        result["classifier"] = _classifier_metadata(True, "blocked_by_deterministic_no_match")
-        return result
-    if len(result.get("eligible_candidates", [])) < 2:
-        result["classifier"] = _classifier_metadata(True, "not_needed")
-        return result
-    if classifier is None and llm_gateway is None:
-        result["classifier"] = _classifier_metadata(True, "unavailable")
-        return result
+    def _unavailable(reason: str) -> dict[str, Any]:
+        return {"outcome": "unavailable", "alpha_id": None, "fallback_reason": reason, "diagnostic": _classifier_metadata(True, reason, used=True)}
 
-    candidates = [
-        {
-            "alpha_id": item["alpha_id"],
-            "alpha_name": item["alpha_name"],
-            "score": item["score"],
-            "relation": item["relation"],
-            "score_components": {
-                "keyword": item["keyword_score"],
-                "factor": item["factor_score"],
-                "direction": item["direction_score"],
-                "semantic": item["semantic_score"],
-            },
-            "matched_keywords": item.get("matched_keywords", []),
-            "matched_factors": item.get("matched_factors", []),
-            "taxonomy": {
-                "core_thesis": taxonomy[item["alpha_id"]].core_thesis,
-                "trigger_signals": taxonomy[item["alpha_id"]].trigger_signals,
-                "confirmation_signals": taxonomy[item["alpha_id"]].confirmation_signals,
-            },
-        }
-        for item in result.get("eligible_candidates", [])[:MAX_CLASSIFIER_CANDIDATES]
-    ]
-    allowed_ids = {item["alpha_id"] for item in candidates}
+    if not classifier_enabled:
+        return {"outcome": "unavailable", "alpha_id": None, "fallback_reason": "disabled", "diagnostic": _classifier_metadata(False, "disabled")}
+    if classifier is None and llm_gateway is None:
+        return _unavailable("unavailable")
+
+    allowed_ids = set(taxonomy)
     request = {
         "claim": str(record.get("claim") or ""),
         "evidence": str(record.get("evidence") or ""),
+        "ticker": str(record.get("ticker") or ""),
         "factors": _record_factors(record),
         "direction": normalize_direction(record.get("direction")),
-        "allowed_alpha_ids": sorted(allowed_ids),
-        "candidates": candidates,
+        "alpha_taxonomy": _alpha_taxonomy_request_block(taxonomy),
     }
 
     try:
@@ -390,12 +381,16 @@ def _apply_optional_classifier(
                     raise ValueError("classifier response has unexpected fields")
                 decision = str(payload.get("decision") or "").strip().lower()
                 selected_alpha_id = payload.get("selected_alpha_id")
-                if decision == "defer" and selected_alpha_id in (None, ""):
-                    return {"match_status": "ambiguous", "alpha_id": ""}
-                selected_alpha_id = str(selected_alpha_id or "").strip()
-                if decision == "select" and selected_alpha_id in allowed_ids:
-                    return {"match_status": "matched", "alpha_id": selected_alpha_id}
-                raise ValueError("classifier response violates the candidate contract")
+                if decision == "none":
+                    if selected_alpha_id not in (None, ""):
+                        raise ValueError("none decision must not include a selected_alpha_id")
+                    return {"outcome": "none", "alpha_id": ""}
+                if decision == "select":
+                    selected_alpha_id = str(selected_alpha_id or "").strip()
+                    if selected_alpha_id in allowed_ids:
+                        return {"outcome": "selected", "alpha_id": selected_alpha_id}
+                    raise ValueError("classifier selected an Alpha ID outside the canonical taxonomy")
+                raise ValueError("classifier response used an unrecognized decision value")
 
             if getattr(llm_gateway, "semantic_runtime", None) is None or not callable(
                 getattr(llm_gateway, "invoke_json_with_trace", None)
@@ -424,66 +419,32 @@ def _apply_optional_classifier(
                     )
                     response = None
             if response is None:
-                result["classifier"] = _classifier_metadata(True, "fallback", used=True)
-                return result
+                return _unavailable("invalid_output")
         else:
             response = call_with_timeout(
                 lambda: classifier(request, timeout_seconds=timeout_seconds),
                 timeout_seconds,
             )
     except TimeoutError:
-        result["classifier"] = _classifier_metadata(True, "timeout", used=True)
-        return result
+        return _unavailable("provider_timeout")
     except Exception:
-        result["classifier"] = _classifier_metadata(True, "error", used=True)
-        return result
+        return _unavailable("provider_error")
 
     if not isinstance(response, Mapping):
-        result["classifier"] = _classifier_metadata(True, "invalid_output", used=True)
-        return result
-    if set(response) != {"match_status", "alpha_id"}:
-        result["classifier"] = _classifier_metadata(True, "invalid_output", used=True)
-        return result
+        return _unavailable("invalid_output")
+    if set(response) != {"outcome", "alpha_id"}:
+        return _unavailable("invalid_output")
 
-    status = str(response.get("match_status") or "").strip().lower()
+    outcome = str(response.get("outcome") or "").strip().lower()
     alpha_id = str(response.get("alpha_id") or "").strip()
-    if status == "matched" and alpha_id in allowed_ids:
-        alpha = taxonomy[alpha_id]
-        selected = next(
-            item for item in result["eligible_candidates"] if item["alpha_id"] == alpha_id
-        )
-        result.update(
-            {
-                "matched_alpha": alpha_id,
-                "matched_alpha_name": alpha.name_en,
-                "match_status": "matched",
-                "score": selected["score"],
-                "keyword_score": selected["keyword_score"],
-                "factor_score": selected["factor_score"],
-                "direction_score": selected["direction_score"],
-                "reason": "optional classifier selected from deterministic eligible candidates",
-                "secondary_alphas": [
-                    item["alpha_id"] for item in candidates if item["alpha_id"] != alpha_id
-                ],
-            }
-        )
-        result["classifier"] = _classifier_metadata(True, "applied", used=True)
-        return result
-    if status == "ambiguous" and not alpha_id:
-        result.update(
-            {
-                "matched_alpha": None,
-                "matched_alpha_name": None,
-                "match_status": "ambiguous",
-                "reason": "optional classifier deferred among admissible candidates",
-                "secondary_alphas": [],
-            }
-        )
-        result["classifier"] = _classifier_metadata(True, "confirmed_ambiguous", used=True)
-        return result
+    if outcome == "selected" and alpha_id in allowed_ids:
+        return {"outcome": "selected", "alpha_id": alpha_id, "fallback_reason": None, "diagnostic": _classifier_metadata(True, "llm_selected", used=True)}
+    if outcome == "selected" and alpha_id not in allowed_ids:
+        return _unavailable("invalid_alpha_id")
+    if outcome == "none" and not alpha_id:
+        return {"outcome": "none", "alpha_id": None, "fallback_reason": None, "diagnostic": _classifier_metadata(True, "llm_none", used=True)}
 
-    result["classifier"] = _classifier_metadata(True, "invalid_output", used=True)
-    return result
+    return _unavailable("invalid_output")
 
 # Map a structured claim record to the best matching alpha definition, returning a detailed match result.
 def map_claim_to_alpha(
@@ -573,18 +534,73 @@ def map_claim_to_alpha(
             if top["score"] - item["score"] <= DEFAULT_SECONDARY_DELTA
         ]
 
+    # Pure-LLM Alpha semantic authority: the deterministic computation above
+    # (candidates/eligible_candidates/top/second/status/matched_alpha) is
+    # captured here as a diagnostic/counterfactual ONLY -- it never becomes
+    # the semantic result, including on any LLM operational failure. The
+    # LLM is consulted regardless of what deterministic scoring concluded,
+    # and its own outcome ("selected" / "none" / "unavailable") is the SOLE
+    # source of the top-level match_status/matched_alpha/matched_alpha_name
+    # below -- deterministic logic is never a semantic fallback source.
+    deterministic_top_alpha = matched_alpha
+    deterministic_match_status = status
+
+    llm_outcome = _classify_alpha_with_llm(
+        record,
+        taxonomy,
+        classifier,
+        classifier_enabled or llm_gateway is not None,
+        classifier_timeout_seconds,
+        llm_gateway,
+    )
+    if llm_outcome["outcome"] == "selected":
+        alpha = taxonomy[llm_outcome["alpha_id"]]
+        status = "matched"
+        matched_alpha = llm_outcome["alpha_id"]
+        matched_alpha_name = alpha.name_en
+        reason = "llm semantic classifier selected from full canonical taxonomy"
+        alpha_match_method = "llm"
+        alpha_match_fallback_reason = None
+    elif llm_outcome["outcome"] == "none":
+        status = "no_match"
+        matched_alpha = None
+        matched_alpha_name = None
+        reason = "llm semantic classifier determined no canonical Alpha materially fits"
+        alpha_match_method = "llm"
+        alpha_match_fallback_reason = None
+    else:
+        status = "unavailable"
+        matched_alpha = None
+        matched_alpha_name = None
+        reason = f"llm semantic classifier unavailable: {llm_outcome['fallback_reason']}"
+        alpha_match_method = "llm_unavailable"
+        alpha_match_fallback_reason = llm_outcome["fallback_reason"]
+
     # Sprint 2, Track B1: classify Evidence Stance for every candidate now
-    # that `matched_alpha` is known (needed for the supports_counter_alpha
-    # check) -- attaches additive fields onto the SAME dict objects that
+    # that the FINAL `matched_alpha` is known (needed for the
+    # supports_counter_alpha check, and to resolve conflict partners
+    # relative to the semantic -- not merely deterministic -- match) --
+    # attaches additive fields onto the SAME dict objects that
     # candidate_scores/top_candidates/eligible_candidates below reference,
     # so every view reads one identical, non-drifting result per candidate.
-    # `candidates` is sorted eligible-first (see _sort_candidates), so
-    # eligible_candidates is always a prefix of it -- classifying
-    # candidates[:max(5, len(eligible_candidates))] fully covers
-    # candidate_scores (candidates[:5]), top_candidates (candidates[:3]),
-    # and eligible_candidates without wastefully classifying every one of
-    # the taxonomy's other alphas for every single claim.
+    # `candidates` always has one entry per taxonomy Alpha (see the
+    # `_candidate_score(...) for alpha in taxonomy.values()` comprehension
+    # above), so the matched Alpha's own entry always exists somewhere in
+    # it even when the LLM selected an Alpha deterministic scoring ranked
+    # far outside the top 5 -- `stance_scope` is widened to that Alpha's own
+    # index so it is never skipped, and `candidate_scores` below is likewise
+    # widened so every downstream reader that looks up "the matched Alpha's
+    # own candidate diagnostics" by scanning eligible_candidates/
+    # top_candidates/candidate_scores (B1's own LLM upgrade pass, B2
+    # admissibility, B4 activation, and the audit/evidence-review exporter
+    # all do exactly this -- see the dependency audit) keeps finding it.
+    matched_alpha_index = next(
+        (index for index, item in enumerate(candidates) if item["alpha_id"] == matched_alpha),
+        None,
+    ) if matched_alpha else None
     stance_scope = max(5, len(eligible_candidates))
+    if matched_alpha_index is not None:
+        stance_scope = max(stance_scope, matched_alpha_index + 1)
     _attach_evidence_stance(
         candidates[:stance_scope],
         {**record, "matched_alpha": matched_alpha},
@@ -593,6 +609,12 @@ def map_claim_to_alpha(
     matched_candidate = next(
         (item for item in candidates if item["alpha_id"] == matched_alpha), None
     ) if (status == "matched" and matched_alpha) else None
+
+    candidate_scores = candidates[:5]
+    if matched_candidate is not None and matched_alpha not in {
+        item["alpha_id"] for item in candidate_scores
+    }:
+        candidate_scores = candidate_scores + [matched_candidate]
 
     result = {
         "run_id": record.get("run_id"),
@@ -607,17 +629,36 @@ def map_claim_to_alpha(
         "direction": normalize_direction(record.get("direction")),
         "matched_alpha": matched_alpha,
         "matched_alpha_name": matched_alpha_name,
-        "score": top["score"] if top else 0.0,
-        "keyword_score": top["keyword_score"] if top else 0.0,
-        "factor_score": top["factor_score"] if top else 0.0,
-        "direction_score": top["direction_score"] if top else 0.0,
-        "candidate_scores": candidates[:5],
+        "score": matched_candidate["score"] if matched_candidate else 0.0,
+        "keyword_score": matched_candidate["keyword_score"] if matched_candidate else 0.0,
+        "factor_score": matched_candidate["factor_score"] if matched_candidate else 0.0,
+        "direction_score": matched_candidate["direction_score"] if matched_candidate else 0.0,
+        "candidate_scores": candidate_scores,
         "top_candidates": candidates[:3],
         "eligible_candidates": plausible_candidates,
         "plausible_alphas": [item["alpha_id"] for item in plausible_candidates],
         "secondary_alphas": secondary_alphas,
         "match_status": status,
         "reason": reason,
+        # Pure-LLM Alpha semantic authority: which semantic authority
+        # produced `matched_alpha` -- always "llm" for a genuine LLM
+        # decision, whether it selected an Alpha (match_status="matched") or
+        # determined no Alpha materially fits (match_status="no_match");
+        # "llm_unavailable" only when no LLM decision could be obtained at
+        # all (disabled, provider timeout/error, malformed/invalid output,
+        # unknown Alpha ID) -- deterministic scoring is never the value's
+        # source. Mirrors B1's existing stance_method/stance_fallback_reason
+        # naming convention rather than inventing a parallel vocabulary.
+        "alpha_match_method": alpha_match_method,
+        "alpha_match_fallback_reason": alpha_match_fallback_reason,
+        # Pure-LLM Alpha semantic authority: the deterministic mapper's own
+        # conclusion, captured BEFORE the LLM outcome is applied above --
+        # diagnostic/counterfactual only, never a semantic fallback source.
+        # deterministic_top_alpha mirrors matched_alpha's shape (an Alpha ID
+        # or None); deterministic_match_status mirrors match_status's
+        # vocabulary ("matched"/"no_match"/"ambiguous").
+        "deterministic_top_alpha": deterministic_top_alpha,
+        "deterministic_match_status": deterministic_match_status,
         "assertion_status": semantics.assertion_status,
         "semantic_polarity": semantics.semantic_polarity,
         "taxonomy_gap_context": semantics.taxonomy_gap_context,
@@ -648,16 +689,9 @@ def map_claim_to_alpha(
         # claim_quality.is_claim_eligible() without recomputing it from a
         # possibly-narrower (Mapper-filtered) factor list.
         "claim_quality": record.get("claim_quality"),
+        "classifier": llm_outcome["diagnostic"],
     }
-    return _apply_optional_classifier(
-        result,
-        record,
-        taxonomy,
-        classifier,
-        classifier_enabled or llm_gateway is not None,
-        classifier_timeout_seconds,
-        llm_gateway,
-    )
+    return result
 
 # Map a list of structured claim records to their best matching alpha definitions, returning a list of match results.
 def map_structured_records(

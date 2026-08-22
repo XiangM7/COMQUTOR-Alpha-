@@ -69,6 +69,12 @@ def test_factor_score_handles_artificial_intelligence_demand_alias():
 
 
 def test_clear_ai_demand_claim_maps_to_ai_expansion():
+    # No classifier_enabled/llm_gateway: under Pure-LLM Alpha semantic
+    # authority, matched_alpha/match_status are always an LLM-only result
+    # (here, "unavailable", since the classifier never ran) -- see
+    # tests/test_alpha_mapper_llm_authority.py for that contract. This
+    # deterministic-scoring test asserts the deterministic conclusion
+    # directly via deterministic_top_alpha/deterministic_match_status.
     result = map_claim_to_alpha(
         _record(
             "AI training demand is accelerating and GPU demand is rising for NVDA.",
@@ -76,8 +82,8 @@ def test_clear_ai_demand_claim_maps_to_ai_expansion():
         )
     )
 
-    assert result["match_status"] == "matched"
-    assert result["matched_alpha"] == "A101"
+    assert result["deterministic_match_status"] == "matched"
+    assert result["deterministic_top_alpha"] == "A101"
 
 
 def test_clear_valuation_risk_claim_maps_to_multiple_compression():
@@ -89,16 +95,19 @@ def test_clear_valuation_risk_claim_maps_to_multiple_compression():
         )
     )
 
-    assert result["match_status"] == "matched"
-    assert result["matched_alpha"] == "A304"
+    assert result["deterministic_match_status"] == "matched"
+    assert result["deterministic_top_alpha"] == "A304"
 
 
 def test_labeled_claim_accuracy_is_at_least_80_percent():
-    """Official Week 2 gate: a claim only counts as correct when the mapper
-    actually committed to a match (match_status == "matched") on the right
-    alpha. Counting a claim as correct just because the right alpha happened
-    to be the top candidate (even under no_match/ambiguous) would be too
-    loose for the official gate, so that is tracked separately as a
+    """Official Week 2 gate: a claim only counts as correct when the
+    DETERMINISTIC mapper actually committed to a match
+    (deterministic_match_status == "matched") on the right alpha -- this
+    gate measures the deterministic scoring layer itself, independent of
+    Pure-LLM Alpha semantic authority (no classifier_enabled/llm_gateway is
+    used here). Counting a claim as correct just because the right alpha
+    happened to be the top candidate (even under no_match/ambiguous) would
+    be too loose for the official gate, so that is tracked separately as a
     diagnostic-only metric below.
     """
     taxonomy = load_alpha_taxonomy()
@@ -114,8 +123,8 @@ def test_labeled_claim_accuracy_is_at_least_80_percent():
         top_candidate = result["candidate_scores"][0] if result["candidate_scores"] else None
         top_alpha = top_candidate["alpha_id"] if top_candidate else None
         is_strict_correct = (
-            result["match_status"] == "matched"
-            and result["matched_alpha"] == case["expected_alpha"]
+            result["deterministic_match_status"] == "matched"
+            and result["deterministic_top_alpha"] == case["expected_alpha"]
         )
         if is_strict_correct:
             strict_correct += 1
@@ -127,8 +136,8 @@ def test_labeled_claim_accuracy_is_at_least_80_percent():
                     "id": case["id"],
                     "text": case["text"],
                     "expected_alpha": case["expected_alpha"],
-                    "matched_alpha": result["matched_alpha"],
-                    "match_status": result["match_status"],
+                    "deterministic_top_alpha": result["deterministic_top_alpha"],
+                    "deterministic_match_status": result["deterministic_match_status"],
                     "top_candidate": top_candidate,
                     "candidate_scores": result["candidate_scores"],
                 }
@@ -182,8 +191,8 @@ def test_development_plan_acceptance_sentence_maps_strictly(
 ):
     result = map_claim_to_alpha(_record(text, direction=direction))
 
-    assert result["match_status"] == "matched"
-    assert result["matched_alpha"] == expected_alpha
+    assert result["deterministic_match_status"] == "matched"
+    assert result["deterministic_top_alpha"] == expected_alpha
 
 
 def test_no_match_does_not_force_bad_alpha():
@@ -191,8 +200,8 @@ def test_no_match_does_not_force_bad_alpha():
         _record("The company signed an ordinary office lease with no market signal.")
     )
 
-    assert result["match_status"] == "no_match"
-    assert result["matched_alpha"] is None
+    assert result["deterministic_match_status"] == "no_match"
+    assert result["deterministic_top_alpha"] is None
 
 
 # ---------------------------------------------------------------------------
@@ -250,8 +259,8 @@ def test_ambiguous_match_is_explicit():
         )
     )
 
-    assert result["match_status"] == "ambiguous"
-    assert result["matched_alpha"] is None
+    assert result["deterministic_match_status"] == "ambiguous"
+    assert result["deterministic_top_alpha"] is None
     assert len(result["candidate_scores"]) >= 2
 
 
@@ -286,5 +295,12 @@ def test_save_alpha_matches_writes_week2_artifact(tmp_path):
     payload = save_alpha_matches("run1", output_root=tmp_path)
 
     assert payload["schema_version"] == "week2.alpha_matches.v2"
-    assert payload["matches"][0]["matched_alpha"] == "A101"
+    # No classifier_enabled/llm_gateway is wired here, so the semantic
+    # (top-level) result is "unavailable" -- see
+    # tests/test_alpha_mapper_llm_authority.py. The deterministic scoring
+    # this test actually cares about (did the artifact get built from a
+    # real scored match) remains inspectable via deterministic_top_alpha.
+    assert payload["matches"][0]["matched_alpha"] is None
+    assert payload["matches"][0]["match_status"] == "unavailable"
+    assert payload["matches"][0]["deterministic_top_alpha"] == "A101"
     assert (run_dir / "alpha_matches.json").exists()

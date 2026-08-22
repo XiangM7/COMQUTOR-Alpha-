@@ -36,6 +36,17 @@ SEMANTIC_TASKS = frozenset(
         "structured_adapter",
         "alpha_classifier",
         "structure_extractor",
+        # B1 Evidence Stance LLM upgrade (evidence_stance_llm.py,
+        # LLM_TASK_NAME). A first-class live-pipeline semantic task, exactly
+        # like the three above -- always used its own registered task name
+        # in prompt/schema identity (week2_llm.py's _TASK_INSTRUCTIONS/
+        # _TASK_RUNTIME_METADATA["evidence_stance_classifier"] predate this
+        # entry), but was never added to this contract-level vocabulary.
+        # Post-Alpha-Authority-Migration cleanup: registering it here (and
+        # in replay/source_bundle.py's own copy of this set) is a pure
+        # registry completion, not a semantic change -- it changes no
+        # prompt, no schema, no B1 stance behavior.
+        "evidence_stance_classifier",
         # Phase 1B.1: offline Shadow evaluation task only (see
         # structured_output_shadow_provider.py). Never used by the live
         # Adapter/Mapper/Extractor and never affects their existing

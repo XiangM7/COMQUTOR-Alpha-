@@ -21,6 +21,7 @@ from comqutor_alpha.storage.db.engine import build_engine
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
 from scripts.w5_demo_fixtures import approved_demo_outputs
+from scripts.deterministic_echo_llm import build_deterministic_echo_gateway
 
 # SYNTHETIC macro claims -- not a real market report for any ticker.
 _SYNTHETIC_QQQ_OFFLINE_OUTPUTS = approved_demo_outputs("QQQ")
@@ -36,7 +37,10 @@ def _run_qqq_fixture(tmp_path):
         "selected_analysts": ["market", "news", "fundamentals", "sentiment"],
         "offline_raw_agent_outputs": _SYNTHETIC_QQQ_OFFLINE_OUTPUTS,
     }
-    response = run_research_request(payload, output_root=tmp_path, graph_repository=repo)
+    gateway = build_deterministic_echo_gateway("week3-qqq-sanity", tmp_path)
+    response = run_research_request(
+        payload, output_root=tmp_path, graph_repository=repo, week2_llm_gateway=gateway
+    )
     assert response["status"] == "completed"
     graph = get_persisted_structure_graph(response["run_id"], output_root=tmp_path, graph_repository=repo)
     assert graph["status"] == "ok"

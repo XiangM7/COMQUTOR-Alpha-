@@ -1,0 +1,90 @@
+{
+  "alpha_distribution": {
+    "A001": 12,
+    "A003": 5,
+    "A101": 8,
+    "A102": 2,
+    "A103": 17,
+    "A201": 13,
+    "A301": 17,
+    "A304": 38,
+    "A501": 12,
+    "A601": 17
+  },
+  "alpha_soft_cap_fraction": 0.35,
+  "csv_path": "docs/audit_artifacts/item2_blind_holdout_141_v2.csv",
+  "csv_sha256": "5c11f7f6637153dd9178e025dd7e791148a37cb8c9164f69534a397bd65b5870",
+  "duplicate_exclusion_method": "claim_id exact match + normalize_claim_for_dedupe(evidence) text-identity match against ALL rows from the historical 50-row development set AND Blind Holdout #1; also deduplicated within Holdout #2 itself by the same normalized-text key",
+  "exclusion": {
+    "holdout1_excluded_row_count": 100,
+    "old50_excluded_row_count": 50,
+    "pool_sizes_after_exclusion_and_dedup": {
+      "AMD": 60,
+      "MSFT": 57,
+      "NVDA": 267,
+      "QQQ": 37,
+      "SNDK": 19,
+      "TSM": 22
+    },
+    "target_vs_actual_shortfall": {},
+    "total_exclusion_claim_id_count": 145,
+    "total_exclusion_normalized_text_count": 143
+  },
+  "generated_at": "2026-08-20T19:40:17Z",
+  "random_seed": "item2_blind_holdout2_deterministic_seed",
+  "relation_distribution": {
+    "activation": 108,
+    "conditional": 14,
+    "invalidation": 10,
+    "mixed": 4,
+    "risk_relief": 5
+  },
+  "reviewer_labels_used_for_selection": false,
+  "sample_count": 141,
+  "sampling_version": "item2_blind_holdout2.v1",
+  "schema_version": "item2_blind_holdout2_manifest.v1",
+  "source_runs": {
+    "AMD": [
+      "66794ad5-b3a9-4fcc-aa5f-7a6d7957b7c1",
+      "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6"
+    ],
+    "MSFT": [
+      "07ddc074-9ab2-4b16-8957-acbf94012144",
+      "0cb43bae-1a4d-4003-bb29-55d420498842",
+      "61f3e019-63a8-4c56-b763-057208d5efae"
+    ],
+    "NVDA": [
+      "0e044e37-862c-43be-871c-31012cd660e7",
+      "4ca7dafa-6ac1-4d94-add0-f6f93b1af150",
+      "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "e434f80b-e4d0-4b09-9471-d84532659de5"
+    ],
+    "QQQ": [
+      "a364e0ee-3bb4-4032-88b7-5cd82e379805"
+    ],
+    "SNDK": [
+      "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "8d21c047-fc0a-4d94-957d-3787f353a544"
+    ],
+    "TSM": [
+      "1a338ced-118e-44d2-b3f6-2444bfb9d7e6"
+    ]
+  },
+  "ticker_distribution": {
+    "AMD": 25,
+    "MSFT": 25,
+    "NVDA": 25,
+    "QQQ": 25,
+    "SNDK": 19,
+    "TSM": 22
+  },
+  "ticker_targets": {
+    "AMD": 25,
+    "MSFT": 25,
+    "NVDA": 25,
+    "QQQ": 25,
+    "SNDK": 19,
+    "TSM": 22
+  }
+}

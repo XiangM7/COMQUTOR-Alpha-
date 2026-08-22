@@ -41,6 +41,10 @@ def test_structured_claim_shadow_is_additive_to_semantic_tasks():
         "alpha_classifier",
         "structure_extractor",
         "structured_claim_shadow",
+        # Post-Alpha-Authority-Migration Cleanup task: B1's own LLM stance
+        # upgrade, registered here for the first time alongside the four
+        # already-present tasks -- additive, no existing task removed.
+        "evidence_stance_classifier",
     } == SEMANTIC_TASKS
 
 
