@@ -28,39 +28,8 @@ COMQUTOR Alpha adds a typed, testable structure layer downstream of
 the multi-agent research substrate while replacing answer-only consumption with
 an evidence lineage and audit pipeline.
 
-## System architecture
 
-```mermaid
-flowchart TD
-    A["TradingAgents agent reports"] --> B["Structured claims + provenance"]
-    B --> C["Alpha mapping + evidence stance"]
-    C --> D["Evidence Fact dedup + Structure Graph"]
-    D --> E["Activation scoring + conflict admissibility"]
-    E --> F["FastAPI + SQLAlchemy persistence"]
-    F --> G["React research, graph, and conflict UI"]
-    E --> H["Replay, regression, and audit artifacts"]
-```
-
-One research run materializes a versioned chain of artifacts rather than only a
-final narrative:
-
-```text
-raw_agent_outputs.json
-  -> structured_agent_outputs.json
-  -> evidence_facts.json
-  -> alpha_matches.json
-  -> structure_graph.json
-  -> alpha_activations.json
-  -> conflicts.json
-  -> run_audit.json
-```
-
-The resulting lineage lets a reviewer move from a displayed conflict or Alpha
-state back to its supporting evidence, source agent output, semantic decision,
-and deterministic gate result.
-
-## What I built
-
+## new content
 This repository deliberately separates the open-source foundation from my
 original work:
 
@@ -75,24 +44,6 @@ original work:
   replay, regression evaluation, audit artifact generation, and delivery
   verification.
 
-My work includes:
-
-- converting free-form agent reports into structured claims with source
-  provenance and explicit admission rules;
-- implementing Alpha mapping, evidence-stance classification, ticker-specific
-  evidence controls, and Evidence Fact deduplication;
-- building the causal Structure Graph, activation scoring, entity-exposure
-  gates, and conflict admissibility pipeline;
-- designing Bull, Bear, Counter, Missing, and Invalidation evidence views without
-  letting the presentation layer silently change semantic decisions;
-- building FastAPI endpoints, SQLAlchemy persistence with SQLite/PostgreSQL
-  support, and the React/TypeScript frontend;
-- creating provider-free architecture replay, six-ticker regression, frozen
-  evaluation sets, run-level manifests, and integrity checks.
-
-The detailed upstream/local code boundary is documented in
-[`README_DEV.md`](README_DEV.md) and
-[`docs/license_boundary_report.md`](docs/license_boundary_report.md).
 
 ## Engineering decisions
 
@@ -143,90 +94,6 @@ The semantic figures above are frozen evaluation results, not a claim of perfect
 semantic accuracy. The repository also retains failed and superseded evaluation
 rounds instead of rewriting history. Current limitations are stated below.
 
-## Quick start: provider-free demo
-
-Requirements: Python 3.10+, Node.js 22 LTS, npm, Git, and curl.
-
-```bash
-git clone --branch comqutor-structure-layer \
-  https://github.com/XiangM7/COMQUTOR-Alpha-.git
-cd COMQUTOR-Alpha-
-
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e ".[api,dev]"
-
-cd frontend
-npm ci
-cd ..
-
-./scripts/demo_offline.sh
-```
-
-The offline demo uses deterministic fixtures, disables live TradingAgents and
-LLM execution, and starts the API and frontend without Provider credentials.
-
-For manual development:
-
-```bash
-# Terminal 1: backend (SQLite fallback)
-COMQUTOR_OUTPUT_DIR=outputs/runs \
-COMQUTOR_CORS_ORIGINS=http://127.0.0.1:5175 \
-.venv/bin/comqutor-api
-
-# Terminal 2: frontend
-cd frontend
-npm run dev
-```
-
-Open `http://127.0.0.1:5175/research`.
-
-See [`docs/installation_and_usage.md`](docs/installation_and_usage.md) for
-PostgreSQL, environment variables, live-provider configuration, and additional
-operations guidance.
-
-## Replay and regression
-
-Replay a historical run through the current downstream architecture without a
-Provider call or source-run mutation:
-
-```bash
-python -m comqutor_alpha.replay --source-run-id <run_id>
-```
-
-Run the fixed six-ticker regression selection:
-
-```bash
-python scripts/run_regression.py --tickers NVDA QQQ MSFT SNDK TSM AMD
-```
-
-The regression report keeps expected/detected Alpha states, admitted versus
-candidate conflicts, ticker consistency, graph size, evidence-fact counts, and
-explicit failure reasons. See
-[`a4_regression_runner_report.md`](docs/audit_artifacts/a4_regression_runner_report.md).
-
-## Tests and delivery checks
-
-```bash
-# Backend, excluding external-service integration tests
-.venv/bin/python -m pytest -m "not integration" -q
-
-# PostgreSQL integration suite
-.venv/bin/python -m pytest -m integration -q
-
-# Frontend tests and production build
-cd frontend
-npm run test -- --run
-npm run typecheck
-npm run lint
-npm run build
-```
-
-The GitHub Actions definition includes separate backend-offline, frontend, and
-PostgreSQL integration jobs. Tests cover semantic contracts, graph integrity,
-conflict admission, persistence round-trips, API adapters, lifecycle and retry
-behavior, UI rendering, and provider-free replay.
-
 ## Repository map
 
 ```text
@@ -245,20 +112,6 @@ evaluation/            versioned golden cases and policies
 docs/                  design records, runbooks, audits, and QA evidence
 tests/                 backend, integration, semantic, and persistence tests
 ```
-
-## Current boundaries
-
-- This is a local/internal research MVP, not a public multi-tenant service.
-- Authentication, authorization, and tenant ownership are not implemented.
-- Some Alpha invalidation content still awaits formal product approval.
-- Live model and data-provider behavior remains non-deterministic; downstream
-  Architecture Replay is deterministic only for frozen input artifacts.
-- The system does not issue `BUY`/`SELL`/`HOLD` instructions, guarantee returns,
-  or execute trades.
-
-See [`docs/current_system_state.md`](docs/current_system_state.md) and
-[`docs/release_candidate_manifest.md`](docs/release_candidate_manifest.md) for
-the detailed engineering status and release boundary.
 
 ## Attribution and license
 
