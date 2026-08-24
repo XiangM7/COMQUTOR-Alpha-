@@ -12,7 +12,6 @@ replayable, and auditable.
 > is a research-assistance and evidence-auditing system, not an automated
 > trading system and not financial advice.
 
-**Engineering and product implementation:** [Xiang Mao](https://github.com/XiangM7)
 
 ## Thirty-second overview
 
