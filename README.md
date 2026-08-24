@@ -13,6 +13,7 @@ replayable, and auditable.
 > trading system and not financial advice.
 
 
+
 ## Thirty-second overview
 
 Large-language-model research systems can produce fluent conclusions without
@@ -270,4 +271,5 @@ isolated additively as described above and in the license boundary report.
 
 This project is for research and engineering evaluation only. It is not
 financial, investment, or trading advice.
+
 
