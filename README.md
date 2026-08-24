@@ -13,7 +13,6 @@ replayable, and auditable.
 > trading system and not financial advice.
 
 
-
 ## Thirty-second overview
 
 Large-language-model research systems can produce fluent conclusions without
