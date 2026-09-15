@@ -45,6 +45,10 @@ def test_structured_claim_shadow_is_additive_to_semantic_tasks():
         # upgrade, registered here for the first time alongside the four
         # already-present tasks -- additive, no existing task removed.
         "evidence_stance_classifier",
+        # Step 5A (v0.1.2.1) execution-capacity repair: batched sibling of
+        # alpha_classifier, registered here for the first time -- additive,
+        # no existing task removed or changed.
+        "alpha_classifier_batch",
     } == SEMANTIC_TASKS
 
 

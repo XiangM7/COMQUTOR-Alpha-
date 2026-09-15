@@ -1,0 +1,223 @@
+{
+  "schema_version": "v0.2.demo_sanity_cleanup.v1",
+  "phase": "PRODUCT_DEMO_HARDENING_PHASE_2C",
+  "objective": "P1-3: make research-only/not-financial-advice positioning explicit and visible. P1-4: remove the operator-only Replay-All control from the normal /research landing page without deleting the capability.",
+  "authority_verification": {
+    "gold_closure_sha256_expected": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "phase1_audit_sha256_expected": "f6905337d4697a85fb30b9419ec165b90b629d42c1927e3297eccb54f6ad9c1c",
+    "phase2a_json_sha256_expected": "0aa62ca9d022f17e2b05f884c335202c8bbaee8848f3e4247d31a2d628332918",
+    "phase2b_json_sha256_expected": "961fe4c70bb1db431b0106a76dc7aa2c0d67fee2e7e9cf5d653d112ddf019384",
+    "phase2b_md_sha256_expected": "7d16c5289f6fedad74ff29d5f3d82032b24d92a187c46d4f97d4af18c2719454",
+    "all_verified_unchanged": true
+  },
+  "pre_implementation_inspection_findings": {
+    "appshell_capability": "No footer existed. AppShell was a header (brand + tagline) + <main> landmark only, wrapping every route in App.tsx. A footer added here is automatically visible on every page, including /research and the full result flow, with a single source of truth.",
+    "replayallpanel_current_location": "Mounted directly and unconditionally on ResearchPage.tsx (the /research landing page), between the Recent research runs panel and the product explainer panel -- visible to every visitor, no gating.",
+    "existing_operator_admin_route": "None existed.",
+    "existing_dev_only_surface": "None existed.",
+    "router_setup": "Single flat react-router-dom <Routes> tree in App.tsx, six routes, no nested/lazy admin area.",
+    "conclusion": "P1-3 -> add one footer to AppShell (global, single instance). P1-4 -> create one new narrowly-scoped route (/operator) hosting the unmodified ReplayAllPanel component, and remove its mount from ResearchPage.tsx. No existing pattern to reuse for either -- both are minimal, additive, presentation-only changes."
+  },
+  "files_changed": {
+    "added": [
+      {
+        "path": "frontend/src/pages/OperatorPage.tsx",
+        "sha256": "af849e297be75c1bc302abb8e9a1b6d374ba3141596221917b7df158cdf43235",
+        "purpose": "Narrowly-scoped, non-primary route hosting the unmodified ReplayAllPanel with an explicit 'Operator Tools' heading and explanatory copy."
+      },
+      {
+        "path": "frontend/src/components/AppShell.test.tsx",
+        "sha256": "318047f015bbf972f635e878f28cf9844d20f11dde42832300fbc0ecc7adadbc",
+        "purpose": "6 tests for the new global disclaimer."
+      },
+      {
+        "path": "frontend/src/pages/ResearchPage.test.tsx",
+        "sha256": "a427a758fd4ddc4bef37c1ac12f6b6183d6a50eff67db72eb47f16ea829742b6",
+        "purpose": "4 tests confirming ReplayAllPanel is absent from /research and the normal workflow is unchanged."
+      },
+      {
+        "path": "frontend/src/pages/OperatorPage.test.tsx",
+        "sha256": "8da984960bcbd353141c0a592f69d97049c8e31ab86259055ab52c30297e0f45",
+        "purpose": "7 tests confirming Replay-All functionality (confirmation dialog, POST call, success/error handling) is fully preserved at its new location."
+      }
+    ],
+    "modified": [
+      {
+        "path": "frontend/src/components/AppShell.tsx",
+        "change": "+3 lines: one <footer> element with the disclaimer paragraph, added after the existing <main> landmark. No existing element touched."
+      },
+      {
+        "path": "frontend/src/pages/ResearchPage.tsx",
+        "change": "-3 lines: removed the ReplayAllPanel import and its <ReplayAllPanel /> mount. No other content changed."
+      },
+      {
+        "path": "frontend/src/App.tsx",
+        "change": "+2 lines: one import, one new <Route path=\"/operator\" element={<OperatorPage />} />. All six pre-existing routes (/research, /runs/:runId/processing, /runs/:runId/research, /runs/:runId/structure, /runs/:runId/conflicts, *) unchanged."
+      },
+      {
+        "path": "frontend/src/styles.css",
+        "change": "+18 lines, purely additive .app-footer/.app-disclaimer rules reusing existing design tokens. No existing rule modified."
+      }
+    ],
+    "backend_files_changed": 0,
+    "backend_api_schema_changed": false,
+    "alpha_taxonomy_changed": false,
+    "mapper_changed": false,
+    "activation_changed": false,
+    "graph_changed": false,
+    "conflict_changed": false,
+    "evidence_semantics_changed": false,
+    "replayall_backend_endpoint_deleted": false,
+    "replayall_semantics_changed": false
+  },
+  "routes_changed": {
+    "added": [
+      "/operator -> OperatorPage"
+    ],
+    "removed": [],
+    "modified_behavior": [],
+    "unchanged": [
+      "/research",
+      "/runs/:runId/processing",
+      "/runs/:runId/research",
+      "/runs/:runId/structure",
+      "/runs/:runId/conflicts",
+      "*"
+    ],
+    "operator_route_linked_from_stakeholder_nav": false,
+    "operator_route_navigable_by_known_url": true,
+    "authentication_added": false,
+    "note": "No authentication was added or implied. This is UI separation only, exactly as scoped -- the route is not advertised in the stakeholder header/navigation, but is not access-controlled either."
+  },
+  "disclaimer": {
+    "exact_copy": "Research analysis only \u2014 not financial advice.",
+    "placement": "AppShell footer -- a single, global, stable placement appearing on every route (landing page and full result flow) with no duplication.",
+    "reinforcement_on_result_page": "Not duplicated a second time on ResearchRunPage specifically -- the global AppShell footer already renders there (AppShell wraps every route), satisfying the requirement to be visible during the result flow without repeating the exact sentence excessively (per the task's own guidance).",
+    "visible_without_interaction": true,
+    "requires_tooltip_or_docs_page": false
+  },
+  "replayall_before_after": {
+    "before": {
+      "location": "/research (public landing page)",
+      "guarded": false,
+      "visible_to_every_visitor": true
+    },
+    "after": {
+      "location": "/operator (new, non-primary, un-advertised route)",
+      "guarded": "UI-separation only, no auth added",
+      "visible_to_every_visitor_of_research": false
+    },
+    "functionality_preserved": {
+      "confirmation_dialog": true,
+      "post_replay_all_endpoint": "/api/replay-all (unchanged)",
+      "provider_calls": 0,
+      "tradingagents_calls": 0,
+      "success_summary_rendering": true,
+      "error_handling_safe_copy": true,
+      "component_file_modified": false
+    }
+  },
+  "product_language_safety": {
+    "productlanguage_test_result": "1/1 passed (unchanged global scanner covering all source files, including the two new pages and the new disclaimer)",
+    "new_copy_checked_for": [
+      "guaranteed",
+      "risk-free",
+      "buy",
+      "sell",
+      "should invest"
+    ],
+    "forbidden_wording_found": false,
+    "p1_2_jargon_cleanup_attempted": false
+  },
+  "accessibility": {
+    "disclaimer_is_plain_text": true,
+    "disclaimer_color_only_dependency": false,
+    "operator_page_semantic_heading": "h1 'Operator Tools'",
+    "operator_controls_retain_labels": true,
+    "confirmation_dialog_role_preserved": "role=dialog, aria-modal=true, aria-labelledby (unchanged, component not modified)"
+  },
+  "responsive_behavior": {
+    "research_page_still_responsive": true,
+    "disclaimer_horizontal_overflow_introduced": false,
+    "operator_page_uses_existing_breakpoints": true,
+    "layout_system_redesigned": false
+  },
+  "regression_check_phase_2b": {
+    "structural_snapshot_intact": true,
+    "active_alpha_structures_rendering": true,
+    "dominant_no_dominant_state_rendering": true,
+    "main_conflict_no_conflict_state_rendering": true,
+    "test_result": "ResearchRunPage.test.tsx 47/47 passed, StructuralSnapshot.test.tsx 14/14 passed (re-run explicitly this phase)"
+  },
+  "test_results": {
+    "focused_phase_2c_tests": {
+      "files": [
+        "AppShell.test.tsx",
+        "ResearchPage.test.tsx",
+        "OperatorPage.test.tsx"
+      ],
+      "passed": 17,
+      "failed": 0
+    },
+    "product_language_test": {
+      "passed": 1,
+      "failed": 0
+    },
+    "full_frontend_unit_suite": {
+      "command": "npx vitest run",
+      "test_files": 24,
+      "tests_passed": 269,
+      "tests_failed": 0,
+      "new_regressions": 0
+    },
+    "typescript_typecheck": {
+      "command": "npx tsc -b",
+      "result": "0 errors"
+    },
+    "production_build": {
+      "command": "npm run build",
+      "result": "success -- 65 modules transformed, build completed in 636ms"
+    },
+    "e2e_playwright": {
+      "attempted": true,
+      "command": "npx playwright test e2e/w5-demo.spec.ts",
+      "result": "BLOCKED -- same pre-existing, unrelated Python packaging issue documented in the Phase-2B audit",
+      "detail": "scripts/seed_w5_demo.py still fails with ModuleNotFoundError: No module named 'scripts' when the Playwright webServer launches it. Identical failure signature to Phase 2B. Not fixed -- explicitly out of scope per this phase's own instruction not to modify unrelated Python packaging."
+    }
+  },
+  "zero_provider_proof": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "post_research_calls": 0,
+    "post_replay_all_calls_against_real_data": 0,
+    "basis": "All new/changed code is presentation-only (a footer, a route, an import removal). The only POST /api/replay-all invocations anywhere in this phase's work are inside mocked frontend tests (vi.spyOn), never against a running server or real persisted data."
+  },
+  "final_validation": {
+    "gold_closure_unchanged": true,
+    "phase1_audit_unchanged": true,
+    "phase2a_artifact_unchanged": true,
+    "phase2b_artifact_unchanged": true,
+    "research_page_no_longer_exposes_replayallpanel": true,
+    "replay_functionality_still_exists": true,
+    "research_only_positioning_visible": true,
+    "backend_files_changed": 0,
+    "semantic_files_changed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0
+  },
+  "phase_2c_success_criteria_met": {
+    "research_only_not_financial_advice_positioning_clearly_visible": true,
+    "replayallpanel_absent_from_normal_research": true,
+    "replayall_capability_remains_available_for_operators": true,
+    "normal_research_workflow_unchanged": true,
+    "phase_2b_structural_snapshot_intact": true,
+    "no_backend_changes": true,
+    "no_semantic_changes": true,
+    "frontend_tests_and_build_pass": true,
+    "no_new_regressions": true,
+    "overall_result": "PASS"
+  },
+  "next_recommended_phase": "PRODUCT DEMO HARDENING -- PHASE 2D: default-view jargon cleanup (translate/hide regime_level, candidate, 'B2 Conflict Evidence Admissibility', raw reason codes, and Alpha Memory/SHADOW/phi_id from normal stakeholder views, preserving an advanced technical path where useful). Not implemented in this phase."
+}

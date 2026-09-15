@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  getAlphaLibrary,
   getApiBaseUrl,
   getReadiness,
   getResearchHistory,
@@ -227,5 +228,45 @@ describe("api client", () => {
       selected_analysts: ["market", "sentiment", "news", "fundamentals"],
       status: "failed",
     });
+  });
+
+  it("getAlphaLibrary fetches /api/alpha-library and preserves invalidation_conditions", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      jsonResponse({
+        schema_version: "week1.alpha_library.v1",
+        alpha_count: 1,
+        alphas: [
+          {
+            alpha_id: "A101",
+            name_en: "AI Expansion",
+            name_cn: "AI 扩张",
+            layer: "Theme",
+            status: "active",
+            core_thesis: "AI infrastructure demand drives growth.",
+            keywords: [],
+            trigger_signals: [],
+            confirmation_signals: [],
+            beneficiary_assets: [],
+            risk_assets: [],
+            conflict_alphas: [],
+            invalidation_conditions: ["AI capex cuts", "model demand slows", "GPU oversupply"],
+            agent_sources: [],
+          },
+        ],
+      })
+    );
+
+    const result = await getAlphaLibrary();
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/alpha-library"),
+      expect.anything()
+    );
+    expect(result.alphas).toHaveLength(1);
+    expect(result.alphas[0]?.invalidation_conditions).toEqual([
+      "AI capex cuts",
+      "model demand slows",
+      "GPU oversupply",
+    ]);
   });
 });

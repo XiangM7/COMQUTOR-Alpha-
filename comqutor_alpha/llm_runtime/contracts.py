@@ -52,6 +52,12 @@ SEMANTIC_TASKS = frozenset(
         # Adapter/Mapper/Extractor and never affects their existing
         # cache/manifest/task identity.
         "structured_claim_shadow",
+        # Step 5A (v0.1.2.1) execution-capacity repair: batched sibling of
+        # "alpha_classifier" (week2_llm.py's alpha_classifier_batch task) --
+        # a genuinely distinct request/response contract (many claims per
+        # call instead of one), so it gets its own registered task/cache
+        # identity rather than being silently merged into "alpha_classifier".
+        "alpha_classifier_batch",
     }
 )
 EXECUTION_MODES = frozenset({"live", "shadow", "replay_fixture", "test"})

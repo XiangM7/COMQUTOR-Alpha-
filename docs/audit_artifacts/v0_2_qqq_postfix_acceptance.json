@@ -1,0 +1,290 @@
+{
+  "schema_version": "v0.2.qqq_postfix_acceptance.v1",
+  "task": "V0.2_POSTFIX_VALIDATION_STEP_7B_3_QQQ_POSTFIX_ACCEPTANCE",
+  "ticker": "QQQ",
+  "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+  "authorities": {
+    "gold_contract_json": {
+      "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+      "expected_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "actual_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "match": true
+    },
+    "gold_contract_md": {
+      "path": "docs/audit_artifacts/v0_2_gold_operational_contract.md",
+      "expected_sha256": "8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04",
+      "actual_sha256": "8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04",
+      "match": true
+    },
+    "run_manifest_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_postfix_fresh_run_manifest.json",
+      "expected_sha256": "ea08fe5ac9b0c6b138d1e89192235b332a404df15160663255a7fe7a9802c8b2",
+      "actual_sha256": "ea08fe5ac9b0c6b138d1e89192235b332a404df15160663255a7fe7a9802c8b2",
+      "match": true
+    },
+    "run_manifest_md": {
+      "path": "docs/audit_artifacts/v0_2_qqq_postfix_fresh_run_manifest.md",
+      "expected_sha256": "0cd203965b172d9d7811427a55446c55561b123d2ebd79375ed945e33d9b2c0e",
+      "actual_sha256": "0cd203965b172d9d7811427a55446c55561b123d2ebd79375ed945e33d9b2c0e",
+      "match": true
+    },
+    "postfix_trigger_matrix_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_postfix_evidence_trigger_matrix.json",
+      "expected_sha256": "4527adeb0218ffde3de16d3665919314ae85fee48b2f5056a62cb2426af968c1",
+      "actual_sha256": "4527adeb0218ffde3de16d3665919314ae85fee48b2f5056a62cb2426af968c1",
+      "match": true
+    },
+    "postfix_trigger_matrix_md": {
+      "path": "docs/audit_artifacts/v0_2_qqq_postfix_evidence_trigger_matrix.md",
+      "expected_sha256": "559f8b2492e29f198b9eec31611a57c4b0ac0d089d983c6a556ac7d96e4604a6",
+      "actual_sha256": "559f8b2492e29f198b9eec31611a57c4b0ac0d089d983c6a556ac7d96e4604a6",
+      "match": true
+    }
+  },
+  "detection_authority": {
+    "path": "comqutor_alpha/regression/regression_report_v3.py::_DETECTED_LEVELS",
+    "verified_unchanged_since_step4": true,
+    "detected_levels": [
+      "active",
+      "dominant",
+      "regime_level"
+    ],
+    "dominant_levels": [
+      "dominant",
+      "regime_level"
+    ]
+  },
+  "actual_output": {
+    "detected_alphas": [
+      "A103",
+      "A301",
+      "A304",
+      "A601"
+    ],
+    "dominant_alphas": [],
+    "main_conflict": "A301__A304",
+    "main_conflict_scores": {
+      "bull_score": null,
+      "bear_score": null
+    },
+    "gold_alpha_states": {
+      "A001": {
+        "alpha_id": "A001",
+        "level": "candidate",
+        "score": 26.6462,
+        "direction": "negative",
+        "detected": false,
+        "dominant": false
+      },
+      "A003": {
+        "alpha_id": "A003",
+        "level": "candidate",
+        "score": 0.0,
+        "direction": "unknown",
+        "detected": false,
+        "dominant": false
+      },
+      "A301": {
+        "alpha_id": "A301",
+        "level": "active",
+        "score": 51.4597,
+        "direction": "positive",
+        "detected": true,
+        "dominant": false
+      },
+      "A304": {
+        "alpha_id": "A304",
+        "level": "active",
+        "score": 69.9588,
+        "direction": "negative",
+        "detected": true,
+        "dominant": false
+      },
+      "A501": {
+        "alpha_id": "A501",
+        "level": "candidate",
+        "score": 44.8717,
+        "direction": "negative",
+        "detected": false,
+        "dominant": false
+      },
+      "A601": {
+        "alpha_id": "A601",
+        "level": "active",
+        "score": 58.09,
+        "direction": "positive",
+        "detected": true,
+        "dominant": false
+      }
+    },
+    "note": "Alphas outside the frozen QQQ Gold rule set (A101, A102, A103, A201) are reported for audit context only per Section 15 and are never converted into failures -- Gold v0.2 has no exact expected-Alpha set."
+  },
+  "rule_results": [
+    {
+      "rule_id": "QQQ-A001-RATE-CUT-CYCLE",
+      "ticker": "QQQ",
+      "frozen_trigger": "ABSENT",
+      "actual_level": "candidate",
+      "actual_score": 26.6462,
+      "required_behavior": "do_not_force -- must remain not-detected given ABSENT evidence",
+      "result": "PASS",
+      "blocking": true,
+      "conditional_force_violation": false,
+      "rationale": "A001 remained at level=candidate (score 26.6462), not an official detected level. Correct non-forcing given the frozen ABSENT trigger -- the Step-7A/7A.2 remediation's intended effect."
+    },
+    {
+      "rule_id": "QQQ-A003-LIQUIDITY-EXPANSION",
+      "ticker": "QQQ",
+      "frozen_trigger": "ABSENT",
+      "actual_level": "candidate",
+      "actual_score": 0.0,
+      "required_behavior": "do_not_force -- must remain not-detected given ABSENT evidence",
+      "result": "PASS",
+      "blocking": true,
+      "conditional_force_violation": false,
+      "rationale": "A003 remained at level=candidate (score 0.0). Correct non-forcing."
+    },
+    {
+      "rule_id": "QQQ-A304-VALUATION-RISK",
+      "ticker": "QQQ",
+      "frozen_trigger": "PRESENT/STRONG",
+      "actual_level": "active",
+      "actual_score": 69.9588,
+      "required_behavior": "should surface given PRESENT/STRONG evidence",
+      "result": "PASS",
+      "blocking": true,
+      "conditional_force_violation": false,
+      "rationale": "A304 detected at level=active (score 69.959), consistent with frozen PRESENT/STRONG evidence."
+    },
+    {
+      "rule_id": "QQQ-A501-RECESSION-RISK",
+      "ticker": "QQQ",
+      "frozen_trigger": "ABSENT",
+      "actual_level": "candidate",
+      "actual_score": 44.8717,
+      "required_behavior": "do_not_force -- must remain not-detected given ABSENT evidence",
+      "result": "PASS",
+      "blocking": true,
+      "conditional_force_violation": false,
+      "rationale": "A501 remained at level=candidate (score 44.872). Correct non-forcing."
+    },
+    {
+      "rule_id": "QQQ-A601-NARRATIVE-MOMENTUM",
+      "ticker": "QQQ",
+      "frozen_trigger": "PRESENT/STRONG",
+      "actual_level": "active",
+      "actual_score": 58.09,
+      "required_behavior": "should surface given PRESENT/STRONG evidence",
+      "result": "PASS",
+      "blocking": true,
+      "conditional_force_violation": false,
+      "rationale": "A601 detected at level=active (score 58.090), consistent with frozen PRESENT/STRONG evidence."
+    },
+    {
+      "rule_id": "QQQ-ETF-CONTEXT-CONTROL",
+      "ticker": "QQQ",
+      "frozen_trigger": "UNCERTAIN (strong ETF-level A301 evidence)",
+      "actual_level": "active",
+      "actual_score": 51.4597,
+      "required_behavior": "forbidden_dominant_without_strong_evidence (asymmetric): PASS unless A301 reaches dominant/regime_level",
+      "result": "PASS",
+      "blocking": true,
+      "conditional_force_violation": false,
+      "rationale": "A301 reached level=active (score 51.460) but NOT dominant/regime_level. Per the frozen asymmetric rule, forbidden dominance did not occur, so this resolves PASS regardless of the UNCERTAIN underlying evidence strength."
+    }
+  ],
+  "conflict_result": {
+    "frozen_strongly_triggered_allowed_family": "A601__A304",
+    "actual_a304_state": {
+      "alpha_id": "A304",
+      "level": "active",
+      "score": 69.9588,
+      "direction": "negative",
+      "detected": true,
+      "dominant": false
+    },
+    "actual_a601_state": {
+      "alpha_id": "A601",
+      "level": "active",
+      "score": 58.09,
+      "direction": "positive",
+      "detected": true,
+      "dominant": false
+    },
+    "a601_a304_conflict_candidate_exists": null,
+    "actual_main_conflict": "A301__A304",
+    "actual_main_conflict_scores": {
+      "bull_score": null,
+      "bear_score": null
+    },
+    "is_canonical_taxonomy_pair": true,
+    "canonical_pair_note": "A301__A304 IS one of the six canonical taxonomy conflict_alphas pairs (contradiction_weight 0.85) -- not an invented pair.",
+    "both_sides_supported_by_frozen_trigger_matrix": {
+      "A304_side": "PRESENT/STRONG -- well supported",
+      "A301_side": "UNCERTAIN (qqq_a301_strong_etf_level_evidence) -- not confirmed strong; per-constituent evidence with an explicit data gap per Step-7B.2"
+    },
+    "classification": "REVIEW",
+    "classification_rationale": "The admitted main conflict is A301__A304, not the A601__A304 family the frozen trigger matrix most strongly evidences (A001/A003/A501 all ABSENT ruled out A001__A501/A003__A501 families; A304 and A601 are both PRESENT/STRONG). A301__A304 is a legitimate, canonical taxonomy pair and A304's side is well supported, but A301's side rests on evidence the Step-7B.2 trigger matrix explicitly adjudicated as UNCERTAIN (per-constituent backlog/guidance stories, with a documented market-data-vendor gap on the one metric that could have settled it), not confirmed PRESENT/strong. Per the instruction to not accept an unsupported conflict merely because it is canonical globally, this is classified REVIEW rather than a clean PASS -- genuinely mixed support, not simply unsupported.",
+    "affects_qqq_postfix_status": false,
+    "affects_qqq_postfix_status_note": "QQQ's frozen Gold v0.2 contract defines NO rule (no COMPOSITE_STRUCTURE_HIT hit_type exists for QQQ, unlike NVDA/AMD/TSM) that gates PASS/FAIL/REVIEW on a specific main-conflict family. QQQ-ETF-CONTEXT-CONTROL governs only A301's DOMINANCE (resolved PASS above, since A301 is not dominant). This conflict finding is therefore reported as a distinct, non-blocking diagnostic -- inventing a new blocking conflict-family requirement for QQQ here would itself be an unauthorized modification of Gold v0.2's semantics, not a comparison against an existing rule."
+  },
+  "a001_remediation_effect_trace": {
+    "historical_run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+    "historical": {
+      "mapped_claims": 66,
+      "qualifying_groups": 26,
+      "score": 66.4226,
+      "level": "active",
+      "detected": true,
+      "gold_result": "FAIL"
+    },
+    "postfix": {
+      "mapped_claims": 4,
+      "qualifying_groups": 3,
+      "distinct_agents": 2,
+      "score": 26.6462,
+      "level": "candidate",
+      "detected": false,
+      "gold_result": "PASS"
+    },
+    "gate_effect": {
+      "claims_rejected_by_negative_invalidation_veto": 19,
+      "claims_rejected_by_positive_requirement_gate": 27,
+      "claims_surviving_both_gates": 4,
+      "total_claims_llm_selected_as_a001_before_either_gate": 50
+    },
+    "residual_imprecision_found": {
+      "description": "All 4 final surviving matched_alpha=A001 claims were re-inspected and found to still be, on their own text, either negations of a rate-cut ('prices at 0%', 'has been removed as a tailwind... replaced by a hike-risk headwind', '\"No cuts in 2026\" at 93%... Removes the... tailwind') or a speculative, hypothetical retail-tweet aside ('the black swan will be when they finally cut rates... but... rates spike over 10%') -- none are genuine positive-easing assertions. Root cause identified by direct inspection of comqutor_alpha.structure_engine.claim_semantics.classify_a001_directional_semantics: (1) the DIRECT_POSITIVE branch does not check for simple negation words ('removed', 'dead', 'ended') the way it checks for hedging/modal language, so 'Rate Cut Cycle...has been removed' still matches the bare 'rate cut cycle' phrase; (2) the NEGATIVE_OR_HAWKISH pattern requires 'no (fed )?rate cuts?' but this run's phrasing is bare 'No cuts in 2026' (without the word 'rate' immediately adjacent), so it is not caught; (3) the conditional/modal word list (if/unless/could/may/might/would/potentially) does not cover 'will...when' hypothetical framing or prediction-market 'prices at 0%' negation framing.",
+      "impact_on_this_acceptance_determination": "NONE -- per Gold's frozen acceptance rule, PASS/FAIL is determined by A001's final detected LEVEL, not by the precision of every individual claim classification. The residual 4 claims (down from ~50 that were ever LLM-selected as A001 before either gate) reduced evidence_quality (raw 7.81 vs historical 97.73) and agent_independence (2 agents vs historical 7) so far that the final score (26.65) stayed far below any detection threshold. The remediation achieved its intended product effect on this run despite the residual classifier imprecision.",
+      "production_code_changed_to_fix_this": false,
+      "note": "Identified for transparency only, per this task's explicit authorization to report remediation-effect context. Not implemented -- production code changes are not authorized in Step 7B.3. A candidate follow-up (not performed here): extend classify_a001_directional_semantics with a general negation check (e.g. 'removed'/'dead'/'ended'/'no longer') on the DIRECT_POSITIVE branch, and broaden the bare 'no/zero cuts' pattern to not require the word 'rate' immediately adjacent."
+    }
+  },
+  "provider_health_context": {
+    "requests": 617,
+    "timeouts": 25,
+    "validation_failures": 9,
+    "semantic_critical_recoverable_events": 34,
+    "fatal_failures": 0,
+    "double_penalization_applied": false,
+    "note": "Already fully considered by the frozen Step-7B.2 trigger matrix (materiality assessed per rule); not re-applied as a second penalty here."
+  },
+  "totals": {
+    "blocking_pass": 6,
+    "blocking_fail": 0,
+    "blocking_review": 0
+  },
+  "qqq_postfix_status": "PASS",
+  "historical_status": {
+    "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+    "status": "FAIL",
+    "unchanged": true
+  },
+  "full_release_status_recomputed": false,
+  "full_release_status_recomputed_note": "Only QQQ post-fix validation status is established here. Whether NVDA/SNDK historical PASS can be carried forward, or require post-fix reruns, is explicitly deferred to a future task (Step 7C).",
+  "production_files_changed": 0,
+  "test_files_changed": 0,
+  "provider_calls_this_step": 0,
+  "tradingagents_calls_this_step": 0,
+  "ticker_runs_this_step": 0
+}

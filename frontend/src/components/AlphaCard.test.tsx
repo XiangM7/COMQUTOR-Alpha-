@@ -214,13 +214,23 @@ describe("AlphaCard", () => {
     });
     expect(screen.getByText("Activation v2")).toBeInTheDocument();
     expect(screen.getByText("75.2")).toBeInTheDocument();
-    expect(screen.getByText(/70 \(NO_LOCAL_STRUCTURE_SUPPORT\)/)).toBeInTheDocument();
-    expect(screen.getByText(/Yes — final score: 70.0 \(NO_LOCAL_STRUCTURE_SUPPORT\)/)).toBeInTheDocument();
+    // Product Demo Hardening Phase 2D: the default view shows the ceiling
+    // value and the capped/qualified state without the raw reason code --
+    // the exact raw code is preserved, relocated to Technical details.
+    expect(screen.getByText("Qualification ceiling").closest("div")?.textContent).toBe(
+      "Qualification ceiling70"
+    );
+    expect(screen.getByText(/^Yes — final score: 70\.0$/)).toBeInTheDocument();
     expect(screen.getByText("Ticker-specific evidence")).toBeInTheDocument();
     expect(screen.getByText("Local structural edges")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Not qualified \(NO_LOCAL_STRUCTURE_FOR_REGIME\)/)
-    ).toBeInTheDocument();
+    expect(screen.getByText("Not qualified")).toBeInTheDocument();
+    // Raw codes remain fully auditable under Technical details, just not
+    // visible by default.
+    expect(screen.getByText("Technical details")).toBeInTheDocument();
+    for (const el of screen.getAllByText("NO_LOCAL_STRUCTURE_SUPPORT")) {
+      expect(el).not.toBeVisible();
+    }
+    expect(screen.getByText("NO_LOCAL_STRUCTURE_FOR_REGIME")).not.toBeVisible();
   });
 
   it("cap contract test #16: distinguishes an eligible-but-non-binding cap from a binding one", () => {
@@ -235,8 +245,14 @@ describe("AlphaCard", () => {
         activation_score: 65.9,
       }),
     });
-    expect(screen.getByText(/70 \(INSUFFICIENT_AGENT_INDEPENDENCE\)/)).toBeInTheDocument();
+    expect(screen.getByText("Qualification ceiling").closest("div")?.textContent).toBe(
+      "Qualification ceiling70"
+    );
     expect(screen.getByText("No")).toBeInTheDocument();
+    // Raw code preserved under Technical details for this non-binding cap.
+    expect(screen.getByText("Qualification ceiling reason codes").closest("div")?.textContent).toContain(
+      "INSUFFICIENT_AGENT_INDEPENDENCE"
+    );
     unmount();
 
     renderCard({
@@ -250,13 +266,20 @@ describe("AlphaCard", () => {
         activation_score: 60,
       }),
     });
-    // The "Score was capped" row shows only the binding (60-value) reason
-    // -- the non-binding 70-value cap's reason must never appear there,
-    // even though it legitimately still appears in the "Qualification
-    // ceiling" row's full cap_reason_codes list.
-    const cappedRow = screen.getByText(/Yes — final score: 60.0/);
-    expect(cappedRow.textContent).toContain("INSUFFICIENT_UNIQUE_EVIDENCE");
-    expect(cappedRow.textContent).not.toContain("NO_LOCAL_STRUCTURE_SUPPORT");
+    // The default "Score was capped" row no longer shows any raw reason
+    // code at all (Phase 2D). The binding-vs-eligible distinction is
+    // preserved verbatim under Technical details: "Score-capped reason
+    // codes" carries only the binding (60-value) reason, while
+    // "Qualification ceiling reason codes" carries the full eligible-cap
+    // list -- the non-binding 70-value-style reason must never appear in
+    // the binding-only technical field.
+    expect(screen.getByText(/^Yes — final score: 60\.0$/)).toBeInTheDocument();
+    const scoreCappedCodes = screen.getByText("Score-capped reason codes").closest("div");
+    expect(scoreCappedCodes?.textContent).toContain("INSUFFICIENT_UNIQUE_EVIDENCE");
+    expect(scoreCappedCodes?.textContent).not.toContain("NO_LOCAL_STRUCTURE_SUPPORT");
+    const ceilingCodes = screen.getByText("Qualification ceiling reason codes").closest("div");
+    expect(ceilingCodes?.textContent).toContain("INSUFFICIENT_UNIQUE_EVIDENCE");
+    expect(ceilingCodes?.textContent).toContain("NO_LOCAL_STRUCTURE_SUPPORT");
   });
 
   it("regime gate test #27: reads regime_gate_passed directly, never re-derives it from status", () => {
@@ -270,8 +293,12 @@ describe("AlphaCard", () => {
         regime_gate_failures: ["EVIDENCE_INTEGRITY_WARNING"],
       }),
     });
-    expect(screen.getByText(/Not qualified \(EVIDENCE_INTEGRITY_WARNING\)/)).toBeInTheDocument();
+    expect(screen.getByText("Not qualified")).toBeInTheDocument();
     expect(screen.queryByText("Qualified")).not.toBeInTheDocument();
+    // The raw failure code is preserved verbatim under Technical details.
+    expect(screen.getByText("Regime gate failure codes").closest("div")?.textContent).toContain(
+      "EVIDENCE_INTEGRITY_WARNING"
+    );
   });
 
   it("labels a v1-legacy activation as v1 and never as v2", () => {
@@ -386,14 +413,20 @@ describe("AlphaCard", () => {
         classification_version: "b4.alpha_level.v1",
       }),
     });
-    expect(screen.getByText("Target level").closest("div")?.textContent).toContain("dominant");
+    // Product Demo Hardening Phase 2D: raw level tokens embedded in this
+    // prose are translated to product language ("Dominant"/"Active"),
+    // never the raw "dominant"/"active" strings.
+    expect(screen.getByText("Target level").closest("div")?.textContent).toContain("Dominant");
     const blockedRow = screen.getByText("Blocked").closest("div");
-    expect(blockedRow?.textContent).toContain("active");
-    expect(blockedRow?.textContent).toContain("dominant");
+    expect(blockedRow?.textContent).toContain("Active");
+    expect(blockedRow?.textContent).toContain("Dominant");
     // Canonical reason rendered with friendly text, not the raw code alone.
     expect(blockedRow?.textContent).toContain("No supporting Structure Graph edges");
     // Raw diagnostic detail is present but collapsed behind a <details>.
     expect(screen.getByText("Full diagnostic detail")).toBeInTheDocument();
+    // The raw level tokens remain available verbatim under Technical details.
+    expect(screen.getByText("Target level (raw)").closest("div")?.textContent).toContain("dominant");
+    expect(screen.getByText("Qualified level (raw)").closest("div")?.textContent).toContain("active");
   });
 
   // QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment).
@@ -416,14 +449,20 @@ describe("AlphaCard", () => {
         activation_level: "capped_active",
       }),
     });
+    // Product Demo Hardening Phase 2D: the default label is the translated
+    // "Active" (capped_active and plain active are both "Active" from a
+    // stakeholder's perspective) -- never the raw "capped_active" token.
     const levelRow = screen.getByText("Activation level").closest("div");
-    expect(levelRow?.textContent).toContain("capped_active");
-    // Never silently shown as plain "active" once activation_level says
-    // otherwise.
-    expect(levelRow?.querySelector("dd")?.textContent).toBe("capped_active");
+    expect(levelRow?.querySelector("dd")?.textContent).toBe("Active");
     const capReasonRow = screen.getByText("Cap reason").closest("div");
-    expect(capReasonRow?.textContent).toContain("NO_LOCAL_STRUCTURE_SUPPORT");
+    expect(capReasonRow?.textContent).not.toContain("NO_LOCAL_STRUCTURE_SUPPORT");
     expect(capReasonRow?.textContent).toContain("No supporting Structure Graph edges");
+    // The raw "capped_active" token remains available verbatim under
+    // Technical details -- the distinction is relocated, never destroyed.
+    expect(screen.getByText("Raw activation level").closest("div")?.textContent).toContain("capped_active");
+    expect(screen.getByText("Cap reason codes (raw)").closest("div")?.textContent).toContain(
+      "NO_LOCAL_STRUCTURE_SUPPORT"
+    );
     // The underlying score is never hidden.
     expect(screen.getByText("Activation score").closest("div")?.textContent).toContain("70.0");
     // The existing, richer "Blocked" row is preserved alongside the new
@@ -449,7 +488,7 @@ describe("AlphaCard", () => {
         activation_level: "active",
       }),
     });
-    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("active");
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("Active");
     expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
     expect(screen.queryByText("Blocked")).not.toBeInTheDocument();
   });
@@ -472,11 +511,11 @@ describe("AlphaCard", () => {
         activation_level: "dominant",
       }),
     });
-    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("dominant");
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("Dominant");
     expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
   });
 
-  it("shows plain regime_level, never capped_active, for a genuinely qualified Regime-level Alpha", () => {
+  it("shows Dominant (translated), never raw regime_level or capped_active, for a genuinely qualified Regime-level Alpha -- raw value preserved under Technical details", () => {
     renderCard({
       status: "regime_level",
       activationScore: 86.9,
@@ -495,8 +534,15 @@ describe("AlphaCard", () => {
         regime_gate_passed: true,
       }),
     });
-    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("regime_level");
+    // Product Demo Hardening Phase 2D: regime_level is a sustained/
+    // confirmed form of Dominant from a stakeholder's perspective, and is
+    // translated to the same "Dominant" product word -- never the raw
+    // "regime_level" token.
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("Dominant");
     expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
+    // The raw distinction is not destroyed -- it remains available verbatim
+    // under Technical details.
+    expect(screen.getByText("Raw activation level").closest("div")?.textContent).toContain("regime_level");
   });
 
   it("falls back to the legacy status for Activation level on a payload predating activation_level, but still shows the existing Blocked row", () => {
@@ -517,7 +563,7 @@ describe("AlphaCard", () => {
         classification_version: "b4.alpha_level.v1",
       }),
     });
-    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("active");
+    expect(screen.getByText("Activation level").closest("div")?.querySelector("dd")?.textContent).toBe("Active");
     expect(screen.queryByText("Cap reason")).not.toBeInTheDocument();
     expect(screen.getByText("Blocked")).toBeInTheDocument();
   });
@@ -559,5 +605,79 @@ describe("AlphaCard", () => {
     expect(screen.queryByText("Legacy classification — this run predates the B4 alpha-level classifier")).not.toBeInTheDocument();
     expect(screen.queryByText("Blocked")).not.toBeInTheDocument();
     expect(screen.queryByText("Target level")).not.toBeInTheDocument();
+  });
+
+  // Product Demo Hardening Phase 2D, Section 24: an unrecognized future
+  // activation-level value must never crash the card, and must never be
+  // silently misrepresented as a known state (Active/Dominant/Emerging).
+  it("does not crash on an unrecognized future activation level and does not misrepresent it as a known state", () => {
+    renderCard({ status: "some_future_level" as never });
+    const levelRow = screen.getByText("Activation level").closest("div");
+    const shown = levelRow?.querySelector("dd")?.textContent ?? "";
+    expect(shown.length).toBeGreaterThan(0);
+    expect(["Active", "Dominant", "Emerging", "Watchlist", "Inactive"]).not.toContain(shown);
+  });
+});
+
+// John Follow-Up Requirement A (Invalidation-Condition Coverage
+// Completion): AlphaCard renders whatever invalidationConditions prop it is
+// given -- it never special-cases A101, and never fetches anything itself
+// (the Alpha Library fetch happens once, upstream, in useAlphaLibrary).
+describe("AlphaCard invalidation conditions", () => {
+  it("renders A101's taxonomy invalidation conditions", () => {
+    renderCard({
+      alphaId: "A101",
+      alphaName: "AI Expansion",
+      invalidationConditions: ["AI capex cuts", "model demand slows", "GPU oversupply"],
+    });
+    expect(screen.getByText("Invalidation conditions")).toBeInTheDocument();
+    expect(screen.getByText("AI capex cuts")).toBeInTheDocument();
+    expect(screen.getByText("model demand slows")).toBeInTheDocument();
+    expect(screen.getByText("GPU oversupply")).toBeInTheDocument();
+  });
+
+  it("renders a second, non-A101 Alpha's conditions from the exact same prop/source -- proving no hardcoded A101-only path remains", () => {
+    renderCard({
+      alphaId: "A201",
+      alphaName: "Semiconductor Supercycle",
+      invalidationConditions: ["inventory glut returns", "order cuts resume"],
+    });
+    expect(screen.getByText("Invalidation conditions")).toBeInTheDocument();
+    expect(screen.getByText("inventory glut returns")).toBeInTheDocument();
+    expect(screen.getByText("order cuts resume")).toBeInTheDocument();
+  });
+
+  it("renders conditions as plain, human-readable list text -- never raw YAML/JSON syntax", () => {
+    renderCard({ invalidationConditions: ["revenue misses, guide-down, demand weakens"] });
+    const item = screen.getByText("revenue misses, guide-down, demand weakens");
+    expect(item.tagName).toBe("LI");
+    expect(item.textContent).not.toMatch(/[{}[\]"]|:\s/);
+  });
+
+  it("shows an honest fallback, not a hidden section or invented content, when the taxonomy defines zero conditions", () => {
+    renderCard({ invalidationConditions: [] });
+    expect(screen.getByText("Invalidation conditions")).toBeInTheDocument();
+    expect(
+      screen.getByText("No validated invalidation condition is currently defined for this Alpha.")
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+  });
+
+  it("renders no invalidation section at all while the Alpha Library hasn't loaded (undefined), never a false null/undefined display", () => {
+    renderCard({ invalidationConditions: undefined });
+    expect(screen.queryByText("Invalidation conditions")).not.toBeInTheDocument();
+    expect(screen.queryByText("null")).not.toBeInTheDocument();
+    expect(screen.queryByText("undefined")).not.toBeInTheDocument();
+  });
+
+  it("never labels taxonomy conditions as approved or John-approved -- that provenance claim is not supported for this source", () => {
+    renderCard({ invalidationConditions: ["AI capex cuts"] });
+    expect(screen.queryByText(/John-approved/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Approved/)).not.toBeInTheDocument();
+  });
+
+  it("makes clear these conditions come from the Alpha's own definition, not the current run's analysis", () => {
+    renderCard({ invalidationConditions: ["AI capex cuts"] });
+    expect(screen.getByText("From this Alpha's definition, not this run's analysis.")).toBeInTheDocument();
   });
 });

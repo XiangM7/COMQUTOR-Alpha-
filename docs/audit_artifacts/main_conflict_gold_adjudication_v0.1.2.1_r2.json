@@ -1,0 +1,97 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Main Conflict Gold Adjudication -- CORRECTED re-adjudication (r2)",
+  "supersedes": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.json",
+  "supersession_reason": "The r1 adjudication applied an overly restrictive criterion 3 ('both sides materially represented in frozen ticker-specific evidence'), interpreting it to require an actual run-bound historical observation. That is not the correct authority hierarchy for this acceptance gate. The correct hierarchy, applied here, is: (1) Approved Product Decisions/ADRs, (2) Development Plan documented expectations, (3) canonical conflict ontology, (4) pre-existing/provisional regression labels as supporting evidence, (5) historical/reference-run artifacts as supporting evidence only. A historical frozen run is useful corroborating evidence, never a requirement, and must never override a higher-authority documented expectation.",
+  "adjudication_method": "Independent, frozen-evidence-only adjudication performed BEFORE inspecting the current v0.1.2.1 final selected six-run production outputs' Main Conflict values. The expected-label derivation below references only: COMQUTOR_Alpha_Development_Plan_v1.0.docx (verified SHA-256 cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9, matches development_plan_v1.0_reference_index.md), comqutor_alpha/config/entity_alpha_exposure_seed_v0.1.yaml (John-approved 2026-08-11, status=approved_gating for all six tickers), comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (conflict_alphas legality + each alpha's own canonical core_thesis), comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml (conditional_conflicts, as supporting/corroborating evidence only), and PD-017 (docs/specs/product_decisions_and_unknowns.md). It never references, and was not shaped by, any final v0.1.2.1 production run's observed Main Conflict.",
+  "authority_hierarchy": [
+    "1. Approved Product Decisions / ADRs (e.g. PD-017)",
+    "2. Explicit documented expectations in the Development Plan",
+    "3. Canonical conflict ontology (alpha_taxonomy_v1.yaml conflict_alphas + each alpha's own core_thesis polarity)",
+    "4. Pre-existing regression labels / provisional labels (supporting evidence)",
+    "5. Historical/reference artifacts, e.g. a frozen prior run's own observed conflict (supporting evidence only, never a requirement, never overrides tiers 1-3)"
+  ],
+  "mechanical_selection_rule_for_undocumented_tickers": "Where the Development Plan gives no explicit row (MSFT's sole row is rejected; SNDK/TSM/AMD have no row at all), the single best defensible candidate is selected by: among all canonically-legal, non-rejected conflict_alphas pairs where one side's alpha has an inherently growth/expansion core_thesis (A101/A102/A103/A201/A301/A001/A003) and the other has an inherently risk/downside core_thesis (A304 Multiple Compression, A501 Recession Risk), and BOTH sides have a recorded exposure weight in the John-approved entity_alpha_exposure_seed_v0.1.yaml for that ticker, pick the pair with the highest product of the two exposure weights. This single rule is applied uniformly to all six tickers as a consistency check; it independently reproduces the Development-Plan-documented answer for both NVDA and QQQ exactly, which corroborates the rule rather than overriding Development Plan authority for those two.",
+  "per_ticker_adjudication": {
+    "NVDA": {
+      "expected_main_conflict": "A101__A304",
+      "authority_level": "DEVELOPMENT_PLAN_DOCUMENTED (tier 2)",
+      "exact_source": "COMQUTOR_Alpha_Development_Plan_v1.0.docx section 12 golden test case table: \"NVDA ... Bull A101 vs Bear A304\" (verified by direct extraction from the docx XML; document SHA-256 matches development_plan_v1.0_reference_index.md).",
+      "canonical_legality": "LEGAL -- A101.conflict_alphas includes A304 (contradiction_weight 0.9) in alpha_taxonomy_v1.yaml.",
+      "corroborating_evidence": "entity_alpha_exposure_seed_v0.1.yaml (John-approved 2026-08-11): NVDA A101 exposure 0.95, A304 exposure 0.75 -- product 0.7125, the single highest-ranked legal candidate pair for NVDA under the mechanical selection rule, independently reproducing the Development Plan answer.",
+      "rationale": "Tier-2 Development Plan authority is dispositive here and is independently corroborated by tier-3 exposure-weight ranking. A prior frozen reference run (e3eb3909-3744-4a02-9b32-b225cf6ef665) separately observed A301__A304 in one specific execution -- this is tier-5 supporting evidence only and does not outrank the documented, corroborated expectation.",
+      "rejected_alternatives": ["A301__A304 (tier-5 single-run historical observation only; does not override tiers 2-3)"],
+      "gold_evaluable": true
+    },
+    "QQQ": {
+      "expected_main_conflict": "A001__A501",
+      "authority_level": "DEVELOPMENT_PLAN_DOCUMENTED (tier 2)",
+      "exact_source": "COMQUTOR_Alpha_Development_Plan_v1.0.docx section 12 golden test case table: \"QQQ ... Bull A001 vs Bear A501\" (verified by direct extraction).",
+      "canonical_legality": "LEGAL -- A001.conflict_alphas includes A501 (contradiction_weight 0.85).",
+      "corroborating_evidence": "entity_alpha_exposure_seed_v0.1.yaml: QQQ A001 exposure 0.80, A501 exposure 0.65 -- product 0.52, the single highest-ranked legal candidate pair for QQQ under the mechanical selection rule (ahead of A003__A501 at 0.4875 and A101__A304 at 0.42), independently reproducing the Development Plan answer.",
+      "rationale": "Tier-2 Development Plan authority is dispositive and independently corroborated. No frozen reference run exists for QQQ at all (run_bound_expectations: null in j2_provisional_regression_labels_v0.2.yaml) -- but per the corrected authority hierarchy, the ABSENCE of a run-bound observation is not a reason to discard a documented expectation; it simply means there is no tier-5 supporting evidence, which is not required.",
+      "rejected_alternatives": [],
+      "gold_evaluable": true
+    },
+    "MSFT": {
+      "expected_main_conflict": "A301__A304",
+      "authority_level": "EXPOSURE_SEED_DERIVED (tier 3, John-approved magnitude data + canonical legality; Development Plan's sole candidate is rejected at tier 1)",
+      "exact_source": "Development Plan's only MSFT row (\"Bull A102 vs Bear A304\") is REJECTED at tier 1 by PD-017 (docs/specs/product_decisions_and_unknowns.md: REJECTED_BY_INDEPENDENT_LLM_ADJUDICATION; A102.conflict_alphas == [] in alpha_taxonomy_v1.yaml, structurally illegal). With the sole tier-2 candidate eliminated, the next authority tier is applied: entity_alpha_exposure_seed_v0.1.yaml (John-approved 2026-08-11) gives MSFT A301 exposure 0.80, A304 exposure 0.70 -- product 0.56, the highest-ranked legal candidate pair for MSFT (ahead of A101__A304 at 0.49; A102__A304 excluded as canonically illegal/rejected).",
+      "canonical_legality": "LEGAL -- A301.conflict_alphas includes A304 (contradiction_weight 0.85).",
+      "corroborating_evidence": "j2_provisional_regression_labels_v0.2.yaml lists A301 under MSFT's structural_expectations.positive_alphas, consistent with A301 being a materially relevant MSFT alpha (though this specific pair is not separately listed in MSFT's own conditional_conflicts in that file).",
+      "rationale": "MSFT's only Development-Plan-documented candidate is formally rejected and canonically illegal, so tier 2 provides nothing for MSFT. The next-highest authority (tier 3: canonical legality + John-approved exposure magnitude) yields a single, mechanically-derived, non-cherry-picked answer using the same rule applied to every other ticker.",
+      "rejected_alternatives": ["A102__A304 (REJECTED_OR_SUPERSEDED, PD-017; canonically illegal)"],
+      "gold_evaluable": true
+    },
+    "SNDK": {
+      "expected_main_conflict": "A301__A304",
+      "authority_level": "EXPOSURE_SEED_DERIVED (tier 3), corroborated by tier-4 provisional label",
+      "exact_source": "SNDK does not appear in the Development Plan's section 12 table at all. entity_alpha_exposure_seed_v0.1.yaml (John-approved 2026-08-11) gives SNDK A301 exposure 0.70, A304 exposure 0.75 -- product 0.525, the highest-ranked legal candidate pair (ahead of A101__A304 at 0.225; A201__A304 excluded as canonically illegal/rejected).",
+      "canonical_legality": "LEGAL -- A301.conflict_alphas includes A304 (contradiction_weight 0.85).",
+      "corroborating_evidence": "j2_provisional_regression_labels_v0.2.yaml tickers.SNDK.conditional_conflicts independently lists exactly A301__A304 -- converges with the exposure-derived answer.",
+      "rationale": "No Development Plan row and no frozen reference run exist for SNDK. Tier-3 exposure-derived ranking and tier-4 provisional-label evidence independently converge on the same pair.",
+      "rejected_alternatives": ["A201__A304 (canonically illegal, REJECTED_OR_SUPERSEDED)"],
+      "gold_evaluable": true
+    },
+    "TSM": {
+      "expected_main_conflict": "A301__A304",
+      "authority_level": "EXPOSURE_SEED_DERIVED (tier 3), corroborated by tier-4 provisional label",
+      "exact_source": "TSM is named in the Development Plan's golden-ticker list but has no explicit section 12 row. entity_alpha_exposure_seed_v0.1.yaml gives TSM A301 exposure 0.75, A304 exposure 0.65 -- product 0.4875, the highest-ranked legal candidate pair (ahead of A101__A304 at 0.3575; A201__A304 excluded as canonically illegal/rejected).",
+      "canonical_legality": "LEGAL -- A301.conflict_alphas includes A304 (contradiction_weight 0.85).",
+      "corroborating_evidence": "j2_provisional_regression_labels_v0.2.yaml tickers.TSM.conditional_conflicts independently lists exactly A301__A304 -- converges with the exposure-derived answer.",
+      "rationale": "No Development Plan row and no frozen reference run exist for TSM. Tier-3 and tier-4 evidence independently converge.",
+      "rejected_alternatives": ["A201__A304 (canonically illegal, REJECTED_OR_SUPERSEDED)"],
+      "gold_evaluable": true
+    },
+    "AMD": {
+      "expected_main_conflict": "A101__A304",
+      "authority_level": "EXPOSURE_SEED_DERIVED (tier 3), corroborated by tier-4 provisional label",
+      "exact_source": "AMD is named in the Development Plan's golden-ticker list but has no explicit section 12 row. entity_alpha_exposure_seed_v0.1.yaml gives AMD A101 exposure 0.80, A304 exposure 0.75 -- product 0.60, the highest-ranked legal candidate pair (ahead of A301__A304 at 0.525; A201__A304 excluded as canonically illegal/rejected).",
+      "canonical_legality": "LEGAL -- A101.conflict_alphas includes A304 (contradiction_weight 0.9).",
+      "corroborating_evidence": "j2_provisional_regression_labels_v0.2.yaml tickers.AMD.conditional_conflicts independently lists exactly A101__A304 -- converges with the exposure-derived answer.",
+      "rationale": "No Development Plan row and no frozen reference run exist for AMD. Tier-3 and tier-4 evidence independently converge.",
+      "rejected_alternatives": ["A201__A304 (canonically illegal, REJECTED_OR_SUPERSEDED)"],
+      "gold_evaluable": true
+    }
+  },
+  "summary": {
+    "gold_evaluable_ticker_count": 6,
+    "gold_evaluable_tickers": ["NVDA", "QQQ", "MSFT", "SNDK", "TSM", "AMD"],
+    "not_gold_evaluable_ticker_count": 0
+  },
+  "rejected_pairs_confirmed_non_canonical": {
+    "MSFT_A102__A304": "REJECTED_OR_SUPERSEDED (PD-017) -- remains rejected, not resurrected.",
+    "SNDK_A201__A304": "REJECTED_OR_SUPERSEDED -- remains rejected, not resurrected.",
+    "TSM_A201__A304": "REJECTED_OR_SUPERSEDED -- remains rejected, not resurrected.",
+    "AMD_A201__A304": "REJECTED_OR_SUPERSEDED -- remains rejected, not resurrected."
+  },
+  "canonical_ontology_modified": false,
+  "b1_b2_b4_semantics_modified": false,
+  "labels_derived_from_final_observed_main_conflict": false,
+  "labels_derived_from_final_output": false,
+  "labels_frozen_before_final_comparison": true,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false
+}

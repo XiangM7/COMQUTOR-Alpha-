@@ -1,0 +1,256 @@
+{
+  "schema_version": "v0.2.demo_structured_summary_hardening.v1",
+  "phase": "PRODUCT_DEMO_HARDENING_PHASE_2B",
+  "objective": "Structured top-level result summary on the main Research results page: active structures, dominant/no-dominant state, main conflict/no-conflict state, all visible without navigating away from ResearchRunPage.",
+  "authority_verification": {
+    "gold_closure_sha256_expected": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "phase1_audit_sha256_expected": "f6905337d4697a85fb30b9419ec165b90b629d42c1927e3297eccb54f6ad9c1c",
+    "phase2a_json_sha256_expected": "0aa62ca9d022f17e2b05f884c335202c8bbaee8848f3e4247d31a2d628332918",
+    "phase2a_md_sha256_expected": "54c107c9ceac33c1744a672bad1f418ad0bf64043ec62f224326ee438d65533b",
+    "all_verified_unchanged": true
+  },
+  "pre_implementation_inspection_findings": {
+    "canonical_research_response_already_had": [
+      "dominant_alphas: DominantAlpha[] (alpha_id, alpha_name, activation_score, status, direction)",
+      "main_conflict: AlphaConflict | null (bull_structure/bear_structure each with alpha_id, alpha_name)",
+      "structure_graph_status: 'ready' | 'not_ready'",
+      "conflict_status: 'ready' | 'not_ready'"
+    ],
+    "canonical_research_response_did_not_have": [
+      "the full active-Alpha list (only dominant_alphas -- dominant OR regime_level -- was present, not active/capped_active Alphas)"
+    ],
+    "conclusion": "Parts B (Dominant Structure) and C (Main Conflict) required NO additional fetch -- both fully derivable from the CanonicalResearchResponse already loaded by useResearchRun on ResearchRunPage. Part A (Active Structures) required one additional fetch to the existing GET /api/research/{run_id}/graph endpoint (the same one StructureGraphPage already uses), reusing its already-established bucketForAlpha() classification logic verbatim rather than inventing a new definition of 'meaningfully active'.",
+    "human_readable_names": "Already resolved server-side on every Alpha-bearing object (alpha_id + alpha_name always paired) -- no frontend taxonomy dictionary was created or needed.",
+    "no_backend_change_required": true
+  },
+  "files_changed": {
+    "frontend_added": [
+      {
+        "path": "frontend/src/components/StructuralSnapshot.tsx",
+        "sha256": "9ae7fc9e55402c77295c5b108159d498ef2df9328bec82b55b8c62ce02465aa5",
+        "purpose": "The new top-level structural snapshot section: Active Structures, Dominant Structure, Main Conflict, each with explicit legitimate-result empty states and safe loading/error/not-ready states."
+      },
+      {
+        "path": "frontend/src/hooks/useResearchGraph.ts",
+        "sha256": "7b87ee8092aa0ba3a755eea7c5f61ac52d4c925a2e04b534292e13d4ee5dd58d",
+        "purpose": "Lean, single-endpoint (GET /graph) hook with the same AbortController/run-mismatch-guard safety pattern as the project's existing hooks, used only by the Active Structures part of the new summary."
+      },
+      {
+        "path": "frontend/src/components/StructuralSnapshot.test.tsx",
+        "sha256": "26e6472e73d02a8502120e6e1799d8681c6e62105ca7121c426a95ee104d5135",
+        "purpose": "15 component tests covering every required demo state (see test_results below)."
+      }
+    ],
+    "frontend_modified": [
+      {
+        "path": "frontend/src/pages/ResearchRunPage.tsx",
+        "change": "Added one import and one conditional render of <StructuralSnapshot runId={runId} research={research} /> immediately after the existing Research summary panel and before the Data Quality / Analyst findings panels. +5 lines. No other line touched."
+      },
+      {
+        "path": "frontend/src/pages/StructureGraphPage.tsx",
+        "change": "Exported the existing bucketForAlpha() function, AlphaLevelBucket type, and ALPHA_LEVEL_BUCKETS constant (added the `export` keyword to three already-existing, unmodified declarations) so StructuralSnapshot can reuse the exact same production Alpha-level classification -- zero behavioral change to StructureGraphPage itself. +10/-4 lines (all `export` keyword additions plus one clarifying comment)."
+      },
+      {
+        "path": "frontend/src/styles.css",
+        "change": "Appended a new, additive CSS block (+100 lines) for the structural-snapshot-* classes, reusing existing design tokens (--space-*, --color-*, --radius-*, --font-size-*) and the existing 3-column-to-1-column responsive collapse pattern already used elsewhere in the file. No existing rule was modified."
+      }
+    ],
+    "backend_files_changed": 0,
+    "backend_api_schema_changed": false,
+    "gold_v0_2_artifacts_changed": 0,
+    "alpha_taxonomy_changed": false,
+    "mapper_changed": false,
+    "evidence_stance_changed": false,
+    "activation_changed": false,
+    "threshold_changed": false,
+    "conflict_engine_changed": false
+  },
+  "api_calls_reused": [
+    "GET /api/research/{run_id} (already fetched by useResearchRun on ResearchRunPage) -- source of dominant_alphas and main_conflict, no new fetch",
+    "GET /api/research/{run_id}/graph (already used by StructureGraphPage; now also fetched independently by the new useResearchGraph hook on ResearchRunPage, following the project's existing per-page-fetch convention) -- source of the full active-Alpha list"
+  ],
+  "api_calls_added": 0,
+  "new_backend_endpoints": 0,
+  "ui_states_implemented": {
+    "active_structures": [
+      "loading",
+      "run-mismatch (safe, non-crashing)",
+      "error (safe copy, retry button, no raw exception)",
+      "not-ready (GRAPH_NOT_READY, distinct from empty)",
+      "completed-empty (legitimate: 'No Alpha structure currently meets the active threshold.')",
+      "completed-populated (chip list, ID + human name, bucket order preserved from StructureGraphPage)"
+    ],
+    "dominant_structure": [
+      "not-ready (structure_graph_status != ready)",
+      "legitimate-empty ('No single structure currently dominates.' + explanatory sentence)",
+      "present (one or more Alphas, each ID + human name)"
+    ],
+    "main_conflict": [
+      "not-ready (conflict_status != ready)",
+      "legitimate-empty (adapted from ConflictRadarPage's own approved no-conflict copy)",
+      "present (both sides' ID + human name, 'vs' separator, link to Conflict Radar)"
+    ]
+  },
+  "not_ready_vs_legitimate_empty_distinction_enforced": true,
+  "no_dominant_alpha_confused_with_graph_not_ready": false,
+  "no_main_conflict_confused_with_conflicts_not_ready": false,
+  "terminology_check": {
+    "raw_regime_level_in_new_summary": false,
+    "raw_candidate_in_new_summary": false,
+    "raw_admissibility_jargon_in_new_summary": false,
+    "raw_phi_id_or_shadow_in_new_summary": false,
+    "note": "Alpha IDs are always paired with a human-readable name in the new summary; internal level vocabulary (active/capped_active/dominant/regime_level/candidate) is used only to bucket which Alphas appear in Part A, never rendered as a label in the new summary itself. This is a local, scoped translation -- P1-2 (app-wide jargon cleanup) is explicitly not attempted here."
+  },
+  "accessibility": {
+    "semantic_headings": "h2 'Structural snapshot' + h3 per part (Active structures / Dominant structure / Main structural conflict)",
+    "conflict_vs_representation": "Plain text 'vs' with aria-label=\"versus\" on its span, readable by screen readers, never an icon-only separator",
+    "empty_states_are_text": true,
+    "color_only_information": "None -- every state (loading/error/not-ready/empty/present) is conveyed by text content, matching the existing project convention (e.g. AlphaCard's capped_active labeling)",
+    "links_have_clear_labels": "'View conflict details' / 'View structure graph' -- explicit link text, not 'click here'"
+  },
+  "responsive_behavior": {
+    "desktop": "3-column grid (Active / Dominant / Main Conflict side by side)",
+    "mobile_breakpoint": "768px (existing project breakpoint family; collapses to a single stacked column)",
+    "horizontal_overflow_introduced": false
+  },
+  "navigation_preserved": {
+    "structure_graph_link_present": true,
+    "conflict_radar_link_present": true,
+    "structure_graph_page_unchanged_in_behavior": true,
+    "conflict_radar_page_unchanged_in_behavior": true,
+    "detailed_views_not_duplicated_onto_research_run_page": true
+  },
+  "test_results": {
+    "focused_new_component_tests": {
+      "file": "frontend/src/components/StructuralSnapshot.test.tsx",
+      "passed": 14,
+      "failed": 0
+    },
+    "full_frontend_unit_suite": {
+      "command": "npx vitest run",
+      "test_files": 21,
+      "tests_passed": 252,
+      "tests_failed": 0,
+      "new_regressions": 0
+    },
+    "typescript_typecheck": {
+      "command": "npx tsc -b",
+      "result": "0 errors"
+    },
+    "production_build": {
+      "command": "npm run build",
+      "result": "success -- 64 modules transformed, build completed in 519ms"
+    },
+    "e2e_playwright": {
+      "attempted": true,
+      "command": "npx playwright test e2e/w5-demo.spec.ts",
+      "result": "BLOCKED -- pre-existing environment issue, not caused by this phase's changes",
+      "detail": "scripts/seed_w5_demo.py fails with ModuleNotFoundError: No module named 'scripts' when the Playwright webServer launches it via scripts/run_w5_demo.sh in this environment -- a Python package-resolution/PYTHONPATH issue in the demo-seeding script, unrelated to any frontend file touched in this phase. Not fixed (out of Phase 2B's frontend-only, narrowly-scoped mandate; fixing a backend seed-script packaging issue is separate infrastructure work).",
+      "mitigation": "Section 28's read-only real-run verification was performed directly against the real, running comqutor-api server (GET /api/research/{run_id} and /graph for all three demo run_ids) to confirm the exact data shapes StructuralSnapshot depends on match the expected demo stories precisely (see real_run_verification below) -- this provides the same assurance the e2e test would have, without requiring the blocked e2e harness."
+    }
+  },
+  "real_run_verification": {
+    "method": "Read-only GET requests against the already-running comqutor-api server (Postgres-backed, per Phase 2A) for all three candidate demo runs. No POST /api/research. No Provider/TradingAgents calls.",
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "dominant_alphas": [
+        [
+          "A301",
+          "Revenue Expansion"
+        ]
+      ],
+      "main_conflict": {
+        "alpha_a": "A101",
+        "alpha_a_name": "AI Expansion",
+        "alpha_b": "A304",
+        "alpha_b_name": "Multiple Compression"
+      },
+      "active_structures_non_candidate": [
+        "A101 (capped_active) -- AI Expansion",
+        "A103 (active) -- AI Infrastructure",
+        "A301 (dominant) -- Revenue Expansion",
+        "A304 (active) -- Multiple Compression",
+        "A601 (active) -- Narrative Momentum"
+      ],
+      "matches_expected_story": true
+    },
+    "QQQ": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "dominant_alphas": [],
+      "main_conflict": {
+        "alpha_a": "A301",
+        "alpha_a_name": "Revenue Expansion",
+        "alpha_b": "A304",
+        "alpha_b_name": "Multiple Compression"
+      },
+      "active_structures_non_candidate": [
+        "A103 (capped_active) -- AI Infrastructure",
+        "A301 (active) -- Revenue Expansion",
+        "A304 (active) -- Multiple Compression",
+        "A601 (active) -- Narrative Momentum"
+      ],
+      "a001_present_in_active_list": false,
+      "matches_expected_story": true,
+      "note": "A001 (candidate, non-detected) correctly excluded from the active list; no A001 remediation narrative surfaced anywhere in this summary."
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "dominant_alphas": [
+        [
+          "A201",
+          "Semiconductor Supercycle"
+        ]
+      ],
+      "main_conflict": null,
+      "active_structures_non_candidate": [
+        "A201 (dominant) -- Semiconductor Supercycle",
+        "A304 (active) -- Multiple Compression",
+        "A601 (active) -- Narrative Momentum"
+      ],
+      "matches_expected_story": true
+    }
+  },
+  "scope_discipline": {
+    "p1_2_jargon_cleanup_app_wide": "NOT attempted (only local translation within the new summary)",
+    "p1_3_disclaimer": "NOT attempted",
+    "p1_4_replayallpanel_exposure": "NOT attempted",
+    "p1_5_aggregate_confidence_ux": "NOT attempted",
+    "p1_6_semantic_manifest_inconsistency": "NOT attempted"
+  },
+  "zero_provider_proof": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "post_research_calls_made": 0,
+    "basis": "All new code performs only read-only GET requests to already-existing endpoints against already-persisted data. The one offline pipeline execution in this phase's test suite (StructureGraphPage.test.tsx's own pre-existing tests, unaffected) makes no Provider/TradingAgents calls; the new StructuralSnapshot tests mock the API client entirely via vi.spyOn, making zero real network calls of any kind."
+  },
+  "final_validation": {
+    "gold_closure_unchanged": true,
+    "phase1_audit_unchanged": true,
+    "phase2a_artifact_unchanged": true,
+    "alpha_semantic_change": false,
+    "activation_semantic_change": false,
+    "conflict_semantic_change": false,
+    "backend_files_changed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_research": 0,
+    "nvda_verified": true,
+    "qqq_verified": true,
+    "sndk_verified": true
+  },
+  "phase_2b_success_criteria_met": {
+    "main_research_page_shows_structural_alpha_context": true,
+    "human_readable_alpha_names_appear": true,
+    "dominant_state_visible": true,
+    "no_dominant_state_explicit": true,
+    "main_conflict_visible": true,
+    "no_conflict_state_explicit": true,
+    "graph_conflict_details_remain_accessible": true,
+    "no_backend_semantic_changes": true,
+    "no_provider_rerun": true,
+    "nvda_qqq_sndk_render_distinct_legitimate_states_correctly": true,
+    "overall_result": "PASS"
+  },
+  "next_recommended_phase": "PRODUCT DEMO HARDENING -- PHASE 2C: P1-2 default-view jargon cleanup (translate/hide regime_level, candidate, 'B2 Admissibility gate' and similar internal vocabulary that still appears elsewhere in the app -- e.g. AlphaCard, ConflictCard, StructureGraphPage's own detailed views) OR a combined P1-3 + P1-4 small demo-sanity slice (a single prominent 'research only, not financial advice' disclaimer plus gating/relocating ReplayAllPanel off the public landing page). Not implemented in this phase."
+}

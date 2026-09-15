@@ -45,6 +45,29 @@ class OfflineSemanticModel:
                 for segment in payload["segments"]
             ]
             return _Response(json.dumps({"claims": claims}))
+        if "claims" in payload and "alpha_taxonomy" in payload:
+            # Step 5A execution-capacity repair: build_alpha_matches_payload
+            # now batches Alpha classification by default
+            # (map_structured_records(use_batched_classifier=True)), so the
+            # real request envelope is {"alpha_taxonomy": [...], "claims":
+            # [...]} rather than the old single-claim {"claim": ..., ...,
+            # "alpha_taxonomy": [...]}. One decision per claim_id, matching
+            # the same alpha_decision ("select"/"none") this fixture was
+            # already parameterized on.
+            first_alpha_id = payload["alpha_taxonomy"][0]["alpha_id"]
+            decisions = [
+                (
+                    {"claim_id": claim["claim_id"], "decision": "none", "selected_alpha_id": None}
+                    if self._alpha_decision == "none"
+                    else {
+                        "claim_id": claim["claim_id"],
+                        "decision": "select",
+                        "selected_alpha_id": first_alpha_id,
+                    }
+                )
+                for claim in payload["claims"]
+            ]
+            return _Response(json.dumps({"decisions": decisions}))
         if "alpha_taxonomy" in payload:
             if self._alpha_decision == "none":
                 return _Response(json.dumps({"decision": "none", "selected_alpha_id": None}))

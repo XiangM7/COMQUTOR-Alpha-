@@ -239,6 +239,12 @@ def test_http_model_and_config_fields_cannot_override_the_profile(tmp_path, monk
     from comqutor_alpha.storage.db.repository import build_write_repository_from_env
 
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    # Live-semantic-pipeline readiness guard (operational safety fix): a
+    # real submission now also requires Week2's LLM classifier and its own
+    # provider to be ready before a run can be claimed.
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "deepseek-v4-flash")
 
     app = create_app(output_root=str(tmp_path))
     with TestClient(app) as client:
@@ -311,6 +317,9 @@ def test_claimed_run_records_profile_id_in_progress_row(tmp_path, monkeypatch):
     from comqutor_alpha.storage.db.repository import build_write_repository_from_env
 
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "deepseek-v4-flash")
 
     app = create_app(output_root=str(tmp_path))
     with TestClient(app) as client:

@@ -5,12 +5,16 @@ import { RunStatusBanner } from "../components/RunStatusBanner";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
 import { EmptyState } from "../components/EmptyState";
+import { StructuralSnapshot } from "../components/StructuralSnapshot";
 import { useRunPolling } from "../hooks/useRunPolling";
 import { useResearchRun } from "../hooks/useResearchRun";
 import { describeApiError } from "../api/errors";
 import { getApiBaseUrl } from "../api/client";
 import { UNCLASSIFIED_FINDING_REASONS } from "../api/types";
 import type {
+  AlphaMemoryPhiStructure,
+  AlphaMemorySection,
+  AlphaMemorySummaryEntry,
   CanonicalResearchResponse,
   DataSanityNumericSemantics,
   DataSanityWarning,
@@ -253,6 +257,159 @@ function UnclassifiedFindingsPanel({
         >
           Download full audit ({totalCount})
         </a>
+      ) : null}
+    </section>
+  );
+}
+
+// Alpha Memory (Implementation Step 4B, Feedback Loop Visibility). SHADOW
+// ONLY: this panel makes Steps 1-3's already-implemented cross-run
+// recurrence memory visible for audit, and never implies it changes
+// Activation/Conflict/Evidence -- activation_modulation_applied is read
+// straight from the backend and rendered verbatim, never derived or
+// assumed. Absence of a phi in history is shown as "no exact historical
+// recurrence found", never "failed"/"expired"/"invalidated" (those
+// lifecycle concepts remain unimplemented -- MODEL 0).
+function formatMemoryTimestamp(value: string | null | undefined): string {
+  return value ? value : "Unavailable";
+}
+
+function PhiStructureDetail({ structure }: { structure: AlphaMemoryPhiStructure }) {
+  return (
+    <li className="alpha-memory-phi-item">
+      <p className="alpha-memory-phi-relation">
+        <code>{structure.source}</code> --{structure.edge_type}--&gt; <code>{structure.target}</code>
+      </p>
+      {structure.is_recurring ? (
+        <dl className="alpha-memory-phi-history">
+          <dt>Previously observed</dt>
+          <dd>
+            {structure.prior_observation_count} prior run{structure.prior_observation_count === 1 ? "" : "s"}
+          </dd>
+          <dt>First seen</dt>
+          <dd>{formatMemoryTimestamp(structure.first_seen)}</dd>
+          <dt>Last prior observation</dt>
+          <dd>{formatMemoryTimestamp(structure.last_seen_prior)}</dd>
+        </dl>
+      ) : (
+        <p className="alpha-memory-first-seen-note">First seen — no exact historical recurrence found.</p>
+      )}
+      <details className="alpha-memory-technical-detail">
+        <summary>Technical detail</summary>
+        <p>
+          phi_id: <code>{structure.phi_id}</code>
+        </p>
+        {structure.prior_run_ids.length > 0 ? (
+          <p>Source run(s): {structure.prior_run_ids.join(", ")}</p>
+        ) : null}
+      </details>
+    </li>
+  );
+}
+
+function AlphaMemoryEntry({
+  summaryEntry,
+  phiStructures,
+}: {
+  summaryEntry: AlphaMemorySummaryEntry;
+  phiStructures: AlphaMemoryPhiStructure[];
+}) {
+  const recurring = phiStructures.filter((s) => s.is_recurring);
+  const ratioPercent =
+    summaryEntry.recurrence_ratio === null ? null : Math.round(summaryEntry.recurrence_ratio * 100);
+  return (
+    <li className="alpha-memory-entry">
+      <p className="alpha-memory-entry-summary">
+        <strong>{summaryEntry.alpha_id}</strong> — {summaryEntry.current_phi_count} current structure
+        {summaryEntry.current_phi_count === 1 ? "" : "s"}, {summaryEntry.recurring_phi_count} recurring,{" "}
+        {summaryEntry.first_seen_phi_count} first seen
+        {ratioPercent !== null ? `, ${ratioPercent}% recurrence` : ""}
+      </p>
+      {recurring.length > 0 ? (
+        <details className="alpha-memory-recurring-detail">
+          <summary>Recurring structures ({recurring.length})</summary>
+          <ul className="alpha-memory-phi-list">
+            {recurring.map((structure) => (
+              <PhiStructureDetail key={structure.phi_id} structure={structure} />
+            ))}
+          </ul>
+        </details>
+      ) : (
+        <p className="alpha-memory-none-recurring-note">No exact historical recurrence found for this Alpha.</p>
+      )}
+    </li>
+  );
+}
+
+function AlphaMemoryPanel({ alphaMemory }: { alphaMemory: AlphaMemorySection | null | undefined }) {
+  if (!alphaMemory) {
+    return null; // Historical run predating Step 1, or malformed payload -- never fabricate a memory section.
+  }
+  const phiByAlpha = new Map<string, AlphaMemoryPhiStructure[]>();
+  for (const structure of alphaMemory.phi_structures) {
+    const list = phiByAlpha.get(structure.alpha_id) ?? [];
+    list.push(structure);
+    phiByAlpha.set(structure.alpha_id, list);
+  }
+  const instability = alphaMemory.instability_signals;
+  const instabilityCount =
+    (instability?.alpha_attribution_variance.length ?? 0) + (instability?.edge_type_variance.length ?? 0);
+
+  return (
+    <section className="panel alpha-memory-panel">
+      <h2>Alpha Memory</h2>
+      {/* Product Demo Hardening Phase 2D: the default copy states the
+          accurate, narrowest claim the current implementation supports --
+          never implying memory changes current scoring. The raw
+          mode/activation_modulation_applied values are preserved verbatim
+          under Technical details below, never deleted. */}
+      <p className="alpha-memory-context-note">
+        {alphaMemory.activation_modulation_applied
+          ? "Historical memory modulation is currently applied to this run's activation."
+          : "Historical memory is shown for context and does not alter the current activation result."}
+      </p>
+      <details className="alpha-memory-technical-detail alpha-memory-mode-detail">
+        <summary>Technical details</summary>
+        <dl>
+          <div>
+            <dt>Mode</dt>
+            <dd className="alpha-memory-shadow-badge">{alphaMemory.mode}</dd>
+          </div>
+          <div>
+            <dt>Activation modulation applied</dt>
+            <dd>{alphaMemory.activation_modulation_applied ? "Yes" : "No"}</dd>
+          </div>
+        </dl>
+      </details>
+      {alphaMemory.alpha_memory_summary.length === 0 ? (
+        <EmptyState title="No current Alpha structures to compare against history for this run." />
+      ) : (
+        <ul className="alpha-memory-list">
+          {alphaMemory.alpha_memory_summary.map((entry) => (
+            <AlphaMemoryEntry
+              key={entry.alpha_id}
+              summaryEntry={entry}
+              phiStructures={phiByAlpha.get(entry.alpha_id) ?? []}
+            />
+          ))}
+        </ul>
+      )}
+      {alphaMemory.aggregate_fingerprints.length > 0 || instabilityCount > 0 ? (
+        <details className="alpha-memory-technical-detail alpha-memory-secondary-diagnostics">
+          <summary>Secondary diagnostics (technical)</summary>
+          {alphaMemory.aggregate_fingerprints.length > 0 ? (
+            <p>
+              Whole-Alpha aggregate structure fingerprint is a secondary diagnostic only — it is not the primary
+              recurrence signal shown above.
+            </p>
+          ) : null}
+          {instabilityCount > 0 ? (
+            <p>
+              {instabilityCount} attribution/edge-type variance signal{instabilityCount === 1 ? "" : "s"} observed
+              across this ticker's historical runs (audit-only; never affects recurrence above).
+            </p>
+          ) : null}
+        </details>
       ) : null}
     </section>
   );
@@ -506,6 +663,10 @@ export function ResearchRunPage() {
             </section>
           ) : null}
 
+          {research && "summary" in research ? (
+            <StructuralSnapshot runId={runId} research={research} />
+          ) : null}
+
           {research && "data_sanity_status" in research ? (
             <section className="panel data-quality-panel">
               <h2>Data Quality</h2>
@@ -540,6 +701,10 @@ export function ResearchRunPage() {
           <UnclassifiedFindingsPanel
             runId={runId}
             response={research && "summary" in research ? research : null}
+          />
+
+          <AlphaMemoryPanel
+            alphaMemory={research && "summary" in research ? research.alpha_memory : null}
           />
         </>
       ) : null}

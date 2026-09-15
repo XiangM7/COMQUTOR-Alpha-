@@ -1,0 +1,659 @@
+{
+  "schema_version": "v0_1_3_a102_cross_company_integrity_audit.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "test_files_changed": [],
+  "commit": false,
+  "push": false,
+  "executive_summary": {
+    "a102_legitimate_system_recovery_targets": [
+      "NVDA",
+      "MSFT",
+      "AMD"
+    ],
+    "a102_gold_review_negative_control": "SNDK",
+    "cross_company_contamination_confirmed_C1": 1,
+    "company_name_false_negative_candidates_total": 60,
+    "company_name_false_negative_in_final_evidence": 39,
+    "company_name_false_negative_excluded_for_other_reasons_ambiguous": 21,
+    "shared_entity_root_cause": "PARTIALLY",
+    "p0_integrity_defects": 1,
+    "p1_implementation_defects": 1,
+    "p2_research_coverage_gaps": 2,
+    "p3_semantic_design_gaps": 1,
+    "etf_product_model_gaps": 1,
+    "recommended_first_implementation_target": "P0 -- the AMD A201 Silicon Motion/SanDisk cross-company evidence-ownership contamination (Alpha Mapper Pure-LLM matched_alpha assignment has no entity-ownership veto), because evidence-correctness integrity outranks score recovery and this defect is the only confirmed case of a claim about zero-relationship foreign companies counting as direct ticker evidence anywhere in the six-run corpus."
+  },
+  "a102_semantic_contract": {
+    "source": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (A101/A102/A103 definitions) + comqutor_alpha/structure_engine/ai_alpha_discriminator.py (AI hard gate, canonical authority)",
+    "A101_AI_Expansion": "core_thesis: 'AI training and adoption increase demand for accelerators and AI-related equities.' Anchor groups: training (AI training, pretraining, fine-tuning...), accelerator (GPU, AI accelerator, AI chip...), investment (AI capex, AI investment...), adoption (AI adoption). Gate requires one of these anchors co-located with a change predicate in the same clause.",
+    "A102_Inference_Explosion": "core_thesis: 'Enterprise AI applications and AI agents increase inference compute demand.' Single flat anchor group 'inference': inference, AI inference, inference workload(s), inference demand, inference request(s)/traffic/capacity, model/serving workload/demand/capacity, token generation/volume/tokens generated/processed, AI agent(s)/agent workload(s), enterprise AI usage/application(s), production AI/model deployment. Gate requires an inference anchor co-located with a change predicate in the same clause.",
+    "A103_AI_Infrastructure": "core_thesis: 'AI buildout drives datacenter, power, cooling, networking, and server demand.' Anchor groups: datacenter_facilities, compute_hardware, networking, power, cooling -- physical buildout only, locative-preposition-excluded (a bare 'in data centers' does not count).",
+    "decision_table": [
+      {
+        "example": "'AI demand is growing'",
+        "classification": "A101 only (generic 'AI'/'adoption'-level demand, no inference-specific or infrastructure-specific anchor)"
+      },
+      {
+        "example": "'Microsoft is increasing AI capex'",
+        "classification": "A101 (investment anchor group) and/or A103 (capex/buildout), NOT automatically A102 -- capex language alone contains no inference anchor"
+      },
+      {
+        "example": "'inference token volume doubled'",
+        "classification": "Strongly A102 -- 'token volume' is an explicit A102 anchor phrase co-located with the predicate 'doubled'"
+      },
+      {
+        "example": "'MI-series demand is increasing'",
+        "classification": "Ambiguous -- MI-series (AI accelerator) is an A101 'accelerator' anchor; A102 requires the inference WORKLOAD specifically to be named, not merely a chip family associated with both training and inference"
+      },
+      {
+        "example": "'AI accelerator demand increased because inference workloads expanded'",
+        "classification": "Potentially BOTH A101 (accelerator+increased) and A102 (inference workloads+expanded) -- each anchor has its own co-located predicate in this sentence, so both gates can independently pass on the same claim (the gate never prevents multi-alpha admission except the one documented A101-adoption-suppression rule)"
+      }
+    ],
+    "cross_alpha_special_rule": "If A101's only qualifying anchor is the broad 'adoption' group and A102 independently passes on the same claim, A101 is suppressed (a bare 'AI adoption' mention riding alongside genuine inference evidence is not independent A101 corroboration). No other suppression rule exists between A101/A102/A103."
+  },
+  "track_a_nvda_a102": {
+    "claims_found": 8,
+    "first_broken_stage": "B1 stance / relation classification (relation='mention' for 6 of 8; relation='activation' with ai_gate_passed=False for the other 2)",
+    "detail": "All 8 claims mentioning 'inference' in NVDA's raw corpus are competitive-threat framed (custom ASICs from Google/Amazon/Microsoft eroding NVDA's inference-market share). None assert NVDA's OWN inference demand/token growth. Two claims (bull_researcher:23, bear_researcher:22) reach relation='activation' but fail the AI hard gate outright (ai_gate_passed=False) because their predicate ('is', 'will be challenged') is not a recognized change predicate co-located with the inference anchor. The other 6 are classified relation='mention' (rejection: 'candidate is only mentioned or appears in an unmapped context') because they describe a competitive dynamic, not an asserted NVDA-specific change.",
+    "root_cause": "A102-N1 QUERY_COVERAGE_GAP (primary) -- the raw research corpus contains zero 'token' mentions and the only 'inference' content that exists is uniformly bearish/competitive framing, never the real, externally-confirmed bullish 'tokens=inference explosion, NVIDIA captures it' narrative (Jensen Huang: 'the product is tokens'; confirmed STRONG_GOLD by the Gold Validity Audit).",
+    "root_cause_note": "This is NOT B1-stance misclassification -- the deterministic relation/gate logic correctly rejected content that is genuinely non-supportive. The break is upstream: the bullish narrative was never surfaced by NVDA's research agents in this run.",
+    "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE -- contingent entirely on research/query coverage improvement (Track A Option A), not on any scoring/gate/entity change."
+  },
+  "track_a_msft_a102": {
+    "company_names_production_audit": {
+      "call_site": "comqutor_alpha/graph_engine/pipeline.py line 183, score_and_assemble_structure_graph() -> score_alpha_activations_v2(alpha_matches_payload, graph_edges=..., ticker=graph.get('ticker'), structured_records=..., taxonomy=..., run_timestamp=..., as_of=...)",
+      "finding": "company_names is NEVER passed at this call site -- confirmed by direct grep of pipeline.py showing zero occurrences of 'company_names' anywhere in the file. It silently defaults to the score_alpha_v2/score_alpha_activations_v2 signature default company_names: Sequence[str] = ().",
+      "caller": "comqutor_alpha.graph_engine.pipeline.score_and_assemble_structure_graph (Week 3 structure-graph assembly, the only production caller of score_alpha_activations_v2)",
+      "callee": "comqutor_alpha.graph_engine.activation_scorer_v2._is_ticker_specific(record, ticker, company_names, entities_by_claim), reached via score_alpha_v2 -> _gather_qualifying_evidence -> _qualify_groups_for_activation",
+      "parameter_definition": "activation_scorer_v2.py score_alpha_v2()/score_alpha_activations_v2(): 'company_names: Sequence[str] = ()' -- a real, documented, type-annotated parameter, not a placeholder stub",
+      "upstream_producer_search": "Exhaustive grep across comqutor_alpha/ for any ticker-to-company-name registry, TICKER_REGISTRY, ticker_metadata, KNOWN_TICKERS, or similar found NOTHING. metadata.json (each run's own metadata artifact) carries only 'ticker': 'MSFT' -- no legal name, no aliases, no company-name field anywhere.",
+      "aliases_exist_but_unused": "NO -- there is no alias list anywhere in the codebase for any of the six tickers (Microsoft, Nvidia, SanDisk, Taiwan Semiconductor/TSMC, Advanced Micro Devices/AMD/Ryzen/Instinct/Epyc). This is not a wiring bug in the narrow sense (nothing exists to wire).",
+      "classification": "MISSING_METADATA_PROPAGATION -- more precisely, no metadata source for company_names exists ANYWHERE upstream (not merely unwired). The parameter was added to the scorer's signature with the correct intent, but no producer of that data was ever built.",
+      "all_six_runs_scanned": "company_names_empty_runs = 6 / 6 -- every one of NVDA/QQQ/MSFT/SNDK/TSM/AMD's structure_graph.json activation payload was produced via the identical call site with the identical missing parameter. 6/6, stated explicitly."
+    },
+    "blast_radius_all_six_runs": {
+      "methodology": "For every claim in each run's alpha_matches.json with a non-null matched_alpha, checked whether the literal ticker symbol is token-boundary-absent from the claim text while the ticker's real company name/product-brand IS token-boundary-present (using the SAME _token_boundary_match function activation_scorer_v2.py uses in production, imported and run directly, read-only).",
+      "total_candidates_found": 60,
+      "per_ticker": [
+        {
+          "ticker": "NVDA",
+          "company_terms_checked": [
+            "Nvidia"
+          ],
+          "in_final_evidence_detail_true": 8,
+          "excluded_other_reasons": 6,
+          "alphas_affected": [
+            "A101",
+            "A201",
+            "A301",
+            "A304",
+            "A601"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "company_terms_checked": [
+            "Microsoft"
+          ],
+          "in_final_evidence_detail_true": 14,
+          "excluded_other_reasons": 7,
+          "alphas_affected": [
+            "A101",
+            "A102",
+            "A103",
+            "A301"
+          ]
+        },
+        {
+          "ticker": "SNDK",
+          "company_terms_checked": [
+            "SanDisk"
+          ],
+          "in_final_evidence_detail_true": 9,
+          "excluded_other_reasons": 1,
+          "alphas_affected": [
+            "A103",
+            "A201",
+            "A601"
+          ]
+        },
+        {
+          "ticker": "TSM",
+          "company_terms_checked": [
+            "Taiwan Semiconductor",
+            "TSMC"
+          ],
+          "in_final_evidence_detail_true": 7,
+          "excluded_other_reasons": 4,
+          "alphas_affected": [
+            "A103",
+            "A201",
+            "A301",
+            "A601"
+          ]
+        },
+        {
+          "ticker": "AMD",
+          "company_terms_checked": [
+            "Advanced Micro Devices",
+            "AMD",
+            "Ryzen",
+            "Instinct",
+            "Epyc"
+          ],
+          "in_final_evidence_detail_true": 1,
+          "excluded_other_reasons": 3,
+          "alphas_affected": [
+            "A201"
+          ]
+        },
+        {
+          "ticker": "QQQ",
+          "company_terms_checked": [],
+          "note": "No single company name exists for an ETF -- deliberately excluded here and handled as the separate ETF_ENTITY_MODEL_GAP (Section 16/below), not counted in the 60."
+        }
+      ],
+      "classification_of_60": {
+        "CLEAR_FALSE_NEGATIVE_in_final_evidence_but_zero_ticker_specificity_credit": 39,
+        "AMBIGUOUS_excluded_for_reasons_independent_of_ticker_specificity": 21,
+        "note_on_ambiguous_21": "These 21 candidates were excluded from final evidence for OTHER stated reasons (Secondary-duplicate dedup, weak/zero match_score, non-activation relation) that are independent of the ticker-specificity check -- fixing company_names alone would not flip these into evidence, so they are not counted as clear false negatives, though several (e.g. MSFT bear_researcher claim:23 'Microsoft is effectively a contract manufacturer for OpenAI's compute needs') plausibly deserve individual re-review; that is out of this audit's scope (no reclassification performed)."
+      },
+      "representative_rows": [
+        {
+          "ticker": "MSFT",
+          "alpha": "A102",
+          "claim_id": "fundamental_agent:fundamentals_report:claim:74",
+          "text": "AI Monetization (Copilot & AI Services): Microsoft's AI products...are driving inference demand and enterprise adoption...",
+          "ticker_symbol_present": false,
+          "company_name_present": true,
+          "token_boundary_match_result": true,
+          "source_role": "PRIMARY_RESEARCH",
+          "in_final_evidence": true,
+          "classification": "CLEAR_FALSE_NEGATIVE"
+        },
+        {
+          "ticker": "MSFT",
+          "alpha": "A103",
+          "claim_id": "fundamental_agent:fundamentals_report:claim:72",
+          "text": "Azure & Cloud Infrastructure: The massive capex buildout signals Microsoft's commitment to expanding Azure capacity...",
+          "ticker_symbol_present": false,
+          "company_name_present": true,
+          "token_boundary_match_result": true,
+          "source_role": "PRIMARY_RESEARCH",
+          "in_final_evidence": true,
+          "classification": "CLEAR_FALSE_NEGATIVE"
+        },
+        {
+          "ticker": "SNDK",
+          "alpha": "A201",
+          "claim_id": "news_agent:news_report:claim:44",
+          "text": "Both Micron and Sandisk are benefiting from 'a surge in memory demand'...",
+          "ticker_symbol_present": false,
+          "company_name_present": true,
+          "token_boundary_match_result": true,
+          "source_role": "PRIMARY_RESEARCH",
+          "in_final_evidence": true,
+          "classification": "CLEAR_FALSE_NEGATIVE"
+        },
+        {
+          "ticker": "TSM",
+          "alpha": "A201",
+          "claim_id": "news_agent:news_report:claim:8",
+          "text": "Notably, TSMC's equipment requirements grew 1.9x in six months...",
+          "ticker_symbol_present": false,
+          "company_name_present": true,
+          "token_boundary_match_result": true,
+          "source_role": "PRIMARY_RESEARCH",
+          "in_final_evidence": true,
+          "classification": "CLEAR_FALSE_NEGATIVE"
+        },
+        {
+          "ticker": "AMD",
+          "alpha": "A201",
+          "claim_id": "fundamental_agent:fundamentals_report:claim:84",
+          "text": "Client PC: Recovery in the PC market with Ryzen processors.",
+          "ticker_symbol_present": false,
+          "company_name_present": true,
+          "token_boundary_match_result": true,
+          "source_role": "PRIMARY_RESEARCH",
+          "in_final_evidence": true,
+          "classification": "CLEAR_FALSE_NEGATIVE"
+        }
+      ],
+      "conclusion": "MSFT A102 is not an isolated incident. The company_names=() gap is a SYSTEMIC defect confirmed to silently zero out ticker-specificity credit for at least 39 already-qualifying, real evidence facts across 5 of 6 tickers (all except QQQ, which is architecturally distinct)."
+    },
+    "full_counterfactual": {
+      "ticker_specificity_only_fix": "34.9674 -> 44.9674 (already established: +10.0 contribution from ticker_specificity raw 0->100). Still short of the 50.0 activation threshold by 5.0326.",
+      "remaining_blocker_after_ticker_specificity_fix": "INSUFFICIENT_UNIQUE_EVIDENCE + INSUFFICIENT_AGENT_INDEPENDENCE (both still-active cap_reason_codes). Only ONE independent qualifying Primary fact exists (fundamental_agent:claim:74); the only other member of its evidence_fact_group (bull_researcher:claim:14) is correctly excluded as SECONDARY_DUPLICATE_OF_PRIMARY -- a correct dedupe, not an attrition bug. unique_semantic_groups=1 (saturation=4.0, so evidence_quality raw is capped near 15 even at full per-fact quality), distinct_agents=1 (coverage_denominator=3, so agent_independence raw stays low until a SECOND independent Primary agent corroborates the same theme).",
+      "exact_formulas_used": {
+        "evidence_quality_raw": "min(100, unique_contribution_sum / 4.0 * 100) where unique_contribution_sum = sum over unique semantic groups of max(match_score * RELATION_WEIGHTS[relation] * ASSERTION_WEIGHTS[assertion_status])",
+        "agent_independence_raw": "agent_coverage*0.70 + cross_agent_confirmation*0.30, where agent_coverage = min(distinct_agents/3, 1)*100 and cross_agent_confirmation = min(multi_agent_groups/2, 1)*100"
+      },
+      "counterfactual_plus_one_legitimate_A102_primary_fact": {
+        "assumption": "one new, ticker-specific, asserted/activation-relation Primary fact from a DIFFERENT primary agent (e.g. news_agent), quality comparable to the existing fact (match_score ~0.6058)",
+        "new_unique_semantic_groups": 2,
+        "new_unique_contribution_sum": 1.2116,
+        "new_evidence_quality": "raw=30.29, contribution=10.6 (+5.3 vs current)",
+        "new_distinct_agents": 2,
+        "new_agent_independence": "agent_coverage=66.67, raw=46.67, contribution=9.33 (+4.67 vs current)",
+        "ticker_specificity_after_fix": "raw=100 (2/2 ticker-specific), contribution=10.0 (unchanged from the ticker-specificity-only-fix scenario)",
+        "local_structure_recency_direction_unchanged": "10.0 + 10.0 + 5.0 (assumed unchanged, conservative)",
+        "new_total_score": "10.6 + 9.33 + 10.0 + 10.0 + 10.0 + 5.0 = 54.93",
+        "crosses_50": true,
+        "official_hit_recovery": "YES (reconstructable, formula-exact, under the stated assumption of one comparable-quality additional Primary fact) -- but this requires BOTH the company_names fix AND one additional genuinely independent Primary source discussing MSFT's Copilot/Azure inference growth, which does not currently exist in this run's corpus. Two separate conditions, not one."
+      },
+      "counterfactual_plus_two_legitimate_A102_primary_facts": {
+        "new_unique_semantic_groups": 3,
+        "new_distinct_agents": 3,
+        "new_evidence_quality": "unique_contribution_sum ~1.8174, raw=45.44, contribution=15.9 (+10.6)",
+        "new_agent_independence": "agent_coverage=100, raw=70.0, contribution=14.0 (+9.33)",
+        "new_total_score": "15.9 + 14.0 + 10.0 + 10.0 + 10.0 + 5.0 = 64.9",
+        "crosses_50": true,
+        "note": "Both scenarios use the EXACT documented formula constants (EVIDENCE_QUALITY_SATURATION=4.0, AGENT_COVERAGE_DENOMINATOR=3, AGENT_COVERAGE_SHARE=0.70, CROSS_AGENT_CONFIRMATION_SHARE=0.30) -- no invented weights. The only assumption is the quality/ticker-specificity of the hypothetical new fact(s), which cannot be verified without new research (out of scope for this offline audit)."
+      }
+    },
+    "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE -- the mechanism is fully understood and formula-exact, but requires two independent conditions (company_names fix + at least one new independently-sourced Primary A102 fact) neither of which is sufficient alone."
+  },
+  "track_a_amd_a102": {
+    "mi_series_claims_found": 8,
+    "gate_re_execution_methodology": "Directly imported and ran comqutor_alpha.structure_engine.ai_alpha_discriminator.evaluate_ai_alpha_gates() offline against each claim's raw text (no LLM call; this is the deterministic, code-only hard gate) to verify exactly which anchor/predicate combinations did or did not fire.",
+    "per_claim": [
+      {
+        "claim_id": "sentiment_agent:sentiment_report:claim:28",
+        "agent": "sentiment_agent",
+        "role": "PRIMARY",
+        "text": "AMD's new Threadripper Halo Station workstation...up to four Instinct MI350P accelerators...",
+        "A102_gate_passed": false,
+        "classification": "NON_A102 -- product spec listing, no anchor or predicate at all"
+      },
+      {
+        "claim_id": "sentiment_agent:sentiment_report:claim:53",
+        "agent": "sentiment_agent",
+        "role": "PRIMARY",
+        "text": "...data center revenue and EPS projected to double by 2027, driven by AI accelerators (Instinct MI350P) and server CPUs...",
+        "A102_gate_passed": false,
+        "A101_gate_passed": true,
+        "A103_gate_passed": true,
+        "classification": "GENERIC_AI_ACCELERATOR -- passes A101/A103 (accelerator+datacenter anchors with 'double'/'driven' predicates) but contains no inference anchor at all"
+      },
+      {
+        "claim_id": "sentiment_agent:sentiment_report:claim:61",
+        "agent": "sentiment_agent",
+        "role": "PRIMARY",
+        "text": "New product momentum (Threadripper Halo Station with Instinct MI350P accelerators).",
+        "A102_gate_passed": false,
+        "classification": "NON_A102 -- no predicate"
+      },
+      {
+        "claim_id": "news_agent:news_report:claim:14",
+        "agent": "news_agent",
+        "role": "PRIMARY",
+        "text": "This raises the competitive bar for AMD's MI-series accelerators...clear #2 in AI compute...",
+        "A102_gate_passed": false,
+        "classification": "NON_A102 -- competitive-positioning language, no recognized change predicate"
+      },
+      {
+        "claim_id": "fundamental_agent:fundamentals_report:claim:82",
+        "agent": "fundamental_agent",
+        "role": "PRIMARY",
+        "text": "Data Center / AI Accelerators (MI-series GPUs): The massive revenue acceleration and margin expansion strongly suggest AMD's Instinct MI300/MI400 series AI accelerators are ramping rapidly, competing with NVIDIA in the AI training/inference market.",
+        "A102_gate_passed": false,
+        "A101_gate_passed": false,
+        "A103_gate_passed": false,
+        "classification": "MIXED_TRAINING_INFERENCE -- closest near-miss (see predicate-vocabulary finding below)"
+      },
+      {
+        "claim_id": "bull_researcher:investment_debate_state.bull_history:claim:33",
+        "agent": "bull_researcher",
+        "role": "SECONDARY",
+        "text": "That margin expansion is the direct result of the mix shift toward high-margin data center AI accelerators (MI350, MI400 series).",
+        "A102_gate_passed": false,
+        "classification": "GENERIC_AI_ACCELERATOR -- 'expansion' (nominal) is not in the predicate vocabulary; no inference anchor present regardless"
+      },
+      {
+        "claim_id": "research_manager:investment_plan:claim:15",
+        "agent": "research_manager",
+        "role": "SECONDARY",
+        "text": "Watch the competitive landscape closely: ...AMD's MI350/MI400 data center traction are the swing factors.",
+        "A102_gate_passed": false,
+        "classification": "NON_A102"
+      },
+      {
+        "claim_id": "aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:37",
+        "agent": "aggressive_risk_analyst",
+        "role": "SECONDARY",
+        "text": "AMD's MI-series accelerators are ramping, and the revenue trajectory proves it.",
+        "A102_gate_passed": false,
+        "classification": "GENERIC_AI_ACCELERATOR -- 'ramping' not in predicate vocabulary; no inference anchor present regardless"
+      }
+    ],
+    "true_a102_eligible_count_after_manual_audit": 0,
+    "closest_near_miss": "fundamental_agent:claim:82 -- CODE-VERIFIED SEGMENT ANALYSIS: the claim splits (on ':'/','/'.') into 3 segments: (1) 'data center ai accelerators mi series gpus', (2) 'the massive revenue acceleration and margin expansion strongly suggest amd s instinct mi300 mi400 series ai accelerators are ramping rapidly', (3) 'competing with nvidia in the ai training inference market'. Segment 3 contains the A102 anchor 'inference' but its only verb is 'competing' -- NOT in the predicate vocabulary. Segment 2 contains the predicate 'ramping' -- but 'ramp'/'ramping' is ITSELF ABSENT from POSITIVE_PREDICATES (verified: evaluate_ai_alpha_gates('AMD inference demand is ramping rapidly.') returns A102 passed=False; the equivalent sentence with 'accelerating' instead of 'ramping' DOES pass). Even if 'ramping' were added to the predicate vocabulary, this specific claim would STILL fail because the inference anchor (segment 3) and the ramping predicate (segment 2) are in DIFFERENT clauses, and the gate requires same-segment co-location.",
+    "root_cause_classification": "MIXED -- two independent, compounding factors: (1) AMD-A102-RESEARCH_GAP (primary): none of AMD's 8 real MI-series claims assert an inference-SPECIFIC demand/growth fact isolated from the bundled 'training/inference market' framing; the real external distinction (FP4-for-inference vs FP8-for-training) that made this genuinely STRONG_GOLD was never captured by AMD's own research agents. (2) AMD-A102-SEMANTIC_GAP (secondary, newly identified by this audit): the AI hard gate's POSITIVE_PREDICATES vocabulary is missing the common hardware/business term 'ramp'/'ramping' (and the nominal form 'acceleration'), which is a real, narrow, low-risk gap independent of the research question -- but fixing it alone would NOT flip claim:82 due to the separate clause-boundary issue.",
+    "correction_to_prior_audit": "The prior Evidence Starvation audit characterized this as 'the gate rejects bundled training/inference claims' -- direct gate re-execution shows the actual mechanism is more specific: it is not a deliberate anti-bundling exclusion (the gate would happily admit a claim asserting both A101 AND A102 in the same sentence, per the semantic contract's own example #5), it is a predicate-vocabulary gap plus a clause-boundary separation specific to how this particular claim was phrased.",
+    "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE -- primarily via research coverage improvement (an isolated, single-clause 'AMD inference demand increased' assertion would cleanly pass); a narrow predicate-vocabulary addition (Track A102 Option B) is a secondary, smaller lever that alone is insufficient for this specific claim."
+  },
+  "sndk_a102_negative_control": {
+    "score": 0.0,
+    "raw_supporting_claim_count": 0,
+    "mapper_candidate_appearance_count": 819,
+    "mapper_candidate_eligible_count": 0,
+    "conclusion": "TRUE EVIDENCE VACUUM, not a qualification/ticker-specificity/entity problem. No design option proposed in this audit (entity/ticker-specificity fixes, A102 research-coverage improvements, or A102 semantic-gate adjustments) can possibly activate SNDK A102, because there is no claim content of any kind to newly qualify -- SNDK_A102_FALSE_POSITIVE_RISK is evaluated as LOW for every option in Sections 18-19 on this basis. SNDK A102 remains a v1 Gold miss and is NOT treated as a system-recovery target, consistent with the prior Gold Benchmark Validity Audit's REVIEW_CANDIDATE classification (thematic-association risk: SNDK's real driver is AI-driven STORAGE demand, better fitting A103, not the compute/inference-specific A102 mechanism)."
+  },
+  "track_b_amd_a201_case_study": {
+    "claim_id": "949f685a-3945-4fd0-b7b9-362b37c90721:news_agent:news_report:claim:43",
+    "source": "news_agent:news_report",
+    "original_text": "Memory/storage: Silicon Motion up 186% in a year on NAND strength; SanDisk soaring on S&P 100 inclusion.",
+    "companies_entities_mentioned": [
+      "Silicon Motion",
+      "SanDisk"
+    ],
+    "run_ticker": "AMD",
+    "mapped_alpha": "A201",
+    "b1_stance": "evidence_stance=neutral_background, stance_reason_codes=['GENERIC_BACKGROUND'], stance_method=deterministic_fallback, stance_fallback_reason=provider_error",
+    "ticker_specific_status": "False (correctly -- neither 'AMD' nor any AMD alias appears in the text)",
+    "source_role": "PRIMARY_RESEARCH (news_agent)",
+    "fact_group": "086868a2a90b8ca8609efb67 is a DIFFERENT group (claim:76); this claim is its own singleton semantic group",
+    "qualified": true,
+    "contributed_to_activation_score": true,
+    "first_incorrect_decision": {
+      "stage": "Alpha Mapping -- Pure-LLM Semantic Authority classifier (comqutor_alpha/structure_engine/alpha_mapper.py::_classify_alpha_with_llm, lines ~354-450+)",
+      "exact_mechanism": "The deterministic candidate-scoring layer correctly found NO eligible candidate for this claim: eligible_candidates=[], deterministic_top_alpha=null, deterministic_match_status='no_match', and the A201 candidate_score itself has eligible=false with no positive keyword/factor match. However, the Pure-LLM Semantic Authority classifier -- documented in alpha_mapper.py as 'the ONLY source of the semantic Alpha result...unrestricted by deterministic candidate generation/eligibility/score threshold/AI hard gate' -- independently selected A201 (matched_alpha='A201', alpha_match_method='llm', reason='llm semantic classifier selected from full canonical taxonomy'), OVERRIDING the deterministic layer's correct rejection.",
+      "why_it_happened": "The LLM's classification prompt asks it to select the best-fitting canonical Alpha from the FULL taxonomy based on thematic/topical resemblance ('Memory/storage' + rally language + semiconductor-adjacent sector framing loosely resembles 'Semiconductor Supercycle'), but the prompt and validation contract (comqutor_alpha/structure_engine/alpha_mapper.py::_classify_alpha_with_llm's validate_response) contain NO requirement that the claim be substantively ABOUT the run's own ticker/company -- it only validates that the selected_alpha_id is a member of the canonical taxonomy. There is no entity-ownership check anywhere in the Alpha Mapping stage.",
+      "downstream_consequence": "matched_alpha='A201' then flows, unmodified, into the evidence-qualification pipeline (graph_builder/_gather_qualifying_evidence), which correctly marks the claim non-ticker-specific (so it does NOT falsely inflate ticker_specificity), but it STILL counts toward evidence_count, unique_evidence_count, distinct_supporting_agents, direction_consistency, and (most materially) agent_independence -- because none of those components check entity ownership, only ticker-specificity does."
+    }
+  },
+  "cross_company_contamination_scan_all_six_runs": {
+    "methodology": "Scanned every claim in every alpha's final evidence_detail (i.e. claims that actually contributed to that alpha's activation score, not merely candidates) across all six runs for mentions of ~19 well-known peer/competitor/supplier company names, using token-boundary matching.",
+    "total_evidence_contributing_claims_scanned": "all evidence_detail entries across 750+ total alpha_matches records across 6 runs",
+    "flagged_rows_total": 55,
+    "classification_counts": {
+      "C1_CLEAR_CROSS_COMPANY_CONTAMINATION": 1,
+      "C2_POSSIBLE_RELATIONAL_EVIDENCE": 39,
+      "C3_SECTOR_CONTEXT_CORRECTLY_NON_TICKER_SPECIFIC": 8,
+      "C4_MULTI_COMPANY_CLAIM_AMBIGUOUS": 0,
+      "C5_ETF_CONSTITUENT_CASE": 7
+    },
+    "c1_case": "AMD | A201 | news_agent:news_report:claim:43 -- the Silicon Motion/SanDisk claim (see Track B case study above). This is the ONLY claim across all six runs' entire qualifying-evidence corpus where a claim contributing to an alpha's activation score is EXCLUSIVELY about companies with zero established business relationship to the run ticker, in an unrelated sub-sector (NAND memory/storage vs AMD's CPU/GPU business), with no relational/comparative language tying it back to the run ticker at all.",
+    "c2_examples": [
+      "NVDA|A101|'Broadcom's CEO is guiding to $230 billion in AI revenue by 2028' -- explicitly framed as sector-wide AI-demand corroboration with 'Implication for NVDA: Strongly supportive of GPU demand & pricing power' in the same/paired claim",
+      "AMD|A101|'The single most dominant theme...is Nvidia's aggressive expansion of its competitive moat, which directly pressures AMD's AI accelerator ambitions' -- explicitly competitive/relational to AMD",
+      "MSFT|A101|'This is relevant to MSFT because OpenAI's competitive position directly drives Azure AI consumption' -- explicit relational linkage stated in the claim itself",
+      "SNDK|A201|'Both Micron and Sandisk are benefiting from a surge in memory demand' -- SNDK named directly alongside the peer, not exclusively about the peer"
+    ],
+    "c3_examples": [
+      "TSM|A101|'Competitive noise: Intel's EMIB-T packaging as a potential CoWoS alternative' -- correctly non-ticker-specific competitive/sector commentary, appropriately excluded from ticker_specific credit but legitimately part of the sector-theme Alpha's background evidence pool"
+    ],
+    "c5_examples": [
+      "QQQ|A103|'Marvell rose 6% on hyperscaler spending acceleration' -- QQQ genuinely holds Marvell as an index constituent; this is legitimate ETF-constituent evidence, not contamination, though it is currently (correctly, under the CURRENT single-company-oriented contract) excluded from ticker-specific credit -- see ETF Special Case below",
+      "QQQ|A201|'Signal: Semiconductor resilience...Supporting Evidence: Intel +4%, AMD +3%, Marvell +6%, NVIDIA up' -- same ETF-constituent pattern"
+    ],
+    "note": "C4 (multi-company ambiguous) had zero qualifying occurrences in the final evidence pool -- all multi-company claims found were resolvable into C2 (relational) or C5 (ETF) once the claim's own tie-back language was read."
+  },
+  "entity_ownership_matrix": {
+    "A_false_positive_foreign_evidence_counted_for_ticker": {
+      "count": 1,
+      "cases": [
+        "AMD A201 Silicon Motion/SanDisk claim"
+      ]
+    },
+    "B_false_negative_ticker_name_present_but_empty_company_names_causes_zero_ticker_specificity_credit": {
+      "count": 39,
+      "cases": "see blast_radius_all_six_runs above -- MSFT(14), SNDK(9), TSM(7), NVDA(8), AMD(1)"
+    },
+    "C_legitimate_relational_evidence_partner_customer_competitor": {
+      "count": 39,
+      "cases": "the C2 contamination-scan rows -- correctly included in evidence pools for sector-theme Alphas (A101/A103/A201/A304/A601), correctly excluded from direct ticker-specificity credit"
+    },
+    "D_generic_sector_evidence_correctly_non_ticker_specific": {
+      "count": 8,
+      "cases": "the C3 contamination-scan rows"
+    },
+    "bias_conclusion": "The entity/ticker-specificity layer is biased toward FALSE NEGATIVES (39 confirmed real, legitimate, already-qualifying facts denied ticker-specificity credit) far more than false positives (1 confirmed contamination case). The two are NOT symmetric and do NOT share a single mechanical cause (see shared-root-cause analysis below)."
+  },
+  "etf_special_case": {
+    "qqq_vs_nasdaq_100_vs_holdings_vs_constituent_claims": "The run ticker 'QQQ' is an ETF tracking the Nasdaq-100 index. Claims in the QQQ run corpus reference (a) QQQ itself (rare, mostly price/technical claims), (b) the Nasdaq-100 index generically, (c) aggregate 'AI capex cycle'/'semiconductor complex' trends, and (d) NAMED individual constituents (Intel, AMD, Marvell, NVIDIA) -- which is how QQQ's real economic exposure is naturally expressed in research prose.",
+    "can_company_names_represent_qqq": "NO in any single-string sense -- 'QQQ', 'Invesco QQQ Trust', and 'Nasdaq-100' are all valid aliases for the FUND itself, but none of them capture the actual mechanism (constituent exposure) that drives the ETF's price. A company_names-style fix (Track A Option A) is structurally inapplicable to QQQ.",
+    "ETF_ENTITY_MODEL_GAP": "YES",
+    "kept_separate": "This audit does NOT propose fixing ETF semantics -- consistent with the task's instruction, this is flagged as a distinct P4 PRODUCT_MODEL_GAP requiring a constituent-holdings data source and a new RELATIONAL_TICKER_EVIDENCE classification category, not a company_names or entity-ownership veto fix."
+  },
+  "shared_root_cause_analysis": {
+    "question": "Do MSFT's ticker-specificity false negative and AMD's cross-company false positive share one common weak entity-ownership model?",
+    "answer": "SHARED_ENTITY_ROOT_CAUSE: PARTIALLY",
+    "mechanism": "Both trace to the SAME underlying absence: the system has NO formal entity/issuer-ownership model anywhere (no ticker-to-company-alias registry, no claim-level 'is this claim substantively about ticker X' classifier). But they manifest at TWO DIFFERENT, INDEPENDENT pipeline stages via TWO DIFFERENT mechanisms: MSFT's false negative occurs at the ACTIVATION stage's ticker-specificity check (_is_ticker_specific), which is too strict because it has no company-name data to check against -- an absence-of-check-input problem. AMD's false positive occurs at the ALPHA MAPPING stage's Pure-LLM matched_alpha assignment, which has no ownership check AT ALL (not even a strict one) -- an absence-of-check-existence problem, one full pipeline stage earlier. Fixing MSFT's problem (populating company_names) does nothing for AMD's, because AMD's contamination is decided before ticker-specificity is ever evaluated. This is why the task's Section 20 instruction to not force one unified fix is correct: these are two real, separate defects that happen to share a root THEME (weak entity modeling) but require two separate, independently-sequenced fixes."
+  },
+  "design_options_entity_ownership": {
+    "option_A_populate_company_names_from_canonical_registry": {
+      "files_functions": [
+        "new: a small static ticker->company-name/alias registry (e.g. comqutor_alpha/reference_data/ticker_company_names.py)",
+        "comqutor_alpha/graph_engine/pipeline.py (wire company_names= into the existing score_alpha_activations_v2 call)"
+      ],
+      "fixes_msft_false_negative": true,
+      "fixes_amd_contamination": false,
+      "affects_qqq_etf": false,
+      "changes_primary_secondary": false,
+      "changes_b1": false,
+      "false_positive_risk": "LOW",
+      "false_negative_risk": "reduces but does not eliminate (residual gaps for unlisted product-brand aliases)",
+      "regression_risk": "LOW (purely additive; never removes an existing match term)",
+      "auditability": "HIGH (simple static table, easy to diff/review)",
+      "migration_complexity": "LOW",
+      "sndk_a102_false_positive_risk": "LOW (SNDK A102 is a true evidence vacuum -- no claim content exists to newly qualify regardless of company_names)"
+    },
+    "option_B_entities_by_claim_via_NER_extraction": {
+      "files_functions": [
+        "new NER/entity-extraction module (likely in structure_engine or data_sanity)",
+        "comqutor_alpha/graph_engine/pipeline.py (populate entities_by_claim, an existing but currently always-empty parameter)"
+      ],
+      "fixes_msft_false_negative": "YES, more generally (covers any company mentioned by name, not just a static list)",
+      "fixes_amd_contamination": "NOT DIRECTLY (different stage), though the extracted entity data could later feed a stage-2 ownership check",
+      "affects_qqq_etf": "Possible if extended to tag constituent relationships, but that is additional scope",
+      "changes_primary_secondary": false,
+      "changes_b1": false,
+      "false_positive_risk": "MEDIUM -- an NER pass that is too liberal about which entity is the claim's true SUBJECT could introduce the same class of contamination this audit is trying to remove, just relocated to the ticker-specificity layer",
+      "regression_risk": "MEDIUM-HIGH (new extraction logic, more moving parts, needs new test coverage)",
+      "auditability": "MEDIUM",
+      "migration_complexity": "MEDIUM-HIGH",
+      "sndk_a102_false_positive_risk": "LOW"
+    },
+    "option_C_deterministic_evidence_ownership_classification": {
+      "files_functions": [
+        "new module, e.g. comqutor_alpha/graph_engine/evidence_ownership.py",
+        "comqutor_alpha/structure_engine/alpha_mapper.py (post-LLM ownership veto on matched_alpha)",
+        "comqutor_alpha/graph_engine/activation_scorer_v2.py (_is_ticker_specific extended/superseded)"
+      ],
+      "fixes_msft_false_negative": true,
+      "fixes_amd_contamination": "YES -- the only option of the three that addresses Track B at all",
+      "affects_qqq_etf": "Needs its own RELATIONAL_TICKER_EVIDENCE category and an ETF-holdings data source to do this correctly",
+      "changes_primary_secondary": false,
+      "changes_b1": "NO in intent, but sits close enough to B1/matched_alpha assignment that careful sequencing review is required before implementation",
+      "false_positive_risk": "LOW once correctly built, MEDIUM implementation risk of building the classification itself incorrectly at first",
+      "false_negative_risk": "LOW-MEDIUM depending on classification completeness",
+      "regression_risk": "HIGH (touches two pipeline stages -- the most invasive of the three options)",
+      "auditability": "HIGH if built with explicit deterministic reason codes (consistent with the codebase's existing reason-code culture)",
+      "migration_complexity": "HIGH",
+      "sndk_a102_false_positive_risk": "LOW"
+    },
+    "preferred_minimal_option": "Option A for the MSFT-class false-negative problem (lowest risk, immediately buildable, zero Primary/Secondary/B1 impact, LOW SNDK false-positive risk). Option A alone does NOT address Track B -- a separate, NARROWLY SCOPED slice of Option C (an ownership veto limited to: 'if the Alpha-Mapper's LLM-selected matched_alpha's claim contains NO reference of any kind -- direct or relational -- to the run's own ticker/company, veto the match') is recommended as a second, independently-sequenced fix, not a unification of the two."
+  },
+  "design_options_a102_semantic_coverage": {
+    "option_A_research_query_coverage": {
+      "nvda_a102_impact": "HIGH -- directly targets the confirmed gap (zero 'token' mentions, competitive-only 'inference' framing)",
+      "msft_a102_impact": "LOW-MEDIUM (MSFT already has one real qualifying fact; more independent Primary sources would help agent_independence)",
+      "amd_a102_impact": "MEDIUM (better queries might surface a cleaner, single-clause inference-specific assertion distinct from the always-bundled training/inference framing)",
+      "sndk_a102_false_positive_risk": "LOW (cannot manufacture inference content for a company whose real business is storage, not compute)",
+      "taxonomy_change_required": false,
+      "provider_behavior_changed": "YES -- this touches TradingAgents' research query construction, which is Provider-facing and would need separate explicit authorization before any implementation",
+      "regression_risk": "LOW-MEDIUM",
+      "historical_generic_ai_evidence_could_leak_into_a102": false
+    },
+    "option_B_predicate_vocabulary_fix": {
+      "description": "Add the missing 'ramp'/'ramping' (and nominal 'acceleration'/'expansion') to POSITIVE_PREDICATES in ai_alpha_discriminator.py",
+      "nvda_a102_impact": "LOW (NVDA's block is at relation='mention'/stance classification, upstream of the gate; the gate never even evaluates most of NVDA's inference claims)",
+      "msft_a102_impact": "NONE (MSFT's existing qualifying claim already passes the gate cleanly)",
+      "amd_a102_impact": "MEDIUM-HIGH in principle, but INSUFFICIENT ALONE for the specific claim examined (claim:82's inference anchor and 'ramping' predicate sit in different clauses; the co-location requirement would still block it even after this vocabulary fix)",
+      "sndk_a102_false_positive_risk": "MEDIUM -- this is a GLOBAL change to a shared cross-cutting gate affecting every ticker's A101/A102/A103 evaluation, including SNDK's; requires an explicit SNDK regression check before any adoption",
+      "taxonomy_change_required": false,
+      "provider_behavior_changed": false,
+      "regression_risk": "MEDIUM (global vocabulary change needs a full regression sweep, not just AMD)",
+      "historical_generic_ai_evidence_could_leak_into_a102": false
+    },
+    "option_C_deterministic_multilabel_relaxed_colocation": {
+      "description": "Allow a weaker A102-supportive classification when an inference anchor appears ANYWHERE in a claim that already passes A101's gate, even in a different clause",
+      "nvda_a102_impact": "LOW (still blocked upstream at stance/relation classification, which this option does not touch)",
+      "msft_a102_impact": "NONE (already passing)",
+      "amd_a102_impact": "HIGH -- would directly unlock claim:82",
+      "sndk_a102_false_positive_risk": "HIGH -- this is precisely the pattern the task's own Section 25 stop-conditions flag ('makes every mixed training/inference claim A102'); NOT RECOMMENDED without extremely narrow scoping and full six-run regression proof of zero SNDK A102 side-effect",
+      "taxonomy_change_required": false,
+      "provider_behavior_changed": false,
+      "regression_risk": "HIGH",
+      "historical_generic_ai_evidence_could_leak_into_a102": true
+    },
+    "preferred_design_per_case": {
+      "NVDA": "Option A (research/query coverage) -- the only lever that addresses NVDA's actual break point",
+      "MSFT": "Neither A102-semantic option applies -- MSFT's blocker is entity ownership (Track A design), not semantic coverage",
+      "AMD": "Option A primarily; a narrowly-scoped Option B (predicate vocabulary addition only, no co-location relaxation) as a secondary, low-risk, SNDK-regression-tested improvement -- insufficient alone for the specific claim examined but may help other future claims phrased differently",
+      "rejected": "Option C -- HIGH SNDK false-positive risk, violates the task's own stop conditions"
+    }
+  },
+  "can_one_safe_fix_solve_all_three_a102_cases": {
+    "answer": "NO",
+    "reasoning": "Three independently-verified, non-overlapping failure mechanisms: NVDA = B1 stance/relation classification correctly rejecting genuinely non-supportive (competitive-threat-framed) content, a pure research-coverage gap; MSFT = entity-ownership/ticker-specificity gap plus independent-evidence thinness, a scoring/metadata gap with the underlying research content already correct; AMD = AI hard-gate predicate-vocabulary and clause co-location gap layered on top of a research gap (no claim ever isolates inference specifically from the bundled training/inference framing). No single code change touches all three break points."
+  },
+  "counterfactual_recovery_a102": {
+    "NVDA_A102": {
+      "minimally_needed_facts": "UNKNOWN precise (all six activation components are currently exactly 0; qualitatively more than one fact is very likely required since evidence_quality/agent_independence/ticker_specificity/local_structure are all at floor)",
+      "official_hit_recovery": "UNKNOWN"
+    },
+    "MSFT_A102": {
+      "with_company_names_fixed_plus_one_fact": "44.9674 + evidence_quality/agent_independence gains = 54.93 (see full_counterfactual above)",
+      "crosses_50": true,
+      "official_hit_recovery": "YES",
+      "with_company_names_fixed_plus_two_facts": "64.9"
+    },
+    "AMD_A102": {
+      "if_one_existing_MI_claim_legitimately_qualifies": "UNKNOWN precise -- none of the 8 existing MI-series claims genuinely qualify after manual semantic audit (0/8); this scenario requires a NEW claim, not requalification of an existing one",
+      "if_two_qualify": "UNKNOWN precise, same reason",
+      "official_hit_recovery": "UNKNOWN"
+    }
+  },
+  "counterfactual_integrity_impact_amd_a201": {
+    "before": {
+      "evidence_count": 5,
+      "score": 25.7333,
+      "level": "candidate"
+    },
+    "after_removing_contaminated_claim": {
+      "evidence_count": 4,
+      "agent_independence_change": "distinct_agents 2->1 (removes the only news_agent claim), agent_coverage 66.6667->33.3333, raw 46.6667->23.3333, contribution 9.3333->4.6667 (-4.6666)",
+      "evidence_quality_change": "unchanged -- the contaminated claim's own match_score was 0.0, contributing nothing to unique_contribution_sum (0.16 before and after)",
+      "other_components_unchanged": "local_structure_support (0), ticker_specificity (0), recency (10.0), direction_consistency (5.0) all unchanged",
+      "score": 21.0667,
+      "level": "candidate"
+    },
+    "alpha_hit_before": "MISS (25.7333 < 50)",
+    "alpha_hit_after": "MISS (21.0667 < 50) -- no change",
+    "conflict_impact": "NONE -- AMD's admitted main conflict (A101__A304) does not involve A201",
+    "conclusion": "Correcting this contamination case makes AMD A201's score WORSE (25.73 -> 21.07, a genuine 4.67-point decrease), not better. This is reported honestly per the task's explicit instruction that correctness takes priority over Alpha Hit; no Alpha Hit status changes either way since AMD A201 was already, and remains, a miss."
+  },
+  "cross_ticker_metric_impact_of_all_confirmed_contamination": {
+    "clear_contamination_cases_found": 1,
+    "estimated_impact_if_removed": "AMD A201 score decreases 25.7333 -> 21.0667 (-4.6666). No Alpha Hit status change (miss before and after). No level change (candidate before and after). No main-conflict impact. No evidence-review implication beyond this single claim.",
+    "honest_disclosure": "Correcting the one confirmed integrity defect found in this audit provably LOWERS a headline component score. This is disclosed explicitly and not hidden, per the task's requirement."
+  },
+  "priority_classification": {
+    "P0_INTEGRITY_DEFECT": [
+      {
+        "case": "AMD A201 Silicon Motion/SanDisk claim",
+        "reason": "evidence assigned to entirely unrelated companies counted as direct AMD evidence"
+      }
+    ],
+    "P1_IMPLEMENTATION_DEFECT": [
+      {
+        "case": "company_names=() never populated (MSFT A102 + 38 other confirmed false-negative claims across 5 tickers)",
+        "reason": "a real, type-annotated parameter designed to receive company-name data has no producer anywhere in the codebase"
+      }
+    ],
+    "P2_RESEARCH_COVERAGE_GAP": [
+      {
+        "case": "NVDA A102"
+      },
+      {
+        "case": "AMD A102"
+      }
+    ],
+    "P3_SEMANTIC_DESIGN_GAP": [
+      {
+        "case": "AMD A102 predicate-vocabulary + clause co-location gap (secondary contributor)"
+      }
+    ],
+    "P4_PRODUCT_MODEL_GAP": [
+      {
+        "case": "QQQ ETF ticker-specificity (ETF_ENTITY_MODEL_GAP=YES)"
+      }
+    ],
+    "P5_EXPECTED_CONSERVATIVE_GOLD_REVIEW": [
+      {
+        "case": "SNDK A102 -- true evidence vacuum, Gold REVIEW_CANDIDATE, not a system-fix target"
+      }
+    ]
+  },
+  "regression_risks_top_5": [
+    "Option C (entity ownership veto) touching Alpha Mapping could inadvertently suppress legitimate relational evidence (C2-class cases) if the veto is scoped too broadly -- must require a clean 'zero relationship of any kind' bar, not merely 'ticker not literally named'",
+    "Predicate-vocabulary expansion (A102 Option B) is a GLOBAL change to ai_alpha_discriminator.py affecting all six tickers' A101/A102/A103 gates simultaneously -- must be regression-tested against all six runs, especially SNDK, before adoption",
+    "Populating company_names (Entity Option A) with overly broad product-brand aliases (e.g. generic terms) risks reintroducing false-positive ticker-specificity matches -- alias curation must stay to genuine legal/common company names and clearly product-specific brand names (Ryzen, Instinct, Azure), never generic sector words",
+    "Any change to Alpha Mapping's Pure-LLM matched_alpha stage risks altering evidence_stance/matched_alpha for MANY claims beyond the ones this audit examined, given 750+ matches per run -- requires the full existing regression suite (item2_blind_holdout5, evidence_review_summary_v2's 200 rows) to be rerun before any implementation is considered complete",
+    "QQQ ETF-constituent handling (P4), if eventually built, must not be conflated with the single-company entity fix (P1) -- building one general-purpose 'entity ownership' system that tries to handle both simultaneously is exactly the forced-unification risk the task explicitly warns against"
+  ],
+  "required_negative_control_tests_design_only": [
+    "SNDK A102 must remain non-active (score below 50) under every proposed Entity Option A/B/C and A102 Option A/B implementation -- run offline replay against the frozen SNDK run artifacts before any production change",
+    "All 23 current Gold hits (61.0317% baseline) must be re-verified unchanged (no regression) after any entity-ownership or predicate-vocabulary change",
+    "AMD A201's score must be re-verified to genuinely account for evidence_count=4 (not 5) once the P0 fix is applied -- confirming the contamination is actually removed, not merely relabeled",
+    "The 39 confirmed company-name false-negative claims must be spot-checked post-fix to confirm ticker_specific_evidence_count increases exactly as predicted, with no unintended new matches",
+    "QQQ's admitted main conflict (A304__A601) and all six runs' main-conflict admissions must be re-verified unchanged after any entity-ownership change, since local_structure_support and conflict admissibility both consume qualifying-evidence sets"
+  ],
+  "recommended_implementation_order": [
+    "Phase 1: Fix the P0 AMD A201 evidence-ownership contamination first (narrowly-scoped ownership veto on Alpha-Mapper matched_alpha) -- correctness before score, and it is the single confirmed integrity defect",
+    "Phase 2: Wire company_names from a canonical static registry (Entity Option A) into pipeline.py's score_alpha_activations_v2 call -- fixes the 39-claim false-negative blast radius",
+    "Phase 3: Run an offline blast-radius replay against all six runs' frozen artifacts (no ticker runs) to confirm the predicted score/level changes for the 39 false-negative claims and zero SNDK A102 side-effect",
+    "Phase 4: Address A102 research/semantic gaps separately -- NVDA/AMD research-coverage improvements (Provider-facing, requires separate explicit authorization) and, if desired, the narrow predicate-vocabulary addition with full SNDK regression proof",
+    "Phase 5: Run the full existing test suite plus item2_blind_holdout5/evidence_review_summary_v2 regression check",
+    "Phase 6: Only after explicit authorization, a fresh six-ticker production run to measure real-world impact"
+  ],
+  "path_to_75_diagnostic_only": {
+    "potential_legitimate_gains": "MSFT A102 formula-exact recoverable to 54.93-64.9 IF both company_names is fixed AND at least one new independent Primary A102 fact is found (not yet found); NVDA/AMD A102 gains are UNKNOWN precise pending research-coverage work that has not been done",
+    "potential_legitimate_losses": "AMD A201 score decreases 25.7333 -> 21.0667 if the confirmed P0 contamination is corrected (no Alpha Hit status change since it was already a miss)",
+    "net_diagnostic_range": "Even in the most optimistic reconstructable scenario (MSFT A102 flips, requiring a not-yet-existing new fact), this audit adds at most ONE additional plausible conversion beyond what the prior Structure-side and Evidence-Starvation audits already identified. Combined with those audits' own conclusion (5 conversions needed, no credible HIGH-confidence path yet exists), this audit does NOT change the overall conclusion that 75% is not yet reachable with fixes identified so far.",
+    "disclaimer": "This section is diagnostic only, computed AFTER all correctness analysis, and no design decision in this audit was made to maximize this number."
+  },
+  "validation_checks": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "no_gold_v2_created": true,
+    "no_production_code_modified": true,
+    "no_tests_modified": true,
+    "no_ticker_runs": true,
+    "no_provider_calls": true,
+    "no_tradingagents_calls": true,
+    "no_threshold_changes": true,
+    "no_taxonomy_changes": true,
+    "no_b1_b2_b4_changes": true,
+    "no_alpha_hit_semantic_changes": true,
+    "nvda_msft_amd_a102_independently_traced": true,
+    "sndk_a102_retained_as_negative_control_only": true,
+    "amd_a201_contaminated_claim_exactly_traced": true,
+    "all_six_runs_scanned_for_contamination": true,
+    "false_positives_and_negatives_both_quantified": true,
+    "etf_behavior_kept_separate": true,
+    "counterfactual_metric_decrease_reported_honestly": true,
+    "no_fix_selected_merely_because_it_raises_alpha_hit": true
+  }
+}

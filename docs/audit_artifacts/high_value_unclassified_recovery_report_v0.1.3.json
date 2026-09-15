@@ -1,0 +1,45 @@
+{
+  "schema_version": "high_value_unclassified_recovery_report.v1",
+  "release": "v0.1.3",
+  "task": "COMQUTOR Alpha v0.1.3 QA Closure, Section G: High-value unclassified recovery",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "status": "ROLLFORWARD_FROM_V0.1.2.1_PENDING_FRESH_V0.1.3_RUNS",
+  "generated_at": "2026-09-01T00:00:00+00:00",
+  "why_this_is_a_rollforward_not_a_fresh_review": {
+    "reason": "v0.1.3 QA Closure Sections A-H (this section included) must complete offline, before Sections I/J execute one authorized real NVDA smoke test and the fresh six-ticker v0.1.3 production run set. No fresh v0.1.3 run data exists yet at the time this artifact was produced, so 'healthy semantic runs' still means the same Step 5A six-ticker coverage-validation runs (outputs/runs/_step5a_coverage_{nvda,qqq,msft,sndk,tsm,amd}) that docs/audit_artifacts/high_value_unclassified_recovery_report.json (v0.1.2.1) already reviewed exhaustively.",
+    "why_the_prior_conclusions_still_hold_unchanged": "This v0.1.3 session's own code changes (Section B: entity-exposure seed-status API overlay; Section C: alpha_level_classifier.py Active-level gate; Section D: conflict_detector.py bull_structure/bear_structure display filter) touch B4 qualification, the Conflict Detector, and Entity Exposure -- all stages strictly DOWNSTREAM of Alpha Mapper matching. None of them re-runs or re-scores match_status/candidate_scores/no_match classification for any claim. The 2091 MATCHED / 2764 NONE / 39 UNAVAILABLE split, and the 209-candidate reviewed pool and its per-item CORRECT_NONE/DUPLICATE_OR_LOW_VALUE/STRONG/BORDERLINE verdicts, are therefore byte-identical to v0.1.2.1's finding if re-run against this same source data today -- re-doing the full manual semantic re-adjudication would reproduce the same 209 rows with the same conclusions, not surface anything new.",
+    "what_could_change_this_on_the_fresh_v0.1.3_run_set": "A pre-existing (session-predating), unrelated repair already staged in comqutor_alpha/structure_engine/alpha_mapper.py -- ALPHA_CLASSIFIER_BATCH_SIZE reduced 40 -> 15, plus bounded ThreadPoolExecutor concurrency in week2_llm.py -- fixes the WEEK2_LLM_TIMEOUT starvation that caused some of the 39 UNAVAILABLE rows in the Step 5A run. A fresh v0.1.3 run under this repair could plausibly convert some prior UNAVAILABLE rows into a real MATCHED or NONE verdict, changing the NONE pool's composition. This report must be regenerated against the actual fresh v0.1.3 six-ticker run set once Section J completes -- carried forward as an explicit action item, not silently dropped."
+  },
+  "source_semantic_validation": {
+    "source": "outputs/runs/_step5a_coverage_{nvda,qqq,msft,sndk,tsm,amd}/alpha_matches.json (same Step 5A healthy six-ticker semantic coverage validation cited by the v0.1.2.1 report -- no newer healthy run exists yet)",
+    "six_ticker_coverage_percent": 99.2,
+    "matched": 2091,
+    "none": 2764,
+    "unavailable": 39
+  },
+  "total_valid_none": 2764,
+  "candidate_discovery_method": {
+    "description": "Unchanged from v0.1.2.1 -- see docs/audit_artifacts/high_value_unclassified_recovery_report.json for the full per-method breakdown and every one of the 209 individually reviewed rows.",
+    "total_reviewed_after_dedup": 209
+  },
+  "results": {
+    "STRONG_RECOVERY_CANDIDATE": 0,
+    "BORDERLINE_RECOVERY_CANDIDATE": 0,
+    "CORRECT_NONE": 208,
+    "DUPLICATE_OR_LOW_VALUE": 1,
+    "INSUFFICIENT_CONTEXT": 0
+  },
+  "target_status": {
+    "requested_target": ">=20 important recoveries (John's original ask, carried forward unchanged into v0.1.3 scope)",
+    "observed_result": "0 strong + 0 borderline (unchanged from v0.1.2.1)",
+    "result_code": "TARGET_NOT_SUPPORTED_BY_HEALTHY_SEMANTIC_DATA",
+    "note": "Not a refusal to tune the model -- the healthy post-Step-5A semantic data genuinely does not contain >=20 recoverable high-value unclassified claims. This finding predates v0.1.3 and is re-affirmed, not re-derived, here."
+  },
+  "no_production_changes_from_this_section": "Alpha Mapper, taxonomy, B1, B2, B4, Step-6 evidence qualification, and Step-7 display normalization remain untouched by Section G. No claim ID was hardcoded, no keyword fallback added, no ticker rule added, no persisted Alpha mapping rewritten.",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false,
+  "action_item_for_section_k_l_m": "Regenerate this report against the actual fresh v0.1.3 six-ticker selected_run_ids once Section J completes, and confirm whether the alpha_mapper.py batch-size/concurrency repair changed the UNAVAILABLE pool composition."
+}

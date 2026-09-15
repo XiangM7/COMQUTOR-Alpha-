@@ -498,7 +498,15 @@ def _raw_match(claim_id, alpha_id, evidence, *, score=0.8, stance="supports_alph
     return {
         "claim_id": claim_id,
         "source_agent_output_id": f"o_{claim_id}",
-        "agent": f"agent_{claim_id}",
+        # Step 6 (Primary vs Secondary Evidence Qualification): a real
+        # PRIMARY_RESEARCH agent identity, not a synthetic per-claim name.
+        # This helper feeds detect_alpha_conflicts's full pipeline (unlike
+        # _qualifying_claim above, which calls evaluate_conflict_admissibility
+        # directly and never passes through source-role qualification) --
+        # these tests exercise B2 threshold/gate logic, not source-role
+        # qualification, so evidence must resolve to PRIMARY (qualifies
+        # under existing rules unchanged).
+        "agent": "market_agent",
         "match_status": "matched",
         "matched_alpha": alpha_id,
         "matched_alpha_name": alpha_id,

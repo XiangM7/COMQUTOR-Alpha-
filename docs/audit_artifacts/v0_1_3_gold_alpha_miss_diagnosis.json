@@ -1,0 +1,1542 @@
+{
+  "schema_version": "v0_1_3_gold_alpha_miss_diagnosis.v1",
+  "task": "V0.1.3 GOLD ALPHA HIT MISS DIAGNOSIS -- OFFLINE / READ-ONLY (diagnosis only, no fixes)",
+  "gold_benchmark_version": "alpha_conflict_gold.v1",
+  "gold_benchmark_sha256_before_analysis": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_benchmark_sha256_after_analysis": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_unchanged": true,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "commit": false,
+  "push": false,
+  "hit_contract_reconfirmation": {
+    "authority": "comqutor_alpha/regression/regression_report_v3.py::_detected_alphas()",
+    "rule": "An Alpha counts as a hit only when final level in {active, dominant, regime_level}. candidate, capped_active (as a status label), blocked, ambiguous, unavailable never count.",
+    "reproduced_per_ticker_hit_rates": {
+      "NVDA": "5/7 = 71.43%",
+      "QQQ": "3/6 = 50.00%",
+      "MSFT": "3/6 = 50.00%",
+      "SNDK": "2/5 = 40.00%",
+      "TSM": "5/6 = 83.33%",
+      "AMD": "5/7 = 71.43%"
+    },
+    "reproduced_macro_average": 61.03174603174606,
+    "matches_prior_reported_61_03_percent": true,
+    "discrepancy_found": false
+  },
+  "totals": {
+    "gold_expected": 37,
+    "total_hits": 23,
+    "total_misses": 14,
+    "total_matches_prior_reported_14_misses": true
+  },
+  "aggregate_causes": {
+    "system_primary_causes": {
+      "A_true_recall_defect": 0,
+      "B_evidence_starvation": 7,
+      "C_structure_starvation": 7,
+      "D_gating_design_bottleneck": 0
+    },
+    "primary_cause_percentages_of_total_misses": {
+      "A": 0.0,
+      "B": 50.0,
+      "C": 50.0,
+      "D": 0.0
+    },
+    "gold_review_flags_E": 2,
+    "gold_review_flag_percentage_of_total_misses": 14.29,
+    "sum_A_through_D_equals_total_misses": true
+  },
+  "behavior_judgment_counts": {
+    "DEFECT": 0,
+    "EXPECTED_CONSERVATIVE_BEHAVIOR": 5,
+    "DESIGN_REVIEW_NEEDED": 7,
+    "GOLD_REVIEW_NEEDED": 2,
+    "INSUFFICIENT_DATA": 0
+  },
+  "why_D_is_zero": "cap_was_binding=false for all 14 misses (verified directly from each run's alpha_activations.json) -- the qualification_ceiling never actually clipped a higher raw score down in any case. Every miss fails purely because its own uncapped score never reached the 50-point ACTIVE_THRESHOLD; the ceiling mechanism was never the operative constraint. No miss has status=capped_active. Gating/ceiling design is therefore not implicated in any of the 14 misses.",
+  "why_A_is_zero": "Every missed Gold Alpha shows alpha_recognized_by_mapper_at_all=true (the Alpha Mapper generated deterministic candidate_scores entries for each, ranging from 25 to 819 scoring attempts per case). None show the mapper failing to engage with the Alpha at all. Where mapper engagement produced zero qualifying evidence (NVDA A102, SNDK A102), direct inspection of the underlying claims showed they were genuinely off-thesis (competitive-risk commentary, not the Alpha's actual bullish mechanism) or simply absent -- not a case of relevant on-thesis evidence existing but being missed.",
+  "per_ticker_breakdown": {
+    "NVDA": {
+      "gold_expected": 7,
+      "hits": 5,
+      "misses": 2,
+      "missed_alpha_ids": [
+        "A102",
+        "A201"
+      ],
+      "primary_cause_distribution": {
+        "B": 2
+      }
+    },
+    "QQQ": {
+      "gold_expected": 6,
+      "hits": 3,
+      "misses": 3,
+      "missed_alpha_ids": [
+        "A101",
+        "A201",
+        "A301"
+      ],
+      "primary_cause_distribution": {
+        "B": 1,
+        "C": 2
+      }
+    },
+    "MSFT": {
+      "gold_expected": 6,
+      "hits": 3,
+      "misses": 3,
+      "missed_alpha_ids": [
+        "A102",
+        "A304",
+        "A601"
+      ],
+      "primary_cause_distribution": {
+        "B": 1,
+        "C": 2
+      }
+    },
+    "SNDK": {
+      "gold_expected": 5,
+      "hits": 2,
+      "misses": 3,
+      "missed_alpha_ids": [
+        "A102",
+        "A103",
+        "A301"
+      ],
+      "primary_cause_distribution": {
+        "B": 1,
+        "C": 2
+      }
+    },
+    "TSM": {
+      "gold_expected": 6,
+      "hits": 5,
+      "misses": 1,
+      "missed_alpha_ids": [
+        "A301"
+      ],
+      "primary_cause_distribution": {
+        "C": 1
+      }
+    },
+    "AMD": {
+      "gold_expected": 7,
+      "hits": 5,
+      "misses": 2,
+      "missed_alpha_ids": [
+        "A102",
+        "A201"
+      ],
+      "primary_cause_distribution": {
+        "B": 2
+      }
+    }
+  },
+  "which_tickers_contribute_most": "SNDK contributes most in relative terms (40.00% hit rate, lowest of the six) because its 5-Alpha Gold set has the smallest denominator, so each of its 3 misses (60% of its own expected set) carries the largest single-ticker weight in the macro-average (each SNDK conversion is worth 1/5 = 3.33pp of the aggregate, the largest of any ticker). Structurally, SNDK's misses are dominated by NO_LOCAL_STRUCTURE_SUPPORT (2 of 3) plus one genuine evidence vacuum (A102) that also carries a Gold-review flag, since 'Inference Explosion' is a conceptually less direct thesis for a NAND/storage manufacturer than for a compute/inference chip vendor. QQQ and MSFT tie for the next-largest contribution (50.00% each) -- QQQ's misses split between evidence thinness (A101) and structure-only gaps (A201, A301); MSFT's split between evidence thinness (A102, three codes) and structure-only gaps (A304, A601), both A304 and A601 backed by substantial evidence volume that nonetheless produced zero qualifying local edges. TSM contributes least (83.33%, only 1 miss) and that single miss (A301) is the closest near-hit in the entire set (score 44.77, only 5.23pp from threshold, with the strongest evidence_quality of any missed Alpha) -- purely structure-blocked.",
+  "gap_quantification": {
+    "current_macro_average_percent": 61.03,
+    "target_percent": 75.0,
+    "gap_percentage_points": 13.97,
+    "marginal_macro_average_impact_per_ticker_conversion": {
+      "NVDA": {
+        "per_ticker_fraction": "1/7",
+        "macro_average_contribution_pp": 2.381
+      },
+      "QQQ": {
+        "per_ticker_fraction": "1/6",
+        "macro_average_contribution_pp": 2.778
+      },
+      "MSFT": {
+        "per_ticker_fraction": "1/6",
+        "macro_average_contribution_pp": 2.778
+      },
+      "SNDK": {
+        "per_ticker_fraction": "1/5",
+        "macro_average_contribution_pp": 3.333
+      },
+      "TSM": {
+        "per_ticker_fraction": "1/6",
+        "macro_average_contribution_pp": 2.778
+      },
+      "AMD": {
+        "per_ticker_fraction": "1/7",
+        "macro_average_contribution_pp": 2.381
+      }
+    },
+    "minimum_additional_legitimate_hits_required": 5,
+    "minimum_hits_verification": "4 conversions maximum possible improvement = 3xSNDK(3.333) + 1x(2.778) = 12.778pp < 13.97pp gap (insufficient). 5 conversions can reach >=75% via multiple combinations.",
+    "distinct_5_conversion_combinations_reaching_target": 61,
+    "example_5_conversion_combinations": [
+      {
+        "SNDK": 2,
+        "TSM": 1,
+        "AMD": 2,
+        "resulting_macro_average_percent": 75.24
+      },
+      {
+        "SNDK": 3,
+        "AMD": 2,
+        "resulting_macro_average_percent": 75.79
+      },
+      {
+        "QQQ": 1,
+        "MSFT": 1,
+        "SNDK": 3,
+        "resulting_macro_average_percent": 76.59
+      }
+    ],
+    "note": "This is diagnostic mathematics only. No recommendation is made to convert any specific miss merely to reach the threshold -- see per-miss diagnosis for whether each conversion would represent a legitimate finding versus a fix that shouldn't be forced."
+  },
+  "counterfactual_aggregate_impact": {
+    "all_A_recovered": {
+      "count": 0,
+      "new_macro_average_percent": null,
+      "note": "No A-classified misses exist."
+    },
+    "all_B_recovered": {
+      "count": 7,
+      "new_macro_average_percent": 79.44
+    },
+    "all_C_recovered": {
+      "count": 7,
+      "new_macro_average_percent": 81.59
+    },
+    "all_D_recovered": {
+      "count": 0,
+      "new_macro_average_percent": null,
+      "note": "No D-classified misses exist."
+    },
+    "interpretation": "Full recovery of either the B (evidence starvation) or C (structure starvation) bucket alone would independently exceed the 75% target -- the failure is not concentrated in one single mechanism; both evidence acquisition and local-structure extraction contribute roughly equally (7 misses each) to the shortfall. No double counting: A/B/C/D partitions are mutually exclusive by construction (each miss has exactly one primary cause)."
+  },
+  "capped_active_check": {
+    "gold_misses_currently_at_capped_active": 0,
+    "affected_ticker_alpha_ids": [],
+    "hypothetical_macro_average_if_capped_active_counted": 61.03,
+    "note": "No miss has status=capped_active (verified directly from alpha_activations.json for all 14). Counting capped_active as a hit would therefore make NO difference to the current result -- this is a non-factor in the current 61.03% shortfall, though the diagnostic question was verified rather than assumed."
+  },
+  "high_value_recovery_cross_check": {
+    "method": "Cross-referenced docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3_final.json (200 candidates, individually reviewed, 0 strong + 1 borderline) against the 14 missed Gold Alpha IDs. No classifiers rerun, no Provider calls.",
+    "matches_found": 3,
+    "detail": [
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A103",
+        "recovery_audit_verdict": "BORDERLINE_RECOVERY_CANDIDATE",
+        "recovery_audit_action": "None -- below the bar for actual recovery",
+        "implication": "Confirms SNDK A103's miss is not a hidden true-recall defect; independently supports its C (structure starvation) classification."
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A101",
+        "recovery_audit_verdict": "CORRECT_NONE",
+        "recovery_audit_action": "None",
+        "implication": "Confirms no additional qualifying evidence was missed by the mapper for QQQ A101; supports its B classification."
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A102",
+        "recovery_audit_verdict": "CORRECT_NONE",
+        "recovery_audit_action": "None",
+        "implication": "Confirms no additional qualifying evidence was missed for MSFT A102; supports its B classification."
+      }
+    ],
+    "credible_true_recall_defects_found": 0,
+    "conclusion": "No hidden recoverable evidence was found for any missed Gold Alpha. This is consistent with A=0 across the diagnosis and with the recovery audit's own prior conclusion (0 strong recoveries across the entire fresh six-run set)."
+  },
+  "entity_exposure_note": "Entity Exposure reason codes present on the missed Alphas (EXPOSURE_BELOW_REGIME_THRESHOLD, EXPOSURE_BELOW_DOMINANT_THRESHOLD, EXPOSURE_SEED_MISSING) all govern eligibility for the DOMINANT/REGIME_LEVEL tiers specifically -- none of them affect the basic ACTIVE_THRESHOLD (50) gate that every one of these 14 misses actually fails at. Entity Exposure is therefore not a contributing cause to any of the 14 misses.",
+  "priority_table": [
+    {
+      "priority": "P1",
+      "ticker": "TSM",
+      "alpha": "A301",
+      "cause": "C",
+      "judgment": "DESIGN_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Closest miss (5.23pp gap) with the strongest evidence_quality of any missed Alpha (raw=56.56) -- highest payoff-per-effort to investigate.",
+      "recommended_next_investigation": "Inspect why the structure-extraction step produced zero qualifying local edges (LINEAGE_UNRESOLVED, NO_COMMITTED_ALPHA_MATCH, RELATION_OR_ASSERTION_NOT_QUALIFYING) despite 23 raw / 13 unique supporting claims."
+    },
+    {
+      "priority": "P2",
+      "ticker": "QQQ",
+      "alpha": "A201",
+      "cause": "C",
+      "judgment": "DESIGN_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Cleanest structure-only miss -- every evidence-side qualification code passes; only structure fails, gap is small (3.77pp) relative to structure's 20pt weight.",
+      "recommended_next_investigation": "Same structure-extraction review as above, applied to this ticker/Alpha pair."
+    },
+    {
+      "priority": "P2",
+      "ticker": "MSFT",
+      "alpha": "A304",
+      "cause": "C",
+      "judgment": "DESIGN_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "39 raw supporting claims yet 0 qualifying local edges -- high evidence volume, zero structural credit.",
+      "recommended_next_investigation": "Same structure-extraction review."
+    },
+    {
+      "priority": "P2",
+      "ticker": "SNDK",
+      "alpha": "A103",
+      "cause": "C",
+      "judgment": "DESIGN_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Independently cross-checked against the recovery audit (borderline, not actioned) -- confirms structure, not recall, is binding.",
+      "recommended_next_investigation": "Same structure-extraction review."
+    },
+    {
+      "priority": "P2",
+      "ticker": "SNDK",
+      "alpha": "A301",
+      "cause": "C",
+      "judgment": "DESIGN_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Highest evidence volume among SNDK's misses (23 raw claims) yet zero qualifying edges.",
+      "recommended_next_investigation": "Same structure-extraction review."
+    },
+    {
+      "priority": "P2",
+      "ticker": "MSFT",
+      "alpha": "A601",
+      "cause": "C",
+      "judgment": "DESIGN_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Structure-only miss with a tighter margin (17.24pp vs 20pt max) than other C cases.",
+      "recommended_next_investigation": "Same structure-extraction review; verify margin is genuinely achievable via structure alone."
+    },
+    {
+      "priority": "P2",
+      "ticker": "QQQ",
+      "alpha": "A301",
+      "cause": "C",
+      "judgment": "DESIGN_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Structure is the larger, sufficient-alone lever versus the smaller ticker-specificity gap also present.",
+      "recommended_next_investigation": "Same structure-extraction review."
+    },
+    {
+      "priority": "P3",
+      "ticker": "NVDA",
+      "alpha": "A201",
+      "cause": "B",
+      "judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "potential_legitimate_hit_improvement": "Evidence-quality is the dominant lever (raw 1.18/100); large gap (31.42pp), not a near-miss.",
+      "recommended_next_investigation": "None recommended -- conservative gating behaving as documented on thin evidence."
+    },
+    {
+      "priority": "P3",
+      "ticker": "QQQ",
+      "alpha": "A101",
+      "cause": "B",
+      "judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "potential_legitimate_hit_improvement": "Both evidence and structure absent; evidence more comprehensively flagged.",
+      "recommended_next_investigation": "None recommended."
+    },
+    {
+      "priority": "P3",
+      "ticker": "MSFT",
+      "alpha": "A102",
+      "cause": "B",
+      "judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "potential_legitimate_hit_improvement": "Three independent evidence-side codes fire; structure already half-credited.",
+      "recommended_next_investigation": "None recommended."
+    },
+    {
+      "priority": "P3",
+      "ticker": "AMD",
+      "alpha": "A102",
+      "cause": "B",
+      "judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "potential_legitimate_hit_improvement": "Three independent evidence-side codes fire; structure already partially credited.",
+      "recommended_next_investigation": "None recommended."
+    },
+    {
+      "priority": "P3",
+      "ticker": "AMD",
+      "alpha": "A201",
+      "cause": "B",
+      "judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "potential_legitimate_hit_improvement": "Second-largest gap in the set (24.27pp); evidence_quality raw catastrophically low (4.0/100).",
+      "recommended_next_investigation": "None recommended."
+    },
+    {
+      "priority": "P4",
+      "ticker": "NVDA",
+      "alpha": "A102",
+      "cause": "B",
+      "judgment": "GOLD_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Total evidence vacuum; only related content is bear/competitive-threat commentary, not the Alpha's actual bullish mechanism.",
+      "recommended_next_investigation": "Future independent review of whether 'Inference Explosion' materiality was correctly assumed for NVDA this period -- NOT a system fix."
+    },
+    {
+      "priority": "P4",
+      "ticker": "SNDK",
+      "alpha": "A102",
+      "cause": "B",
+      "judgment": "GOLD_REVIEW_NEEDED",
+      "potential_legitimate_hit_improvement": "Total evidence vacuum; SNDK is a storage/NAND maker, a conceptually less direct fit for an inference-compute thesis than NVDA/AMD.",
+      "recommended_next_investigation": "Future independent review of whether this Gold expectation is well-calibrated for SNDK's business model -- NOT a system fix, and would require alpha_conflict_gold.v2 if ever revised."
+    }
+  ],
+  "detailed_miss_rows": [
+    {
+      "ticker": "NVDA",
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "gold_alpha": "A102",
+      "alpha_name": "Inference Explosion",
+      "final_level": "candidate",
+      "score": 0.0,
+      "uncapped_score": 0.0,
+      "gap_to_active_threshold": 50.0,
+      "qualification_ceiling": null,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 0,
+      "unique_evidence_fact_count": 0,
+      "distinct_supporting_agents": 0,
+      "raw_supporting_claim_count": 0,
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 0,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_QUALIFYING_EVIDENCE"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 0.0,
+          "weight": 0.35,
+          "contribution": 0.0
+        },
+        "agent_independence": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 0.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "direction_consistency": {
+          "raw": 0.0,
+          "weight": 0.05,
+          "contribution": 0.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 6,
+        "candidate_appearance_count": 614,
+        "candidate_eligible_count": 0,
+        "max_candidate_score_seen": 0.6923,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "B",
+      "secondary_causes": [],
+      "gold_review_flag": true,
+      "behavior_judgment": "GOLD_REVIEW_NEEDED",
+      "priority": "P4",
+      "diagnosis": "Total evidence vacuum: score=0 across every component. The only claims the deterministic mapper ever attached to A102 (6 claims) are bear/competitive-threat content about custom ASICs eroding NVDA's inference dominance -- not assertions that inference demand is exploding in NVDA's favor. Evidence-stance qualification correctly rejected all of them, yielding 0 supporting claims. Not a mapper recall failure (mapper did engage, 614 candidate-scoring attempts); the underlying content genuinely doesn't support this specific bullish thesis this period.",
+      "counterfactuals": {
+        "evidence_alone": "NO (all components are 0; even full local structure credit (+20) only reaches score=20, still far below 50)",
+        "structure_alone": "NO",
+        "ceiling_removed": "N/A (no ceiling ever engaged, cap_was_binding=false)",
+        "capped_active_counted": "N/A (status=candidate, not capped_active)"
+      }
+    },
+    {
+      "ticker": "NVDA",
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "gold_alpha": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "final_level": "candidate",
+      "score": 18.5807,
+      "uncapped_score": 18.5807,
+      "gap_to_active_threshold": 31.4193,
+      "qualification_ceiling": 60.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 0,
+      "unique_evidence_fact_count": 2,
+      "distinct_supporting_agents": 1,
+      "raw_supporting_claim_count": 2,
+      "incident_graph_edge_count": 0,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 0,
+      "entity_exposure_reason_codes": [],
+      "qualification_codes": [
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "INSUFFICIENT_AGENT_INDEPENDENCE",
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 1.183,
+          "weight": 0.35,
+          "contribution": 0.414
+        },
+        "agent_independence": {
+          "raw": 23.3333,
+          "weight": 0.2,
+          "contribution": 4.6667
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 0.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 70.0,
+          "weight": 0.05,
+          "contribution": 3.5
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 12,
+        "candidate_appearance_count": 25,
+        "candidate_eligible_count": 9,
+        "max_candidate_score_seen": 0.3123,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "B",
+      "secondary_causes": [
+        "C"
+      ],
+      "gold_review_flag": false,
+      "behavior_judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "priority": "P3",
+      "diagnosis": "Score 18.58, gap 31.42pp to threshold -- evidence is thin on every axis (2 raw claims, 1 distinct agent, 0 ticker-specific), driving evidence_quality raw to just 1.18/100 (contribution 0.41 of a possible 35). Local structure is also 0 (contribution 0 of possible 20). Evidence weakness dominates: even full local-structure credit (+20) only reaches 38.58, still short of 50 -- evidence_quality is the larger, binding lever.",
+      "counterfactuals": {
+        "evidence_alone": "YES (raising evidence_quality to a realistic mid-range, e.g. raw>=55, adds ~19pts, crossing 50 even without structure)",
+        "structure_alone": "NO (+20 max only reaches 38.58)",
+        "ceiling_removed": "N/A (cap not binding)",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "gold_alpha": "A101",
+      "alpha_name": "AI Expansion",
+      "final_level": "candidate",
+      "score": 32.2068,
+      "uncapped_score": 32.2068,
+      "gap_to_active_threshold": 17.7932,
+      "qualification_ceiling": 60.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 1,
+      "unique_evidence_fact_count": 1,
+      "distinct_supporting_agents": 1,
+      "raw_supporting_claim_count": 4,
+      "incident_graph_edge_count": 0,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 1,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "INSUFFICIENT_UNIQUE_EVIDENCE",
+        "INSUFFICIENT_AGENT_INDEPENDENCE",
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 7.2575,
+          "weight": 0.35,
+          "contribution": 2.5401
+        },
+        "agent_independence": {
+          "raw": 23.3333,
+          "weight": 0.2,
+          "contribution": 4.6667
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 100.0,
+          "weight": 0.05,
+          "contribution": 5.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 12,
+        "candidate_appearance_count": 631,
+        "candidate_eligible_count": 7,
+        "max_candidate_score_seen": 0.8204,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "B",
+      "secondary_causes": [
+        "C"
+      ],
+      "gold_review_flag": false,
+      "behavior_judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "priority": "P3",
+      "diagnosis": "Score 32.21, gap 17.79pp. Reason codes flag both INSUFFICIENT_UNIQUE_EVIDENCE and INSUFFICIENT_AGENT_INDEPENDENCE (unique_evidence=1, distinct_agents=1) plus NO_LOCAL_STRUCTURE_SUPPORT. Evidence-side qualification codes (2) outnumber the structure code (1) and evidence_quality raw is very low (7.26/100). Structure alone (+20) would reach 52.21 and cross, but evidence thinness is the more comprehensively documented root condition.",
+      "counterfactuals": {
+        "evidence_alone": "YES (raising evidence_quality materially would cross 50 without touching structure)",
+        "structure_alone": "YES (+20 -> 52.21, crosses by a narrow 2.21pp margin)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "gold_alpha": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "final_level": "candidate",
+      "score": 46.2329,
+      "uncapped_score": 46.2329,
+      "gap_to_active_threshold": 3.7671,
+      "qualification_ceiling": 70.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 2,
+      "unique_evidence_fact_count": 5,
+      "distinct_supporting_agents": 3,
+      "raw_supporting_claim_count": 5,
+      "incident_graph_edge_count": 0,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 2,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_QUALIFICATION_APPLIED",
+        "EXPOSURE_SEED_MISSING",
+        "SEED_ENTRY_MISSING"
+      ],
+      "qualification_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 40.2712,
+          "weight": 0.35,
+          "contribution": 14.0949
+        },
+        "agent_independence": {
+          "raw": 70.0,
+          "weight": 0.2,
+          "contribution": 14.0
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 40.0,
+          "weight": 0.1,
+          "contribution": 4.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 82.7608,
+          "weight": 0.05,
+          "contribution": 4.138
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 10,
+        "candidate_appearance_count": 30,
+        "candidate_eligible_count": 26,
+        "max_candidate_score_seen": 0.7596,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "C",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "DESIGN_REVIEW_NEEDED",
+      "priority": "P2",
+      "diagnosis": "Score 46.23, gap only 3.77pp -- the closest near-miss besides TSM A301. Every evidence-side qualification code is ABSENT (no NO_TICKER_SPECIFIC_EVIDENCE, no INSUFFICIENT_UNIQUE_EVIDENCE, no INSUFFICIENT_AGENT_INDEPENDENCE) -- evidence_quality(40.27), agent_independence(70.0), and ticker_specificity(40.0) all pass their own checks. The SOLE cap_reason_code is NO_LOCAL_STRUCTURE_SUPPORT (local_structure raw=0, contribution 0 of a possible 20) -- a lever more than 5x larger than the remaining gap. This is the cleanest structure-only miss in the set: qualification passed everywhere except structure, and structure alone would clear the threshold with room to spare.",
+      "counterfactuals": {
+        "evidence_alone": "NO (evidence already passes its own checks; improving it further isn't the binding lever)",
+        "structure_alone": "YES (+20 -> 66.23, crosses easily)",
+        "ceiling_removed": "N/A (cap not binding, eligible_cap=70 was never reached)",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "gold_alpha": "A301",
+      "alpha_name": "Revenue Expansion",
+      "final_level": "candidate",
+      "score": 37.7754,
+      "uncapped_score": 37.7754,
+      "gap_to_active_threshold": 12.2246,
+      "qualification_ceiling": 60.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 0,
+      "unique_evidence_fact_count": 3,
+      "distinct_supporting_agents": 3,
+      "raw_supporting_claim_count": 6,
+      "incident_graph_edge_count": 2,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH",
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 0,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_QUALIFICATION_APPLIED",
+        "EXPOSURE_SEED_MISSING",
+        "SEED_ENTRY_MISSING"
+      ],
+      "qualification_codes": [
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 25.0725,
+          "weight": 0.35,
+          "contribution": 8.7754
+        },
+        "agent_independence": {
+          "raw": 70.0,
+          "weight": 0.2,
+          "contribution": 14.0
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 0.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 100.0,
+          "weight": 0.05,
+          "contribution": 5.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 9,
+        "candidate_appearance_count": 36,
+        "candidate_eligible_count": 26,
+        "max_candidate_score_seen": 0.7596,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "C",
+      "secondary_causes": [
+        "B"
+      ],
+      "gold_review_flag": false,
+      "behavior_judgment": "DESIGN_REVIEW_NEEDED",
+      "priority": "P2",
+      "diagnosis": "Score 37.78, gap 12.22pp. Two reason codes: NO_TICKER_SPECIFIC_EVIDENCE (ticker_specific=0, contribution 0 of possible 10) and NO_LOCAL_STRUCTURE_SUPPORT (contribution 0 of possible 20). Ticker-specificity alone (+10 max) reaches only 47.78, still short; local-structure alone (+20 max) reaches 57.78, crossing comfortably -- structure is the larger, sufficient-alone lever, so it is primary; ticker-specificity gap is real but insufficient by itself.",
+      "counterfactuals": {
+        "evidence_alone": "NO (ticker-specificity alone maxes at +10, insufficient)",
+        "structure_alone": "YES (+20 -> 57.78, crosses)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "gold_alpha": "A102",
+      "alpha_name": "Inference Explosion",
+      "final_level": "candidate",
+      "score": 34.9674,
+      "uncapped_score": 34.9674,
+      "gap_to_active_threshold": 15.0326,
+      "qualification_ceiling": 60.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 0,
+      "unique_evidence_fact_count": 1,
+      "distinct_supporting_agents": 1,
+      "raw_supporting_claim_count": 2,
+      "incident_graph_edge_count": 2,
+      "qualifying_local_edge_count": 1,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH",
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 0,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "INSUFFICIENT_UNIQUE_EVIDENCE",
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "INSUFFICIENT_AGENT_INDEPENDENCE"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 15.145,
+          "weight": 0.35,
+          "contribution": 5.3007
+        },
+        "agent_independence": {
+          "raw": 23.3333,
+          "weight": 0.2,
+          "contribution": 4.6667
+        },
+        "local_structure_support": {
+          "raw": 50.0,
+          "weight": 0.2,
+          "contribution": 10.0
+        },
+        "ticker_specificity": {
+          "raw": 0.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 100.0,
+          "weight": 0.05,
+          "contribution": 5.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 8,
+        "candidate_appearance_count": 623,
+        "candidate_eligible_count": 4,
+        "max_candidate_score_seen": 0.6058,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "B",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "priority": "P3",
+      "diagnosis": "Score 34.97, gap 15.03pp. THREE evidence-side codes fire (INSUFFICIENT_UNIQUE_EVIDENCE, NO_TICKER_SPECIFIC_EVIDENCE, INSUFFICIENT_AGENT_INDEPENDENCE) -- unique_evidence=1, ticker_specific=0, distinct_agents=1. Notably, local_structure_support is NOT flagged as failing here (raw=50.0, contributing 10 of possible 20) -- structure is half-present. Evidence thinness across three independent axes is unambiguously the binding cause.",
+      "counterfactuals": {
+        "evidence_alone": "YES (evidence_quality raw is only 15.15/100; a realistic improvement crosses 50 without touching structure, which is already half-credited)",
+        "structure_alone": "NO (already at half credit; the remaining +10 max alone reaches only 44.97, short)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "gold_alpha": "A304",
+      "alpha_name": "Multiple Compression",
+      "final_level": "candidate",
+      "score": 43.3642,
+      "uncapped_score": 43.3642,
+      "gap_to_active_threshold": 6.6358,
+      "qualification_ceiling": 70.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 5,
+      "unique_evidence_fact_count": 14,
+      "distinct_supporting_agents": 4,
+      "raw_supporting_claim_count": 39,
+      "incident_graph_edge_count": 0,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 5,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 32.1672,
+          "weight": 0.35,
+          "contribution": 11.2585
+        },
+        "agent_independence": {
+          "raw": 70.0,
+          "weight": 0.2,
+          "contribution": 14.0
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 35.7143,
+          "weight": 0.1,
+          "contribution": 3.5714
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 90.6862,
+          "weight": 0.05,
+          "contribution": 4.5343
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 52,
+        "candidate_appearance_count": 141,
+        "candidate_eligible_count": 22,
+        "max_candidate_score_seen": 0.7596,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "C",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "DESIGN_REVIEW_NEEDED",
+      "priority": "P2",
+      "diagnosis": "Score 43.36, gap 6.64pp. Sole cap_reason_code is NO_LOCAL_STRUCTURE_SUPPORT. Evidence is genuinely healthy: 39 raw supporting claims, 14 unique facts, 5 ticker-specific, 4 distinct agents -- none of the evidence-side qualification codes fire. Local structure contributes 0 of a possible 20, more than 3x the remaining gap. A ticker with this much real evidence volume failing purely on the structure-extraction step is a clean design-attention case.",
+      "counterfactuals": {
+        "evidence_alone": "NO (evidence already qualifies; more of it isn't the lever)",
+        "structure_alone": "YES (+20 -> 63.36, crosses)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "gold_alpha": "A601",
+      "alpha_name": "Narrative Momentum",
+      "final_level": "candidate",
+      "score": 32.7558,
+      "uncapped_score": 32.7558,
+      "gap_to_active_threshold": 17.2442,
+      "qualification_ceiling": 70.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 1,
+      "unique_evidence_fact_count": 8,
+      "distinct_supporting_agents": 2,
+      "raw_supporting_claim_count": 21,
+      "incident_graph_edge_count": 0,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 1,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 21.015,
+          "weight": 0.35,
+          "contribution": 7.3552
+        },
+        "agent_independence": {
+          "raw": 46.6667,
+          "weight": 0.2,
+          "contribution": 9.3333
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 12.5,
+          "weight": 0.1,
+          "contribution": 1.25
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 96.3468,
+          "weight": 0.05,
+          "contribution": 4.8173
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 46,
+        "candidate_appearance_count": 98,
+        "candidate_eligible_count": 54,
+        "max_candidate_score_seen": 0.5046,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "C",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "DESIGN_REVIEW_NEEDED",
+      "priority": "P2",
+      "diagnosis": "Score 32.76, gap 17.24pp -- close to the full +20 structure ceiling, a tighter margin than MSFT A304. Sole cap_reason_code is NO_LOCAL_STRUCTURE_SUPPORT; no evidence-side code fires despite ticker_specific being only 1 (evidently above whatever minimum the NO_TICKER_SPECIFIC_EVIDENCE check requires). 21 raw claims / 8 unique facts / 2 distinct agents is moderate but adequate by the system's own qualification logic. Structure is still the documented sole blocker, though the margin is tighter than other structure-only cases.",
+      "counterfactuals": {
+        "evidence_alone": "UNKNOWN (evidence already passes its own checks, but the gap (17.24) is close to structure's max (20) -- a partial evidence improvement combined with structure could also close it; pure structure alone is the only single-lever fix confirmed sufficient)",
+        "structure_alone": "YES (+20 -> 52.76, crosses narrowly)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "gold_alpha": "A102",
+      "alpha_name": "Inference Explosion",
+      "final_level": "candidate",
+      "score": 0.0,
+      "uncapped_score": 0.0,
+      "gap_to_active_threshold": 50.0,
+      "qualification_ceiling": null,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 0,
+      "unique_evidence_fact_count": 0,
+      "distinct_supporting_agents": 0,
+      "raw_supporting_claim_count": 0,
+      "incident_graph_edge_count": 0,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [],
+      "entity_exposure_ticker_specific_fact_count": 0,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_DOMINANT_THRESHOLD",
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_QUALIFYING_EVIDENCE"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 0.0,
+          "weight": 0.35,
+          "contribution": 0.0
+        },
+        "agent_independence": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 0.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "direction_consistency": {
+          "raw": 0.0,
+          "weight": 0.05,
+          "contribution": 0.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 0,
+        "candidate_appearance_count": 819,
+        "candidate_eligible_count": 0,
+        "max_candidate_score_seen": 0.4923,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "B",
+      "secondary_causes": [],
+      "gold_review_flag": true,
+      "behavior_judgment": "GOLD_REVIEW_NEEDED",
+      "priority": "P4",
+      "diagnosis": "Total evidence vacuum, identical pattern to NVDA A102: score=0 across every component, 0 matched claims, 0 of 819 candidate-scoring attempts ever eligible. SNDK is a NAND/storage manufacturer, not a compute/inference chip vendor -- 'Inference Explosion' is a conceptually more indirect thesis for this ticker than for NVDA/AMD. No mapper recall failure; there is essentially no generated content this period asserting SNDK-specific inference-demand exposure.",
+      "counterfactuals": {
+        "evidence_alone": "NO (all components 0; structure alone would only reach 20)",
+        "structure_alone": "NO",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "gold_alpha": "A103",
+      "alpha_name": "AI Infrastructure",
+      "final_level": "candidate",
+      "score": 39.0305,
+      "uncapped_score": 39.0305,
+      "gap_to_active_threshold": 10.9695,
+      "qualification_ceiling": 70.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 1,
+      "unique_evidence_fact_count": 6,
+      "distinct_supporting_agents": 2,
+      "raw_supporting_claim_count": 13,
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 1,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 37.23,
+          "weight": 0.35,
+          "contribution": 13.0305
+        },
+        "agent_independence": {
+          "raw": 46.6667,
+          "weight": 0.2,
+          "contribution": 9.3333
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 16.6667,
+          "weight": 0.1,
+          "contribution": 1.6667
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 100.0,
+          "weight": 0.05,
+          "contribution": 5.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 22,
+        "candidate_appearance_count": 698,
+        "candidate_eligible_count": 5,
+        "max_candidate_score_seen": 0.3988,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "C",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "DESIGN_REVIEW_NEEDED",
+      "priority": "P2",
+      "diagnosis": "Score 39.03, gap 10.97pp. Sole cap_reason_code is NO_LOCAL_STRUCTURE_SUPPORT; evidence is moderate (13 raw claims, 6 unique, 2 agents, evidence_quality raw=37.23) and passes its own checks. Independently cross-checked against the high-value unclassified recovery audit (v0_1_3): its ONE borderline candidate across the entire fresh six-run set is this exact ticker/alpha (SNDK A103) -- a bear rebuttal comparing SNDK to NVDA's AI moat, judged comparative/meta-argumentative rather than a first-person ticker-specific claim, and explicitly NOT actioned as a recovery. This independently confirms the miss is not a hidden mapper recall defect.",
+      "counterfactuals": {
+        "evidence_alone": "NO (evidence already qualifies)",
+        "structure_alone": "YES (+20 -> 59.03, crosses)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "gold_alpha": "A301",
+      "alpha_name": "Revenue Expansion",
+      "final_level": "candidate",
+      "score": 36.9042,
+      "uncapped_score": 36.9042,
+      "gap_to_active_threshold": 13.0958,
+      "qualification_ceiling": 70.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 1,
+      "unique_evidence_fact_count": 10,
+      "distinct_supporting_agents": 2,
+      "raw_supporting_claim_count": 23,
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 1,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 34.264,
+          "weight": 0.35,
+          "contribution": 11.9924
+        },
+        "agent_independence": {
+          "raw": 46.6667,
+          "weight": 0.2,
+          "contribution": 9.3333
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 10.0,
+          "weight": 0.1,
+          "contribution": 1.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 91.5694,
+          "weight": 0.05,
+          "contribution": 4.5785
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 39,
+        "candidate_appearance_count": 88,
+        "candidate_eligible_count": 61,
+        "max_candidate_score_seen": 0.7596,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "C",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "DESIGN_REVIEW_NEEDED",
+      "priority": "P2",
+      "diagnosis": "Score 36.90, gap 13.10pp. Sole cap_reason_code is NO_LOCAL_STRUCTURE_SUPPORT; evidence is the strongest-volume case among SNDK's misses (23 raw claims, 10 unique, evidence_quality raw=34.26) yet still structure-blocked. Local structure contributes 0 of a possible 20, comfortably larger than the gap.",
+      "counterfactuals": {
+        "evidence_alone": "NO",
+        "structure_alone": "YES (+20 -> 56.90, crosses)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "TSM",
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "gold_alpha": "A301",
+      "alpha_name": "Revenue Expansion",
+      "final_level": "candidate",
+      "score": 44.7724,
+      "uncapped_score": 44.7724,
+      "gap_to_active_threshold": 5.2276,
+      "qualification_ceiling": 70.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 1,
+      "unique_evidence_fact_count": 13,
+      "distinct_supporting_agents": 2,
+      "raw_supporting_claim_count": 23,
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH",
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 1,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 56.5558,
+          "weight": 0.35,
+          "contribution": 19.7945
+        },
+        "agent_independence": {
+          "raw": 46.6667,
+          "weight": 0.2,
+          "contribution": 9.3333
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 7.6923,
+          "weight": 0.1,
+          "contribution": 0.7692
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 97.5076,
+          "weight": 0.05,
+          "contribution": 4.8754
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 36,
+        "candidate_appearance_count": 70,
+        "candidate_eligible_count": 45,
+        "max_candidate_score_seen": 0.7596,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "C",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "DESIGN_REVIEW_NEEDED",
+      "priority": "P1",
+      "diagnosis": "Score 44.77, gap only 5.23pp -- the single closest miss in the entire set. Evidence is the strongest of any missed Alpha (evidence_quality raw=56.56, the highest among all 14 misses; 23 raw claims, 13 unique facts). Sole cap_reason_code is NO_LOCAL_STRUCTURE_SUPPORT, contributing 0 of a possible 20 -- nearly 4x the remaining gap. This is the highest-payoff case to investigate further: strong, qualifying evidence exists, yet the structure-extraction layer produced zero qualifying local edges (exclusion reasons: LINEAGE_UNRESOLVED, NO_COMMITTED_ALPHA_MATCH, RELATION_OR_ASSERTION_NOT_QUALIFYING).",
+      "counterfactuals": {
+        "evidence_alone": "NO (evidence already strong and passing; not the lever)",
+        "structure_alone": "YES (+20 -> 64.77, crosses with room to spare)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "AMD",
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "gold_alpha": "A102",
+      "alpha_name": "Inference Explosion",
+      "final_level": "candidate",
+      "score": 35.6327,
+      "uncapped_score": 35.6327,
+      "gap_to_active_threshold": 14.3673,
+      "qualification_ceiling": 60.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 0,
+      "unique_evidence_fact_count": 1,
+      "distinct_supporting_agents": 1,
+      "raw_supporting_claim_count": 1,
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 1,
+      "local_edge_exclusion_reasons": [],
+      "entity_exposure_ticker_specific_fact_count": 0,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "INSUFFICIENT_UNIQUE_EVIDENCE",
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "INSUFFICIENT_AGENT_INDEPENDENCE"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 22.76,
+          "weight": 0.35,
+          "contribution": 7.966
+        },
+        "agent_independence": {
+          "raw": 23.3333,
+          "weight": 0.2,
+          "contribution": 4.6667
+        },
+        "local_structure_support": {
+          "raw": 40.0,
+          "weight": 0.2,
+          "contribution": 8.0
+        },
+        "ticker_specificity": {
+          "raw": 0.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 100.0,
+          "weight": 0.05,
+          "contribution": 5.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 2,
+        "candidate_appearance_count": 680,
+        "candidate_eligible_count": 0,
+        "max_candidate_score_seen": 0.9104,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "B",
+      "secondary_causes": [],
+      "gold_review_flag": false,
+      "behavior_judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "priority": "P3",
+      "diagnosis": "Score 35.63, gap 14.37pp. Three evidence-side codes fire (INSUFFICIENT_UNIQUE_EVIDENCE, NO_TICKER_SPECIFIC_EVIDENCE, INSUFFICIENT_AGENT_INDEPENDENCE) -- unique_evidence=1, ticker_specific=0, distinct_agents=1, despite local_structure already contributing 8 of a possible 20 (not flagged as failing). Evidence thinness is the clear, multiply-documented binding cause.",
+      "counterfactuals": {
+        "evidence_alone": "YES (evidence_quality raw is only 22.76/100; realistic improvement crosses 50)",
+        "structure_alone": "NO (remaining +12 max reaches only 47.63, short)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    },
+    {
+      "ticker": "AMD",
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "gold_alpha": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "final_level": "candidate",
+      "score": 25.7333,
+      "uncapped_score": 25.7333,
+      "gap_to_active_threshold": 24.2667,
+      "qualification_ceiling": 60.0,
+      "cap_was_binding": false,
+      "ticker_specific_evidence_count": 0,
+      "unique_evidence_fact_count": 5,
+      "distinct_supporting_agents": 2,
+      "raw_supporting_claim_count": 5,
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ],
+      "entity_exposure_ticker_specific_fact_count": 0,
+      "entity_exposure_reason_codes": [
+        "EXPOSURE_BELOW_REGIME_THRESHOLD",
+        "EXPOSURE_QUALIFICATION_APPLIED"
+      ],
+      "qualification_codes": [
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "components": {
+        "evidence_quality": {
+          "raw": 4.0,
+          "weight": 0.35,
+          "contribution": 1.4
+        },
+        "agent_independence": {
+          "raw": 46.6667,
+          "weight": 0.2,
+          "contribution": 9.3333
+        },
+        "local_structure_support": {
+          "raw": 0.0,
+          "weight": 0.2,
+          "contribution": 0.0
+        },
+        "ticker_specificity": {
+          "raw": 0.0,
+          "weight": 0.1,
+          "contribution": 0.0
+        },
+        "recency": {
+          "raw": 100.0,
+          "weight": 0.1,
+          "contribution": 10.0
+        },
+        "direction_consistency": {
+          "raw": 100.0,
+          "weight": 0.05,
+          "contribution": 5.0
+        }
+      },
+      "mapper_diagnostics": {
+        "matched_claim_count": 8,
+        "candidate_appearance_count": 30,
+        "candidate_eligible_count": 20,
+        "max_candidate_score_seen": 0.3123,
+        "alpha_recognized_by_mapper_at_all": true
+      },
+      "primary_cause": "B",
+      "secondary_causes": [
+        "C"
+      ],
+      "gold_review_flag": false,
+      "behavior_judgment": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "priority": "P3",
+      "diagnosis": "Score 25.73, gap 24.27pp -- the second-largest gap among all misses. evidence_quality raw is catastrophically low (4.0/100, contribution 1.4 of a possible 35) despite 5 raw claims; ticker_specific=0. Local structure is also 0. Evidence weakness dominates by a wide margin: even full structure credit (+20) only reaches 45.73, still short of 50.",
+      "counterfactuals": {
+        "evidence_alone": "YES (evidence_quality raw at even a moderate 50 would add ~16pts, crossing 50 without structure)",
+        "structure_alone": "NO (+20 max only reaches 45.73)",
+        "ceiling_removed": "N/A",
+        "capped_active_counted": "N/A"
+      }
+    }
+  ],
+  "validation_checks": {
+    "gold_sha256_unchanged": true,
+    "six_selected_run_ids_unchanged": true,
+    "official_hit_semantics_unchanged": true,
+    "all_14_misses_diagnosed": true,
+    "no_row_omitted": true,
+    "no_duplicate_miss_rows": true,
+    "A_B_C_D_sum_equals_total_misses": true,
+    "E_tracked_separately": true,
+    "macro_average_math_reproduces_61_03": true,
+    "no_provider_calls": true,
+    "no_tradingagents_calls": true,
+    "no_ticker_runs": true,
+    "no_production_code_modifications": true
+  }
+}

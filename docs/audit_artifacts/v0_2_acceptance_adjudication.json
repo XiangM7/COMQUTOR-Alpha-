@@ -1,0 +1,1455 @@
+{
+  "schema_version": "v0.2.acceptance_adjudication.v1",
+  "task": "V0.2_ACCEPTANCE_ADJUDICATION_STEP_5",
+  "authorities": {
+    "gold": {
+      "path_json": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+      "path_md": "docs/audit_artifacts/v0_2_gold_operational_contract.md",
+      "sha256_json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "sha256_md": "8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04",
+      "integrity_verified": true,
+      "modified_this_task": false
+    },
+    "trigger_matrix": {
+      "path_json": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+      "path_md": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.md",
+      "sha256_json": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "sha256_md": "b751faec4166e17bf70393e0ad25523dfa3d1dae66e9ed9bdfca9a1506db5bfc",
+      "integrity_verified": true,
+      "modified_this_task": false
+    },
+    "step4_acceptance": {
+      "path_json": "docs/audit_artifacts/v0_2_final_acceptance_table.json",
+      "path_md": "docs/audit_artifacts/v0_2_final_acceptance_table.md",
+      "sha256_json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "sha256_md": "0a4afdd4b71e1aa2dfcd8ca5a10c9409cf81f157daceb5bc77ea90792d1bd9d6",
+      "integrity_verified": true,
+      "modified_this_task": false
+    }
+  },
+  "queue_reconciliation": {
+    "step4_final_response_reported_queue_count": 2,
+    "step4_json_step5_review_queue_count": 2,
+    "reconciled_queue_count": 3,
+    "omitted_case": "QQQ-A003-LIQUIDITY-EXPANSION",
+    "explanation": "The Step-4 final numbered response (item 37) listed only two Step-5 items -- QQQ-A001-RATE-CUT-CYCLE and MSFT-CAPEX-BURDEN-CONDITIONAL -- matching the `requires_step5_adjudication=true` flags actually set in the Step-4 JSON's per-rule records and its `step5_review_queue` field. However, the same Step-4 final response also separately reported (item 30) 'Formal Gold blocking REVIEW count = 1', naming QQQ-A003-LIQUIDITY-EXPANSION -- a blocking, unresolved REVIEW that by its nature also requires adjudication attention, even though its own `requires_step5_adjudication` flag was left false in the Step-4 JSON (its outcome was already fully determined by the frozen UNCERTAIN trigger, with no root-cause ambiguity requiring trace work). This was a reporting-scope omission in the two-item queue framing, not a data error in the Step-4 JSON itself: the JSON's blocking/REVIEW fields were internally consistent throughout. Per this task's explicit instruction, the omission is corrected here by including QQQ-A003 as Case B, without modifying the frozen Step-4 file."
+  },
+  "cases": [
+    {
+      "case_id": "A",
+      "ticker": "QQQ",
+      "rule_id": "QQQ-A001-RATE-CUT-CYCLE",
+      "tier": "FORMAL_GOLD",
+      "step4_result": "FAIL",
+      "blocking": true,
+      "frozen_trigger_state": "ABSENT",
+      "frozen_evidence_strength": "STRONG",
+      "actual_level": "active",
+      "actual_score": 66.4226,
+      "actual_direction": "positive",
+      "trace": {
+        "mapped_claim_count": 66,
+        "mapped_claims_direction_distribution": {
+          "positive": 16,
+          "neutral": 10,
+          "negative": 17,
+          "unknown": 23
+        },
+        "mapped_claims_evidence_stance_distribution": {
+          "neutral_background": 41,
+          "supports_alpha": 13,
+          "opposes_alpha": 10,
+          "mentions_alpha": 2
+        },
+        "mapped_claims_detail": [
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:3",
+            "agent": "sentiment_agent",
+            "claim": "The single most consequential macro event is the August jobs report, which surprised to the upside (+162K, 4.1% unemployment) and pushed September rate-hike odds past 60%.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:4",
+            "agent": "sentiment_agent",
+            "claim": "This is a distinctly hawkish repricing that pressures long-duration, high-multiple growth names \u2014 the core of QQQ's holdings.",
+            "match_method": "llm",
+            "match_score": 0.3403,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:5",
+            "agent": "sentiment_agent",
+            "claim": "Headlines explicitly frame this tension: \"Netflix Falls 4% as Rate Repricing Pressures Long-Duration Growth,\" \"Intel Climbs 4%, AMD Rises 3%, NVIDIA Ticks Up as Chip Stocks Shrug Off Rising Rate Hike ",
+            "match_method": "llm",
+            "match_score": 0.3803,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A201",
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:29",
+            "agent": "sentiment_agent",
+            "claim": "Rate-hike repricing / hawkish macro.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:30",
+            "agent": "sentiment_agent",
+            "claim": "The strong jobs report pushed September rate-hike odds past 60%, pressuring long-duration growth.",
+            "match_method": "llm",
+            "match_score": 0.3923,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "supports_alpha",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:34",
+            "agent": "sentiment_agent",
+            "claim": "Chips (Intel, AMD, Marvell, NVIDIA) are shrugging off the rate headwind, while software and long-duration media names are selling off.",
+            "match_method": "llm",
+            "match_score": 0.3803,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:38",
+            "agent": "sentiment_agent",
+            "claim": "September FOMC decision and the >60% rate-hike odds \u2014 a hike would pressure QQQ's long-duration holdings further.",
+            "match_method": "llm",
+            "match_score": 0.3223,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:45",
+            "agent": "sentiment_agent",
+            "claim": "Semiconductor strength running into the rate headwind.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A201",
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:46",
+            "agent": "sentiment_agent",
+            "claim": "Wolfe's chief economist suggesting the hawkish price action may be \"taking the print a little too far\" \u2014 a potential contrarian floor.",
+            "match_method": "llm",
+            "match_score": 0.052,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:48",
+            "agent": "sentiment_agent",
+            "claim": "Signal: Rate-hike odds >60% after strong jobs report; Direction: Bearish; Source: News; Supporting Evidence: \"+162K, +4.1% unemployment\"; \"September rate hike odds past 60%\"",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:49",
+            "agent": "sentiment_agent",
+            "claim": "Signal: Long-duration growth under pressure; Direction: Bearish; Source: News; Supporting Evidence: Netflix -4%, Adobe -7%, Tesla -3% on rate repricing",
+            "match_method": "llm",
+            "match_score": 0.3403,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:56",
+            "agent": "sentiment_agent",
+            "claim": "Signal: Hawkish price action may be overdone; Direction: Mildly Bullish; Source: News/StockTwits; Supporting Evidence: Wolfe chief economist \"taking the print a little too far\"",
+            "match_method": "llm",
+            "match_score": 0.052,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:58",
+            "agent": "sentiment_agent",
+            "claim": "The macro backdrop (hawkish rate repricing) is pressuring QQQ's long-duration growth holdings, retail sentiment on StockTwits is decisively bearish with traders positioned for further downside, and Re",
+            "match_method": "llm",
+            "match_score": 0.3123,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:4",
+            "agent": "news_agent",
+            "claim": "Rate environment: Prediction markets show 72% probability of a Fed rate HIKE in 2026 (up 4pp in a week), 93% probability of NO rate cuts in 2026.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "opposes_alpha",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:5",
+            "agent": "news_agent",
+            "claim": "September rate hike odds pushed past 60% after the jobs report.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:11",
+            "agent": "news_agent",
+            "claim": "The tension between rising rate-hike odds (a headwind for long-duration growth equities) and persistent AI-driven earnings momentum is the central theme traders must weigh for QQQ positioning.",
+            "match_method": "llm",
+            "match_score": 0.3803,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:12",
+            "agent": "news_agent",
+            "claim": "The August non-farm payrolls report surprised to the upside at +162K, with unemployment at 4.1%.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:14",
+            "agent": "news_agent",
+            "claim": "A \"blowout jobs report\" per market commentary pushed September rate-hike odds past 60%.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:15",
+            "agent": "news_agent",
+            "claim": "This is a key macro input: a resilient labor market reduces the case for Fed easing and raises the risk of further tightening.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:17",
+            "agent": "news_agent",
+            "claim": "72% probability of a Fed rate hike in 2026 (up +4.0pp over the week; $8.7M volume)",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:18",
+            "agent": "news_agent",
+            "claim": "93% probability of NO Fed rate cuts in 2026 (up +4.3pp over the week; $8.1M volume)",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "opposes_alpha",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:19",
+            "agent": "news_agent",
+            "claim": "62% probability of a hike by the October 2026 meeting",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:20",
+            "agent": "news_agent",
+            "claim": "50% probability of a hike by the September 2026 meeting",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:21",
+            "agent": "news_agent",
+            "claim": "This is a dramatic reversal from any lingering easing expectations.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:22",
+            "agent": "news_agent",
+            "claim": "Notably, Fed Governor Christopher Waller advocated leaving rates unchanged provided inflation shows signs of cooling \u2014 a dovish counterpoint within the Fed, but markets are pricing a hike as the base ",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:24",
+            "agent": "news_agent",
+            "claim": "However, the \"Inflation Odds Move Toward 100%\" headline and rising rate-hike bets indicate inflation is being watched closely as the justification for potential hikes.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:46",
+            "agent": "news_agent",
+            "claim": "The S&P 500 and Dow posted their \"best day in a month\" on calmer yields as rate-hike bets waned intraweek, before the jobs report re-ignited hawkish pricing.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:47",
+            "agent": "news_agent",
+            "claim": "Rate-Hike Risk (Primary Headwind): With 72% odds of a 2026 hike and September odds past 60%, rising yields directly pressure QQQ's long-duration, high-multiple growth holdings.",
+            "match_method": "llm",
+            "match_score": 0.3803,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:48",
+            "agent": "news_agent",
+            "claim": "Netflix's 4% drop on rate repricing is a template for how this plays out.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:53",
+            "agent": "news_agent",
+            "claim": "Theme: Labor Market; Data Point: NFP +162K, unemployment 4.1%; Implication for QQQ: Strong economy; reduces case for Fed cuts; Direction: Mixed/Neutral",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:54",
+            "agent": "news_agent",
+            "claim": "Theme: Fed Policy; Data Point: 72% odds of 2026 hike; 93% odds of NO cuts; Implication for QQQ: Rising yields pressure long-duration growth; Direction: Bearish",
+            "match_method": "llm",
+            "match_score": 0.3123,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:55",
+            "agent": "news_agent",
+            "claim": "Theme: Rate-Sensitive Growth; Data Point: Netflix -4% on rate repricing; Implication for QQQ: High-multiple growth names vulnerable; Direction: Bearish",
+            "match_method": "llm",
+            "match_score": 0.028,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:63",
+            "agent": "news_agent",
+            "claim": "The week's macro data has shifted the policy narrative decisively toward a potential Fed rate hike, which is the single largest headwind for QQQ's long-duration growth profile.",
+            "match_method": "llm",
+            "match_score": 0.3803,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:42",
+            "agent": "fundamental_agent",
+            "claim": "Rate Sensitivity: As a growth-heavy fund, QQQ is sensitive to the interest-rate environment.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:43",
+            "agent": "fundamental_agent",
+            "claim": "Falling rates (a rate-cut cycle) would tend to support valuations, while rising rates would pressure them.",
+            "match_method": "llm",
+            "match_score": 0.8639,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "neutral_background",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:48",
+            "agent": "fundamental_agent",
+            "claim": "Watch the rate environment: Given the growth-heavy composition, QQQ is a high-beta play on the direction of interest rates and liquidity conditions.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A003",
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:67",
+            "agent": "fundamental_agent",
+            "claim": "Metric / Factor: Rate Sensitivity; Value / Status: High; Interpretation: Growth-heavy; sensitive to discount rates",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bull_researcher:investment_debate_state.bull_history:claim:5",
+            "agent": "bull_researcher",
+            "claim": "The bear points to the 72% probability of a rate hike in 2026 and the 93% odds of no cuts as a death knell for QQQ's long-duration growth holdings.",
+            "match_method": "llm",
+            "match_score": 0.3923,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "supports_alpha",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bull_researcher:investment_debate_state.bull_history:claim:7",
+            "agent": "bull_researcher",
+            "claim": "The market is pricing a hike because the economy is strong \u2014 we just saw a +162K jobs report with unemployment at 4.1%.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bull_researcher:investment_debate_state.bull_history:claim:12",
+            "agent": "bull_researcher",
+            "claim": "Moreover, look at what happened on the very day the rate-hike odds spiked: Intel climbed 4%, AMD rose 3%, and NVIDIA ticked up.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bull_researcher:investment_debate_state.bull_history:claim:15",
+            "agent": "bull_researcher",
+            "claim": "The bear's Netflix -4% example is cherry-picking one long-duration media name while ignoring that the chip complex \u2014 which carries far more index weight \u2014 is shrugging off the same pressure.",
+            "match_method": "llm",
+            "match_score": 0.3123,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bull_researcher:investment_debate_state.bull_history:claim:50",
+            "agent": "bull_researcher",
+            "claim": "Yes, rate-hike odds have risen.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:4",
+            "agent": "bear_researcher",
+            "claim": "On the Rate \"Headwind\": The Bull Has It Backwards",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:5",
+            "agent": "bear_researcher",
+            "claim": "The bull argues that a rate hike in a strong economy is a \"sign of strength.\" That's a convenient framing, but it ignores the mechanics of how QQQ trades.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:8",
+            "agent": "bear_researcher",
+            "claim": "When discount rates rise, the present value of those distant earnings falls more for QQQ than for the broader market.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:10",
+            "agent": "bear_researcher",
+            "claim": "The bull points to Intel +4%, AMD +3%, and NVIDIA ticking up on the day rate-hike odds spiked as proof that semiconductors are immune.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:13",
+            "agent": "bear_researcher",
+            "claim": "The bull is cherry-picking the semiconductor pocket while ignoring that the software and media complex \u2014 which collectively carry enormous weight in the Nasdaq-100 \u2014 is cracking under the same rate pr",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:14",
+            "agent": "bear_researcher",
+            "claim": "And here's the critical point the bull conveniently omits: the market is pricing a 72% probability of a hike in 2026 and a 93% probability of NO cuts.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:15",
+            "agent": "bear_researcher",
+            "claim": "That's not a transient wobble \u2014 that's a structural repricing of the entire rate outlook.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:16",
+            "agent": "bear_researcher",
+            "claim": "The \"strong economy\" the bull celebrates is precisely what's keeping the Fed hawkish.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:17",
+            "agent": "bear_researcher",
+            "claim": "Every strong jobs report, every resilient consumer number, pushes the first cut further out and raises the odds of a hike.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:49",
+            "agent": "bear_researcher",
+            "claim": "And when rates are rising \u2014 as they are now \u2014 the financing costs for the very AI buildout the bull celebrates go up.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:50",
+            "agent": "bear_researcher",
+            "claim": "The bull is celebrating a cycle that the rate environment is actively undermining.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:research_manager:investment_plan:claim:8",
+            "agent": "research_manager",
+            "claim": "First, the rate mechanics argument is correct: QQQ is a concentrated bet on long-duration, high-multiple growth, and at a 29x aggregate PE it is far more sensitive to rising discount rates than the br",
+            "match_method": "llm",
+            "match_score": 0.3923,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "supports_alpha",
+            "direction": "positive",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:research_manager:investment_plan:claim:9",
+            "agent": "research_manager",
+            "claim": "The market pricing a 72% probability of a hike and 93% odds of no cuts is a structural repricing, not a transient wobble.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:3",
+            "agent": "aggressive_risk_analyst",
+            "claim": "The conservative and neutral analysts are going to frame this as a coin flip, a \"wait-and-see\" moment defined by fear of a rate hike and a negative MACD histogram.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:7",
+            "agent": "aggressive_risk_analyst",
+            "claim": "Rebuttal to the Conservative Analyst (The \"Risk-Off\" Hawk): You will argue that the 72% probability of a rate hike and the 93% odds of no cuts are a death knell for long-duration growth.",
+            "match_method": "llm",
+            "match_score": 0.3403,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "supports_alpha",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:11",
+            "agent": "aggressive_risk_analyst",
+            "claim": "While you obsess over Netflix and Adobe, the hardware complex\u2014the actual engine of this market\u2014is running straight into the rate headwind.",
+            "match_method": "llm",
+            "match_score": 0.08,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "opposes_alpha",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42",
+            "agent": "aggressive_risk_analyst",
+            "claim": "The only catalyst on the table is a rate hike, and the market has had a week to digest that 72% probability.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:14",
+            "agent": "conservative_risk_analyst",
+            "claim": "When the software and media complex\u2014which constitutes a massive portion of the Nasdaq-100\u2014is being sold off on guidance concerns and rate repricing, the index is bleeding, regardless of what the chip ",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "unknown",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:18",
+            "agent": "conservative_risk_analyst",
+            "claim": "The 72% probability of a rate hike is not \"priced in\" as you claim\u2014if it were, the selling would have been orderly.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "mentions_alpha",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:27",
+            "agent": "conservative_risk_analyst",
+            "claim": "To the Neutral Analyst: Your \"balanced\" view ignores the cost of capital.",
+            "match_method": "llm",
+            "match_score": 0.028,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:43",
+            "agent": "conservative_risk_analyst",
+            "claim": "If the hike is not delivered, the market will rally\u2014but we will have missed nothing by being defensively positioned, because we can re-enter on confirmation.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "mentions_alpha",
+            "direction": "neutral",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9",
+            "agent": "neutral_risk_analyst",
+            "claim": "When these names are selling off on guidance concerns and rate repricing, the index is bleeding internally, regardless of what the chip names are doing.",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:neutral_risk_analyst:risk_debate_state.neutral_history:claim:16",
+            "agent": "neutral_risk_analyst",
+            "claim": "The Aggressive Analyst is essentially betting that the market has fully digested the rate risk, but the negative MACD histogram since August 21 and the broad crack in high-multiple software names sugg",
+            "match_method": "llm",
+            "match_score": 0.0,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": null,
+            "evidence_stance": "neutral_background",
+            "direction": "negative",
+            "match_status": "matched"
+          },
+          {
+            "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:portfolio_manager:final_trade_decision:claim:8",
+            "agent": "portfolio_manager",
+            "claim": "However, the bear (Conservative) wins the medium-term tactical argument: QQQ is a concentrated bet on long-duration, high-multiple growth at a 29x PE, and with a 72% probability of a rate hike and 93%",
+            "match_method": "llm",
+            "match_score": 0.3923,
+            "matched_alpha": "A001",
+            "deterministic_top_alpha": "A001",
+            "evidence_stance": "supports_alpha",
+            "direction": "positive",
+            "match_status": "matched"
+          }
+        ],
+        "activation_components": {
+          "evidence_quality": {
+            "raw": 97.7287,
+            "weight": 0.35,
+            "contribution": 34.205,
+            "unique_semantic_groups": 26,
+            "unique_contribution_sum": 3.9091,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 70.0,
+            "weight": 0.2,
+            "contribution": 14.0,
+            "distinct_agents": 7,
+            "agents": [
+              "bear_researcher",
+              "bull_researcher",
+              "fundamental_agent",
+              "news_agent",
+              "portfolio_manager",
+              "research_manager",
+              "sentiment_agent"
+            ],
+            "agent_coverage": 100.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "LINEAGE_UNRESOLVED",
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 50.0,
+            "weight": 0.1,
+            "contribution": 5.0,
+            "ticker_specific_evidence_count": 13,
+            "total_unique_evidence_count": 26
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 10.0,
+            "evidence_gated": false,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 64.3522,
+            "weight": 0.05,
+            "contribution": 3.2176,
+            "evidence_gated": false,
+            "qualifying_group_count": 48,
+            "weighted_signed_average": 0.287
+          }
+        },
+        "entity_exposure": {
+          "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+          "ticker": "QQQ",
+          "alpha_id": "A001",
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "historical_mapping": 0.8,
+          "current_evidence": 0.21631538461538463,
+          "agent_confidence": 0.6944444444444444,
+          "final_exposure": 0.6037835042735042,
+          "unique_evidence_fact_count": 38,
+          "ticker_specific_fact_count": 13,
+          "distinct_supporting_agent_count": 9,
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": false,
+          "override_candidate": false,
+          "qualification_effect_applied": false,
+          "reason_codes": [],
+          "provenance": {
+            "formula_version": "week4.exposure_score.mvp_v1",
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "representative_fact_group_ids": [
+              "07634eaac18e147196f3de50",
+              "09fda995e9c4d1963b19a6e9",
+              "2039c59529f415ea3865d7e5",
+              "2fb67cbd8f61b3d43c8473ad",
+              "3f903dc1fcbe95df0a72ccf6",
+              "6ae7638021b736cc3c20a69e",
+              "8b1ef1b53dcc73b57fec12f4",
+              "97a4e1f99e8a2ff6b7d83c00",
+              "a24123cf14b5ff0e882a69a9",
+              "b7e307c3fcd20c0ff7a9152c",
+              "cc1bf68b04d3d1eb13cadf55",
+              "d3cfded13f7627acd5fb98b9",
+              "f2d173ef2204d027d3ced8a4"
+            ],
+            "mean_representative_match_score": 0.21631538461538463,
+            "ticker_specific_fact_ratio": 1.0,
+            "qualifying_local_edge_count": 0
+          }
+        },
+        "qualification_effect_applied": false,
+        "would_block_dominant": false,
+        "would_block_regime_level": false,
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "stage_findings": {
+          "evidence_stage": "CORRECT -- upstream corpus genuinely and predominantly describes a rate-HIKE/hawkish environment (93% no-cut probability, 72% hike probability), matching the frozen ABSENT/STRONG-contrary determination.",
+          "mapping_stage": "INCORRECT -- the Alpha Mapper's LLM classifier assigned matched_alpha=A001 to 66 claims on TOPIC proximity ('interest rate policy' discussion) without requiring directional alignment to A001's specific falling-rate/easing thesis. Of the 66, the shadow evidence_stance classifier (evidence_stance.py, which explicitly never feeds activation scoring per its own docstring) independently found only 13 supports_alpha, 10 opposes_alpha, 41 neutral_background, 2 mentions_alpha -- i.e. a large majority of the pooled claims do not actually support a rate-cut thesis, several directly oppose it.",
+          "qualification_stage": "Existing qualification gates (local_structure_support cap, entity-exposure would_block flags) are direction-agnostic; they evaluate evidentiary STRUCTURE and historical exposure blocking, not whether pooled evidence nets toward the Alpha's own polarity. No existing gate is designed to catch a direction-blind topical mapping error, so none fired.",
+          "activation_stage": "Given its (incorrect) mapped inputs, the deterministic activation formula computed correctly: evidence_quality (raw 97.7 from 26 unique semantic groups, pure volume-based) and agent_independence (raw 70.0 from 7 distinct agents, pure breadth-based) are the two highest-weighted components (0.35+0.2=0.55 combined) and are computed from claim VOLUME, not net directional alignment -- so a large pool of topically-adjacent-but-wrong-direction claims drove the uncapped score to 66.42, past the 'active' threshold.",
+          "exposure_stage": "entity_alpha_exposures.json shows historical_mapping=0.8 (static/seed-based prior) vs current_evidence=0.216 (much lower, and arguably a more direction-aware signal) blended to final_exposure=0.604 -- but qualification_effect_applied=false and would_block_dominant/regime_level=false for this run, meaning exposure did NOT actively alter this outcome (it stayed dormant). Static exposure is therefore not the active cause here, though its high historical_mapping input is a latent risk factor worth separate attention.",
+          "final_level_stage": "Reached 'active' (66.42, direction=positive). Note: the aggregate direction label 'positive' is itself a secondary anomaly -- among the 66 mapped claims' own claim-level direction field, the split is close to even-to-slightly-negative (17 negative vs 16 positive, 23 unknown, 10 neutral), yet the alpha-level rollup reads 'positive'. This does not change the root-cause conclusion (the volume-based mapping/scoring mechanism is the primary defect) but is flagged as a related observation."
+        }
+      },
+      "root_cause_primary": "SYSTEM_ERROR",
+      "root_cause_secondary": "SEMANTIC_MAPPING_FALSE_POSITIVE",
+      "root_cause_secondary_detail": "The Alpha Mapper's LLM classifier pools claims into an Alpha's evidence set on topical/keyword proximity to the Alpha's subject area (here: 'interest rate policy') without gating on directional alignment to the Alpha's own defined thesis (here: specifically a rate-CUT/easing condition, not rate policy in general). A separate, already-implemented direction-aware signal (evidence_stance.py's supports_alpha/opposes_alpha classification) exists in the codebase but is architecturally walled off (by explicit design, per its own docstring) from ever feeding into Alpha Mapper admission or Activation Scorer arithmetic, so it could not correct this.",
+      "mechanism": "A high-volume, multi-agent debate about 'the interest rate environment' (driven by a single news event: a strong August jobs report shifting Fed-hike odds) was topically matched to A001 (Rate Cut Cycle) by the LLM classifier across 66 claims from 7 distinct agents, even though the great majority of that debate content is about a HIKE, not a CUT, and 10 of the 66 claims are explicitly stance=opposes_alpha. Because Activation Scorer v2's dominant-weighted evidence_quality and agent_independence components are volume/breadth-based rather than net-direction-based, this large, direction-mixed pool alone was sufficient to push A001 to 'active' despite the true current evidence pointing the opposite way.",
+      "first_incorrect_stage": "MAPPING",
+      "upstream_evidence_correct": "yes",
+      "mapping_correct": "no",
+      "qualification_correct": "no -- existing gates are structurally sound for their own intended purpose (graph-edge locality, historical-exposure blocking) but none of them is designed to check directional alignment between pooled evidence and the Alpha's own thesis, so this defect class passes through unchecked",
+      "activation_correct_given_inputs": "yes -- the deterministic activation formula correctly computed 66.42 from the (incorrectly pooled) inputs it was given; the arithmetic itself is not in question",
+      "gold_change_required": "NO",
+      "gold_change_required_detail": "The frozen Gold trigger (ABSENT, STRONG contrary evidence) is well-supported by the same underlying evidence corpus used in this trace and is not contradicted by anything found here -- if anything, this trace independently corroborates Step 3's ABSENT determination.",
+      "production_fix_recommended": "yes",
+      "fix_scope": "Description only, not implemented: for directional/cyclical macro Alphas (A001, A501, A003, and structurally similar Alphas), require net directional alignment between a claim's stance relative to the Alpha's own thesis and the Alpha's polarity before the claim counts toward that Alpha's evidence pool -- e.g. wiring the already-computed (but currently shadow-only) evidence_stance classification into the Alpha Mapper's admission/scoring path for these Alphas, or adding an equivalent direction-gate at the LLM matching stage, rather than pooling any topically-adjacent claim regardless of whether it supports or opposes the Alpha's specific mechanism.",
+      "implemented": false
+    },
+    {
+      "case_id": "B",
+      "ticker": "QQQ",
+      "rule_id": "QQQ-A003-LIQUIDITY-EXPANSION",
+      "tier": "FORMAL_GOLD",
+      "step4_result": "REVIEW",
+      "blocking": true,
+      "frozen_trigger_state": "UNCERTAIN",
+      "frozen_evidence_strength": "WEAK",
+      "actual_level": "candidate",
+      "actual_score": 0.0,
+      "trace": {
+        "mapped_claim_count": 0,
+        "mapped_claims_detail": [],
+        "activation_components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "LINEAGE_UNRESOLVED",
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "entity_exposure": {
+          "historical_mapping": 0.75,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.375,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "finding": "Zero claims were assigned matched_alpha=A003 in this run (alpha_matches.json). Activation reason_codes=['NO_QUALIFYING_EVIDENCE'], score=0.0, level=candidate. This is a clean, non-suspicious 'no evidence found' outcome, not a mapping or scoring anomaly -- consistent with (and slightly stronger than) Step 3's own UNCERTAIN/WEAK characterization, which found only indirect recession-relief framing via broader upstream text search, not any claim the deterministic/LLM mapper itself was willing to commit to A003."
+      },
+      "implementation_behavior_classification": "reasonable_given_uncertain_evidence",
+      "acceptance_status_after_step5": "REVIEW",
+      "acceptance_status_after_step5_rationale": "The frozen trigger is UNCERTAIN and there is no already-defined frozen rule that deterministically resolves UNCERTAIN without changing the trigger (Section 10/11 of the Step-4 spec explicitly forbids inventing one). System behavior here is unsuspicious and does not change this.",
+      "human_resolution_needed": true,
+      "note_on_release": "Release status is already FAIL via QQQ-A001 (Case A); this unresolved REVIEW does not change the overall release result.",
+      "implemented": false
+    },
+    {
+      "case_id": "C",
+      "ticker": "MSFT",
+      "rule_id": "MSFT-CAPEX-BURDEN-CONDITIONAL",
+      "tier": "SILVER_DIAGNOSTIC",
+      "step4_result": "REVIEW",
+      "blocking": false,
+      "frozen_trigger_state": "PRESENT",
+      "frozen_evidence_strength": "STRONG",
+      "frozen_sub_conditions": {
+        "capex_present": "PRESENT",
+        "capex_downside_linkage_present": "PRESENT"
+      },
+      "actual_level": "candidate",
+      "actual_score": 43.3642,
+      "trace": {
+        "mapped_claim_count_matched_alpha_A304": 52,
+        "raw_unique_evidence_fact_count": 39,
+        "qualified_unique_evidence_fact_count": 14,
+        "qualification_reason_counts": {
+          "PRIMARY_QUALIFIED": 13,
+          "SECONDARY_NOT_TICKER_SPECIFIC": 25,
+          "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+        },
+        "activation_components": {
+          "evidence_quality": {
+            "raw": 32.1672,
+            "weight": 0.35,
+            "contribution": 11.2585,
+            "unique_semantic_groups": 14,
+            "unique_contribution_sum": 1.2867,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 70.0,
+            "weight": 0.2,
+            "contribution": 14.0,
+            "distinct_agents": 4,
+            "agents": [
+              "aggressive_risk_analyst",
+              "fundamental_agent",
+              "news_agent",
+              "sentiment_agent"
+            ],
+            "agent_coverage": 100.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "LINEAGE_UNRESOLVED",
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 35.7143,
+            "weight": 0.1,
+            "contribution": 3.5714,
+            "ticker_specific_evidence_count": 5,
+            "total_unique_evidence_count": 14
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 10.0,
+            "evidence_gated": false,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 90.6862,
+            "weight": 0.05,
+            "contribution": 4.5343,
+            "evidence_gated": false,
+            "qualifying_group_count": 39,
+            "weighted_signed_average": 0.8137
+          }
+        },
+        "entity_exposure": {
+          "historical_mapping": 0.7,
+          "current_evidence": 0.08082,
+          "agent_confidence": 0.6909090909090909,
+          "final_exposure": 0.5124278181818182,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 39,
+          "ticker_specific_fact_count": 5,
+          "distinct_supporting_agent_count": 11,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "sample_matched_evidence": [
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:sentiment_agent:sentiment_report:claim:28",
+            "agent": "sentiment_agent",
+            "claim": "r/stocks: \"Mag 7 already did their 100x (and more).",
+            "match_score": 0.0,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:sentiment_agent:sentiment_report:claim:29",
+            "agent": "sentiment_agent",
+            "claim": "So where does the next trillion-dollar company come from?\" \u2014 questions whether mega-cap growth is exhausted, a mildly bearish/valuation-skeptical framing for MSFT as a Mag 7 member.",
+            "match_score": 0.2441,
+            "evidence_stance": "supports_alpha"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:sentiment_agent:sentiment_report:claim:45",
+            "agent": "sentiment_agent",
+            "claim": "Mag 7 exhaustion / valuation skepticism \u2014 Cramer's \"finally cheap\" call is being met with retail skepticism (\"means sell\"), and r/stocks questions whether Mag 7 growth is spent.",
+            "match_score": 0.2441,
+            "evidence_stance": "supports_alpha"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:sentiment_agent:sentiment_report:claim:54",
+            "agent": "sentiment_agent",
+            "claim": "Valuation skepticism on Mag 7 growth exhaustion.",
+            "match_score": 0.2162,
+            "evidence_stance": "supports_alpha"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:sentiment_agent:sentiment_report:claim:67",
+            "agent": "sentiment_agent",
+            "claim": "Signal: Mag 7 growth exhaustion question; Direction: Mildly Bearish; Source: Reddit r/stocks; Supporting Evidence: \"Mag 7 already did their 100x...",
+            "match_score": 0.0,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:news_agent:news_report:claim:7",
+            "agent": "news_agent",
+            "claim": "This creates a two-sided setup for MSFT: strong company-specific AI/cloud momentum versus rising discount-rate pressure on high-multiple growth equities.",
+            "match_score": 0.0,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:news_agent:news_report:claim:24",
+            "agent": "news_agent",
+            "claim": "This is a \"growth is fine, but the multiple is under pressure\" environment.",
+            "match_score": 0.028,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:news_agent:news_report:claim:53",
+            "agent": "news_agent",
+            "claim": "MSFT presents a constructive company-specific story (Stifel $530 target, GPT-6 Astra catalyst, improving AI narrative, visible Azure scale) offset by a hawkish macro regime (rising probability of Fed ",
+            "match_score": 0.0,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:news_agent:news_report:claim:65",
+            "agent": "news_agent",
+            "claim": "Category: Cloud Profitability; Signal: \"Buried\" in reporting; Detail: Transparency concern; Direction for MSFT: Negative",
+            "match_score": 0.08,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:4",
+            "agent": "fundamental_agent",
+            "claim": "The PEG ratio of 1.66 suggests the stock is priced at a premium relative to its growth rate but remains within a reasonable range for a mega-cap technology leader.",
+            "match_score": 0.0,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:80",
+            "agent": "fundamental_agent",
+            "claim": "Valuation Risk: At 27.8x trailing earnings and 21.2x forward earnings, the stock is not cheap.",
+            "match_score": 0.3962,
+            "evidence_stance": "mentions_alpha"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:82",
+            "agent": "fundamental_agent",
+            "claim": "Any slowdown in Azure growth could trigger multiple compression.",
+            "match_score": 0.6896,
+            "evidence_stance": "supports_alpha"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:96",
+            "agent": "fundamental_agent",
+            "claim": "Valuation (PEG 1.66) leaves limited margin of safety if growth disappoints.",
+            "match_score": 0.2262,
+            "evidence_stance": "supports_alpha"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:100",
+            "agent": "fundamental_agent",
+            "claim": "The stock's pullback from its high, combined with strong forward EPS estimates ($23.57), suggests the market is offering a more reasonable entry point than earlier in the year.",
+            "match_score": 0.0,
+            "evidence_stance": "neutral_background"
+          },
+          {
+            "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:103",
+            "agent": "fundamental_agent",
+            "claim": "Metric: P/E (TTM); Value: 27.8x; Assessment: Moderately rich",
+            "match_score": 0.0,
+            "evidence_stance": "neutral_background"
+          }
+        ],
+        "finding": "52 claims were matched_alpha=A304, spanning 11 distinct agents including exactly the capex-downside-linkage claims Step 3 cited (e.g. fundamental_agent: 'Any slowdown in Azure growth could trigger multiple compression'; 'Despite the capex surge, free cash flow remained robust... though it declined modestly from FY2025's $71.6B'; portfolio_manager: 'declining FCF efficiency (FCF fell to $67.0B from $74.1B while capex...)'). However, the evidence_source_role_v1 qualification policy classified 25 of 39 raw unique evidence facts as SECONDARY_NOT_TICKER_SPECIFIC -- i.e. restatements of the same underlying facts by 'secondary' role agents (bear_researcher, bull_researcher, portfolio_manager, research_manager, conservative/neutral/aggressive risk analysts, trader) debating the primary analysts' findings -- leaving only 14 qualified unique groups (13 PRIMARY_QUALIFIED + 1 SECONDARY_QUALIFIED_CAUSAL_EVIDENCE), reducing agent_independence.distinct_agents from 11 (raw) to 4 (qualified: aggressive_risk_analyst, fundamental_agent, news_agent, sentiment_agent). The resulting uncapped activation score (43.36) fell short of the 'active' threshold (candidate remained). This qualification behavior appears to be the evidence_source_role_v1 policy operating as designed -- deliberately down-weighting debate-agent restatement of already-counted primary facts to prevent duplicate-evidence overweighting -- rather than a mapping loss or code defect. No claim was lost outright; the genuine capex-downside-linkage evidence (fundamental_agent claims) is present among the 14 qualified groups, but the aggregate falls short of the active-level bar once debate-agent volume is correctly excluded."
+      },
+      "root_cause_primary": "ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION",
+      "root_cause_primary_confidence": "moderate-to-high; a residual open question is whether SECONDARY_NOT_TICKER_SPECIFIC is too aggressive for debate-agent claims that do restate hard MSFT-specific figures (PEG 1.66, P/E 27.8x, FCF $67.0B, capex $115.9B) in their own words -- this trace did not find decisive evidence that this is a mapping/loss defect rather than intended policy, so SYSTEM_ERROR was not asserted.",
+      "root_cause_secondary": "OTHER",
+      "root_cause_secondary_detail": "evidence_source_role_v1 SECONDARY_NOT_TICKER_SPECIFIC qualification filtering removed 25/39 raw evidence facts (debate-agent restatement of primary findings) before they could contribute to the qualified evidence pool used in activation scoring.",
+      "distinction_noted": "Gold's semantic evidence trigger being PRESENT (Step 3, evidence-only, upstream-of-activation text search) does not by itself prove B2/B4 production admissibility requirements were satisfied -- this case is a direct, concrete illustration of that documented distinction.",
+      "acceptance_status_after_step5": "REVIEW",
+      "acceptance_status_after_step5_rationale": "Frozen rule (conditional_only/do_not_force) does not impose an affirmative detection obligation even when the evidence condition is met; the trace confirms no force violation occurred (nothing was wrongly forced) and that the shortfall traces to a plausible, reasonable admissibility mechanism rather than a clear defect -- REVIEW is preserved, non-blocking (Silver).",
+      "implemented": false
+    }
+  ],
+  "known_nonblocking_failures": [
+    {
+      "ticker": "MSFT",
+      "rule_id": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+      "concept": "Direct A102 inference mechanism trigger",
+      "result": "FAIL",
+      "blocking": false,
+      "step4_result": "FAIL",
+      "note": "Step-4 comparison was already deterministic (frozen trigger PRESENT/STRONG, must_detect_if_evidence_present, actual A102 remained at level=candidate score=34.967). Not placed in the Step-5 adjudication queue because no deeper trace is needed to explain the acceptance outcome itself; recorded here so it is not lost from the closure package. Preserved as FAIL, non-blocking (Silver).",
+      "deep_trace_performed": false
+    }
+  ],
+  "additional_composite_conflict_review_cases": "NO_ADDITIONAL_COMPOSITE_CONFLICT_REVIEW_CASES",
+  "additional_composite_conflict_review_cases_detail": "All three COMPOSITE_STRUCTURE_HIT rules (NVDA-GROWTH-VS-VALUATION-CONFLICT, TSM-AI-TO-FOUNDRY-TRANSMISSION, AMD-AI-GROWTH-VS-VALUATION) resolved PASS in the Step-4 JSON; none was marked REVIEW for a PRESENT-trigger-but-no-admitted-conflict scenario.",
+  "forbidden_dominant_and_conditional_force_audit": {
+    "step4_reported_forbidden_dominant_violations": 0,
+    "step4_json_forbidden_dominant_violation_rule_ids": [],
+    "step4_reported_conditional_force_violations": 1,
+    "step4_json_conditional_force_violation_rule_ids": [
+      "QQQ-A001-RATE-CUT-CYCLE"
+    ],
+    "reconciled": true,
+    "inconsistency_found": false
+  },
+  "alpha_memory": {
+    "revisited": false,
+    "carried_forward": {
+      "shadow_consistency": "6/6",
+      "activation_modulation_applied": false
+    },
+    "considered_as_root_cause": false,
+    "note": "Not a candidate root cause for any case in this task; no persisted evidence implicates it."
+  },
+  "release": {
+    "status_before_step5": "FAIL",
+    "status_after_step5": "FAIL",
+    "primary_blocking_defect": "QQQ-A001-RATE-CUT-CYCLE conditional-force violation (Case A)",
+    "note": "A diagnosed defect is still a defect. Root-cause explanation does not change the frozen Step-4 acceptance outcome."
+  },
+  "remediation_backlog": [
+    {
+      "priority": "P1",
+      "blocking": true,
+      "affected": "QQQ-A001-RATE-CUT-CYCLE (and structurally similar directional macro Alphas: A501, A003)",
+      "likely_module": "comqutor_alpha/structure_engine/week2_llm.py (Alpha Mapper LLM classification) and/or comqutor_alpha/graph_engine/activation_scorer_v2.py (evidence_quality / agent_independence components)",
+      "minimal_future_remediation_concept": "Gate directional/cyclical Alpha admission on net stance alignment (wire the existing evidence_stance.py classification, or an equivalent, into the Alpha Mapper's admission path for these Alphas) rather than pooling any topically-adjacent claim regardless of support/opposition.",
+      "required_regression_tests": "A fixture reproducing a direction-mixed, high-volume single-topic debate (as in this QQQ run) that currently activates A001 incorrectly; assert it no longer reaches 'active' once the fix is applied. Add coverage for A501/A003 analogues.",
+      "requires_new_gold_version": "NO",
+      "requires_new_fresh_acceptance_runs_after_code_fix": "YES"
+    },
+    {
+      "priority": "P2",
+      "blocking": false,
+      "affected": "MSFT-CAPEX-BURDEN-CONDITIONAL",
+      "likely_module": "comqutor_alpha/graph_engine/evidence_source_role.py (evidence_source_role_v1 policy)",
+      "minimal_future_remediation_concept": "Review whether SECONDARY_NOT_TICKER_SPECIFIC should recognize debate-agent restatements that carry hard, ticker-specific figures already established by a primary agent (e.g. exact FCF/capex/PEG numbers), rather than blanket-excluding all secondary-role content -- open question, not a confirmed defect.",
+      "required_regression_tests": "A fixture with a primary-agent fact and multiple secondary-agent restatements of the same ticker-specific figure; assert the intended qualification behavior once a decision is made.",
+      "requires_new_gold_version": "NO",
+      "requires_new_fresh_acceptance_runs_after_code_fix": "YES"
+    },
+    {
+      "priority": "P2",
+      "blocking": false,
+      "affected": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+      "likely_module": "comqutor_alpha/structure_engine/week2_llm.py / comqutor_alpha/graph_engine/activation_scorer_v2.py",
+      "minimal_future_remediation_concept": "Not deep-traced in this task (Section 15); recorded as a known non-blocking Silver failure for future investigation.",
+      "required_regression_tests": "TBD pending a dedicated trace.",
+      "requires_new_gold_version": "NO",
+      "requires_new_fresh_acceptance_runs_after_code_fix": "YES"
+    }
+  ],
+  "gold_v0_2_survives_failure_statement": "Gold v0.2 remained immutable throughout comparison and adjudication. A release FAIL is a valid acceptance outcome and does not invalidate the benchmark -- the purpose of Gold v0.2 is to expose defects, not to be tuned until results look acceptable. Every root cause identified in this task is a production-system finding, not a Gold-authority defect; no case in this task met the bar for GOLD_LABEL_NEEDS_UPDATE or MARKET_CONDITION_CHANGED (no persisted evidence proves the frozen benchmark authority itself became invalid), and neither classification was used as an escape hatch.",
+  "anti_leakage": {
+    "gold_modified": false,
+    "trigger_matrix_modified": false,
+    "step4_acceptance_modified": false,
+    "acceptance_results_changed_to_improve_outcome": false,
+    "tickers_rerun": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "production_files_changed": 0,
+    "test_files_changed": 0,
+    "thresholds_retuned": false,
+    "taxonomy_retuned": false,
+    "alternate_runs_selected": false
+  },
+  "evaluation_status": "ADJUDICATED_STEP_5_DIAGNOSTIC_ONLY_NO_FIX"
+}

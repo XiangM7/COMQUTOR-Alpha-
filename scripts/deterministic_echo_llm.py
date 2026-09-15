@@ -48,6 +48,13 @@ class DeterministicEchoAlphaModel:
         self.calls = 0
         self._taxonomy = load_alpha_taxonomy()
 
+    def _echo_decision(self, record: dict[str, Any]) -> dict[str, Any]:
+        deterministic = map_claim_to_alpha(record, self._taxonomy, classifier_enabled=False)
+        top_alpha = deterministic["deterministic_top_alpha"]
+        if top_alpha:
+            return {"decision": "select", "selected_alpha_id": top_alpha}
+        return {"decision": "none", "selected_alpha_id": None}
+
     def invoke(self, prompt: str) -> _Response:
         self.calls += 1
         payload = json.loads(prompt.split("\nINPUT_JSON:\n", 1)[1])
@@ -58,6 +65,27 @@ class DeterministicEchoAlphaModel:
             # module docstring).
             return _Response(json.dumps({"invalid_by_design": True}))
 
+        if "claims" in payload:
+            # Step 5A execution-capacity repair: build_alpha_matches_payload
+            # now batches Alpha classification by default
+            # (map_structured_records(use_batched_classifier=True)), so the
+            # real request envelope is {"alpha_taxonomy": [...], "claims":
+            # [...]}, not a single claim -- echo each claim independently,
+            # same semantics as the single-claim branch below, and return
+            # the batched decisions shape.
+            decisions = []
+            for claim in payload["claims"]:
+                record = {
+                    "claim": claim.get("claim", ""),
+                    "evidence": claim.get("evidence", ""),
+                    "ticker": claim.get("ticker", ""),
+                    "factors": claim.get("factors", []),
+                    "direction": claim.get("direction", "neutral"),
+                }
+                decision = self._echo_decision(record)
+                decisions.append({"claim_id": claim.get("claim_id"), **decision})
+            return _Response(json.dumps({"decisions": decisions}))
+
         record = {
             "claim": payload.get("claim", ""),
             "evidence": payload.get("evidence", ""),
@@ -65,13 +93,7 @@ class DeterministicEchoAlphaModel:
             "factors": payload.get("factors", []),
             "direction": payload.get("direction", "neutral"),
         }
-        deterministic = map_claim_to_alpha(record, self._taxonomy, classifier_enabled=False)
-        top_alpha = deterministic["deterministic_top_alpha"]
-        if top_alpha:
-            decision: dict[str, Any] = {"decision": "select", "selected_alpha_id": top_alpha}
-        else:
-            decision = {"decision": "none", "selected_alpha_id": None}
-        return _Response(json.dumps(decision))
+        return _Response(json.dumps(self._echo_decision(record)))
 
 
 def build_deterministic_echo_gateway(run_id: str, output_root: Any) -> Week2LLMGateway:

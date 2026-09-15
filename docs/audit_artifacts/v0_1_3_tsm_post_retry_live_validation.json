@@ -1,0 +1,396 @@
+{
+  "schema_version": "v0_1_3_tsm_post_retry_live_validation.v1",
+  "scope": "LIVE_VALIDATION -- one authorized fresh TSM production run",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "official_alpha_hit": "61.0317%",
+  "executive_summary": {
+    "pre_fix_tsm_run": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+    "post_fix_tsm_run": "fc09821e-c7cf-40a7-bd76-c98172e16992",
+    "run_complete": true,
+    "evidence_stance_old_retry": 1,
+    "evidence_stance_new_retry": 2,
+    "pre_fix_stance_final_orphans": 32,
+    "post_fix_stance_final_orphans": 37,
+    "third_attempt_successes": 0,
+    "third_attempt_exhausted": 37,
+    "retry_effectiveness": "CASE_R4_EXTRA_RETRY_USED_BUT_NO_RECOVERY",
+    "keep_retry_fix": "MORE_VALIDATION_REQUIRED (not REVERT -- no clear downside proven; not KEEP -- no proven recovery either)",
+    "a301": {
+      "score": 51.6447,
+      "level": "active",
+      "provider_impacted": false
+    },
+    "tsm_3_run_mean_gold_hit": "77.78%",
+    "official_six_ticker_alpha_hit": "61.0317% (unchanged)",
+    "code_changed_after_validation": false
+  },
+  "pre_run_snapshot": {
+    "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+    "retry_policy": {
+      "evidence_stance_classifier": "2 retries (3 max attempts) -- EVIDENCE_STANCE_CLASSIFIER_MAX_RETRIES=2",
+      "alpha_classifier": "1 retry (2 max attempts) -- unchanged",
+      "structure_extractor": "1 retry (2 max attempts) -- unchanged",
+      "MAX_SERVER_RETRIES_ceiling": 2
+    },
+    "timeout_seconds": 45,
+    "provider_model": "deepseek / deepseek-v4-flash (comqutor_deepseek_default_v1 profile, thinking disabled, 1 debate round, 1 risk round)",
+    "closed_status_prerequisites": {
+      "p0_p1": "CLOSED PASS (26/26 reconfirmed)",
+      "provider_health": "CLOSED PASS (32/32 reconfirmed)",
+      "measurement_foundation": "CLOSED PASS (46/46 reconfirmed)",
+      "evidence_stance_retry_fix": "CLOSED PASS (18/18 reconfirmed)"
+    },
+    "operational_note": "A pre-existing server process (PID 38207, started 10:30:21, predating the retry-fix code edit at 14:10:15) was found occupying port 8000 at task start. It was stopped and the server was restarted via the approved scripts/start_live_comqutor.sh launcher (new PID 72821, started 15:15:30) to guarantee the fresh TSM run actually executed the post-fix code -- otherwise this validation would have silently tested stale, pre-fix retry behavior.",
+    "pre_fix_tsm_run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+    "pre_fix_provider_health_metrics_recap": {
+      "provider_health": "PROVIDER_DEGRADED",
+      "evidence_stance_final_orphans": 32,
+      "provider_final_orphans_total": 42,
+      "impacted_alpha_ids": [
+        "A101"
+      ]
+    }
+  },
+  "run_execution": {
+    "ticker": "TSM",
+    "new_run_id": "fc09821e-c7cf-40a7-bd76-c98172e16992",
+    "cache_disposition": "force_refreshed",
+    "start_timestamp": "2026-09-09T22:15:45.918579Z",
+    "end_timestamp": "2026-09-09T23:48:12.083008Z",
+    "wall_clock_duration_minutes": 92.44,
+    "exit_status": "completed",
+    "force_refresh_used": true,
+    "force_refresh_justification": "Same already-established mechanism used for the pre-fix TSM validation run (0aeea938) -- not invented for this task.",
+    "config_differences_from_pre_fix_run": "NONE other than the approved evidence_stance_classifier retry increase -- same model, same timeout (45s), same alpha_classifier/structure_extractor retry policy, same profile (comqutor_deepseek_default_v1), same concurrency default."
+  },
+  "run_completeness": {
+    "run_completed": true,
+    "semantic_status": "PASS",
+    "artifact_completeness": "9/9",
+    "graph_edge_count": 11,
+    "graph_node_count": 12,
+    "data_sanity_status": "CRITICAL",
+    "data_sanity_detail": "NO_MARKET_DATA_AVAILABLE (Yahoo Finance returned no OHLCV data for TSM on 2026-09-09) -- an external MARKET-DATA provider issue, unrelated to the Week2 semantic/LLM Provider pipeline this fix targets. ohlcv_row_count=0. This does NOT affect llm_semantic_calls.jsonl, error_logs, alpha_matches.json, or structure_graph.json, all of which are present, non-empty, and internally consistent.",
+    "claims_present": true,
+    "claims_count": 852,
+    "alpha_outputs_present": true,
+    "provider_logs_present": true,
+    "diagnostics_readable": true,
+    "classification": "VALID_FOR_RETRY_EFFECTIVENESS_ANALYSIS -- the Data Sanity CRITICAL finding is a market-data (OHLCV) ingestion issue, not a semantic/Provider pipeline failure, and does not invalidate the evidence_stance retry-effectiveness comparison. It IS flagged as a reason this run should receive extra scrutiny before being used for any market-price-dependent claim analysis, and is reported honestly rather than suppressed.",
+    "not_classified_as": "RUN_INVALID_FOR_RETRY_EFFECTIVENESS"
+  },
+  "primary_reliability_metrics_post_fix": {
+    "provider_health": "PROVIDER_DEGRADED",
+    "provider_call_attempts_total": 724,
+    "provider_failure_events": 184,
+    "semantic_critical_failure_events": 170,
+    "alpha_classifier_final_orphans": 13,
+    "evidence_stance_final_orphans": 37,
+    "structure_extractor_final_orphans": 9,
+    "provider_final_orphans_total": 59,
+    "claims_orphaned_by_provider_failure": 13,
+    "alphas_impacted_by_provider_failure": 0,
+    "impacted_alpha_ids": [],
+    "traceability_unknown_count": 13,
+    "benchmark_review_required": false,
+    "evidence_stance_detail": {
+      "failed_calls": 38,
+      "failure_events": 112,
+      "attempt_distribution": {
+        "attempt_1": 38,
+        "attempt_2": 37,
+        "attempt_3": 37
+      },
+      "retry_recovered_calls": 1,
+      "retry_recovered_at_attempt": 2,
+      "final_orphans": 37,
+      "orphan_rate_given_failure_pct": 97.37,
+      "attempts_to_success_distribution": {
+        "1_attempt": 1,
+        "2_attempts": 1,
+        "3_attempts_all_failed": 37
+      },
+      "note": "The one recovered call succeeded on ATTEMPT 2, which the OLD 1-retry policy already supported -- it is NOT attributable to the new fix."
+    }
+  },
+  "primary_effectiveness_comparison": {
+    "note": "Raw failure events are NOT the primary success metric -- final orphans, orphan rate, retry recovery, and impacted Alphas are.",
+    "evidence_stance": {
+      "failed_calls": {
+        "pre_fix": 32,
+        "post_fix": 38,
+        "delta": 6
+      },
+      "failure_events": {
+        "pre_fix": 64,
+        "post_fix": 112,
+        "delta": 48
+      },
+      "retry_recovered_calls": {
+        "pre_fix": 0,
+        "post_fix": 1,
+        "delta": 1
+      },
+      "final_orphans": {
+        "pre_fix": 32,
+        "post_fix": 37,
+        "delta": 5
+      },
+      "orphan_rate_given_failure_pct": {
+        "pre_fix": 100.0,
+        "post_fix": 97.37,
+        "delta": -2.63
+      }
+    },
+    "overall": {
+      "provider_final_orphans_total": {
+        "pre_fix": 42,
+        "post_fix": 59,
+        "delta": 17
+      },
+      "claims_orphaned_by_provider_failure": {
+        "pre_fix": 6,
+        "post_fix": 13,
+        "delta": 7
+      },
+      "impacted_alpha_ids": {
+        "pre_fix": [
+          "A101"
+        ],
+        "post_fix": []
+      },
+      "benchmark_review_required": {
+        "pre_fix": true,
+        "post_fix": false
+      }
+    },
+    "interpretation": "Evidence-stance orphan RATE improved marginally (100.0% -> 97.37%), driven by exactly ONE recovered call that succeeded on attempt 2 (not attempt 3) -- i.e. NOT causally attributable to the new fix. Absolute final-orphan COUNT and claims-orphaned both increased in raw terms, but this run also carries 6 more failed calls and a large one-off transport-error cluster (see below) that the pre-fix run did not have -- these two runs are not a controlled apples-to-apples comparison of identical underlying failure exposure. impacted_alpha_ids dropped from [A101] to [] this run, but this is because the specific claim that triggered A101's impact in the pre-fix run did not recur with an equivalent lineage here -- unrelated to evidence_stance_classifier (that impact channel is alpha_classifier-specific, per the prior audit's attribution-tool limitation)."
+  },
+  "third_attempt_analysis": {
+    "third_attempt_success_count": 0,
+    "third_attempt_exhaustion_count": 37,
+    "direct_evidence_old_policy_would_have_orphaned_a_recovered_call": false,
+    "conclusion": "The 3rd attempt was genuinely exercised live 37 times in this run -- direct, real evidence the fix is ACTIVE in production -- but ZERO of those 37 calls recovered on attempt 3. This is not classified as failure per the task's own instruction ('if no call needed a third attempt, do not call that failure') because calls DID need and use the third attempt; the honest classification is that the opportunity was used but did not pay off in this specific run.",
+    "terminal_cause_breakdown_of_the_37_exhausted_calls": {
+      "WEEK2_LLM_TIMEOUT": 13,
+      "WEEK2_LLM_TRANSPORT_ERROR": 24
+    },
+    "timeout_terminal_calls_note": "13 calls exhausted all 3 attempts via TIMEOUT -- consistent with, and not contradicting, the prior audit's own cautious 'POSSIBLY_RECOVERABLE, not proven' classification for this failure mode. This run adds real evidence that an un-modified 3rd attempt at the same 45s window did not, in these 13 cases, change the outcome.",
+    "transport_terminal_calls_note": "24 calls (72 raw evidence_stance events + 18 structure_extractor events = 90 total) exhausted all attempts via TRANSPORT_ERROR, ALL logged within a 1-2 SECOND window (23:48:08Z-23:48:09Z) at the very end of the run -- a brief, shared-infrastructure disruption event, structurally identical to (but larger than) the AMD transport cluster found in the prior audit. Because there is no backoff between attempts, 3 back-to-back fast-failing attempts fired inside the SAME 1-2 second outage window for every affected call -- a retry-COUNT increase without a backoff (Option F, explicitly deferred) cannot be expected to escape a brief outage this way. This event confounds roughly two-thirds (24 of 37) of this run's third-attempt trials and is NOT representative of steady-state conditions."
+  },
+  "retry_benefit_classification": {
+    "case": "CASE_R4_EXTRA_RETRY_USED_BUT_NO_RECOVERY",
+    "reasoning": "37 calls genuinely reached and used the new 3rd attempt (direct live confirmation the fix is active); none of them recovered. This does not meet CASE_R1 (no attempt-3 success), CASE_R3 (a real third-attempt opportunity DID occur, repeatedly), or CASE_R5 (no meaningful cost/latency/operational regression was found -- see below). CASE_R2 does not apply either: the orphan-rate improvement that did occur (100%->97.37%) is traceable to a single non-third-attempt recovery, so it is not even a 'directionally better, uncertain lineage' case -- the lineage is fully known and is NOT third-attempt-related.",
+    "excluded_cases": {
+      "CASE_R1": "NOT MET -- 0 third-attempt successes",
+      "CASE_R2": "NOT MET -- the one improvement observed has a KNOWN, non-third-attempt lineage",
+      "CASE_R3": "NOT MET -- 37 calls genuinely used the third-attempt opportunity",
+      "CASE_R5": "NOT MET -- no meaningful cost/latency/operational regression found (see latency_cost_observation)",
+      "CASE_R6": "NOT MET -- run is valid (9/9 artifacts; Data Sanity issue is unrelated and does not invalidate semantic-pipeline analysis)"
+    }
+  },
+  "latency_cost_observation": {
+    "pre_fix_duration_minutes": 87.28,
+    "post_fix_duration_minutes": 92.44,
+    "duration_delta_minutes": 5.16,
+    "duration_delta_pct": 5.9,
+    "pre_fix_provider_call_attempts_total": 658,
+    "post_fix_provider_call_attempts_total": 724,
+    "provider_attempts_delta": 66,
+    "provider_attempts_delta_pct": 10.0,
+    "evidence_stance_extra_attempts_count": 37,
+    "attribution_caveat": "Not all wall-clock variance is attributable to the retry policy -- TradingAgents/Provider latency varies run-to-run for many unrelated reasons (already established throughout this whole session's TSM reproducibility findings). Of the +66 extra Provider attempts, 24 (the transport-error-cluster third attempts) failed near-instantly and consumed negligible wall-clock time; the other 13 (timeout-terminal third attempts) could each add up to ~45s, i.e. up to ~9.75 minutes theoretical maximum -- consistent with, and roughly explaining most of, the observed +5.16 minute total increase.",
+    "incremental_latency_risk": "LOW-MEDIUM",
+    "incremental_cost_risk": "LOW-MEDIUM",
+    "classification_note": "Neither risk is classified HIGH: the increase is bounded, scoped to already-failing calls, and consistent with the LOW pre-implementation estimate -- but it is also not INCONCLUSIVE, since a real, measurable (if modest and partly confounded) increase was directly observed."
+  },
+  "provider_health_report": {
+    "pre_fix": {
+      "provider_health": "PROVIDER_DEGRADED",
+      "alpha_classifier_final_orphans": 13,
+      "evidence_stance_final_orphans": 32,
+      "structure_extractor_final_orphans": 3,
+      "provider_final_orphans_total": 42,
+      "impacted_alpha_ids": [
+        "A101"
+      ],
+      "benchmark_review_required": true
+    },
+    "post_fix": {
+      "provider_health": "PROVIDER_DEGRADED",
+      "alpha_classifier_final_orphans": 13,
+      "evidence_stance_final_orphans": 37,
+      "structure_extractor_final_orphans": 9,
+      "provider_final_orphans_total": 59,
+      "impacted_alpha_ids": [],
+      "benchmark_review_required": false
+    },
+    "note": "Overall PROVIDER_HEALTHY status is NOT required for the retry fix to be useful, per task instruction -- neither run achieves it, consistent with every one of the seven runs studied across this entire v0.1.3 effort."
+  },
+  "recorder_health_report": {
+    "post_fix": {
+      "recorder_failure_events": 274,
+      "recorder_health": "RECORDER_DEGRADED",
+      "canonical_semantic_losses": 0,
+      "recorder_source": "/tmp/comqutor_live_start_postfix.log (a NEW, separate log file created for this task -- explicitly not overwriting or mixing with the pre-fix run's /tmp/comqutor_live_start.log, preserving log traceability per task section 8)"
+    },
+    "note": "Recorder failures are NOT mixed into Provider reliability metrics -- kept entirely separate per architecture (AUDIT_TRACE_ONLY, proven in the prior recorder audit)."
+  },
+  "a301_control": {
+    "post_fix_score": 51.6447,
+    "post_fix_level": "active",
+    "post_fix_detected": true,
+    "post_fix_provider_impacted": false,
+    "post_fix_qualifying_local_edge_count": 0,
+    "post_fix_local_structure_support": "NO_LOCAL_STRUCTURE_SUPPORT (capped at 70.0 ceiling, same qualification code as both prior runs)",
+    "comparison_to_pre_fix_validation": {
+      "pre_fix_score": 75.9582,
+      "pre_fix_level": "dominant"
+    },
+    "verdict": "A301 remains a Gold HIT and remains NOT Provider-impacted in the post-fix run -- the retry fix did not damage this control. The score/level DECREASE from 75.9582/dominant to 51.6447/active is consistent with ordinary research-content variance across independent live runs (the same phenomenon documented extensively throughout this whole v0.1.3 effort for A103/A201) -- NOT evidence of retry-fix harm, since A301 was never Provider-impacted in either run and its lineage is alpha_classifier-driven, not evidence_stance-driven."
+  },
+  "all_gold_alphas_post_fix": {
+    "A101": {
+      "score": 70.0,
+      "level": "active",
+      "detected": true,
+      "provider_impacted": false
+    },
+    "A103": {
+      "score": 42.3237,
+      "level": "candidate",
+      "detected": false,
+      "provider_impacted": false
+    },
+    "A201": {
+      "score": 61.5376,
+      "level": "active",
+      "detected": true,
+      "provider_impacted": false
+    },
+    "A301": {
+      "score": 51.6447,
+      "level": "active",
+      "detected": true,
+      "provider_impacted": false
+    },
+    "A304": {
+      "score": 64.9288,
+      "level": "active",
+      "detected": true,
+      "provider_impacted": false
+    },
+    "A601": {
+      "score": 60.962,
+      "level": "active",
+      "detected": true,
+      "provider_impacted": false
+    },
+    "gold_hit_this_run": "5/6 = 83.33% (A103 miss)",
+    "causal_lineage_caveat": "Per task section 22, this Gold outcome is NOT used as evidence for or against the retry fix -- A103's miss and the overall Gold composition are governed by research-content/structure-extraction variance (established throughout this v0.1.3 effort), not evidence_stance retry behavior, and A103/A201/A301 are precisely the three alphas already flagged as historically variable across TSM runs."
+  },
+  "run_to_run_reproducibility_3_run": {
+    "runs_evaluated": [
+      "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "0aeea938-97a8-49c8-97e1-409f6dadad30",
+      "fc09821e-c7cf-40a7-bd76-c98172e16992"
+    ],
+    "label": "TSM_THREE_RUN_REPRODUCIBILITY_DIAGNOSTIC -- NOT promoted into the official six-ticker benchmark",
+    "per_run_gold_hit_rates": {
+      "OLD": "83.33%",
+      "PRE_FIX_VALIDATION": "66.67%",
+      "POST_FIX": "83.33%"
+    },
+    "three_run_mean_gold_hit": "77.78%",
+    "per_alpha_3run_detection_frequency": {
+      "A101": 1.0,
+      "A103": 0.3333333333333333,
+      "A201": 0.6666666666666666,
+      "A301": 0.6666666666666666,
+      "A304": 1.0,
+      "A601": 1.0
+    },
+    "variable_gold_alpha_ids": [
+      "A103",
+      "A201",
+      "A301"
+    ],
+    "stable_hit_alpha_ids": [
+      "A101",
+      "A304",
+      "A601"
+    ],
+    "pairwise_gold_jaccards": [
+      {
+        "run_a": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+        "run_b": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+        "jaccard": 0.5
+      },
+      {
+        "run_a": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+        "run_b": "fc09821e-c7cf-40a7-bd76-c98172e16992",
+        "jaccard": 0.8
+      },
+      {
+        "run_a": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+        "run_b": "fc09821e-c7cf-40a7-bd76-c98172e16992",
+        "jaccard": 0.6666666666666666
+      }
+    ],
+    "mean_pairwise_gold_jaccard": 0.6555555555555556,
+    "min_pairwise_gold_jaccard": 0.5,
+    "max_pairwise_gold_jaccard": 0.8
+  },
+  "main_conflict": {
+    "post_fix": {
+      "main_conflict_id": "A101__A304",
+      "outcome": "admitted",
+      "conflict_score": 16.6549,
+      "conflict_level": "low",
+      "bull_score": 70.0,
+      "bear_score": 64.9288,
+      "b2_admissibility_status": "admitted",
+      "reason_codes": []
+    },
+    "old_authoritative": "A101__A304 (unchanged)",
+    "pre_fix_validation": "A101__A304 (unchanged)",
+    "changed": false
+  },
+  "p0_p1_validation": {
+    "p0": "PASS -- _foreign_issuer_only_reason() unmodified this task (file untouched), confirmed callable against this run's live data. 0 of 26 spot-checked competitor-mentioning claims triggered the veto in this specific run -- consistent with the veto's own documented narrow, rare-firing design (it fires only on the exact 3-condition conjunction: own-ticker terms absent, a system-covered foreign ticker present, AND zero deterministic taxonomy signal -- not merely 'a competitor is mentioned'). Zero firings this run is not a failure signal; it reflects that none of this run's claims fell into that specific narrow contamination pattern.",
+    "p1": "PASS -- TSMC (39 mentions) and 'Taiwan Semiconductor' (10 mentions) present in raw research; every one of the 6 Gold Alphas shows a nonzero ticker_specific_evidence_count (14, 2, 11, 3, 10, 5) in this run's per-alpha activation data, confirming company_names/alias recognition remains active and effective on live, freshly-generated data."
+  },
+  "keep_revert_recommendation": {
+    "decision": "MORE_VALIDATION_REQUIRED",
+    "reasoning": "Neither KEEP nor REVERT's stated criteria are cleanly met. KEEP requires 'bounded live evidence shows useful recovery or clearly improved final-orphan behavior without meaningful downside' -- no third-attempt recovery occurred, so no direct useful-recovery evidence exists; the modest orphan-rate improvement observed is not third-attempt-attributable. REVERT requires 'no useful recovery AND meaningful latency/cost downside or unexpected operational regression' -- the first half is true (no recovery), but the second half is not met (LOW-MEDIUM, not meaningful/unacceptable, cost/latency impact; no operational regression; no semantic change). Additionally, two-thirds of this run's third-attempt trials (24 of 37) were dominated by one brief, atypical transport-outage cluster that a retry-COUNT change alone was never expected to fix (that specific pattern needs Option F, not Option C) -- making this single run's third-attempt evidence base non-representative of steady-state conditions. Do not revert in this task per explicit instruction; this is a recommendation only."
+  },
+  "next_development_step": {
+    "chosen": "NEXT_MSFT_A304",
+    "reasoning": "MSFT A304 was independently confirmed NOT Provider-caused in the prior Phase 2 recall recovery audit and reconfirmed again in the prior reliability audit (MSFT's impacted_alpha_ids=[A301], already a redundant Gold hit) -- this remains true regardless of the inconclusive live retry-fix result, since A304's own blocker is a regex/negation-aware extraction capability gap, unrelated to evidence_stance_classifier retry behavior. The retry fix itself is not reverted and requires no further code action right now; a SEPARATE future TSM (or other-ticker) replicate is a reasonable idea to resolve the retry-effectiveness question more conclusively, but is recommended only, not scheduled, and does not block proceeding to MSFT A304.",
+    "should_provider_reliability_block_msft_a304": false
+  },
+  "final_validation": {
+    "official_six_ticker_alpha_hit_changed": false,
+    "official_six_ticker_alpha_hit": "61.0317%",
+    "frozen_ledger_changed": false,
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+    "production_files_changed_during_validation": 0,
+    "test_files_changed_during_validation": 0,
+    "provider_calls_occurred": true,
+    "tradingagents_calls_occurred": true,
+    "total_ticker_runs": 1,
+    "tickers_run": [
+      "TSM"
+    ],
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0,
+    "code_patched_after_seeing_result": false
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Step 4 - Fresh Six-Ticker Production Baseline",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "worktree_state": {
+    "modified_before_task": [
+      "docs/audit_artifacts/a4_regression_runner_report.json",
+      "docs/audit_artifacts/repository_cleanup_v0.1.2_report.md"
+    ],
+    "untracked_before_task": [
+      "comqutor_alpha/regression/authority_contract.py",
+      "docs/audit_artifacts/qa_closure_index.json",
+      "docs/audit_artifacts/qa_source_consistency_report_v0.1.2.1.json",
+      "docs/audit_artifacts/qa_source_of_truth_cleanup_v0.1.2.1.md",
+      "docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json",
+      "docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.md",
+      "docs/audit_artifacts/regression_qa_contract_cleanup_v0.1.2.1.md",
+      "tests/test_regression_authority_contract.py"
+    ],
+    "preserved": true,
+    "no_reset_restore_checkout_clean_stash_used": true
+  },
+  "preflight_result": "CONFIGURATION_INVALID",
+  "stop_stage": "Section 2 pre-flight, before any ticker run was started",
+  "checks": {
+    "A_real_tradingagents_execution_enabled": {
+      "status": "FAIL",
+      "evidence": "comqutor_alpha/server_execution.py:87-88 is_real_tradingagents_enabled() reads COMQUTOR_REAL_TRADINGAGENTS_ENABLED via _parse_bool_env(..., default=False); env var is unset in the executing shell -> resolves to False (fail-closed by design, per inline comment at server_execution.py:80-84)."
+    },
+    "B_alpha_mapper_llm_classifier_enabled": {
+      "status": "FAIL",
+      "evidence": "comqutor_alpha/structure_engine/week2_llm.py:391-394 week2_llm_enabled() reads COMQUTOR_WEEK2_LLM_ENABLED via os.environ.get(...); env var is unset in the executing shell -> _enabled(None) = False. This is the exact same gate that produced the prior NVDA run's 794/794 llm_unavailable/fallback_reason=disabled outcome (alpha_mapper.py:362-363)."
+    },
+    "C_provider_credentials_available": {
+      "status": "FAIL",
+      "evidence": "ANTHROPIC_API_KEY and OPENAI_API_KEY are not set in the executing process environment. A .env file at repo root does contain ANTHROPIC_API_KEY and DEEPSEEK_API_KEY entries, but no load_dotenv()/dotenv call exists anywhere under comqutor_alpha/ (verified by repo-wide grep) -- .env is not read by any runtime path, so those keys are not actually available to a run process."
+    },
+    "D_process_inherits_settings": {
+      "status": "FAIL",
+      "evidence": "Moot: since none of COMQUTOR_REAL_TRADINGAGENTS_ENABLED / COMQUTOR_WEEK2_LLM_ENABLED / provider API keys are set anywhere reachable by a freshly spawned process (not in shell env, not loaded from .env), there is nothing correct for a child process to inherit."
+    },
+    "E_semantic_mapper_would_enter_disabled_fallback": {
+      "status": "CONFIRMED_WOULD_OCCUR",
+      "evidence": "Given B is False, alpha_mapper.py:362-363 would return {\"outcome\": \"unavailable\", \"fallback_reason\": \"disabled\"} for every claim on every ticker, reproducing the exact dangerous failure mode this task's Section 2 was written to prevent."
+    }
+  },
+  "action_taken": "STOP before any ticker run. Zero TradingAgents calls made. Zero Provider calls made. No production code, Alpha Mapper, B1/B2/B4, conflict taxonomy, or regression labels touched. No commit. No push.",
+  "tickers_run": [],
+  "fresh_runs_completed": "0 / 6",
+  "required_operator_action_before_retry": [
+    "Set COMQUTOR_REAL_TRADINGAGENTS_ENABLED=true in the operator's own shell (never in .env -- per prior session guidance, this gate must not be persisted to a file) for the process that will execute Step 4.",
+    "Set COMQUTOR_WEEK2_LLM_ENABLED=true (or the recognized truthy value) in that same shell/process.",
+    "Ensure a real Provider API key (ANTHROPIC_API_KEY or the configured provider's key) is exported into that same process environment -- not merely present in .env, since nothing currently loads .env.",
+    "Re-run this Step 4 task only after confirming, in that exact execution shell, that all three checks above resolve to True/present."
+  ]
+}

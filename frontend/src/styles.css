@@ -157,6 +157,24 @@ a {
   gap: var(--space-5);
 }
 
+/* Product Demo Hardening Phase 2C (P1-3): a single, stable, global
+   research-only positioning statement -- visible on every page (including
+   the Research landing page and the full result flow) without repeating
+   itself a second time per page. Plain text, readable contrast, never
+   color-only. */
+.app-footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-5);
+}
+
+.app-disclaimer {
+  margin: 0 auto;
+  max-width: var(--max-content-width);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
 .panel {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -441,6 +459,38 @@ a {
   color: var(--color-warning);
 }
 
+/* John Item 8: the orthogonal Blocked view -- a compact list, not a
+   second AlphaCard grid, since a blocked Alpha may already be rendered in
+   its own level section above and a full duplicate card would read as a
+   competing copy rather than an orthogonal status view. */
+.alpha-blocked-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.alpha-blocked-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface);
+}
+
+.alpha-blocked-item-meta {
+  color: var(--color-text-muted);
+}
+
+.activation-level-badge {
+  display: inline-block;
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-2);
+  font-size: 0.85em;
+  border: 1px solid var(--color-border);
+}
+
 .alpha-card-header {
   display: flex;
   align-items: flex-start;
@@ -527,6 +577,28 @@ a {
 }
 
 .alpha-card-diagnostic-reasons li {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.alpha-card-invalidation {
+  margin-top: var(--space-2);
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.alpha-card-invalidation-source-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: var(--space-1) 0;
+}
+
+.alpha-card-invalidation-list {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-4);
+}
+
+.alpha-card-invalidation-list li {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -1001,6 +1073,22 @@ a {
   padding: 2px var(--space-2);
 }
 
+/* Product Demo Hardening Phase 3B (F1): a claim_id like
+   "<run_id>:<agent>:<source>:claim:<n>" is a long, colon-delimited,
+   space-free string -- normal word-break rules never find a break
+   opportunity in it, so at a narrow viewport it overflows the card and the
+   page grows a horizontal scrollbar. overflow-wrap: anywhere lets the
+   browser break it (and only it -- ordinary prose already wraps at word
+   boundaries and is unaffected) at any character when necessary, so the
+   full, exact, copyable ID stays on-screen and never gets truncated,
+   ellipsized, or hidden. Scoped to the finding-card family specifically
+   (not the global `code` element) so unrelated short `code` text (Alpha
+   IDs, ticker symbols) is never affected. Mirrors the same rule
+   .unclassified-finding-card already applies below.  */
+.analyst-output-card {
+  overflow-wrap: anywhere;
+}
+
 .unclassified-finding-card {
   overflow-wrap: anywhere;
 }
@@ -1012,6 +1100,115 @@ a {
 }
 
 .unclassified-findings-download {
+  margin-top: var(--space-3);
+}
+
+/* -- Alpha Memory panel (Research run page, Implementation Step 4B) --------*/
+/* SHADOW ONLY -- styling deliberately neutral (no bullish/bearish color
+   coding), matching the wording constraint that this panel never implies
+   confidence, validation, or a signal direction. */
+
+.alpha-memory-panel {
+  margin-top: var(--space-4);
+}
+
+.alpha-memory-shadow-badge {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 1px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  vertical-align: middle;
+}
+
+.alpha-memory-modulation-status {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+}
+
+.alpha-memory-shadow-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-3);
+}
+
+.alpha-memory-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.alpha-memory-entry {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+}
+
+.alpha-memory-entry-summary {
+  margin: 0;
+}
+
+.alpha-memory-none-recurring-note,
+.alpha-memory-first-seen-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: var(--space-1) 0 0;
+}
+
+.alpha-memory-recurring-detail {
+  margin-top: var(--space-2);
+}
+
+.alpha-memory-phi-list {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.alpha-memory-phi-item {
+  border-left: 2px solid var(--color-border);
+  padding-left: var(--space-2);
+}
+
+.alpha-memory-phi-relation {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.alpha-memory-phi-history {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-2);
+}
+
+.alpha-memory-phi-history dt {
+  font-weight: 600;
+}
+
+.alpha-memory-phi-history dd {
+  margin: 0;
+}
+
+.alpha-memory-technical-detail {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.alpha-memory-secondary-diagnostics {
   margin-top: var(--space-3);
 }
 
@@ -1205,4 +1402,104 @@ a {
 
 .processing-error-code code {
   font-family: monospace;
+}
+
+/* -- Structural snapshot (Product Demo Hardening Phase 2B) ------------------
+   A compact, top-level orientation section on the main Research results
+   page. Desktop: three conceptual areas side by side; mobile: stacked,
+   never horizontally overflowing. */
+
+.structural-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: 768px) {
+  .structural-snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.structural-snapshot-part {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.structural-snapshot-part h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.structural-snapshot-alpha-chip-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.structural-snapshot-alpha-chip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.structural-snapshot-alpha-id {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.structural-snapshot-alpha-name {
+  font-weight: 600;
+}
+
+/* A legitimate research conclusion (no dominant Alpha, no admitted
+   conflict, or no Alpha meeting the active threshold) -- analytical, not an
+   error or missing-data state, so it deliberately does not reuse
+   .error-panel/.empty-state-title styling. */
+.structural-snapshot-legitimate-empty {
+  margin: 0;
+  font-weight: 500;
+}
+
+.structural-snapshot-legitimate-empty-detail {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.structural-snapshot-not-ready,
+.structural-snapshot-unavailable {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.structural-snapshot-conflict-pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+}
+
+.structural-snapshot-conflict-vs {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.structural-snapshot-nav-link {
+  display: inline-block;
+  margin-top: var(--space-2);
 }

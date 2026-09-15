@@ -50,6 +50,13 @@ _REAL_EXECUTION_REASONS = {
     "REAL_RUN_CREDENTIAL_MISSING": "credential_missing",
 }
 
+# Safe, stable reason labels for a not-ready live semantic pipeline (see
+# server_execution.build_live_semantic_readiness). Never an env var value.
+_LIVE_SEMANTIC_REASONS = {
+    "LIVE_SEMANTIC_PIPELINE_NOT_READY": "week2_llm_disabled",
+    "LIVE_SEMANTIC_PROVIDER_NOT_READY": "week2_provider_not_ready",
+}
+
 
 def health_response() -> dict[str, Any]:
     return {"status": "ok"}
@@ -98,6 +105,24 @@ def _real_execution_status() -> tuple[str, str | None]:
     return "configured", None
 
 
+def _live_semantic_status() -> tuple[str, str | None]:
+    """``("not_applicable"|"ready"|"not_ready", safe_reason_or_None)``.
+
+    ``not_applicable`` when real TradingAgents execution itself is disabled
+    -- live research isn't relevant at all, so this never blocks
+    offline/read-only readiness (existing saved-output/replay behavior is
+    entirely unaffected by this guard). Only when real execution is enabled
+    does this report whether Week2's LLM classifier and its own semantic
+    Provider are actually ready for a live run -- see
+    ``server_execution.build_live_semantic_readiness``."""
+    if not server_execution.is_real_tradingagents_enabled():
+        return "not_applicable", None
+    readiness = server_execution.build_live_semantic_readiness()
+    if readiness["ready"]:
+        return "ready", None
+    return "not_ready", _LIVE_SEMANTIC_REASONS.get(readiness["error"], "not_ready")
+
+
 def _active_profile_fields() -> dict[str, Any] | None:
     """Safe, non-secret snapshot of the profile a real request would
     resolve to right now -- never a credential, never a config value beyond
@@ -133,8 +158,18 @@ def readiness_response(*, job_manager: Any, output_root: str | None = None) -> t
     database_ready = _database_ready(output_root)
     job_manager_ready = job_manager is not None and bool(job_manager.is_accepting())
     real_execution_status, real_execution_reason = _real_execution_status()
+    live_semantic_status, live_semantic_reason = _live_semantic_status()
 
-    overall_ready = database_ready and job_manager_ready and real_execution_status != "misconfigured"
+    # A "not_applicable" live-semantic status (real execution disabled)
+    # never blocks overall readiness -- only "not_ready" (real execution
+    # enabled but Week2 LLM/Provider isn't) does, mirroring how a merely
+    # *disabled* real_execution_status never blocks readiness either.
+    overall_ready = (
+        database_ready
+        and job_manager_ready
+        and real_execution_status != "misconfigured"
+        and live_semantic_status != "not_ready"
+    )
 
     body = {
         "status": "ready" if overall_ready else "not_ready",
@@ -142,6 +177,8 @@ def readiness_response(*, job_manager: Any, output_root: str | None = None) -> t
         "job_manager": "ready" if job_manager_ready else "unavailable",
         "real_execution": real_execution_status,
         "real_execution_reason": real_execution_reason,
+        "live_semantic_pipeline": live_semantic_status,
+        "live_semantic_pipeline_reason": live_semantic_reason,
         # Always the real, current default profile -- never a stale/
         # hardcoded provider label. None only if the profile itself fails
         # to build (see real_execution_reason for why).

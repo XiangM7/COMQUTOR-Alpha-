@@ -296,3 +296,93 @@ def test_resolve_real_analysis_date_resolves_server_utc_today_when_omitted():
 
 def test_resolve_real_analysis_date_treats_blank_as_omitted():
     assert server_execution.resolve_real_analysis_date("   ") != "   "
+
+
+# ---------------------------------------------------------------------------
+# Live-semantic-pipeline readiness guard (operational safety fix): two fresh
+# live runs (NVDA 40bd7e3d-2759-45bc-97ec-8f1cf96c2266, SNDK
+# 52c23371-c374-4064-a91c-20c599ffa79c) were allowed to execute real
+# TradingAgents research while COMQUTOR_WEEK2_LLM_ENABLED was false. Alpha
+# Mapper's Pure-LLM semantic authority never falls back to deterministic
+# scoring on LLM unavailability, so every claim in both runs recorded
+# match_status="unavailable" (reason "disabled"), producing zero committed
+# Alpha matches and zero Activation despite a fully completed, expensive
+# TradingAgents session. These tests prove the new guard closes that gap.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _clean_week2_llm_env(monkeypatch):
+    for var in ("COMQUTOR_WEEK2_LLM_ENABLED", "COMQUTOR_WEEK2_LLM_PROVIDER", "COMQUTOR_WEEK2_LLM_MODEL"):
+        monkeypatch.delenv(var, raising=False)
+
+
+def test_week2_llm_disabled_by_default():
+    assert server_execution.is_week2_llm_enabled() is False
+
+
+def test_week2_llm_enabled_requires_exact_true_value(monkeypatch):
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "sort-of")
+    assert server_execution.is_week2_llm_enabled() is False
+
+
+def test_week2_llm_enabled_true(monkeypatch):
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    assert server_execution.is_week2_llm_enabled() is True
+
+
+def test_week2_semantic_provider_not_ready_when_provider_or_model_unset():
+    # Neither COMQUTOR_WEEK2_LLM_PROVIDER/MODEL nor the TRADINGAGENTS_*
+    # fallbacks are set -- config-incomplete, never "ready" by accident.
+    assert server_execution.is_week2_semantic_provider_ready() is False
+
+
+def test_week2_semantic_provider_ready_when_configured_and_credentialed(monkeypatch):
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "deepseek-v4-flash")
+    # DEEPSEEK_API_KEY is set to a placeholder by the autouse _dummy_api_keys
+    # fixture in conftest.py.
+    assert server_execution.is_week2_semantic_provider_ready() is True
+
+
+def test_week2_semantic_provider_not_ready_when_credential_missing(monkeypatch):
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "claude-haiku")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    assert server_execution.is_week2_semantic_provider_ready() is False
+
+
+def test_live_semantic_readiness_not_applicable_when_real_disabled():
+    # The guard must never block offline/read-only behavior -- when real
+    # TradingAgents execution itself is off, there is nothing live to
+    # protect, so this must report ready=True regardless of Week2 state.
+    result = server_execution.build_live_semantic_readiness()
+    assert result == {"ready": True, "error": None, "message": None}
+
+
+def test_live_semantic_readiness_scenario_b_real_true_week2_false(monkeypatch):
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    result = server_execution.build_live_semantic_readiness()
+    assert result["ready"] is False
+    assert result["error"] == "LIVE_SEMANTIC_PIPELINE_NOT_READY"
+    assert "Week2 semantic LLM is disabled" in result["message"]
+
+
+def test_live_semantic_readiness_scenario_c_provider_missing(monkeypatch):
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "claude-haiku")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    result = server_execution.build_live_semantic_readiness()
+    assert result["ready"] is False
+    assert result["error"] == "LIVE_SEMANTIC_PROVIDER_NOT_READY"
+
+
+def test_live_semantic_readiness_scenario_d_fully_ready(monkeypatch):
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "deepseek-v4-flash")
+    result = server_execution.build_live_semantic_readiness()
+    assert result == {"ready": True, "error": None, "message": None}

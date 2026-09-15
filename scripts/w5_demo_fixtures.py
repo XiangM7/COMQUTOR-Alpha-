@@ -36,7 +36,12 @@ _NVDA_OFFLINE_OUTPUTS = (
         ),
     },
     {
-        "agent": "technical_agent",
+        # Step 6 (Primary vs Secondary Evidence Qualification): renamed from
+        # "technical_agent" -- DEMO_SELECTED_ANALYSTS is
+        # ("market", "news", "fundamentals", "sentiment"), so this 4th raw
+        # output is the market analyst's; "technical" never matched any
+        # selected analyst and predates the source-role registry.
+        "agent": "market_agent",
         "raw_output": (
             "The semiconductor chip cycle is turning upward as inventories normalize and "
             "orders recover. NVDA is priced for perfection and rich valuation creates "
@@ -71,7 +76,12 @@ _QQQ_OFFLINE_OUTPUTS = (
         ),
     },
     {
-        "agent": "technical_agent",
+        # Step 6 (Primary vs Secondary Evidence Qualification): renamed from
+        # "technical_agent" -- DEMO_SELECTED_ANALYSTS is
+        # ("market", "news", "fundamentals", "sentiment"), so this 4th raw
+        # output is the market analyst's; "technical" never matched any
+        # selected analyst and predates the source-role registry.
+        "agent": "market_agent",
         "raw_output": (
             "The easing cycle from the Fed is supporting duration sensitive growth names. "
             "Liquidity expansion is broadening participation beyond mega cap tech."

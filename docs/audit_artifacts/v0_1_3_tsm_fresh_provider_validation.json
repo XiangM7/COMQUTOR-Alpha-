@@ -1,0 +1,370 @@
+{
+  "schema_version": "v0_1_3_tsm_fresh_provider_validation.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "run_authorization": {
+    "old_run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+    "new_run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+    "fresh_runs_executed": 1,
+    "tickers_executed": [
+      "TSM"
+    ],
+    "second_tsm_run_executed": false,
+    "other_tickers_executed": [],
+    "cache_disposition": "force_refreshed",
+    "started_at": "2026-09-09T17:30:36.205941+00:00",
+    "completed_at": "2026-09-09T18:57:52.882191+00:00",
+    "runtime_minutes": 87.3
+  },
+  "pre_run_config_verification": {
+    "profile_id": "comqutor_deepseek_default_v1",
+    "provider": "deepseek",
+    "quick_model": "deepseek-v4-flash",
+    "deep_model": "deepseek-v4-flash",
+    "thinking": "disabled",
+    "temperature": 0.0,
+    "max_debate_rounds": 1,
+    "max_risk_discuss_rounds": 1,
+    "data_sanity_enabled": true,
+    "matches_historical_config": true,
+    "config_difference_found": "NONE -- confirmed identical to the fixed, hardcoded comqutor_deepseek_default_v1 profile used for all six original FINAL_FRESH_SELECTED runs. No Provider config, timeout, retry, model, or prompt was changed before this run.",
+    "postgres_state_note": "Postgres/Docker were found stopped at task start (a deviation from the environment that produced the original six runs); started via the same, already-approved docker compose --profile postgres up -d postgres mechanism used earlier in this session, restoring parity with the historical environment rather than proceeding with a silently-different (DB-unavailable) configuration."
+  },
+  "run_completion": {
+    "run_status": "completed",
+    "semantic_status": "run_completed_normally",
+    "artifact_completeness": "9/9 PASS",
+    "all_22_artifact_files_present": true,
+    "graph_edge_count_new": null,
+    "data_sanity_status": "ok",
+    "invalid_for_comparison": false
+  },
+  "new_discovery_recorder_append_failures": {
+    "finding": "During this run, the server log showed 247 'semantic runtime degraded (reason_code=SEMANTIC_RECORDER_APPEND_FAILED, exc_type=RecorderIntegrityError)' events -- a failure class NOT captured by error_logs/week2_llm_errors.jsonl (which only logs WEEK2_LLM_TIMEOUT/TRANSPORT_ERROR/VALIDATION_FAILED-style Provider-call failures) and therefore NOT currently measured by the Provider Health diagnostics tool built in the prior task.",
+    "evidence": "llm_semantic_calls.jsonl grew healthily throughout the run (0->616 lines) with the final line showing a genuine, successfully-accepted record, confirming the recorder was not permanently broken. The failure count plateaued (stayed at 247) once the run moved from the initial highly-concurrent parallel-research-agent phase into the slower, sequential debate/risk-analysis phase -- consistent with RECORDER_SEQUENCE_NOT_MONOTONIC / RECORDER_DUPLICATE_CALL_ID-style concurrency races during concurrent execution, not a fatal defect.",
+    "diagnostics_tool_limitation_identified": "provider_health_diagnostics.py's provider_failure_events/semantic_critical_failure_events undercounts total semantic-runtime distress in this run by not including SEMANTIC_RECORDER_APPEND_FAILED events. This is reported as a finding for a future, separately-authorized enhancement -- NOT fixed in this validation-only task.",
+    "action_taken": "NONE -- no code was modified to address this finding, per this task's explicit no-code-change rule."
+  },
+  "old_vs_new_provider_comparison": {
+    "provider_health": {
+      "old": "PROVIDER_DEGRADED",
+      "new": "PROVIDER_DEGRADED",
+      "delta": "unchanged (both DEGRADED)"
+    },
+    "provider_failure_events": {
+      "old": 128,
+      "new": 117,
+      "delta": -11
+    },
+    "semantic_critical_failure_events": {
+      "old": 114,
+      "new": 103,
+      "delta": -11
+    },
+    "alpha_classifier_failure_events": {
+      "old": 47,
+      "new": 33,
+      "delta": -14
+    },
+    "alpha_classifier_final_orphans": {
+      "old": 9,
+      "new": 6,
+      "delta": -3
+    },
+    "provider_final_orphans_total": {
+      "old": 42,
+      "new": 42,
+      "delta": 0
+    },
+    "claims_orphaned_by_provider_failure": {
+      "old": 9,
+      "new": 6,
+      "delta": -3
+    },
+    "impacted_alpha_ids": {
+      "old": [
+        "A301",
+        "A601"
+      ],
+      "new": [
+        "A101"
+      ],
+      "delta": "old={A301,A601}, new={A101} -- A301 NO LONGER impacted; A601 no longer impacted; a DIFFERENT alpha (A101) is newly impacted (see below, no Gold consequence)"
+    },
+    "benchmark_review_required": {
+      "old": true,
+      "new": true,
+      "delta": "unchanged (both True) -- for a different underlying reason (A101 now, not A301/A601)"
+    },
+    "interpretation": "Overall raw Provider distress is modestly lower in the new run (117 vs 128 failure events, 33 vs 47 alpha_classifier events, 6 vs 9 final orphans) but NOT eliminated -- the new run is still meaningfully DEGRADED. The key result is not 'the run became healthy' but 'the SPECIFIC lineage that blocked A301 in the old run succeeded this time', while a DIFFERENT, unrelated claim (Secondary, non-material) was orphaned instead."
+  },
+  "a301_primary_validation": {
+    "old": {
+      "score": 44.7724,
+      "level": "candidate",
+      "detected": false,
+      "ticker_specific_evidence_count": 1,
+      "unique_evidence_count": 13,
+      "local_structure_support_raw": 0.0,
+      "cap_reason_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ]
+    },
+    "new": {
+      "score": 75.9582,
+      "level": "dominant",
+      "detected": true,
+      "ticker_specific_evidence_count": 5,
+      "unique_evidence_count": 14,
+      "local_structure_support_raw": 50.0,
+      "local_structure_contribution": 10.0,
+      "cap_reason_codes": []
+    },
+    "detected_state_rule_applied": "Only active/dominant/regime_level count as detected -- 'dominant' correctly counts. candidate/capped_active/blocked never count.",
+    "structure_edge_new": "ai_demand -> tsm_revenue_growth (causal, alpha_ids=['A101','A301']), local_claim_ids=[fundamental_agent:claim:29]"
+  },
+  "new_claim_lineage_a301": {
+    "old_claim": {
+      "claim_id": "fundamental_agent:fundamentals_report:claim:42",
+      "text": "TSM has delivered two consecutive years of >30% revenue growth (2024 and 2025), driven by the AI infrastructure buildout.",
+      "deterministic_a301_score": 0.7596,
+      "outcome": "match_status=unavailable (provider_timeout)"
+    },
+    "new_claim": {
+      "claim_id": "fundamental_agent:fundamentals_report:claim:29",
+      "text": "This is a clear beat-and-raise revenue acceleration pattern driven by AI demand.",
+      "deterministic_a301_score": 0.7596,
+      "outcome": "match_status=matched, alpha_match_method=llm, matched_alpha=A301"
+    },
+    "same_economic_thesis_confirmed": true,
+    "note": "Not the same claim_id (as expected -- fresh research produces new claim IDs), but functionally the SAME 'AI demand/infrastructure drives TSM revenue growth' thesis, with the IDENTICAL deterministic candidate score (0.7596) as the old orphaned claim. This time the alpha_classifier LLM call succeeded (no timeout), producing a genuine, non-fallback matched_alpha=A301 decision that flowed through to a real committed structure edge.",
+    "full_lineage_trace": [
+      "raw research: fundamental_agent's fundamentals_report contains the beat-and-raise/AI-demand claim",
+      "extracted claim: fundamentals_report:claim:29",
+      "deterministic candidate_scores: A301 eligible=True, relation=activation, score=0.7596 (identical to old claim:42)",
+      "alpha_classifier result: SUCCESS (no timeout) -- match_status=matched, alpha_match_method=llm",
+      "matched_alpha: A301",
+      "B1 stance: supports_alpha (implied by qualifying evidence membership)",
+      "source role: PRIMARY_RESEARCH (fundamental_agent), PRIMARY_QUALIFIED",
+      "ticker-specific: contributes to A301's 5/14 ticker-specific count",
+      "qualification: activation_eligible=True",
+      "structure: committed edge ai_demand->tsm_revenue_growth, alpha_ids includes A301",
+      "local structure contribution: raw 50.0, weight 0.20, contribution +10.0",
+      "A301 activation: 75.9582, status=dominant (detected)"
+    ]
+  },
+  "provider_failure_causality_classification": {
+    "case": "CASE_A_PROVIDER_CAUSE_CONFIRMED",
+    "requirements_met": {
+      "new_run_materially_healthier_on_relevant_a301_lineage": true,
+      "a301_now_active_dominant_regime_level": true,
+      "no_new_algorithmic_rule_changed": true
+    },
+    "interpretation": "The old TSM A301 miss was caused by a transient Provider (alpha_classifier) execution failure, not an algorithmic/structural defect. When the identical-strength deterministic candidate (score 0.7596) was given a successful LLM call this time, A301 correctly and naturally reached 'dominant' status with zero code changes.",
+    "scope_of_classification": "This CASE_A classification applies specifically and only to the A301 lineage. It does NOT extend to, or excuse, the separately-observed A103/A201 regressions (see all-alpha drift section) -- those are independent findings requiring their own follow-up, not folded into this causality conclusion."
+  },
+  "tsm_gold_result": {
+    "gold_expected_alphas": [
+      "A101",
+      "A103",
+      "A201",
+      "A301",
+      "A304",
+      "A601"
+    ],
+    "old_detected": [
+      "A101",
+      "A103",
+      "A201",
+      "A304",
+      "A601"
+    ],
+    "old_hit_count": 5,
+    "old_hit_rate_percent": 83.33,
+    "new_detected": [
+      "A101",
+      "A301",
+      "A304",
+      "A601"
+    ],
+    "new_hit_count": 4,
+    "new_hit_rate_percent": 66.67,
+    "label": "TSM_SINGLE_RERUN_DIAGNOSTIC -- NOT a replacement for the frozen six-run benchmark",
+    "honest_disclosure": "Despite A301 recovering (a genuine, confirmed win), TSM's overall single-rerun Gold hit rate is LOWER than the old run (66.67% vs 83.33%) because A103 and A201 -- both unrelated to Provider failure -- regressed from hit to miss in this fresh run. This is reported honestly, not hidden, per this task's explicit instruction not to focus only on A301."
+  },
+  "all_ten_taxonomy_alphas_drift": [
+    {
+      "alpha": "A001",
+      "old_score": null,
+      "old_level": null,
+      "new_score": 30.6909,
+      "new_level": "candidate",
+      "note": "not part of TSM Gold expected set; old value not previously tracked in this comparison"
+    },
+    {
+      "alpha": "A003",
+      "old_score": null,
+      "old_level": null,
+      "new_score": 0.0,
+      "new_level": "candidate"
+    },
+    {
+      "alpha": "A101",
+      "old_score": 52.9006,
+      "old_level": "active",
+      "old_detected": true,
+      "new_score": 70.0,
+      "new_level": "active",
+      "new_detected": true,
+      "change": "score increased, level unchanged, still HIT"
+    },
+    {
+      "alpha": "A102",
+      "old_score": 0.0,
+      "old_level": "candidate",
+      "old_detected": false,
+      "new_score": 0.0,
+      "new_level": "candidate",
+      "new_detected": false,
+      "change": "unchanged (not a Gold-expected TSM alpha; excluded from Gold, unaffected)"
+    },
+    {
+      "alpha": "A103",
+      "old_score": 68.5499,
+      "old_level": "active",
+      "old_detected": true,
+      "new_score": 25.7618,
+      "new_level": "candidate",
+      "new_detected": false,
+      "change": "REGRESSED: HIT -> MISS. Not Provider-impacted (absent from new impacted_alpha_ids) -- attributed to this fresh run's research producing much thinner AI-infrastructure-specific content (only 1 unique evidence fact, INSUFFICIENT_UNIQUE_EVIDENCE), a natural research-content variance between independent live runs, not a Provider or algorithmic defect."
+    },
+    {
+      "alpha": "A201",
+      "old_score": 64.5041,
+      "old_level": "active",
+      "old_detected": true,
+      "new_score": 44.4406,
+      "new_level": "candidate",
+      "new_detected": false,
+      "change": "REGRESSED: HIT -> MISS. Not Provider-impacted (absent from new impacted_alpha_ids) -- also attributed to natural research-content variance, not investigated further as out of this task's TSM-A301-focused scope."
+    },
+    {
+      "alpha": "A301",
+      "old_score": 44.7724,
+      "old_level": "candidate",
+      "old_detected": false,
+      "new_score": 75.9582,
+      "new_level": "dominant",
+      "new_detected": true,
+      "change": "RECOVERED: MISS -> HIT. Confirmed Provider-failure-caused (CASE_A)."
+    },
+    {
+      "alpha": "A304",
+      "old_score": 57.9945,
+      "old_level": "active",
+      "old_detected": true,
+      "new_score": 75.8263,
+      "new_level": "dominant",
+      "new_detected": true,
+      "change": "score increased, still HIT"
+    },
+    {
+      "alpha": "A501",
+      "old_score": null,
+      "old_level": null,
+      "new_score": 46.5254,
+      "new_level": "candidate",
+      "note": "not part of TSM Gold expected set"
+    },
+    {
+      "alpha": "A601",
+      "old_score": 54.1843,
+      "old_level": "active",
+      "old_detected": true,
+      "new_score": 55.4809,
+      "new_level": "active",
+      "new_detected": true,
+      "change": "score increased, still HIT"
+    }
+  ],
+  "main_conflict_comparison": {
+    "old_main_conflict": "A101__A304 (admitted)",
+    "new_main_conflict": "A101__A304 (admitted)",
+    "admission_changed": false,
+    "new_conflict_detail": {
+      "conflict_score": 19.8256,
+      "conflict_level": "low",
+      "bull_score": 70.0,
+      "bear_score": 75.8263,
+      "bull_unique_fact_count": 18,
+      "bear_unique_fact_count": 18,
+      "bull_distinct_agent_count": 3,
+      "bear_distinct_agent_count": 6
+    },
+    "b2_admissibility_outcome": "admitted, reason_codes=[]"
+  },
+  "p0_p1_correctness_check_new_run": {
+    "p0_c1_contamination_check": {
+      "method": "Directly re-ran _foreign_issuer_only_reason() against every claim in the new run's alpha_matches.json",
+      "result": "4 claims correctly triggered the foreign-issuer veto (all AMD/Intel/Samsung/Qualcomm-competitive-dynamics claims with zero TSM mention and zero taxonomy signal) -- confirmed EXCLUDED from qualifying evidence via activation_qualification_reason='FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL'. Zero confirmed C1 contamination reached the final activation score.",
+      "conclusion": "P0 evidence-ownership gate confirmed ACTIVE and EFFECTIVE on live, freshly-generated data -- not just historical replay."
+    },
+    "p1_company_names_check": {
+      "method": "Directly tested _is_ticker_specific() against sample claims containing 'TSMC'/'Taiwan Semiconductor'",
+      "result": "Correctly recognized as ticker-specific (True) in all sampled cases.",
+      "conclusion": "P1 company_names propagation confirmed ACTIVE on live, freshly-generated data."
+    }
+  },
+  "provider_impact_on_other_tsm_alphas": {
+    "impacted_alpha_ids_new_run": [
+      "A101"
+    ],
+    "gold_alpha_other_than_a301_materially_provider_affected": false,
+    "detail": "The one A101-impacted claim (bear_researcher, Secondary, 'Any hiccup...' claim) has zero Gold consequence -- A101 is already a HIT via 18 other unique qualifying facts (score 70.0, active) regardless of this one orphaned claim."
+  },
+  "data_sanity": {
+    "status": "ok",
+    "gates_alpha_acceptance": false,
+    "note": "Data Sanity is not currently an Alpha acceptance gate in this architecture; reported for completeness only."
+  },
+  "no_code_changes_after_result": true,
+  "no_second_tsm_run": true,
+  "no_other_ticker_run": true,
+  "final_decision_logic": {
+    "case_classification": "CASE_A_PROVIDER_CAUSE_CONFIRMED (for A301 specifically)",
+    "recommendation": "PROMOTE_NEW_TSM_CANDIDATE_FOR_REVALIDATION",
+    "recommendation_caveat": "NOT promoted in this task. Promotion additionally requires resolving the A103/A201 regression finding (a separate, unrelated diagnostic question) before this run could be considered a strict, unqualified improvement over the old one -- recommend a separate, explicitly-authorized decision that weighs the A301 recovery against the A103/A201 losses before any ledger promotion.",
+    "secondary_finding_requiring_follow_up": "SEMANTIC_RECORDER_APPEND_FAILED (247 events) is a newly-discovered, currently-unmeasured failure class recommended for a future Provider Health diagnostics enhancement."
+  },
+  "official_benchmark_status": {
+    "official_six_ticker_alpha_hit_changed": false,
+    "official_alpha_hit_percent": 61.0317,
+    "frozen_ledger_changed": false,
+    "gold_validation_report_changed": false,
+    "regression_report_v3_changed": false,
+    "final_closure_reports_changed": false
+  },
+  "final_validation": {
+    "exactly_one_fresh_ticker_run_executed": true,
+    "ticker_was_tsm_only": true,
+    "no_other_ticker_executed": true,
+    "no_second_tsm_run": true,
+    "no_code_changed": true,
+    "no_tests_changed": true,
+    "gold_unchanged": true,
+    "p0_p1_unchanged": true,
+    "provider_health_layer_unchanged": true,
+    "old_authoritative_ledger_unchanged": true,
+    "official_gold_result_unchanged": true,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

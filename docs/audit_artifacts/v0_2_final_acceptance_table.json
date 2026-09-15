@@ -1,0 +1,175 @@
+{
+  "schema_version": "v0.2.final_acceptance_table.v1",
+  "tickers": {
+    "NVDA": {
+      "tier": "FORMAL_GOLD",
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "expected_alphas": [
+        "A101",
+        "A103",
+        "A201",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "detected_alphas": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [
+        "A201"
+      ],
+      "unexpected_dominant": [],
+      "allowed_main_conflicts": [
+        "A101__A304",
+        "A301__A304"
+      ],
+      "actual_main_conflict": "A101__A304",
+      "main_conflict_match": true,
+      "acceptance_status": "PASS"
+    },
+    "QQQ": {
+      "tier": "FORMAL_GOLD",
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "expected_alphas": [
+        "A304",
+        "A601"
+      ],
+      "detected_alphas": [
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [],
+      "unexpected_dominant": [],
+      "conflict_rule_governed": false,
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": "A301__A304",
+      "main_conflict_match": "NOT_APPLICABLE",
+      "acceptance_status": "PASS"
+    },
+    "MSFT": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "expected_alphas": [
+        "A101",
+        "A102",
+        "A304"
+      ],
+      "detected_alphas": [
+        "A001",
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "missing_expected": [
+        "A102",
+        "A304"
+      ],
+      "unexpected_dominant": [],
+      "conflict_rule_governed": false,
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": null,
+      "main_conflict_match": "NOT_APPLICABLE",
+      "acceptance_status": "FAIL",
+      "blocking": false
+    },
+    "SNDK": {
+      "tier": "FORMAL_GOLD",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "expected_alphas": [
+        "A201"
+      ],
+      "detected_alphas": [
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [],
+      "unexpected_dominant": [],
+      "conflict_rule_governed": false,
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": null,
+      "main_conflict_match": "NOT_APPLICABLE",
+      "acceptance_status": "PASS"
+    },
+    "TSM": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "expected_alphas": [
+        "A101",
+        "A201",
+        "A301"
+      ],
+      "detected_alphas": [
+        "A101",
+        "A103",
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [
+        "A301"
+      ],
+      "unexpected_dominant": [],
+      "conflict_rule_governed": false,
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": "A101__A304",
+      "main_conflict_match": "NOT_APPLICABLE",
+      "acceptance_status": "PASS",
+      "blocking": false
+    },
+    "AMD": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "expected_alphas": [
+        "A101",
+        "A201",
+        "A301",
+        "A304"
+      ],
+      "detected_alphas": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [
+        "A201"
+      ],
+      "unexpected_dominant": [],
+      "allowed_main_conflicts": [
+        "A101__A304",
+        "A301__A304"
+      ],
+      "actual_main_conflict": "A101__A304",
+      "main_conflict_match": true,
+      "acceptance_status": "PASS",
+      "blocking": false
+    }
+  },
+  "formal_gold_final": {
+    "NVDA": "PASS",
+    "QQQ": "PASS",
+    "SNDK": "PASS",
+    "pass_count": 3,
+    "fail_count": 0,
+    "review_count": 0,
+    "release_blocking_status": "PASS"
+  },
+  "silver_diagnostic": {
+    "MSFT": "FAIL",
+    "TSM": "PASS",
+    "AMD": "PASS",
+    "blocking": false
+  },
+  "alpha_memory": {
+    "mode": "SHADOW",
+    "activation_modulation_applied": false
+  }
+}

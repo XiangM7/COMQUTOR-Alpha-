@@ -151,10 +151,10 @@ describe("ConflictCard", () => {
         "Counter Evidence, Missing Evidence, and Invalidation Conditions are not available for this historical run."
       )
     ).toBeInTheDocument();
-    // Never a fabricated "No B2 evidence gaps identified." / "No
+    // Never a fabricated "No evidence gaps identified." / "No
     // qualification gaps identified." for a run that was never actually
     // checked against these newer fields.
-    expect(screen.queryByText("No B2 evidence gaps identified.")).not.toBeInTheDocument();
+    expect(screen.queryByText("No evidence gaps identified.")).not.toBeInTheDocument();
     expect(screen.queryByText("No qualification gaps identified.")).not.toBeInTheDocument();
     expect(screen.queryByText(/What would invalidate/)).not.toBeInTheDocument();
     // The legacy bull/bear evidence panel is unaffected by evidence_ui's absence.
@@ -185,7 +185,7 @@ describe("ConflictCard", () => {
         "Counter Evidence, Missing Evidence, and Invalidation Conditions are not available for this historical run."
       )
     ).not.toBeInTheDocument();
-    expect(screen.getByText("No B2 evidence gaps identified.")).toBeInTheDocument();
+    expect(screen.getByText("No evidence gaps identified.")).toBeInTheDocument();
   });
 
   // QA Closure v0.1.2 Item 3 (Candidate Conflict vs Main Conflict Strict
@@ -223,13 +223,15 @@ describe("ConflictCard", () => {
       />
     );
     const activationLine = screen.getByText(/^Activation: 70\.0/);
-    expect(activationLine.textContent).toContain("capped_active");
+    // Product Demo Hardening Phase 2D: the raw "capped_active" token is no
+    // longer shown by default -- it displays as the translated "Active",
+    // with the (already-translated) cap reason still present.
+    expect(activationLine.textContent).not.toContain("capped_active");
+    expect(activationLine.textContent).toContain("Active");
     expect(activationLine.textContent).toContain("No supporting Structure Graph edges");
-    // Never silently shown as plain "active".
-    expect(activationLine.textContent).not.toMatch(/\(active\)/);
   });
 
-  it("shows plain status (e.g. dominant) with no cap reason when activation_level is not capped_active", () => {
+  it("shows the translated level (e.g. Dominant) with no cap reason when activation_level is not capped_active", () => {
     render(
       <ConflictCard
         conflict={makeConflict({
@@ -243,7 +245,7 @@ describe("ConflictCard", () => {
       />
     );
     const activationLine = screen.getByText(/^Activation: 84\.5/);
-    expect(activationLine.textContent).toBe("Activation: 84.5 (dominant)");
+    expect(activationLine.textContent).toBe("Activation: 84.5 (Dominant)");
   });
 
   it("falls back to the legacy status on a conflict payload predating activation_level", () => {
@@ -251,7 +253,20 @@ describe("ConflictCard", () => {
     // makeConflict()'s bull_structure.status defaults to "active" with no
     // activation_level field at all -- must render exactly as before,
     // never crash, never fabricate "capped_active".
-    expect(screen.getByText(/^Activation: 66\.5/).textContent).toBe("Activation: 66.5 (active)");
+    expect(screen.getByText(/^Activation: 66\.5/).textContent).toBe("Activation: 66.5 (Active)");
+  });
+
+  it("never shows a raw regime_level/candidate/capped_active token in the Activation line", () => {
+    render(
+      <ConflictCard
+        conflict={makeConflict({
+          bull_structure: { ...makeConflict().bull_structure, activation_level: "regime_level" },
+        })}
+      />
+    );
+    const activationLine = screen.getByText(/^Activation: 66\.5/);
+    expect(activationLine.textContent).not.toContain("regime_level");
+    expect(activationLine.textContent).toContain("Dominant");
   });
 
   // Product-language guardrails scoped to this card's own authored copy

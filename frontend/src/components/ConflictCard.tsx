@@ -4,6 +4,7 @@ import type {
   ConflictEvidenceItem,
   ConflictSideStructure,
 } from "../api/types";
+import { formatActivationLevelForDisplay } from "../utils/activationLevelDisplay";
 import { ConflictEvidenceSections } from "./ConflictEvidenceSections";
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -28,16 +29,23 @@ const CONFLICT_SIDE_CAP_REASON_LABELS: Record<string, string> = {
 /** The same display-facing level AlphaCard shows for this Alpha elsewhere
  * -- read directly from the backend, never recomputed from
  * activation_score/status here. Falls back to `status` on a payload
- * predating this task (or a historical conflict record). */
+ * predating this task (or a historical conflict record).
+ *
+ * Product Demo Hardening Phase 2D: the raw internal level token
+ * (capped_active/regime_level/etc.) is translated to product language via
+ * the shared formatter before display -- the raw value itself remains the
+ * source of truth for the cap-reason branch below and for the CSS class
+ * applied by the caller, never mutated. */
 function activationLevelText(structure: ConflictSideStructure): string {
   const level = structure.activation_level ?? structure.status;
+  const displayLevel = formatActivationLevelForDisplay(level);
   if (level !== "capped_active" || !structure.blocked_reason_codes || structure.blocked_reason_codes.length === 0) {
-    return level;
+    return displayLevel;
   }
   const reasons = structure.blocked_reason_codes
     .map((code) => CONFLICT_SIDE_CAP_REASON_LABELS[code] ?? code)
     .join(", ");
-  return `${level} — ${reasons}`;
+  return `${displayLevel} — ${reasons}`;
 }
 
 interface ConflictCardProps {

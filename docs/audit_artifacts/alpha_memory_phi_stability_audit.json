@@ -1,0 +1,204 @@
+{
+  "schema_version": "alpha_memory_phi_stability_audit.v1",
+  "task": "STEP 1.5 -- phi Identity Stability Audit on Real Cross-Run Data (read-only analysis, no implementation)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "production_code_modified": false,
+  "tests_modified": false,
+  "phi_implementation_changed": false,
+
+  "real_run_pairs": [
+    {"ticker": "NVDA", "run_a": "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d", "run_b": "c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6", "note": "The two real runs already used in Step 1 (required minimum)."},
+    {"ticker": "MSFT", "run_a": "07ddc074-9ab2-4b16-8957-acbf94012144", "run_b": "6cd2566d-e0f1-4306-995f-74f39efb21eb", "note": "Additional healthy pair (semantic_execution_health PASS, classified_coverage 1.0 and 0.989 respectively), included as extra offline evidence per instruction."}
+  ],
+
+  "current_phi_overlap": {
+    "definition": "Step 1's implemented granularity: whole per-(ticker, alpha_id) canonical edge SET must be byte-identical.",
+    "NVDA": {"alphas_checked": 6, "whole_set_identical_count": 0, "per_alpha": {
+      "A001": {"count_a": 2, "count_b": 1, "exact_overlap": 0, "jaccard": 0.0},
+      "A101": {"count_a": 5, "count_b": 1, "exact_overlap": 1, "jaccard": 0.2},
+      "A102": {"count_a": 2, "count_b": 1, "exact_overlap": 1, "jaccard": 0.5},
+      "A103": {"count_a": 4, "count_b": 2, "exact_overlap": 0, "jaccard": 0.0},
+      "A301": {"count_a": 1, "count_b": 1, "exact_overlap": 0, "jaccard": 0.0},
+      "A501": {"count_a": 1, "count_b": 0, "exact_overlap": 0, "jaccard": 0.0}
+    }},
+    "MSFT": {"alphas_checked": 8, "whole_set_identical_count": 0, "per_alpha": {
+      "A001": {"count_a": 0, "count_b": 1, "exact_overlap": 0, "jaccard": 0.0},
+      "A003": {"count_a": 1, "count_b": 0, "exact_overlap": 0, "jaccard": 0.0},
+      "A101": {"count_a": 0, "count_b": 1, "exact_overlap": 0, "jaccard": 0.0},
+      "A102": {"count_a": 0, "count_b": 3, "exact_overlap": 0, "jaccard": 0.0},
+      "A103": {"count_a": 0, "count_b": 2, "exact_overlap": 0, "jaccard": 0.0},
+      "A304": {"count_a": 0, "count_b": 2, "exact_overlap": 0, "jaccard": 0.0},
+      "A501": {"count_a": 0, "count_b": 1, "exact_overlap": 0, "jaccard": 0.0},
+      "A601": {"count_a": 0, "count_b": 2, "exact_overlap": 0, "jaccard": 0.0}
+    }},
+    "conclusion": "0 of 14 checked alphas (across both ticker pairs) produced an identical whole-edge-set. Step 1's zero-phi-overlap finding is confirmed structural, not a one-off fluke of the two original NVDA runs."
+  },
+
+  "node_overlap": {
+    "NVDA": {"count_a": 11, "count_b": 13, "exact_match": 11, "union": 13, "jaccard": 0.846},
+    "MSFT": {"count_a": 11, "count_b": 12, "exact_match": 10, "union": 13, "jaccard": 0.769},
+    "conclusion": "BY FAR the most stable granularity measured -- 77-85% of canonical factor nodes recur exactly across independent runs of the same ticker. Node identity (structure_extractor.py's existing id) is a strong, already-reusable lower-level primitive, but a bare node is a single factor's presence, not a causal RELATIONSHIP -- it carries no direction, no Alpha attribution, and no 'A causes B' information by itself."
+  },
+
+  "edge_overlap": {
+    "definition": "Ticker-wide (NOT per-alpha) exact (source, edge_type, target) triples -- Candidate C2's core unit, without the alpha_id scope yet applied.",
+    "NVDA": {"count_a": 14, "count_b": 10, "exact_match": 5, "union": 19, "jaccard": 0.263, "shared_edges": [
+      ["ai_capex", "causal", "gpu_demand"],
+      ["ai_infrastructure", "supportive", "nvda_revenue_growth"],
+      ["inference_demand", "supportive", "nvda_revenue_growth"],
+      ["rate_cut_cycle", "conflicting", "valuation_risk"],
+      ["valuation_risk", "conflicting", "nvda_revenue_growth"]
+    ]},
+    "MSFT": {"count_a": 9, "count_b": 9, "exact_match": 2, "union": 16, "jaccard": 0.125, "shared_edges": [
+      ["ai_capex", "supportive", "ai_infrastructure"],
+      ["ai_demand", "supportive", "msft_revenue_growth"]
+    ]},
+    "edge_type_variance_on_same_node_pair": {
+      "NVDA": [
+        {"pair": ["ai_capex", "gpu_demand"], "run_a_type": "causal", "run_b_type": "supportive"},
+        {"pair": ["ai_capex", "nvda_revenue_growth"], "run_a_type": "supportive", "run_b_type": "causal"}
+      ],
+      "MSFT": [
+        {"pair": ["ai_capex", "msft_revenue_growth"], "run_a_type": "causal", "run_b_type": "conflicting"}
+      ],
+      "conclusion": "Ignoring edge_type and comparing (source, target) only raises overlap modestly (NVDA 6/15=0.40 vs typed 5/19=0.26; MSFT 3/14=0.21 vs typed 2/16=0.125) -- edge_type disagreement between independent extractions is a REAL but SECONDARY contributor to instability, not the dominant one."
+    },
+    "conclusion": "Genuine recurring edges DO exist (5 of 19 union for NVDA, 2 of 16 for MSFT) -- individual edges are meaningfully more stable than whole per-alpha edge sets, though still far short of node-level stability."
+  },
+
+  "motif_overlap": {
+    "two_edge_motif": {
+      "definition": "Deterministic 2-hop chains (edge1.target == edge2.source) among edges sharing one alpha_id.",
+      "NVDA": {"A101": {"count_a": 1, "count_b": 0}, "A103": {"count_a": 3, "count_b": 0}, "all_other_alphas": "0 motifs in either run"},
+      "MSFT": {"all_alphas": "0 motifs in either run"},
+      "cross_run_exact_overlap": 0
+    },
+    "three_edge_motif": {
+      "definition": "Deterministic 3-hop chains among edges sharing one alpha_id.",
+      "NVDA": {"A103": {"count_a": 1, "count_b": 0}, "all_other_alphas": "0 motifs in either run"},
+      "MSFT": {"all_alphas": "0 motifs in either run"},
+      "cross_run_exact_overlap": 0
+    },
+    "conclusion": "Multi-hop motifs are RARE even within a single run (most alphas produce zero 2- or 3-edge motifs at all -- their linked edges do not chain into a path), and where they do exist, cross-run overlap is ZERO in every case measured. Motif-level identity is empirically LESS stable than edge-level, not more -- moving to motifs would make the zero-overlap problem worse, not better."
+  },
+
+  "component_overlap": {
+    "definition": "Per-alpha connected components (undirected) among that alpha's linked edges.",
+    "NVDA": {"A001": {"a": 1, "b": 1, "overlap": 0}, "A101": {"a": 2, "b": 1, "overlap": 0}, "A102": {"a": 2, "b": 1, "overlap": 1}, "A103": {"a": 1, "b": 2, "overlap": 0}, "A301": {"a": 1, "b": 1, "overlap": 0}, "A501": {"a": 1, "b": 0, "overlap": 0}},
+    "MSFT": {"all_alphas": "0 or 1 components per run, 0 exact overlap in every case"},
+    "conclusion": "No better than edge-level (1 exact match out of 14 alpha-component comparisons across both pairs) and structurally coarser/less specific -- a component can silently absorb an unrelated edge added anywhere in the same alpha's local subgraph. Not recommended as a standalone identity layer."
+  },
+
+  "alpha_assignment_instability": {
+    "finding": "Even among the exact-identical (source, edge_type, target) edges that DO recur across runs, the SET of alpha_ids attached to that same literal edge sometimes differs between runs.",
+    "examples": [
+      {"edge": ["ai_capex", "causal", "gpu_demand"], "ticker": "NVDA", "run_a_alpha_ids": ["A101", "A103"], "run_b_alpha_ids": ["A101"]},
+      {"edge": ["ai_infrastructure", "supportive", "nvda_revenue_growth"], "ticker": "NVDA", "run_a_alpha_ids": ["A101"], "run_b_alpha_ids": ["A103"]},
+      {"edge": ["rate_cut_cycle", "conflicting", "valuation_risk"], "ticker": "NVDA", "run_a_alpha_ids": ["A001"], "run_b_alpha_ids": []}
+    ],
+    "conclusion": "This is a SEPARATE and materially important root cause, distinct from edge content changing: the SAME literal causal claim can be linked to a different Alpha (or to no Alpha at all) by independent Alpha Mapper/LLM classification runs. This means Step 1's per-alpha SET requirement fails even in cases where the underlying edge content is byte-identical, purely because of alpha-attribution variance. An edge-level phi scoped by (ticker, alpha_id, edge) converts this from a silent all-or-nothing SET failure into an honest, partial, edge-by-edge picture: the edge matches under whichever alpha_id(s) both runs agree on, and simply does not match under an alpha_id only one run assigned -- without needing to invent any similarity threshold."
+  },
+
+  "root_cause_of_zero_phi_overlap": [
+    "Edge additions/removals between independent runs: different real-world claims get sampled/extracted each run (different day, different agent-report phrasing), so the raw edge inventory itself differs run to run -- confirmed by edge-level union counts (19 for NVDA, 16 for MSFT) being much larger than either run's own edge count alone.",
+    "edge_type disagreement on the same (source, target) node pair between independent LLM-driven canonical-relation extraction (e.g. ai_capex->gpu_demand classified causal in one run, supportive in another) -- a real, secondary contributor.",
+    "Alpha-attribution instability: the identical literal edge is sometimes linked to a different alpha_id set across runs (see alpha_assignment_instability above) -- a real, materially significant contributor, independent of edge content changing.",
+    "Structural consequence of requiring an entire SET match: Step 1's implementation demands perfect agreement across EVERY edge linked to an alpha simultaneously -- with typically only 1-5 edges per alpha, even a single one of the above three effects on any ONE edge is enough to break the whole-set match to exact zero. This amplifies small, individually-explainable differences into total non-recognition."
+  ],
+
+  "candidate_identity_models": [
+    {
+      "id": "C1", "name": "Whole-Alpha edge set (current Step 1 implementation)",
+      "stability": "LOW (0 of 14 alpha-pairs matched across both real ticker pairs)",
+      "semantic_specificity": "HIGH (captures an alpha's full local structure at once)",
+      "collision_risk": "LOW (a full-set match is a very strong signal when it does occur)",
+      "fragmentation_risk": "VERY HIGH (any single edge/type/alpha-attribution difference anywhere in the set breaks the entire match)",
+      "implementation_complexity": "LOW (already implemented)",
+      "cross_run_usefulness": "NONE observed on real data -- empirically fails to serve the Development Plan's 'match recurring causal chains' purpose."
+    },
+    {
+      "id": "C2", "name": "Single canonical edge phi (ticker + alpha_id + source + edge_type + target + version authority)",
+      "stability": "MODERATE (5/19 NVDA, 2/16 MSFT edges recur exactly at the ticker-wide level; per-alpha scoping narrows this further but converts all-or-nothing failure into partial, edge-by-edge recognition -- see alpha_assignment_instability)",
+      "semantic_specificity": "MODERATE (one causal relationship, not a full thesis, but a genuine directed causal/supportive/conflicting claim)",
+      "collision_risk": "LOW (still ticker+alpha+source+type+target+taxonomy-scoped; exact match only)",
+      "fragmentation_risk": "MODERATE (a genuinely-recurring chain still fragments into several independently-tracked edge phi ids rather than one atomic identity, but each piece is individually far more likely to be recognized than the whole)",
+      "implementation_complexity": "LOW (same hashing approach as C1, applied to individual edges instead of edge sets)",
+      "cross_run_usefulness": "DEMONSTRATED on real data -- concrete recurring edges were found and enumerated for both ticker pairs."
+    },
+    {
+      "id": "C3", "name": "Two-edge causal motif (A->B->C)",
+      "stability": "VERY LOW (0 of 4 alpha-pairs with any 2-edge motif at all shared a motif across runs; most alphas produce zero motifs even within one run)",
+      "semantic_specificity": "HIGH (a genuine mini-chain, closest to the Development Plan's own worked example)",
+      "collision_risk": "LOW",
+      "fragmentation_risk": "VERY HIGH -- worse than C1, since it requires simultaneous agreement on two edges at once, compounding C2's own instability",
+      "implementation_complexity": "MODERATE (adjacency construction per alpha)",
+      "cross_run_usefulness": "NONE observed on real data."
+    },
+    {
+      "id": "C4", "name": "Maximal deterministic path",
+      "stability": "NOT EVALUATED AS UNAMBIGUOUS -- the real graphs' linked-edge subgraphs branch and span multiple components per alpha (see NVDA A101/A103's own 2/1 component counts), so 'the' maximal path is not deterministically defined without an arbitrary tie-break rule this audit refuses to invent, per the same Chain Boundary Rule documented in Step 1.",
+      "semantic_specificity": "N/A (not evaluable)",
+      "collision_risk": "N/A",
+      "fragmentation_risk": "N/A",
+      "implementation_complexity": "HIGH (would require inventing a path-selection heuristic)",
+      "cross_run_usefulness": "NOT EVALUATED -- disqualified by ambiguity, consistent with the instruction to only implement path construction where graph topology makes it unambiguous."
+    },
+    {
+      "id": "C5", "name": "Connected component per alpha",
+      "stability": "LOW (1 of 14 alpha-pairs showed any exact component overlap)",
+      "semantic_specificity": "LOW-MODERATE (a whole local subgraph, not a specific claim)",
+      "collision_risk": "MODERATE (a component can absorb an unrelated edge added anywhere in the same local subgraph, diluting specificity)",
+      "fragmentation_risk": "HIGH (similar failure mode to C1 -- one added/removed edge changes the component's exact membership)",
+      "implementation_complexity": "MODERATE (union-find/BFS per alpha)",
+      "cross_run_usefulness": "MINIMAL observed on real data (1 match out of 14 comparisons)."
+    },
+    {
+      "id": "C6", "name": "Hierarchical identity (phi_structure_id > phi_motif_id > phi_edge_id)",
+      "stability": "Inherits phi_edge_id's MODERATE stability as its most durable layer; phi_structure_id (C1-equivalent) remains the least stable, retained only as a coarse audit/display aggregate, never as the primary matching unit; the motif layer is NOT populated in v1 given C3's empirically zero cross-run usefulness today.",
+      "semantic_specificity": "Best of all candidates -- exposes both the atomic recurring fact (edge) AND the coarser per-alpha grouping (structure) simultaneously, each honestly labeled with its own stability profile.",
+      "collision_risk": "LOW at the edge layer (same as C2); the structure layer inherits C1's already-low collision risk.",
+      "fragmentation_risk": "LOW-MODERATE overall -- a fragmenting whole-structure match no longer discards the edges that DID genuinely recur; they remain individually visible at the phi_edge_id layer.",
+      "implementation_complexity": "MODERATE (two concurrently-exposed granularities instead of one; no motif layer needed initially, reducing scope versus a full 3-layer build)",
+      "cross_run_usefulness": "Combines C2's demonstrated real-data usefulness with C1's already-implemented coarse aggregate, without discarding either."
+    }
+  ],
+
+  "node_id_reuse_investigation": {
+    "node_level_overlap_vs_edge_level": "Node overlap (0.77-0.85 Jaccard) is roughly 3-6x higher than typed-edge overlap (0.125-0.263) and vastly higher than per-alpha edge-set overlap (0.0 in every case measured) -- node identity is materially, dramatically more stable than any relational granularity.",
+    "can_node_identity_safely_serve_as_a_lower_level_phi_component": "YES, as an INPUT to edge/chain identity (which it already is, since an edge's source/target ARE node ids) -- but NOT as a standalone phi unit by itself, since a bare node carries no causal direction, no Alpha attribution, and no 'this is a claim about a relationship' semantics. It is necessary infrastructure, not sufficient identity.",
+    "does_the_revenue_growth_scoping_inconsistency_affect_observed_matching_here": "NO practical effect in this audit's measurements: both ticker pairs' phi computations are already ticker-scoped at the TOP LEVEL (ticker is a first-class hashed field per Step 1's Product Decision 2), independent of whatever scoping a given node id itself uses. The inconsistency (only 'Revenue Growth' is ticker-scoped in the node id string; ~109 other factors share an identical node id string across ALL tickers) would only matter for a hypothetical future feature that compared node ids DIRECTLY across tickers without an explicit ticker field of its own -- which is exactly what Step 1 avoided by design. This audit's own analysis confirms that design choice was correct: e.g. NVDA and MSFT both contain a node literally named 'ai_capex' (ticker-independent, unscoped) -- without Step 1's explicit ticker hash field, these would incorrectly appear as 'the same structure' across two unrelated companies.",
+    "should_node_ids_change_in_this_step": "NO -- not evaluated for change, and this audit found no evidence requiring one. Node ids remain the correct, stable, reusable lower-level primitive they already were found to be in the original Step 0 audit."
+  },
+
+  "recommended_phi_model": "E_HIERARCHICAL_PHI (edge-level as the atomic/durable layer, whole-alpha-structure retained only as a coarser, non-primary aggregate; motif layer explicitly NOT included in v2 given C3's measured zero cross-run usefulness)",
+  "recommendation_reasoning": "Evidence rules out C1 (0% match rate, confirmed structural failure, not implementable-as-is for the Plan's stated purpose), C3/motifs (measured WORSE than C1 -- rarer within a single run and zero cross-run overlap in every case found), C4 (topologically ambiguous on real data, would require inventing a path rule), and C5/components (1 match in 14 comparisons, no better than edges while being less specific). C2 (single edge) is the only candidate with DEMONSTRATED real cross-run recurrence (5/19 and 2/16 exact edge matches with concrete examples). Recommending pure C2 alone, however, would discard the already-implemented and already-tested C1 aggregate for no reason -- C6/hierarchical keeps C1 as a coarse, honestly-labeled roll-up while promoting C2's edges to be the actual matching primitive. This is additive to Step 1's existing work, not a full rewrite: phi_identity.py's chain_edges computation and hashing approach are directly reusable, applied per-edge instead of per-set.",
+
+  "one_alpha_multiple_phi_tokens_answer": {
+    "answer": "YES -- one Alpha should be allowed to contain multiple persistent phi tokens (one per recurring edge it is linked to), not exactly one.",
+    "evidence": "Every alpha examined in both real ticker pairs has 1-5 distinct linked edges, several of which independently recur across runs while others do not (see current_phi_overlap's per-alpha breakdown, e.g. NVDA A101: 5 edges in run A, only 1 shared with run B). Forcing 'one alpha = one phi' (as C1 does) has already been shown empirically to produce 0% recognition; allowing multiple phi tokens per alpha (one per edge) is the change that makes recognition possible at all on real data.",
+    "development_plan_support": "The Plan's own roadmap language is plural: 'match recurring causal CHAINS [plural] to stable phi-IDs' -- it does not say 'one phi-ID per Alpha'. This is consistent with, not contradicted by, allowing multiple phi tokens per Alpha."
+  },
+
+  "development_plan_alignment": "The Plan's own worked example, 'phi-001 = AI demand -> GPU shortage -> NVDA benefits', is itself a 2-hop CHAIN, not a whole-Alpha-graph identity -- textually, the Plan more naturally supports individual recurring causal-chain/motif identities over one monolithic per-Alpha structure identity. However, this audit's own real-data measurement (motif_overlap) shows that EXACT 2-hop chain matching, as literally described in the Plan's example, has ZERO measured cross-run stability today given real independent extraction variance. The recommended edge-level unit (C2, as the base of the C6 hierarchy) is best understood as the Plan's own 'chain' concept truncated to its smallest constituent, unambiguous, currently-stable fragment (a chain of length 1) -- honestly reporting that full multi-hop chain matching, as the Plan envisions it, is not yet achievable without either accepting near-total non-recognition (as measured) or introducing similarity/fuzzy matching (explicitly forbidden by this step's own constraints). The hierarchical structure leaves room to reintroduce a motif layer later if a future step finds a way to close this gap without fuzzy matching (e.g. normalizing edge_type disagreements via an explicit, Product-approved equivalence table -- itself a new PRODUCT_DECISION_REQUIRED, not attempted here).",
+
+  "product_decisions_required": [
+    "Whether to formally adopt edge-level (C2) as the primary phi matching unit, retaining the current whole-alpha set (C1) only as a secondary aggregate -- this audit recommends it but does not implement it.",
+    "Whether an explicit, Product-approved edge_type equivalence/normalization table (e.g. treating 'causal' and 'supportive' as compatible for phi-matching purposes in specific cases) should ever be introduced -- this is a form of controlled, non-fuzzy relaxation distinct from similarity matching, but still a new product decision, not made here.",
+    "Whether to keep pursuing motif-level (chain) identity as a stretch goal for a future step given it is empirically unsupported today, or to formally deprioritize it.",
+    "Whether alpha-attribution instability (the same edge linked to different alpha_ids across runs) should itself become a tracked, visible phenomenon (e.g. reported as a data-quality signal) -- a new capability, not decided or implemented here.",
+    "All Step 1 spec's original open items (ticker-scoping for the other 109 factors, taxonomy-drift migration policy, whether phi ids should be durably persisted) remain equally open and are not resolved by this audit."
+  ],
+
+  "files_inspected": [
+    "outputs/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/structure_graph.json",
+    "outputs/runs/c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6/structure_graph.json",
+    "outputs/runs/07ddc074-9ab2-4b16-8957-acbf94012144/structure_graph.json",
+    "outputs/runs/6cd2566d-e0f1-4306-995f-74f39efb21eb/structure_graph.json",
+    "comqutor_alpha/memory/phi_identity.py (read only, unchanged)",
+    "comqutor_alpha/memory/history_reader.py (read only, unchanged)",
+    "comqutor_alpha/regression/semantic_execution_health.py (used read-only to select a healthy MSFT run pair)"
+  ]
+}

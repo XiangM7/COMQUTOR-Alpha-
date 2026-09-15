@@ -1,0 +1,70 @@
+{
+  "schema_version": "v0_1_3_gold_validation.v1",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "commit": false,
+  "push": false,
+
+  "gold_benchmark_authority": {
+    "benchmark_version": "alpha_conflict_gold.v1",
+    "benchmark_path": "docs/audit_artifacts/alpha_conflict_gold_benchmark_v1.json",
+    "gold_dimensions": ["Expected Alpha Hit", "Main Conflict Match"],
+    "as_of_date": "2026-09-08",
+    "frozen": true,
+    "validation_mode": "RETROSPECTIVE_GOLD_VALIDATION",
+    "benchmark_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a"
+  },
+
+  "methodology_note": "Because alpha_conflict_gold.v1 was created AFTER the outputs of the current six FINAL_FRESH_SELECTED runs were already available, this comparison is retrospective and must not be represented as a blind prospective benchmark. For a fully prospective acceptance test: (1) keep alpha_conflict_gold.v1 unchanged, (2) its SHA-256 is already frozen above, (3) run a NEW six-ticker regression afterward, (4) compare those new outputs against this same already-frozen Gold. That prospective rerun is not part of this task.",
+
+  "expected_alpha_hit_gold_results": {
+    "per_ticker": [
+      {"ticker": "NVDA", "gold_expected_count": 7, "gold_expected": ["A101","A102","A103","A201","A301","A304","A601"], "actual_hits": ["A101","A103","A301","A304","A601"], "misses": ["A102","A201"], "hit_count": 5, "hit_rate_percent": 71.43},
+      {"ticker": "QQQ", "gold_expected_count": 6, "gold_expected": ["A101","A103","A201","A301","A304","A601"], "actual_hits": ["A103","A304","A601"], "misses": ["A101","A201","A301"], "hit_count": 3, "hit_rate_percent": 50.0},
+      {"ticker": "MSFT", "gold_expected_count": 6, "gold_expected": ["A101","A102","A103","A301","A304","A601"], "actual_hits": ["A101","A103","A301"], "misses": ["A102","A304","A601"], "hit_count": 3, "hit_rate_percent": 50.0},
+      {"ticker": "SNDK", "gold_expected_count": 5, "gold_expected": ["A102","A103","A201","A301","A601"], "actual_hits": ["A201","A601"], "misses": ["A102","A103","A301"], "hit_count": 2, "hit_rate_percent": 40.0},
+      {"ticker": "TSM", "gold_expected_count": 6, "gold_expected": ["A101","A103","A201","A301","A304","A601"], "actual_hits": ["A101","A103","A201","A304","A601"], "misses": ["A301"], "hit_count": 5, "hit_rate_percent": 83.33},
+      {"ticker": "AMD", "gold_expected_count": 7, "gold_expected": ["A101","A102","A103","A201","A301","A304","A601"], "actual_hits": ["A101","A103","A301","A304","A601"], "misses": ["A102","A201"], "hit_count": 5, "hit_rate_percent": 71.43}
+    ],
+    "official_metric": "macro-average of per-ticker hit rates (authority_contract.expected_alpha_gate, unmodified)",
+    "official_aggregate_hit_rate_percent": 61.03,
+    "pooled_micro_alternative_not_official": "23/37 = 62.16% -- shown for reference only, NOT the metric the >=75% gate is evaluated against",
+    "target_percent": 75.0,
+    "status": "FAIL",
+    "note": "Detected-Alpha definition reused unmodified from regression_report_v3._detected_alphas() (active/dominant/regime_level only). Actual detected Alphas read directly from each run's persisted run_audit.json activation_summary.per_alpha -- not recomputed, not copied from any prior diagnostic report."
+  },
+
+  "main_conflict_gold_results": {
+    "per_ticker": [
+      {"ticker": "NVDA", "gold_main_conflict": "A101__A304", "actual_main_conflict": "A101__A304", "match": true, "reason": "exact string match against canonical conflict_id"},
+      {"ticker": "QQQ", "gold_main_conflict": "A304__A601", "actual_main_conflict": "A304__A601", "match": true, "reason": "exact string match against canonical conflict_id"},
+      {"ticker": "MSFT", "gold_main_conflict": "A301__A304", "actual_main_conflict": "none_admitted", "match": false, "reason": "Gold=A301__A304 != Actual=none_admitted"},
+      {"ticker": "SNDK", "gold_main_conflict": "NO_ADMITTED_MAIN_CONFLICT", "actual_main_conflict": "none_admitted", "match": true, "reason": "Gold expects NO_ADMITTED_MAIN_CONFLICT; actual has no admitted main conflict -> MATCH"},
+      {"ticker": "TSM", "gold_main_conflict": "A101__A304", "actual_main_conflict": "A101__A304", "match": true, "reason": "exact string match against canonical conflict_id"},
+      {"ticker": "AMD", "gold_main_conflict": "A101__A304", "actual_main_conflict": "A101__A304", "match": true, "reason": "exact string match against canonical conflict_id"}
+    ],
+    "match_count": 5,
+    "total": 6,
+    "match_percent": 83.33,
+    "target": ">=4/6",
+    "status": "PASS",
+    "note": "Actual main conflicts read directly from each run's persisted run_audit.json conflict_summary.main_conflict_id -- not copied from this task's prompt."
+  },
+
+  "do_not_manufacture_pass_confirmation": "Expected Alpha Hit Rate genuinely FAILs the >=75% target (61.03%) against this newly-frozen Gold -- reported as FAIL, not adjusted, not re-defined, not silently passed. Main Conflict Match genuinely PASSes (5/6=83.33% >= 4/6) -- reported as PASS because that is the real recomputed result, not because a PASS was desired.",
+
+  "final_revalidation_update": {
+    "previous_status": "NOT_GOLD_EVALUABLE",
+    "previous_reason": "No approved Gold existed at that time (see docs/audit_artifacts/v0_1_3_final_revalidation.json/.md, which remains unmodified and historically accurate for the point in time it was written).",
+    "new_status": "Gold benchmark alpha_conflict_gold.v1 has now been explicitly frozen (this task).",
+    "current_six_run_evaluation_mode": "RETROSPECTIVE_GOLD_VALIDATION",
+    "newly_calculated_expected_alpha_hit_rate_percent": 61.03,
+    "newly_calculated_expected_alpha_hit_status": "FAIL",
+    "newly_calculated_main_conflict_match": "5/6 = 83.33%",
+    "newly_calculated_main_conflict_status": "PASS",
+    "note": "v0_1_3_final_revalidation.json/.md is NOT rewritten as though Gold existed before it did -- it is left exactly as originally written, and this new v0_1_3_gold_validation.json/.md is the authoritative successor document for Gold-evaluable status going forward."
+  }
+}

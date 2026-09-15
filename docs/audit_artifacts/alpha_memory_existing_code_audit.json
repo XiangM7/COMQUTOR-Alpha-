@@ -1,0 +1,258 @@
+{
+  "schema_version": "alpha_memory_existing_code_audit.v1",
+  "task": "STEP 0 -- Alpha Memory / Feedback Loop Existing-Code Audit (read-only)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "note": "Local worktree (including uncommitted changes) was inspected directly with grep/read against files on disk -- not git history, not GitHub, not HEAD alone.",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false,
+  "production_code_modified": false,
+  "tests_modified": false,
+
+  "overall_verdict": "MIXED",
+  "overall_verdict_explanation": "The Development Plan's own 'MVP Lite memory' half (static Alpha taxonomy + static entity-exposure seed) is genuinely ALREADY_IMPLEMENTED_ACTIVE -- it is real, in the live runtime path, and exactly matches what the Plan describes as MVP scope. The Phase-2 'adaptive memory' half (persistent structure identity / phi-ID, cross-run causal-chain matching, invalidation-event persistence, reason-code lifecycle, memory-based activation modulation, human-review feedback into future runs) is essentially NOT_IMPLEMENTED anywhere in the codebase -- not disconnected, not half-built, simply never started, with exactly ONE incidental, unintentional reusable primitive found (a deterministic factor+ticker node-id scheme in the Structure Extractor, built for graph deduplication, never used for cross-run identity). Calling the whole system PARTIAL_FOUNDATION_ONLY would understate that MVP Lite genuinely works today; calling it NOT_IMPLEMENTED would be wrong for the same reason. MIXED is the only verdict that is true of both halves at once.",
+
+  "capability_matrix": {
+    "M1_static_alpha_taxonomy_memory": {"status": "PASS", "evidence": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml + alpha_loader.py -- versioned, hash-guarded, loaded on every run."},
+    "M2_static_entity_exposure_seed": {"status": "PASS", "evidence": "comqutor_alpha/config/entity_alpha_exposure_seed_v0.1.yaml + exposure/seed_loader.py -- versioned, hash-guarded, loaded on every run."},
+    "M3_exposure_history_persistence": {"status": "PASS", "evidence": "entity_alpha_exposures DB table (storage/db/schema.py) + entity_alpha_exposures.json artifact -- a full per-run snapshot is genuinely written every run."},
+    "M4_exposure_history_reused_across_runs": {"status": "NOT_IMPLEMENTED", "evidence": "No function anywhere queries a DIFFERENT run's entity_alpha_exposures row. repository.get_entity_alpha_exposures(run_id) and get_entity_alpha_exposures() (routes_research.py) are always scoped to the ONE current run_id being displayed. Only the STATIC seed value (same number every run) is reused -- never an outcome from a prior run."},
+    "M5_persistent_structure_identity": {"status": "NOT_IMPLEMENTED", "evidence": "No deliberate cross-run structure-identity feature exists. An INCIDENTAL, reusable primitive exists (structure_extractor.py::_make_node -- id=_slug(_display_label(canonical_factor, ticker)), deterministic and stable across runs of the same ticker) but it is never compared/matched across runs by any code -- see reusable_foundations."},
+    "M6_stable_phi_id": {"status": "NOT_IMPLEMENTED", "evidence": "No 'phi'/'phi_id'/'phi_token' symbol, field, column, or config key exists anywhere in code, schema, or config. The word appears only in docs/specs/development_plan_v1.0_reference_index.md (a false-positive grep hit, unrelated) and the Development Plan docx itself (as a deferred patent concept)."},
+    "M7_cross_run_causal_chain_matching": {"status": "NOT_IMPLEMENTED", "evidence": "No code loads two different runs' structure graphs/activations and matches recurring chains. comqutor_alpha/evaluation/cross_run.py is an offline QA harness that aggregates metrics across GOLDEN TEST CASES (fixture-based regression evaluation), not across real research runs' Alpha outcomes -- unrelated concept sharing only the name."},
+    "M8_invalidation_event_detection": {"status": "NOT_IMPLEMENTED", "evidence": "invalidation_registry.py's conditions are static Product-authored text, looked up by alpha_id and displayed verbatim in the Conflict Radar Evidence UI (conflict_evidence_ui.py). No code ever evaluates a condition against actual evidence/claim text to detect whether it has been triggered."},
+    "M9_invalidation_event_persistence": {"status": "NOT_IMPLEMENTED", "evidence": "No event type for 'an invalidation condition fired' exists anywhere -- nothing to persist because nothing is ever detected (see M8)."},
+    "M10_non_execution_event_persistence": {"status": "NOT_IMPLEMENTED", "evidence": "The codebase has no trading-execution/portfolio-action concept at all (the Development Plan's own MVP scope guard: 'must never emit bare Buy/Sell/Hold instructions... automated trading... explicitly out of MVP scope'), so a 'non-execution event' is not even a defined concept yet, let alone persisted."},
+    "M11_reason_code_lifecycle": {"status": "NOT_IMPLEMENTED", "evidence": "blocked_reason_codes/cap_reason_codes/admissibility reason_codes are all computed FRESH every run from that run's own current inputs (activation_scorer_v2.py, conflict_admissibility.py -- both have zero repository/DB imports). No code tracks a reason code being raised, persisted, and later cleared/resolved over time."},
+    "M12_historical_memory_lookup": {"status": "NOT_IMPLEMENTED", "evidence": "No function of the shape 'get_alpha_history(ticker, alpha_id)' or 'get_prior_run(ticker)' exists anywhere in comqutor_alpha/."},
+    "M13_memory_based_activation_modulation": {"status": "NOT_IMPLEMENTED", "evidence": "activation_scorer_v2.py and exposure_engine.py import no repository/DB module at all -- architecturally incapable of reading any historical state, confirmed by direct inspection of every import statement in both files."},
+    "M14_human_review_feedback_into_future_runs": {"status": "NOT_IMPLEMENTED", "evidence": "grep across comqutor_alpha/ for evidence_review_summary_v2/item2_blind_holdout5 returns zero production-code hits -- only test files reference these artifacts. Review data exists; it changes nothing at runtime."},
+    "M15_feedback_loop_artifact_api_visibility": {"status": "NOT_IMPLEMENTED", "evidence": "run_audit.json (the most comprehensive existing audit artifact) has no memory/feedback-loop section of any kind."},
+    "M16_feedback_loop_ui_visibility": {"status": "NOT_IMPLEMENTED", "evidence": "No frontend component (grepped all of frontend/src/components, frontend/src/pages) renders anything related to memory, feedback loops, or cross-run history. The one 'history' hit found (ProcessingPage.test.tsx) is unrelated ETA-estimation history for a progress spinner."}
+  },
+
+  "explicit_answers": {
+    "q1_stable_cross_run_structure_identity": {
+      "exists": "INCIDENTAL_PRIMITIVE_ONLY, not a deliberate feature",
+      "file": "comqutor_alpha/structure_engine/structure_extractor.py",
+      "symbol": "_make_node() -> node['id'] = _slug(_display_label(canonical_factor, ticker))",
+      "how_generated": "Deterministic string slug of (canonical_factor, ticker) via _display_label()/_slug() -- pure functions, no run_id, no timestamp, no randomness involved.",
+      "survives_across_runs": "YES, by construction -- the same (factor, ticker) pair always produces the identical id string in every run's structure_graph.json, forever, with no code change needed.",
+      "actually_used_cross_run": "NO -- confirmed no code anywhere loads two different runs' structure_graph.json and compares/matches node ids across them. It exists purely as an intra-run deduplication key today.",
+      "important_caveat": "Only the special-cased factor 'Revenue Growth' is ticker-scoped in its id (e.g., 'nvda_revenue_growth'); every OTHER canonical factor's id is ticker-INDEPENDENT (e.g., 'ai_demand' would be the same id for NVDA, AMD, or any ticker). A future per-ticker phi-ID design would need to decide whether to change this scoping -- itself a PRODUCT_DECISION_REQUIRED, not something to infer."
+    },
+    "q2_phi_id_equivalent": {
+      "docs_only": "YES -- the Development Plan docx's patent-mapping table names phi-tokens as a deferred Phase 2 concept.",
+      "schema_only": "NO",
+      "persisted_field": "NO",
+      "runtime_active": "NO"
+    },
+    "q3_invalidation_conditions": {
+      "verdict": "TAXONOMY_METADATA_ONLY, never evaluated at runtime",
+      "where_evaluated": "NOWHERE -- invalidation_registry.load_invalidation_registry()'s only consumers are conflict_evidence_ui.py (display) and week4_persistence.py (storage passthrough of the already-static text for API/UI). No code path checks whether a condition's text describes something that has actually happened.",
+      "what_happens_when_triggered": "N/A -- nothing can trigger it; there is no detection mechanism.",
+      "event_persisted": "N/A -- no event exists to persist."
+    },
+    "q4_failed_expired_invalidated_suppressed_non_execution_events": {
+      "stored": "PARTIALLY, for one specific meaning of 'suppressed' only",
+      "detail": "conflict_detector.py's own arbitration.candidate_evaluations DOES persist a per-pair 'suppressed'/'rejected'/'admitted' outcome with reason_codes, per run -- but this is a WITHIN-RUN structural/evidentiary outcome (did this candidate conflict pair clear the evidence/B2 gate this run), not a cross-run 'this Alpha's thesis failed/expired over time' concept. No future run ever reads a prior run's candidate_evaluations back in (see M4/M12).",
+      "reason_codes": "Yes, exist and are descriptive (REASON_NO_LOCAL_STRUCTURE_SUPPORT etc.) but computed fresh every run, never accumulated.",
+      "lifecycle": "None -- no code tracks a reason code's state changing over time.",
+      "future_runs_read_them": "NO."
+    },
+    "q5_any_historical_state_modifies_b4_activation": {
+      "answer": "NO",
+      "trace": "activation_scorer_v2.py and exposure_engine.py -- the two modules that jointly determine B4's activation_score and cap_reason_codes -- both have ZERO import of comqutor_alpha.storage.db.repository or any other persistence module (confirmed by reading every import statement in both files). They are pure, stateless functions of the CURRENT run's own alpha_matches/graph/exposure-seed inputs. It is therefore architecturally impossible today for a prior run's score, a prior conflict outcome, retained graph state, or human-review data to affect B4."
+    },
+    "q6_entity_exposure_history": {
+      "A_static_seed_exists": true,
+      "B_historical_exposure_is_persisted": "YES, per-run only (entity_alpha_exposures table/artifact) -- but this is a snapshot of THIS run's computed exposure, not an accumulated cross-run history record.",
+      "C_historical_exposure_is_read_on_later_runs": "NO for per-run records (see M4). YES, trivially, for the STATIC seed's historical_mapping number, which is the same fixed value every run regardless of what actually happened in any prior run.",
+      "D_historical_exposure_changes_activation_gating": "YES, via the static seed's historical_mapping (50% weight of the exposure formula, exposure_engine.py) feeding into B4's exposure-based blocking (REASON_LOW_ENTITY_EXPOSURE).",
+      "E_current_implementation_is": "STATIC. The word 'historical' in historical_mapping refers to a human-authored prior belief baked into a YAML seed file at seed-approval time, never to anything the system itself measured or learned from actual past runs."
+    },
+    "q7_write_only_foundation": [
+      {"component": "entity_alpha_exposures DB table + JSON artifact", "writes": "per-run snapshot", "reads_back": "never cross-run"},
+      {"component": "alpha_activations DB table + alpha_activations.json", "writes": "per-run snapshot", "reads_back": "never cross-run"},
+      {"component": "alpha_conflicts DB table + conflicts.json (candidate_evaluations, reason_codes)", "writes": "per-run outcome + reason codes", "reads_back": "never cross-run"},
+      {"component": "structure_graphs DB table + structure_graph.json (including the stable factor+ticker node id)", "writes": "per-run graph, with a node-id scheme that happens to be cross-run-stable", "reads_back": "never cross-run"}
+    ],
+    "q8_shadow_read_path": {
+      "found": false,
+      "detail": "No component was found that reads historical/persisted data but keeps it isolated from official results (the strict definition of SHADOW_READ_PATH). The closest adjacent concept, Entity Exposure's shadow/draft_shadow MODE (B3), is a real, already-classified, unrelated concept: it reads the CURRENT run's own just-computed exposure and deliberately withholds it from affecting THIS SAME run's activation -- it never reads a prior run's history at all, so it does not qualify as a history-reading shadow path."
+    },
+    "q9_dead_or_disconnected_alpha_memory_components": {
+      "found": false,
+      "detail": "No file/symbol was found that appears purpose-built for Alpha Memory and is now orphaned/disconnected. Everything discovered either (a) is fully active for its OWN, non-memory purpose (fingerprinting, request dedup, within-run claim integrity, QA golden-case harness), or (b) was never built at all. The one reusable primitive (structure node ids) is not 'disconnected from Alpha Memory' -- it was never connected to it in the first place; it exists for graph deduplication."
+    },
+    "q10_unused_db_columns_tables_migrations": {
+      "found": false,
+      "detail": "Inspected every table in comqutor_alpha/storage/db/schema.py (schema_migrations, alpha_matches, structure_graphs, alpha_activations, entity_alpha_exposures, alpha_conflicts, research_runs, agent_outputs, research_run_progress). No column or table name (phi_id, structure_signature, invalidated_at, supersedes_run_id, memory_*, feedback_*) suggests planned-but-unbuilt Alpha Memory schema. research_runs.request_fingerprint exists but serves request-dedup, not structure identity (see q1 caveat and NOT_MEMORY_RELATED components)."
+    },
+    "q11_tests_specifying_intended_feedback_behavior": {
+      "found": false,
+      "detail": "Grepped tests/ for alpha_memory, feedback_loop, phi_id, structure_identity, memory_modul* -- zero hits. No test or fixture anywhere encodes an intended-but-unbuilt Alpha Memory contract."
+    },
+    "q12_evidence_review_feeds_future_runs": {
+      "review_data_exists": true,
+      "changes_future_behavior": false,
+      "evidence": "grep -rl 'evidence_review_summary_v2|item2_blind_holdout5' comqutor_alpha/ returns zero files. Every reference is in tests/ or docs/audit_artifacts/. No production code path reads these artifacts."
+    },
+    "q13_graph_persistence_sufficiency_for_stable_identity": {
+      "answer": "YES, already sufficient for a v1 phi-ID without touching the Structure Extractor's extraction logic itself",
+      "detail": "structure_extractor.py already computes and persists a deterministic, cross-run-stable node id (factor+ticker slug) for every node in every run's structure_graph.json. A cross-run matcher could be built entirely as a NEW, separate read-side component that loads N runs' structure_graph.json files and groups nodes by this existing id -- no change to _make_node()/_extract_factors()/the extraction pipeline would be required. The only design question (ticker-scoping consistency across all factors, not just 'Revenue Growth') is a PRODUCT_DECISION_REQUIRED, not an extraction-logic gap."
+    },
+    "q14_retention_logic": {
+      "found": false,
+      "detail": "No retention/deletion policy exists anywhere in comqutor_alpha/ (zero grep hits for 'retention'). Every run's artifacts (DB rows and JSON files under outputs/runs/) persist indefinitely by default. This is FAVORABLE for a future Alpha Memory feature: the raw materials a cross-run matcher or invalidation-event store would need are not being destroyed today -- they simply are not being read back."
+    },
+    "q15_components_to_reuse_vs_duplicate": [
+      "structure_extractor.py's factor+ticker node-id scheme -- reuse as the seed of a v1 stable structure identity; do not invent a parallel id scheme.",
+      "comqutor_alpha.regression.authority_contract's APPROVED_GOLD/DOCUMENTED_EXPECTATION/PROVISIONAL_AI_PREDICTED/REJECTED_OR_SUPERSEDED vocabulary -- an existing, precise pattern for 'how confident is this classification, and can it affect production acceptance' that maps well onto any future invalidation-event confidence/authority question, if Product ever defines one.",
+      "comqutor_alpha.storage.db.repository's existing per-run read/write patterns (get_entity_alpha_exposures, get_research_run_record, etc.) -- extend with a new, explicitly cross-run query rather than building a second persistence layer.",
+      "run_audit.json's existing additive-section convention (activation_summary, conflict_summary, entity_exposure, ...) -- the natural place to add a future 'memory_summary' section, never a new top-level artifact file duplicating this one."
+    ]
+  },
+
+  "components": [
+    {"path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml + alpha_loader.py", "symbol": "load_alpha_taxonomy", "classification": "ACTIVE_PRODUCTION", "runtime_evidence": "Imported and called by alpha_mapper.py, activation_scorer_v2.py, conflict_detector.py, and more on every run.", "what_it_does": "Static, versioned, hash-guarded MVP Alpha taxonomy -- Development Plan's 'MVP Lite' static memory, half 1.", "reusable": "N/A -- already the production authority; do not duplicate."},
+    {"path": "comqutor_alpha/config/entity_alpha_exposure_seed_v0.1.yaml + exposure/seed_loader.py", "symbol": "load_exposure_seed, resolve_exposure_mode", "classification": "ACTIVE_PRODUCTION", "runtime_evidence": "Loaded by exposure_engine.py every run; consumed by the API's current_seed_status overlay.", "what_it_does": "Static, versioned, hash-guarded per-ticker seed lifecycle (draft_shadow/approved_gating/disabled) and historical_mapping prior -- Development Plan's 'MVP Lite' static memory, half 2.", "reusable": "N/A -- already the production authority."},
+    {"path": "comqutor_alpha/exposure_engine.py", "symbol": "compute_run_entity_alpha_exposures", "classification": "ACTIVE_PRODUCTION", "runtime_evidence": "Called from the real research pipeline every run; zero repository/DB imports.", "what_it_does": "Pure function combining the static seed's historical_mapping (50% weight) with THIS run's current_evidence/agent_confidence into an exposure score gating B4.", "reusable": "Would need a NEW, additive input (a real cross-run signal) to become adaptive -- do not modify its existing formula (PRODUCT_DECISION_REQUIRED)."},
+    {"path": "comqutor_alpha/storage/db/exposure_persistence.py + schema.py::entity_alpha_exposures", "symbol": "build_entity_exposure_rows, reconstruct_entity_exposure_record", "classification": "WRITE_ONLY_FOUNDATION", "runtime_evidence": "Written every run; repository.get_entity_alpha_exposures(run_id) is always scoped to ONE run_id -- no cross-run query exists.", "what_it_does": "Persists a full per-run exposure snapshot.", "reusable": "YES -- the natural place to query FROM for any future cross-run exposure history feature; no new table needed."},
+    {"path": "comqutor_alpha/conflict_engine/invalidation_registry.py + config/alpha_invalidation_conditions_v0.1.yaml", "symbol": "load_invalidation_registry", "classification": "CONFIG_ONLY", "runtime_evidence": "Consumed only by conflict_evidence_ui.py (display) and week4_persistence.py (storage passthrough of the same static text).", "what_it_does": "Static, Product-authored descriptive text per Alpha ('what would invalidate this thesis'), shown read-only in the Conflict Radar Evidence UI.", "reusable": "The registry's CONTENT (what conditions Product cares about) is a good source of TRUTH for a future detector's target list -- but the module itself has no detection logic to reuse."},
+    {"path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml's own (older) invalidation_conditions field", "symbol": "n/a (taxonomy field)", "classification": "DEAD_CODE", "runtime_evidence": "Per invalidation_registry.py's own module docstring: 'older, unversioned, carries no explicit source/approval metadata... not treated as a formal Product Owner approval source here.'", "what_it_does": "Superseded duplicate of the newer registry.", "reusable": "NO -- explicitly non-authoritative; do not resurrect."},
+    {"path": "comqutor_alpha/structure_engine/structure_extractor.py", "symbol": "_make_node, _display_label, _slug", "classification": "WRITE_ONLY_FOUNDATION", "runtime_evidence": "Called every run; node['id'] persisted into every structure_graph.json; never read back across runs by any code.", "what_it_does": "Deterministic, cross-run-stable id = slug(canonical_factor [+ ticker for one special-cased factor]).", "reusable": "YES -- the single best-positioned existing primitive for a v1 phi-ID; see q1/q13."},
+    {"path": "comqutor_alpha/graph_engine/activation_scorer_v2.py", "symbol": "score_alpha_activations_v2 and all helpers", "classification": "ACTIVE_PRODUCTION", "runtime_evidence": "Zero repository/DB imports -- confirmed by reading every import statement.", "what_it_does": "B4's pure, stateless, single-run activation scoring.", "reusable": "Would need a new, explicitly additive input parameter to ever consume history -- must never gain an implicit DB read (PRODUCT_DECISION_REQUIRED before any change)."},
+    {"path": "comqutor_alpha/graph_engine/alpha_level_classifier.py", "symbol": "classify_alpha_level", "classification": "ACTIVE_PRODUCTION", "runtime_evidence": "Pure function of activation_score + cap reason codes only.", "what_it_does": "B4's sole qualification authority (candidate/active/dominant/regime_level).", "reusable": "NOT_MEMORY_RELATED today; any future memory-based modulation would need to flow through this layer's existing reason-code vocabulary, never bypass it."},
+    {"path": "comqutor_alpha/conflict_engine/conflict_detector.py", "symbol": "detect_alpha_conflicts, _claim_semantic_fingerprint", "classification": "ACTIVE_PRODUCTION / NOT_MEMORY_RELATED", "runtime_evidence": "_claim_semantic_fingerprint deliberately includes run_id in its tuple -- the opposite of a cross-run identity.", "what_it_does": "Pure, single-run conflict arbitration; the 'fingerprint' here is a within-call duplicate/integrity check, not a memory concept.", "reusable": "No"},
+    {"path": "comqutor_alpha/research_lifecycle.py", "symbol": "build_research_request_fingerprint, research_runs.request_fingerprint", "classification": "ACTIVE_PRODUCTION / NOT_MEMORY_RELATED", "runtime_evidence": "Used for request-level cache/dedup (force_refresh, in-flight de-duplication).", "what_it_does": "Recognizes 'the same request' (ticker+date+config), not 'a recurring causal structure'.", "reusable": "No -- solves a different problem (avoiding duplicate paid runs), already correctly scoped for that."},
+    {"path": "comqutor_alpha/evaluation/cross_run.py, metrics.py", "symbol": "aggregate_cross_run_metrics, run CLI", "classification": "TEST_ONLY / NOT_MEMORY_RELATED", "runtime_evidence": "Offline QA harness CLI over a YAML manifest of GOLDEN fixture cases.", "what_it_does": "'Cross-run' here means across evaluation-harness runs of the SAME golden fixture set, never across real production research runs' Alpha outcomes.", "reusable": "Its evidence-comparison plumbing pattern (metrics.py) could be a useful STYLE reference for a future memory-accuracy report, but it operates on a wholly different data source."},
+    {"path": "docs/audit_artifacts/evidence_review_summary_v2.json + item2_blind_holdout5_*.csv/json", "symbol": "n/a (data files)", "classification": "DOC_ONLY", "runtime_evidence": "Zero production-code references; only tests/ import these paths.", "what_it_does": "Frozen human-reviewed QA sample -- an audit artifact, never a production feedback source.", "reusable": "Its rubric/schema (evidence_stance-style adjudication) is a reasonable reference pattern; the DATA itself was never wired to feed anything."},
+    {"path": "comqutor_alpha/storage/db/schema.py (all 9 tables)", "symbol": "schema_migrations, alpha_matches, structure_graphs, alpha_activations, entity_alpha_exposures, alpha_conflicts, research_runs, agent_outputs, research_run_progress", "classification": "SCHEMA_ONLY / WRITE_ONLY_FOUNDATION (per-table, see q7/q10)", "runtime_evidence": "All 9 tables are actively written every run; none is unused; none was clearly intended for Alpha Memory specifically (no phi/memory-named column anywhere).", "what_it_does": "Standard per-run persistence for every existing pipeline stage.", "reusable": "Yes, as the query TARGET for a future cross-run reader -- no new table required for a v1 memory feature that only needs to read what already exists."},
+    {"path": "frontend/src/components/AlphaCard.tsx, ConflictCard.tsx", "symbol": "n/a", "classification": "NOT_MEMORY_RELATED", "runtime_evidence": "Renders only the current run's own activation_level/entity_exposure/conflict fields; no history/memory/feedback-loop UI element exists.", "what_it_does": "Per-run product display.", "reusable": "Would need new UI surface entirely if a memory feature is ever built and Product wants it visible."}
+  ],
+
+  "dead_or_disconnected_code": [],
+  "reusable_foundations": [
+    {
+      "component": "structure_extractor.py's deterministic factor(+ticker) node id",
+      "why_reusable": "Already cross-run-stable by construction, already persisted in every run's structure_graph.json, requires zero change to the extraction pipeline to start reading it back cross-run.",
+      "gap_to_close": "Nothing reads it cross-run today; and its ticker-scoping is inconsistent across factors (see q1 caveat)."
+    },
+    {
+      "component": "entity_alpha_exposures / alpha_conflicts / alpha_activations DB tables",
+      "why_reusable": "Already contain every run's full outcome; a new read-side query (e.g. repository.get_entity_alpha_exposures_history(ticker, limit=N)) is additive and needs no schema migration.",
+      "gap_to_close": "No such cross-run query function exists yet."
+    },
+    {
+      "component": "comqutor_alpha.regression.authority_contract's GOLD/DOCUMENTED/PROVISIONAL/REJECTED vocabulary",
+      "why_reusable": "A precise, already-tested pattern for 'how authoritative is this classification, and may it affect production acceptance' -- directly analogous to any future 'how confident is this invalidation-event detection' question.",
+      "gap_to_close": "Not wired to anything memory-related today; would need a new, separate authority file if Product ever defines invalidation-event confidence tiers."
+    },
+    {
+      "component": "run_audit.json's additive-section convention",
+      "why_reusable": "Every prior QA sprint (activation_summary, conflict_summary, entity_exposure, ...) added a new top-level section without touching existing ones -- the established, safe pattern for exposing a future memory_summary.",
+      "gap_to_close": "No such section exists yet."
+    }
+  ],
+  "missing_capabilities": [
+    "M4 exposure history reused across runs",
+    "M5 persistent structure identity (as a deliberate, tracked feature)",
+    "M6 stable phi-ID",
+    "M7 cross-run causal-chain matching",
+    "M8 invalidation event detection",
+    "M9 invalidation event persistence",
+    "M10 non-execution event persistence",
+    "M11 reason-code lifecycle",
+    "M12 historical memory lookup",
+    "M13 memory-based activation modulation",
+    "M14 human-review feedback into future runs",
+    "M15 feedback-loop artifact/API visibility",
+    "M16 feedback-loop UI visibility"
+  ],
+
+  "product_decisions_required": [
+    "Whether a future stable structure identity should be ticker-scoped for EVERY canonical factor (today only 'Revenue Growth' is) -- changing this changes what 'the same structure' means across tickers.",
+    "Phi-similarity thresholds (how similar must two runs' evidence be to count as 'the same recurring causal chain') -- no existing authority defines this; must not be invented.",
+    "Memory weights (how much a historical signal should influence a new run's activation score, if at all) -- no existing authority defines this; activation_scorer_v2.py's frozen formula must not be silently extended.",
+    "Decay/expiry formulas for how long a persisted invalidation/non-execution event should remain influential -- no existing authority defines this.",
+    "Reason-code semantics for a NEW cross-run event type (e.g., what does 'this Alpha's thesis expired' mean precisely, and what reason code names it) -- no existing authority defines this; the existing 4 canonical B4 reason codes are for a different (within-run qualification) purpose and must not be silently repurposed.",
+    "Whether/how Evidence Review's human-adjudicated labels should ever be allowed to influence a future run (today they are explicitly audit-only) -- a genuine product-scope question, not an engineering one.",
+    "Which of the two readings of John's original 'feedback loop' complaint is meant (see docs/audit_artifacts/section_f_feedback_loop_spec_search_v0.1.3.json) -- this audit does not resolve that ambiguity, it only maps what exists today."
+  ],
+
+  "minimal_delta_plan": [
+    {
+      "missing_capability": "M5/M6 -- Persistent structure identity / stable phi-ID equivalent",
+      "existing_component_to_reuse": "structure_extractor.py's factor(+ticker) node id (already cross-run-stable, already persisted)",
+      "missing_piece": "A NEW, separate, read-only cross-run matcher that loads N runs' structure_graph.json for one ticker and groups nodes by existing id -- and a PRODUCT_DECISION on ticker-scoping consistency first.",
+      "files_likely_to_change": "A new module, e.g. comqutor_alpha/memory/structure_identity.py (read-only, offline); no change needed to structure_extractor.py itself.",
+      "changes_research_semantics": false,
+      "testable_offline": true,
+      "requires_provider_calls": false,
+      "requires_tradingagents_calls": false
+    },
+    {
+      "missing_capability": "M4/M12 -- Historical exposure/activation/conflict lookup",
+      "existing_component_to_reuse": "repository.py's existing per-run get_* functions and the entity_alpha_exposures/alpha_activations/alpha_conflicts tables",
+      "missing_piece": "New, explicitly additive, read-only repository functions (e.g. get_entity_alpha_exposures_history(ticker, limit)) -- purely additive, no schema migration.",
+      "files_likely_to_change": "comqutor_alpha/storage/db/repository.py (new functions only)",
+      "changes_research_semantics": false,
+      "testable_offline": true,
+      "requires_provider_calls": false,
+      "requires_tradingagents_calls": false
+    },
+    {
+      "missing_capability": "M8/M9 -- Invalidation event detection + persistence",
+      "existing_component_to_reuse": "invalidation_registry.py's existing per-Alpha condition text as the target vocabulary",
+      "missing_piece": "A detector that compares NEW evidence against the registry's condition text (needs a PRODUCT_DECISION on detection method -- keyword? LLM classification? similarity threshold?) plus a new persisted event record (schema/table does not exist).",
+      "files_likely_to_change": "A new module + a new DB table/migration (comqutor_alpha/storage/db/schema.py) -- genuinely new schema, not purely additive to an existing table.",
+      "changes_research_semantics": "Only if wired into scoring (a separate PRODUCT_DECISION); detection+persistence alone would not.",
+      "testable_offline": true,
+      "requires_provider_calls": "Only if the detection method chosen is LLM-based (a PRODUCT_DECISION not yet made) -- a keyword/rule-based detector would require none.",
+      "requires_tradingagents_calls": false
+    },
+    {
+      "missing_capability": "M13 -- Memory-based activation modulation",
+      "existing_component_to_reuse": "None -- this is the one capability that, by definition, must eventually touch activation_scorer_v2.py's frozen formula.",
+      "missing_piece": "An explicit, additive new input parameter/weight (PRODUCT_DECISION_REQUIRED on the formula itself) -- must never be added silently to the existing frozen weights.",
+      "files_likely_to_change": "comqutor_alpha/graph_engine/activation_scorer_v2.py -- HIGH RISK, frozen-formula file; must not proceed without an explicit, approved Product formula change.",
+      "changes_research_semantics": true,
+      "testable_offline": true,
+      "requires_provider_calls": false,
+      "requires_tradingagents_calls": false
+    },
+    {
+      "missing_capability": "M14 -- Human-review feedback into future runs",
+      "existing_component_to_reuse": "evidence_review_summary_v2.json's existing adjudication schema as a reference rubric",
+      "missing_piece": "A PRODUCT_DECISION on whether/how this should ever happen at all -- today it is explicitly audit-only by design, and changing that is a scope decision, not a coding gap.",
+      "files_likely_to_change": "Undetermined pending the Product decision.",
+      "changes_research_semantics": "Undetermined pending the Product decision.",
+      "testable_offline": true,
+      "requires_provider_calls": false,
+      "requires_tradingagents_calls": false
+    },
+    {
+      "missing_capability": "M15/M16 -- Feedback-loop artifact/API/UI visibility",
+      "existing_component_to_reuse": "run_audit.json's additive-section convention; AlphaCard.tsx/ConflictCard.tsx's existing per-alpha rendering pattern",
+      "missing_piece": "A new run_audit.json section (e.g. memory_summary) once any of the above exists to report on, plus new frontend components -- purely a visibility layer, has no meaning until at least one underlying capability above exists.",
+      "files_likely_to_change": "comqutor_alpha/api/routes_research.py (new additive section), new frontend components",
+      "changes_research_semantics": false,
+      "testable_offline": true,
+      "requires_provider_calls": false,
+      "requires_tradingagents_calls": false
+    }
+  ],
+
+  "safety_requirements_confirmed_not_violated": {
+    "b1_stance_definitions": "untouched (read-only audit)",
+    "b2_conflict_thresholds_admissibility": "untouched",
+    "b4_activation_thresholds": "untouched",
+    "alpha_taxonomy_semantics": "untouched",
+    "frozen_human_review_labels": "untouched",
+    "canonical_conflict_pairs": "untouched",
+    "no_thresholds_weights_or_reason_codes_invented": true
+  }
+}

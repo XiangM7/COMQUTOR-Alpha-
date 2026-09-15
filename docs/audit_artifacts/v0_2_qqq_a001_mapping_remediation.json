@@ -1,0 +1,252 @@
+{
+  "schema_version": "v0.2.qqq_a001_mapping_remediation.v1",
+  "task": "V0.2_REMEDIATION_STEP_7A_QQQ_A001_SEMANTIC_MAPPING_FALSE_POSITIVE",
+  "authorities_verified_before_editing": {
+    "gold_contract_json": {
+      "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+      "expected_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "actual_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "match": true
+    },
+    "evidence_trigger_matrix_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+      "expected_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "actual_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "match": true
+    },
+    "final_acceptance_json": {
+      "path": "docs/audit_artifacts/v0_2_final_acceptance_table.json",
+      "expected_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "actual_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "match": true
+    },
+    "acceptance_adjudication_json": {
+      "path": "docs/audit_artifacts/v0_2_acceptance_adjudication.json",
+      "expected_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "actual_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "match": true
+    },
+    "evidence_failure_analysis_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_failure_analysis.json",
+      "expected_sha256": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+      "actual_sha256": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+      "match": true
+    }
+  },
+  "original_defect": {
+    "ticker": "QQQ",
+    "rule": "QQQ-A001-RATE-CUT-CYCLE",
+    "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+    "trigger": "ABSENT",
+    "actual_level": "active",
+    "score": 66.4226,
+    "step4_result": "FAIL",
+    "root_cause_primary": "SYSTEM_ERROR",
+    "root_cause_secondary": "SEMANTIC_MAPPING_FALSE_POSITIVE",
+    "first_incorrect_stage": "MAPPING"
+  },
+  "root_cause_trace": {
+    "architecture": "matched_alpha is produced under 'Pure-LLM Alpha semantic authority' (comqutor_alpha/structure_engine/alpha_mapper.py:map_claim_to_alpha): the LLM semantic classifier (week2_llm.py 'alpha_classifier'/'alpha_classifier_batch' prompts) is the SOLE source of matched_alpha -- deterministic keyword/factor/direction scoring (_candidate_score/direction_score) is diagnostic/counterfactual only and never overrides or gates the LLM's decision.",
+    "prompt_analysis": "The alpha_classifier prompt instructs the LLM to select the Alpha whose thesis the Evidence 'most directly and substantively supports OR OPPOSES' -- by design, evidence opposing an Alpha's thesis is a valid reason to select that Alpha as matched_alpha, with direction/stance meant to be captured separately (evidence_stance.py, a shadow layer). The taxonomy context sent to the LLM (_alpha_taxonomy_request_block) is only {alpha_id, alpha_name, definition=core_thesis} -- it does NOT include the taxonomy's own invalidation_conditions field (already defined for every Alpha, e.g. A001's own ['inflation reaccelerates','rates rise','Fed stays restrictive'] in alpha_taxonomy_v1.yaml), so the LLM has no explicit contrastive signal for what would invalidate the Alpha's thesis.",
+    "downstream_amplification": "Activation Scorer v2's evidence_quality (weight 0.35) and agent_independence (weight 0.20) components are computed from matched claim VOLUME and distinct-agent BREADTH, with no net-directional weighting once a claim carries a given matched_alpha -- so a large, direction-mixed pool of topically-adjacent claims (many explicitly opposing the Alpha) is sufficient on its own to push the Alpha to an official 'active' level. Documented previously in docs/audit_artifacts/v0_2_acceptance_adjudication.json Case A.",
+    "confirmed_code_level_defect_investigated_but_not_the_chosen_fix_target": "alpha_mapper.py's own deterministic direction_score() has an inverted branch (`if relation == 'invalidation' and alpha_id in POSITIVE_ALPHA_IDS: return 1.0`) that treats explicit thesis-invalidation text as maximal positive direction alignment for that Alpha. This was investigated and reproduced (e.g. direction_score()==1.0 for '93% probability of NO Fed rate cuts...' against A001) but was NOT changed in this task: it feeds only the diagnostic/counterfactual deterministic layer, which never determines matched_alpha under Pure-LLM authority, so it is not the mapping-path stage that produced this defect and fixing it is out of this task's minimal-repair scope. Flagged here for a possible separate follow-up, not implemented.",
+    "why_not_stance_layer": "evidence_stance.py was investigated and is NOT the root cause of matched_alpha=A001 for these 66 claims -- it is a shadow layer explicitly documented as never feeding back into alpha_mapper scoring or admission. The Step-6 QQQ A001 evidence-review overlap check independently confirmed 0 overlap with the 34-row Alpha Match failure set, and this task did not find concrete production provenance requiring a stance-code change for the A001 defect specifically; stance behavior is left untouched per the task's explicit scope."
+  },
+  "false_positive_clusters": {
+    "explicit_no_cut_or_hike_probability_language": {
+      "count": 30,
+      "example": "72% probability of a Fed rate hike in 2026 (up +4.0pp over the week; $8.7M volume)",
+      "corrected_by_this_fix": true
+    },
+    "hawkish_repricing_language": {
+      "count": 5,
+      "example": "This is a distinctly hawkish repricing that pressures long-duration, high-multiple growth names.",
+      "corrected_by_this_fix": true
+    },
+    "rising_yields_language": {
+      "count": 1,
+      "example": "Rate-Hike Risk (Primary Headwind): ... rising yields directly pressure QQQ's long-duration holdings.",
+      "corrected_by_this_fix": true
+    },
+    "generic_rate_environment_no_explicit_direction": {
+      "count": 26,
+      "example": "Rate Sensitivity: As a growth-heavy fund, QQQ is sensitive to the interest-rate environment.",
+      "corrected_by_this_fix": false,
+      "note": "Topically about rates but without the explicit hike/no-cut/hawkish/rising-yield phrasing this fix targets; remains a candidate for a future, separate remediation (e.g. LLM prompt/context enrichment) since it cannot be safely, precisely vetoed by a narrow deterministic pattern without materially raising false-suppression risk."
+    },
+    "negated_or_conditional_easing_reference_not_corrected": {
+      "count": 4,
+      "example": "This is a key macro input: a resilient labor market reduces the case for Fed easing and raises the risk of further tightening.",
+      "corrected_by_this_fix": false,
+      "note": "Mentions 'easing'/'cut' vocabulary but in a negating or conditional-explanatory frame, not asserting an actual cut. Genuinely subtle; intentionally left uncorrected by this narrow, high-precision fix rather than risk suppressing a real positive claim via broader regex heuristics."
+    },
+    "cluster_total": 66
+  },
+  "files_changed": [
+    {
+      "path": "comqutor_alpha/structure_engine/claim_semantics.py",
+      "change_summary": "Expanded _RATE_CUT_INVALIDATION_PATTERN (A001's own existing, alpha-specific invalidation pattern) with real, persisted-evidence-driven phrasings: 'rate hike(s)', 'hike odds', 'probability of a hike', 'odds of a hike', 'hawkish', 'rising yields'/'yields rising|rose'. Added a new general, table-driven ALPHA_SPECIFIC_INVALIDATION_PATTERNS registry (currently {'A001': _RATE_CUT_INVALIDATION_PATTERN}) and alpha_specific_invalidation_matched(text, alpha_id) predicate, extensible to any future Alpha, never ticker- or run-ID-keyed."
+    },
+    {
+      "path": "comqutor_alpha/structure_engine/alpha_mapper.py",
+      "change_summary": "In map_claim_to_alpha, added a deterministic 'Alpha-Specific Invalidation Veto' applied to the FINAL matched_alpha (however produced -- LLM select or the rare deterministic-fallback path): when alpha_specific_invalidation_matched(text, matched_alpha) is True, matched_alpha/matched_alpha_name are reset to None and match_status to 'no_match', with a clear reason string. Added an additive-only diagnostic field 'alpha_specific_invalidation_override' (bool) to the result dict. No existing field's meaning changed; no ticker/run-ID conditional anywhere in the change."
+    }
+  ],
+  "production_change_summary": "A narrow, taxonomy-native, general (not QQQ- or run-ID-specific) deterministic veto: an Alpha can never be the final matched_alpha for a claim whose text explicitly asserts that Alpha's own core thesis is false, per that Alpha's own registered high-precision pattern. This is a deliberate, documented, narrow exception to the 'Pure-LLM Alpha semantic authority' invariant, scoped only to explicit taxonomy-native invalidation signals -- it does not reintroduce deterministic scoring as a general fallback authority, and is a no-op for every Alpha (today, every Alpha except A001) with no registered pattern.",
+  "no_ticker_specific_hack": true,
+  "no_run_id_hardcode": true,
+  "tests_added": {
+    "file": "tests/test_qqq_a001_mapping_remediation.py",
+    "sha256": "a1c3fed9815be23cdb4642dbfea8dd5598fb255f2e086e46e5678a3ae81da66f",
+    "test_count": 20,
+    "categories": {
+      "unit_level_predicate": 4,
+      "positive_a001_controls": 4,
+      "negative_controls_from_persisted_qqq_evidence": 6,
+      "boundary_controls_a003_a501": 4,
+      "collateral_damage_checks": 2
+    }
+  },
+  "offline_replay": {
+    "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+    "before_a001_mapped_count": 66,
+    "after_a001_mapped_count": 29,
+    "vetoed_count": 37,
+    "before_supports_alpha_shadow_count": 13,
+    "note": "No target N was set in advance and none was optimized for; 29/66 remain because they lack the explicit hike/no-cut/hawkish/rising-yield phrasing this narrow, evidence-driven fix targets (see false_positive_clusters). This is a replay of the deterministic veto applied to the SAME persisted claim text against the CURRENT code, given the LLM's original decision is fixed historical fact (no live LLM call was made in this task) -- it answers 'would this specific defect mechanism still let this claim stand as A001 today', not 'what would a fresh LLM call now decide'.",
+    "remaining_mapped_claim_ids": [
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:34",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:45",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:49",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:12",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:15",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:21",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:22",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:48",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:53",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:55",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:42",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:43",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:48",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:fundamental_agent:fundamentals_report:claim:67",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bull_researcher:investment_debate_state.bull_history:claim:7",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bull_researcher:investment_debate_state.bull_history:claim:15",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:4",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:8",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:13",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:15",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:49",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:bear_researcher:investment_debate_state.bear_history:claim:50",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:research_manager:investment_plan:claim:8",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:11",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:14",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:27",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:43",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:neutral_risk_analyst:risk_debate_state.neutral_history:claim:16"
+    ],
+    "vetoed_claim_ids_sample": [
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:3",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:4",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:5",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:29",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:30",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:38",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:46",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:48",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:56",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:sentiment_agent:sentiment_report:claim:58",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:4",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:5",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:11",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:14",
+      "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:17"
+    ],
+    "vetoed_claim_ids_total_count": 37
+  },
+  "test_results": {
+    "focused_tests": {
+      "file": "tests/test_qqq_a001_mapping_remediation.py",
+      "passed": 20,
+      "failed": 0
+    },
+    "relevant_subsystem_tests": {
+      "files": [
+        "tests/test_alpha_mapper.py",
+        "tests/test_alpha_mapper_llm_authority.py",
+        "tests/test_alpha_mapper_nvda_real_report.py",
+        "tests/test_ai_alpha_mapper_discrimination.py"
+      ],
+      "passed": 181,
+      "failed": 0
+    },
+    "broader_claim_semantics_dependent_tests": {
+      "files": [
+        "tests/test_activation_scorer.py",
+        "tests/test_b5_conflict_radar_evidence_ui.py",
+        "tests/test_conflict_detector.py",
+        "tests/test_evidence_stance_classifier.py",
+        "tests/test_evidence_eligibility_unification.py",
+        "tests/test_evidence_integrity.py",
+        "tests/test_msft_a304_negation_aware_extraction.py"
+      ],
+      "passed": 327,
+      "failed": 0
+    },
+    "full_backend_suite": {
+      "command": "COMQUTOR_DATABASE_URL=\"\" COMQUTOR_ENV=\"\" python -m pytest tests/ -m \"not integration\" -q",
+      "passed": 4171,
+      "failed": 27,
+      "errors": 3,
+      "skipped": 3,
+      "deselected": 47,
+      "subtests_passed": 69,
+      "duration_seconds": 742.37,
+      "pre_existing_unrelated_count": 25,
+      "pre_existing_unrelated_tests": [
+        "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+        "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+        "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded",
+        "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e42_head_unchanged_from_session_frozen_starting_commit",
+        "tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch",
+        "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence",
+        "tests/test_evidence_review_v2.py::test_case1_v2_summary_uses_exactly_one_200_row_current_review_source",
+        "tests/test_evidence_review_v2.py::test_case2_legacy_50_row_metrics_cannot_become_current_acceptance_metrics",
+        "tests/test_evidence_review_v2.py::test_case3_development_rereview_cannot_overwrite_current_acceptance",
+        "tests/test_evidence_review_v2.py::test_case4_raw_h5_metrics_recompute_deterministically",
+        "tests/test_evidence_review_v2.py::test_case5_raw_critical_reversal_remains_1",
+        "tests/test_evidence_review_v2.py::test_case6_adjudication_does_not_mutate_frozen_labels",
+        "tests/test_evidence_review_v2.py::test_case9_ambiguous_adjudication_remains_pending",
+        "tests/test_evidence_review_v2.py::test_case9b_ambiguous_direction_resolves_current_acceptance_to_pass_without_erasing_the_raw_reversal",
+        "tests/test_evidence_review_v2.py::test_case10_alpha_threshold_is_exactly_80_percent",
+        "tests/test_evidence_review_v2.py::test_case11_polarity_threshold_is_exactly_80_percent",
+        "tests/test_evidence_review_v2.py::test_case12_critical_reversal_target_is_exactly_0",
+        "tests/test_evidence_review_v2.py::test_case13_john_approved_cannot_become_true_without_explicit_approval_provenance",
+        "tests/test_evidence_review_v2.py::test_case14_human_review_performed_remains_false_for_independent_model_review",
+        "tests/test_evidence_review_v2_directional_eligibility.py::test_f_john_approved_cannot_become_true_automatically_even_when_all_mechanical_gates_pass",
+        "tests/test_evidence_review_v2_directional_eligibility.py::test_g_legacy_mixed_summary_metrics_are_not_read_as_current_acceptance",
+        "tests/test_evidence_review_v2_directional_eligibility.py::test_g_eligibility_contract_is_the_generic_source_used_by_the_build_script",
+        "tests/test_evidence_review_v2_directional_eligibility.py::test_a_ambiguous_row_is_preserved_in_audit_provenance (ERROR)",
+        "tests/test_evidence_review_v2_directional_eligibility.py::test_b_ambiguous_row_excluded_from_polarity_acceptance_denominator (ERROR)",
+        "tests/test_evidence_review_v2_directional_eligibility.py::test_c_ambiguous_row_excluded_from_critical_reversal_gate (ERROR)"
+      ],
+      "expected_collateral_frozen_hash_count": 5,
+      "expected_collateral_frozen_hash_tests": [
+        "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/structure_engine/alpha_mapper.py]",
+        "tests/test_high_value_unclassified_recovery.py::test_case10_production_semantic_artifacts_are_not_modified",
+        "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical",
+        "tests/test_step10_final_e2e_qa.py::test_production_semantic_files_unchanged_during_step10",
+        "tests/test_step11_provider_health_rerun.py::test_production_semantic_files_unchanged_during_step11"
+      ],
+      "new_unexplained_regressions_count": 0,
+      "new_unexplained_regressions": [],
+      "causality_verification_method": "Every failure/error was individually inspected. The 25 'pre-existing, unrelated' items were confirmed either by direct traceback inspection showing a KeyError/AssertionError sourced entirely from evidence_review_summary_v2.json's own on-disk content (a JSON data/schema gap -- e.g. missing 'raw_h5_metrics'/'directional_eligibility' keys -- utterly independent of any Python function this task touched), or (for test_replay_conflict_does_not_get_run_id_mismatch, the one case with a real code path) by an active causality test: re-running the exact same replay with the new alpha_specific_invalidation_matched veto monkey-patched to a permanent no-op (i.e. behaviorally identical to the pre-Step-7A code) -- admitted_count remained 0, proving this failure predates and is unrelated to this task's change. The 5 'expected collateral' items are the well-established, repeatedly-precedented FROZEN_HASHES/production-semantic-file-unchanged pattern already documented for this repository: any authorized edit to alpha_mapper.py is expected to trip every test pinning that file's exact SHA-256; per established precedent (see e.g. tests/test_msft_a102_a304_taxonomy_adjudication.py's own commit history of this exact situation), these are reported honestly and never silently fixed or re-pinned by the change's own author."
+    }
+  },
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_runs": 0,
+  "acceptance_recomputed": false,
+  "historical_qqq_acceptance_remains": "FAIL",
+  "new_fresh_qqq_validation_required": true
+}

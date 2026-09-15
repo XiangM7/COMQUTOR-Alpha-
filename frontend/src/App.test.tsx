@@ -22,7 +22,7 @@ describe("App routing", () => {
   it("redirects the root path to /research", async () => {
     vi.spyOn(client, "getReadiness").mockResolvedValue({
       status: 200,
-      result: { status: "ready", database: "ready", job_manager: "ready", real_execution: "disabled" },
+      result: { status: "ready", database: "ready", job_manager: "ready", real_execution: "disabled", live_semantic_pipeline: "not_applicable" },
     });
     vi.spyOn(client, "getResearchHistory").mockResolvedValue({ status: "ok", items: [], next_cursor: null });
 
@@ -128,7 +128,7 @@ describe("Recent runs routing", () => {
   function renderRecentRun(status: (typeof cases)[number][0]) {
     vi.spyOn(client, "getReadiness").mockResolvedValue({
       status: 200,
-      result: { status: "ready", database: "ready", job_manager: "ready", real_execution: "disabled" },
+      result: { status: "ready", database: "ready", job_manager: "ready", real_execution: "disabled", live_semantic_pipeline: "not_applicable" },
     });
     vi.spyOn(client, "getResearchHistory").mockResolvedValue({
       status: "ok",

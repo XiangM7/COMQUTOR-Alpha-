@@ -43,13 +43,21 @@ function makeEvaluation(overrides: Partial<ConflictCandidateEvaluation> = {}): C
 }
 
 describe("CandidateConflictCard", () => {
-  it("shows the Candidate conflict badge once B2 has been evaluated, and never Main conflict", () => {
+  it("shows the Potential conflict badge once B2 has been evaluated, and never Main conflict", () => {
     render(<CandidateConflictCard evaluation={makeEvaluation()} />);
-    expect(screen.getByText("Candidate conflict")).toBeInTheDocument();
+    expect(screen.getByText("Potential conflict")).toBeInTheDocument();
     expect(screen.queryByText(/main conflict/i)).not.toBeInTheDocument();
   });
 
-  it("shows 'Not evaluated' (never 'Candidate conflict') for a pair rejected before B2", () => {
+  it("uses plain product language, not B2 pipeline-stage vocabulary, in the default copy", () => {
+    render(<CandidateConflictCard evaluation={makeEvaluation()} />);
+    expect(
+      screen.getByText("Evidence is not yet strong enough for inclusion as the main structural conflict.")
+    ).toBeInTheDocument();
+    expect(screen.getByText(/\bB2\b/)).not.toBeVisible();
+  });
+
+  it("shows 'Not evaluated' (never 'Potential conflict') for a pair rejected before B2", () => {
     render(
       <CandidateConflictCard
         evaluation={makeEvaluation({
@@ -62,9 +70,13 @@ describe("CandidateConflictCard", () => {
       />
     );
     expect(screen.getByText("Not evaluated")).toBeInTheDocument();
-    expect(screen.queryByText("Candidate conflict")).not.toBeInTheDocument();
-    expect(screen.getByText(/never a candidate conflict with a B2 gate result/)).toBeInTheDocument();
+    expect(screen.queryByText("Potential conflict")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("This declared pair did not have enough evidence to be evaluated as a potential conflict.")
+    ).toBeInTheDocument();
     expect(screen.queryByText(/main conflict/i)).not.toBeInTheDocument();
+    // The raw rejection reason code is preserved, just relocated under Technical details.
+    expect(screen.getByText("MISSING_LEFT_EVIDENCE")).not.toBeVisible();
   });
 
   // Fail-closed coverage for task section 5, Case A (status=candidate,
@@ -74,7 +86,7 @@ describe("CandidateConflictCard", () => {
   // component should never actually receive -- ConflictRadarPage filters
   // outcome !== "admitted" before rendering it) still cannot produce a
   // Main Conflict badge. The mislabeling risk, if any, is strictly
-  // under-claiming ("Candidate conflict" for a genuinely-admitted pair),
+  // under-claiming ("Potential conflict" for a genuinely-admitted pair),
   // never over-claiming main-conflict status.
   it("never renders Main conflict even for a malformed evaluation claiming outcome=admitted", () => {
     render(
@@ -86,7 +98,7 @@ describe("CandidateConflictCard", () => {
       />
     );
     expect(screen.queryByText(/main conflict/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Candidate conflict")).toBeInTheDocument();
+    expect(screen.getByText("Potential conflict")).toBeInTheDocument();
   });
 
   it("keeps candidate evidence UI visible when the backend provides it", () => {
@@ -108,13 +120,23 @@ describe("CandidateConflictCard", () => {
         })}
       />
     );
-    expect(screen.getByText("No B2 evidence gaps identified.")).toBeInTheDocument();
+    expect(screen.getByText("No evidence gaps identified.")).toBeInTheDocument();
   });
 
-  it("renders the B2 admissibility diagnostic (scores, evidence counts, reason codes)", () => {
+  it("hides the B2 admissibility diagnostic (scores, evidence counts, reason codes) behind Technical details by default", () => {
     render(<CandidateConflictCard evaluation={makeEvaluation()} />);
-    expect(screen.getByText("65.0")).toBeInTheDocument();
-    expect(screen.getByText("60.0")).toBeInTheDocument();
-    expect(screen.getByText("INSUFFICIENT_BULL_SUPPORTING_EVIDENCE")).toBeInTheDocument();
+    expect(screen.getByText("65.0")).not.toBeVisible();
+    expect(screen.getByText("60.0")).not.toBeVisible();
+    expect(screen.getByText("INSUFFICIENT_BULL_SUPPORTING_EVIDENCE")).not.toBeVisible();
+  });
+
+  it("still exposes the exact raw admissibility diagnostic once Technical details is opened", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+    render(<CandidateConflictCard evaluation={makeEvaluation()} />);
+    await user.click(screen.getByText("Technical details"));
+    expect(screen.getByText("65.0")).toBeVisible();
+    expect(screen.getByText("60.0")).toBeVisible();
+    expect(screen.getByText("INSUFFICIENT_BULL_SUPPORTING_EVIDENCE")).toBeVisible();
   });
 });

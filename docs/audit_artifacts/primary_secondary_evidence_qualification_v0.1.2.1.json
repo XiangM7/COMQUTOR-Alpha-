@@ -1,0 +1,1949 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Primary vs Secondary Evidence Qualification (Step 6)",
+  "purpose": "John's requirement: separate Primary Evidence Agents (first-order TradingAgents research analysts) from Secondary/Decision agents (bull/bear debate, risk analysts, research manager, trader, portfolio manager) for ACTIVATION-INPUT ELIGIBILITY purposes only. Does not change B1's five stance labels, Alpha Mapper semantic meaning, or any B2/B4 threshold VALUE -- only which evidence inputs are eligible to feed those unchanged formulas.",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-08-27T20:43:09.889463+00:00",
+  "source_role_contract_version": "evidence_source_role_v1",
+  "new_module": "comqutor_alpha/graph_engine/evidence_source_role.py",
+  "wired_into": [
+    "comqutor_alpha/graph_engine/activation_scorer_v2.py (score_alpha_v2)",
+    "comqutor_alpha/conflict_engine/conflict_detector.py (_evaluate_candidate, via _qualify_and_filter_evidence)"
+  ],
+  "agent_role_mapping": {
+    "policy": "Default-deny: any agent name not explicitly registered is UNKNOWN, never PRIMARY.",
+    "primary_research_agents": [
+      "fundamental_agent",
+      "market_agent",
+      "news_agent",
+      "sentiment_agent"
+    ],
+    "secondary_decision_or_debate_agents": [
+      "aggressive_risk_analyst",
+      "bear_researcher",
+      "bull_researcher",
+      "conservative_risk_analyst",
+      "neutral_risk_analyst",
+      "portfolio_manager",
+      "research_manager",
+      "trader"
+    ],
+    "unknown_agents_observed_in_real_data": [],
+    "real_six_ticker_agent_claim_counts": {
+      "fundamental_agent": {
+        "role": "PRIMARY_RESEARCH",
+        "real_claim_count": 669
+      },
+      "market_agent": {
+        "role": "PRIMARY_RESEARCH",
+        "real_claim_count": 480
+      },
+      "sentiment_agent": {
+        "role": "PRIMARY_RESEARCH",
+        "real_claim_count": 457
+      },
+      "news_agent": {
+        "role": "PRIMARY_RESEARCH",
+        "real_claim_count": 399
+      },
+      "bear_researcher": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 817
+      },
+      "bull_researcher": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 607
+      },
+      "conservative_risk_analyst": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 411
+      },
+      "neutral_risk_analyst": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 407
+      },
+      "aggressive_risk_analyst": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 337
+      },
+      "research_manager": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 163
+      },
+      "portfolio_manager": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 108
+      },
+      "trader": {
+        "role": "SECONDARY_DECISION_OR_DEBATE",
+        "real_claim_count": 39
+      }
+    },
+    "source": "outputs/runs/_step5a_coverage_{nvda,qqq,msft,sndk,tsm,amd}/alpha_matches.json 'agent' field -- not assumed/invented (Step 6 Section 3)"
+  },
+  "reason_codes": {
+    "PRIMARY_QUALIFIED": "Primary agent's claim qualifies under existing rules, unchanged.",
+    "PRIMARY_EXISTING_RULE_REJECTED": "Reserved (unreachable at current integration point -- only already-eligibility-passing records reach qualification).",
+    "SECONDARY_NOT_INDEPENDENT_EVIDENCE": "Reserved for a future stricter independence check.",
+    "SECONDARY_NOT_TICKER_SPECIFIC": "Secondary-only group failed the existing, reused _is_ticker_specific gate.",
+    "SECONDARY_DUPLICATE_OF_PRIMARY": "Secondary member restates a fact already carried by a Primary member in the SAME Evidence Fact group -- ineligible, prevents double counting.",
+    "SECONDARY_CAUSALITY_UNPROVEN": "Secondary-only, ticker-specific, but relation/assertion_status did not clear the strong-causal bar (relation=='activation' AND assertion_status=='asserted') -- conservative default.",
+    "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": "Secondary-only, ticker-specific, AND cleared the strong-causal bar -- genuinely independent evidence, eligible.",
+    "UNKNOWN_SOURCE_ROLE": "Agent name not in either registry -- default-deny, never eligible."
+  },
+  "qualification_reason_counts_aggregate_across_six_tickers": {
+    "PRIMARY_QUALIFIED": 584,
+    "SECONDARY_CAUSALITY_UNPROVEN": 30,
+    "SECONDARY_DUPLICATE_OF_PRIMARY": 21,
+    "SECONDARY_NOT_TICKER_SPECIFIC": 504,
+    "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 65
+  },
+  "before_after_evidence_fact_counts": {
+    "definition": "unique_evidence_fact_count = number of canonical Evidence Fact groups (post-dedup) feeding EvidenceQuality/AgentIndependence/TickerSpecificity for one (ticker, alpha_id) pair. 'Before' = every group's members treated as eligible regardless of source role (pre-Step-6 behavior, computed via a no-op qualification passthrough over the SAME formula code -- not a separate reimplementation). 'After' = Step 6's role-based qualification applied.",
+    "total_across_six_tickers_all_alphas_with_any_evidence": {
+      "before": 1145,
+      "after": 623,
+      "relative_change_pct": -45.59
+    },
+    "per_ticker_totals": {
+      "NVDA": {
+        "unique_evidence_fact_count_before": 203,
+        "unique_evidence_fact_count_after": 111,
+        "delta": -92
+      },
+      "QQQ": {
+        "unique_evidence_fact_count_before": 171,
+        "unique_evidence_fact_count_after": 83,
+        "delta": -88
+      },
+      "MSFT": {
+        "unique_evidence_fact_count_before": 168,
+        "unique_evidence_fact_count_after": 78,
+        "delta": -90
+      },
+      "SNDK": {
+        "unique_evidence_fact_count_before": 178,
+        "unique_evidence_fact_count_after": 104,
+        "delta": -74
+      },
+      "TSM": {
+        "unique_evidence_fact_count_before": 227,
+        "unique_evidence_fact_count_after": 127,
+        "delta": -100
+      },
+      "AMD": {
+        "unique_evidence_fact_count_before": 198,
+        "unique_evidence_fact_count_after": 120,
+        "delta": -78
+      }
+    },
+    "per_ticker_per_alpha_detail": {
+      "NVDA": {
+        "A001": {
+          "raw_unique_evidence_fact_count": 2,
+          "qualified_unique_evidence_fact_count": 1,
+          "delta": -1,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A101": {
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 19,
+          "delta": -4,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 15,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 4
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A103": {
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 17,
+          "delta": -6,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 7,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A201": {
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 5,
+          "delta": 0,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 5
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A301": {
+          "raw_unique_evidence_fact_count": 49,
+          "qualified_unique_evidence_fact_count": 27,
+          "delta": -22,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 27,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 20,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A304": {
+          "raw_unique_evidence_fact_count": 53,
+          "qualified_unique_evidence_fact_count": 15,
+          "delta": -38,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 13,
+            "SECONDARY_CAUSALITY_UNPROVEN": 5,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 35,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A501": {
+          "raw_unique_evidence_fact_count": 6,
+          "qualified_unique_evidence_fact_count": 4,
+          "delta": -2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 4,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A601": {
+          "raw_unique_evidence_fact_count": 42,
+          "qualified_unique_evidence_fact_count": 23,
+          "delta": -19,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 21,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 19,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        }
+      },
+      "QQQ": {
+        "A001": {
+          "raw_unique_evidence_fact_count": 14,
+          "qualified_unique_evidence_fact_count": 8,
+          "delta": -6,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 9,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 6
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A003": {
+          "raw_unique_evidence_fact_count": 4,
+          "qualified_unique_evidence_fact_count": 4,
+          "delta": 0,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 5
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A101": {
+          "raw_unique_evidence_fact_count": 11,
+          "qualified_unique_evidence_fact_count": 5,
+          "delta": -6,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 5,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 4
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A102": {
+          "raw_unique_evidence_fact_count": 1,
+          "qualified_unique_evidence_fact_count": 1,
+          "delta": 0,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A103": {
+          "raw_unique_evidence_fact_count": 21,
+          "qualified_unique_evidence_fact_count": 13,
+          "delta": -8,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 13,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 8,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A201": {
+          "raw_unique_evidence_fact_count": 7,
+          "qualified_unique_evidence_fact_count": 4,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 4,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A301": {
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 7,
+          "delta": -16,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 7,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 15,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A304": {
+          "raw_unique_evidence_fact_count": 49,
+          "qualified_unique_evidence_fact_count": 16,
+          "delta": -33,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 15,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 31,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A501": {
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 2,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A601": {
+          "raw_unique_evidence_fact_count": 36,
+          "qualified_unique_evidence_fact_count": 23,
+          "delta": -13,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 22,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 14,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        }
+      },
+      "MSFT": {
+        "A001": {
+          "raw_unique_evidence_fact_count": 3,
+          "qualified_unique_evidence_fact_count": 2,
+          "delta": -1,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A101": {
+          "raw_unique_evidence_fact_count": 12,
+          "qualified_unique_evidence_fact_count": 5,
+          "delta": -7,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 8,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 7
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A102": {
+          "raw_unique_evidence_fact_count": 3,
+          "qualified_unique_evidence_fact_count": 2,
+          "delta": -1,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A103": {
+          "raw_unique_evidence_fact_count": 69,
+          "qualified_unique_evidence_fact_count": 31,
+          "delta": -38,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 35,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 38,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 4
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A201": {
+          "raw_unique_evidence_fact_count": 1,
+          "qualified_unique_evidence_fact_count": 1,
+          "delta": 0,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A301": {
+          "raw_unique_evidence_fact_count": 31,
+          "qualified_unique_evidence_fact_count": 13,
+          "delta": -18,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 4,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 20
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A304": {
+          "raw_unique_evidence_fact_count": 27,
+          "qualified_unique_evidence_fact_count": 10,
+          "delta": -17,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 9,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 17,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A501": {
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 2,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A601": {
+          "raw_unique_evidence_fact_count": 17,
+          "qualified_unique_evidence_fact_count": 12,
+          "delta": -5,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 12,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 5
+          },
+          "activation_score_before_unavailable": null
+        }
+      },
+      "SNDK": {
+        "A001": {
+          "raw_unique_evidence_fact_count": 8,
+          "qualified_unique_evidence_fact_count": 6,
+          "delta": -2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 6,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A101": {
+          "raw_unique_evidence_fact_count": 16,
+          "qualified_unique_evidence_fact_count": 11,
+          "delta": -5,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 11,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 4
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A103": {
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 2,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A201": {
+          "raw_unique_evidence_fact_count": 54,
+          "qualified_unique_evidence_fact_count": 28,
+          "delta": -26,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 27,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 26,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A301": {
+          "raw_unique_evidence_fact_count": 34,
+          "qualified_unique_evidence_fact_count": 19,
+          "delta": -15,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 18,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 15,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A304": {
+          "raw_unique_evidence_fact_count": 20,
+          "qualified_unique_evidence_fact_count": 11,
+          "delta": -9,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 12,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 9
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A501": {
+          "raw_unique_evidence_fact_count": 3,
+          "qualified_unique_evidence_fact_count": 1,
+          "delta": -2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A601": {
+          "raw_unique_evidence_fact_count": 38,
+          "qualified_unique_evidence_fact_count": 26,
+          "delta": -12,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 26,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 12
+          },
+          "activation_score_before_unavailable": null
+        }
+      },
+      "TSM": {
+        "A001": {
+          "raw_unique_evidence_fact_count": 7,
+          "qualified_unique_evidence_fact_count": 4,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A101": {
+          "raw_unique_evidence_fact_count": 39,
+          "qualified_unique_evidence_fact_count": 25,
+          "delta": -14,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 22,
+            "SECONDARY_CAUSALITY_UNPROVEN": 4,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 10,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 7
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A103": {
+          "raw_unique_evidence_fact_count": 9,
+          "qualified_unique_evidence_fact_count": 4,
+          "delta": -5,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 4,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 4
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A201": {
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 18,
+          "delta": -5,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 15,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 5,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A301": {
+          "raw_unique_evidence_fact_count": 46,
+          "qualified_unique_evidence_fact_count": 29,
+          "delta": -17,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 21,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 19,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 8
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A304": {
+          "raw_unique_evidence_fact_count": 55,
+          "qualified_unique_evidence_fact_count": 19,
+          "delta": -36,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 11,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 34,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 8
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A501": {
+          "raw_unique_evidence_fact_count": 6,
+          "qualified_unique_evidence_fact_count": 3,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 3,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 5
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A601": {
+          "raw_unique_evidence_fact_count": 42,
+          "qualified_unique_evidence_fact_count": 25,
+          "delta": -17,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 25,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 16
+          },
+          "activation_score_before_unavailable": null
+        }
+      },
+      "AMD": {
+        "A001": {
+          "raw_unique_evidence_fact_count": 15,
+          "qualified_unique_evidence_fact_count": 12,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 11,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A003": {
+          "raw_unique_evidence_fact_count": 2,
+          "qualified_unique_evidence_fact_count": 0,
+          "delta": -2,
+          "qualification_reason_counts": {
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A101": {
+          "raw_unique_evidence_fact_count": 29,
+          "qualified_unique_evidence_fact_count": 18,
+          "delta": -11,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 16,
+            "SECONDARY_CAUSALITY_UNPROVEN": 5,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 6,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A102": {
+          "raw_unique_evidence_fact_count": 14,
+          "qualified_unique_evidence_fact_count": 8,
+          "delta": -6,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 8,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 6
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A103": {
+          "raw_unique_evidence_fact_count": 17,
+          "qualified_unique_evidence_fact_count": 15,
+          "delta": -2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A201": {
+          "raw_unique_evidence_fact_count": 13,
+          "qualified_unique_evidence_fact_count": 10,
+          "delta": -3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 10,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A301": {
+          "raw_unique_evidence_fact_count": 33,
+          "qualified_unique_evidence_fact_count": 15,
+          "delta": -18,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 16,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A304": {
+          "raw_unique_evidence_fact_count": 38,
+          "qualified_unique_evidence_fact_count": 14,
+          "delta": -24,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 12,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 24,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A501": {
+          "raw_unique_evidence_fact_count": 4,
+          "qualified_unique_evidence_fact_count": 4,
+          "delta": 0,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        },
+        "A601": {
+          "raw_unique_evidence_fact_count": 33,
+          "qualified_unique_evidence_fact_count": 24,
+          "delta": -9,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 23,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 9,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          },
+          "activation_score_before_unavailable": null
+        }
+      }
+    }
+  },
+  "before_after_activation_score_and_status": {
+    "definition": "activation_score/status computed by score_alpha_v2 with 'before' = no-op qualification passthrough (byte-identical pre-Step-6 formula path) vs 'after' = real qualification, both over the same persisted alpha_matches.json, graph_edges=() (these directories hold no structure_graph.json -- local_structure_support is not exercised by this comparison; comparison isolates the evidence-fact/agent-qualification effect on the other five components + caps/regime-gate).",
+    "expected_direction": "LOWER or equal activation where Secondary agents were inflating support -- confirmed below. This is intended, not a regression; thresholds/formula are unchanged.",
+    "per_ticker_active_alpha_totals": {
+      "NVDA": {
+        "active_alphas_before": 6,
+        "active_alphas_after": 5
+      },
+      "QQQ": {
+        "active_alphas_before": 9,
+        "active_alphas_after": 7
+      },
+      "MSFT": {
+        "active_alphas_before": 6,
+        "active_alphas_after": 5
+      },
+      "SNDK": {
+        "active_alphas_before": 8,
+        "active_alphas_after": 5
+      },
+      "TSM": {
+        "active_alphas_before": 8,
+        "active_alphas_after": 8
+      },
+      "AMD": {
+        "active_alphas_before": 9,
+        "active_alphas_after": 8
+      }
+    },
+    "total_active_alphas_across_six_tickers": {
+      "before": 46,
+      "after": 38
+    },
+    "per_ticker_alphas_with_score_or_status_change": {
+      "NVDA": {
+        "A001": {
+          "activation_score_before": 20.8268,
+          "activation_score_after": 20.9532,
+          "status_before": "inactive",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 2,
+          "unique_evidence_count_after": 1,
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 1
+        },
+        "A101": {
+          "activation_score_before": 65.881,
+          "activation_score_after": 63.1785,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 23,
+          "unique_evidence_count_after": 19,
+          "distinct_agents_before": 7,
+          "distinct_agents_after": 5
+        },
+        "A103": {
+          "activation_score_before": 67.7194,
+          "activation_score_after": 62.3588,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 23,
+          "unique_evidence_count_after": 17,
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 5
+        },
+        "A301": {
+          "activation_score_before": 63.513,
+          "activation_score_after": 61.2689,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 49,
+          "unique_evidence_count_after": 27,
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 4
+        },
+        "A304": {
+          "activation_score_before": 63.251,
+          "activation_score_after": 50.0002,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 53,
+          "unique_evidence_count_after": 15,
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 5
+        },
+        "A501": {
+          "activation_score_before": 39.1013,
+          "activation_score_after": 20.113,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 6,
+          "unique_evidence_count_after": 4,
+          "distinct_agents_before": 3,
+          "distinct_agents_after": 1
+        },
+        "A601": {
+          "activation_score_before": 63.2974,
+          "activation_score_after": 61.6742,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 42,
+          "unique_evidence_count_after": 23,
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 5
+        }
+      },
+      "QQQ": {
+        "A001": {
+          "activation_score_before": 41.224,
+          "activation_score_after": 35.1146,
+          "status_before": "watch",
+          "status_after": "watch",
+          "unique_evidence_count_before": 14,
+          "unique_evidence_count_after": 8,
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 2
+        },
+        "A101": {
+          "activation_score_before": 53.3175,
+          "activation_score_after": 41.2668,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 11,
+          "unique_evidence_count_after": 5,
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 3
+        },
+        "A103": {
+          "activation_score_before": 66.46,
+          "activation_score_after": 64.6321,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 21,
+          "unique_evidence_count_after": 13,
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 4
+        },
+        "A201": {
+          "activation_score_before": 42.9207,
+          "activation_score_after": 27.9484,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 7,
+          "unique_evidence_count_after": 4,
+          "distinct_agents_before": 3,
+          "distinct_agents_after": 1
+        },
+        "A301": {
+          "activation_score_before": 64.0154,
+          "activation_score_after": 46.8375,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 23,
+          "unique_evidence_count_after": 7,
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 3
+        },
+        "A304": {
+          "activation_score_before": 62.4407,
+          "activation_score_after": 56.3576,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 49,
+          "unique_evidence_count_after": 16,
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 5
+        },
+        "A501": {
+          "activation_score_before": 43.1885,
+          "activation_score_after": 26.7752,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 5,
+          "unique_evidence_count_after": 2,
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 1
+        },
+        "A601": {
+          "activation_score_before": 66.2189,
+          "activation_score_after": 52.7741,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 36,
+          "unique_evidence_count_after": 23,
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 5
+        }
+      },
+      "MSFT": {
+        "A001": {
+          "activation_score_before": 20.1777,
+          "activation_score_after": 17.1778,
+          "status_before": "inactive",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 3,
+          "unique_evidence_count_after": 2,
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 1
+        },
+        "A101": {
+          "activation_score_before": 60.7861,
+          "activation_score_after": 41.5357,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 12,
+          "unique_evidence_count_after": 5,
+          "distinct_agents_before": 7,
+          "distinct_agents_after": 2
+        },
+        "A102": {
+          "activation_score_before": 29.5673,
+          "activation_score_after": 21.2423,
+          "status_before": "inactive",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 3,
+          "unique_evidence_count_after": 2,
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 1
+        },
+        "A103": {
+          "activation_score_before": 66.107,
+          "activation_score_after": 68.2389,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 69,
+          "unique_evidence_count_after": 31,
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 5
+        },
+        "A301": {
+          "activation_score_before": 60.0,
+          "activation_score_after": 54.2214,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 31,
+          "unique_evidence_count_after": 13,
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 2
+        },
+        "A304": {
+          "activation_score_before": 62.3611,
+          "activation_score_after": 47.8028,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 27,
+          "unique_evidence_count_after": 10,
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 4
+        },
+        "A501": {
+          "activation_score_before": 33.0903,
+          "activation_score_after": 15.9818,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 5,
+          "unique_evidence_count_after": 2,
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 1
+        },
+        "A601": {
+          "activation_score_before": 47.8401,
+          "activation_score_after": 44.2602,
+          "status_before": "watch",
+          "status_after": "watch",
+          "unique_evidence_count_before": 17,
+          "unique_evidence_count_after": 12,
+          "distinct_agents_before": 6,
+          "distinct_agents_after": 3
+        }
+      },
+      "SNDK": {
+        "A001": {
+          "activation_score_before": 30.1068,
+          "activation_score_after": 21.4818,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 8,
+          "unique_evidence_count_after": 6,
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 2
+        },
+        "A101": {
+          "activation_score_before": 52.4924,
+          "activation_score_after": 43.0649,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 16,
+          "unique_evidence_count_after": 11,
+          "distinct_agents_before": 6,
+          "distinct_agents_after": 2
+        },
+        "A103": {
+          "activation_score_before": 36.7433,
+          "activation_score_after": 25.1786,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 5,
+          "unique_evidence_count_after": 2,
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 2
+        },
+        "A201": {
+          "activation_score_before": 60.266,
+          "activation_score_after": 56.0598,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 54,
+          "unique_evidence_count_after": 28,
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 4
+        },
+        "A301": {
+          "activation_score_before": 59.3997,
+          "activation_score_after": 56.25,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 34,
+          "unique_evidence_count_after": 19,
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 4
+        },
+        "A304": {
+          "activation_score_before": 50.5094,
+          "activation_score_after": 42.8131,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 20,
+          "unique_evidence_count_after": 11,
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 2
+        },
+        "A501": {
+          "activation_score_before": 33.4194,
+          "activation_score_after": 23.0576,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 3,
+          "unique_evidence_count_after": 1,
+          "distinct_agents_before": 3,
+          "distinct_agents_after": 1
+        },
+        "A601": {
+          "activation_score_before": 53.6329,
+          "activation_score_after": 42.622,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 38,
+          "unique_evidence_count_after": 26,
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 4
+        }
+      },
+      "TSM": {
+        "A001": {
+          "activation_score_before": 34.9526,
+          "activation_score_after": 38.0057,
+          "status_before": "watch",
+          "status_after": "watch",
+          "unique_evidence_count_before": 7,
+          "unique_evidence_count_after": 4,
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 4
+        },
+        "A101": {
+          "activation_score_before": 66.9304,
+          "activation_score_after": 68.2022,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 39,
+          "unique_evidence_count_after": 25,
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 7
+        },
+        "A103": {
+          "activation_score_before": 54.0887,
+          "activation_score_after": 31.022,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 9,
+          "unique_evidence_count_after": 4,
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 1
+        },
+        "A201": {
+          "activation_score_before": 36.9522,
+          "activation_score_after": 36.0353,
+          "status_before": "watch",
+          "status_after": "watch",
+          "unique_evidence_count_before": 23,
+          "unique_evidence_count_after": 18,
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 4
+        },
+        "A301": {
+          "activation_score_before": 63.7304,
+          "activation_score_after": 61.7499,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 46,
+          "unique_evidence_count_after": 29,
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 7
+        },
+        "A304": {
+          "activation_score_before": 60.5698,
+          "activation_score_after": 62.8655,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 55,
+          "unique_evidence_count_after": 19,
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 7
+        },
+        "A501": {
+          "activation_score_before": 54.4206,
+          "activation_score_after": 31.3072,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 6,
+          "unique_evidence_count_after": 3,
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 1
+        },
+        "A601": {
+          "activation_score_before": 60.6663,
+          "activation_score_after": 48.5535,
+          "status_before": "active",
+          "status_after": "watch",
+          "unique_evidence_count_before": 42,
+          "unique_evidence_count_after": 25,
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 3
+        }
+      },
+      "AMD": {
+        "A001": {
+          "activation_score_before": 37.877,
+          "activation_score_after": 37.3104,
+          "status_before": "watch",
+          "status_after": "watch",
+          "unique_evidence_count_before": 15,
+          "unique_evidence_count_after": 12,
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 3
+        },
+        "A003": {
+          "activation_score_before": 18.8831,
+          "activation_score_after": 0.0,
+          "status_before": "inactive",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 2,
+          "unique_evidence_count_after": 0,
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 0
+        },
+        "A101": {
+          "activation_score_before": 64.5543,
+          "activation_score_after": 65.3589,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 29,
+          "unique_evidence_count_after": 18,
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 5
+        },
+        "A102": {
+          "activation_score_before": 40.1256,
+          "activation_score_after": 32.4528,
+          "status_before": "watch",
+          "status_after": "watch",
+          "unique_evidence_count_before": 14,
+          "unique_evidence_count_after": 8,
+          "distinct_agents_before": 6,
+          "distinct_agents_after": 2
+        },
+        "A103": {
+          "activation_score_before": 60.8926,
+          "activation_score_after": 58.4228,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 17,
+          "unique_evidence_count_after": 15,
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 4
+        },
+        "A201": {
+          "activation_score_before": 30.6392,
+          "activation_score_after": 29.8175,
+          "status_before": "watch",
+          "status_after": "inactive",
+          "unique_evidence_count_before": 13,
+          "unique_evidence_count_after": 10,
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 3
+        },
+        "A301": {
+          "activation_score_before": 59.8619,
+          "activation_score_after": 51.468,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 33,
+          "unique_evidence_count_after": 15,
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 3
+        },
+        "A304": {
+          "activation_score_before": 60.4262,
+          "activation_score_after": 63.1329,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 38,
+          "unique_evidence_count_after": 14,
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 5
+        },
+        "A601": {
+          "activation_score_before": 62.1637,
+          "activation_score_after": 63.4137,
+          "status_before": "active",
+          "status_after": "active",
+          "unique_evidence_count_before": 33,
+          "unique_evidence_count_after": 24,
+          "distinct_agents_before": 7,
+          "distinct_agents_after": 4
+        }
+      }
+    }
+  },
+  "b2_conflict_admissibility_impact": {
+    "definition": "detect_alpha_conflicts run per ticker over the real MVP-10 taxonomy's declared conflict pairs, 'before'/'after' via the same no-op-vs-real qualification technique (applied to both Activation's evidence gathering AND conflict_detector's own _qualify_and_filter_evidence, since B2 consumes activation_score + its own qualifying-claim pool). B2's own threshold VALUES (score>=50, >=2 unique supports_alpha facts, >=1 ticker-specific fact per side) are untouched -- see conflict_admissibility.ALPHA_SCORE_THRESHOLD/MIN_SUPPORTING_EVIDENCE_PER_SIDE/MIN_TICKER_SPECIFIC_SUPPORT_PER_SIDE, pinned unchanged by test_15 in tests/test_evidence_source_role_qualification.py.",
+    "total_admitted_conflicts_across_six_tickers": {
+      "before": 16,
+      "after": 8
+    },
+    "per_ticker": {
+      "NVDA": {
+        "admitted_conflicts_before": 3,
+        "admitted_conflicts_after": 3,
+        "candidate_pairs_evaluated": 6,
+        "main_conflict_before": "A101__A304",
+        "main_conflict_after": "A101__A304",
+        "admitted_conflict_ids_before": [
+          "A101__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "admitted_conflict_ids_after": [
+          "A101__A304",
+          "A301__A304",
+          "A304__A601"
+        ]
+      },
+      "QQQ": {
+        "admitted_conflicts_before": 3,
+        "admitted_conflicts_after": 1,
+        "candidate_pairs_evaluated": 6,
+        "main_conflict_before": "A301__A304",
+        "main_conflict_after": "A304__A601",
+        "admitted_conflict_ids_before": [
+          "A301__A304",
+          "A101__A304",
+          "A304__A601"
+        ],
+        "admitted_conflict_ids_after": [
+          "A304__A601"
+        ]
+      },
+      "MSFT": {
+        "admitted_conflicts_before": 1,
+        "admitted_conflicts_after": 0,
+        "candidate_pairs_evaluated": 6,
+        "main_conflict_before": "A101__A304",
+        "main_conflict_after": null,
+        "admitted_conflict_ids_before": [
+          "A101__A304"
+        ],
+        "admitted_conflict_ids_after": []
+      },
+      "SNDK": {
+        "admitted_conflicts_before": 3,
+        "admitted_conflicts_after": 0,
+        "candidate_pairs_evaluated": 6,
+        "main_conflict_before": "A101__A304",
+        "main_conflict_after": null,
+        "admitted_conflict_ids_before": [
+          "A101__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "admitted_conflict_ids_after": []
+      },
+      "TSM": {
+        "admitted_conflicts_before": 3,
+        "admitted_conflicts_after": 2,
+        "candidate_pairs_evaluated": 6,
+        "main_conflict_before": "A101__A304",
+        "main_conflict_after": "A101__A304",
+        "admitted_conflict_ids_before": [
+          "A101__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "admitted_conflict_ids_after": [
+          "A101__A304",
+          "A301__A304"
+        ]
+      },
+      "AMD": {
+        "admitted_conflicts_before": 3,
+        "admitted_conflicts_after": 2,
+        "candidate_pairs_evaluated": 6,
+        "main_conflict_before": "A101__A304",
+        "main_conflict_after": "A101__A304",
+        "admitted_conflict_ids_before": [
+          "A101__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "admitted_conflict_ids_after": [
+          "A101__A304",
+          "A304__A601"
+        ]
+      }
+    },
+    "notable_finding": "MSFT and SNDK: main_conflict was non-null before qualification (A101__A304 for both) and becomes null after -- every previously-admitted candidate pair on these two tickers relied on Secondary-agent-inflated evidence that no longer clears B2's unchanged >=2-unique-fact / ticker-specific bar on its own."
+  },
+  "duplication_inflation_audit": {
+    "definition": "Evidence Fact groups where a Secondary member restates a fact already carried by a Primary member in the same group -- SECONDARY_DUPLICATE_OF_PRIMARY. The group itself was already deduped to 1 fact by the existing canonical grouping (evidence_fact_index.group_evidence_candidates) both before and after Step 6; what changes is that the Secondary member's AGENT no longer counts toward agent_independence/cross_agent_confirmation for that group.",
+    "total_duplicate_groups_found_across_six_tickers": 13,
+    "examples": [
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A101",
+        "evidence_fact_group_id": "2f68eb4ea1efbd64fb05d198",
+        "primary_fact_source": [
+          "news_agent"
+        ],
+        "secondary_restatement_sources": [
+          "bull_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A301",
+        "evidence_fact_group_id": "2209a55051ee30a900912fa6",
+        "primary_fact_source": [
+          "fundamental_agent"
+        ],
+        "secondary_restatement_sources": [
+          "research_manager"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A601",
+        "evidence_fact_group_id": "94edbf56038f091e41e4d130",
+        "primary_fact_source": [
+          "sentiment_agent"
+        ],
+        "secondary_restatement_sources": [
+          "research_manager"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A103",
+        "evidence_fact_group_id": "5a865e307701c33f516b9723",
+        "primary_fact_source": [
+          "news_agent",
+          "news_agent"
+        ],
+        "secondary_restatement_sources": [
+          "aggressive_risk_analyst",
+          "bull_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A301",
+        "evidence_fact_group_id": "327e226c0ee6ab55809c600b",
+        "primary_fact_source": [
+          "fundamental_agent",
+          "fundamental_agent"
+        ],
+        "secondary_restatement_sources": [
+          "aggressive_risk_analyst",
+          "bull_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A601",
+        "evidence_fact_group_id": "1a3642970b4f03bd4f1086c9",
+        "primary_fact_source": [
+          "news_agent",
+          "news_agent"
+        ],
+        "secondary_restatement_sources": [
+          "conservative_risk_analyst",
+          "conservative_risk_analyst"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A101",
+        "evidence_fact_group_id": "d576767c13727831aaa2af9b",
+        "primary_fact_source": [
+          "news_agent",
+          "news_agent"
+        ],
+        "secondary_restatement_sources": [
+          "bear_researcher",
+          "bull_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A103",
+        "evidence_fact_group_id": "0129433e11f921269b566970",
+        "primary_fact_source": [
+          "news_agent",
+          "sentiment_agent"
+        ],
+        "secondary_restatement_sources": [
+          "bull_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A301",
+        "evidence_fact_group_id": "2c34634560a56455ce9c0faf",
+        "primary_fact_source": [
+          "fundamental_agent",
+          "fundamental_agent"
+        ],
+        "secondary_restatement_sources": [
+          "aggressive_risk_analyst",
+          "bear_researcher",
+          "neutral_risk_analyst",
+          "research_manager"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A304",
+        "evidence_fact_group_id": "8e0ad51668490f63992c51f8",
+        "primary_fact_source": [
+          "news_agent"
+        ],
+        "secondary_restatement_sources": [
+          "bull_researcher",
+          "bull_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A101",
+        "evidence_fact_group_id": "2d6d6a6793cda270cd0340ca",
+        "primary_fact_source": [
+          "news_agent",
+          "news_agent",
+          "sentiment_agent",
+          "sentiment_agent",
+          "sentiment_agent"
+        ],
+        "secondary_restatement_sources": [
+          "bear_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A103",
+        "evidence_fact_group_id": "797489e613363819ae2da75a",
+        "primary_fact_source": [
+          "news_agent"
+        ],
+        "secondary_restatement_sources": [
+          "bear_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A102",
+        "evidence_fact_group_id": "91d75f0a6920f2c2ef3f8a8a",
+        "primary_fact_source": [
+          "news_agent"
+        ],
+        "secondary_restatement_sources": [
+          "bull_researcher"
+        ],
+        "before_count_contribution": 1,
+        "after_count_contribution": 1,
+        "note": "Group already deduped to 1 fact both before/after; the Secondary restatement's independent-agent contribution to agent_independence/cross_agent_confirmation is what's excluded now, not the group count itself."
+      }
+    ]
+  },
+  "agent_independence_effect": {
+    "definition": "distinct_supporting_agents / cross_agent_confirmed_groups before vs after, for every (ticker, alpha_id) where either changed -- this is the specific mechanism John flagged (a Secondary agent restating a Primary fact within the same group inflating 'cross-agent confirmation').",
+    "tickers_with_any_change": [
+      "NVDA",
+      "QQQ",
+      "MSFT",
+      "SNDK",
+      "TSM",
+      "AMD"
+    ],
+    "detail": {
+      "NVDA": {
+        "A001": {
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A101": {
+          "distinct_agents_before": 7,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A103": {
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 2,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A301": {
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A304": {
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A501": {
+          "distinct_agents_before": 3,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A601": {
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        }
+      },
+      "QQQ": {
+        "A001": {
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A101": {
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 3,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A103": {
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 2,
+          "cross_agent_confirmed_groups_after": 1
+        },
+        "A201": {
+          "distinct_agents_before": 3,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A301": {
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 3,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A304": {
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 1
+        },
+        "A501": {
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A601": {
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 2,
+          "cross_agent_confirmed_groups_after": 0
+        }
+      },
+      "MSFT": {
+        "A001": {
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A101": {
+          "distinct_agents_before": 7,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A102": {
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A103": {
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 4,
+          "cross_agent_confirmed_groups_after": 4
+        },
+        "A301": {
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 3,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A304": {
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A501": {
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A601": {
+          "distinct_agents_before": 6,
+          "distinct_agents_after": 3,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        }
+      },
+      "SNDK": {
+        "A001": {
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A101": {
+          "distinct_agents_before": 6,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A103": {
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A201": {
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A301": {
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A304": {
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A501": {
+          "distinct_agents_before": 3,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A601": {
+          "distinct_agents_before": 9,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        }
+      },
+      "TSM": {
+        "A001": {
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A101": {
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 7,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 1
+        },
+        "A103": {
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A201": {
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A301": {
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 7,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A304": {
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 7,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A501": {
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 1,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A601": {
+          "distinct_agents_before": 10,
+          "distinct_agents_after": 3,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        }
+      },
+      "AMD": {
+        "A001": {
+          "distinct_agents_before": 4,
+          "distinct_agents_after": 3,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A003": {
+          "distinct_agents_before": 2,
+          "distinct_agents_after": 0,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A101": {
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A102": {
+          "distinct_agents_before": 6,
+          "distinct_agents_after": 2,
+          "cross_agent_confirmed_groups_before": 1,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A201": {
+          "distinct_agents_before": 5,
+          "distinct_agents_after": 3,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A301": {
+          "distinct_agents_before": 8,
+          "distinct_agents_after": 3,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A304": {
+          "distinct_agents_before": 11,
+          "distinct_agents_after": 5,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        },
+        "A601": {
+          "distinct_agents_before": 7,
+          "distinct_agents_after": 4,
+          "cross_agent_confirmed_groups_before": 0,
+          "cross_agent_confirmed_groups_after": 0
+        }
+      }
+    }
+  },
+  "invariants_verified": {
+    "b1_five_stance_labels_unchanged": true,
+    "b1_stance_never_reinterpreted_by_role": true,
+    "alpha_mapper_semantic_prompt_unchanged": true,
+    "alpha_taxonomy_unchanged": true,
+    "conflict_ontology_unchanged": true,
+    "regression_labels_unchanged": true,
+    "b2_threshold_values_unchanged": {
+      "ALPHA_SCORE_THRESHOLD": 50.0,
+      "MIN_SUPPORTING_EVIDENCE_PER_SIDE": 2,
+      "MIN_TICKER_SPECIFIC_SUPPORT_PER_SIDE": 1
+    },
+    "b4_activation_cap_and_regime_gate_constants_unchanged": {
+      "AGENT_COVERAGE_DENOMINATOR": 3,
+      "CROSS_AGENT_CONFIRMATION_DENOMINATOR": 2
+    },
+    "role_never_used_as_score_multiplier": true,
+    "unknown_agents_default_deny_never_primary": true,
+    "primary_evidence_remains_auditable": "evidence_fact_groups[*].members_source_role_detail exposes every member (Primary and Secondary, eligible and ineligible) -- nothing deleted.",
+    "evidence_artifact_schema_backwards_readable": "Only additive fields (source_agent/source_role/activation_eligible/activation_qualification_reason) -- no existing key removed or renamed."
+  },
+  "tests": {
+    "new_test_file": "tests/test_evidence_source_role_qualification.py",
+    "new_test_count": 16,
+    "targeted_regression_suite_pass_count": "227/227 (activation_scorer_v2, conflict_detector, conflict_admissibility, evidence_fact_index, evidence_source_role)",
+    "pre_existing_test_fixtures_updated": [
+      "tests/test_activation_scorer_v2.py (synthetic agent_x/y/z/w/a-d/p-r/one-four/analyst_one-three/solo_agent names replaced with real PRIMARY_RESEARCH agent names market_agent/fundamental_agent/sentiment_agent/news_agent so oracle/mutation tests exercise realistic agent identities under the new role registry -- no assertion values changed)",
+      "tests/test_conflict_admissibility.py (_raw_match's default synthetic per-claim agent name replaced with a real PRIMARY_RESEARCH agent -- only the 2 tests exercising the full detect_alpha_conflicts pipeline via _raw_match were affected; the file's other ~200 tests call evaluate_conflict_admissibility directly and never passed through source-role qualification)"
+    ],
+    "full_suite_regression_check": "in progress at time of this report -- see qa_closure_index.json's step_6 block for final status once complete"
+  },
+  "non_goals_confirmed": {
+    "no_six_ticker_production_rerun": true,
+    "no_alpha_mapper_tuning": true,
+    "no_taxonomy_change": true,
+    "no_amd_a201_precision_fix": true,
+    "no_forced_high_value_none_recovery": true,
+    "no_conflict_ontology_or_regression_label_change": true,
+    "no_alpha_level_display_normalization": true,
+    "no_evidence_review_summary_v2": true,
+    "no_john_approved_flag_set": true,
+    "no_commit": true,
+    "no_push": true
+  },
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false,
+  "regression_fixes_applied_during_step_6": {
+    "activation_scorer_v2_direction_consistency_gating_bug": "score_alpha_v2 direction_consistency contribution was not gated by has_qualifying_evidence (only recency was) -- pre-existing latent bug, never triggered before Step 6 because an empty raw evidence pool almost always implied an empty direction-evidence pool too. Step 6 qualification can now make qualified evidence empty while raw direction evidence still exists (all of it Secondary/ineligible), which surfaced the bug via the components-sum-equals-activation-score invariant test. Fixed by gating direction_consistency the same way recency already was -- a minimal, correctness-only fix, not a formula/weight change.",
+    "w5_demo_fixtures_technical_agent_rename": "scripts/w5_demo_fixtures.py used agent=\"technical_agent\" for the 4th NVDA/QQQ demo claim, which never matched DEMO_SELECTED_ANALYSTS (market/news/fundamentals/sentiment) -- a pre-existing naming inconsistency, latent until source-role qualification made agent identity matter. Renamed to \"market_agent\" (the analyst it was actually meant to represent).",
+    "test_fixture_synthetic_agent_names_updated": "tests/test_conflict_evidence_fact_integration.py and tests/test_b2_admissibility_integration.py used synthetic/typo agent names (\"fundamentals_agent\", \"second_bear_agent\", \"bear_researcher\" used where a Primary-equivalent placeholder was intended, per-claim f\"agent_{claim_id}\") predating the source-role concept -- updated to real registered agent names, same pattern as tests/test_activation_scorer_v2.py and tests/test_conflict_admissibility.py (see tests.pre_existing_test_fixtures_updated).",
+    "week4_persistence_evidence_qualification_field_not_yet_persisted": "The new evidence_qualification diagnostic field on the conflict dict is dropped by the Week4 DB whitelist layer (comqutor_alpha/storage/db/week4_persistence.py explicitly whitelists every persisted field; unknown additive keys are not copied through). Documented, known gap -- not a data-loss bug since nothing currently reads this field back from the DB. Three tests (tests/test_week4_persistence.py x2, tests/test_b2_admissibility_integration.py x1) updated to strip evidence_qualification before their API-vs-DB-reconstruction equality comparisons, following this codebase's established convention for other additive fields (e.g. bull_evidence/bear_evidence)."
+  },
+  "pre_existing_failures_confirmed_unrelated_to_step_6": {
+    "method": "For each candidate failure, checked raw_supporting_claim_count / raw_unique_evidence_fact_count (computed by _gather_qualifying_evidence and _group_evidence, both fully UNMODIFIED by Step 6) directly -- when this raw, pre-qualification count is already 0, Step 6 qualification cannot be the cause (it only filters evidence that already qualifies).",
+    "tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch": "Architecture Replay of run e434f80b-e4d0-4b09-9471-d84532659de5 produces raw_supporting_claim_count=0 for all 10 alphas even under pre-Step-6 logic -- a replay-pipeline issue (likely stemming from Step 5A's week2_llm.py task/prompt rework changing the replay-cache lookup shape), not Step 6.",
+    "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence": "Same root cause, confirmed identically for NVDA via Architecture Replay -- raw_unique_evidence_fact_count=0 for all 10 alphas pre-qualification.",
+    "tests/test_w5_demo_seed.py (2 tests)": "Already documented as pre-existing in project memory since 2026-08-14 (\"frozen baseline / golden fixture predates later B1/B2 changes\"), well before this session. All four raw source agents in this fixture (news_agent/fundamental_agent/sentiment_agent/market_agent) are PRIMARY_RESEARCH and qualify unconditionally under Step 6, so Step 6 cannot be the cause of this fixture's main_conflict arbitration outcome.",
+    "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e42_head_unchanged_from_session_frozen_starting_commit": "Hardcodes an old session's git HEAD; fails identically regardless of what code changes any segment makes, per established project memory precedent."
+  },
+  "expected_hash_drift_not_reverted": {
+    "test": "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical",
+    "file": "comqutor_alpha/conflict_engine/conflict_detector.py",
+    "reason": "This FROZEN_HASHES guard pins conflict_detector.py to detect any B1-B4 logic change during the (unrelated) PD-017/MSFT-A102-A304 taxonomy-adjudication task. Step 6 legitimately, explicitly-authorizedly modified conflict_detector.py (source-role qualification wiring) -- this correctly, expectedly trips the pinned hash. Per established project precedent (comqutor-frozen-contracts memory, third documented instance): reported honestly here, guard left untouched, not reverted or silently re-pinned."
+  },
+  "full_suite_final_confirmation": {
+    "result": "3761 passed / 6 failed / 47 skipped / 69 subtests passed in 673.67s (0:11:13)",
+    "failures": [
+      "tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch",
+      "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence",
+      "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e42_head_unchanged_from_session_frozen_starting_commit",
+      "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical",
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ],
+    "note": "Exact match, name-for-name, with pre_existing_failures_confirmed_unrelated_to_step_6 and expected_hash_drift_not_reverted above -- both determined BEFORE this confirmation run completed, via direct root-cause inspection (raw_supporting_claim_count already 0 pre-qualification; frozen-HEAD-pin/frozen-hash guards independently explained). Zero failures attributable to Step 6."
+  }
+}

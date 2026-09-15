@@ -150,4 +150,48 @@ describe("ResearchForm", () => {
     render(<ResearchForm isSubmitting onSubmit={vi.fn()} />);
     expect(screen.getByRole("button", { name: /submitting/i })).toBeDisabled();
   });
+
+  // Live-research readiness guard (operational safety fix): the two fresh
+  // live runs (NVDA/SNDK) that recorded zero Alpha activation happened
+  // because a live submission was allowed through while Week2's semantic
+  // pipeline was not ready. The form must never let that happen again.
+  it("disables Start research and shows the reason when disabledReason is set", () => {
+    render(
+      <ResearchForm
+        isSubmitting={false}
+        onSubmit={vi.fn()}
+        disabledReason="Live semantic pipeline not ready. Live research was not started."
+      />
+    );
+    expect(screen.getByRole("button", { name: /start research/i })).toBeDisabled();
+    expect(screen.getByText(/live semantic pipeline not ready/i)).toBeInTheDocument();
+  });
+
+  it("does not call onSubmit when disabledReason is set and the form is submitted", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <ResearchForm
+        isSubmitting={false}
+        onSubmit={onSubmit}
+        disabledReason="Live semantic pipeline not ready."
+      />
+    );
+    await user.type(screen.getByLabelText(/ticker/i), "NVDA");
+    // The button itself is disabled (already covered above); this proves
+    // the handler's own early-return guard also blocks a submit that
+    // somehow still reaches it (e.g. pressing Enter in a text field).
+    const form = screen.getByRole("button", { name: /start research/i }).closest("form")!;
+    form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("re-enables the submit button once disabledReason clears", () => {
+    const { rerender } = render(
+      <ResearchForm isSubmitting={false} onSubmit={vi.fn()} disabledReason="Live semantic pipeline not ready." />
+    );
+    expect(screen.getByRole("button", { name: /start research/i })).toBeDisabled();
+    rerender(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} disabledReason={null} />);
+    expect(screen.getByRole("button", { name: /start research/i })).not.toBeDisabled();
+  });
 });

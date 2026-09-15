@@ -18,12 +18,202 @@ from comqutor_alpha.llm_runtime.session import SemanticCallTrace, SemanticRuntim
 from comqutor_alpha.storage.file_store import append_jsonl_record, validate_artifact_path
 
 ERROR_LOG_ARTIFACT_PATH = "error_logs/week2_llm_errors.jsonl"
-DEFAULT_TIMEOUT_SECONDS = 15.0
+# Step 5A runtime-capacity repair, single-claim semantics (docs/audit_artifacts/
+# week2_runtime_capacity_root_cause_v0.1.2.1.json + week2_single_claim_
+# concurrency_benchmark_v0.1.2.1.json). Multi-claim batching was evaluated
+# and DEFERRED for v0.1.2.1: real controlled-Provider testing against
+# DeepSeek deepseek-v4-flash showed multi-item structured completions are
+# unreliable regardless of batch size (40 -> 22.9% coverage; 15 -> repeated
+# >60s timeouts even with a fresh client per call, ruling out a connection-
+# reuse bug) or timeout (45s, then 60s). A raw single-claim call, by
+# contrast, was consistently fast and reliable (~1.8-2s measured directly,
+# matching Step-4's own per-claim p50 ~1.87s/p90 ~3.47s for the old
+# unbatched alpha_classifier task). 20.0s is roughly 6x that observed p50 and
+# comfortably above the observed p90 -- enough headroom for real variance
+# without retaining a timeout sized for the multi-claim case that no longer
+# applies. Still overridable per-run via the existing
+# COMQUTOR_WEEK2_LLM_TIMEOUT_SECONDS env var (bounded 1-120s in
+# build_server_week2_llm_gateway) -- no provider-specific hardcoding.
+DEFAULT_TIMEOUT_SECONDS = 20.0
 DEFAULT_MAX_RETRIES = 1
-DEFAULT_MAX_CALLS = 32
 MAX_SERVER_RETRIES = 2
-MAX_SERVER_CALLS = 100
 MAX_PROMPT_PAYLOAD_CHARS = 60_000
+
+# v0.1.3 Provider Final-Orphan Reliability Fix, Phase 1 (Option C from
+# docs/audit_artifacts/v0_1_3_provider_final_orphan_reliability_audit.md):
+# evidence_stance_classifier alone contributed 74.4% of all final semantic
+# orphans across the six authoritative runs with a 97.3% orphan-rate-given-
+# failure and only a 2.7% retry recovery rate -- by far the dominant
+# component-specific reliability gap identified by that audit. This is a
+# component-SPECIFIC retry-count increase, not a global one: alpha_classifier
+# (72.2% recovery, already well-served by 1 retry) and structure_extractor
+# (orphans are schema/validation-driven, not attempt-count-driven) keep the
+# shared DEFAULT_MAX_RETRIES unchanged. Bounded to MAX_SERVER_RETRIES -- this
+# is not a new ceiling, it reaches the existing one exactly.
+EVIDENCE_STANCE_CLASSIFIER_MAX_RETRIES = min(2, MAX_SERVER_RETRIES)
+
+
+def _resolve_task_max_retries(task: str, default_max_retries: int) -> int:
+    """Component-specific retry-policy resolution. Every task except
+    ``evidence_stance_classifier`` keeps the shared Gateway-level
+    ``default_max_retries`` (``self.max_retries``) exactly as before this
+    change -- this function changes behavior for exactly one task.
+
+    An explicit ``default_max_retries == 0`` is respected as-is, never
+    raised, even for ``evidence_stance_classifier``: zero is an intentional
+    "no retries at all" signal (used, for example, by narrow unit tests that
+    construct a Gateway with ``max_retries=0`` to isolate single-attempt
+    behavior unrelated to retry-count itself) -- the component-specific
+    reliability increase only ever *adds* attempt opportunities on top of a
+    non-zero configured policy, never overrides an explicit opt-out."""
+    if task == "evidence_stance_classifier" and default_max_retries > 0:
+        return max(default_max_retries, EVIDENCE_STANCE_CLASSIFIER_MAX_RETRIES)
+    return default_max_retries
+
+# --- Workload-aware call budget (Step 5A Section 8, single-claim semantics) -
+# DEFAULT_MAX_CALLS was a fixed 32 with no documented rationale (see the
+# root-cause artifact, questions 5-7: classified HISTORICAL_TEST_DEFAULT,
+# not evidenced as safety/cost/rate-limit protection). Six real Step-4
+# production runs proved this more than 25x too small for a single real
+# ticker under single-claim semantics (up to 949 claims observed, one
+# Provider call per claim). This replaces it with an explicit, auditable
+# formula rather than an arbitrary large number (never "set MAX_CALLS =
+# 5000"): one call per expected claim, plus the OTHER existing tasks
+# (claim_batch_enrichment/structure_extractor/evidence_stance_classifier,
+# unaffected by this repair and still sharing this one global budget), plus
+# one full bounded retry pass over that entire total (retries reserve a
+# separate budget unit each, per Week2LLMGateway._reserve_call/
+# invoke_json_with_trace) and a small fixed safety margin.
+MAX_EXPECTED_CLAIMS_PER_TICKER = 1200  # observed max = 949 (TSM, Step 4); ~25% headroom, rounded
+ENRICHMENT_BATCH_SIZE = 64  # structured_output_adapter.LLM_CLAIM_BATCH_SIZE, duplicated here only as a documented budget-formula input, not re-exported
+OTHER_TASK_CALL_ALLOWANCE = 15  # structure_extractor + evidence_stance_classifier + misc (observed <= 11/ticker across all six Step-4 runs)
+CALL_BUDGET_SAFETY_MARGIN = 10
+
+
+def compute_workload_aware_max_calls(
+    *,
+    eligible_claim_count: int = MAX_EXPECTED_CLAIMS_PER_TICKER,
+    enrichment_batch_size: int = ENRICHMENT_BATCH_SIZE,
+    other_task_allowance: int = OTHER_TASK_CALL_ALLOWANCE,
+    max_retries: int = DEFAULT_MAX_RETRIES,
+    safety_margin: int = CALL_BUDGET_SAFETY_MARGIN,
+) -> dict[str, int]:
+    """Deterministic, auditable per-run call-budget formula (Step 5A
+    Section 3/8, single-claim semantics): one Provider call per eligible
+    claim (no batching), plus the other existing tasks, plus one full
+    bounded retry pass over that total, plus a small fixed margin.
+
+    base_call_budget = eligible_claim_count + ceil(eligible_claim_count / enrichment_batch_size) + other_task_allowance
+    retry_budget = base_call_budget * max_retries
+    total_call_budget = base_call_budget + retry_budget + safety_margin
+
+    Returns the full breakdown (not just the total) so callers can persist
+    eligible_claim_count/base_call_budget/retry_budget/total_call_budget
+    exactly, per Section 3. Every input is a named, documented constant or
+    the real observed claim count -- never a blind round number. Still
+    finite and bounded (the caller additionally clamps against
+    MAX_SERVER_CALLS).
+    """
+    eligible_claim_count = int(eligible_claim_count)
+    base_call_budget = (
+        eligible_claim_count
+        + -(-eligible_claim_count // int(enrichment_batch_size))  # ceil division, no float rounding
+        + int(other_task_allowance)
+    )
+    retry_budget = base_call_budget * max(0, int(max_retries))
+    total_call_budget = base_call_budget + retry_budget + int(safety_margin)
+    return {
+        "eligible_claim_count": eligible_claim_count,
+        "base_call_budget": base_call_budget,
+        "retry_budget": retry_budget,
+        "total_call_budget": total_call_budget,
+    }
+
+
+DEFAULT_MAX_CALLS = compute_workload_aware_max_calls()["total_call_budget"]  # = (1200+19+15) + 1234*1 + 10 = 2478
+# Hard ceiling an operator's COMQUTOR_WEEK2_LLM_MAX_CALLS override can reach.
+# Raised from 100 (itself unexplained, same origin as the old
+# DEFAULT_MAX_CALLS=32) to comfortably exceed the new workload-aware default
+# with real headroom for a ticker above MAX_EXPECTED_CLAIMS_PER_TICKER,
+# while remaining a firm, documented, bounded ceiling -- never unbounded.
+MAX_SERVER_CALLS = 3000
+
+# --- Controlled single-claim concurrency (Step 5A Section 4/10) ------------
+# Batching is DEFERRED for v0.1.2.1 (see DEFAULT_TIMEOUT_SECONDS's own
+# comment above); execution capacity instead comes from running independent
+# single-claim calls concurrently. Week2LLMGateway's call-budget counter
+# (_reserve_call) and error logger (_log) are both lock-protected
+# (Section 5), so concurrent workers cannot overshoot the shared budget or
+# corrupt the shared error log. Selected from a real 3-way benchmark
+# (concurrency 1 vs 4 vs 8) against persisted QQQ claims -- see
+# docs/audit_artifacts/week2_single_claim_concurrency_benchmark_v0.1.2.1.json
+# for the measured evidence this default is based on.
+DEFAULT_ALPHA_CLASSIFIER_CONCURRENCY = 4
+MAX_ALPHA_CLASSIFIER_CONCURRENCY = 8
+
+
+def resolve_alpha_classifier_concurrency() -> int:
+    return _bounded_int(
+        os.environ.get("COMQUTOR_WEEK2_LLM_CONCURRENCY"),
+        DEFAULT_ALPHA_CLASSIFIER_CONCURRENCY,
+        1,
+        MAX_ALPHA_CLASSIFIER_CONCURRENCY,
+    )
+
+
+# --- Bounded concurrency for evidence_stance_classifier (John Requirement B,
+# Phase B2 Slice 2A) ---------------------------------------------------------
+# evidence_stance_classifier's batches are independent (proven in
+# docs/audit_artifacts/v0_2_evidence_stance_concurrency_optimization.json --
+# each batch reads only the immutable taxonomy and writes onto its own
+# already-unique candidate dicts, mutating no state any other batch reads or
+# writes) and were, before this change, the single largest fully-serial
+# latency contributor identified by the B1 cost/latency audit (median ~2671s
+# span across the seven analyzed runs). A dedicated offline scheduling
+# simulation using persisted per-call durations from all seven runs (see the
+# same artifact) showed diminishing returns past concurrency=4 relative to
+# the Provider-pressure increase of running more of this task's much
+# heavier, longer-running batch calls (mean ~48.6s, up to 135s observed)
+# simultaneously -- so this reuses the SAME proven default already selected
+# for alpha_classifier via a real controlled benchmark, rather than picking
+# a new, unvalidated-under-real-Provider-load ceiling. A separate env var
+# (not COMQUTOR_WEEK2_LLM_CONCURRENCY) keeps the two tasks independently
+# tunable, since they have very different per-call cost/duration profiles.
+DEFAULT_EVIDENCE_STANCE_CONCURRENCY = 4
+MAX_EVIDENCE_STANCE_CONCURRENCY = 8
+
+
+def resolve_evidence_stance_concurrency() -> int:
+    return _bounded_int(
+        os.environ.get("COMQUTOR_WEEK2_STANCE_CONCURRENCY"),
+        DEFAULT_EVIDENCE_STANCE_CONCURRENCY,
+        1,
+        MAX_EVIDENCE_STANCE_CONCURRENCY,
+    )
+
+
+# --- Bounded concurrency for structured_adapter (John Requirement B, Phase
+# B2 Slice 2B) ---------------------------------------------------------------
+# Every persisted run analyzed (all seven) shows exactly 4 LLM-eligible raw
+# agent outputs per ticker (market_agent, sentiment_agent, news_agent,
+# fundamental_agent) -- confirmed from source, not assumed -- so 4 concurrent
+# workers already give every independent agent-report its own lane; a higher
+# cap (6/8) was simulated and produces IDENTICAL stage makespan to 4 in every
+# one of the seven runs (there is nothing left to parallelize past the 4th
+# lane). This mirrors both alpha_classifier's and evidence_stance_classifier's
+# own already-proven default, rather than introducing a new, unvalidated
+# ceiling for a task with an even smaller, more tightly-bounded fan-out.
+DEFAULT_STRUCTURED_ADAPTER_CONCURRENCY = 4
+MAX_STRUCTURED_ADAPTER_CONCURRENCY = 8
+
+
+def resolve_structured_adapter_concurrency() -> int:
+    return _bounded_int(
+        os.environ.get("COMQUTOR_WEEK2_ADAPTER_CONCURRENCY"),
+        DEFAULT_STRUCTURED_ADAPTER_CONCURRENCY,
+        1,
+        MAX_STRUCTURED_ADAPTER_CONCURRENCY,
+    )
 # Phase 1B.1 only: invoke_prebuilt_json_prompt's own bound, sized for the
 # Shadow prompt's shape (frozen instructions + full verbatim untrusted
 # report + candidate-segment hints, which the Shadow contract's own
@@ -80,6 +270,41 @@ _TASK_INSTRUCTIONS = {
         "object with an edges array. Each edge must contain source_factor, target_factor, edge_type "
         "(causal, supportive, or conflicting), assertion_status (asserted, conditional, negated, "
         "mixed, or unknown), and confidence. Return an empty array when no relation is stated."
+    ),
+    # Step 5A execution-capacity repair: batched sibling of "alpha_classifier"
+    # with the IDENTICAL semantic decision criteria -- only the input/output
+    # envelope changes (one claim per call -> many claims per call, matched
+    # by claim_id). This is not a semantic prompt change; every classification
+    # rule below is copied verbatim from "alpha_classifier" v3.
+    "alpha_classifier_batch": (
+        "Classify EACH claim in the supplied claims array independently against the FULL supplied "
+        "Alpha taxonomy (alpha_taxonomy) -- every canonical Alpha is a legitimate candidate for "
+        "every claim, none has been pre-filtered or pre-admitted by any other program logic. For "
+        "each claim, select the single Alpha whose core thesis and causal/economic mechanism that "
+        "claim's Evidence most directly and substantively supports or opposes -- never an Alpha "
+        "that merely shares surface words or a topic with the Evidence. Several Alphas can share "
+        "overlapping keywords (for example AI capex, GPU demand, or data center activity can each "
+        "relate to more than one Alpha); when more than one Alpha looks plausible for a given claim, "
+        "compare them directly against each other and select whichever one's own stated mechanism "
+        "that claim's Evidence engages with more closely and substantively -- never by keyword "
+        "overlap alone, and never by declining to choose merely because the comparison is close. A "
+        "difficult or close classification is still a classification task: decision=none is not a "
+        "way to avoid choosing between two or more plausible Alphas for that claim. For example, if "
+        "both A101 and A103 seem plausible for a claim, deciding decision=none because 'both are "
+        "plausible' is WRONG; if A103 is the closer, more substantive fit, the required answer for "
+        "that claim is decision=select with selected_alpha_id=A103. Use decision=none with "
+        "selected_alpha_id=null for a claim only when no single canonical Alpha materially fits that "
+        "claim's Evidence at all -- when the Evidence does not substantively engage any Alpha's "
+        "thesis, or is generic or background market commentary with no specific Alpha-relevant "
+        "mechanism. Judge each claim only from its own claim, its own evidence, and each Alpha's own "
+        "definition -- never let one claim's content influence another claim's classification. "
+        "Return one JSON object with a decisions array containing EXACTLY one item per input claim, "
+        "matched by claim_id. Each item must contain claim_id (copied verbatim from the input claim "
+        "with that id), decision set to select or none, and selected_alpha_id set to exactly one "
+        "alpha_id from the supplied alpha_taxonomy when decision is select, or null when decision is "
+        "none. Never omit a claim_id and never invent one that was not supplied. Never invent an "
+        "Alpha ID that is not in the supplied taxonomy, never select more than one Alpha for a "
+        "claim, and never provide a trading decision or recommendation."
     ),
     "evidence_stance_classifier": (
         "For each item, classify only the Evidence's stance toward its own target_alpha_id -- never "
@@ -163,6 +388,19 @@ _TASK_RUNTIME_METADATA = {
         "prompt_version": "week2.alpha_classifier.v3",
         "input_schema_version": "week2.alpha_classifier.input.v2",
         "output_schema_version": "week2.alpha_classifier.output.v2",
+        "taxonomy_version": "alpha_taxonomy_v1",
+    },
+    "alpha_classifier_batch": {
+        "semantic_task": "alpha_classifier_batch",
+        # v1: Step 5A execution-capacity repair. Same semantic decision
+        # contract as alpha_classifier v3 (see the instruction text above),
+        # restructured for batched claims -> decisions I/O. A distinct task
+        # name/prompt identity (never silently merged with the unbatched
+        # "alpha_classifier" task's own cache/replay identity) because the
+        # request/response shape genuinely differs, per ADR-005.
+        "prompt_version": "week2.alpha_classifier_batch.v1",
+        "input_schema_version": "week2.alpha_classifier_batch.input.v1",
+        "output_schema_version": "week2.alpha_classifier_batch.output.v1",
         "taxonomy_version": "alpha_taxonomy_v1",
     },
     "structure_extractor": {
@@ -438,18 +676,25 @@ class Week2LLMGateway:
             return True
 
     def _log(self, task: str, error_code: str, attempt: int) -> None:
-        append_jsonl_record(
-            self.run_id,
-            self.error_log_artifact_path,
-            {
-                "run_id": self.run_id,
-                "task": task,
-                "error_code": error_code,
-                "attempt": attempt,
-                "created_at": _now(),
-            },
-            output_root=self.output_root,
-        )
+        # Step 5A Section 5 (controlled single-claim concurrency): append_
+        # jsonl_record is a read-whole-file-then-rewrite operation, not a
+        # true atomic append -- concurrent unlocked writers could silently
+        # lose each other's lines. Serialized under the same lock
+        # _reserve_call already uses, so concurrent workers' error-log
+        # entries are never dropped.
+        with self._lock:
+            append_jsonl_record(
+                self.run_id,
+                self.error_log_artifact_path,
+                {
+                    "run_id": self.run_id,
+                    "task": task,
+                    "error_code": error_code,
+                    "attempt": attempt,
+                    "created_at": _now(),
+                },
+                output_root=self.output_root,
+            )
 
     def _log_budget_exhausted_once(self, task: str, attempt: int) -> None:
         with self._lock:
@@ -580,7 +825,8 @@ class Week2LLMGateway:
         last_parsed: dict[str, Any] | None = None
         last_provider_status = "provider_error"
         last_error_code: str | None = "WEEK2_LLM_PROVIDER_ERROR"
-        for attempt in range(1, self.max_retries + 2):
+        effective_max_retries = _resolve_task_max_retries(task, self.max_retries)
+        for attempt in range(1, effective_max_retries + 2):
             if not self._reserve_call():
                 self._log_budget_exhausted_once(task, attempt)
                 if provider_attempts == 0:
@@ -618,9 +864,20 @@ class Week2LLMGateway:
             except (TypeError, ValueError, KeyError):
                 last_provider_status = "success"
                 last_error_code = "WEEK2_LLM_VALIDATION_FAILED"
-            except Exception:
+            except Exception as exc:
+                # Step 5A Section 9: sub-classify transient provider failures
+                # (rate limit / transport) so BUDGET_EXHAUSTED-adjacent
+                # symptoms are auditable per-cause instead of one generic
+                # bucket. Retry COUNT/bound behavior is unchanged -- this
+                # only refines the recorded error_code.
                 last_provider_status = "provider_error"
-                last_error_code = "WEEK2_LLM_PROVIDER_ERROR"
+                transient_reason = _transient_provider_error_reason(exc)
+                if transient_reason == "HTTP_429":
+                    last_error_code = "WEEK2_LLM_RATE_LIMIT"
+                elif transient_reason is not None:
+                    last_error_code = "WEEK2_LLM_TRANSPORT_ERROR"
+                else:
+                    last_error_code = "WEEK2_LLM_PROVIDER_ERROR"
             self._log(task, last_error_code, attempt)
 
         return Week2LLMInvocation(

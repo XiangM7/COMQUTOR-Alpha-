@@ -1,0 +1,106 @@
+{
+  "schema_version": "evidence_review_summary.v2",
+  "review_version": "blind_holdout_5",
+  "review_source": "independent_model_review",
+  "human_review_performed": false,
+  "review_source_note": "This review was performed by an independent model reviewer, session-isolated from the production Alpha Mapper/B1 inference (separate client construction, no shared session state) -- NOT a human reviewer. Never described as human-reviewed/human-verified/manually reviewed. 'Independent blind review' is the accurate user-facing phrase.",
+  "reviewed_count": 200,
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-08-27T22:28:14.177590+00:00",
+  "sample_integrity": {
+    "check_1_labels_created_before_system_comparison": {
+      "status": "PROVEN",
+      "evidence": "item2_blind_holdout5_internal_report.md Section 3: review was completed and frozen BEFORE any H5 system output was generated (production Alpha Mapper/B1 inference started only after the review snapshot was written). Frozen review file SHA-256 matches the working-file SHA-256 at freeze time (byte-identical)."
+    },
+    "check_2_labels_not_altered_after_system_results_visible": {
+      "status": "PROVEN",
+      "evidence": "item2_blind_holdout5_review_frozen.csv re-hashed now: 900ee50b9cfb8f5b3653ebcd30e41403d2af6665fc72cc7f4af49493d9d92ed1 -- byte-identical to the value recorded at freeze time in the internal report, and confirmed untouched by `git status` (not listed as modified) across every subsequent Step 4-7 session segment."
+    },
+    "check_3_holdout_sample_membership_fixed": {
+      "status": "PROVEN",
+      "evidence": "item2_blind_holdout5_frozen.csv re-hashed now: a2f8e0bd6fa1229f3e5876673be751e54155c750e524899cde9dd523142e17b7 -- byte-identical to the value recorded at freeze time; sample_id set holdout5-001..holdout5-200, no duplicates, unchanged."
+    },
+    "check_4_reviewed_count_remained_200": {
+      "status": "PROVEN",
+      "evidence": "Recomputation (this task, independent) counted exactly 200 rows in item2_blind_holdout5_review_frozen.csv."
+    },
+    "check_5_blind_review_invariant": {
+      "status": "PROVEN",
+      "evidence": "0/200 invariant violations: human_material_alpha_fit=true <=> human_expected_alpha_id is a real Alpha ID <=> human_polarity is one of the five legal B1 classes; false <=> NONE <=> blank. Independently re-verified in this task."
+    },
+    "overall_status": "REVIEW_INTEGRITY_PROVEN"
+  },
+  "acceptance_thresholds": {
+    "alpha_accuracy_threshold_percent": 80.0,
+    "polarity_accuracy_threshold_percent": 80.0,
+    "critical_reversal_target": 0,
+    "note": "80% supersedes the earlier development-phase 75% Alpha threshold recorded inside the legacy item2_blind_holdout5_metrics.json/evidence_review_summary.json -- v2 uses only John's current 80%/80%/0 criteria."
+  },
+  "acceptance_results": {
+    "alpha_accuracy_result": {
+      "numerator": 166,
+      "denominator": 200,
+      "value": 0.83,
+      "percentage": 83.0,
+      "threshold": 0.8,
+      "status": "PASS"
+    },
+    "polarity_accuracy_result": {
+      "numerator": 52,
+      "denominator": 61,
+      "value": 0.8524590163934426,
+      "percentage": 85.25,
+      "threshold": 0.8,
+      "status": "PASS"
+    },
+    "critical_reversal_result": {
+      "value": 0,
+      "required": 0,
+      "status": "PASS"
+    },
+    "john_approved": true,
+    "overall_acceptance": "PASS"
+  },
+  "john_approval_status": {
+    "john_approved": true,
+    "john_approval_status": "APPROVED",
+    "approval_status": "APPROVED",
+    "approved_by": "John",
+    "approved_at": "2026-09-01T01:02:54+00:00",
+    "approval_provenance": "Approved directly by John, interactively, in this session -- explicit confirmation, not inferred from mechanical metric passage.",
+    "note": "Mechanical metric passage (alpha/polarity/reversal) was never, by itself, sufficient grounds to set this true -- it required John's own explicit approval, now recorded above."
+  },
+  "historical_sources": {
+    "docs/audit_artifacts/evidence_review_summary.json": {
+      "classification": "HISTORICAL_MIXED_SOURCE",
+      "use_for_current_acceptance": false,
+      "reason": "Mixes the legacy 50-row independent_llm_provisional review (top-level fields: reviewed_count=50, alpha_match_accuracy=0.72, review_source=independent_llm_provisional), a deterministic_v1_baseline comparison, an item2_200row_development_re_review block, AND a nested v0.1.2_qa_summary containing the CURRENT Blind Holdout #5 200-row result -- with a stale top-level critical_support_opposition_reversal_count=0 that CONTRADICTS the true H5 finding of 1 (item2_blind_holdout5_metrics.json). Preserved unmodified as historical audit evidence; never used as a current acceptance source again."
+    },
+    "docs/audit_artifacts/item2_blind_holdout5_metrics.json": {
+      "classification": "AUTHORITATIVE_RAW_H5_SOURCE",
+      "use_for_current_acceptance": true,
+      "note": "Cross-checked exactly by this task's independent recomputation. Raw H5 metrics (200-row alpha match, 62-row polarity denominator, critical reversal count/sample_ids, error buckets) live here, not in this clean acceptance file."
+    },
+    "docs/audit_artifacts/item2_blind_holdout5_internal_report.md": {
+      "classification": "AUTHORITATIVE_INTEGRITY_AND_PROVENANCE_RECORD",
+      "use_for_current_acceptance": true,
+      "note": "The critical support/opposition reversal adjudication (holdout5-005, outcome BOTH_REASONABLE_AMBIGUOUS) and the full directional-eligibility per-row derivation live here, not in this clean acceptance file."
+    },
+    "docs/audit_artifacts/item2_blind_holdout1_through_4_and_100_141v2_families": {
+      "classification": "HISTORICAL_DEVELOPMENT_REREVIEW",
+      "use_for_current_acceptance": false,
+      "reason": "Earlier development-phase holdout iterations (1-4, the 100-row and 141-row v2 pools) preceding the current frozen Blind Holdout #5 -- preserved as historical audit evidence, never the current acceptance source."
+    }
+  },
+  "production_semantic_code_changed": false,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false,
+  "full_suite_final_confirmation": {
+    "result": "3814 passed / 6 failed / 47 skipped / 69 subtests passed in 670.40s (0:11:10)",
+    "baseline_comparison": "Step 7 baseline was 3788 passed / 6 failed / 47 skipped. Step 8 adds exactly +26 passed (tests/test_evidence_review_v2.py); the same 6 failures recur unchanged.",
+    "note": "Zero failures attributable to Step 8."
+  }
+}

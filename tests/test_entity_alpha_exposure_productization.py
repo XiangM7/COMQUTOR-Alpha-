@@ -497,6 +497,72 @@ def test_api_old_run_returns_explicit_unavailable_without_500(tmp_path):
     assert result["records"] == []
 
 
+# ---------------------------------------------------------------------------
+# v0.1.3 QA Closure, Section B: one current authority for seed status. A
+# frozen per-run artifact's own historical status (whatever schema/value was
+# true when that run executed) must never be the only status the API
+# exposes -- `current_seed_status` always additionally reflects the LIVE
+# seed file's current per-ticker status, so a stale historical artifact can
+# never be mistaken for the current production approval state.
+# ---------------------------------------------------------------------------
+
+
+def _write_run_with_exposure_artifact(tmp_path, run_id, ticker, artifact):
+    run_dir = tmp_path / run_id
+    run_dir.mkdir()
+    (run_dir / "metadata.json").write_text(
+        json.dumps({"run_id": run_id, "ticker": ticker}), encoding="utf-8"
+    )
+    save_json_record(run_id, "entity_alpha_exposures.json", artifact, output_root=tmp_path)
+
+
+def test_current_seed_status_reflects_live_seed_for_approved_ticker(tmp_path):
+    # NVDA is approved_gating in the live production seed
+    # (entity_alpha_exposure_seed_v0.1.yaml) -- current_seed_status must say
+    # so regardless of the frozen artifact's own (here, deliberately stale
+    # pre-approval "draft") historical status.
+    _write_run_with_exposure_artifact(
+        tmp_path,
+        "nvda-old-run",
+        "NVDA",
+        {
+            "schema_version": "entity_alpha_exposure.run.v1",
+            "run_id": "nvda-old-run",
+            "ticker": "NVDA",
+            "records": [{"alpha_id": "A101", "seed_approval_status": "draft"}],
+        },
+    )
+    result = get_entity_alpha_exposures("nvda-old-run", output_root=tmp_path)
+    assert result["status"] == "ready"
+    assert result["current_seed_status"] == "approved_gating"
+    # The frozen artifact's own historical record is untouched/preserved.
+    assert result["records"][0]["seed_approval_status"] == "draft"
+
+
+def test_current_seed_status_is_draft_shadow_for_unconfigured_ticker(tmp_path):
+    _write_run_with_exposure_artifact(
+        tmp_path,
+        "googl-run",
+        "GOOGL",
+        {
+            "schema_version": "entity_alpha_exposure.run.v1",
+            "run_id": "googl-run",
+            "ticker": "GOOGL",
+            "records": [{"alpha_id": "A101"}],
+        },
+    )
+    result = get_entity_alpha_exposures("googl-run", output_root=tmp_path)
+    assert result["current_seed_status"] == "draft_shadow"
+
+
+def test_current_seed_status_none_when_ticker_missing(tmp_path):
+    run_dir = tmp_path / "no-ticker-run"
+    run_dir.mkdir()
+    (run_dir / "metadata.json").write_text(json.dumps({"run_id": "no-ticker-run"}), encoding="utf-8")
+    result = get_entity_alpha_exposures("no-ticker-run", output_root=tmp_path)
+    assert result["current_seed_status"] is None
+
+
 def test_off_mode_writes_no_records_and_removes_transient_fact_summary():
     bundle = _bundle_with_value(0.4)
     result, artifact = compute_run_entity_alpha_exposures(

@@ -7,7 +7,6 @@ import { ResearchForm } from "../components/ResearchForm";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
 import { EmptyState } from "../components/EmptyState";
-import { ReplayAllPanel } from "../components/ReplayAllPanel";
 import { useResearchSubmission } from "../hooks/useResearchSubmission";
 
 const REAL_EXECUTION_LABELS: Record<string, string> = {
@@ -16,7 +15,14 @@ const REAL_EXECUTION_LABELS: Record<string, string> = {
   misconfigured: "Real execution misconfigured",
 };
 
-function ServerCapabilityBanner() {
+// Live-research readiness guard (operational safety fix): a safe,
+// user-facing reason the Start research button is disabled. Never an env
+// var value -- these mirror the backend's own safe reason labels exactly
+// (server_execution.build_live_semantic_readiness).
+const LIVE_SEMANTIC_NOT_READY_MESSAGE =
+  "Live semantic pipeline not ready. Real TradingAgents is enabled, but the Week2 semantic classifier or its Provider is not ready. Live research was not started.";
+
+function useReadiness() {
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -34,6 +40,10 @@ function ServerCapabilityBanner() {
     return () => controller.abort();
   }, []);
 
+  return { readiness, errorMessage };
+}
+
+function ServerCapabilityBanner({ readiness, errorMessage }: { readiness: ReadinessResponse | null; errorMessage: string | null }) {
   if (errorMessage) {
     return (
       <p className="server-capability-banner server-capability-unknown">
@@ -44,10 +54,16 @@ function ServerCapabilityBanner() {
   if (!readiness) {
     return <p className="server-capability-banner">Checking server status…</p>;
   }
+  const liveSemanticNotReady = readiness.live_semantic_pipeline === "not_ready";
   return (
-    <p className={`server-capability-banner server-capability-${readiness.status}`}>
+    <p
+      className={`server-capability-banner server-capability-${
+        liveSemanticNotReady ? "not_ready" : readiness.status
+      }`}
+    >
       API {readiness.status === "ready" ? "ready" : "not ready"} ·{" "}
       {REAL_EXECUTION_LABELS[readiness.real_execution] ?? readiness.real_execution}
+      {liveSemanticNotReady ? " · Live semantic pipeline not ready" : null}
     </p>
   );
 }
@@ -137,6 +153,15 @@ export function ResearchPage() {
   const navigate = useNavigate();
   const { isSubmitting, errorMessage, submit } = useResearchSubmission();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const { readiness, errorMessage: readinessErrorMessage } = useReadiness();
+  // Live-research readiness guard (operational safety fix): never let the
+  // user submit a live run doomed to record zero Alpha activation because
+  // Week2's semantic pipeline isn't ready. `readiness === null` (still
+  // loading) does NOT disable the button -- only a confirmed "not_ready"
+  // does, so the form stays usable while the readiness check is in flight
+  // or for an offline-only server where this guard never applies.
+  const formDisabledReason =
+    readiness?.live_semantic_pipeline === "not_ready" ? LIVE_SEMANTIC_NOT_READY_MESSAGE : null;
 
   async function handleSubmit(request: Parameters<typeof submit>[0]) {
     setSubmissionError(null);
@@ -167,8 +192,8 @@ export function ResearchPage() {
     <div className="research-page">
       <section className="panel research-form-panel">
         <h1>Research a ticker</h1>
-        <ServerCapabilityBanner />
-        <ResearchForm isSubmitting={isSubmitting} onSubmit={handleSubmit} />
+        <ServerCapabilityBanner readiness={readiness} errorMessage={readinessErrorMessage} />
+        <ResearchForm isSubmitting={isSubmitting} onSubmit={handleSubmit} disabledReason={formDisabledReason} />
         {errorMessage ? <ErrorPanel message={errorMessage} /> : null}
         {submissionError ? <ErrorPanel message={submissionError} /> : null}
       </section>
@@ -177,8 +202,6 @@ export function ResearchPage() {
         <h2>Recent research runs</h2>
         <RecentRuns />
       </section>
-
-      <ReplayAllPanel />
 
       <section className="panel comqutor-explainer-panel">
         <h2>What makes COMQUTOR different</h2>

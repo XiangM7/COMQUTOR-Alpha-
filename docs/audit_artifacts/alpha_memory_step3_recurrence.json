@@ -1,0 +1,157 @@
+{
+  "schema_version": "alpha_memory_step3_recurrence.v1",
+  "task": "Alpha Memory Implementation Step 3 -- Historical Observation + Recurrence Memory (SHADOW ONLY, descriptive only)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_ticker_research": false,
+  "commit": false,
+  "push": false,
+  "mode": "shadow",
+  "activation_modulation_applied": false,
+
+  "recurrence_definition": {
+    "rule": "is_recurring = prior_observation_count >= 1 -- the exact same atomic phi_id (identity model frozen at Step 2, unchanged) exists in at least one prior, history-eligible run.",
+    "no_fuzzy_or_equivalence": "No embeddings, no semantic matching, no edge-type equivalence, no Alpha equivalence -- exact phi_id equality only.",
+    "no_scoring_concepts_introduced": "No recurrence strength, confidence, weight, streak bonus, decay, or temporal scoring exists anywhere in this step's output."
+  },
+
+  "historical_run_eligibility_rule": {
+    "criteria": [
+      "exclude the current run (unchanged from Step 1/2)",
+      "same ticker (unchanged from Step 1/2)",
+      "structure_graph.json + vocabulary_snapshot must be present and derivable (unchanged -- a run with none contributes zero phi, naturally)",
+      "taxonomy/identity-version compatibility is enforced structurally by the phi_id hash itself (a mismatch produces a different phi_id and can never silently match) -- no separate filter step needed or added",
+      "NEW: a candidate run whose OWN persisted artifact_manifest.json explicitly reports artifact_completeness != 'pass' is excluded -- reusing the ONE existing, already-authoritative per-run completeness signal this codebase has (Sprint 1 Track A2), never inventing a new 'healthy run' standard"
+    ],
+    "runs_with_no_manifest_at_all": "NOT excluded on that basis alone -- an old run predating that sprint is an honest gap, not treated as corrupted without evidence.",
+    "reported_limitation": "This filter does NOT catch every possible bad run. Concrete example found in this repository's own history: NVDA run 40bd7e3d-2759-45bc-97ec-8f1cf96c2266 was executed while Week2 LLM was disabled, producing zero committed Alpha matches and zero Activation (see scripts/start_live_comqutor.sh's own docstring) -- yet its artifact_manifest.json reports artifact_completeness == 'pass' (its files are all present; they are just semantically empty). No existing authoritative field distinguishes 'complete but semantically empty' from 'complete and meaningful'. This specific failure mode is instead caught incidentally by the pre-existing requirement that a run have real, alpha_ids-linked edges to derive any phi at all -- confirmed empirically: 40bd7e3d has 7 edges, zero of which carry any alpha_ids, so it contributes exactly zero phi structures and can never produce a false historical match. Reported as a real, known gap -- not silently patched over."
+  },
+
+  "observation_count_deduplication_rule": {
+    "rule": "One phi counts at most once per run -- deduplicated by (run_id, phi_id) in find_prior_phi_edge_observations before any count is computed. prior_observation_count means the number of DISTINCT prior runs containing the phi, never a count of duplicate edge rows.",
+    "belt_and_suspenders": "compute_phi_edges (Step 2) already de-duplicates within a single run at the identity-computation layer; find_prior_phi_edge_observations (this step) adds an explicit, independent second dedup guarantee at the cross-run-matching layer, so correctness does not rely on the first layer's internal behavior alone.",
+    "test_proof": "tests/test_alpha_memory_history_reader.py::test_duplicate_edge_producing_the_same_phi_within_one_run_counts_once"
+  },
+
+  "alpha_level_recurrence_summary_fields": [
+    "alpha_id", "current_phi_count", "first_seen_phi_count", "recurring_phi_count",
+    "historically_matched_phi_count (Step 2 name, retained as an exact alias of recurring_phi_count)",
+    "unmatched_phi_count (Step 2 name, retained as an exact alias of first_seen_phi_count)",
+    "recurrence_ratio (= recurring_phi_count / current_phi_count when current_phi_count > 0, else null)",
+    "prior_observation_total"
+  ],
+  "recurrence_ratio_is_descriptive_only": "Verified by test_alpha_level_recurrence_summary_is_descriptive_only -- no 'score', 'weight', or 'confidence' key exists anywhere in the summary, and summarize_alpha_memory is never imported by activation_scorer_v2.py/alpha_level_classifier.py/conflict_detector.py/conflict_admissibility.py (same architectural guard test as Step 2, re-verified).",
+
+  "real_offline_verification": {
+    "method": "Same persisted NVDA and MSFT runs used throughout the audits and Step 2, current run scanned against its FULL eligible ticker history (not just the one designated pair) -- the actual production reader behavior. No new research, zero Provider/TradingAgents calls.",
+    "NVDA": {
+      "current_run_id": "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d",
+      "current_phi_count": 15,
+      "first_seen_phi_count": 9,
+      "recurring_phi_count": 6,
+      "prior_observation_total": 13,
+      "exact_recurring_phi_ids_and_source_runs": [
+        {"alpha_id": "A001", "source": "rate_cut_cycle", "edge_type": "conflicting", "target": "valuation_risk", "phi_id": "1ab88bb316a0434bfb456eff99c4ce68c639f8093b2182ef7777870f83e397e4", "prior_run_ids": ["a8d47429-a47a-446b-93c4-dd718b8e2ff9"]},
+        {"alpha_id": "A101", "source": "ai_capex", "edge_type": "causal", "target": "gpu_demand", "phi_id": "4c90872238019a4093a2eb245a13be47ca47292df2724f12f8ee802234960014", "prior_run_ids": ["5ffe121a-68fd-473b-82b5-c9465332d8a2", "948be419-b542-4096-a536-ff567ef459c2", "a8d47429-a47a-446b-93c4-dd718b8e2ff9", "c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6", "e3eb3909-3744-4a02-9b32-b225cf6ef665"]},
+        {"alpha_id": "A102", "source": "inference_demand", "edge_type": "supportive", "target": "nvda_revenue_growth", "phi_id": "80969b0243cdd7bac9973008c14da23bbebb6d2fcedbc8ceca6d5ba184adaa1c", "prior_run_ids": ["c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6", "e3eb3909-3744-4a02-9b32-b225cf6ef665"]},
+        {"alpha_id": "A103", "source": "ai_capex", "edge_type": "causal", "target": "gpu_demand", "phi_id": "5e6e301580715fb53d7818c4940ee6e5ac55da6f7ad5c7a479b82043c56e04de", "prior_run_ids": ["a8d47429-a47a-446b-93c4-dd718b8e2ff9", "e3eb3909-3744-4a02-9b32-b225cf6ef665"]},
+        {"alpha_id": "A103", "source": "ai_capex", "edge_type": "supportive", "target": "nvda_revenue_growth", "phi_id": "d79bb8746a8f4b6a047802fd911a7183e4652d120c0b0f529e30d3590a87acb8", "prior_run_ids": ["948be419-b542-4096-a536-ff567ef459c2", "a8d47429-a47a-446b-93c4-dd718b8e2ff9"]},
+        {"alpha_id": "A301", "source": "gpu_demand", "edge_type": "causal", "target": "nvda_revenue_growth", "phi_id": "aa4cdc017acc0196552d3c33e86e4b6a2955c3c66bdab042bc18f18b5d618a2c", "prior_run_ids": ["a8d47429-a47a-446b-93c4-dd718b8e2ff9"]}
+      ],
+      "confirms_step2_finding": "Step 2's two exact atomic matches (A101, A102 against c9abf687) are both present above, now shown as genuine recurring structures with real source run_ids, alongside additional matches found against the fuller eligible historical corpus (a8d47429, e3eb3909, 948be419, 5ffe121a)."
+    },
+    "MSFT": {
+      "current_run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+      "current_phi_count": 12,
+      "first_seen_phi_count": 12,
+      "recurring_phi_count": 0,
+      "prior_observation_total": 0,
+      "honest_result": "ZERO recurrence, even when scanning this run's full eligible MSFT history, not just the one designated pair. Not manufactured -- reported exactly as computed. Root cause carried forward from Step 1.6/Step 2: the designated prior pair run (07ddc074) has almost no alpha-linked edges at all, and no other eligible MSFT run in this repository's persisted history happens to share an exact edge with 6cd2566d's own structure."
+    }
+  },
+
+  "atomic_recurrence_with_differing_aggregate_fingerprint": {
+    "occurred": true,
+    "real_example": "NVDA current run 2f8ee897 vs prior run a8d47429: A101's aggregate_fingerprint_id does NOT match a8d47429's (whole 5-edge set differs), yet A101's individual edge (ai_capex, causal, gpu_demand) DOES recur atomically against a8d47429 (and 4 other prior runs). Same finding for A102 (aggregate differs, one atomic edge recurs) and A103 (aggregate differs, two atomic edges recur). Only A301 (which has just 1 current edge, so its whole set and its one edge carry the same information) shows both aggregate AND atomic agreement with a8d47429.",
+    "interpretation": "Exactly the useful, non-invalidation-labeled memory result Section J anticipated: some causal structures recur while the overall Alpha structure changed. Not called drift, failure, or invalidation -- purely descriptive."
+  },
+
+  "instability_signals_cannot_create_or_remove_recurrence": {
+    "verified_by_tests": ["test_alpha_attribution_variance_cannot_create_recurrence", "test_edge_type_variance_cannot_create_recurrence"],
+    "guarantee": "detect_alpha_attribution_variance/detect_edge_type_variance remain pure, read-only, side-effect-free diagnostic functions -- neither is called by, nor can influence, compute_phi_edges/find_prior_phi_edge_observations/summarize_phi_edge_history. A genuinely-detected variance case leaves recurrence exactly as exact phi_id equality alone would determine it."
+  },
+
+  "api_and_ui": {
+    "api": "No new route created. alpha_memory (including every new Step 3 field) continues to be exposed exclusively via the existing internal run_audit.json artifact path established in Step 1/2 -- the same build_run_audit_payload()/write_run_audit_artifact() functions, now producing the extended section automatically. run_audit.json itself has no public GET route by original design (documented in this codebase's own artifact-manifest comment: 'internal audit / evaluation harness (no public GET route)') -- adding one is out of scope for this step and was not done.",
+    "ui": "DEFERRED. No frontend code anywhere reads run_audit.json today (confirmed in the original Step 0 audit and re-confirmed now) -- there is no existing alpha_memory-adjacent UI surface to extend with a minimal additive change. Building even a small indicator would require inventing new frontend product surface, which this step's own instruction reserves for a dedicated later UI step. Choice made: DEFER, not build."
+  },
+
+  "files_changed": {
+    "modified_production_modules": [
+      "comqutor_alpha/memory/history_reader.py -- adds _is_run_eligible_for_history (Section E); find_ticker_run_ids now filters on it; find_prior_phi_edge_observations adds explicit (run_id, phi_id) dedup (Section F); summarize_phi_edge_history rewritten with total_observation_count/has_prior_observation/is_recurring/current_seen_at/last_seen_prior (renamed from last_seen)/first_seen (now includes the current run when no prior exists) and dropped exact_match_count (superseded by the exact-dedup guarantee making it redundant with prior_observation_count); summarize_alpha_memory extended with first_seen_phi_count/recurring_phi_count/recurrence_ratio"
+    ],
+    "unchanged_this_step": [
+      "comqutor_alpha/memory/phi_identity.py -- identity model frozen at Step 2, not touched",
+      "comqutor_alpha/api/routes_research.py -- _alpha_memory_section already calls build_phi_structures/summarize_alpha_memory, so it automatically carries the new fields with no code change needed"
+    ],
+    "rewritten_test_file": "tests/test_alpha_memory_history_reader.py -- 28 tests (was 13), covering all 21 required proof points",
+    "modified_test_file": "tests/test_run_audit_v2.py -- 1 assertion updated for the new alpha_memory_summary field set (26 tests total, unchanged count)",
+    "regenerated_artifacts_offline_zero_cost": [
+      "outputs/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/run_audit.json",
+      "outputs/runs/c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6/run_audit.json"
+    ]
+  },
+
+  "db_migration": {
+    "required": false,
+    "reasoning": "Recurrence is recomputed fresh from already-persisted source runs on every call -- no mutable counter is persisted anywhere, exactly per Section L's instruction. No new column, table, or migration added or needed."
+  },
+
+  "proof_b1_b2_b4_conflict_unchanged": {
+    "architectural_guarantee": "comqutor_alpha/memory/*.py remains never imported by activation_scorer_v2.py, alpha_level_classifier.py, conflict_detector.py, or conflict_admissibility.py -- re-verified after this step's changes.",
+    "integration_guarantee": "test_alpha_memory_instability_signals_are_detected_but_never_change_official_sections (Step 2, re-run unmodified against Step 3's rewritten history_reader.py) continues to assert activation_summary/conflict_summary/audit_validation are byte-identical.",
+    "full_regression_sweep": "446 passed across the 14-file targeted sweep (test_run_audit_v2.py + both alpha_memory test files + B4/B2/Conflict/ActivationV2/EvidenceStance/EntityExposure/AlphaDisplay/OfflineReplay/RegressionReportV3/EvidenceReviewV2) -- zero new failures; only the same 13 pre-existing, already-documented evidence_review_v2.json schema-stripping failures remain."
+  },
+
+  "tests": {
+    "new_or_revised_tests_total": 28,
+    "new_or_revised_tests_passed": 28,
+    "new_or_revised_tests_failed": 0,
+    "proof_points_covered": {
+      "1_absent_from_all_prior": "test_phi_absent_from_all_prior_runs",
+      "2_recurring_true_count_1": "test_phi_appears_in_one_prior_run_is_recurring",
+      "3_n_distinct_prior_runs": "test_phi_appears_in_n_distinct_prior_runs",
+      "4_duplicate_counts_once": "test_duplicate_edge_producing_the_same_phi_within_one_run_counts_once",
+      "5_current_run_never_counts": "test_current_run_never_counts_as_its_own_history / test_find_ticker_run_ids_excludes_current_run_and_filters_by_ticker",
+      "6_different_ticker": "test_different_ticker_does_not_count",
+      "7_different_alpha": "test_different_alpha_does_not_count",
+      "8_different_edge_type": "test_different_edge_type_does_not_count",
+      "9_different_taxonomy_version": "test_different_taxonomy_version_does_not_count",
+      "10_first_seen_earliest_actual": "test_first_seen_comes_from_earliest_actual_metadata / test_first_seen_for_a_first_seen_structure_is_the_current_run_own_timestamp",
+      "11_last_seen_prior_latest_actual": "test_last_seen_prior_comes_from_latest_actual_prior_observation",
+      "12_missing_timestamps_not_fabricated": "test_missing_timestamps_are_not_fabricated",
+      "13_atomic_recurrence_aggregate_differs": "test_aggregate_fingerprints_differ_while_atomic_phi_still_matches",
+      "14_attribution_variance_no_recurrence_creation": "test_alpha_attribution_variance_cannot_create_recurrence",
+      "15_edge_type_variance_no_recurrence_creation": "test_edge_type_variance_cannot_create_recurrence",
+      "16_recurrence_ratio_deterministic": "test_alpha_level_recurrence_summary_is_descriptive_only (includes a repeated-computation equality check)",
+      "17_18_19_no_activation_alpha_level_conflict_change": "test_alpha_memory_instability_signals_are_detected_but_never_change_official_sections (test_run_audit_v2.py, unmodified, re-run against Step 3 code)",
+      "20_modulation_flag_remains_false": "assert alpha_memory['activation_modulation_applied'] is False -- present throughout",
+      "21_deterministic_repeated_execution": "test_repeated_execution_of_the_reader_is_deterministic"
+    },
+    "additional_eligibility_tests": [
+      "test_run_marked_incomplete_by_its_own_manifest_is_excluded_from_history",
+      "test_run_with_no_manifest_at_all_is_not_excluded_on_that_basis_alone",
+      "test_run_marked_pass_by_its_own_manifest_is_included"
+    ]
+  },
+
+  "remaining_lifecycle_product_decisions": [
+    "All items from Steps 1/1.5/1.6/2's own open lists remain open (per-factor ticker-scoping consistency, chain-boundary/extraction-variance handling, whether phi ids should ever be durably persisted).",
+    "Whether/how absence should ever become a meaningful signal (this step deliberately records positive observations only, per Section H) -- explicitly deferred, not decided here.",
+    "Invalidation/expiration/failure/non-execution operational definitions and their reason-code vocabulary -- still entirely undefined, per the Development Plan's own gap (see Step 1's spec).",
+    "Whether/how the whole-Alpha aggregate-vs-atomic drift observation (Section J) should ever be formalized into a named diagnostic category, versus remaining an ad hoc cross-reference between two already-exposed fields.",
+    "Whether/when a dedicated Alpha Memory UI step should proceed, and what it should show."
+  ]
+}

@@ -1,0 +1,294 @@
+{
+  "schema_version": "v0.1.5.final_acceptance_table.v1",
+  "package_version": "v0.1.5",
+  "package_scope": "Final Acceptance Cleanup -- John-approved Gold strict reconciliation. READ/DERIVE/REPORT ONLY. Historical v0.1.3/v0.1.4 artifacts are preserved and were not renamed.",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "branch": "comqutor-structure-layer",
+  "result": "JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+  "gold_authority_search": {
+    "conclusion": "No auditable John-approved Gold authority exists in this repository for either Alpha-detection expectations or Main Conflict expectations, for any of the six tickers, as of this task.",
+    "authoritative_proof": {
+      "path": "docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json",
+      "role": "This IS the repository's own rigorous authority-classification mechanism (five levels: APPROVED_GOLD, DOCUMENTED_EXPECTATION, PROVISIONAL_AI_PREDICTED, REJECTED_OR_SUPERSEDED, UNKNOWN -- reused unmodified by comqutor_alpha.regression.authority_contract).",
+      "summary_extracted": {
+        "approved_gold_alpha_expectations": 0,
+        "alpha_expectation_total_count": 37,
+        "main_conflict_authority_breakdown": {
+          "APPROVED_GOLD": 0,
+          "DOCUMENTED_EXPECTATION": 2,
+          "PROVISIONAL_AI_PREDICTED": 5,
+          "REJECTED_OR_SUPERSEDED": 4,
+          "UNKNOWN": 0
+        },
+        "exact_main_conflict_gold_count": 0,
+        "note_verbatim": "0 of the 6 tickers currently has any expected main conflict qualifying as exact regression gold. 0 Alpha expectations qualify as exact per-run regression gold -- all current Alpha expectations are either structural/ticker-general (not per-run) or explicitly conditional."
+      }
+    },
+    "candidates_considered_and_rejected": [
+      {
+        "path": "docs/audit_artifacts/alpha_conflict_gold_benchmark_v1.json",
+        "why_not_sufficient": "Self-describes as benchmark_type='external_analyst_gold', validation_mode_for_existing_runs='RETROSPECTIVE_GOLD_VALIDATION'. Its own scope_statement explicitly states it is 'NOT derived from or copied from docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json (that file's own APPROVED_GOLD count remains zero and is untouched by this benchmark)'. This is precisely the kind of retrospective/diagnostic benchmark artifact this task warns is NOT automatically acceptance authority -- it is an internally-created (or external-analyst-authored) benchmark used for a retrospective validation exercise, never presented to or signed off by John. This was the file treated as 'Gold' throughout the prior v0.1.3 session for the 61.0317% figure -- that figure is therefore a HISTORICAL_INTERNAL_DIAGNOSTIC_RESULT, not a JOHN_ACCEPTANCE_GOLD_RESULT."
+      },
+      {
+        "path": "docs/audit_artifacts/john_v0.1.2.1_approval_sheet.md",
+        "why_not_sufficient": "This IS a genuine John-approval REQUEST document (Sections A-E present explicit checkboxes for John to approve/reject Alpha Gold, Main Conflict Gold, and a Final Decision). However every checkbox in the file is UNCHECKED (\u25a1), the Comments field is blank, the Date field is blank, and 'Reviewer: John' has no accompanying signature or decision marked. It was never signed. Additionally, its own PROPOSED Gold table (Section A: e.g. MSFT=[A101,A102,A304], TSM=[A103,A304]) does not even match alpha_conflict_gold_benchmark_v1.json's numbers (MSFT and TSM each carry a different 6-alpha set there) -- confirming these are two separate, unreconciled proposals, neither of which was ever approved."
+      },
+      {
+        "path": "docs/audit_artifacts/john_acceptance_closure_v0.1.2.1.json",
+        "why_not_sufficient": "Concerns John's Item 10 review of RUN-ID freshness/ticker-consistency and artifact completeness for the v0.1.2.1 six-run set -- not an approval of Alpha-detection or Main-Conflict Gold labels. It also references a DIFFERENT six run IDs (v0.1.2.1-era, e.g. NVDA=a8d47429...) than the six FINAL_FRESH_SELECTED v0.1.3 runs (e.g. NVDA=57d7b4c4...) this task and the whole prior v0.1.3 session actually used -- it is not even fresh-run-consistent with the current baseline."
+      },
+      {
+        "path": "docs/audit_artifacts/qa_closure_index.json",
+        "why_not_sufficient": "Its own selected_runs.status field reads 'NO_CURRENT_VALID_SEMANTIC_BASELINE', with an explicit note that the only fresh v0.1.2.1 runs available at the time failed semantic execution health -- this index is stale and does not reference the current six FINAL_FRESH_SELECTED v0.1.3 runs at all."
+      },
+      {
+        "path": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1_r2.json",
+        "why_not_sufficient": "A well-reasoned ENGINEERING-side proposed adjudication, explicitly performed before inspecting production outputs -- but it is a proposal awaiting John's decision via the approval sheet's Section B checkboxes (also left blank), not itself an approval."
+      },
+      {
+        "path": "comqutor_alpha/config/entity_alpha_exposure_seed_v0.1.yaml",
+        "why_not_sufficient": "This IS genuinely John-approved (2026-08-11, status=approved_gating, confirmed for all six tickers per main_conflict_gold_adjudication_v0.1.2.1_r2.json's own citation) -- but it approves the Entity Alpha Exposure GATING seed specifically, not Alpha-detection expectations or Main-Conflict Gold labels. Not sufficient authority for this task's specific comparison."
+      }
+    ]
+  },
+  "fresh_run_authority": {
+    "path": "docs/audit_artifacts/v0_1_3_final_fresh_six_ticker_ledger.json",
+    "note": "This ledger IS independently identified as the current authoritative fresh-run source (FINAL_FRESH_SELECTED status, force_refreshed, completed, for all six tickers) -- fresh-run identification does not depend on Gold authority and is reported here regardless of the hard stop above.",
+    "ticker_consistency": {
+      "passed": true,
+      "count": "6/6"
+    },
+    "important_self_disclosure": "Every one of this ledger's own six main_conflict.authority fields already reads 'NOT_GOLD_EVALUABLE' -- the production system's own persisted ledger independently corroborates this task's hard-stop finding."
+  },
+  "detection_rule": {
+    "authority": "comqutor_alpha.regression.regression_report_v3._detected_alphas() / _DETECTED_LEVELS -- reused unmodified, not reinvented",
+    "detected_levels": [
+      "active",
+      "dominant",
+      "regime_level"
+    ],
+    "not_detected_levels": [
+      "candidate",
+      "capped_active",
+      "blocked",
+      "ambiguous",
+      "unavailable"
+    ]
+  },
+  "tickers": {
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "cache_disposition": "force_refreshed",
+      "terminal_status": "completed",
+      "artifact_completeness": "9/9",
+      "graph_edges": 9,
+      "expected_alphas": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "detected_alphas": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": "NOT_COMPUTABLE -- no John-approved expected set exists to diff against",
+      "unexpected_dominant": [
+        "A301"
+      ],
+      "expected_alpha_hit_rate": "NOT_COMPUTABLE",
+      "allowed_main_conflicts": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "actual_main_conflict": "A101__A304",
+      "actual_main_conflict_status": "admitted",
+      "main_conflict_match": "NOT_COMPUTABLE -- no John-approved allowed-conflict set exists to compare against",
+      "conflict_mismatch_reason": null,
+      "conflict_mismatch_evidence": null,
+      "alpha_memory_shadow_mode": "shadow",
+      "alpha_memory_activation_modulation_applied": false
+    },
+    "QQQ": {
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "cache_disposition": "force_refreshed",
+      "terminal_status": "completed",
+      "artifact_completeness": "9/9",
+      "graph_edges": 9,
+      "expected_alphas": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "detected_alphas": [
+        "A001",
+        "A103",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": "NOT_COMPUTABLE -- no John-approved expected set exists to diff against",
+      "unexpected_dominant": [],
+      "expected_alpha_hit_rate": "NOT_COMPUTABLE",
+      "allowed_main_conflicts": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "actual_main_conflict": "A304__A601",
+      "actual_main_conflict_status": "admitted",
+      "main_conflict_match": "NOT_COMPUTABLE -- no John-approved allowed-conflict set exists to compare against",
+      "conflict_mismatch_reason": null,
+      "conflict_mismatch_evidence": null,
+      "alpha_memory_shadow_mode": "shadow",
+      "alpha_memory_activation_modulation_applied": false
+    },
+    "MSFT": {
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "cache_disposition": "force_refreshed",
+      "terminal_status": "completed",
+      "artifact_completeness": "9/9",
+      "graph_edges": 7,
+      "expected_alphas": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "detected_alphas": [
+        "A001",
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "missing_expected": "NOT_COMPUTABLE -- no John-approved expected set exists to diff against",
+      "unexpected_dominant": [
+        "A103"
+      ],
+      "expected_alpha_hit_rate": "NOT_COMPUTABLE",
+      "allowed_main_conflicts": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "actual_main_conflict": "NO_ADMITTED_MAIN_CONFLICT",
+      "actual_main_conflict_status": "no_conflict_admitted",
+      "main_conflict_match": "NOT_COMPUTABLE -- no John-approved allowed-conflict set exists to compare against",
+      "conflict_mismatch_reason": null,
+      "conflict_mismatch_evidence": null,
+      "alpha_memory_shadow_mode": "shadow",
+      "alpha_memory_activation_modulation_applied": false
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "cache_disposition": "force_refreshed",
+      "terminal_status": "completed",
+      "artifact_completeness": "9/9",
+      "graph_edges": 7,
+      "expected_alphas": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "detected_alphas": [
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": "NOT_COMPUTABLE -- no John-approved expected set exists to diff against",
+      "unexpected_dominant": [
+        "A201"
+      ],
+      "expected_alpha_hit_rate": "NOT_COMPUTABLE",
+      "allowed_main_conflicts": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "actual_main_conflict": "NO_ADMITTED_MAIN_CONFLICT",
+      "actual_main_conflict_status": "no_conflict_admitted",
+      "main_conflict_match": "NOT_COMPUTABLE -- no John-approved allowed-conflict set exists to compare against",
+      "conflict_mismatch_reason": null,
+      "conflict_mismatch_evidence": null,
+      "alpha_memory_shadow_mode": "shadow",
+      "alpha_memory_activation_modulation_applied": false
+    },
+    "TSM": {
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "cache_disposition": "force_refreshed",
+      "terminal_status": "completed",
+      "artifact_completeness": "9/9",
+      "graph_edges": 8,
+      "expected_alphas": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "detected_alphas": [
+        "A101",
+        "A103",
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": "NOT_COMPUTABLE -- no John-approved expected set exists to diff against",
+      "unexpected_dominant": [],
+      "expected_alpha_hit_rate": "NOT_COMPUTABLE",
+      "allowed_main_conflicts": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "actual_main_conflict": "A101__A304",
+      "actual_main_conflict_status": "admitted",
+      "main_conflict_match": "NOT_COMPUTABLE -- no John-approved allowed-conflict set exists to compare against",
+      "conflict_mismatch_reason": null,
+      "conflict_mismatch_evidence": null,
+      "alpha_memory_shadow_mode": "shadow",
+      "alpha_memory_activation_modulation_applied": false
+    },
+    "AMD": {
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "cache_disposition": "force_refreshed",
+      "terminal_status": "completed",
+      "artifact_completeness": "9/9",
+      "graph_edges": 8,
+      "expected_alphas": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "detected_alphas": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": "NOT_COMPUTABLE -- no John-approved expected set exists to diff against",
+      "unexpected_dominant": [],
+      "expected_alpha_hit_rate": "NOT_COMPUTABLE",
+      "allowed_main_conflicts": "NOT_AVAILABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+      "actual_main_conflict": "A101__A304",
+      "actual_main_conflict_status": "admitted",
+      "main_conflict_match": "NOT_COMPUTABLE -- no John-approved allowed-conflict set exists to compare against",
+      "conflict_mismatch_reason": null,
+      "conflict_mismatch_evidence": null,
+      "alpha_memory_shadow_mode": "shadow",
+      "alpha_memory_activation_modulation_applied": false
+    }
+  },
+  "summary": {
+    "ticker_consistency": "6/6 PASS",
+    "artifact_completeness": "6/6 PASS (9/9 each)",
+    "graph_edge_gate": "6/6 PASS (edges observed: 7-9, matching John's reported range)",
+    "john_acceptance_gold_result": "NOT_COMPUTABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+    "historical_internal_diagnostic_result": {
+      "label": "HISTORICAL_INTERNAL_DIAGNOSTIC_RESULT (kept explicitly separate from JOHN_ACCEPTANCE_GOLD_RESULT per this task's own instruction)",
+      "source": "docs/audit_artifacts/alpha_conflict_gold_benchmark_v1.json (external_analyst_gold / RETROSPECTIVE_GOLD_VALIDATION, not John-approved)",
+      "official_alpha_hit_previously_reported": "61.0317%",
+      "caveat": "This number was computed and reported throughout the prior v0.1.3 session as if it were an acceptance-grade result. Per this task's strict reconciliation, it is NOT a John-approved acceptance result -- it remains a valid, internally-consistent diagnostic measurement against a frozen, dated, external-analyst benchmark, but should not be represented as 'John-approved Gold Alpha Hit' until Section A/B of john_v0.1.2.1_approval_sheet.md (or an equivalent v0.1.5 sheet) is actually signed."
+    },
+    "main_conflict_match_aggregate": "NOT_COMPUTABLE -- JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND",
+    "unexpected_dominant_total": 3,
+    "unexpected_dominant_detail": {
+      "NVDA": [
+        "A301"
+      ],
+      "MSFT": [
+        "A103"
+      ],
+      "SNDK": [
+        "A201"
+      ]
+    },
+    "alpha_memory_shadow_consistency": "6/6 -- mode=shadow, activation_modulation_applied=false for every ticker (verified from the fresh-run ledger, not modified)",
+    "evidence_review_qa_context_only": {
+      "alpha_match": "83%",
+      "polarity": "85.25%",
+      "critical_reversal": 0,
+      "note": "Included as QA context only per task section 32 -- not used to compute expected_alphas, allowed conflicts, or main_conflict_match."
+    },
+    "acceptance_findings": [
+      "JOHN_APPROVED_GOLD_AUTHORITY_NOT_FOUND: no Alpha-detection or Main-Conflict Gold label set in this repository carries an APPROVED_GOLD authority level or a signed John approval.",
+      "The blank john_v0.1.2.1_approval_sheet.md is the correct, ready-made vehicle to obtain that approval -- it has never been completed.",
+      "The six fresh production runs (FINAL_FRESH_SELECTED, force_refreshed) ARE independently verified complete and consistent (9/9 artifacts, 7-9 graph edges, 6/6 ticker consistency) regardless of Gold status.",
+      "3 unexpected-dominant Alphas were observed (NVDA:A301, MSFT:A103, SNDK:A201) -- reported factually, not classified as defects, since no approved expectation exists to compare against.",
+      "The 61.0317% figure from the prior v0.1.3 session is a valid HISTORICAL_INTERNAL_DIAGNOSTIC_RESULT, not a JOHN_ACCEPTANCE_GOLD_RESULT -- these must not be conflated going forward."
+    ]
+  },
+  "final_validation": {
+    "gold_authority_identified_and_auditable": "NO -- explicitly not found; absence itself is auditable via regression_label_authority_audit_v0.1.2.1.json",
+    "gold_authority_modified": false,
+    "fresh_run_authority_identified": true,
+    "ticker_consistency": "6/6",
+    "fresh_runs_executed_this_task": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "production_code_changed": 0,
+    "test_files_changed": 0,
+    "alpha_memory_modulation_changed": false,
+    "historical_files_renamed": false,
+    "new_files_use_v0_1_5_naming": true,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

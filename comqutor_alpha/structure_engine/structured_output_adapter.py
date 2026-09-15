@@ -9,6 +9,7 @@ import math
 import re
 import unicodedata
 from collections.abc import Mapping
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -35,6 +36,7 @@ from comqutor_alpha.structure_engine.factor_normalizer import (
     extract_known_factors_from_text,
     normalize_factor_label,
 )
+from comqutor_alpha.structure_engine.week2_llm import resolve_structured_adapter_concurrency
 from comqutor_alpha.structure_engine.structure_schema import (
     VALID_DIRECTIONS,
     clamp_score,
@@ -1308,40 +1310,142 @@ def _add_quality_audit(target, source):
         target["reason_counts"][code] = target["reason_counts"].get(code, 0) + count
 
 
-# Adapt all raw agent output records in a run directory into structured claim records, logging any warnings
-def adapt_run_outputs(run_dir, *, llm_gateway=None):
-    run_dir, run_id, output_root = _run_context_from_dir(run_dir)
-    raw_payload = load_raw_agent_outputs(run_dir)
-    ticker = str(raw_payload.get("ticker") or "unknown").upper()
-    records = []
+class _DeferredFinalizeGatewayProxy:
+    """John Requirement B, Phase B2 Slice 2B: wraps a real llm_gateway so
+    ``invoke_json_with_trace`` (the Provider call, and the call_sequence
+    allocation that comes with it) runs immediately -- safe to call
+    concurrently, since it is the same already-thread-safe
+    Week2LLMGateway/SemanticRuntimeSession infrastructure alpha_classifier's
+    and evidence_stance_classifier's own existing concurrency already rely
+    on -- while ``finalize_semantic_invocation`` (the call that actually
+    appends to the shared recorder) is BUFFERED rather than applied
+    immediately. A caller drains ``buffered_finalizations`` afterward,
+    sorted by each invocation's own ``trace_handle.call_sequence``, into the
+    real gateway -- exactly the invoke-concurrently/finalize-in-sequence-
+    order technique Phase B2 Slice 2A validated for evidence_stance_
+    classifier, generalized here behind a transparent proxy so
+    ``adapt_raw_agent_outputs`` (and anything else) needs zero changes to
+    run safely under concurrency. Everything else (attribute access,
+    ``invoke_json`` for a gateway with no attached semantic_runtime) is
+    delegated straight through, unproxied."""
+
+    def __init__(self, real_gateway: Any) -> None:
+        self._real = real_gateway
+        self.buffered_finalizations: list[tuple[Any, bool, str | None]] = []
+
+    def invoke_json_with_trace(self, task: str, payload: Mapping[str, Any], validator: Any) -> Any:
+        return self._real.invoke_json_with_trace(task, payload, validator)
+
+    def finalize_semantic_invocation(self, invocation: Any, *, accepted: bool, fallback_reason: str | None = None) -> None:
+        self.buffered_finalizations.append((invocation, accepted, fallback_reason))
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._real, name)
+
+
+def _sequence_key_for_buffered_finalization(item: tuple[Any, bool, str | None]) -> float:
+    invocation, _accepted, _reason = item
+    trace = getattr(invocation, "trace_handle", None)
+    sequence = getattr(trace, "call_sequence", None)
+    # A call with no trace (no attached semantic_runtime, or trace
+    # allocation itself failed) never reaches the recorder, so its relative
+    # position among buffered finalizations cannot violate the sequence
+    # invariant -- ordered last is an arbitrary-but-safe placement.
+    return sequence if isinstance(sequence, int) else float("inf")
+
+
+def _run_one_raw_agent_output(
+    index: int,
+    raw_record: Any,
+    run_id: str,
+    ticker: str,
+    proxy: "_DeferredFinalizeGatewayProxy",
+) -> tuple[int, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    """One concurrency-safe unit of work: adapt_raw_agent_outputs is called
+    completely unmodified, with its own fresh, thread-local filter_audit/
+    quality_audit/canonical_relations_audit accumulators (never shared with
+    any other raw_record's own call) -- so no shared-list/dict mutation is
+    even possible during the concurrent phase."""
+    local_filter_audit: list[dict[str, Any]] = []
+    local_quality_audit = _new_quality_audit()
+    local_canonical_relations: list[dict[str, Any]] = []
+    adapted_records = adapt_raw_agent_outputs(
+        raw_record,
+        run_id,
+        ticker,
+        llm_gateway=proxy,
+        filter_audit=local_filter_audit,
+        quality_audit=local_quality_audit,
+        canonical_relations_audit=local_canonical_relations,
+    )
+    return index, adapted_records, local_filter_audit, local_canonical_relations, local_quality_audit
+
+
+def _adapt_run_outputs_concurrently(
+    raw_agent_outputs: list[Any],
+    run_id: str,
+    ticker: str,
+    llm_gateway: Any,
+    concurrency: int,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any], dict[str, dict[str, Any]]]:
+    """John Requirement B, Phase B2 Slice 2B: bounded concurrency across
+    independent raw agent outputs. Each raw_record's own call is fully
+    independent of every other (see the Slice 2B audit's independence
+    proof: own segments, own batches, own filter/quality/canonical-relation
+    accumulators, and adapt_raw_agent_outputs itself is completely
+    unmodified and unaware it is running concurrently).
+
+    Phase 1 (concurrent): dispatch one _run_one_raw_agent_output call per
+    raw_record, each wrapped in its own _DeferredFinalizeGatewayProxy (built
+    up front so phase 2a can drain each one's buffered finalizations after
+    its future resolves).
+    Phase 2a (serial, sequence-sorted): drain every buffered
+    finalize_semantic_invocation call, sorted by call_sequence -- restoring
+    the exact recorder-append ordering SemanticCallRecorder already
+    requires for every task (the same fix Slice 2A validated).
+    Phase 2b (serial, ORIGINAL raw_agent_outputs order -- never completion
+    order): merge each worker's own results into the run-level
+    records/filter_audit/canonical_relations/global_audit/per_agent
+    structures, byte-identical to what the serial loop in adapt_run_outputs
+    already does.
+    """
+    proxies = [_DeferredFinalizeGatewayProxy(llm_gateway) for _ in raw_agent_outputs]
+    with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="comqutor-structured-adapter") as executor:
+        futures = [
+            executor.submit(_run_one_raw_agent_output, index, raw_record, run_id, ticker, proxies[index])
+            for index, raw_record in enumerate(raw_agent_outputs)
+        ]
+        completed = [future.result() for future in futures]
+
+    # Phase 2a: finalize every buffered gateway call, in ascending
+    # call_sequence order across ALL raw_agent_outputs combined (never
+    # per-agent or completion order).
+    all_buffered: list[tuple[Any, bool, str | None]] = []
+    for proxy in proxies:
+        all_buffered.extend(proxy.buffered_finalizations)
+    for invocation, accepted, fallback_reason in sorted(all_buffered, key=_sequence_key_for_buffered_finalization):
+        llm_gateway.finalize_semantic_invocation(invocation, accepted=accepted, fallback_reason=fallback_reason)
+
+    # Phase 2b: merge each worker's own results, in ORIGINAL
+    # raw_agent_outputs order -- byte-identical to the serial loop's own
+    # per-iteration bookkeeping.
+    records: list[dict[str, Any]] = []
     filter_audit: list[dict[str, Any]] = []
     canonical_relations: list[dict[str, Any]] = []
     global_audit = _new_quality_audit()
-    # Section E: per-agent coverage breakdown. Keyed by normalized agent
-    # name; multiple raw outputs for the same agent are aggregated (their
-    # original source_agent_output_id provenance stays on each record
-    # regardless -- this bucket is a count-only rollup).
     per_agent: dict[str, dict[str, Any]] = {}
 
-    raw_agent_outputs = raw_payload.get("agent_outputs", []) or []
-    for raw_record in raw_agent_outputs:
+    for index, adapted_records, local_filter_audit, local_canonical_relations, local_quality_audit in sorted(
+        completed, key=lambda item: item[0]
+    ):
+        raw_record = raw_agent_outputs[index]
         agent_key = normalize_agent_name(
             (raw_record.get("agent") or raw_record.get("tradingagents_agent"))
             if isinstance(raw_record, dict)
             else "unknown_agent"
         )
-        call_audit = _new_quality_audit()
-        filter_start = len(filter_audit)
-        adapted_records = adapt_raw_agent_outputs(
-            raw_record,
-            run_id,
-            ticker,
-            llm_gateway=llm_gateway,
-            filter_audit=filter_audit,
-            quality_audit=call_audit,
-            canonical_relations_audit=canonical_relations,
-        )
-        call_filtered = filter_audit[filter_start:]
+        filter_audit.extend(local_filter_audit)
+        canonical_relations.extend(local_canonical_relations)
 
         bucket = per_agent.setdefault(
             agent_key,
@@ -1353,23 +1457,119 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None):
             },
         )
         bucket["raw_output_count"] += 1
-        for item in call_filtered:
+        for item in local_filter_audit:
             code = str(item.get("reason_code") or "UNKNOWN")
             if code == FILTER_REASON_DISCLAIMER:
                 bucket["disclaimer_removed"] += 1
             else:
                 bucket["boilerplate_removed"] += 1
-        _add_quality_audit(bucket.setdefault("_audit", _new_quality_audit()), call_audit)
-        _add_quality_audit(global_audit, call_audit)
+        _add_quality_audit(bucket.setdefault("_audit", _new_quality_audit()), local_quality_audit)
+        _add_quality_audit(global_audit, local_quality_audit)
 
-        for record in adapted_records:
+        records.extend(adapted_records)
+
+    return records, filter_audit, canonical_relations, global_audit, per_agent
+
+
+# Adapt all raw agent output records in a run directory into structured claim
+# records, logging any warnings. ``concurrency`` (John Requirement B, Phase
+# B2 Slice 2B): number of independent raw agent outputs to process at once.
+# ``None`` (the default) resolves to
+# week2_llm.resolve_structured_adapter_concurrency() -- the same env-var-
+# overridable, centrally-defined resolution pattern already used for
+# alpha_classifier and evidence_stance_classifier. ``concurrency<=1`` (or a
+# single/empty raw_agent_outputs list) reproduces the exact prior serial
+# behavior with zero functional change.
+def adapt_run_outputs(run_dir, *, llm_gateway=None, concurrency=None):
+    run_dir, run_id, output_root = _run_context_from_dir(run_dir)
+    raw_payload = load_raw_agent_outputs(run_dir)
+    ticker = str(raw_payload.get("ticker") or "unknown").upper()
+    raw_agent_outputs = raw_payload.get("agent_outputs", []) or []
+
+    if concurrency is None:
+        concurrency = resolve_structured_adapter_concurrency()
+
+    if llm_gateway is None or concurrency <= 1 or len(raw_agent_outputs) <= 1:
+        records = []
+        filter_audit: list[dict[str, Any]] = []
+        canonical_relations: list[dict[str, Any]] = []
+        global_audit = _new_quality_audit()
+        # Section E: per-agent coverage breakdown. Keyed by normalized agent
+        # name; multiple raw outputs for the same agent are aggregated
+        # (their original source_agent_output_id provenance stays on each
+        # record regardless -- this bucket is a count-only rollup).
+        per_agent: dict[str, dict[str, Any]] = {}
+
+        for raw_record in raw_agent_outputs:
+            agent_key = normalize_agent_name(
+                (raw_record.get("agent") or raw_record.get("tradingagents_agent"))
+                if isinstance(raw_record, dict)
+                else "unknown_agent"
+            )
+            call_audit = _new_quality_audit()
+            filter_start = len(filter_audit)
+            adapted_records = adapt_raw_agent_outputs(
+                raw_record,
+                run_id,
+                ticker,
+                llm_gateway=llm_gateway,
+                filter_audit=filter_audit,
+                quality_audit=call_audit,
+                canonical_relations_audit=canonical_relations,
+            )
+            call_filtered = filter_audit[filter_start:]
+
+            bucket = per_agent.setdefault(
+                agent_key,
+                {
+                    "agent": agent_key,
+                    "raw_output_count": 0,
+                    "boilerplate_removed": 0,
+                    "disclaimer_removed": 0,
+                },
+            )
+            bucket["raw_output_count"] += 1
+            for item in call_filtered:
+                code = str(item.get("reason_code") or "UNKNOWN")
+                if code == FILTER_REASON_DISCLAIMER:
+                    bucket["disclaimer_removed"] += 1
+                else:
+                    bucket["boilerplate_removed"] += 1
+            _add_quality_audit(bucket.setdefault("_audit", _new_quality_audit()), call_audit)
+            _add_quality_audit(global_audit, call_audit)
+
+            for record in adapted_records:
+                if record.get("adapter_warning"):
+                    _log_error(
+                        run_id,
+                        output_root,
+                        _error_payload(run_id, ticker, raw_record, record),
+                    )
+                records.append(record)
+    else:
+        records, filter_audit, canonical_relations, global_audit, per_agent = _adapt_run_outputs_concurrently(
+            raw_agent_outputs, run_id, ticker, llm_gateway, concurrency
+        )
+        for record in records:
             if record.get("adapter_warning"):
+                # Re-derive which raw_record this came from for the error
+                # log payload -- adapter_warning records always carry their
+                # own source_agent_output_id, matching the serial path's
+                # own per-record logging exactly.
+                matching_raw_record = next(
+                    (
+                        r
+                        for r in raw_agent_outputs
+                        if isinstance(r, dict)
+                        and str(r.get("agent_output_id") or "") == str(record.get("source_agent_output_id") or "")
+                    ),
+                    None,
+                ) or {}
                 _log_error(
                     run_id,
                     output_root,
-                    _error_payload(run_id, ticker, raw_record, record),
+                    _error_payload(run_id, ticker, matching_raw_record, record),
                 )
-            records.append(record)
 
     raw_claim_count = len(records)  # legacy pre-dedup count, kept for backward compatibility
     pre_dedup_by_agent: dict[str, int] = {}

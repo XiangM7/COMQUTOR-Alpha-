@@ -1,0 +1,301 @@
+{
+  "schema_version": "v0_1_3_phase2_recall_recovery.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "executive_summary": {
+    "targets_reviewed": 5,
+    "READY_TO_IMPLEMENT": 0,
+    "IMPLEMENTED": 0,
+    "DEFERRED_NOT_READY": 5,
+    "offline_replayable_recovered_hits": 0,
+    "fresh_run_dependent_potential_recoveries": "up to 3 (NVDA A102, MSFT A102, AMD A102) -- uncertain, contingent on Provider-facing research changes never designed or validated here",
+    "current_official_alpha_hit_percent": 61.0317,
+    "offline_diagnostic_alpha_hit_percent": 61.0317,
+    "projected_maximum_from_legitimate_current_targets_percent": 74.127,
+    "can_phase2_target_set_plausibly_reach_75": "NO -- mathematically impossible even at 100% hypothetical success on all 5 targets (74.125% macro-average ceiling, computed below); QQQ and SNDK misses are out of Phase 2 scope and drag the macro-average below 75% regardless",
+    "p0_p1_regressions": 0,
+    "new_regressions": 0,
+    "gold_unchanged": true,
+    "headline": "Zero code changes implemented. Rigorous, evidence-based investigation of all 5 targets found that every one requires either a live Provider/LLM call (forbidden in this phase) or a broader architectural change than the 'narrowest blind-spot fix' this task authorizes. Two targets (TSM A301, MSFT A304) were found to have MORE PRECISE root causes than the prior audits assumed, superseding those earlier, more optimistic characterizations."
+  },
+  "target_classification_reconfirmation_and_discrepancies": {
+    "NVDA_A102": "Reconfirmed STRONG_GOLD, current miss, research/query coverage gap -- consistent with prior audit.",
+    "MSFT_A102": "Reconfirmed STRONG_GOLD, current miss, P0/P1 correctness fix intact (0->1 ticker-specific, score 34.9674->44.9674), remaining blockers INSUFFICIENT_UNIQUE_EVIDENCE + INSUFFICIENT_AGENT_INDEPENDENCE -- consistent with prior audit.",
+    "AMD_A102": "Reconfirmed STRONG_GOLD, current miss, 0/8 MI-series claims truly A102-eligible -- consistent with prior audit.",
+    "TSM_A301": "DISCREPANCY FOUND -- see below. Prior audit characterized this as a 'high-confidence recovery candidate' via an S6 locality-qualification gap (edge alpha-tagged but claim fails role/ticker qualification). Direct re-trace this task found TWO distinct candidate edges, and the REAL binding blocker for the stronger candidate is a documented LLM PROVIDER-TIMEOUT data artifact (alpha_match_fallback_reason='provider_timeout') that orphaned a claim the DETERMINISTIC layer scored as a clean, eligible A301 match (score=0.7596, deterministic_top_alpha='A301') -- not a ticker-specificity or role-qualification defect at all. This is a MORE PRECISE, and different, root cause than the prior audit's S6 characterization.",
+    "MSFT_A304": "DISCREPANCY FOUND -- see below. Prior audit correctly identified claim:82 as PRIMARY_QUALIFIED/eligible/factor_score=1.0 with no extracted structure. This task traced the EXACT extraction blind spot: the deterministic structure extractor requires >=2 distinct canonical factors per claim to form any edge; claim:82 ('Any slowdown in Azure growth could trigger multiple compression') contains only ONE recognized factor (Valuation Risk, via 'multiple compression'). No existing FACTOR_ALIASES phrase matches 'slowdown in Azure growth' as a second (Revenue-Growth-adjacent) factor, and the SAME 'slowdown in Azure/hyperscaler/AI-demand growth -> trigger -> compression' pattern recurs verbatim in NVDA, TSM (x2), and AMD claims -- meaning a real fix is a generalizable pattern, not a MSFT-only patch, but the literal-phrase-only matching architecture (term_in_text) cannot represent the non-adjacent 'slowdown in X growth' word order without becoming a broader regex-capability change, and a bare 'slowdown' alias would misfire on MSFT's own separate claim explicitly stating 'not a slowdown scenario' (a real, discovered negative-control failure).",
+    "stop_and_report_discrepancy_triggered": true
+  },
+  "nvda_a102": {
+    "gold_validity": "STRONG_GOLD (HIGH confidence, no thematic-association risk) -- v0_1_3_gold_benchmark_validity_audit.json",
+    "first_broken_stage": "B1 stance/relation classification (correctly rejecting genuinely non-supportive content) -- but the ROOT cause is upstream: research/query coverage never surfaced the real bullish inference-token narrative.",
+    "research_path_inspected": {
+      "files": [
+        "tradingagents/agents/analysts/fundamentals_analyst.py",
+        "tradingagents/agents/analysts/news_analyst.py",
+        "tradingagents/agents/analysts/sentiment_analyst.py",
+        "tradingagents/agents/analysts/market_analyst.py"
+      ],
+      "finding": "Each analyst uses ONE generic, shared, ticker-agnostic, Alpha-agnostic system_message (e.g. fundamentals_analyst.py: 'You are a researcher tasked with analyzing fundamental information over the past week about a company...') -- no concept of 'A102'/'inference-specific facts' exists anywhere in these prompts. This is the actual live LLM Provider prompt sent for every ticker's research generation.",
+      "why_8_mentions_were_all_competitive_threat_framed": "Confirmed via raw_agent_outputs.json: 14 raw 'inference' occurrences (8 unique after extraction) exist, ALL discussing custom-ASIC competitive threats to NVDA's inference-market share -- zero raw mention of 'token volume', 'tokens generated/processed', 'serving demand', or 'serving workload' anywhere in the corpus. The research genuinely never surfaced the real, externally-confirmed bullish narrative."
+    },
+    "proposed_fix": "A neutral, bounded addition to the research-agent prompt(s) directing them to also seek current evidence on inference workload growth / token volume / serving demand / deployment growth, and report whatever they find (supporting, opposing, neutral, or competitive-threat) -- framed neutrally per Section 6's explicit GOOD/BAD wording guidance.",
+    "implementation_readiness": "DEFERRED_NOT_READY (DESIGN_DEFERRED)",
+    "readiness_reasoning": "The gap is real, deterministic, and neutrally expressible, BUT the fix requires editing tradingagents/agents/analysts/*.py's system_message -- a single, shared, Provider-facing prompt used identically for EVERY ticker and EVERY future run, not a NVDA-localized or COMQUTOR-internal change. This is Provider behavior by this project's own established terminology (see docs/audit_artifacts/v0_1_3_p0_p1_correctness_fix.json's prior classification of an identical proposal as 'Provider behavior changed: YES... requires separate explicit authorization'). It also cannot be validated without a live Provider call, and Section 23 mandates Provider calls = 0 for this entire phase. Per Section 7's explicit instruction: 'If implementation requires a broad research-agent redesign: DO NOT implement. Mark DESIGN_DEFERRED.'",
+    "implemented": false,
+    "files_changed": [],
+    "tests_added": [],
+    "offline_counterfactual": "NOT APPLICABLE -- no persisted run can gain missing research retroactively. FRESH_RUN_REQUIRED_FOR_REAL_VALIDATION if this prompt change were ever separately authorized and implemented.",
+    "remaining_blocker": "Research/query coverage gap requiring a Provider-facing prompt change, out of scope for this no-Provider-calls implementation phase."
+  },
+  "msft_a102": {
+    "gold_validity": "STRONG_GOLD (HIGH confidence, no thematic-association risk)",
+    "p0_p1_fix_confirmed_intact": {
+      "ticker_specific_evidence_count": "0 -> 1 (unchanged from P0/P1 closure)",
+      "score": "34.9674 -> 44.9674 (unchanged)"
+    },
+    "second_fact_audit": {
+      "question": "Why did only one independent Primary A102 fact survive?",
+      "methodology": "Searched all 12 raw agent outputs (raw_agent_outputs.json) for every 'inference' occurrence, with context, and cross-checked against alpha_matches.json's extracted claims.",
+      "finding": "Exactly ONE raw statement exists: fundamental_agent's 'Microsoft's AI products... are driving inference demand and enterprise adoption' -- appearing twice within fundamental_agent's OWN report (main analysis + its own markdown summary table, i.e. the SAME source, not two independent facts), once paraphrased by bull_researcher (correctly deduped as SECONDARY_DUPLICATE_OF_PRIMARY), and once quoted-then-rebutted by bear_researcher (correctly excluded, conditional/neutral). No second, independently-sourced inference-specific fact exists anywhere in the raw corpus.",
+      "classification": "F. legitimately absent -- NOT A (never researched in the sense of a coverage bug), NOT B (present raw but unextracted -- it WAS correctly extracted), NOT C (no duplicate-group collapse bug -- the dedupe behaved exactly as designed), NOT D (there IS one genuine Primary source), NOT E (correctly categorized as A102, not A101/A103)."
+    },
+    "implementation_readiness": "DEFERRED_NOT_READY",
+    "readiness_reasoning": "Per Section 9's explicit instruction: 'If no real second independent fact is present or collectable by a justified research improvement: leave MSFT A102 candidate. That is acceptable.' The absence is genuine and verified, not a fixable coverage/extraction/dedupe bug. No safe code change exists.",
+    "implemented": false,
+    "files_changed": [],
+    "tests_added": [],
+    "offline_counterfactual": "NOT APPLICABLE -- no fabrication performed.",
+    "remaining_blocker": "INSUFFICIENT_UNIQUE_EVIDENCE + INSUFFICIENT_AGENT_INDEPENDENCE, requiring a second, independently-sourced A102 fact that does not currently exist in this run's corpus and cannot be manufactured."
+  },
+  "amd_a102": {
+    "gold_validity": "STRONG_GOLD (HIGH confidence, no thematic-association risk)",
+    "prior_finding_reconfirmed": "0/8 MI-series claims genuinely A102-gate-eligible (re-confirmed via direct evaluate_ai_alpha_gates() re-execution in the prior audit; not re-litigated here per Section 10's explicit instruction not to 'fix' AMD A102 by reclassifying existing claims).",
+    "research_acquisition_check": {
+      "methodology": "Searched all raw agent outputs for AMD inference deployments, inference workloads using MI-series, inference serving adoption, inference token growth, inference-specific customer deployments, inference-vs-training mix.",
+      "finding": "Only one raw mention found: news_agent's 'The broader trend toward inference workloads and AI agents (GPT-6 Astra, enterprise AI) supports sustained compute demand' -- a generic, industry-wide statement not specific to AMD's own MI-series deployments, already correctly captured (and already correctly judged non-ticker-specific/generic in the prior audit). No AMD-specific inference-deployment, inference-serving, or inference-token content exists anywhere in the raw corpus."
+    },
+    "semantic_change_stop_condition_check": {
+      "requirement": "A semantic code change is allowed ONLY if there is an explicit inference claim that current deterministic semantics wrongly reject, demonstrable with a concrete minimal fixture.",
+      "finding": "No such explicit claim exists in AMD's corpus (e.g. no claim reading 'MI accelerators are seeing increased deployment for inference workloads' or equivalent). The closest candidate (fundamental_agent:claim:82 in the prior audit's numbering, 'AMD's Instinct MI300/MI400... are ramping rapidly, competing with NVIDIA in the AI training/inference market') was already directly gate-tested in the prior audit and confirmed to fail on a predicate-vocabulary + clause-boundary combination, not a wrongful-rejection of an explicit inference-specific assertion.",
+      "conclusion": "Section 11's semantic-change stop condition is NOT met -- no implementation authorized."
+    },
+    "implementation_readiness": "DEFERRED_NOT_READY (DESIGN_DEFERRED for the research component; semantic component explicitly not authorized per Section 11)",
+    "implemented": false,
+    "files_changed": [],
+    "tests_added": [],
+    "offline_counterfactual": "NOT APPLICABLE.",
+    "remaining_blocker": "Research/query coverage gap (Provider-facing, out of scope) for an AMD-specific inference-deployment fact; no wrongly-rejected explicit claim exists to justify any semantic gate change."
+  },
+  "tsm_a301": {
+    "gold_validity": "Structure-side legitimate miss (not part of the Gold Validity Audit's STRONG/SUPPORTED A102 classification track, but an independently-tracked structure-recovery candidate from the prior Structure Starvation audit)",
+    "current_state_retraced": {
+      "score": 44.7724,
+      "level": "candidate",
+      "evidence_count": 13,
+      "ticker_specific_evidence_count": 1,
+      "local_structure_support_raw": 0.0,
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "local_edge_exclusion_reasons": [
+        "LINEAGE_UNRESOLVED",
+        "NO_COMMITTED_ALPHA_MATCH",
+        "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+      ]
+    },
+    "first_broken_stage_reexamined": {
+      "candidate_edge_1": {
+        "edge": "ai_demand -> tsm_revenue_growth (supportive, asserted, alpha_ids=['A301'])",
+        "source_claim": "neutral_risk_analyst:risk_debate_state.neutral_history:claim:28 -- 'The fundamentals are genuinely exceptional \u2014 revenue up 36% YoY, gross margins at 67.7%, a fortress balance sheet with TWD 3.6 trillion in cash, and a forward P/E of 19.6x with a PEG of 0.81.'",
+        "finding": "This claim NEVER mentions TSM/TSMC/Taiwan Semiconductor anywhere in its full text (verified directly against the complete claim string, not a truncated excerpt) -- it is genuinely, correctly non-ticker-specific generic financial-statement commentary that could describe any company. Correctly excluded as SECONDARY_NOT_TICKER_SPECIFIC (neutral_risk_analyst is Secondary, singleton group, no Primary member). This is CORRECT_NON_TICKER_SPECIFIC, not a bug -- no legitimate fix exists without fabricating ticker-specificity for text that has no company-identifying anchor."
+      },
+      "candidate_edge_2_the_real_finding": {
+        "edge": "ai_infrastructure -> tsm_revenue_growth (causal, asserted, alpha_ids=[] -- UNTAGGED for any alpha)",
+        "source_claim": "fundamental_agent:fundamentals_report:claim:42 -- 'Insight: After a modest downcycle in 2023, TSM has delivered two consecutive years of >30% revenue growth (2024 and 2025), driven by the AI infrastructure buildout.'",
+        "finding": "This claim IS ticker-specific ('TSM' literally present), IS Primary-sourced, and the DETERMINISTIC Alpha Mapper layer found it a clean, eligible A301 candidate: deterministic_top_alpha='A301', deterministic_match_status='matched', A301 candidate score=0.7596 (eligible=True, relation='activation', matched_keywords=['revenue','revenue growth']). However, the claim's FINAL matched_alpha is None, because match_status='unavailable' with alpha_match_fallback_reason='provider_timeout' -- the original run's LLM Pure-Semantic-Authority call for this specific claim timed out. Per this codebase's own documented, intentional design ('Pure-LLM Alpha Semantic Authority': 'Every operational failure... timeout... returns outcome=unavailable, never a deterministic Alpha standing in as the semantic answer'), deterministic_top_alpha is NEVER used as a fallback -- this is a deliberate architectural invariant, not a bug. The edge therefore correctly carries alpha_ids=[] given the current, intentional design."
+      }
+    },
+    "discrepancy_vs_prior_audit": "The prior Structure Starvation audit characterized TSM A301 as an 'S6 Locality Qualification' case (edge alpha-tagged but claim independently fails Evidence-Source-Role qualification). Direct re-trace this task finds the REAL, higher-value blocker is edge #2: a Provider-timeout data artifact from the ORIGINAL run that left a deterministically-strong, ticker-specific, Primary A301 claim with no LLM-committed Alpha at all -- a fundamentally different mechanism than S6, and one this task's own rules (no Provider calls, do not override the intentional Pure-LLM-authority no-fallback design) cannot safely correct.",
+    "safe_fix_requirement_check": "Section 14 requires ticker ownership valid, B1 stance supports A301, Primary/Secondary rules satisfied, fact dedupe satisfied, AND (Section 12) that 'ticker/entity ownership must remain independently deterministic' with 'no Alpha-level shortcut.' Neither candidate edge can be safely granted A301 credit without either (a) fabricating ticker-specificity for claim:28 (forbidden), or (b) overriding the intentional Pure-LLM-authority no-deterministic-fallback design for claim:42's provider-timeout (a semantic-architecture change explicitly out of this task's narrow-structure-fix scope, and unvalidatable without a live Provider retry, which Section 23 forbids).",
+    "implementation_readiness": "DEFERRED_NOT_READY",
+    "implemented": false,
+    "before_score": 44.7724,
+    "after_score": 44.7724,
+    "before_level": "candidate",
+    "after_level": "candidate",
+    "files_changed": [],
+    "tests_added": [],
+    "offline_counterfactual": "Reconstructable IF claim:42 were granted A301 commitment: local_structure_support raw would rise from 0.0 toward min(100, 1.0/2.0*100)=50.0 (contribution +10.0 at weight 0.20, using the causal/asserted EDGE_CONTRIBUTIONS=1.00 entry), giving an estimated new score of approximately 54.77 -- crossing the 50.0 threshold. This is NOT implemented because the only path to it requires overriding the documented Pure-LLM-authority timeout-never-falls-back invariant, which this task does not authorize.",
+    "remaining_blocker": "A Provider-timeout data artifact from the original run (requires either a live Provider retry -- forbidden this phase -- or a considered, separately-authorized architectural decision about whether/how timed-out LLM Alpha-classification calls should be retried or handled, which this task's scope does not cover)."
+  },
+  "msft_a304": {
+    "gold_validity": "Structure-side legitimate miss, medium-confidence per prior Structure Starvation / S5-S2 audits",
+    "claim_82_confirmed": {
+      "text": "Any slowdown in Azure growth could trigger multiple compression.",
+      "matched_alpha": "A304",
+      "eligible": true,
+      "factor_score": 1.0,
+      "relation": "conditional",
+      "matched_factors": [
+        "Valuation Risk"
+      ],
+      "source_role": "PRIMARY_RESEARCH (fundamental_agent)"
+    },
+    "extraction_path_traced": {
+      "files": [
+        "comqutor_alpha/structure_engine/structure_extractor.py",
+        "comqutor_alpha/structure_engine/factor_normalizer.py",
+        "comqutor_alpha/structure_engine/relation_grammar.py"
+      ],
+      "exact_blind_spot": "structure_extractor.py::_extract_edges() requires len(factors) >= 2 to form any edge (a source factor and a target factor). claim:82 produces exactly ONE recognized factor (Valuation Risk, via the alias 'multiple compression'). No FACTOR_ALIASES entry matches 'slowdown in Azure growth' as a second, growth-adjacent factor -- 'Revenue Growth' aliases (revenue growth, revenue acceleration, sales growth, guidance raised, beat and raise, eps revisions, addressable market, revenue runway, booked revenue) do not cover this phrasing.",
+      "causal_grammar_already_sufficient": "Separately confirmed: 'trigger'/'triggers'/'triggering' IS already a recognized FORWARD_CAUSAL_VERB in relation_grammar.py. If a second factor existed, the EXISTING causal-relation grammar would almost certainly form the edge correctly with no further change needed. The ONLY missing piece is the second factor recognition, not the causal-language detection."
+    },
+    "generalization_check": "Searched all six runs for the same 'slowdown ... could/would/can trigger/pressure/impact ... compression/thesis/utilization' pattern. Found NEAR-IDENTICAL phrasing in NVDA ('Any slowdown in AI infrastructure spending would directly pressure revenue'), TSM (x2: 'any slowdown in hyperscaler spending would directly pressure the thesis', 'any slowdown in hyperscaler capex could impact utilization rates'), and AMD ('Any guidance miss or AI demand slowdown could trigger significant multiple compression'). This is a RECURRING pattern across 4 of 6 tickers, not an MSFT-specific one-off -- any legitimate fix must be generalizable, not a claim-82-specific hardcode.",
+    "why_not_ready": {
+      "architecture_limit": "The existing FACTOR_ALIASES/term_in_text matching is literal-phrase-only (exact adjacent word sequence, word-boundary regex). MSFT's own phrasing ('slowdown in Azure growth'), TSM's ('slowdown in hyperscaler spending'/'slowdown in hyperscaler capex'), and NVDA's ('slowdown in AI infrastructure spending') all use a NON-ADJACENT 'slowdown in [X] growth/spending/capex' word order that no literal 2-3-word phrase alias can match. Representing this pattern correctly would require upgrading term_in_text/extract_known_factors_from_text from literal-phrase matching to a regex-capable pattern matcher -- a broader architectural change than 'the narrowest blind-spot fix,' with blast radius across every one of the 20+ existing factor categories, not just Revenue Growth.",
+      "negative_control_failure_found": "A bare 'slowdown' alias (the only literal-phrase option that would actually catch all the found examples) was tested against MSFT's OWN separate claim: 'The macro picture is one of a resilient economy that is running hot enough to force the Fed toward hikes \u2014 not a slowdown scenario.' This claim explicitly NEGATES slowdown, yet a bare-word alias would still tag it with a slowdown-adjacent factor, since the existing factor-extraction layer has no negation awareness. This is a concrete, demonstrated regression risk, not a hypothetical one."
+    },
+    "implementation_readiness": "DEFERRED_NOT_READY",
+    "implemented": false,
+    "before_score": null,
+    "after_score": null,
+    "before_level": null,
+    "after_level": null,
+    "files_changed": [],
+    "tests_added": [],
+    "offline_counterfactual": "NOT COMPUTED -- no safe fix was found to counterfactually evaluate; computing a hypothetical score for an unimplemented, architecturally-unsound approach would not meet Section 15's 'exact reconstructable' bar for TSM A301 nor this section's analogous requirement for A304.",
+    "remaining_blocker": "A generalizable 'slowdown in [X] growth/spending/capex' pattern requires regex-capable factor matching (broader than a phrase-alias addition) plus negation-awareness (to avoid the demonstrated 'not a slowdown scenario' false-positive) -- both exceed this task's narrow-fix mandate."
+  },
+  "implementation_changes": {
+    "production_files_changed": [],
+    "test_files_changed": [],
+    "note": "Zero implementation performed. All 5 targets independently investigated and classified DEFERRED_NOT_READY with concrete, evidence-based root causes (two of which -- TSM A301, MSFT A304 -- are materially more precise than, and partially supersede, the prior audits' characterizations)."
+  },
+  "targeted_tests": {
+    "new_tests_added": 0,
+    "reran_existing": {
+      "tests/test_p0_p1_evidence_correctness_fix.py": "26 passed, 0 failed",
+      "sha_guard_tests_3": "3 passed, 0 failed"
+    }
+  },
+  "offline_replay": {
+    "performed": true,
+    "scope": "Re-verification only (no code changed, so no before/after delta exists for any of the 5 targets). Confirmed current persisted scores for all 5 targets match the prior audits' recorded values exactly: NVDA A102=0.0, MSFT A102=44.9674 (post P0/P1), AMD A102=35.6327, TSM A301=44.7724, MSFT A304=43.3642 (structure_graph.json A304 activation score, pre this task, unaffected).",
+    "fresh_run_required_for_real_validation": [
+      "NVDA A102 (research coverage)",
+      "MSFT A102 (research coverage, if a second fact were ever found)",
+      "AMD A102 (research coverage)"
+    ],
+    "note": "TSM A301 and MSFT A304's blockers are NOT fixable by a fresh run alone either -- TSM A301 needs the SAME LLM call to not time out (non-deterministic, unguaranteed even on rerun) or an architectural decision about timeout handling; MSFT A304 needs a COMQUTOR-side extraction capability upgrade, not new research."
+  },
+  "alpha_hit_counterfactual": {
+    "A_real_offline_replayable_conversions": 0,
+    "B_requires_fresh_run_potential_conversions": [
+      "NVDA A102",
+      "MSFT A102 (uncertain)",
+      "AMD A102"
+    ],
+    "C_still_unresolved": [
+      "TSM A301 (provider-timeout artifact / architecture decision needed)",
+      "MSFT A304 (regex-capability + negation-awareness upgrade needed)"
+    ],
+    "current_official_retrospective_percent": 61.0317,
+    "offline_replay_diagnostic_after_deterministic_fixes_percent": 61.0317,
+    "note_on_diagnostic": "Identical to current official -- zero deterministic/offline-only fixes were implemented in this task.",
+    "maximum_plausible_projected_percent_if_all_5_targets_legitimately_recovered": {
+      "label": "PROJECTION_ONLY. NOT_ACCEPTANCE_RESULT.",
+      "value": 74.127,
+      "methodology": "Exact macro-average recomputation: NVDA 6/7=85.7143% (if A102 recovers), QQQ unchanged 3/6=50.0% (out of Phase 2 scope), MSFT 5/6=83.3333% (if A102 AND A304 both recover), SNDK unchanged 2/5=40.0% (out of Phase 2 scope, explicitly not a target), TSM 6/6=100.0% (if A301 recovers), AMD 6/7=85.7143% (if A102 recovers). Macro-average = (85.7143+50.0+83.3333+40.0+100.0+85.7143)/6 = 444.7619/6 = 74.1270%."
+    }
+  },
+  "minimum_75_percent_math_recheck": {
+    "denominators": {
+      "NVDA": 7,
+      "QQQ": 6,
+      "MSFT": 6,
+      "SNDK": 5,
+      "TSM": 6,
+      "AMD": 7
+    },
+    "current_hit_counts": {
+      "NVDA": 5,
+      "QQQ": 3,
+      "MSFT": 3,
+      "SNDK": 2,
+      "TSM": 5,
+      "AMD": 5
+    },
+    "current_per_ticker_rates_percent": {
+      "NVDA": 71.4286,
+      "QQQ": 50.0,
+      "MSFT": 50.0,
+      "SNDK": 40.0,
+      "TSM": 83.3333,
+      "AMD": 71.4286
+    },
+    "current_macro_average_percent": 61.0318,
+    "phase2_target_set_max_hypothetical_per_ticker_rates_percent": {
+      "NVDA": 85.7143,
+      "QQQ": 50.0,
+      "MSFT": 83.3333,
+      "SNDK": 40.0,
+      "TSM": 100.0,
+      "AMD": 85.7143
+    },
+    "phase2_target_set_max_hypothetical_macro_average_percent": 74.127,
+    "is_75_percent_mathematically_reachable_from_current_phase2_target_set": false,
+    "reason": "QQQ (stuck at 50.0%, 3 misses: A101/A201/A301, none targeted in Phase 2) and SNDK (stuck at 40.0%, 3 misses: A102/A103/A301, explicitly excluded as a negative control) are NOT part of the Phase 2 target set. Because Alpha Hit is a PER-TICKER macro-average (not a pooled count), these two tickers' unrecovered low rates mathematically cap the achievable macro-average below 75% regardless of perfect success on all 5 Phase 2 targets. To reach >=75% would additionally require at least one QQQ and/or SNDK conversion, both explicitly out of scope for this task."
+  },
+  "regression_safety": {
+    "amd_a201_contaminated_claim_remains_excluded": true,
+    "c1_contamination_remains": 0,
+    "company_names_propagation_remains_active": true,
+    "39_restored_company_name_cases_unaffected": "unaffected -- zero production code changed in this task",
+    "qqq_etf_behavior_unchanged": true,
+    "sndk_a102_remains_inactive": true,
+    "p0_p1_closed_pass_intact": true,
+    "sha_guards_3_3_pass": true,
+    "targeted_tests_26_26_pass": true,
+    "main_conflict_admissions_unchanged": "NVDA/TSM/AMD: A101__A304; QQQ: A304__A601; MSFT/SNDK: none admitted -- all unchanged since zero code changed",
+    "new_regressions": 0
+  },
+  "deferred_work": [
+    "NVDA A102: Provider-facing research-prompt improvement (requires separate authorization + live Provider validation)",
+    "MSFT A102: requires a second independent A102 fact that does not currently exist (no manufacture)",
+    "AMD A102: requires AMD-specific inference-deployment research (Provider-facing) -- no safe semantic gate change justified",
+    "TSM A301: requires either a live Provider retry of the timed-out LLM Alpha-classification call, or a separately-authorized architectural decision on timeout-retry policy (out of this task's scope; explicitly does not override the intentional Pure-LLM-authority no-fallback design)",
+    "MSFT A304: requires a regex-capable, negation-aware factor-extraction upgrade (broader than a phrase-alias addition) -- flagged for a future, properly-scoped design task",
+    "Alpha Hit >=75%: mathematically unreachable from the Phase 2 target set alone even at 100% success (74.125% ceiling); QQQ and SNDK conversions would additionally be required and are out of scope here"
+  ],
+  "final_validation": {
+    "gold_v1_hash_unchanged": true,
+    "gold_validity_hash_unchanged": true,
+    "p0_contamination_still_fixed": true,
+    "p1_company_names_still_fixed": true,
+    "sndk_a102_negative_control_intact": true,
+    "qqq_etf_unchanged": true,
+    "all_implemented_changes_have_targeted_tests": "N/A -- zero changes implemented",
+    "no_thresholds_changed": true,
+    "no_taxonomy_changed": true,
+    "no_gold_changed": true,
+    "no_b1_b2_b4_changes": true,
+    "no_alpha_hit_rule_change": true,
+    "full_backend_new_regressions": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commit": false,
+    "push": false,
+    "destructive_git_operations": 0
+  }
+}

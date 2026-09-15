@@ -1,0 +1,253 @@
+{
+  "schema_version": "v0.2.qqq_a001_positive_requirement_remediation.v1",
+  "task": "V0.2_REMEDIATION_STEP_7A_2_A001_POSITIVE_REQUIREMENT_GATE",
+  "authorities_verified_before_editing": {
+    "gold_contract_json": {
+      "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+      "expected_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "actual_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "match": true
+    },
+    "evidence_trigger_matrix_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+      "expected_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "actual_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "match": true
+    },
+    "final_acceptance_json": {
+      "path": "docs/audit_artifacts/v0_2_final_acceptance_table.json",
+      "expected_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "actual_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "match": true
+    },
+    "acceptance_adjudication_json": {
+      "path": "docs/audit_artifacts/v0_2_acceptance_adjudication.json",
+      "expected_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "actual_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "match": true
+    },
+    "evidence_failure_analysis_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_failure_analysis.json",
+      "expected_sha256": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+      "actual_sha256": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+      "match": true
+    },
+    "step7a_remediation_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_mapping_remediation.json",
+      "expected_sha256": "ab3e4558167bcd5186678e53c7b9cbbd7621d9d5e910c1294e977e9ffba819d0",
+      "actual_sha256": "ab3e4558167bcd5186678e53c7b9cbbd7621d9d5e910c1294e977e9ffba819d0",
+      "match": true
+    },
+    "step7a1_residual_audit_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_residual_mapping_audit.json",
+      "expected_sha256": "f8d6b59e1b717db32bb00e6ac2f68ff81ea5803925fe3993fd3689439337015c",
+      "actual_sha256": "f8d6b59e1b717db32bb00e6ac2f68ff81ea5803925fe3993fd3689439337015c",
+      "match": true
+    },
+    "step7a1_residual_audit_md": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_residual_mapping_audit.md",
+      "expected_sha256": "db88869331b899553c823f85e6cc4df78df6577d5b50537b8585b41f88858de2",
+      "actual_sha256": "db88869331b899553c823f85e6cc4df78df6577d5b50537b8585b41f88858de2",
+      "match": true
+    }
+  },
+  "defect_history": {
+    "historical": 66,
+    "after_step7a": 29,
+    "step7a1_valid_positive": 0,
+    "step7a1_clear_false_positive": 28,
+    "step7a1_uncertain": 1
+  },
+  "production_change": {
+    "summary": "Added a complementary 'Alpha-Specific Positive Requirement' gate to the existing Step-7A negative invalidation veto. A matched A001 result must now clear BOTH: (A) no decisive invalidation/opposition semantics (Step-7A veto, unchanged), AND (B) affirmative directional easing semantics (new Step-7A.2 gate). Applied at the single production path capable of emitting a final matched_alpha under Pure-LLM Alpha semantic authority (map_claim_to_alpha, immediately after the Step-7A veto, before evidence-stance attachment) -- traced and confirmed there is no other path (deterministic scoring is diagnostic-only and never assigns the final matched_alpha; the LLM 'none'/'unavailable' outcomes never risk a positive A001 result in the first place).",
+    "why_two_files": "claim_semantics.py: new classify_a001_directional_semantics()/ALPHA_POSITIVE_REQUIREMENT_CLASSIFIERS/alpha_positive_requirement_satisfied() -- the semantic classification logic itself, alongside the existing alpha_specific_invalidation_matched() this complements. alpha_mapper.py: the single call site wiring the new gate into map_claim_to_alpha's final matched_alpha resolution, mirroring exactly how the Step-7A veto is wired in. Both files were necessary for the same reason Step 7A needed both."
+  },
+  "positive_requirement_semantics": {
+    "directional_classes": [
+      "POSITIVE_EASING",
+      "NEGATIVE_OR_HAWKISH",
+      "CONDITIONAL_OR_UNCERTAIN",
+      "GENERIC_RATE_CONTEXT",
+      "NO_RATE_SEMANTICS"
+    ],
+    "only_class_satisfying_gate": "POSITIVE_EASING",
+    "not_a_literal_five_string_gate": "Each class is a tuple of regex patterns covering real semantic variants (explicit cuts, 'cutting rates', 'rate-cut cycle', 'easing cycle', 'monetary/policy easing', 'fed is cutting/easing', 'falling/declining/lower rates', 'borrowing costs falling', 'central bank shifting to easier policy', 'rate decline', plus confident affirmative-expectation phrasing -- 'markets expect/anticipate/are pricing in cuts', 'fed is set to/poised to/expected to cut') -- not merely the five taxonomy anchor phrases quoted in the Step-7A.1 recommendation.",
+    "generic_terms_insufficient_alone": [
+      "discount rate",
+      "duration",
+      "treasury yield",
+      "interest rate(s)",
+      "fed",
+      "monetary policy",
+      "macro",
+      "inflation",
+      "yield(s)",
+      "rate sensitivity",
+      "rate environment"
+    ],
+    "mention_only_excluded": "A dedicated mention-only check ('focused on whether', 'debate/question/uncertainty...whether', 'whether the fed will') resolves to CONDITIONAL_OR_UNCERTAIN before the positive patterns are even checked, so a bare 'cut rates' inside a 'will the Fed cut?' framing never counts.",
+    "modality_handling": "A direct-positive pattern match still carrying a conditional/modal marker (if/unless/could/may/might/would/potentially -- reusing the existing _CONDITIONAL_PATTERN) downgrades to CONDITIONAL_OR_UNCERTAIN. Confident affirmative-expectation phrasing (its own separate pattern group) is exempt from this downgrade, since it already encodes non-hedged certainty in its own wording.",
+    "boundary_preservation": {
+      "A001_vs_A003": "Liquidity-only evidence (no falling-rate/easing semantics) classifies GENERIC_RATE_CONTEXT or NO_RATE_SEMANTICS for A001 and is unaffected for A003 (gate is A001-only).",
+      "A001_vs_A501": "Recession-risk evidence alone does not imply A001; classifies NO_RATE_SEMANTICS or GENERIC_RATE_CONTEXT, never POSITIVE_EASING merely from a possible future policy response.",
+      "A001_vs_A304": "Rate-sensitive valuation pressure ('high yields pressure technology valuations') classifies GENERIC_RATE_CONTEXT for A001 and is unaffected for A304 (gate is A001-only)."
+    },
+    "no_qqq_or_run_id_hardcode": true,
+    "registry_extensibility": "ALPHA_POSITIVE_REQUIREMENT_CLASSIFIERS is table-driven and currently registers only A001; a no-op (always satisfied) for every other Alpha, per explicit instruction not to build a ten-Alpha framework now."
+  },
+  "files_changed": [
+    {
+      "path": "comqutor_alpha/structure_engine/claim_semantics.py",
+      "sha256": "f0d9d891c1ee459f149677da19639434f3b236901b455e180e841b354688299b"
+    },
+    {
+      "path": "comqutor_alpha/structure_engine/alpha_mapper.py",
+      "sha256": "36d36ffebac280578e540372e33eb657622b39d2530927510f28cb1cadcaed29"
+    }
+  ],
+  "tests": {
+    "file": "tests/test_qqq_a001_mapping_remediation.py",
+    "sha256": "74c055d1379215684fd68aac3910369e93808d070fc145c126a1f780cbd97c07",
+    "extended_not_new_file": true,
+    "total_test_count": 56,
+    "step7a_tests_updated_count": 1,
+    "step7a_test_updated_reason": "test_boundary_recession_evidence_does_not_become_a001_even_if_llm_selected_it renamed to test_boundary_recession_evidence_negative_veto_does_not_overreach and its assertion updated: the Step-7A NEGATIVE veto still correctly does not fire for this claim (documented, unchanged behavior), but the claim is now correctly rejected end-to-end by the separate Step-7A.2 POSITIVE-requirement gate instead, since it contains no affirmative easing evidence. Not a weakening of the original test's intent -- the negative-veto-scope assertion is preserved and still checked explicitly.",
+    "step7a2_new_tests_count": 36,
+    "categories": {
+      "unit_level_classifier": 8,
+      "unit_level_gate_predicate": 3,
+      "positive_controls": 5,
+      "negative_controls": 15,
+      "boundary_controls": 4,
+      "residual_29_regression": 1
+    }
+  },
+  "offline_replay": {
+    "original_66": {
+      "before": 66,
+      "after": 0
+    },
+    "after_step7a_before_step7a2": 29,
+    "residual_29": {
+      "before": 29,
+      "after": 0,
+      "rejected": 29
+    },
+    "survivors": [],
+    "survivor_justifications": [],
+    "note": "No target N was set in advance and none was optimized for. The semantic gate (not a numeric target) is the authority; it happens to reject all 66 original claims and all 29 residual claims because none of them, on independent inspection, expresses affirmative directional easing -- consistent with the Step-7A.1 audit's own independent finding of 0/29 valid positive support."
+  },
+  "systematic_false_positive_pattern_remains": false,
+  "ready_for_fresh_qqq_validation": true,
+  "ready_reason": "No survivors remain in either the full 66-claim or 29-claim residual replay; the rejection is not a bare count outcome but a semantic one -- inspection confirms every original opposition/hawkish, generic-rate, mention-only, and conditional-cut claim correctly resolves to a non-POSITIVE_EASING class. Positive A001 recall is independently confirmed intact via 5 positive controls (including 2 that avoid the literal phrase 'rate cut' entirely). A001/A003, A001/A501, and A001/A304 boundaries all pass. No new regression was found in 56 focused + 508 relevant-subsystem tests; broader full-suite results are recorded separately below.",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_runs": 0,
+  "fresh_six_ticker_runs": 0,
+  "historical_acceptance_rewritten": false,
+  "no_qqq_specific_production_condition": true,
+  "no_run_id_specific_production_condition": true,
+  "unrelated_alpha_taxonomy_redesign": false,
+  "test_results_step7a2_full_suite": {
+    "command": "COMQUTOR_DATABASE_URL=\"\" COMQUTOR_ENV=\"\" python -m pytest tests/ -m \"not integration\" -q",
+    "passed": 4168,
+    "failed": 27,
+    "errors": 42,
+    "skipped": 3,
+    "deselected": 47,
+    "subtests_passed": 69,
+    "duration_seconds": 723.22,
+    "step7a_baseline": {
+      "passed": 4171,
+      "failed": 27,
+      "errors": 3,
+      "skipped": 3,
+      "deselected": 47
+    },
+    "failed_count_unchanged_from_step7a_baseline": true,
+    "failed_list_identical_to_step7a_baseline": true,
+    "pre_existing_failed_unrelated_27_items": [
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline",
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded",
+      "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e42_head_unchanged_from_session_frozen_starting_commit",
+      "tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch",
+      "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence",
+      "tests/test_evidence_review_v2.py::test_case1_v2_summary_uses_exactly_one_200_row_current_review_source",
+      "tests/test_evidence_review_v2.py::test_case2_legacy_50_row_metrics_cannot_become_current_acceptance_metrics",
+      "tests/test_evidence_review_v2.py::test_case3_development_rereview_cannot_overwrite_current_acceptance",
+      "tests/test_evidence_review_v2.py::test_case4_raw_h5_metrics_recompute_deterministically",
+      "tests/test_evidence_review_v2.py::test_case5_raw_critical_reversal_remains_1",
+      "tests/test_evidence_review_v2.py::test_case6_adjudication_does_not_mutate_frozen_labels",
+      "tests/test_evidence_review_v2.py::test_case9_ambiguous_adjudication_remains_pending",
+      "tests/test_evidence_review_v2.py::test_case9b_ambiguous_direction_resolves_current_acceptance_to_pass_without_erasing_the_raw_reversal",
+      "tests/test_evidence_review_v2.py::test_case10_alpha_threshold_is_exactly_80_percent",
+      "tests/test_evidence_review_v2.py::test_case11_polarity_threshold_is_exactly_80_percent",
+      "tests/test_evidence_review_v2.py::test_case12_critical_reversal_target_is_exactly_0",
+      "tests/test_evidence_review_v2.py::test_case13_john_approved_cannot_become_true_without_explicit_approval_provenance",
+      "tests/test_evidence_review_v2.py::test_case14_human_review_performed_remains_false_for_independent_model_review",
+      "tests/test_evidence_review_v2_directional_eligibility.py::test_f_john_approved_cannot_become_true_automatically_even_when_all_mechanical_gates_pass",
+      "tests/test_evidence_review_v2_directional_eligibility.py::test_g_legacy_mixed_summary_metrics_are_not_read_as_current_acceptance",
+      "tests/test_evidence_review_v2_directional_eligibility.py::test_g_eligibility_contract_is_the_generic_source_used_by_the_build_script"
+    ],
+    "expected_frozen_hash_collateral_failed_5_items": [
+      "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/structure_engine/alpha_mapper.py]",
+      "tests/test_high_value_unclassified_recovery.py::test_case10_production_semantic_artifacts_are_not_modified",
+      "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical",
+      "tests/test_step10_final_e2e_qa.py::test_production_semantic_files_unchanged_during_step10",
+      "tests/test_step11_provider_health_rerun.py::test_production_semantic_files_unchanged_during_step11"
+    ],
+    "errors_pre_existing_3_items": [
+      "tests/test_evidence_review_v2_directional_eligibility.py::test_a_ambiguous_row_is_preserved_in_audit_provenance (ERROR)",
+      "tests/test_evidence_review_v2_directional_eligibility.py::test_b_ambiguous_row_excluded_from_polarity_acceptance_denominator (ERROR)",
+      "tests/test_evidence_review_v2_directional_eligibility.py::test_c_ambiguous_row_excluded_from_critical_reversal_gate (ERROR)"
+    ],
+    "errors_new_39_items": [
+      "tests/replay/test_exact_semantic_replay.py::test_eligible_exact_replay_is_atomic_byte_identical_and_source_read_only",
+      "tests/replay/test_exact_semantic_replay.py::test_exact_replay_no_persist_leaves_no_bundle",
+      "tests/replay/test_replay_behavioral_equivalence.py::test_saved_semantics_and_all_deterministic_outputs_are_equivalent",
+      "tests/replay/test_replay_modes.py::test_cli_explicit_exact_mode_dispatches_without_raw_fallback",
+      "tests/replay/test_replay_provider_zero.py::test_exact_replay_never_recomputes_semantics_or_calls_external_services",
+      "tests/replay/test_replay_provider_zero.py::test_atomic_failure_never_leaves_success_directory[write-EXACT_REPLAY_STAGING_WRITE_FAILED]",
+      "tests/replay/test_replay_provider_zero.py::test_atomic_failure_never_leaves_success_directory[validation-EXACT_REPLAY_OUTPUT_VALIDATION_FAILED]",
+      "tests/replay/test_replay_provider_zero.py::test_atomic_failure_never_leaves_success_directory[rename-EXACT_REPLAY_STAGING_WRITE_FAILED]",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_orphan_call_is_reported_without_weak_matching",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_missing_artifact_decision_call_fails_closed",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_one_call_to_multiple_artifact_positions_is_ambiguous",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_multiple_calls_competing_for_one_decision_are_ambiguous",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_claim_or_segment_identity_mismatch_fails_closed[claim_id]",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_claim_or_segment_identity_mismatch_fails_closed[segment_id]",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_alpha_selected_result_mismatch_fails_closed",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_alpha_none_decision_binds_successfully",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_edge_result_mismatch_fails_closed",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_call_hash_mismatch_fails_closed[input_sha256-EXACT_REPLAY_SEMANTIC_INPUT_MISMATCH]",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_call_hash_mismatch_fails_closed[validated_output_sha256-EXACT_REPLAY_SEMANTIC_OUTPUT_MISMATCH]",
+      "tests/replay/test_semantic_call_artifact_binding.py::test_taxonomy_or_version_mismatch_fails_closed",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_missing_semantic_sidecar_fails_closed[llm_semantic_calls.jsonl]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_missing_semantic_sidecar_fails_closed[llm_semantic_manifest.json]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_manifest_not_ready_stops_before_downstream",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_manifest_invalid_json_has_stable_manifest_error",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_manifest_corruption_fails_closed[calls_file_sha256-...]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_manifest_corruption_fails_closed[record_count-99-...]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_manifest_corruption_fails_closed[tasks-value2-...]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_manifest_corruption_fails_closed[schema_version-unsupported-...]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_manifest_corruption_fails_closed[accepted_count-0-...]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_semantic_call_corruption_fails_closed[invalid_json]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_semantic_call_corruption_fails_closed[middle_corruption]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_semantic_call_corruption_fails_closed[tail_corruption]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_semantic_call_corruption_fails_closed[duplicate_call]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_semantic_call_corruption_fails_closed[sequence]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_semantic_call_corruption_fails_closed[hash]",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_semantic_call_schema_version_mismatch_has_stable_version_error",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_wrong_run_and_ticker_identities_fail_closed",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_wrong_ticker_identity_fails_closed",
+      "tests/replay/test_semantic_source_bundle_validation.py::test_path_traversal_and_symlink_escape_are_rejected"
+    ],
+    "new_error_root_cause": "ONE single root cause across all 39 new errors, individually verified across 4 different test files (test_exact_semantic_replay.py, test_replay_behavioral_equivalence.py, test_replay_modes.py, test_replay_provider_zero.py) in addition to the two files shown in the summary, all failing at the SAME line: tests/replay/conftest.py:221's shared `eligible_live_source` fixture asserts `model.calls == 4` on its `OfflineSemanticModel` mock. That mock's alpha_classifier branch always returns `payload['alpha_taxonomy'][0]['alpha_id']` -- 'the taxonomy's own first alpha_id, sorted' per its own docstring -- which is A001 (alphabetically/numerically first among the 10 canonical Alpha IDs), REGARDLESS of the fixture's fixed claim text ('AI demand drives GPU demand and revenue growth while valuation risk creates downside' -- pure NVDA/AI content, zero rate/cut/easing language). Before this task, that synthetic A001 selection passed through unchallenged (Step 7A's negative veto never fires on this text -- it doesn't invalidate A001's thesis, it's simply unrelated), so matched_alpha stayed non-null and B1's own LLM stance-upgrade pass legitimately fired a real 4th call. This task's new positive-requirement gate correctly classifies this claim NO_RATE_SEMANTICS for A001 and rejects the match, so matched_alpha becomes None, B1's stance upgrade has no Alpha to evaluate and never fires, and model.calls drops to 3, tripping the fixture's hardcoded '== 4' assertion for every one of the 39 tests that depend on this one shared fixture (directly or via a fixture chain).",
+    "new_error_is_production_regression": false,
+    "new_error_is_production_regression_rationale": "This is a test-infrastructure artifact, not a production defect: no real Provider/LLM would plausibly select A001 (Rate Cut Cycle) for 'AI demand drives GPU demand and revenue growth' content -- the mock's 'always pick the alphabetically-first taxonomy entry' convenience convention happens to coincide with A001 purely by alphabetical accident, and was never meant to assert anything about A001-specific semantics; these 39 tests exercise exact-replay atomicity, semantic-call binding, and corruption-handling mechanics using A001 only as an arbitrary non-null placeholder. This exact assertion has ALREADY been bumped once before (the fixture's own comment: '4, not the pre-Alpha-Authority-Migration 3') during a prior, similarly-authorized semantic-authority change -- confirming this is a known, precedented, expected-to-need-future-maintenance call-count tripwire, not a stable production invariant. None of this task's own 56 focused tests or the 508 relevant Alpha-Mapper/claim_semantics-dependent subsystem tests regressed.",
+    "new_error_remediation_not_implemented": "Not fixed in this task (touching the widely-shared tests/replay/conftest.py fixture, used across 6+ test files for unrelated replay-binding/corruption/atomicity mechanics, is outside this task's explicit narrow-scope authorization -- 'prefer extending tests/test_qqq_a001_mapping_remediation.py,' 'do not touch unrelated modules'). Recommended narrow follow-up: update the shared fixture's fixed claim text to include genuine rate-cut/easing language (so the mock's canned A001 selection is semantically defensible) OR change the mock's placeholder-alpha-selection convention to avoid relying on alphabetical-sort-produces-A001 as an implicit, undocumented assumption -- then re-bump the call-count assertion as needed, exactly as was done once before.",
+    "new_regressions_count": 39,
+    "new_regressions_are_test_fixture_only_not_production": true
+  }
+}

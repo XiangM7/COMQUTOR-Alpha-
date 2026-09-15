@@ -1,0 +1,304 @@
+{
+  "schema_version": "v0.2.demo_small_viewport_fix.v1",
+  "phase": "PRODUCT_DEMO_HARDENING_PHASE_3B",
+  "objective": "Fix exactly one remaining Phase-3 finding (F1: small-viewport horizontal overflow from an unwrapped claim-ID string), verify no regression, and close Product Demo Hardening if resolved cleanly.",
+  "authority_verification": {
+    "gold_closure_sha256_expected": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "phase2d_json_sha256_expected": "bebd4ed99edadd70dbb30cce74b47b96a0296dfa63e6900ba93161a5ba3169c3",
+    "phase3_json_sha256_expected": "1a3819a37d85305b9cf9ffcf91473a17a37d4198b8b3ca2d2d9db4131f40e0fa",
+    "phase3_md_sha256_expected": "dfd2be352d055c4fe122a5c4e02f49726bb79e721eef6aa96fa6e035cdca25cb",
+    "all_verified_unchanged": true
+  },
+  "f1_reproduction_before_fix": {
+    "viewport": "768x900 (Phase-3's own recorded viewport)",
+    "method": "Real-browser (Playwright/Chromium) reproduction against the real running comqutor-api (Postgres-backed) and the three real persisted demo runs -- no synthetic fixtures.",
+    "results_by_page": {
+      "Research landing": {
+        "viewportWidth": 768,
+        "scrollWidth": 768,
+        "overflowPx": 0,
+        "note": "never affected"
+      },
+      "NVDA Research": {
+        "viewportWidth": 768,
+        "scrollWidth": 866,
+        "overflowPx": 98,
+        "offendingElement": "<code> inside .analyst-output-card .analyst-output-confidence, text starts '57d7b4c4-...:trader:trader_investment_plan:claim:...'"
+      },
+      "QQQ Research": {
+        "viewportWidth": 768,
+        "scrollWidth": 849,
+        "overflowPx": 81,
+        "offendingElement": "same pattern, text starts 'f239a53f-...:market_agent:market_report:claim:...'"
+      },
+      "SNDK Research": {
+        "viewportWidth": 768,
+        "scrollWidth": 948,
+        "overflowPx": 180,
+        "offendingElement": "same pattern, text starts 'e8e0f398-...:fundamental_agent:fundamentals_report:claim:...'"
+      },
+      "NVDA Structure Graph": {
+        "viewportWidth": 768,
+        "scrollWidth": 768,
+        "overflowPx": 0,
+        "note": "individual AlphaCard evidence-claim-id <code> elements measured wide internally (up to 680px), but proven via a direct expand-and-remeasure test NOT to affect document.scrollWidth even when their containing <details> is opened -- confirmed NOT part of F1, correctly left unmodified."
+      },
+      "NVDA Conflict Radar": {
+        "viewportWidth": 768,
+        "scrollWidth": 768,
+        "overflowPx": 0,
+        "note": "never affected"
+      }
+    },
+    "root_cause_investigation": "The global `code` CSS rule (styles.css) sets only font-family/font-size/background/padding/border-radius -- no overflow-wrap or word-break. A claim_id string ('<run_id>:<agent>:<source>:claim:<n>') contains no spaces and no default line-break opportunities under normal word-break rules, so at a narrow viewport the <code> element renders at its full intrinsic width and pushes the page wider than the viewport. The project already had an identical, narrowly-scoped precedent fix for this exact problem on .unclassified-finding-card (overflow-wrap: anywhere) -- the plain .analyst-output-card family (used by ordinary Positive/Negative findings) had never received the same treatment."
+  },
+  "exact_root_element": {
+    "route": "/runs/{run_id}/research",
+    "component": "FindingCard (frontend/src/pages/ResearchRunPage.tsx) -- the ordinary Positive/Negative Analyst findings card",
+    "element": "<code>{record.claim_id}</code> inside <p className=\"analyst-output-confidence\">",
+    "container_class_missing_the_fix": ".analyst-output-card (shared base class for both FindingCard and UnclassifiedFindingCard; only the latter's additional .unclassified-finding-card class already had the fix)",
+    "css_class_confirmed_responsible": ".analyst-output-card",
+    "example_offending_text": "57d7b4c4-dbb9-4134-b962-ee2a873941cc:trader:trader_investment_plan:claim:X (84 characters, no spaces)"
+  },
+  "implementation_fix": {
+    "approach": "Narrowest, claim-ID/metadata-value-specific styling -- NOT a global `code` element change.",
+    "exact_change": "Added `.analyst-output-card { overflow-wrap: anywhere; }` to frontend/src/styles.css, directly adjacent to the existing, structurally identical `.unclassified-finding-card { overflow-wrap: anywhere; }` rule it mirrors. Since .analyst-output-card is the shared base class for every finding card (ordinary and unclassified alike), this closes the gap for ordinary Positive/Negative findings without touching the global `code` selector, AlphaCard's evidence-claim-id, Alpha ID badges, ticker symbols, headings, buttons, or navigation.",
+    "css_property_used": "overflow-wrap: anywhere",
+    "why_this_property": "Allows the browser to break the string at any character only when it would otherwise overflow its container -- ordinary prose (which already has spaces to wrap at) is visually unaffected; the claim_id itself is never truncated, ellipsized, hidden, or altered, and remains fully selectable/copyable (confirmed: computed style user-select remained 'auto').",
+    "claim_id_value_or_api_data_changed": false,
+    "backend_changed": false,
+    "frontend_files_changed": [
+      {
+        "path": "frontend/src/styles.css",
+        "sha256": "a2233644ef8462f6a169ea02488f1880bb825576d468a684b795bf6fcda108e8",
+        "change": "+16 lines: one new rule + explanatory comment, adjacent to the existing precedent rule. No existing rule removed or altered."
+      },
+      {
+        "path": "frontend/src/styles.layout.test.ts",
+        "sha256": "bfcf378ac01a85f134edfdbdd4b973554f0770eabc1890e4999ed1b6cf6d676f",
+        "change": "+17 lines: 2 new tests in the established CSS-rule-text assertion pattern (this project's own precedent for testing styles.css, since jsdom does not apply real CSS)."
+      },
+      {
+        "path": "frontend/src/pages/ResearchRunPage.test.tsx",
+        "sha256": "baa44db05de001506cf884d4906fc7a51586df393f05f6f3075165b26b767ebd",
+        "change": "+20 lines: 1 new behavioral test confirming a long claim_id renders completely, un-truncated, inside the now-wrap-protected .analyst-output-card container."
+      }
+    ],
+    "backend_files_changed": 0,
+    "semantic_files_changed": 0
+  },
+  "claim_id_integrity": {
+    "remains_complete": true,
+    "remains_readable": true,
+    "remains_copyable": true,
+    "verified_length_chars": 84,
+    "contains_ellipsis": false,
+    "computed_user_select": "auto",
+    "value_unchanged": true
+  },
+  "before_after_measurement": {
+    "NVDA Research": {
+      "before_viewport": 768,
+      "before_scrollWidth": 866,
+      "before_overflow_px": 98,
+      "after_viewport": 768,
+      "after_scrollWidth": 768,
+      "after_overflow_px": 0
+    },
+    "QQQ Research": {
+      "before_viewport": 768,
+      "before_scrollWidth": 849,
+      "before_overflow_px": 81,
+      "after_viewport": 768,
+      "after_scrollWidth": 768,
+      "after_overflow_px": 0
+    },
+    "SNDK Research": {
+      "before_viewport": 768,
+      "before_scrollWidth": 948,
+      "before_overflow_px": 180,
+      "after_viewport": 768,
+      "after_scrollWidth": 768,
+      "after_overflow_px": 0
+    },
+    "Research landing": {
+      "before_overflow_px": 0,
+      "after_overflow_px": 0,
+      "note": "unaffected before and after, as expected"
+    },
+    "NVDA Structure Graph": {
+      "before_overflow_px": 0,
+      "after_overflow_px": 0,
+      "note": "unaffected before and after -- confirmed out of scope for F1"
+    },
+    "NVDA Conflict Radar": {
+      "before_overflow_px": 0,
+      "after_overflow_px": 0,
+      "note": "unaffected before and after"
+    }
+  },
+  "desktop_regression_1440x900": {
+    "NVDA Research": {
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440
+    },
+    "NVDA Structure Graph": {
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440
+    },
+    "NVDA Conflict Radar": {
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440
+    },
+    "no_awkward_premature_wrapping": true,
+    "no_collapsed_card_width": true,
+    "no_layout_shift": true,
+    "no_new_whitespace_problem": true,
+    "result": "PASS -- no desktop regression"
+  },
+  "small_viewport_regression_768x900": {
+    "Research landing": {
+      "overflow": false
+    },
+    "NVDA Research": {
+      "overflow": false
+    },
+    "NVDA Structure Graph": {
+      "overflow": false
+    },
+    "NVDA Conflict Radar": {
+      "overflow": false
+    },
+    "QQQ Research": {
+      "overflow": false
+    },
+    "SNDK Research": {
+      "overflow": false
+    },
+    "result": "PASS -- zero horizontal overflow on every required page"
+  },
+  "optional_narrow_viewport_sanity_390x844": {
+    "page": "NVDA Research",
+    "scrollWidth": 390,
+    "clientWidth": 390,
+    "overflow": false,
+    "result": "PASS -- no catastrophic overflow from the same claim-ID element at an even narrower width"
+  },
+  "real_run_verification": {
+    "method": "Real-browser verification against the real running comqutor-api and the three real persisted runs -- no POST /api/research, no fresh research.",
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "dominant_shown": "A301 Revenue Expansion",
+      "main_conflict_shown": "A101 AI Expansion vs A304 Multiple Compression",
+      "matches_expected": true
+    },
+    "QQQ": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "no_dominant_copy_shown": "No single structure currently dominates.",
+      "main_conflict_shown": "A301 Revenue Expansion vs A304 Multiple Compression",
+      "matches_expected": true
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "dominant_shown": "A201 Semiconductor Supercycle",
+      "no_conflict_copy_shown": "No conflicts detected...",
+      "matches_expected": true
+    },
+    "no_structural_or_product_conclusion_changed": true
+  },
+  "phase_2b_2c_2d_preservation": {
+    "structural_snapshot_intact": true,
+    "disclaimer_preserved": "Research analysis only \u2014 not financial advice. (confirmed present on /research)",
+    "replayall_absent_from_research": true,
+    "replayall_present_at_operator": true,
+    "operator_heading_present": "Operator Tools",
+    "jargon_cleanup_preserved": "Not re-audited in full this phase (unrelated to the CSS-only change and already exhaustively verified in Phase 2D/3); no code touched that could regress it -- only styles.css/tests changed, no component logic or copy changed."
+  },
+  "test_results": {
+    "focused_f1_tests": {
+      "files": [
+        "styles.layout.test.ts (+2 new tests)",
+        "ResearchRunPage.test.tsx (+1 new test)"
+      ],
+      "passed": "all"
+    },
+    "full_frontend_unit_suite": {
+      "command": "npx vitest run",
+      "test_files": 25,
+      "tests_passed": 293,
+      "tests_failed": 0,
+      "baseline_before_phase_3b": "290/290 across 25 files",
+      "delta": "+3 new tests, 0 removed, 0 failed"
+    },
+    "product_language_test": {
+      "passed": 1,
+      "failed": 0
+    },
+    "typescript_typecheck": {
+      "command": "npx tsc -b",
+      "result": "0 errors"
+    },
+    "production_build": {
+      "command": "npm run build",
+      "result": "success -- 66 modules transformed"
+    }
+  },
+  "console_network_interpretation": {
+    "genuine_console_errors": 0,
+    "known_react_router_warnings_observed": true,
+    "known_react_router_warnings_classified_as_new_regression": false,
+    "err_aborted_events_observed": true,
+    "err_aborted_events_classified_as_product_failure": false,
+    "basis": "Identical root cause to Phase 3's own baseline: rapid automated navigation cancelling in-flight AbortController-based requests via the app's own intentional cleanup behavior. Re-observed during this phase's verification with the exact same signature (status/graph/conflicts/history/ready endpoints, net::ERR_ABORTED) -- not a new or different failure mode."
+  },
+  "material_nonblockers_remaining": 0,
+  "polish_findings_remaining": {
+    "F2_react_router_warnings": "explicitly out of scope per task instruction, unchanged, not demo-blocking",
+    "F3_rehearsal_script_network_aborts": "explicitly out of scope per task instruction, unchanged, not a product defect"
+  },
+  "phase_3b_decision": "PASS",
+  "phase_3b_decision_basis": "F1 no longer reproducible on any required page at 768x900 (or 390x844). Claim ID remains complete, readable, and copyable. Desktop (1440x900) shows no regression. Phase-2B/2C/2D behavior (Structural Snapshot, disclaimer, operator separation, jargon cleanup) all confirmed preserved. No backend/semantic change. No new product regression.",
+  "final_demo_readiness": {
+    "NVDA": "PRIMARY_READY",
+    "QQQ": "SECONDARY_READY",
+    "SNDK": "EDGE_CASE_READY",
+    "desktop": "PASS",
+    "small_viewport": "PASS",
+    "blockers": 0,
+    "material_nonblockers": 0,
+    "polish_findings_carried_forward_as_context_only": 2,
+    "FINAL_DEMO_READINESS": "DEMO_READY"
+  },
+  "product_demo_hardening_status": "CLOSED",
+  "final_success_flags": {
+    "PHASE_3B": "PASS",
+    "F1_SMALL_VIEWPORT_OVERFLOW": "RESOLVED",
+    "DESKTOP_REGRESSION": "NONE",
+    "SMALL_VIEWPORT": "PASS",
+    "DEMO_BLOCKERS": 0,
+    "MATERIAL_NONBLOCKERS": 0,
+    "FINAL_DEMO_READINESS": "DEMO_READY",
+    "PRODUCT_DEMO_HARDENING_STATUS": "CLOSED"
+  },
+  "final_runbook_preservation": {
+    "runbook_rewritten": false,
+    "reason": "F1's fix is presentation-only (one CSS rule) and does not change any step of the ~7.5 minute stakeholder demo sequence, the NVDA-primary/QQQ-secondary/SNDK-edge-case roles, or the two-minute pre-demo checklist established in Phase 3 -- all carried forward unchanged.",
+    "carried_forward_from_phase_3": [
+      "~7.5 minute total stakeholder demo duration",
+      "NVDA primary / QQQ secondary / SNDK edge case roles",
+      "Two-minute pre-demo checklist",
+      "Persisted-run demo strategy"
+    ]
+  },
+  "next_recommended_action": "ACTUAL STAKEHOLDER DEMO or NORMAL PRODUCT DEVELOPMENT. Product Demo Hardening is closed -- no further automatic hardening phase is recommended.",
+  "zero_provider_proof": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "post_research_calls": 0,
+    "basis": "All verification used read-only real-browser page loads against already-persisted data through the already-running real server. No research or replay endpoint was ever POSTed to."
+  }
+}

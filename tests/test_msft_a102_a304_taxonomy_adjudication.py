@@ -69,7 +69,18 @@ FROZEN_HASHES = {
     # already-implemented-and-reported work already present in this
     # worktree before this cleanup task began (verify via `git status`) --
     # not something this cleanup task itself performs or reverts.
-    REPO_ROOT / "comqutor_alpha/structure_engine/alpha_mapper.py": "33ab39f0c76c4ceda84d96fdf57295a9abd69aa1c631d146b9fcb2707c253c1c",
+    # Re-pinned again (Step 5A, v0.1.2.1 Week2 Alpha Mapper execution-
+    # capacity repair, final architecture): single-claim semantics restored
+    # as the production default plus controlled bounded concurrency
+    # (_classify_alpha_concurrent_with_llm, map_structured_records's
+    # concurrency=); multi-claim batching was evaluated and DEFERRED after
+    # proving unreliable against the configured Provider (its code is kept,
+    # offline-tested, but unused by default). An intentional, separately-
+    # authorized execution-capacity change -- see docs/audit_artifacts/
+    # week2_runtime_capacity_root_cause_v0.1.2.1.json. Alpha semantic
+    # decision CRITERIA are unchanged (same taxonomy conflict-pair reading,
+    # same ambiguity resolution); only execution-capacity plumbing is new.
+    REPO_ROOT / "comqutor_alpha/structure_engine/alpha_mapper.py": "506a228eb10e0b77b2058c9eaa327ae0ec44ba36b1515e5e6400187ffe65a6fd",
     REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_schema.py": "58466213a20810a062d98551866d4e4895f97771792ccaf6d08991655f28969e",
     REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_admissibility.py": "0b795d4b2ee36fe11496b6766a83196b81d8afaec6c83f15cae2dbd0699b1f41",
     # Re-pinned (QA Closure v0.1.2, B1 v2 freeze/test-cleanup) to the current,
@@ -83,7 +94,16 @@ FROZEN_HASHES = {
     # refreshed after it landed; refreshing it now does not weaken this
     # test's actual protection (a genuinely unauthorized future edit to this
     # file will still trip it against this new baseline).
-    REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_detector.py": "e2be3f229c02ddd1d4859c402ab8f3675270ff00cc01eff4a8a49f8e0c7e18a1",
+    #
+    # v0.1.3 QA Closure, Section D (Evidence Polarity): a further,
+    # intentional, documented change on top of the above -- bull_structure/
+    # bear_structure now display only the stance-correct (supports_alpha)
+    # subset of each side's qualifying evidence, fixing John's reported bug
+    # where a claim rebutting an Alpha's thesis (opposes_alpha) displayed as
+    # that Alpha's own bull/bear supporting evidence. evidence_strength/
+    # conflict_score/admissibility inputs are untouched -- see
+    # tests/test_conflict_detector.py::TestEvidencePolarityBullBearAssignment.
+    REPO_ROOT / "comqutor_alpha/conflict_engine/conflict_detector.py": "f07604bc61a713f7ed3db4cb4db5b6ae9091487cf83c85e40b68696f9c3874da",
     # Development Plan v1.0 is PD-001 SOURCE_FROZEN; its own recorded hash.
     DEVELOPMENT_PLAN_DOCX_PATH: "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
     J3_BENCHMARK_PATH: "0a021feff423ae075dd55d27c77f8e063826caf0046a1756fb92768ab6698ca6",

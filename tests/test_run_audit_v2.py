@@ -434,6 +434,210 @@ def test_conflict_summary_includes_every_declared_pair(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# 7b. v0.1.3 QA Closure, Section E: ADMITTED / CANDIDATE / SUPPRESSED /
+# REJECTED conflict-pair collections are strictly separated, main_conflict
+# comes only from admitted, and the new conservation invariants catch drift.
+# ---------------------------------------------------------------------------
+
+
+def test_conflict_accounting_invariants_pass_on_a_consistent_fixture(tmp_path):
+    run_dir, conflict_payload = _seed_rich_run(tmp_path)
+    audit = build_run_audit_payload("runauditv2", tmp_path, conflict_payload=conflict_payload)
+    invariants = {item["name"]: item for item in audit["accounting_invariants"]}
+    assert invariants["conflict_pairs_conserved"]["passed"] is True
+    assert invariants["conflict_pairs_conserved"]["expected"] == 2
+    assert invariants["conflict_pairs_conserved"]["actual"] == 2
+    assert invariants["candidate_conflicts_are_a_subset_of_suppressed"]["passed"] is True
+    assert "ACCOUNTING_INVARIANT_FAILED" not in audit["audit_validation"]["warnings"]
+
+
+def test_conflict_pair_conservation_invariant_fails_when_counts_do_not_sum(tmp_path):
+    """A tampered arbitration block (declared_pair_count inflated beyond what
+    admitted+suppressed+rejected actually account for) must surface FAIL,
+    never be silently reported as consistent."""
+    run_dir, conflict_payload = _seed_rich_run(tmp_path)
+    conflict_payload["arbitration"]["declared_pair_count"] = 5
+    audit = build_run_audit_payload("runauditv2", tmp_path, conflict_payload=conflict_payload)
+    invariants = {item["name"]: item for item in audit["accounting_invariants"]}
+    assert invariants["conflict_pairs_conserved"]["passed"] is False
+    assert audit["audit_validation"]["overall_status"] == "FAIL"
+    assert "ACCOUNTING_INVARIANT_FAILED" in audit["audit_validation"]["warnings"]
+
+
+def test_b2_denied_candidate_pair_is_counted_as_candidate_never_admitted_never_main(tmp_path):
+    """A pair that reached B2 evaluation but was denied admission
+    (admissibility.status == "candidate") must be counted under
+    candidate_conflict_count, must have outcome "suppressed" (never
+    "admitted"), and must never become main_conflict -- proving CANDIDATE
+    cannot leak into ADMITTED at the audit layer."""
+    run_dir, conflict_payload = _seed_rich_run(tmp_path)
+    conflict_payload["arbitration"]["candidate_evaluations"][0]["admissibility"] = {
+        "status": "candidate",
+        "reason_codes": ["INSUFFICIENT_BULL_SUPPORTING_EVIDENCE"],
+    }
+    audit = build_run_audit_payload("runauditv2", tmp_path, conflict_payload=conflict_payload)
+    summary = audit["conflict_summary"]
+    assert summary["candidate_conflict_count"] == 1
+    denied_entry = next(item for item in summary["per_pair"] if item["pair_id"] == "A001__A101")
+    assert denied_entry["outcome"] == "suppressed"
+    assert denied_entry["is_main"] is False
+    assert summary["main_conflict_id"] == "A101__A102"
+    invariants = {item["name"]: item for item in audit["accounting_invariants"]}
+    assert invariants["candidate_conflicts_are_a_subset_of_suppressed"]["passed"] is True
+
+
+# ---------------------------------------------------------------------------
+# 7c. v0.1.3 QA Closure, Item 3: seed_status_consistency. entity_exposure_
+# audit.current_seed_status must always equal an independent, freshly-
+# resolved call against the live seed file for this run's own ticker -- one
+# canonical status, never two call sites that happen to usually agree.
+# ---------------------------------------------------------------------------
+
+
+def test_seed_status_consistency_invariant_passes_for_an_approved_ticker(tmp_path):
+    run_dir, conflict_payload = _seed_rich_run(tmp_path, ticker="SNDK")
+    audit = build_run_audit_payload("runauditv2", tmp_path, conflict_payload=conflict_payload)
+    invariants = {item["name"]: item for item in audit["accounting_invariants"]}
+    seed_invariant = invariants["seed_status_consistency"]
+    assert seed_invariant["passed"] is True
+    assert seed_invariant["expected"] == "approved_gating"
+    assert seed_invariant["actual"] == "approved_gating"
+    assert audit["entity_exposure"]["current_seed_status"] == "approved_gating"
+    assert "ACCOUNTING_INVARIANT_FAILED" not in audit["audit_validation"]["warnings"]
+
+
+def test_seed_status_consistency_invariant_reflects_draft_shadow_for_unconfigured_ticker(tmp_path):
+    run_dir, conflict_payload = _seed_rich_run(tmp_path, ticker="GOOGL")
+    audit = build_run_audit_payload("runauditv2", tmp_path, conflict_payload=conflict_payload)
+    invariants = {item["name"]: item for item in audit["accounting_invariants"]}
+    assert invariants["seed_status_consistency"]["passed"] is True
+    assert audit["entity_exposure"]["current_seed_status"] == "draft_shadow"
+
+
+# ---------------------------------------------------------------------------
+# 7d. Alpha Memory Implementation Step 2: additive alpha_memory section,
+# SHADOW ONLY, atomic edge phi as the primary identity, whole-Alpha
+# aggregate fingerprint demoted to a secondary diagnostic, and proof that
+# activation_summary/conflict_summary are completely unaffected.
+# ---------------------------------------------------------------------------
+
+
+def test_alpha_memory_section_is_present_shadow_only_and_never_modulates(tmp_path):
+    run_dir, conflict_payload = _seed_rich_run(tmp_path)
+    audit = build_run_audit_payload("runauditv2", tmp_path, conflict_payload=conflict_payload)
+    alpha_memory = audit["alpha_memory"]
+    assert alpha_memory["mode"] == "shadow"
+    assert alpha_memory["activation_modulation_applied"] is False
+    assert alpha_memory["identity_model"] == "atomic_edge_phi"
+    assert alpha_memory["identity_version"] == "alpha_memory.phi_edge.v1"
+    # The fixture's own structure_graph.json edge (a->b, alpha_ids=["A101"])
+    # produces exactly one atomic phi structure, with its history merged in.
+    assert len(alpha_memory["phi_structures"]) == 1
+    structure = alpha_memory["phi_structures"][0]
+    assert structure["alpha_id"] == "A101"
+    assert structure["prior_run_ids"] == []
+    # The secondary aggregate fingerprint is present, separately labeled.
+    assert len(alpha_memory["aggregate_fingerprints"]) == 1
+    assert "aggregate_fingerprint_id" in alpha_memory["aggregate_fingerprints"][0]
+    assert alpha_memory["aggregate_fingerprints"][0]["identity_version"] == "alpha_memory.aggregate_fingerprint.v1"
+    # Alpha-level descriptive summary.
+    assert alpha_memory["alpha_memory_summary"] == [
+        {
+            "alpha_id": "A101",
+            "current_phi_count": 1,
+            "first_seen_phi_count": 1,
+            "recurring_phi_count": 0,
+            "historically_matched_phi_count": 0,
+            "unmatched_phi_count": 1,
+            "recurrence_ratio": 0.0,
+            "prior_observation_total": 0,
+        }
+    ]
+    # No instability signals for a single, standalone run.
+    assert alpha_memory["instability_signals"]["alpha_attribution_variance"] == []
+    assert alpha_memory["instability_signals"]["edge_type_variance"] == []
+
+
+def test_alpha_memory_section_does_not_change_activation_or_conflict_summary(tmp_path):
+    """Proof that the alpha_memory section changes nothing about the
+    pre-existing activation_summary/conflict_summary/audit_validation
+    values -- computed from the exact same fixture used by
+    test_activation_summary_reuses_v2_alpha_counts_verbatim and
+    test_conflict_summary_includes_every_declared_pair below, whose own
+    assertions on those two sections remain byte-identical with
+    alpha_memory now present."""
+    run_dir, conflict_payload = _seed_rich_run(tmp_path)
+    audit = build_run_audit_payload("runauditv2", tmp_path, conflict_payload=conflict_payload)
+    assert audit["activation_summary"]["active_count"] == 0
+    assert audit["activation_summary"]["dominant_count"] == 1
+    assert audit["activation_summary"]["regime_level_count"] == 1
+    assert audit["conflict_summary"]["admitted_count"] == 1
+    assert audit["conflict_summary"]["main_conflict_id"] == "A101__A102"
+    assert audit["audit_validation"]["overall_status"] in ("PASS", "PASS_WITH_WARNINGS")
+    assert "ACCOUNTING_INVARIANT_FAILED" not in audit["audit_validation"]["warnings"]
+
+
+def test_alpha_memory_finds_a_real_prior_atomic_match_across_two_runs(tmp_path):
+    """End-to-end proof (still fully synthetic/offline) that the cross-run
+    reader finds an atomic edge match when a second run for the same
+    ticker genuinely shares the same edge."""
+    _seed_rich_run(tmp_path, run_id="runauditv2_a", ticker="MSFT")
+    _seed_rich_run(tmp_path, run_id="runauditv2_b", ticker="MSFT")
+    audit_b = build_run_audit_payload("runauditv2_b", tmp_path)
+    structures = audit_b["alpha_memory"]["phi_structures"]
+    a101_structure = next(s for s in structures if s["alpha_id"] == "A101")
+    assert a101_structure["prior_run_ids"] == ["runauditv2_a"]
+    assert a101_structure["prior_observation_count"] == 1
+    summary = next(s for s in audit_b["alpha_memory"]["alpha_memory_summary"] if s["alpha_id"] == "A101")
+    assert summary["historically_matched_phi_count"] == 1
+    assert summary["unmatched_phi_count"] == 0
+
+
+def test_alpha_memory_instability_signals_are_detected_but_never_change_official_sections(tmp_path):
+    """Two runs for the same ticker with a genuinely different alpha
+    attribution on the identical edge -- proves the diagnostic fires, and
+    that activation_summary/conflict_summary/audit_validation and B4's own
+    activation_level_alignment tests all remain completely unaffected by
+    its presence (points 13-16 of Implementation Step 2's test list)."""
+    run_a_dir, conflict_payload = _seed_rich_run(tmp_path, run_id="runauditv2_c", ticker="SNDK")
+    # Second run: same edge, but linked to an ADDITIONAL alpha (A999) on
+    # top of the fixture's own A101 -- a genuine attribution variance.
+    graph_path = tmp_path / "runauditv2_c" / "structure_graph.json"
+    graph_payload = json.loads(graph_path.read_text())
+    variant_edges = [dict(e) for e in graph_payload["edges"]]
+    for e in variant_edges:
+        e["alpha_ids"] = list(e.get("alpha_ids") or []) + ["A999"]
+    run_b_dir = tmp_path / "runauditv2_d"
+    run_b_dir.mkdir()
+    for name in ("metadata.json", "alpha_matches.json", "structure_graph.json"):
+        payload = json.loads((tmp_path / "runauditv2_c" / name).read_text())
+        if name == "metadata.json":
+            payload["run_id"] = "runauditv2_d"
+        if name == "structure_graph.json":
+            payload["run_id"] = "runauditv2_d"
+            payload["edges"] = variant_edges
+        _write_json(run_b_dir, name, payload)
+    for name in ("raw_agent_outputs.json", "tradingagents_comqutor_vocabulary_snapshot.json"):
+        payload = json.loads((tmp_path / "runauditv2_c" / name).read_text())
+        _write_json(run_b_dir, name, payload)
+
+    audit_d = build_run_audit_payload("runauditv2_d", tmp_path, conflict_payload=conflict_payload)
+    signals = audit_d["alpha_memory"]["instability_signals"]["alpha_attribution_variance"]
+    assert len(signals) == 1
+    variant_alpha_sets = {tuple(v["alpha_ids"]) for v in signals[0]["observed_variants"]}
+    assert ("A101",) in variant_alpha_sets
+    assert ("A101", "A999") in variant_alpha_sets
+
+    # Official sections are completely unaffected by the diagnostic firing.
+    assert audit_d["activation_summary"]["dominant_count"] == 1
+    assert audit_d["activation_summary"]["regime_level_count"] == 1
+    assert audit_d["conflict_summary"]["main_conflict_id"] == "A101__A102"
+    assert audit_d["audit_validation"]["overall_status"] in ("PASS", "PASS_WITH_WARNINGS")
+    assert "ACCOUNTING_INVARIANT_FAILED" not in audit_d["audit_validation"]["warnings"]
+    assert audit_d["alpha_memory"]["activation_modulation_applied"] is False
+
+
+# ---------------------------------------------------------------------------
 # 8. Production/shadow counts are reused, not recomputed by a second algorithm.
 # ---------------------------------------------------------------------------
 

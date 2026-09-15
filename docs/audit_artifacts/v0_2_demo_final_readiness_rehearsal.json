@@ -1,0 +1,421 @@
+{
+  "schema_version": "v0.2.demo_final_readiness_rehearsal.v1",
+  "phase": "PRODUCT_DEMO_HARDENING_PHASE_3",
+  "objective": "Rehearse the actual stakeholder demo end-to-end using the accepted persisted demo runs on the real serving environment. Read-only. No product code changes.",
+  "authority_verification": {
+    "gold_closure_sha256_expected": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "phase1_audit_sha256_expected": "f6905337d4697a85fb30b9419ec165b90b629d42c1927e3297eccb54f6ad9c1c",
+    "phase2a_json_sha256_expected": "0aa62ca9d022f17e2b05f884c335202c8bbaee8848f3e4247d31a2d628332918",
+    "phase2b_json_sha256_expected": "961fe4c70bb1db431b0106a76dc7aa2c0d67fee2e7e9cf5d653d112ddf019384",
+    "phase2c_json_sha256_expected": "b4aa27eeb13d4404b3be65a738caf96cfe02135f5ffc38eed298d4d578a004af",
+    "phase2d_json_sha256_expected": "bebd4ed99edadd70dbb30cce74b47b96a0296dfa63e6900ba93161a5ba3169c3",
+    "phase2d_md_sha256_expected": "b861fc0631a57d05ed1f3215a8eeee36efb8240c9eb8bb6031db5c7d0aa7c3ff",
+    "all_verified_unchanged": true
+  },
+  "environment_verification": {
+    "active_database": "postgresql+psycopg://127.0.0.1:5433/comqutor_alpha (confirmed via resolve_database_url(), credentials never inspected or printed)",
+    "health_check": {
+      "status": "ok"
+    },
+    "readiness_check": {
+      "status": "ready",
+      "database": "ready",
+      "job_manager": "ready",
+      "real_execution": "configured",
+      "live_semantic_pipeline": "ready"
+    },
+    "persisted_run_serveability_verifier": {
+      "command": "scripts/verify_persisted_run_serveability.py <NVDA> <QQQ> <SNDK>",
+      "exit_code": 0,
+      "all_fully_live_servable": true,
+      "NVDA": {
+        "classification": "FULLY_LIVE_SERVABLE",
+        "dominant_alpha_ids": [
+          "A301"
+        ],
+        "main_conflict_pair": {
+          "alpha_a": "A101",
+          "alpha_b": "A304"
+        }
+      },
+      "QQQ": {
+        "classification": "FULLY_LIVE_SERVABLE",
+        "dominant_alpha_ids": [],
+        "main_conflict_pair": {
+          "alpha_a": "A301",
+          "alpha_b": "A304"
+        }
+      },
+      "SNDK": {
+        "classification": "FULLY_LIVE_SERVABLE",
+        "dominant_alpha_ids": [
+          "A201"
+        ],
+        "main_conflict_pair": null
+      }
+    },
+    "frontend_serving": "Vite dev server started against the real running comqutor-api (VITE_COMQUTOR_API_BASE_URL=http://127.0.0.1:8000); stopped and cleaned up after rehearsal.",
+    "rehearsal_method": "Real-browser (Playwright/Chromium) walkthrough of the actual served UI against the real Postgres-backed API and real persisted runs. No mocked fixtures. No POST /api/research, no POST /api/replay-all, no Provider/TradingAgents calls at any point."
+  },
+  "landing_page": {
+    "result": "PASS",
+    "replayall_absent": true,
+    "operator_controls_visible": false,
+    "disclaimer_visible": true,
+    "disclaimer_text": "Research analysis only \u2014 not financial advice.",
+    "ticker_form_understandable": true,
+    "recent_runs_present": true,
+    "jargon_default_visible": {
+      "regime_level": "NOT_PRESENT",
+      "candidate": "TECHNICAL_ONLY",
+      "B2": "NOT_PRESENT",
+      "Conflict Evidence Admissibility": "NOT_PRESENT",
+      "SHADOW": "TECHNICAL_ONLY",
+      "phi_id": "NOT_PRESENT",
+      "activation_modulation_applied": "NOT_PRESENT",
+      "NO_LOCAL_STRUCTURE_SUPPORT": "NOT_PRESENT",
+      "LINEAGE_UNRESOLVED": "NOT_PRESENT"
+    },
+    "horizontal_overflow_desktop": false,
+    "absolute_local_paths_visible": false,
+    "screenshot": "docs/audit_artifacts/demo_evidence/01_landing_desktop.png"
+  },
+  "nvda_primary_demo": {
+    "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "classification": "PRIMARY_READY",
+    "first_screen_answers_core_question_within_seconds": true,
+    "structural_snapshot_present_without_extra_navigation": true,
+    "active_alphas_shown": [
+      "A103 AI Infrastructure",
+      "A304 Multiple Compression",
+      "A601 Narrative Momentum",
+      "A101 AI Expansion",
+      "A301 Revenue Expansion"
+    ],
+    "dominant_shown": "A301 \u2014 Revenue Expansion",
+    "main_conflict_shown": "A101 \u2014 AI Expansion vs A304 \u2014 Multiple Compression",
+    "story_quality_assessment": "Naturally communicates a strong AI/growth structural thesis (A101/A301 supportive) against a valuation/multiple-compression risk (A304) -- the intended bull-vs-bear tension is legible on first screen without further explanation.",
+    "drill_down": {
+      "structure_graph_loads": true,
+      "conflict_radar_loads": true,
+      "return_to_research_without_manual_refresh": true,
+      "route_continuity_preserved": true,
+      "alpha_naming_consistent_across_pages": true,
+      "no_duplicate_or_conflicting_conclusions": true,
+      "evidence_inspectable": true,
+      "counter_evidence_section_present_on_conflict_radar": true
+    },
+    "why_evidence_traceability_rating": "EASY",
+    "why_rating_basis": "Structural conclusion -> Alpha -> evidence is reachable via a single explicit 'View structure graph' link from the first screen, where each Alpha card's 'Evidence (N)' disclosure directly reveals claim text, agent, match score, and relation -- no raw JSON or terminal needed. Basic evidence (agent, claim, confidence) is additionally already visible on the Research page's own Analyst findings panel without any navigation at all.",
+    "technical_details_test": {
+      "default_shows_stakeholder_language": true,
+      "expanding_reveals_additional_raw_information": true,
+      "not_arbitrary_json_dump": true,
+      "examples_confirmed": [
+        "raw activation level",
+        "raw qualification/reason codes",
+        "Alpha Memory mode + activation_modulation_applied raw value"
+      ]
+    },
+    "screenshots": [
+      "docs/audit_artifacts/demo_evidence/02_nvda_research_desktop.png",
+      "docs/audit_artifacts/demo_evidence/03_nvda_structure_desktop.png",
+      "docs/audit_artifacts/demo_evidence/03b_nvda_technical_details_expanded.png",
+      "docs/audit_artifacts/demo_evidence/04_nvda_conflicts_desktop.png"
+    ]
+  },
+  "qqq_secondary_demo": {
+    "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+    "classification": "SECONDARY_READY",
+    "no_dominant_state_clear": true,
+    "no_dominant_copy_rendered": "No single structure currently dominates.",
+    "does_not_resemble_missing_data_or_loading_failure": true,
+    "main_conflict_shown": "A301 \u2014 Revenue Expansion vs A304 \u2014 Multiple Compression",
+    "story_quality_assessment": "The UI correctly distinguishes 'several meaningful structural forces exist' (5 active structures shown) from 'no single structure has reached dominant status' -- the explicit copy reads as an analytical conclusion, not an error or absence of data.",
+    "jargon_default_visible": {
+      "regime_level": "NOT_PRESENT",
+      "candidate": "TECHNICAL_ONLY",
+      "B2": "NOT_PRESENT",
+      "Conflict Evidence Admissibility": "NOT_PRESENT",
+      "SHADOW": "TECHNICAL_ONLY",
+      "phi_id": "TECHNICAL_ONLY",
+      "activation_modulation_applied": "NOT_PRESENT",
+      "NO_LOCAL_STRUCTURE_SUPPORT": "NOT_PRESENT",
+      "LINEAGE_UNRESOLVED": "NOT_PRESENT"
+    },
+    "jargon_leak_count_visible_default": 0,
+    "screenshot": "docs/audit_artifacts/demo_evidence/05_qqq_research_desktop.png"
+  },
+  "sndk_edge_case_demo": {
+    "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+    "classification": "EDGE_CASE_READY",
+    "dominant_shown": "A201 \u2014 Semiconductor Supercycle",
+    "main_conflict": "none",
+    "no_conflict_state_clear": true,
+    "no_conflict_copy_rendered_on_conflict_radar": "No conflicts detected -- No admitted structural conflict was found between Alphas for this research run. This does not mean the position carries no risk.",
+    "does_not_resemble_engine_failure_or_missing_data": true,
+    "does_not_imply_no_risk": true,
+    "screenshots": [
+      "docs/audit_artifacts/demo_evidence/06_sndk_research_desktop.png",
+      "docs/audit_artifacts/demo_evidence/07_sndk_conflicts_desktop.png"
+    ]
+  },
+  "cross_ticker_consistency": {
+    "result": "PASS",
+    "alpha_naming_consistent": true,
+    "dominant_wording_consistent": "A{id} \u2014 {Human Name}, identical pattern across NVDA/SNDK",
+    "no_dominant_wording_consistent": "'No single structure currently dominates.' -- identical copy, only observed for QQQ in this rehearsal",
+    "no_conflict_wording_consistent": "'No conflicts detected' / 'No admitted structural conflict...' -- identical copy, only observed for SNDK in this rehearsal",
+    "technical_details_labels_consistent": "'Technical details' used uniformly across AlphaCard, CandidateConflictCard, Alpha Memory, StructureGraphPage Blocked-alphas",
+    "navigation_consistent": true,
+    "disclaimer_consistent": "Identical single global footer statement on every page checked",
+    "spacing_layout_hierarchy_consistent": true,
+    "feels_like_one_product": true
+  },
+  "desktop_visual_pass": {
+    "viewport": "1440x900",
+    "pages_checked": [
+      "Research landing",
+      "NVDA Research",
+      "NVDA Structure Graph",
+      "NVDA Conflict Radar",
+      "QQQ Research",
+      "SNDK Research",
+      "SNDK Conflict Radar"
+    ],
+    "horizontal_overflow_found": false,
+    "clipped_cards": false,
+    "awkward_wrapping": false,
+    "overlapping_text": false,
+    "giant_blank_space": false,
+    "unreadable_density": false,
+    "footer_disclaimer_placement": "consistent, bottom of every page",
+    "technical_details_layout": "clean, collapsed by default, no layout break when expanded",
+    "result": "PASS"
+  },
+  "small_viewport_sanity_pass": {
+    "viewport": "768x900",
+    "structural_snapshot_stacks_correctly": true,
+    "conflict_labels_remain_readable": true,
+    "technical_details_does_not_break_layout": true,
+    "footer_disclaimer_stays_legible": true,
+    "horizontal_overflow_found": true,
+    "horizontal_overflow_detail": {
+      "affected_pages": [
+        "NVDA Research",
+        "QQQ Research",
+        "SNDK Research"
+      ],
+      "not_affected": [
+        "Research landing"
+      ],
+      "root_cause": "Unwrapped long claim_id strings (e.g. '57d7b4c4-...:trader:trader_investment_plan:claim:X') rendered inside <code> elements in the Analyst findings panel (and similarly in AlphaCard's own evidence claim-id text) have no overflow-wrap/word-break CSS rule, so they render at full intrinsic width and push the page wider than the 768px viewport (confirmed: scrollWidth 866px vs 768px viewport).",
+      "structural_snapshot_grid_itself_confirmed_stacking_correctly": true,
+      "note": "This is the ONLY horizontal-overflow finding in the entire rehearsal; it does not occur at the planned 1440x900 desktop demo width."
+    },
+    "result": "MATERIAL_NONBLOCKER -- does not affect the planned desktop demo, but is a genuine layout defect at narrow width"
+  },
+  "browser_console_and_network": {
+    "console_errors": 0,
+    "console_warnings": 26,
+    "console_warnings_breakdown": "100% React Router 'future flag' deprecation notices (v7_startTransition / v7_relativeSplatPath) -- framework-level, not application-logic warnings, invisible to a normal demo audience (DevTools not open during a stakeholder demo)",
+    "application_logic_warnings": 0,
+    "failed_network_requests_raw_count": 24,
+    "failed_network_requests_root_cause": "100% net::ERR_ABORTED, caused by the rehearsal script's own rapid, automated page-to-page navigation cancelling in-flight AbortController-based requests (e.g. status polling, graph/conflict fetches) via each page's own unmount cleanup -- this is the application's intentional, already-tested cancellation-safety behavior (confirmed throughout Phase 1-2D), not a genuine request failure a human presenter clicking at normal pace would meaningfully reproduce or notice.",
+    "genuine_unexpected_request_failures": 0,
+    "disclosure_note": "Disclosed in full per task instruction not to declare readiness without disclosing recurring console/network activity, even though root-cause analysis attributes both findings to (1) benign framework deprecation notices and (2) the rehearsal script's own navigation speed rather than a product defect."
+  },
+  "load_time_measurement": {
+    "methodology_note": "An initial measurement pass using Playwright's 'networkidle' wait condition produced misleadingly high figures (~16 seconds) for several pages. Investigation confirmed this was an artifact of the Vite dev server's persistent HMR WebSocket connection preventing true network idle, NOT real user-perceived latency. A corrected, content-based measurement (time until the actual first-screen content -- e.g. 'Structural snapshot' -- appears in the DOM) was used instead and is reported below.",
+    "landing_page_usable_ms": 218,
+    "nvda_research_to_structural_snapshot_ms": 676,
+    "qqq_research_to_structural_snapshot_ms": 625,
+    "sndk_research_to_structural_snapshot_ms": 781,
+    "nvda_structure_graph_ms": 412,
+    "nvda_conflict_radar_ms": 453,
+    "sndk_conflict_radar_ms": 307,
+    "classification": "FAST",
+    "note": "All measured pages render their core content in well under one second against the already-persisted real data -- effectively immediate for a persisted-run demo."
+  },
+  "operator_separation_check": {
+    "research_page_excludes_replayall": true,
+    "operator_route_reachable": true,
+    "operator_heading_present": "Operator Tools",
+    "replayallpanel_present_at_operator": true,
+    "normal_demo_navigation_does_not_link_to_operator": true,
+    "real_replay_triggered": false,
+    "result": "PASS"
+  },
+  "disclaimer_check": {
+    "exact_text": "Research analysis only \u2014 not financial advice.",
+    "present_on": [
+      "/research",
+      "NVDA Research",
+      "QQQ Research (small viewport)",
+      "SNDK Research (small viewport)"
+    ],
+    "single_global_source": "AppShell footer, not duplicated per-page",
+    "result": "PASS"
+  },
+  "demo_script_rehearsal": {
+    "part_1_orientation": "Landing page content supports the presenter narration ('turns multi-agent research into structured market drivers, evidence, and conflicts') without contradiction -- the explainer panel on the page independently makes a compatible claim.",
+    "part_2_nvda": "First-screen Structural Snapshot directly shows A301/A101/A304 with human-readable names and the main conflict; evidence drill-down for the 'Why?' question is EASY (see nvda_primary_demo.why_evidence_traceability_rating).",
+    "part_3_qqq": "'No single structure currently dominates.' renders exactly as scripted; Revenue Expansion vs Multiple Compression conflict renders exactly as scripted.",
+    "part_4_sndk": "A201 Semiconductor Supercycle dominant renders exactly as scripted; no admitted main conflict renders exactly as scripted, with legitimate-result copy.",
+    "part_5_close": "Disclaimer is present and closeable-on without needing to show any internal artifact.",
+    "presenter_narration_not_added_to_ui": true
+  },
+  "rehearsal_timing_estimate": {
+    "orientation_minutes": 0.5,
+    "nvda_main_story_minutes": 1.5,
+    "nvda_evidence_drill_down_minutes": 2.0,
+    "qqq_example_minutes": 1.5,
+    "sndk_example_minutes": 1.5,
+    "close_minutes": 0.5,
+    "total_estimate_minutes": "7.5 (range 6-9 depending on Q&A depth)",
+    "within_recommended_5_to_10_minute_target": true
+  },
+  "what_not_shown_by_default_confirmed": {
+    "gold_acceptance_json": "not shown",
+    "run_audit_json": "not shown",
+    "terminal": "not shown",
+    "raw_database": "not shown",
+    "provider_retry_logs": "not shown (not even reachable via any UI route)",
+    "replay_all": "not shown on the demo path (only at /operator, not visited during the scripted sequence)",
+    "alpha_memory_raw_fields": "not shown by default (behind Technical details)",
+    "raw_reason_codes": "not shown by default (behind Technical details)",
+    "internal_test_results": "not shown",
+    "result": "PASS -- none of these needed to appear during the scripted 5-10 minute sequence"
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "MATERIAL_NONBLOCKER",
+      "page": "ResearchRunPage.tsx (Analyst findings panel) and AlphaCard.tsx (evidence claim-id)",
+      "component": "FindingCard's claim-id <code> element; AlphaCard's evidence claim-id <code> element",
+      "steps_to_reproduce": "Open any persisted run's Research page (confirmed on NVDA/QQQ/SNDK) at a 768px-wide viewport and check document.documentElement.scrollWidth vs clientWidth.",
+      "expected_behavior": "No horizontal page overflow at the existing 768px breakpoint (per the project's own established responsive convention).",
+      "actual_behavior": "Long, unbroken claim_id strings (e.g. '57d7b4c4-...:trader:trader_investment_plan:claim:5') render inside <code> elements with no overflow-wrap/word-break rule, pushing page scrollWidth to 866px against a 768px viewport -- a real, confirmed (screenshot-verified) horizontal scrollbar.",
+      "likely_scope": "Small, presentation-only CSS fix (add overflow-wrap/word-break to the relevant <code> selectors) -- not attempted in this phase per the read-only mandate.",
+      "affects_planned_demo_viewport": false
+    },
+    {
+      "id": "F2",
+      "severity": "POLISH",
+      "page": "All pages",
+      "component": "React Router (framework-level)",
+      "steps_to_reproduce": "Open browser DevTools console while navigating any route.",
+      "expected_behavior": "No console warnings.",
+      "actual_behavior": "26 React Router v7 'future flag' deprecation warnings observed across the rehearsal -- framework-level, non-application-logic, invisible to a normal demo audience.",
+      "likely_scope": "Trivial -- add the two future-flag opt-ins to the router config, or ignore until a React Router v7 upgrade.",
+      "affects_planned_demo_viewport": false
+    },
+    {
+      "id": "F3",
+      "severity": "POLISH",
+      "page": "All pages",
+      "component": "Rehearsal-script methodology (not a product defect)",
+      "steps_to_reproduce": "Navigate rapidly between pages via an automated script.",
+      "expected_behavior": "N/A -- this is not a product finding.",
+      "actual_behavior": "24 net::ERR_ABORTED network events recorded, all attributable to the app's own intentional AbortController-based request-cancellation-on-unmount behavior being triggered by the rehearsal script's faster-than-human navigation speed, not a real product defect.",
+      "likely_scope": "No action needed -- documented for completeness per the task's disclosure instruction.",
+      "affects_planned_demo_viewport": false
+    }
+  ],
+  "demo_blocker_counts": {
+    "BLOCKER": 0,
+    "MATERIAL_NONBLOCKER": 1,
+    "POLISH": 2
+  },
+  "e2e_packaging_issue": {
+    "carried_forward_from_phase_2b_2c_2d": "scripts/seed_w5_demo.py: ModuleNotFoundError: No module named 'scripts' when launched via the Playwright webServer config -- pre-existing, unrelated Python packaging issue.",
+    "classification": "NOT_DEMO_RELEVANT",
+    "basis": "The actual stakeholder demo startup path (real Postgres DB + comqutor-api + Vite dev server or production build) does not invoke this seed script, the Playwright webServer config, or any e2e test runner at all. This phase's own real-browser rehearsal fully exercised the actual demo path independently and successfully, proving the blocked e2e harness has no bearing on demo-day readiness.",
+    "not_fixed_this_phase": true
+  },
+  "readiness_decision": "DEMO_READY_WITH_MINOR_CAVEATS",
+  "readiness_decision_basis": "0 BLOCKER findings. 1 MATERIAL_NONBLOCKER (small-viewport-only horizontal overflow, does not affect the planned 1440x900 desktop demo) and 2 POLISH findings (benign console warnings; script-navigation-only network aborts) remain, all bounded and non-blocking.",
+  "demo_case_decisions": {
+    "NVDA": "PRIMARY_READY",
+    "QQQ": "SECONDARY_READY",
+    "SNDK": "EDGE_CASE_READY"
+  },
+  "screenshots_captured": true,
+  "screenshot_directory": "docs/audit_artifacts/demo_evidence/",
+  "screenshot_list": [
+    "01_landing_desktop.png",
+    "02_nvda_research_desktop.png",
+    "03_nvda_structure_desktop.png",
+    "03b_nvda_technical_details_expanded.png",
+    "04_nvda_conflicts_desktop.png",
+    "05_qqq_research_desktop.png",
+    "06_sndk_research_desktop.png",
+    "07_sndk_conflicts_desktop.png",
+    "small_landing_768.png",
+    "small_nvda_research_768.png",
+    "small_qqq_research_768.png",
+    "small_sndk_research_768.png"
+  ],
+  "final_demo_runbook": {
+    "startup_check": [
+      "Confirm Postgres (127.0.0.1:5433/comqutor_alpha) is up and is the DB the API will resolve.",
+      "GET /health -> {\"status\":\"ok\"}",
+      "GET /ready -> {\"status\":\"ready\", \"database\":\"ready\", ...}",
+      "python scripts/verify_persisted_run_serveability.py <NVDA_RUN_ID> <QQQ_RUN_ID> <SNDK_RUN_ID> -> exit code 0, all FULLY_LIVE_SERVABLE",
+      "Frontend reachable at its serving URL, /research loads."
+    ],
+    "demo_order": [
+      "1. Open /research -- 30s orientation narration.",
+      "2. Navigate to NVDA's Research page -- show Structural Snapshot (dominant + main conflict).",
+      "3. Drill into NVDA Structure Graph, expand an Alpha's Evidence, then Conflict Radar, for the 'Why?' answer.",
+      "4. Navigate to QQQ's Research page -- show the no-dominant state and its conflict.",
+      "5. Navigate to SNDK's Research page -- show the dominant state and no-conflict state (optionally open Conflict Radar for the no-conflict copy)."
+    ],
+    "close": "Return to the research-only, not-financial-advice framing (already visible in the footer throughout).",
+    "optional_technical_deep_dive_only_if_asked": [
+      "Technical Details disclosures (AlphaCard, CandidateConflictCard, Alpha Memory)",
+      "Gold v0.2 acceptance provenance (docs/audit_artifacts/)",
+      "Architecture (structure engine / graph engine / conflict engine)",
+      "Provider/retry internals (not exposed in UI; discuss verbally only)"
+    ]
+  },
+  "two_minute_pre_demo_checklist": [
+    "[ ] Confirm the intended API process resolves COMQUTOR_DATABASE_URL to the real Postgres DSN (not the local SQLite fallback) -- e.g. via scripts/start_live_comqutor.sh or an equivalent env-loaded launch.",
+    "[ ] curl -s http://127.0.0.1:8000/health",
+    "[ ] curl -s http://127.0.0.1:8000/ready",
+    "[ ] python scripts/verify_persisted_run_serveability.py <NVDA_RUN_ID> <QQQ_RUN_ID> <SNDK_RUN_ID> (exit code 0 expected)",
+    "[ ] Open the frontend URL, confirm /research loads without a visible error.",
+    "[ ] Open the NVDA Research page, confirm the Structural Snapshot renders with a dominant Alpha and main conflict.",
+    "[ ] Glance at the browser DevTools console for any red (error) entries -- warnings are expected and benign."
+  ],
+  "final_validation": {
+    "gold_closure_unchanged": true,
+    "phase1_through_2d_artifacts_unchanged": true,
+    "product_code_files_changed": 0,
+    "test_files_changed": 0,
+    "backend_files_changed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "post_research_calls": 0,
+    "post_replay_all_calls_against_real_data": 0
+  },
+  "success_criteria_met": {
+    "all_three_persisted_runs_live_servable": true,
+    "nvda_core_story_immediately_understandable": true,
+    "qqq_no_dominant_state_clear": true,
+    "sndk_no_conflict_state_clear": true,
+    "evidence_traceability_usable_in_ui": true,
+    "no_internal_jargon_leak_in_normal_path": true,
+    "disclaimer_present": true,
+    "operator_tooling_absent_from_normal_path": true,
+    "desktop_layout_usable": true,
+    "small_viewport_not_broken": "mostly -- one confirmed, bounded, non-desktop-affecting overflow finding (F1)",
+    "no_demo_blocking_console_network_issue": true,
+    "no_product_code_changes_during_rehearsal": true,
+    "no_provider_calls": true,
+    "no_fresh_research": true
+  },
+  "product_demo_hardening_closed": false,
+  "next_recommended_action": "PRODUCT DEMO HARDENING -- PHASE 3B (tightly scoped): fix finding F1 only (small-viewport horizontal overflow caused by unwrapped claim_id <code> text in Analyst findings / AlphaCard evidence). Do not create a broad new hardening backlog. F2 and F3 require no code action (F2 is a trivial optional router-config opt-in or can be left until a React Router v7 upgrade; F3 is a rehearsal-methodology artifact, not a product issue)."
+}

@@ -1,0 +1,125 @@
+{
+  "schema_version": "alpha_memory_step4b_visibility.v1",
+  "task": "Implementation Step 4B -- Feedback Loop Visibility: Artifact + API + Minimal UI (SHADOW ONLY)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_ticker_research": false,
+  "commit": false,
+  "push": false,
+  "mode": "shadow",
+  "activation_modulation_applied": false,
+
+  "existing_api_path_audit": {
+    "question": "Is alpha_memory from run_audit.json already returned to the frontend through an existing result/audit payload?",
+    "answer": "NO before this step -- confirmed by inspection: run_audit.json itself has no public GET route by original design, and build_research_response() (the function backing GET /api/research/{run_id}, the existing research-result endpoint the frontend already polls) did not include alpha_memory.",
+    "action_taken": "Reused the ALREADY-LOADED run_audit_for_gate variable inside build_research_response() -- the same variable that function already reads for ticker_consistency/artifact_completeness/evidence_stance_summary -- and added one new key, alpha_memory, mirroring the exact existing pattern used for evidence_stance_summary verbatim. Zero new file reads, zero new API route, zero write endpoint."
+  },
+
+  "api_contract": {
+    "endpoint": "GET /api/research/{run_id} (existing, unchanged route)",
+    "new_field": "alpha_memory: AlphaMemorySection | null",
+    "top_level_fields": ["mode", "activation_modulation_applied", "identity_model", "identity_version"],
+    "per_alpha_summary_fields": ["alpha_id", "current_phi_count", "recurring_phi_count", "first_seen_phi_count", "recurrence_ratio", "prior_observation_total"],
+    "per_phi_fields": ["phi_id", "alpha_id", "source", "edge_type", "target", "is_recurring", "prior_observation_count", "prior_run_ids", "first_seen", "last_seen_prior"],
+    "secondary_fields_exposed": ["aggregate_fingerprints (secondary diagnostic only)", "instability_signals (audit-only, optional)"],
+    "no_fields_invented": "Every exposed field already existed in run_audit.json's alpha_memory section from Steps 1-3 -- nothing new was computed for this step."
+  },
+
+  "frontend_changes": {
+    "location": "frontend/src/pages/ResearchRunPage.tsx -- the existing research-result page, immediately after the existing UnclassifiedFindingsPanel section (same page, same visual convention, no new route/page created)",
+    "new_component": "AlphaMemoryPanel (+ PhiStructureDetail, AlphaMemoryEntry helper components), all defined inline in the same file, matching the existing UnclassifiedFindingsPanel pattern (not separately exported/routed)",
+    "types_added": "frontend/src/api/types.ts -- AlphaMemorySection, AlphaMemoryPhiStructure, AlphaMemorySummaryEntry, AlphaMemoryAggregateFingerprint (all additive, CanonicalResearchResponse gains one new optional field: alpha_memory)",
+    "adapter_added": "frontend/src/api/adapters.ts -- adaptAlphaMemorySection (+3 small per-item adapters), wired additively into adaptCanonicalResearchResponse's existing return. Lenient by design: a malformed/absent alpha_memory degrades to undefined/null, never fails the whole research response.",
+    "styles_added": "frontend/src/styles.css -- new .alpha-memory-* classes only, deliberately neutral styling (no bullish/bearish color coding), inserted after the existing .unclassified-findings-* block"
+  },
+
+  "visible_information": {
+    "header": "\"Alpha Memory\" with a \"SHADOW\" badge",
+    "modulation_status": "\"Activation modulation: Off\" -- rendered directly from activation_modulation_applied, never derived/assumed",
+    "shadow_explanation": "\"Shadow memory — historical recurrence is shown for audit only. It does not modify Alpha activation or conflict selection.\"",
+    "per_alpha_summary": "e.g. \"A101 — 5 current structures, 2 recurring, 3 first seen, 40% recurrence\"",
+    "expandable_recurring_detail": "source --edge_type--> target relation (human-readable, not the raw phi_id), \"Previously observed: N prior runs\", \"First seen: <real timestamp or Unavailable>\", \"Last prior observation: <real timestamp or Unavailable>\"",
+    "technical_detail": "raw phi_id and source run_id list, shown only inside a nested, closed-by-default <details> element -- never the primary human-facing label",
+    "secondary_diagnostics": "aggregate fingerprint note and instability-signal counts, shown only inside a separate, closed-by-default <details> element, explicitly labeled 'technical'"
+  },
+
+  "empty_and_first_seen_states": {
+    "alpha_with_current_phi_but_none_recurring": "Shows \"No exact historical recurrence found for this Alpha.\" -- never a fabricated recurrence, never 'failed'/'expired'.",
+    "alpha_with_no_phi_at_all": "Simply does not appear in the per-Alpha list (alpha_memory_summary is empty for it) -- no fabricated entry.",
+    "no_current_phi_at_all_for_the_run": "Shows the existing EmptyState component: \"No current Alpha structures to compare against history for this run.\"",
+    "msft_style_sparse_history": "Verified via real MSFT run 6cd2566d (see real_offline_verification below): renders \"No exact historical recurrence found for this Alpha.\" for every Alpha, never \"memory failed\" or any lifecycle word.",
+    "missing_timestamp": "Renders the literal string \"Unavailable\" -- never a fabricated date, matching the existing codebase convention for missing metadata elsewhere."
+  },
+
+  "language_safety_verified": {
+    "test": "tests: 'never uses bullish/bearish/confidence language anywhere in the panel' -- scans the panel's full rendered text (including collapsed <details> content) for every banned phrase (bullish, bearish, confirmed thesis, stronger signal, higher confidence, validated Alpha, memory boost, memory penalty, failed, expired, invalidated) and asserts none appear.",
+    "result": "PASS -- confirmed by the actual component's static wording (all copy is hardcoded to the approved vocabulary; no interpolated field ever inserts a sentiment/confidence word)."
+  },
+
+  "aggregate_fingerprint_treatment": {
+    "displayed_as": "A single secondary-diagnostic note inside a closed-by-default technical <details> element, never the main per-Alpha summary line.",
+    "wording_used": "\"Whole-Alpha aggregate structure fingerprint is a secondary diagnostic only — it is not the primary recurrence signal shown above.\"",
+    "note_on_scope": "The UI does NOT claim whether the aggregate 'changed' or 'stayed the same' relative to a specific prior run, because that comparison is not computed/exposed by the current API payload (Steps 1-3 only expose the CURRENT run's own aggregate_fingerprint_id, not a cross-run match verdict for it). Rather than fabricate this comparison in the frontend, the panel states only that the aggregate is secondary and technical -- an honest, narrower claim than the task's own suggested example wording ('Overall Alpha structure changed, while N atomic causal relations recurred'), which would have required inventing a comparison the backend does not yet provide. This is a deliberate, reported scoping decision, not an oversight."
+  },
+
+  "real_offline_verification": {
+    "method": "GET /api/research/{run_id} path (build_research_response), the exact same function the frontend calls, exercised directly against real persisted data. No Provider calls, no TradingAgents calls, no fresh research.",
+    "NVDA_current_run_2f8ee897": {"current_phi_count": 15, "recurring_phi_count": 6, "first_seen_phi_count": 9, "prior_observation_total": 13, "matches_step3_finding": true},
+    "MSFT_current_run_6cd2566d": {"current_phi_count": 12, "recurring_phi_count": 0, "renders_honestly_as": "No exact historical recurrence found for this Alpha (for every Alpha) -- never 'memory failed'."},
+    "note": "These values are verification data only, confirmed via a live call through the real API path against real persisted artifacts -- never hardcoded into production code. run_audit.json for both runs was regenerated offline (zero cost, zero new calls) to pick up the alpha_memory section, exactly as in Steps 2/3."
+  },
+
+  "files_changed": {
+    "backend": ["comqutor_alpha/api/routes_research.py (+1 additive field in build_research_response, reusing the already-loaded run_audit_for_gate variable)"],
+    "backend_tests_new": ["tests/test_alpha_memory_api_exposure.py (4 tests)"],
+    "frontend": [
+      "frontend/src/api/types.ts (+4 new interfaces, +1 optional field on CanonicalResearchResponse)",
+      "frontend/src/api/adapters.ts (+4 new adapter functions, +1 wiring line)",
+      "frontend/src/pages/ResearchRunPage.tsx (+AlphaMemoryPanel and 2 helper components, +1 render call, +3 type imports)",
+      "frontend/src/styles.css (+ .alpha-memory-* rule block)"
+    ],
+    "frontend_tests_new": [
+      "frontend/src/api/adapters.test.ts (+6 tests)",
+      "frontend/src/pages/ResearchRunPage.test.tsx (+11 tests)"
+    ],
+    "regenerated_artifacts_offline_zero_cost": [
+      "outputs/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/run_audit.json",
+      "outputs/runs/c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6/run_audit.json",
+      "outputs/runs/6cd2566d-e0f1-4306-995f-74f39efb21eb/run_audit.json"
+    ]
+  },
+
+  "proof_b1_b2_b4_conflict_unchanged": {
+    "backend": "New alpha_memory field in build_research_response reuses an already-computed value; every other field in the returned dict is untouched, verified by test_api_exposes_alpha_memory_without_changing_existing_fields.",
+    "frontend": "AlphaMemoryPanel is a new, additive component rendered after all existing sections; no existing component's props/logic were changed. Verified by test 'leaves the existing research summary and Unclassified findings panel unchanged when Alpha Memory is present'.",
+    "full_backend_regression_sweep": "Re-ran tests/test_artifact_export_and_api.py, test_data_sanity_api.py, test_week4_pipeline_api.py, test_a3_unclassified_findings_control.py plus the full Alpha Memory suite -- 188 passed, only the same pre-existing test_replay_conflict_does_not_get_run_id_mismatch failure (predates this entire Alpha Memory line of work, confirmed via git status showing pre-existing unstaged replay/ changes).",
+    "full_frontend_suite": "238 of 238 frontend tests passed (20 files) -- zero failures, zero new regressions."
+  },
+
+  "tests": {
+    "backend_new": 4,
+    "frontend_new": 17,
+    "total_new": 21,
+    "all_passed": true,
+    "coverage_of_required_points": {
+      "1_api_exposes_without_changing_existing_fields": "test_api_exposes_alpha_memory_without_changing_existing_fields (backend)",
+      "2_frontend_renders_when_data_exists": "renders the Alpha Memory panel with Shadow badge and modulation Off when data exists",
+      "3_recurring_count_correct": "renders the recurring and first-seen counts correctly",
+      "4_first_seen_count_correct": "same test as above",
+      "5_shadow_modulation_off_shown": "same as test 2",
+      "6_never_bullish_bearish_confidence": "never uses bullish/bearish/confidence language anywhere in the panel",
+      "7_first_seen_only_alpha_renders_correctly": "renders a first-seen-only Alpha (no recurrence) honestly, without a fake recurring section",
+      "8_empty_memory_state_renders_safely": "renders an honest empty state when there is no current Alpha structure to compare",
+      "9_missing_timestamp_no_fake_date": "never fabricates a timestamp when first_seen/last_seen_prior are unavailable",
+      "10_atomic_phi_is_primary_displayed_unit": "shows the actual source-to-target relation and real prior-observation details when expanded",
+      "11_aggregate_fingerprint_secondary_only": "treats aggregate fingerprint information as secondary only, inside technical detail",
+      "12_existing_alpha_conflict_ui_unchanged": "leaves the existing research summary and Unclassified findings panel unchanged when Alpha Memory is present",
+      "13_existing_activation_conflict_payload_unchanged": "test_api_exposes_alpha_memory_without_changing_existing_fields (backend) + full regression sweep",
+      "14_activation_modulation_applied_remains_false": "verified in every test via activation_modulation_applied: false assertions"
+    }
+  },
+
+  "lifecycle_status": "MODEL_0, unchanged. No invalidation/expiration/failure/non-execution/reason-code lifecycle was implemented in this step. No memory weight, decay, reinforcement, or B4/Conflict history gating was implemented. activation_modulation_applied remains hardcoded false throughout the new code."
+}

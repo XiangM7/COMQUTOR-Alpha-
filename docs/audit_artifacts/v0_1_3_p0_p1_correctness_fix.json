@@ -1,0 +1,416 @@
+{
+  "schema_version": "v0_1_3_p0_p1_correctness_fix.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "executive_summary": {
+    "p0_cross_company_contamination": "FIXED",
+    "p1_company_names_propagation": "FIXED",
+    "known_amd_a201_contamination": "FIXED",
+    "production_company_names_nonempty_runs": "5 / 6 supported corporate tickers (NVDA, MSFT, AMD, TSM, SNDK) -- QQQ intentionally excluded (ETF, deferred)",
+    "false_negatives_39": {
+      "now_ticker_recognized": 39,
+      "now_qualifying_activation_evidence": 39,
+      "still_independently_blocked": 0
+    },
+    "remaining_confirmed_c1_contamination": 0,
+    "new_regressions": 3,
+    "gold_unchanged": true
+  },
+  "code_changes": {
+    "files_created": [
+      "comqutor_alpha/graph_engine/issuer_aliases.py"
+    ],
+    "files_modified": [
+      "comqutor_alpha/graph_engine/pipeline.py",
+      "comqutor_alpha/graph_engine/activation_scorer_v2.py"
+    ],
+    "test_files_created": [
+      "tests/test_p0_p1_evidence_correctness_fix.py"
+    ],
+    "test_files_modified": [],
+    "issuer_aliases_py": "New module: CANONICAL_ISSUER_ALIASES (static dict, ticker -> tuple of issuer/product aliases for NVDA, MSFT, AMD, TSM, SNDK; QQQ intentionally absent), company_names_for_ticker(ticker) lookup function, ETF_ENTITY_HANDLING_DEFERRED=True marker.",
+    "pipeline_py_change": "score_and_assemble_structure_graph()'s call to score_alpha_activations_v2 now passes company_names=company_names_for_ticker(graph.get('ticker')) -- previously omitted entirely, silently defaulting to ().",
+    "activation_scorer_v2_py_change": "Added FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL constant and _foreign_issuer_only_reason(record, ticker) function (P0 gate); wired as an additive veto inside _qualify_groups_for_activation, applied AFTER qualify_evidence_group's existing Primary/Secondary decision -- only ever downgrades an already-eligible member, never restores or upgrades one."
+  },
+  "p0_ownership_contract": {
+    "invariant": "A semantic Alpha match (matched_alpha, however derived -- deterministic or Pure-LLM Semantic Authority) is never by itself sufficient to make a claim count as activation-qualifying evidence for the current run ticker. Ticker/entity ownership is independently deterministic.",
+    "veto_conditions_all_three_required": [
+      "1. the current ticker's own symbol/issuer aliases are absent from the claim text",
+      "2. at least one OTHER ticker this system covers (CANONICAL_ISSUER_ALIASES) has its symbol/issuer alias present in the claim text",
+      "3. every canonical Alpha's keyword_score AND factor_score are exactly zero in the claim's own candidate_scores (zero deterministic taxonomy signal of any kind)"
+    ],
+    "why_three_conditions": "Empirically validated against all six persisted runs during design: a broader 'another company is named' veto alone flagged 628 legitimate claims (mostly ticker-agnostic macro-Alpha evidence); a narrower 'foreign known-ticker mention with own-ticker absent' rule still flagged 23 claims, 22 of which were legitimate relational/competitive/ETF-constituent evidence (e.g. 'It signals... a direct target for Nvidia's competitive response' in an AMD run -- NVIDIA is a taxonomy keyword, so this correctly carries real deterministic signal and must NOT be vetoed). The three-condition conjunction fires on exactly the one confirmed contamination case (AMD A201 Silicon Motion/SanDisk) across the entire six-run, 750+-match corpus and nothing else.",
+    "applied_at": "activation_scorer_v2.py::_qualify_groups_for_activation, as an additive override after qualify_evidence_group -- never touches B1 stance, Alpha Mapper eligibility/thresholds, or Primary/Secondary role qualification itself.",
+    "visibility": "The vetoed claim remains fully visible in evidence_fact_groups' audit view (members_source_role_detail), marked activation_eligible=False with reason FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL -- never deleted from any audit/reporting view, per the task's explicit requirement."
+  },
+  "p1_company_alias_contract": {
+    "registry_location": "comqutor_alpha/graph_engine/issuer_aliases.py::CANONICAL_ISSUER_ALIASES",
+    "entries": {
+      "NVDA": [
+        "NVIDIA",
+        "NVIDIA Corporation"
+      ],
+      "MSFT": [
+        "Microsoft",
+        "Microsoft Corporation"
+      ],
+      "AMD": [
+        "Advanced Micro Devices",
+        "Advanced Micro Devices, Inc.",
+        "Ryzen",
+        "Instinct",
+        "Epyc"
+      ],
+      "TSM": [
+        "TSMC",
+        "Taiwan Semiconductor Manufacturing",
+        "Taiwan Semiconductor Manufacturing Company",
+        "Taiwan Semiconductor"
+      ],
+      "SNDK": [
+        "SanDisk",
+        "SanDisk Corporation"
+      ]
+    },
+    "qqq_deliberately_absent": true,
+    "etf_entity_handling_deferred": true,
+    "source_of_truth_decision": "No existing ticker-metadata/company-name source was found anywhere in the codebase (confirmed by the prior audit's exhaustive grep) -- this is a NEW, minimal, static registry, not a repurposing of pre-existing metadata that was simply unwired. Classified accordingly in the prior audit as MISSING_METADATA_PROPAGATION, not BUG_UNWIRED_ARGUMENT.",
+    "wiring": "graph_engine/pipeline.py's score_and_assemble_structure_graph() now calls company_names_for_ticker(graph.get('ticker')) and passes the result into score_alpha_activations_v2 -- the ONLY production call site.",
+    "token_boundary_safety": "Reuses the existing, unmodified _token_boundary_match regex (activation_scorer_v2.py) -- never a bare substring match; verified 'AMD' does not match inside 'AMDocs', 'Microsoft' matches only as a real token."
+  },
+  "targeted_tests": {
+    "file": "tests/test_p0_p1_evidence_correctness_fix.py",
+    "command": ".venv/bin/python3 -m pytest tests/test_p0_p1_evidence_correctness_fix.py -v",
+    "result": "26 passed, 0 failed",
+    "coverage_by_requirement": {
+      "A_company_alias_propagation": "PASS",
+      "B_token_boundary_behavior": "PASS",
+      "C_msft_full_name_ticker_specificity": "PASS",
+      "D_nvda_full_name_ticker_specificity": "PASS",
+      "E_amd_full_name_ticker_specificity": "PASS",
+      "F_unknown_ticker_fallback": "PASS",
+      "G_foreign_company_only_rejection": "PASS",
+      "H_valid_relational_evidence_preservation": "PASS",
+      "I_amd_a201_contamination_regression": "PASS",
+      "J_qqq_etf_negative_control": "PASS",
+      "K_primary_secondary_unchanged": "PASS",
+      "L_b1_stance_unchanged": "PASS",
+      "M_fact_group_dedupe_unchanged": "PASS",
+      "N_neutral_opposing_evidence_cannot_support_activation": "PASS",
+      "O_llm_semantic_mapping_cannot_override_ownership": "PASS",
+      "P_claim_remains_visible_as_background_when_ineligible": "PASS",
+      "production_wiring_msft_nonempty": "PASS",
+      "production_wiring_qqq_empty": "PASS"
+    }
+  },
+  "targeted_regression_suite": {
+    "files": [
+      "test_activation_scorer_v2.py",
+      "test_b4_activation_level_alignment.py",
+      "test_evidence_source_role_qualification.py",
+      "test_conflict_admissibility.py",
+      "test_conflict_evidence_fact_integration.py",
+      "test_conflict_detector.py",
+      "test_entity_alpha_exposure_productization.py",
+      "test_structure_correctness_sprint.py",
+      "test_b2_admissibility_integration.py",
+      "test_msft_a102_a304_taxonomy_adjudication.py",
+      "test_run_audit_v2.py"
+    ],
+    "result": "385 passed, 0 failed"
+  },
+  "full_regression_comparison": {
+    "with_p0_p1_changes": {
+      "passed": 4040,
+      "failed": 24,
+      "errors": 3,
+      "skipped": 47
+    },
+    "baseline_before_p0_p1_changes_same_dirty_tree": "see final report -- computed by temporarily reverting exactly this task's own code hunks (pipeline.py + activation_scorer_v2.py) and rerunning the full suite (excluding the new test file, which depends on the reverted code and was correctly deselected for this isolated comparison), then restoring",
+    "methodology": "Since activation_scorer_v2.py was ALREADY modified (dirty, uncommitted) by earlier, unrelated session work before this task began, comparing against a stale numeric baseline recalled from memory is unreliable. The rigorous approach: precisely reverse this task's own edits (verified via diff to be an exact, clean reversal), rerun the full suite once more, and diff the two failure lists directly.",
+    "baseline_actual_measured": {
+      "passed": 4017,
+      "failed": 21,
+      "errors": 3,
+      "skipped": 47,
+      "note": "measured by precisely reverting this task's own hunks (verified byte-exact via diff) and rerunning the full suite, then restoring (also verified byte-exact)"
+    },
+    "new_regressions_caused_by_this_task": 3,
+    "new_regression_test_names": [
+      "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/graph_engine/activation_scorer_v2.py]",
+      "tests/test_step10_final_e2e_qa.py::test_production_semantic_files_unchanged_during_step10",
+      "tests/test_step11_provider_health_rerun.py::test_production_semantic_files_unchanged_during_step11"
+    ],
+    "new_regression_root_cause": "All three are frozen-SHA256 guard tests that pin activation_scorer_v2.py's exact file bytes to a hash recorded at a prior authorized-change checkpoint (each carries a comment of the form 'Hash updated deliberately for that authorized change... this guard's job is to catch an UNREVIEWED future drift, not to freeze the files forever'). This task's P0 ownership-gate addition to activation_scorer_v2.py is itself an authorized, reviewed, intentional change to that file -- exactly the kind of change this codebase's own established pattern handles by updating the three frozen-hash dict entries in those test files. This task did NOT update them, because doing so requires modifying test files, which this task's explicit safety rules (Section 0's DO NOT list: 'modify tests') prohibit without further authorization. Reported honestly as new regressions rather than silently worked around.",
+    "note_on_the_other_21_pre_existing_failures": "Confirmed identical in both the reverted-baseline run and the with-changes run (21 of the 24 with-changes failures exactly match the 21 baseline failures by name) -- entirely unrelated to this task: a stale FROZEN_SESSION_HEAD constant ('b5837e80...') compared against the real current HEAD ('9f22872...'), and evidence_review_summary_v2.json schema/KeyError issues (e.g. missing 'raw_h5_metrics') from unrelated earlier session work. None of these are affected by, or attributable to, this task's code changes."
+  },
+  "six_run_offline_blast_radius_replay": {
+    "methodology": "Apples-to-apples: score_alpha_activations_v2 called twice per run against the SAME persisted alpha_matches.json/structure_graph.json edges/structured_agent_outputs.json (read-only, no Provider/LLM/TradingAgents calls, no artifact mutation) -- once with company_names=() (old behavior, byte-identical code path) and once with company_names=company_names_for_ticker(ticker) (new, with the P0 gate active in both runs since it is unconditional code, not a company_names-gated branch).",
+    "zero_status_band_transitions_anywhere": true,
+    "note": "Across all six runs and every one of the 46 alpha-ticker combinations scored, NOT ONE alpha's status band changed (dominant/active/candidate/watch/inactive all identical before vs after) -- every change was a same-band score increase (or, for AMD A201, a same-band net score change combining P0's removal of contaminated evidence with P1's simultaneous recognition of the legitimate 'Ryzen processors' claim). This means the Expected Alpha Hit metric is UNCHANGED by this patch in this replay.",
+    "per_ticker_changes": [
+      {
+        "ticker": "NVDA",
+        "changes": [
+          {
+            "alpha_id": "A201",
+            "before_score": 18.5807,
+            "after_score": 23.5807,
+            "status": "inactive (unchanged)"
+          },
+          {
+            "alpha_id": "A301",
+            "before_score": 78.4902,
+            "after_score": 79.4902,
+            "status": "dominant (unchanged)"
+          },
+          {
+            "alpha_id": "A304",
+            "before_score": 67.637,
+            "after_score": 68.0916,
+            "status": "active (unchanged)"
+          },
+          {
+            "alpha_id": "A601",
+            "before_score": 68.1047,
+            "after_score": 68.6929,
+            "status": "active (unchanged)"
+          }
+        ]
+      },
+      {
+        "ticker": "QQQ",
+        "changes": [],
+        "note": "zero changes -- ETF constituent claims correctly unaffected"
+      },
+      {
+        "ticker": "MSFT",
+        "changes": [
+          {
+            "alpha_id": "A101",
+            "before_score": 55.6974,
+            "after_score": 58.1974,
+            "status": "active (unchanged)"
+          },
+          {
+            "alpha_id": "A102",
+            "before_score": 34.9674,
+            "after_score": 44.9674,
+            "status": "watch (unchanged) -- still short of 50 by 5.0326"
+          },
+          {
+            "alpha_id": "A103",
+            "before_score": 86.4726,
+            "after_score": 89.634,
+            "status": "regime_level (unchanged)"
+          },
+          {
+            "alpha_id": "A301",
+            "before_score": 65.1479,
+            "after_score": 65.8146,
+            "status": "active (unchanged)"
+          }
+        ]
+      },
+      {
+        "ticker": "SNDK",
+        "changes": [
+          {
+            "alpha_id": "A103",
+            "before_score": 39.0305,
+            "after_score": 42.3638,
+            "status": "watch (unchanged)"
+          },
+          {
+            "alpha_id": "A201",
+            "before_score": 84.22,
+            "after_score": 84.4581,
+            "status": "dominant (unchanged)"
+          },
+          {
+            "alpha_id": "A601",
+            "before_score": 60.6606,
+            "after_score": 62.2606,
+            "status": "active (unchanged)"
+          }
+        ],
+        "note": "SNDK A102 does NOT appear in this list -- score remains exactly 0.0, status unchanged (true evidence vacuum, confirmed unaffected)"
+      },
+      {
+        "ticker": "TSM",
+        "changes": [
+          {
+            "alpha_id": "A103",
+            "before_score": 68.5499,
+            "after_score": 69.3191,
+            "status": "active (unchanged)"
+          },
+          {
+            "alpha_id": "A201",
+            "before_score": 64.5041,
+            "after_score": 65.7299,
+            "status": "active (unchanged)"
+          },
+          {
+            "alpha_id": "A301",
+            "before_score": 44.7724,
+            "after_score": 45.5417,
+            "status": "watch (unchanged)"
+          },
+          {
+            "alpha_id": "A601",
+            "before_score": 54.1843,
+            "after_score": 54.9535,
+            "status": "active (unchanged)"
+          }
+        ]
+      },
+      {
+        "ticker": "AMD",
+        "changes": [
+          {
+            "alpha_id": "A201",
+            "before_score": 21.0667,
+            "after_score": 23.5667,
+            "status": "inactive (unchanged)",
+            "note": "combined P0(-)+P1(+) net effect -- see AMD A201 Before/After section"
+          }
+        ]
+      }
+    ]
+  },
+  "amd_a201_before_after": {
+    "isolated_p0_only_counterfactual_from_prior_audit": {
+      "evidence_count": "5 -> 4",
+      "score": "25.7333 -> 21.0667",
+      "level": "candidate -> candidate (no change)"
+    },
+    "actual_combined_p0_plus_p1_patch_effect_this_replay": {
+      "evidence_count": "4 -> 4 (unchanged in this comparison since both sides already exclude the contaminated claim -- the isolated P0-only removal already happened relative to the ORIGINAL persisted 5-count)",
+      "score_old_company_names_empty_but_p0_active": 21.0667,
+      "score_new_with_p1_registry_and_p0_active": 23.5667,
+      "ticker_specific_evidence_count": "0 -> 1 (the 'Ryzen processors' claim is now correctly recognized as AMD-ticker-specific)",
+      "level": "inactive/candidate (below 50) -> inactive/candidate (below 50), no change"
+    },
+    "alpha_hit_impact": "NONE -- AMD A201 was a miss before this task's changes and remains a miss after. No Alpha Hit status change.",
+    "conflict_impact": "NONE -- AMD's admitted main conflict (A101__A304) does not involve A201.",
+    "honesty_note": "Removing the confirmed P0 contamination, in isolation, lowers AMD A201's score (25.73 -> 21.07). The P1 fix applied simultaneously happens to add back some legitimate credit (21.07 -> 23.57) via the newly-recognized 'Ryzen processors' claim, but the NET combined result is still below the original contaminated score of 25.7333. Correctness was prioritized throughout; no fix was selected or tuned because it raised a score."
+  },
+  "msft_a102_before_after": {
+    "ticker_specific_evidence_count": "0 -> 1",
+    "unique_evidence_fact_count": "1 -> 1 (unchanged -- still only one independent qualifying fact)",
+    "score": "34.9674 -> 44.9674",
+    "level": "watch/candidate (below 50) -> watch/candidate (below 50), no change -- still short of the 50.0 activation threshold by 5.0326",
+    "alpha_hit_impact": "NONE -- MSFT A102 was a miss before and remains a miss after, exactly as predicted by the prior audit's counterfactual (which explicitly warned not to expect activation from this fix alone).",
+    "remaining_blocker": "INSUFFICIENT_UNIQUE_EVIDENCE + INSUFFICIENT_AGENT_INDEPENDENCE -- unchanged, requires a second independent qualifying fact not currently present in this run's corpus (deferred, explicitly out of scope for this task)."
+  },
+  "other_alpha_level_changes": "NONE across all six runs -- zero status-band transitions anywhere (see six_run_offline_blast_radius_replay above). Every changed alpha kept its exact pre-existing status/level; only the underlying score moved within the same band.",
+  "main_conflict_changes": "NONE -- since no alpha changed qualification band, every run's admitted main conflict is provably unchanged: NVDA/TSM/AMD admit A101__A304, QQQ admits A304__A601, MSFT/SNDK admit none (matching the persisted v0_1_3_gold_validation.json exactly).",
+  "expected_alpha_hit_diagnostic": {
+    "before": 61.0317,
+    "after": 61.0317,
+    "change": 0.0,
+    "note": "UNCHANGED. Diagnostic only, never a manufactured target -- this patch's honest effect on the official Gold-evaluated metric is exactly zero in this replay, despite being a real, defensible evidence-correctness improvement (higher ticker-specificity credit for genuinely correct claims, and removal of one confirmed contamination case)."
+  },
+  "negative_controls": {
+    "gold_hit_classification_23_currently_hit_alphas": {
+      "UNCHANGED_no_score_or_status_change": [
+        "QQQ_A103",
+        "QQQ_A304",
+        "QQQ_A601",
+        "AMD_A101",
+        "AMD_A103",
+        "AMD_A301",
+        "AMD_A304",
+        "AMD_A601",
+        "NVDA_A101",
+        "NVDA_A103",
+        "TSM_A101",
+        "TSM_A304"
+      ],
+      "EXPECTED_CORRECTNESS_CHANGE_score_increased_status_unchanged": [
+        "NVDA_A301",
+        "NVDA_A304",
+        "NVDA_A601",
+        "MSFT_A101",
+        "MSFT_A103",
+        "MSFT_A301",
+        "SNDK_A201",
+        "SNDK_A601",
+        "TSM_A103",
+        "TSM_A201",
+        "TSM_A601"
+      ],
+      "UNEXPECTED_CHANGE": [],
+      "NOT_REPLAYABLE": [],
+      "counts": {
+        "UNCHANGED": 12,
+        "EXPECTED_CORRECTNESS_CHANGE": 11,
+        "UNEXPECTED_CHANGE": 0,
+        "NOT_REPLAYABLE": 0,
+        "total": 23
+      }
+    },
+    "sndk_a102_negative_control": {
+      "before_level": "candidate (score 0.0)",
+      "after_level": "candidate (score 0.0)",
+      "new_ticker_specific_evidence": 0,
+      "new_qualifying_evidence": 0,
+      "result": "PASS -- no artificial activation, exactly as required. SNDK remains excluded from CANONICAL_ISSUER_ALIASES matching only its own listed aliases; this task never targeted or touched SNDK A102."
+    },
+    "qqq_negative_control": {
+      "etf_entity_model": "DEFERRED / UNCHANGED",
+      "result": "PASS -- zero score/status/evidence changes for QQQ across all 6 of its scored alphas. company_names_for_ticker('QQQ') returns () unchanged; no constituent mention (Intel/AMD/Marvell/NVIDIA) became QQQ-direct evidence."
+    },
+    "current_gold_hits_unchanged_regression_count": 0
+  },
+  "deferred_work": [
+    "NVDA A102 research/query coverage (true evidence vacuum for the bullish inference-explosion narrative)",
+    "MSFT A102 unique-evidence/agent-independence gap (needs a second independent qualifying fact -- not manufactured here)",
+    "AMD A102 inference-vs-training semantic/predicate-vocabulary gap (the 'ramp'/'ramping' predicate gap identified in the prior audit)",
+    "SNDK A102 Gold review (REVIEW_CANDIDATE, not a system-fix target)",
+    "QQQ ETF constituent ownership model (ETF_ENTITY_HANDLING_DEFERRED=True, explicitly out of scope per Section 7/16)",
+    "TSM A301 structure recovery (Structure-side audit, separate track)",
+    "MSFT A304 structure extraction recovery (Structure-side audit, separate track)",
+    "Alpha Hit >=75% (this task's changes leave the official metric at 61.0317%, unchanged -- not a target of this correctness-only task)"
+  ],
+  "stop_conditions_encountered": {
+    "cannot_distinguish_foreign_company_only_from_relational_evidence_with_a_simple_rule": "Encountered and RESOLVED, not stopped on -- the two broader candidate rules tested (628 and 23 false positives respectively) were rejected during design; the final three-condition conjunction (own-ticker-absent AND foreign-known-ticker-present AND zero-deterministic-taxonomy-signal) was empirically validated to isolate exactly the one confirmed case with zero collateral damage across the full six-run corpus before being implemented.",
+    "other_stop_conditions": "None encountered. No B1/threshold/taxonomy change was required; ETF handling was correctly kept out of scope without requiring a rewrite; no Provider/LLM call was needed at any point."
+  },
+  "final_validation": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "no_gold_v2": true,
+    "no_threshold_changes": true,
+    "no_taxonomy_changes": true,
+    "b1_unchanged": true,
+    "b2_unchanged": true,
+    "b4_unchanged": true,
+    "primary_secondary_unchanged": true,
+    "source_role_rules_unchanged_except_additive_veto": true,
+    "fact_dedupe_unchanged": true,
+    "alpha_hit_semantics_unchanged": true,
+    "a102_semantics_unchanged": true,
+    "qqq_etf_special_behavior_not_broadened": true,
+    "known_amd_contamination_no_longer_qualifies": true,
+    "company_names_reaches_production_scorer": true,
+    "targeted_tests_pass": true,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commit": false,
+    "push": false,
+    "destructive_git_operations": 0
+  }
+}

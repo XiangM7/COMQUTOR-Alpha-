@@ -22,6 +22,8 @@ reconstruction, the artifact export, or the run_audit summary.
 
 from __future__ import annotations
 
+import copy
+
 from comqutor_alpha.alpha_library.alpha_schema import ConflictAlpha
 from comqutor_alpha.api.artifact_export import extract_conflicts_export
 from comqutor_alpha.api.routes_research import _build_research_summary, _conflict_summary_section
@@ -58,7 +60,12 @@ def _raw_match(claim_id, alpha_id, evidence, *, score=0.8, stance="supports_alph
     return {
         "claim_id": claim_id,
         "source_agent_output_id": f"o_{claim_id}",
-        "agent": f"agent_{claim_id}",
+        # Step 6 (Primary vs Secondary Evidence Qualification): a real
+        # PRIMARY_RESEARCH agent identity, not a synthetic per-claim name --
+        # this fixture exercises B2 threshold/gate logic end-to-end via
+        # detect_alpha_conflicts, so evidence must resolve to PRIMARY
+        # (qualifies under existing rules unchanged).
+        "agent": "market_agent",
         "match_status": "matched",
         "matched_alpha": alpha_id,
         "matched_alpha_name": alpha_id,
@@ -150,7 +157,14 @@ def test_b2_result_is_computed_once_and_identical_across_detector_db_and_export(
     # never recomputed by the persistence/reconstruction layer.
     assert db_evaluations[("A", "B")]["admissibility"] == detector_evaluations[("A", "B")]["admissibility"]
     assert db_evaluations[("C", "D")]["admissibility"] == detector_evaluations[("C", "D")]["admissibility"]
-    assert db_result["main_conflict"] == detector_result["conflicts"][0]
+    # Step 6 (Primary vs Secondary Evidence Qualification): evidence_qualification
+    # is an in-memory/API-only additive diagnostic field, not yet persisted through
+    # the Week4 DB whitelist -- documented gap, stripped here exactly like other
+    # additive fields are stripped before an API-vs-DB-reconstruction comparison.
+    expected_main_conflict = {
+        k: v for k, v in detector_result["conflicts"][0].items() if k != "evidence_qualification"
+    }
+    assert db_result["main_conflict"] == expected_main_conflict
 
     # 3. Conflicts artifact export (artifact_export.extract_conflicts_export):
     # a direct extraction of the same in-memory payload, never a second
@@ -172,7 +186,18 @@ def test_b2_result_is_computed_once_and_identical_across_detector_db_and_export(
     # already has in memory, which after a completed run is this same DB
     # reconstruction) -- still byte-identical, still never recomputed.
     export_from_db = extract_conflicts_export(db_result, run_id=RUN_ID, ticker=TICKER)
-    assert export_from_db == export
+    # Step 6: evidence_qualification is dropped by the DB whitelist (see
+    # above), so it's also absent from conflicts/main_conflict entries
+    # extracted from db_result -- stripped from the in-memory side too for
+    # this specific byte-for-byte comparison.
+    expected_export = copy.deepcopy(export)
+    for c in expected_export["conflicts"]:
+        c.pop("evidence_qualification", None)
+    for c in expected_export["candidate_conflicts"]:
+        c.pop("evidence_qualification", None)
+    if expected_export["main_conflict"] is not None:
+        expected_export["main_conflict"].pop("evidence_qualification", None)
+    assert export_from_db == expected_export
 
     # 4. run_audit's conflict_summary section (routes_research.py): the
     # same per-pair admissibility diagnostic, reshaped but never

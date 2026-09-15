@@ -159,6 +159,13 @@ def test_ready_misconfigured_enabled_real_execution_returns_not_ready(tmp_path, 
 
 def test_ready_configured_real_execution_is_reported(tmp_path, monkeypatch):
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    # Live-semantic-pipeline readiness guard (operational safety fix):
+    # overall readiness now also requires Week2's LLM classifier and its
+    # own provider to be ready -- see test_ready_* below for the guard's
+    # own dedicated /ready tests.
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "deepseek-v4-flash")
     db_path = tmp_path / "_comqutor_alpha_graph.db"
     engine = build_engine(f"sqlite:///{db_path}")
     apply_migrations(engine)
@@ -166,6 +173,34 @@ def test_ready_configured_real_execution_is_reported(tmp_path, monkeypatch):
     body, ok = readiness_response(job_manager=_FakeJobManager(True), output_root=str(tmp_path))
     assert ok is True
     assert body["real_execution"] == "configured"
+    assert body["live_semantic_pipeline"] == "ready"
+
+
+def test_ready_live_semantic_not_ready_blocks_overall_readiness(tmp_path, monkeypatch):
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    monkeypatch.delenv("COMQUTOR_WEEK2_LLM_ENABLED", raising=False)
+    db_path = tmp_path / "_comqutor_alpha_graph.db"
+    engine = build_engine(f"sqlite:///{db_path}")
+    apply_migrations(engine)
+
+    body, ok = readiness_response(job_manager=_FakeJobManager(True), output_root=str(tmp_path))
+    assert ok is False
+    assert body["status"] == "not_ready"
+    assert body["real_execution"] == "configured"
+    assert body["live_semantic_pipeline"] == "not_ready"
+    assert body["live_semantic_pipeline_reason"] == "week2_llm_disabled"
+
+
+def test_ready_live_semantic_not_applicable_when_real_disabled(tmp_path):
+    db_path = tmp_path / "_comqutor_alpha_graph.db"
+    engine = build_engine(f"sqlite:///{db_path}")
+    apply_migrations(engine)
+
+    body, ok = readiness_response(job_manager=_FakeJobManager(True), output_root=str(tmp_path))
+    assert ok is True
+    assert body["real_execution"] == "disabled"
+    assert body["live_semantic_pipeline"] == "not_applicable"
+    assert body["live_semantic_pipeline_reason"] is None
 
 
 def test_ready_missing_migrations_is_not_ready(tmp_path):

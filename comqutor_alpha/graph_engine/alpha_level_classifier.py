@@ -19,8 +19,8 @@ classification per the deterministic order John specified:
                        Entity Exposure, regime gate) is applied.
     is_blocked      -- True exactly when qualified_level < target_level.
     blocked_from    -- which level(s) were reached by score but denied by
-                       qualification, in fixed order (dominant, then
-                       regime_level).
+                       qualification, in fixed order (active, then
+                       dominant, then regime_level).
 
 ``blocked`` is qualification metadata, never a fifth Activation level --
 the four canonical levels remain exactly candidate/active/dominant/
@@ -287,13 +287,51 @@ def classify_alpha_level(
     diagnostic_reason_codes: list[str] = []
     blocked_reason_codes: list[str] = []
 
-    # Case A/B (task section 7): candidate/active have no qualification
-    # gate beyond the score itself -- John: "不要自行给 active 再增加新的
-    # Evidence、Graph 或 Exposure gate."
-    if target_level in (CANDIDATE, ACTIVE):
+    # Case A (unchanged): candidate has no qualification gate at all -- it
+    # is already the floor level, nothing to demote it from.
+    #
+    # Case B (v0.1.3 QA Closure, Section C -- supersedes the original Case
+    # A/B decision, task B4_ACTIVATION_LEVEL_ALIGNMENT section 7, which said
+    # "不要自行给 active 再增加新的 Evidence、Graph 或 Exposure gate"): John's
+    # v0.1.3 report identified a concrete counter-example (an A301 record
+    # with zero ticker-specific evidence AND zero local Structure Graph
+    # support still displaying as plain "active") and explicitly reversed
+    # that decision -- an Alpha reaching the active score band on evidence
+    # that is entirely non-ticker-specific AND has no local structural
+    # corroboration must not display as ordinary active. This checks
+    # exactly the same two ALREADY-COMPUTED, unmodified Activation v2
+    # diagnostic conditions dominant already gates on
+    # (NO_TICKER_SPECIFIC_EVIDENCE/NO_LOCAL_STRUCTURE_SUPPORT in
+    # dominant_cap_reason_codes) -- never a new score threshold, never a
+    # new Activation v2 computation, never a change to the 50/70/86 score
+    # bands themselves. Both conditions must hold (per John's own "lacks
+    # BOTH" wording) -- an Alpha with either evidence type present is left
+    # exactly as before. A gated Alpha demotes to candidate (the only lower
+    # canonical level) via the same is_blocked/blocked_from/
+    # blocked_reason_codes mechanism Case C/D already use, generalized to
+    # allow ACTIVE as a blocked_from target for the first time.
+    active_ungated_reasons = _dedupe_stable(
+        code
+        for code in dominant_cap_reason_codes
+        if code in (REASON_NO_TICKER_SPECIFIC_EVIDENCE, REASON_NO_LOCAL_STRUCTURE_SUPPORT)
+    )
+    active_lacks_both_required_qualifications = REASON_NO_TICKER_SPECIFIC_EVIDENCE in active_ungated_reasons and (
+        REASON_NO_LOCAL_STRUCTURE_SUPPORT in active_ungated_reasons
+    )
+
+    if target_level == CANDIDATE:
         qualified_level = target_level
         is_blocked = False
         blocked_from: tuple[str, ...] = ()
+    elif target_level == ACTIVE:
+        if active_lacks_both_required_qualifications:
+            qualified_level, is_blocked, blocked_from = CANDIDATE, True, (ACTIVE,)
+            diagnostic_reason_codes = active_ungated_reasons
+            blocked_reason_codes = _canonicalize(active_ungated_reasons)
+        else:
+            qualified_level = target_level
+            is_blocked = False
+            blocked_from = ()
     elif target_level == DOMINANT:
         # Case C
         if dominant_qualifies:

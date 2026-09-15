@@ -9,6 +9,8 @@ and fallback logic, faking only the Provider boundary itself.
 
 from __future__ import annotations
 
+import threading
+
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.structure_engine import evidence_stance as es, evidence_stance_llm as esl
 
@@ -38,17 +40,30 @@ _PROVIDER_ERROR = object()
 class FakeStanceGateway:
     """``responses`` is one entry per expected call, in order: a dict (raw
     parsed JSON, run through the real validator), ``_TIMEOUT``/``_PROVIDER_ERROR``
-    sentinels, or a callable(payload) -> one of the above."""
+    sentinels, or a callable(payload) -> one of the above.
+
+    John Requirement B, Phase B2 Slice 2A: ``apply_llm_stance_upgrade`` now
+    defaults to real bounded concurrency, so a multi-batch caller (like
+    test_14 below, before it was pinned to concurrency=1) can reach this
+    fake from more than one thread at once -- the call-count-indexed
+    response lookup is lock-protected so concurrent access can never
+    corrupt ``self.calls``/``self.finalized`` or race on the index lookup.
+    This does NOT make call ARRIVAL order match submission order under
+    real concurrency (nothing could) -- tests that care about strict
+    per-batch response ordering should pass ``concurrency=1`` explicitly.
+    """
 
     def __init__(self, responses):
         self._responses = list(responses)
+        self._lock = threading.Lock()
         self.calls: list[tuple[str, dict]] = []
         self.finalized: list[tuple[bool, str | None]] = []
 
     def invoke_json_with_trace(self, task, payload, validator):
-        self.calls.append((task, dict(payload)))
-        assert len(self.calls) <= len(self._responses), "fake gateway received more calls than scripted"
-        raw = self._responses[len(self.calls) - 1]
+        with self._lock:
+            self.calls.append((task, dict(payload)))
+            assert len(self.calls) <= len(self._responses), "fake gateway received more calls than scripted"
+            raw = self._responses[len(self.calls) - 1]
         if callable(raw) and raw not in (_TIMEOUT, _PROVIDER_ERROR):
             raw = raw(payload)
         if raw is _TIMEOUT:
@@ -64,7 +79,8 @@ class FakeStanceGateway:
         return _FakeInvocation(validation_accepted=True, validated_output=items, provider_status="success", provider_attempt_count=1)
 
     def finalize_semantic_invocation(self, invocation, *, accepted, fallback_reason=None):
-        self.finalized.append((accepted, fallback_reason))
+        with self._lock:
+            self.finalized.append((accepted, fallback_reason))
 
 
 # ---------------------------------------------------------------------------
@@ -406,7 +422,13 @@ def test_14_batch_size_is_capped_at_ten():
         return {"items": [{"claim_id": it["claim_id"], "target_alpha_id": it["target_alpha_id"], "stance": es.OPPOSES_ALPHA} for it in payload["items"]]}
 
     gateway = FakeStanceGateway([_responder] * 3)
-    esl.apply_llm_stance_upgrade(matches, TAXONOMY, llm_gateway=gateway)
+    # concurrency=1: this test verifies chunk_items' own batch-size capping
+    # (10, 10, 3) in submission order -- a property of chunking, not of
+    # concurrent execution. Bounded-concurrency behavior itself (including
+    # that batch arrival order at the Provider need not match submission
+    # order once genuinely concurrent) is covered separately and
+    # extensively in tests/test_evidence_stance_concurrency.py.
+    esl.apply_llm_stance_upgrade(matches, TAXONOMY, llm_gateway=gateway, concurrency=1)
     assert len(gateway.calls) == 3  # ceil(23 / 10)
     assert call_sizes == [10, 10, 3]
     assert all(size <= esl.BATCH_SIZE for size in call_sizes)
@@ -623,7 +645,11 @@ def test_build_alpha_matches_payload_with_gateway_upgrades_the_real_wiring():
     # result), one call before B1's own stance-upgrade call -- this fixture
     # must script both, in order, or the Alpha call alone (a stance-shaped
     # response fails the alpha_classifier validator) makes matched_alpha
-    # null and starves B1's upgrade of anything to request.
+    # null and starves B1's upgrade of anything to request. Step 5A: multi-
+    # claim batching was evaluated and DEFERRED (unreliable against the
+    # configured Provider) -- build_alpha_matches_payload uses single-claim
+    # semantics by default again, so this run goes through the unbatched
+    # "alpha_classifier" task/response shape ({"decision": ...}).
     def _alpha_responder(payload):
         del payload
         return {"decision": "select", "selected_alpha_id": "A304"}

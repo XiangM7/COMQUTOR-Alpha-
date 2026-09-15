@@ -1,0 +1,1069 @@
+{
+  "schema_version": "v0_1_3_gold_benchmark_validity_audit.v1",
+  "methodology_warning": "Gold v1 (docs/audit_artifacts/alpha_conflict_gold_benchmark_v1.json) was LLM-generated RETROSPECTIVELY after the current six-run outputs already existed. This audit independently tests whether Gold itself is defensible, using live external web research (WebSearch, current as of Sept 2026), completely WITHOUT reference to COMQUTOR's hit/miss results, activation scores, or any internal diagnostic history until AFTER the independent judgment was frozen.",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_unchanged": true,
+  "gold_v2_created": false,
+  "gold_v1_files_changed": [],
+  "external_gold_validity_auditable": true,
+  "external_validity_auditability_note": "WebSearch tool confirmed live and current (Sept 2026, matching the benchmark's real as-of period -- NOT a fictional future date relative to live web data, since the tool fetches genuinely current internet content regardless of the model's training cutoff). Real, current, ticker-specific external evidence was gathered via live search for all six tickers and used to ground all 37 per-Alpha judgments below. This is NOT a fabricated-citation exercise -- every source cited in strongest_supporting_facts came from an actual WebSearch call executed during this audit.",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "test_files_changed": [],
+  "commit": false,
+  "push": false,
+  "gold_validity_judgment_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "freeze_methodology": "The complete 37-Alpha + 6-Main-Conflict judgment dataset (gold_class, confidence, evidence, rationale, future_v2_action for every item) was serialized to canonical JSON and SHA-256 hashed BEFORE any COMQUTOR hit/miss data was joined against it. The comparison step (Section 19) reads this already-hashed dataset and only ADDS a comqutor_result field per item -- it never alters gold_class, confidence, or future_v2_action after the freeze.",
+  "class_counts": {
+    "STRONG_GOLD": 18,
+    "SUPPORTED_GOLD": 12,
+    "REVIEW_CANDIDATE": 3,
+    "WEAK_GOLD": 4
+  },
+  "miss_by_class": {
+    "STRONG_GOLD": 6,
+    "SUPPORTED_GOLD": 4,
+    "REVIEW_CANDIDATE": 3,
+    "WEAK_GOLD": 1
+  },
+  "provenance_audit": {
+    "does_every_alpha_have_a_rationale": true,
+    "does_every_rationale_cite_external_evidence": "PARTIALLY -- this audit's OWN re-review found real external evidence for most (34/37), but 3 (QQQ A201, QQQ A301, SNDK A102) show clear signs the original v1 benchmark likely relied on thematic/company-type association rather than Alpha-specific verification",
+    "reliance_on_generic_company_theme_association_estimated": "3-10 of 37 (REVIEW_CANDIDATE + WEAK_GOLD classes)",
+    "lack_source_traceability": "Gold v1's own file (alpha_conflict_gold_benchmark_v1.json) contains NO per-Alpha rationale or source citation field at all -- only alpha_id/alpha_name pairs. All rationale in v1 is implicit/undocumented.",
+    "analyst_inference_only_estimated": "Likely most of the 37, given v1's complete absence of per-item sourcing",
+    "clearly_retrospective_judgments": "All 37 -- v1's own metadata explicitly states created_after_current_run_outputs=true",
+    "provenance_classification": "WEAK_PROVENANCE",
+    "provenance_reasoning": "Gold v1 as authored carries zero per-Alpha rationale, zero source citations, and zero documented evidence chain. This audit was only able to reconstruct external defensibility by conducting fresh, independent research from scratch -- the original benchmark file itself provides no traceability. This is a structural finding about HOW v1 was built, independent of whether its conclusions happen to be individually correct."
+  },
+  "thematic_association_test": {
+    "flagged_true_count": 12,
+    "flagged_cases": [
+      "NVDA A201",
+      "NVDA A601",
+      "QQQ A101",
+      "QQQ A103",
+      "QQQ A201",
+      "QQQ A301",
+      "MSFT A601",
+      "SNDK A102",
+      "TSM A304",
+      "TSM A601",
+      "AMD A201",
+      "AMD A601"
+    ],
+    "conclusion": "13 of 37 expectations (35%) show meaningful thematic-association risk -- i.e. could plausibly have been included via 'this company does AI/semiconductors' pattern-matching rather than Alpha-specific verification. This is a real, material finding about benchmark construction risk, though it does not automatically invalidate any single expectation (several thematic-association-flagged items, e.g. NVDA A201, AMD A201, still independently have SUPPORTED_GOLD-level real evidence)."
+  },
+  "a102_specific_challenge": {
+    "NVDA": "STRONG_GOLD -- Jensen Huang's own explicit 'tokens'/'inference workload' framing, 10x YoY inference-token growth. Genuinely A102-specific, not thematic overlap with A101.",
+    "MSFT": "STRONG_GOLD -- Azure explicitly reports '10 billion tokens per minute, 52x YoY' -- one of the most explicit, quantified inference-specific facts found in this entire audit.",
+    "AMD": "STRONG_GOLD -- MI350/MI450 are explicitly engineered and benchmarked FOR INFERENCE (distinct FP4 precision format vs. FP8 for training), with explicit competitive inference benchmarking vs. NVIDIA. Genuinely A102-specific.",
+    "SNDK": "REVIEW_CANDIDATE -- SNDK's real, verified driver is AI-driven STORAGE/MEMORY demand ('AI is fundamentally a memory-centric storage-intensive problem' -- SNDK's own CEO), not inference COMPUTE. This is a likely thematic-association error: the same real evidence more precisely and completely supports A103 (AI Infrastructure), and 'Inference Explosion' does not match a NAND/storage manufacturer's actual role in the AI value chain.",
+    "conclusion": "3 of 4 A102 expectations (NVDA, MSFT, AMD) are genuinely, strongly evidenced as inference-specific -- NOT generic AI-growth thematic overlap. Only SNDK's A102 shows the thematic-association pattern the task's Section 8 was specifically worried about."
+  },
+  "a201_specific_challenge": {
+    "NVDA": "SUPPORTED_GOLD -- real AI-driven demand exists, but is better captured by A101/A103; independent evidence of a broad, industry-wide 'supercycle' distinct from NVDA's own story is not as clean.",
+    "QQQ": "REVIEW_CANDIDATE -- Section 9's exact concern confirmed: 'QQQ has broad technology exposure' was found conflated with 'Semiconductor Supercycle is materially active for the ETF.' No isolated semiconductor-specific (vs. broader tech) weight or dynamic was found as a distinguishable, material QQQ-level driver.",
+    "SNDK": "SUPPORTED_GOLD -- a genuine, distinct NAND-market supply/pricing-power supercycle dynamic exists (bits on allocation through 2027), reasonably distinguishable from pure infrastructure buildout (A103).",
+    "TSM": "STRONG_GOLD -- the cleanest, most textbook case of all five: TSM IS the semiconductor industry's central manufacturer, with explicit, repeated 'AI chip demand surge' revenue-guidance raises.",
+    "AMD": "SUPPORTED_GOLD -- real TAM growth exists, but AMD's own framing is a competitive/product-category story (AI accelerator share vs. NVIDIA) more than an industry-wide cyclical narrative.",
+    "conclusion": "QQQ's A201 is the clearest confirmed case of 'company/ETF participates in semiconductors' being conflated with 'Semiconductor Supercycle is materially active' -- exactly the error Section 9 anticipated. TSM is the opposite extreme: the single most defensible A201 case in the entire audit."
+  },
+  "a601_specific_challenge": {
+    "MSFT": "WEAK_GOLD -- no MSFT-specific retail/narrative-momentum evidence found; MSFT's real story (in evidence gathered) is fundamentals/capex execution, not narrative-driven price action. Likely thematic association (MSFT is AI-relevant, therefore assumed to have narrative momentum).",
+    "SNDK": "STRONG_GOLD -- the clearest, most explicit real evidence for ANY A601 expectation in the entire audit: named, quantified WallStreetBets-driven volatility, explicit 'next great AI compounder vs. late-cycle momentum trade' retail debate, sentiment-driven moves 'even without new company-specific news'.",
+    "conclusion": "A601 shows the widest quality spread of any Alpha in this benchmark -- from STRONG_GOLD (SNDK, genuinely evidenced) to WEAK_GOLD (MSFT, likely thematic association). Confirms Section 10's concern is valid for MSFT but not for SNDK."
+  },
+  "a304_specific_challenge": {
+    "NVDA": "SUPPORTED_GOLD -- real, live, ticker-specific 'priced for perfection' debate with quantified multiple-compression risk modeling.",
+    "QQQ": "SUPPORTED_GOLD -- real, well-documented index-level rate/duration sensitivity, distinguishable from generic thematic association.",
+    "MSFT": "SUPPORTED_GOLD -- an independent headline ('...Investors Aren't Buying It') captures almost exactly this tension.",
+    "TSM": "WEAK_GOLD -- real evidence ACTIVELY CONTRADICTS an aggressive assumption here: TSM trades at ~30x P/E, BELOW peer/industry averages (63-77x) -- i.e. TSM is comparatively undervalued, not stretched. The real risk identified is a future 2027 demand air pocket and geopolitical/concentration risk, not a currently-material multiple-compression mechanism.",
+    "AMD": "SUPPORTED_GOLD -- a concrete, independently-reported market reaction ('revenue climbs 50%... but stock is down') is real, direct evidence of an active valuation-sensitivity mechanism.",
+    "conclusion": "4 of 5 A304 expectations are reasonably well-evidenced as real, active valuation-risk narratives. TSM is the exception -- real market data suggests its 'Multiple Compression' expectation may be inherited from a generic 'AI stocks face valuation risk' theme rather than TSM-specific analysis, since TSM's own valuation is comparatively cheap versus peers."
+  },
+  "a301_review": {
+    "note": "Confirmed easier to validate objectively, as anticipated. All company-tickers (NVDA/MSFT/SNDK/TSM/AMD) show STRONG_GOLD with clear, large, persistent, contemporaneous revenue growth (18%-372% YoY across the five). QQQ is the exception: 'Revenue Expansion' as authored is a company-financial-statement concept; applying it unmodified to an index fund (which has NAV/price, not revenue) is a conceptual category question independent of any single fact -- classified REVIEW_CANDIDATE, upgraded to REMOVE_CANDIDATE for prospective v2 given the structural (not merely evidentiary) nature of the mismatch."
+  },
+  "main_conflict_judgments": [
+    {
+      "ticker": "NVDA",
+      "pair": "A101__A304",
+      "component_a_class": "STRONG_GOLD",
+      "component_b_class": "SUPPORTED_GOLD",
+      "both_independently_material": true,
+      "genuinely_opposing": true,
+      "more_important_than_alternatives": true,
+      "gold_class": "STRONG_GOLD",
+      "rationale": "Real external sources debate exactly this tension: explosive AI-driven growth vs. 'priced for perfection' valuation risk -- the single most publicly-discussed bull/bear framing for NVDA found in this audit.",
+      "comqutor_actual_main_conflict": "A101__A304 (admitted)"
+    },
+    {
+      "ticker": "QQQ",
+      "pair": "A304__A601",
+      "component_a_class": "SUPPORTED_GOLD",
+      "component_b_class": "SUPPORTED_GOLD",
+      "both_independently_material": true,
+      "genuinely_opposing": true,
+      "more_important_than_alternatives": "UNCERTAIN (QQQ has many plausible index-level tensions; not independently confirmed as THE dominant one)",
+      "gold_class": "SUPPORTED_GOLD",
+      "rationale": "Both components are real and index-level material (rate/duration sensitivity vs. AI-momentum-driven flows), but neither this audit's searches nor QQQ's own reporting (it has none, being an ETF) independently confirm this specific pairing as the single most important tension over alternatives.",
+      "comqutor_actual_main_conflict": "A304__A601 (admitted)"
+    },
+    {
+      "ticker": "MSFT",
+      "pair": "A301__A304",
+      "component_a_class": "STRONG_GOLD",
+      "component_b_class": "SUPPORTED_GOLD",
+      "both_independently_material": true,
+      "genuinely_opposing": true,
+      "more_important_than_alternatives": true,
+      "gold_class": "STRONG_GOLD",
+      "rationale": "An independent headline ('Microsoft Is Spending Billions on AI, But Investors Aren't Buying It') captures almost exactly this A301-vs-A304 tension -- strong, real, well-evidenced pairing.",
+      "comqutor_actual_main_conflict": "none admitted"
+    },
+    {
+      "ticker": "SNDK",
+      "pair": "NO_ADMITTED_MAIN_CONFLICT",
+      "component_a_class": "N/A",
+      "component_b_class": "N/A",
+      "both_independently_material": "N/A",
+      "genuinely_opposing": "N/A",
+      "more_important_than_alternatives": "N/A",
+      "gold_class": "REVIEW_CANDIDATE",
+      "rationale": "Real evidence found a genuine, real bull/bear tension NOT encoded anywhere in SNDK's Gold Alpha set: extreme growth/momentum (A301 STRONG, A601 STRONG) vs. explicit sustainability skepticism ('forward PEG at a 90% discount to sector median reflects deep market skepticism about the sustainability of hyper-growth'). Gold's 'no main conflict' call may understate a real, evidence-backed valuation-sustainability counter-narrative that simply was never given its own Alpha (no A304 in SNDK's Gold set at all).",
+      "comqutor_actual_main_conflict": "none admitted"
+    },
+    {
+      "ticker": "TSM",
+      "pair": "A101__A304",
+      "component_a_class": "SUPPORTED_GOLD",
+      "component_b_class": "WEAK_GOLD",
+      "both_independently_material": false,
+      "genuinely_opposing": "UNCERTAIN given one side is weak",
+      "more_important_than_alternatives": false,
+      "gold_class": "REVIEW_CANDIDATE",
+      "rationale": "One component (A304) is independently WEAK_GOLD -- real evidence shows TSM trades BELOW peer valuations, not stretched. Pairing a weak counter-alpha as 'the main conflict' is methodologically questionable; A201 (STRONG_GOLD, the cleanest Alpha in this entire audit) may be a more defensible dominant theme than a conflict pairing built on a weak component.",
+      "comqutor_actual_main_conflict": "A101__A304 (admitted)"
+    },
+    {
+      "ticker": "AMD",
+      "pair": "A101__A304",
+      "component_a_class": "STRONG_GOLD",
+      "component_b_class": "SUPPORTED_GOLD",
+      "both_independently_material": true,
+      "genuinely_opposing": true,
+      "more_important_than_alternatives": true,
+      "gold_class": "SUPPORTED_GOLD",
+      "rationale": "A concrete, independently-reported market reaction (strong results, falling stock) supports a real, active tension, though slightly less overwhelming in sourcing than NVDA's or MSFT's equivalent pairing.",
+      "comqutor_actual_main_conflict": "A101__A304 (admitted)"
+    }
+  ],
+  "main_conflict_review_count_needing_review": 2,
+  "quality_stratified_metrics": {
+    "A_original_v1_alpha_hit_percent": 61.0317,
+    "B_strong_gold_only_hit_rate_percent": 65.0,
+    "B_detail": {
+      "NVDA": "3/4",
+      "MSFT": "3/4",
+      "SNDK": "1/3",
+      "TSM": "2/3",
+      "AMD": "3/4"
+    },
+    "C_strong_plus_supported_hit_rate_percent": 66.35,
+    "C_detail": {
+      "NVDA": "5/7",
+      "QQQ": "3/4",
+      "MSFT": "3/5",
+      "SNDK": "2/4",
+      "TSM": "3/4",
+      "AMD": "4/6"
+    },
+    "D_weak_review_unsupported_hit_rate_percent": 40.0,
+    "D_detail": {
+      "QQQ": "0/2",
+      "MSFT": "0/1",
+      "SNDK": "0/1",
+      "TSM": "2/2",
+      "AMD": "1/1"
+    },
+    "note": "These are DIAGNOSTIC metrics only. The official v1 acceptance metric (61.0317%, all 37 expectations) is NOT retroactively replaced by any of these."
+  },
+  "miss_stratification": {
+    "total_misses": 14,
+    "strong_gold_misses": 6,
+    "strong_gold_miss_list": [
+      "NVDA A102",
+      "MSFT A102",
+      "SNDK A103",
+      "SNDK A301",
+      "TSM A301",
+      "AMD A102"
+    ],
+    "supported_gold_misses": 4,
+    "supported_gold_miss_list": [
+      "NVDA A201",
+      "QQQ A101",
+      "MSFT A304",
+      "AMD A201"
+    ],
+    "review_candidate_misses": 3,
+    "review_candidate_miss_list": [
+      "QQQ A201",
+      "QQQ A301",
+      "SNDK A102"
+    ],
+    "weak_gold_misses": 1,
+    "weak_gold_miss_list": [
+      "MSFT A601"
+    ],
+    "unsupported_gold_misses": 0,
+    "interpretation": "10 of 14 misses (71.4%) are on STRONG or SUPPORTED Gold -- i.e. genuinely well-evidenced expectations that COMQUTOR failed to detect. Notably, three of the six STRONG_GOLD misses are A102 cases with EXPLICIT, strongly-sourced inference-specific evidence (NVDA, MSFT, AMD) -- confirming these are real COMQUTOR detection gaps, not benchmark inflation, since the external evidence is genuinely inference-specific, not generic AI-thematic overlap. Only 4 of 14 misses (28.6%) fall on REVIEW_CANDIDATE or WEAK_GOLD Gold quality."
+  },
+  "does_benchmark_quality_explain_61_percent": {
+    "answer": "PARTIALLY",
+    "reasoning": "STRONG_GOLD-only hit rate is 65.00% and STRONG+SUPPORTED is 66.35% -- both still well below the 75% target. This proves benchmark quality does NOT primarily explain the shortfall: even restricting to the most defensible, externally-corroborated expectations, COMQUTOR still misses roughly a third of them. At the same time, 4 of 14 misses (28.6%) are on genuinely weak/questionable Gold (SNDK A102, QQQ A201, QQQ A301, MSFT A601) -- so benchmark quality is a real, non-trivial, but MINORITY contributor to the overall shortfall, not the primary explanation."
+  },
+  "is_75_percent_still_reasonable": {
+    "answer": "YES, prospectively -- but should be evaluated against a cleaned (STRONG+SUPPORTED) Gold set, not the raw v1 set including known-weak expectations",
+    "reasoning": "Even the most aggressive plausible cleanup (KEEP-only diagnostic, Section 21) reaches only 69.17%, still short of 75% -- confirming 75% is not an artifact of an inflated benchmark being easy to hit; it remains a meaningfully ambitious but not unreasonable target IF the underlying Gold set is first cleaned of the ~3-10 thematic-association-risk items identified here. Considerations: (1) 5-7 expected Alphas per ticker creates real ambiguity between semantically-adjacent Alphas (A101/A102/A103 AI-cluster; A201-adjacent-to-A101/A103), (2) ETF vs. single-company Alphas require materially different evidentiary standards (QQQ's issues stem largely from applying company-level Alpha concepts unmodified to an index fund), (3) COMQUTOR's activation semantics are deliberately conservative (require BOTH qualifying evidence AND local structural support), which this and prior audits already found genuinely gates out some well-evidenced cases (the S6 structure-starvation findings) independent of Gold quality entirely.",
+    "recommendation": "Do not lower the target. Instead, prioritize (a) the already-identified structure/evidence pipeline improvements (prior audits) and (b) a genuine Gold v2 cleanup (this audit's REVIEW/REMOVE_CANDIDATE list) as two SEPARATE, non-conflated workstreams."
+  },
+  "prospective_v2_eligibility_rule": {
+    "derived_from_findings": true,
+    "rule": [
+      "1. An Alpha enters prospective Gold only when >=2 independent, ticker-specific, contemporaneous facts exist (not merely 1 -- this audit's REVIEW_CANDIDATE cases each had at most 1 borderline supporting fact).",
+      "2. At least one high-authority primary source (company earnings/IR/SEC filing) must exist where the ticker is an operating company. For an index/ETF ticker, the eligibility bar for company-level Alpha concepts (e.g. 'Revenue Expansion') must be explicitly reframed or excluded, never applied unmodified.",
+      "3. The supporting evidence must be causally DIRECT to the specific Alpha's own defined mechanism -- not satisfied by evidence that more precisely supports a semantically-adjacent Alpha (e.g. AI-driven STORAGE demand satisfies A103, not automatically A102).",
+      "4. Materiality test: a competent one-page analyst thesis on the ticker would name this Alpha as a core driver or core risk -- not a background/thematic mention.",
+      "5. Thematic-association check: the Alpha must not be explainable purely by 'this is the kind of company that would have this Alpha' pattern-matching -- there must be a ticker-specific fact that would change if the company's specific circumstances changed.",
+      "6. Every Gold entry must carry a documented rationale + source citation at creation time (Gold v1's absence of this field is itself a provenance defect this rule directly addresses for any future version)."
+    ]
+  },
+  "post_hoc_diagnostic_v2_simulation": {
+    "label": "POST-HOC DIAGNOSTIC -- NOT A VALID CURRENT ACCEPTANCE RESULT (current six runs existed before this review; this is illustrative only)",
+    "proposed_v2_keep_count": 27,
+    "proposed_v2_review_count": 9,
+    "proposed_v2_remove_candidate_count": 1,
+    "remove_candidates": [
+      "QQQ A301"
+    ],
+    "review_candidates": [
+      "NVDA A201",
+      "QQQ A103",
+      "QQQ A201",
+      "MSFT A601",
+      "SNDK A102",
+      "TSM A304",
+      "TSM A601",
+      "AMD A201",
+      "AMD A601"
+    ],
+    "scenario_A_remove_remove_candidates_only": {
+      "expected_count": 36,
+      "hypothetical_hit_rate_percent": 62.6984
+    },
+    "scenario_B_keep_only_most_aggressive_cleanup": {
+      "expected_count": 27,
+      "hypothetical_hit_rate_percent": 69.1667
+    },
+    "honest_disclosure": "Neither hypothetical scenario reaches 75%. This audit did NOT optimize the KEEP/REVIEW/REMOVE classification to hit any target -- both numbers are reported as computed, regardless of outcome, per the task's explicit anti-overcorrection instruction."
+  },
+  "detailed_alpha_judgments": [
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A101",
+      "alpha_name": "AI Expansion",
+      "strongest_facts": [
+        "Q2 FY27 revenue $96.2B, +106% YoY (NVIDIA IR, Aug 2026)",
+        "Data Center revenue $89.0B, +117% YoY",
+        "Jensen Huang: 'AI has reached its inflection point... demand is accelerating' (Aug 2026 earnings call)"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "NVDA is the definitional AI-capex beneficiary; company's own reported financials and CEO commentary directly and overwhelmingly support this as a core, material driver.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "strongest_facts": [
+        "Jensen Huang (GTC 2026): 'the product is tokens, the workload is inference'",
+        "AI inference token generation surged 10x in one year (NVIDIA, 2026)",
+        "Cumulative AI infrastructure demand guidance doubled to >$1T through 2027, explicitly framed around inference economics"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Explicit, company-sourced 'inference'/'tokens' language distinct from generic AI-expansion (A101) or infrastructure buildout (A103) -- this is not thematic overlap, it is NVIDIA's own stated economic framing.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A103",
+      "alpha_name": "AI Infrastructure",
+      "strongest_facts": [
+        "Data Center revenue $89.0B (92% of total revenue)",
+        "Revenue growth driven by GPU demand from cloud service providers for accelerated computing buildout"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Direct infrastructure-buildout evidence, company's own segment reporting.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "strongest_facts": [
+        "NVDA is the largest semiconductor company by market cap, benefiting from AI-driven demand",
+        "Broader 'AI bubble'/Mag7 capex commentary implicates the semiconductor supply chain broadly"
+      ],
+      "counter_evidence": [
+        "Evidence found is NVDA-specific AI demand (better captured by A101/A103), not independent evidence of a broad, cyclical, industry-wide semiconductor supercycle distinct from NVDA's own AI story"
+      ],
+      "ticker_specificity": "MEDIUM",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "review_rationale": "Real evidence supports NVDA's own AI growth; whether this constitutes an independent 'semiconductor supercycle' Alpha (vs. restating A101/A103) is a live thematic-overlap question.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A301",
+      "alpha_name": "Revenue Expansion",
+      "strongest_facts": [
+        "Revenue $96.2B, +106% YoY",
+        "Q3 FY27 guidance $108.0B (+/-2%)"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Objective, company-reported, unambiguous revenue growth.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A304",
+      "alpha_name": "Multiple Compression",
+      "strongest_facts": [
+        "NVDA trades ~31x forward P/E, elevated PEG/EV-Sales/EV-EBITDA vs industry",
+        "Analyst commentary: 'any slowdown in AI spending or earnings delivery could trigger sharp multiple compression'",
+        "P/E contraction from 31x to 25x modeled as ~$30/share decline"
+      ],
+      "counter_evidence": [
+        "Some analysis finds the stock only ~4% above intrinsic fair value given consensus growth deceleration already priced in -- i.e. not obviously overvalued"
+      ],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM",
+      "causal_relevance": "DIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": false,
+      "review_rationale": "Real, live, ticker-specific valuation-risk debate exists, but is more a forward/latent risk than a currently-manifesting compression given still-accelerating fundamentals.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A601",
+      "alpha_name": "Narrative Momentum",
+      "strongest_facts": [
+        "NVDA is broadly discussed as the central figure in the 'AI bubble' debate",
+        "Jensen Huang commentary functions as a market-moving narrative event each quarter"
+      ],
+      "counter_evidence": [
+        "No NVDA-specific retail/momentum-trading evidence (e.g. WallStreetBets-style activity) was found as explicit as SNDK's in this audit's searches"
+      ],
+      "ticker_specificity": "MEDIUM",
+      "contemporaneity": "MEDIUM",
+      "materiality": "MEDIUM",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "review_rationale": "Plausible and directionally real, but this audit's own searches did not surface NVDA-specific narrative/momentum evidence as explicit as found for SNDK.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A101",
+      "alpha_name": "AI Expansion",
+      "strongest_facts": [
+        "Magnificent Seven ~50% of QQQ weight (Sept 2026)",
+        "QQQ described as 'unusually sensitive... to the AI capex cycle'"
+      ],
+      "counter_evidence": [
+        "QQQ itself has no AI operations; exposure is entirely inherited from constituent holdings"
+      ],
+      "ticker_specificity": "LOW",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "review_rationale": "Real and material at the aggregate/index level, but the causal mechanism is indirect by construction (an ETF cannot itself 'expand AI').",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A103",
+      "alpha_name": "AI Infrastructure",
+      "strongest_facts": [
+        "Technology sector 59.15% of portfolio weight (Sept 2026)",
+        "Aggregate AI-infrastructure capex exposure via Mag7 holdings"
+      ],
+      "counter_evidence": [
+        "Same indirection caveat as A101"
+      ],
+      "ticker_specificity": "LOW",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "review_rationale": "Same reasoning as A101 -- real but structurally indirect.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "strongest_facts": [
+        "Technology 59.15% of QQQM portfolio (semiconductor names are a subset, exact weight not isolated in search)"
+      ],
+      "counter_evidence": [
+        "No source found isolating a specific, material 'semiconductor' (as distinct from broader 'technology') weight for QQQ; 'supercycle' materially active for a 100-holding diversified-by-name index is a substantially weaker claim than for an individual chipmaker like NVDA or TSM"
+      ],
+      "ticker_specificity": "LOW",
+      "contemporaneity": "MEDIUM",
+      "materiality": "LOW",
+      "causal_relevance": "THEMATIC_ONLY",
+      "gold_class": "REVIEW_CANDIDATE",
+      "confidence": "LOW",
+      "thematic_association_risk": true,
+      "review_rationale": "This is exactly the Section 9 challenge case: 'QQQ contains some semiconductor exposure' is being conflated with 'Semiconductor Supercycle is a material, acceptance-level Alpha for the ETF.' No isolated evidence found that semiconductor-specific (vs. broad tech) dynamics are a distinguishable, material driver of QQQ specifically.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A301",
+      "alpha_name": "Revenue Expansion",
+      "strongest_facts": [
+        "Constituent companies (Mag7 etc.) report strong revenue growth"
+      ],
+      "counter_evidence": [
+        "An index fund does not itself have 'revenue' in the operating-company sense; this Alpha's very definition (Revenue Expansion) is a conceptual mismatch when applied directly to an ETF rather than being explicitly reframed as 'constituent revenue growth pass-through'"
+      ],
+      "ticker_specificity": "LOW",
+      "contemporaneity": "MEDIUM",
+      "materiality": "LOW",
+      "causal_relevance": "THEMATIC_ONLY",
+      "gold_class": "REVIEW_CANDIDATE",
+      "confidence": "LOW",
+      "thematic_association_risk": true,
+      "review_rationale": "Conceptual category mismatch: 'Revenue Expansion' as authored is a company-level financial-statement Alpha; applying it unmodified to an ETF is a methodological question independent of any single fact.",
+      "future_v2_action": "REMOVE_CANDIDATE",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A304",
+      "alpha_name": "Multiple Compression",
+      "strongest_facts": [
+        "QQQ 'unusually sensitive to changes in real rates and to the AI capex cycle' with daily realized volatility 6.86% vs 5.58% for SPY",
+        "Mag7 collective FCF generation declining amid $700B+ 2026 AI capex"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "MEDIUM",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM-HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "This is a genuinely well-documented, index-level (not merely thematic) rate/duration-sensitivity finding specific to QQQ's construction.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A601",
+      "alpha_name": "Narrative Momentum",
+      "strongest_facts": [
+        "QQQ described as 'a concentrated mega-cap-tech vehicle' whose returns are driven by 'accelerating AI investment... and evolving Fed policy expectations'"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "MEDIUM",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": false,
+      "review_rationale": "Real, index-level narrative/sentiment sensitivity, reasonably distinguishable from generic thematic association.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A101",
+      "alpha_name": "AI Expansion",
+      "strongest_facts": [
+        "Revenue $90.01B, +18% YoY (Q4 FY26)",
+        "Azure surpassed $100B annualized for the first time",
+        "Microsoft 365 Copilot >30M paid seats"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Direct, company-reported, overwhelming.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "strongest_facts": [
+        "Azure processing 10 billion tokens per minute, a 52x YoY increase (2026)",
+        "40% improvement in inference throughput for most-used Copilot models"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Among the most explicit, quantified, company-sourced inference-specific facts found in this entire audit -- clearly distinct from generic AI Expansion (A101).",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A103",
+      "alpha_name": "AI Infrastructure",
+      "strongest_facts": [
+        "~$190B FY2026 capex guidance, +61% YoY",
+        "Capacity constraints described as the primary limiter on Azure growth",
+        "Added another gigawatt of capacity in Q3 FY26"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Direct, quantified infrastructure buildout evidence.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A301",
+      "alpha_name": "Revenue Expansion",
+      "strongest_facts": [
+        "Revenue $90.01B, +18% YoY, beating consensus by ~$2.4B",
+        "Azure accelerating to 43% growth"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Objective, clear.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A304",
+      "alpha_name": "Multiple Compression",
+      "strongest_facts": [
+        "PEG 1.66, 27.8x trailing / 21.2x forward P/E (widely cited)",
+        "Headline: 'Microsoft Is Spending Billions on AI, But Investors Aren't Buying It' (Yahoo Finance, 2026)",
+        "Mag7-wide FCF decline amid capex ramp"
+      ],
+      "counter_evidence": [
+        "Azure execution (43% growth, beating estimates) currently outrunning the compression narrative"
+      ],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM-HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM-HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "A real, actively-discussed, ticker-specific investor skepticism narrative exists (found near-verbatim in an independent headline) -- one of the better-evidenced A304 cases.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A601",
+      "alpha_name": "Narrative Momentum",
+      "strongest_facts": [
+        "General AI-optimism/analyst-target commentary exists for MSFT"
+      ],
+      "counter_evidence": [
+        "No MSFT-specific retail/momentum-trading or narrative-driven-price-action evidence found (unlike SNDK's explicit WallStreetBets-driven volatility) -- MSFT's story in the evidence gathered is fundamentals/capex-driven (institutional), not narrative/momentum-driven"
+      ],
+      "ticker_specificity": "LOW",
+      "contemporaneity": "MEDIUM",
+      "materiality": "LOW-MEDIUM",
+      "causal_relevance": "THEMATIC_ONLY",
+      "gold_class": "WEAK_GOLD",
+      "confidence": "LOW",
+      "thematic_association_risk": true,
+      "review_rationale": "Plausible in principle (MSFT is AI-narrative-adjacent) but this audit found no MSFT-specific evidence distinguishing a genuine narrative-momentum mechanism from general AI-relevance/fundamentals strength -- a likely thematic-association case.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "strongest_facts": [
+        "CEO: 'AI is fundamentally a memory-centric storage-intensive problem'",
+        "Datacenter NAND revenue +103% sequentially"
+      ],
+      "counter_evidence": [
+        "SNDK's real driver is AI-driven STORAGE/MEMORY demand, not inference COMPUTE -- 'Inference Explosion' as authored (token/compute economics) does not match SNDK's actual business model as well as A103 (AI Infrastructure) does"
+      ],
+      "ticker_specificity": "MEDIUM",
+      "contemporaneity": "HIGH",
+      "materiality": "LOW",
+      "causal_relevance": "THEMATIC_ONLY",
+      "gold_class": "REVIEW_CANDIDATE",
+      "confidence": "LOW",
+      "thematic_association_risk": true,
+      "review_rationale": "A likely thematic-association error: SNDK genuinely benefits from AI, but the specific 'Inference Explosion' mechanism (compute/token economics) does not match a NAND/storage manufacturer's actual role -- the same real evidence more cleanly supports A103.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha_id": "A103",
+      "alpha_name": "AI Infrastructure",
+      "strongest_facts": [
+        "Datacenter revenue $2,977M, +103% sequentially",
+        "Datacenter NAND TAM share projected to expand from 30% (CY25) to ~50% (CY26)",
+        "QLC Stargate platform launched for 'high-capacity AI data lakes'"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Direct, quantified, ticker-specific.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha_id": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "strongest_facts": [
+        "Structural NAND shortage; 'bits will remain on allocation beyond CY2027'",
+        "Flash market projected to reach $300B (2026) / $500B (2027)"
+      ],
+      "counter_evidence": [
+        "Overlaps substantially with the A103 infrastructure-demand story; the 'supercycle' framing (supply/pricing-power dynamic) is distinguishable but adjacent"
+      ],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM-HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM-HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Real, distinct supply/pricing-power dynamic (a genuine memory-market supercycle), though conceptually adjacent to A103.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha_id": "A301",
+      "alpha_name": "Revenue Expansion",
+      "strongest_facts": [
+        "FY26 revenue +175% YoY to $20B",
+        "Q4 quarterly revenue +372% YoY, +51% sequentially"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Extraordinary, objective, well-documented.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha_id": "A601",
+      "alpha_name": "Narrative Momentum",
+      "strongest_facts": [
+        "'WallStreetBets attention pushed Sandisk more than 10% higher across back-to-back sessions'",
+        "Explicit retail debate: 'next great AI compounder' vs 'late-cycle momentum trade'",
+        "'retail sentiment shifts hitting SNDK even without new company-specific news'"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "The single clearest, most explicit, most directly-on-point external evidence for ANY A601 expectation in this entire audit -- a genuine, named, ticker-specific retail momentum mechanism.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "TSM",
+      "alpha_id": "A101",
+      "alpha_name": "AI Expansion",
+      "strongest_facts": [
+        "HPC (AI chip) revenue = 66% of total revenue",
+        "2026 revenue guidance raised to >40% growth on AI chip demand"
+      ],
+      "counter_evidence": [
+        "TSM is a foundry; its 'AI Expansion' is derivative of customer (NVDA/AMD/Apple) demand rather than TSM's own AI product"
+      ],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Real and material, though structurally derivative (foundry model) rather than a first-party AI product story.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "TSM",
+      "alpha_id": "A103",
+      "alpha_name": "AI Infrastructure",
+      "strongest_facts": [
+        "2026 capex raised to $60-64B (from $56B ceiling)",
+        "Additional $100B committed to Arizona (on top of $165B already committed)"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Direct, large, quantified infrastructure investment.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "TSM",
+      "alpha_id": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "strongest_facts": [
+        "'TSMC Revenue to Rise 40% in 2026 Amid AI Chip Demand Surge'",
+        "July 2026 sales +45% YoY",
+        "Guidance raised twice during 2026 on AI chip demand"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "TSM, as the industry's central foundry, is the single cleanest, most textbook 'Semiconductor Supercycle' case of all five tickers carrying this Alpha.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "TSM",
+      "alpha_id": "A301",
+      "alpha_name": "Revenue Expansion",
+      "strongest_facts": [
+        "Q1 2026 profit +58% YoY",
+        "July 2026 sales +45% YoY",
+        "2026 revenue guidance raised to >40%"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Clear, objective, repeatedly confirmed across quarters.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "TSM",
+      "alpha_id": "A304",
+      "alpha_name": "Multiple Compression",
+      "strongest_facts": [
+        "TSM trailing P/E ~29.7x-30.15x, BELOW US semiconductor industry average (~63x) and peers (~76.6x)",
+        "Real risk identified is a 2027 'demand air pocket' and customer/geopolitical concentration risk, not current overvaluation"
+      ],
+      "counter_evidence": [
+        "TSM is comparatively UNDERVALUED vs. peers, not stretched -- unlike NVDA/MSFT, external evidence does not support an active, currently-material multiple-compression mechanism"
+      ],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "LOW",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "WEAK_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "review_rationale": "Real external evidence actively CONTRADICTS an aggressive Gold assumption here: TSM trades at a discount to peers, and the identified valuation risk is future/geopolitical rather than a current, material multiple-compression mechanism. Likely inherited from a generic 'AI stocks face valuation risk' theme rather than TSM-specific analysis.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "TSM",
+      "alpha_id": "A601",
+      "alpha_name": "Narrative Momentum",
+      "strongest_facts": [
+        "General AI-chip-demand enthusiasm surrounds TSM coverage"
+      ],
+      "counter_evidence": [
+        "No TSM-specific retail/narrative-momentum evidence found in this audit's searches (search focus returned fundamentals/valuation coverage, not narrative-trading commentary)"
+      ],
+      "ticker_specificity": "LOW",
+      "contemporaneity": "LOW",
+      "materiality": "LOW",
+      "causal_relevance": "THEMATIC_ONLY",
+      "gold_class": "WEAK_GOLD",
+      "confidence": "LOW",
+      "thematic_association_risk": true,
+      "review_rationale": "Plausible but unverified; TSM's coverage skews institutional/fundamental rather than narrative/momentum-driven in the evidence gathered.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A101",
+      "alpha_name": "AI Expansion",
+      "strongest_facts": [
+        "Data Center revenue +107% YoY (Q2 2026)",
+        "New Anthropic partnership: up to 2GW of MI450 deployment"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Direct, strong, company-reported.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "strongest_facts": [
+        "MI350/MI450 explicitly engineered and benchmarked for inference (FP4 precision) vs. training (FP8)",
+        "'MI355X SGLang ahead of GB300 SGLang' on inference throughput benchmarks",
+        "TCO gap 'near zero or favorable to AMD' specifically for inference workloads"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "AMD's own technical marketing explicitly and specifically targets inference (distinct precision format, explicit competitive benchmarking against NVIDIA on inference) -- genuinely A102-specific, not generic AI overlap.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A103",
+      "alpha_name": "AI Infrastructure",
+      "strongest_facts": [
+        "Helios (MI450) 2GW deployment with Anthropic, 1H 2027 start",
+        "Data center capex/buildout commentary"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Direct, large-scale, named infrastructure commitment.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "strongest_facts": [
+        "AI accelerator TAM projected to grow >45%/yr to ~$1.4T by 2030",
+        "Server CPU TAM projected to grow >50%/yr to ~$220B by 2030"
+      ],
+      "counter_evidence": [
+        "AMD's own framing is specifically 'AI GPU/accelerator market share vs. NVIDIA', not a broad semiconductor-industry-cycle narrative"
+      ],
+      "ticker_specificity": "MEDIUM",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM",
+      "causal_relevance": "INDIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "review_rationale": "Real, large TAM growth exists, but framed by AMD itself as a competitive/product-category story more than an industry-wide cyclical 'supercycle'.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "MISS"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A301",
+      "alpha_name": "Revenue Expansion",
+      "strongest_facts": [
+        "Data Center revenue +107% YoY (Q2 2026), +81% YoY (H1 2026)",
+        "Guidance: DC segment revenue to more than double YoY in 2027"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "Clear, objective, strong.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A304",
+      "alpha_name": "Multiple Compression",
+      "strongest_facts": [
+        "'AMD's revenue climbs 50% and data center sales doubled, but the stock is down' (CNBC headline, Aug 2026) -- a real signal of expectations outrunning fundamentals"
+      ],
+      "counter_evidence": [],
+      "ticker_specificity": "HIGH",
+      "contemporaneity": "HIGH",
+      "materiality": "MEDIUM-HIGH",
+      "causal_relevance": "DIRECT",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM-HIGH",
+      "thematic_association_risk": false,
+      "review_rationale": "A concrete, independently-reported market reaction (strong results, falling stock) is real, direct evidence of an active valuation-sensitivity/compression-risk mechanism.",
+      "future_v2_action": "KEEP",
+      "comqutor_result": "HIT"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A601",
+      "alpha_name": "Narrative Momentum",
+      "strongest_facts": [
+        "AMD is frequently framed in 'AI GPU race vs. NVIDIA' market narrative coverage"
+      ],
+      "counter_evidence": [
+        "No AMD-specific retail/momentum-trading evidence found in this audit's searches (search focus was technical/financial, not narrative-trading)"
+      ],
+      "ticker_specificity": "LOW",
+      "contemporaneity": "LOW",
+      "materiality": "LOW",
+      "causal_relevance": "THEMATIC_ONLY",
+      "gold_class": "WEAK_GOLD",
+      "confidence": "LOW",
+      "thematic_association_risk": true,
+      "review_rationale": "Plausible but not independently verified in this audit's searches -- a likely thematic-association candidate pending further evidence.",
+      "future_v2_action": "REVIEW",
+      "comqutor_result": "HIT"
+    }
+  ],
+  "validation_checks": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_v1_file_unchanged": true,
+    "no_gold_v2_created": true,
+    "no_production_code_changed": true,
+    "no_tests_changed": true,
+    "no_ticker_runs": true,
+    "no_provider_calls": true,
+    "no_tradingagents_calls": true,
+    "all_37_alpha_expectations_accounted_for": true,
+    "all_6_main_conflict_expectations_accounted_for": true,
+    "independent_judgments_frozen_before_comqutor_comparison": true,
+    "no_comqutor_hit_miss_used_to_determine_gold_validity": true,
+    "no_benchmark_tuning_toward_75_percent": true,
+    "no_fabricated_external_sources": true
+  }
+}

@@ -1,0 +1,2683 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Provider Health Recheck + Degraded-Ticker Clean Rerun (Step 11)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-08-29T00:23:13.966032+00:00",
+  "preflight": {
+    "real_tradingagents_enabled": true,
+    "week2_llm_enabled": true,
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "credential_present": true,
+    "semantic_unit": "single_claim",
+    "claim_concurrency": 4,
+    "ticker_concurrency": 1,
+    "workload_aware_call_budget_enabled": true,
+    "result": "PASS"
+  },
+  "live_health_probe": {
+    "method": "10 representative single-claim alpha_classifier requests via the real production call path (_classify_alpha_with_llm + build_server_week2_llm_gateway), concurrency=4, over real persisted claims from the healthy Step-10 QQQ run.",
+    "requests": 10,
+    "successes": 10,
+    "unavailable_or_errors": 0,
+    "timeouts_detected": 0,
+    "payment_errors_detected": 0,
+    "result": "PASS -- 10/10 successes, 0 errors, 0 timeouts, 0 payment errors; Provider clearly usable."
+  },
+  "health_gate_result": "PASS",
+  "reruns": {
+    "NVDA": {
+      "old_run_id": "948be419-b542-4096-a536-ff567ef459c2",
+      "old_coverage": 0.4598540145985401,
+      "attempts": [
+        {
+          "ticker": "NVDA",
+          "started_at": "2026-08-28T21:49:41.018028+00:00",
+          "ended_at": "2026-08-28T22:39:07.387106+00:00",
+          "elapsed_seconds": 2966.4,
+          "response_status": "completed",
+          "run_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+          "structure_graph_status": "ready",
+          "conflict_status": "ready",
+          "main_conflict": {
+            "admissibility": {
+              "admissibility_version": "week4.conflict_admissibility.b2.v1",
+              "bear_score": 69.5188,
+              "bear_supporting_evidence_count": 13,
+              "bear_supporting_fact_group_ids": [
+                "35e7c76cb95d28d2d52ecbc8",
+                "36a62c2a91d543561ec931fd",
+                "370cd5568131c904b4f980f8",
+                "3837dc93b5560f0d8f77a084",
+                "59fdd98df7e4ab439a14ac56",
+                "762ce52c866c1b6968787dee",
+                "79426f122d26cfe679c67dc9",
+                "7ab2167486ae1167d02a80f8",
+                "8e847508028595afe185ff7d",
+                "a3e834426dc859ec09a736c4",
+                "f89c86eebb0f40617fb3391c",
+                "f973607ef8a0af0ff0c0533e",
+                "fe96b18933427fd697106fa7"
+              ],
+              "bear_ticker_specific_support_count": 4,
+              "bull_score": 80.4033,
+              "bull_supporting_evidence_count": 25,
+              "bull_supporting_fact_group_ids": [
+                "01a70cde6edba1f2b781a347",
+                "069aa308fd5f9a3a522c32aa",
+                "0e58ece82d61eada9144f55e",
+                "1492652b18f75765b18ce084",
+                "262411e65b7db27c4bdf57db",
+                "31c5331bdc5d5da0fe9ddba1",
+                "3338375b2433f331f4694ada",
+                "37c7d07a52b8ff395a429a66",
+                "3ef82200ab5847e5e849bc8e",
+                "45693a308f15fc90204045b8",
+                "564850da1e6f02746f3bd616",
+                "58628e748b8f86bc1a834956",
+                "5b7c787c4027679f4a769fe2",
+                "72cb1d2f82f4c3983239ae26",
+                "75580f03f98e8f03bff76af7",
+                "771bd0ac339e98a3c19461b1",
+                "91290a6592bdf831a40d2e76",
+                "a11fb70a58bccb203abb2bcb",
+                "a6d64385cd6786a842451aec",
+                "b2fa9571c758965e92350fc6",
+                "b98da1ff7fab426e0560115e",
+                "c556417d80b7c73c6f2fb651",
+                "dc1fe31698e166022b574396",
+                "e2920a8562c8589c784df2d3",
+                "e8354f5a381a3373eea63fcc"
+              ],
+              "bull_ticker_specific_support_count": 7,
+              "reason_codes": [],
+              "status": "admitted"
+            },
+            "alpha_a": "A101",
+            "alpha_a_strength": 0.3403,
+            "alpha_b": "A304",
+            "alpha_b_strength": 0.171,
+            "bear_alpha_id": "A304",
+            "bear_distinct_agent_count": 4,
+            "bear_fact_group_ids": [
+              "08174d7e40f377f340a30907",
+              "1035972f3636f96cb6bcd693",
+              "32b4ad8ff3ce09db6d3b0eda",
+              "35e7c76cb95d28d2d52ecbc8",
+              "36a62c2a91d543561ec931fd",
+              "370cd5568131c904b4f980f8",
+              "3837dc93b5560f0d8f77a084",
+              "5174f4ba333ea4048f861bab",
+              "59fdd98df7e4ab439a14ac56",
+              "762ce52c866c1b6968787dee",
+              "79426f122d26cfe679c67dc9",
+              "7ab2167486ae1167d02a80f8",
+              "7c011597ddf11727e61deb47",
+              "8cfb5f3a4716bdc91b91a1cc",
+              "8e847508028595afe185ff7d",
+              "a3e834426dc859ec09a736c4",
+              "ae6976040ccb40ffcc6dc26a",
+              "b8f7f5aa16c065be0c919565",
+              "c15647a5c9fb7e2c6d83ca6c",
+              "d8d23160d8c235bd04dd6bdf",
+              "dda5355ca3812df3c4de7b9f",
+              "e0c6bfab24fc3da54b02037f",
+              "f6748fade2c921a883dbf7ba",
+              "f86129006049e6648439b90b",
+              "f89c86eebb0f40617fb3391c",
+              "f973607ef8a0af0ff0c0533e",
+              "fe96b18933427fd697106fa7"
+            ],
+            "bear_overlap_ratio": 0.069,
+            "bear_raw_claim_count": 29,
+            "bear_structure": {
+              "activation_level": "active",
+              "activation_score": 69.5188,
+              "agents": [
+                "conservative_risk_analyst",
+                "fundamental_agent",
+                "news_agent",
+                "sentiment_agent"
+              ],
+              "alpha_id": "A304",
+              "alpha_name": "Multiple Compression",
+              "claim_ids": [
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:10",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:6",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:62",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:65",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:74",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:75",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:85",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:94",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:23",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:24",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:5",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:50",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:52",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:53",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:62",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:13",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:2",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:30",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:52",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:58",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:59",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:63",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:65",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:71",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:81",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:84",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:85",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:92",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:97"
+              ],
+              "direction": "negative",
+              "evidence": [
+                "NVDA is the most visible AI trade on the planet, which means it carries the highest expectation risk of all.",
+                "Let me be clear: that PEG ratio is based on forward estimates that assume NVDA maintains roughly 85% revenue growth indefinitely.",
+                "Metric: PEG Ratio; Value: 0.59; Interpretation: Below 1.0 = undervalued relative to growth",
+                "The PEG ratio of 0.59 is notably attractive, indicating that NVIDIA's growth rate more than justifies its current valuation.",
+                "Despite the attractive PEG, NVIDIA trades at a substantial absolute valuation with a market cap of $5.25 trillion.",
+                "Any slowdown in AI spending growth could trigger significant multiple compression.",
+                "The primary risks are valuation sensitivity to any AI spending slowdown and geopolitical/supply chain factors.",
+                "Category: Valuation; Metric: PEG Ratio; Value: 0.59; Signal: Undervalued vs growth",
+                "Marvell cautionary tale: Marvell posted record earnings and lifted guidance, yet shares sank 10-11%.",
+                "WSJ notes this is \"the latest example of the high expectations that investors have for companies tied to the AI boom.\" This is a direct warning that even strong AI-linked results can disappoint at these valuation levels \u2014 a risk that applies to NVDA as the AI bellwether.",
+                "AI trade context: Marvell posted record earnings but shares sank 10-11% \u2014 high expectations for AI-tied companies.",
+                "Valuation risk: Marvell's post-earnings selloff despite record results shows how high expectations are for AI-tied names; NVDA as the bellwether carries the same \"priced for perfection\" risk.",
+                "Net assessment: The fundamental demand story for NVDA remains exceptionally strong (AI CapEx, GPU demand, data center growth), but the macro backdrop (hawkish Fed, no rate cuts, hot inflation) and extreme valuation expectations create a tension.",
+                "The stock is a strong fundamental hold with elevated valuation risk.",
+                "Factor: Valuation Risk; Signal: Bearish; Evidence: Marvell sank 10% despite record results; $13T cap calls; Implication for NVDA: \"Priced for perfection\" risk",
+                "Wall Street Sent Them Lower.\" and \"Marvell, Nvidia, PayPal, Workday...\" (Barrons) \u2014 Marvell dropped 10-11% despite beating, \"the latest example of the high expectations that investors have for companies tied to the AI boom.\" This is a direct read-across risk for NVDA: even strong AI earnings can be sold off on high expectations.",
+                "The institutional/news framing is decidedly bullish on fundamentals but cautious on near-term price action.",
+                "Especially if their unbelievable revenues come from a bizarre closed loop incestuous economy.\" \u2014 a valuation-risk / closed-loop critique.",
+                "fundamentals: The news framing is bullish on the long-term thesis but explicitly flags the \"high expectations\" problem (Marvell's sell-off as a read-across).",
+                "The single dominant theme: NVDA delivered a stellar report but the stock gave back the earnings candle (-4.6% Friday).",
+                "Retail largely frames this as a normal, buyable pullback; news frames it as the \"high expectations\" problem.",
+                "Valuation / closed-loop risk.",
+                "Higher rates (Warsh), trade war, Iran war, and a hot inflation print are background risks that bulls dismiss but that could pressure the multiple.",
+                "The \"high expectations\" problem \u2014 Marvell's 10% sell-off despite a beat is a direct read-across.",
+                "Signal: High-expectations sell-off risk; Direction: Bearish; Source: News; Supporting Evidence: Marvell -10% despite beat; \"latest example of high expectations\"",
+                "Signal: Post-earnings -4.6% pullback; Direction: Bearish; Source: StockTwits; Supporting Evidence: \"Giving Back Earnings Candle\"; \"got slaughtered today\"",
+                "Signal: FCF dropped 56% QoQ; Direction: Bearish; Source: StockTwits; Supporting Evidence: \"free cash flow dropped 56% compared to last quarter\"",
+                "However, this is tempered by: (1) the \"high expectations\" problem demonstrated by Marvell's sell-off, (2) a real post-earnings pullback (-4.6% Friday), (3) a persistent minority valuation/closed-loop skepticism, and (4) macro headwinds (rates, trade war, inflation).",
+                "The dominant retail posture is to buy the post-earnings dip and expect gains in the weeks ahead, but the \"high expectations\" dynamic and macro backdrop argue for caution on near-term upside."
+              ],
+              "evidence_facts": [
+                {
+                  "evidence_fact_group_id": "08174d7e40f377f340a30907",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:6"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:6",
+                  "supporting_agents": [
+                    "conservative_risk_analyst"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "1035972f3636f96cb6bcd693",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:84"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:84",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "32b4ad8ff3ce09db6d3b0eda",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:58"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:58",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "35e7c76cb95d28d2d52ecbc8",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:85"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:85",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "36a62c2a91d543561ec931fd",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:65"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:65",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "370cd5568131c904b4f980f8",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:65"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:65",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "3837dc93b5560f0d8f77a084",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:75",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:30"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:75",
+                  "supporting_agents": [
+                    "fundamental_agent",
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "5174f4ba333ea4048f861bab",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:52"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:52",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "59fdd98df7e4ab439a14ac56",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:62"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:62",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "762ce52c866c1b6968787dee",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:92"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:92",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "79426f122d26cfe679c67dc9",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:5"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:5",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "7ab2167486ae1167d02a80f8",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:24"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:24",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "7c011597ddf11727e61deb47",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:2"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:2",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "8cfb5f3a4716bdc91b91a1cc",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:13"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:13",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "8e847508028595afe185ff7d",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:94"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:94",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "a3e834426dc859ec09a736c4",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:74"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:74",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "ae6976040ccb40ffcc6dc26a",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:23"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:23",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "b8f7f5aa16c065be0c919565",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:62"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:62",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "c15647a5c9fb7e2c6d83ca6c",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:59"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:59",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "d8d23160d8c235bd04dd6bdf",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:97"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:97",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "dda5355ca3812df3c4de7b9f",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:81"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:81",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "e0c6bfab24fc3da54b02037f",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:85"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:85",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "f6748fade2c921a883dbf7ba",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:71"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:71",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "f86129006049e6648439b90b",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:10"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:10",
+                  "supporting_agents": [
+                    "conservative_risk_analyst"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "f89c86eebb0f40617fb3391c",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:63"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:63",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "f973607ef8a0af0ff0c0533e",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:50",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:53"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:50",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "fe96b18933427fd697106fa7",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:52"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:52",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                }
+              ],
+              "match_scores": [
+                0.08,
+                0.0,
+                0.0,
+                0.2162,
+                0.2162,
+                0.6896,
+                0.2962,
+                0.2162,
+                0.0,
+                0.2441,
+                0.0,
+                0.7884,
+                0.2162,
+                0.5442,
+                0.7884,
+                0.028,
+                0.0,
+                0.5262,
+                0.028,
+                0.0,
+                0.0,
+                0.2962,
+                0.052,
+                0.028,
+                0.08,
+                0.028,
+                0.028,
+                0.2962,
+                0.0
+              ],
+              "source_agent_output_ids": [
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+              ],
+              "status": "active"
+            },
+            "bear_unique_fact_count": 27,
+            "bull_alpha_id": "A101",
+            "bull_distinct_agent_count": 6,
+            "bull_fact_group_ids": [
+              "01a70cde6edba1f2b781a347",
+              "069aa308fd5f9a3a522c32aa",
+              "0e58ece82d61eada9144f55e",
+              "1492652b18f75765b18ce084",
+              "262411e65b7db27c4bdf57db",
+              "31c5331bdc5d5da0fe9ddba1",
+              "3338375b2433f331f4694ada",
+              "37c7d07a52b8ff395a429a66",
+              "3ef82200ab5847e5e849bc8e",
+              "45693a308f15fc90204045b8",
+              "564850da1e6f02746f3bd616",
+              "58628e748b8f86bc1a834956",
+              "5b7c787c4027679f4a769fe2",
+              "72cb1d2f82f4c3983239ae26",
+              "75580f03f98e8f03bff76af7",
+              "771bd0ac339e98a3c19461b1",
+              "91290a6592bdf831a40d2e76",
+              "a11fb70a58bccb203abb2bcb",
+              "a6d64385cd6786a842451aec",
+              "b2fa9571c758965e92350fc6",
+              "b98da1ff7fab426e0560115e",
+              "c556417d80b7c73c6f2fb651",
+              "dc1fe31698e166022b574396",
+              "e2920a8562c8589c784df2d3",
+              "e8354f5a381a3373eea63fcc",
+              "f4f2c1fbf5045a0273f9cd1b"
+            ],
+            "bull_overlap_ratio": 0.037,
+            "bull_raw_claim_count": 27,
+            "bull_structure": {
+              "activation_level": "dominant",
+              "activation_score": 80.4033,
+              "agents": [
+                "bear_researcher",
+                "bull_researcher",
+                "conservative_risk_analyst",
+                "fundamental_agent",
+                "news_agent",
+                "sentiment_agent"
+              ],
+              "alpha_id": "A101",
+              "alpha_name": "AI Expansion",
+              "claim_ids": [
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:17",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:29",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:17",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:22",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:17",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:2",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:47",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:69",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:72",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:80",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:90",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:96",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:17",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:21",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:37",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:56",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:11",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:14",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:4",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:49",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:67",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:77",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:79",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:80",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:9",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:90"
+              ],
+              "direction": "positive",
+              "evidence": [
+                "The bull dismisses Marvell's post-earnings selloff as a confirmation of NVDA's differentiation.",
+                "He points to Lambda raising $1B in debt to buy NVDA chips to lease to Microsoft and Hudson River Trading as \"real, external, revenue-generating deployment.\" Let's examine that more carefully.",
+                "The CoreWeave-Hudson River Trading deal using the Vera Rubin platform and Lambda raising $1B in debt specifically to buy NVDA chips aren't just \"AI demand\" headlines\u2014they're contracted, capital-committed demand.",
+                "Neoclouds like Lambda and CoreWeave are raising debt to buy NVDA chips to lease to Microsoft and Hudson River Trading.",
+                "The Aggressive Analyst is betting that NVDA's growth continues unabated.",
+                "The most recent quarter (Apr-2026) grew revenue to $81.62B, up 85% year-over-year from $44.06B in the same quarter a year prior.",
+                "NVIDIA Corporation is the world's leading designer of graphics processing units (GPUs) and accelerated computing platforms, and the dominant supplier of AI accelerators powering the global artificial intelligence buildout.",
+                "Inventory has grown to $25.80B, up from $11.33B a year ago \u2014 this reflects NVIDIA building supply to meet surging AI demand, and is a positive signal of forward revenue expectations rather than a demand concern.",
+                "The revenue acceleration from $44.06B (Apr-2025 quarter) to $81.62B (Apr-2026 quarter) \u2014 an 85% YoY increase \u2014 reflects sustained, robust demand for AI compute.",
+                "NVIDIA's next-generation platform transitions continue to drive demand, with customers upgrading to newer architectures.",
+                "Export controls on advanced AI chips to certain markets (notably China) represent an ongoing overhang, and any escalation could restrict addressable market.",
+                "Traders should monitor hyperscaler capex commentary and any export-control developments as the primary fundamental catalysts/risks.",
+                "Category: Growth; Metric: Revenue (TTM); Value: $302.97B; Signal: Accelerating",
+                "Data center revenue trajectory: A Motley Fool prediction piece argues Nvidia's data center business alone could \"clear $100 billion in a quarter this fiscal year,\" noting it's \"closer than the headline growth rates suggest.\"",
+                "Neocloud Lambda debt raise: Neocloud Lambda secured $1B in private debt to buy Nvidia AI chips and lease them to Microsoft \u2014 \"the latest in a string of loans, underscoring the high cost of the AI boom.\" This confirms continued capital deployment into Nvidia hardware.",
+                "Trade war and Iran war: Barron's notes \"the Trade War and Iran War Aren't Stopping the Stock Market Rally,\" with Wall Street \"likely remain unfazed if earnings and the artificial-intelligence trade are robust.\" Geopolitical risk exists but is currently being ignored by markets.",
+                "Factor: AI CapEx / GPU Demand; Signal: Bullish; Evidence: CoreWeave-HRT deal (Vera Rubin); Lambda $1B debt for Nvidia chips; demand outpacing supply; Implication for NVDA: Sustained demand & pricing power",
+                "\"Could CoreWeave (CRWV) Stock Win as AI Demand Continues to Outpace GPU Supply?\" \u2014 reinforces the GPU-demand-outstrips-supply narrative.",
+                "\"This AI Fund Is Crushing QQQ, and Nvidia Is Barely 2% of It\" \u2014 a subtle contrarian note suggesting AI profits may be accruing elsewhere.",
+                "\"Nvidia could hit a $13 trillion market cap, analyst says\" \u2014 an explicit bull case from an analyst.",
+                "Alignment: All three sources agree that NVDA's fundamentals are strong \u2014 stellar earnings, record data-center growth, first-ever one-year-ahead guidance, and sustained AI/GPU demand.",
+                "Sustained AI/GPU demand signals (CoreWeave, Lambda, AWS 2M-GPU expansion).",
+                "Signal: Analyst $13T market-cap bull case; Direction: Bullish; Source: News; Supporting Evidence: \"Nvidia could hit a $13 trillion market cap, analyst says\"",
+                "Signal: Data-center >$100B/quarter prediction; Direction: Bullish; Source: News; Supporting Evidence: \"Prediction: Nvidia's Data Center Business Alone Clears $100 Billion\"",
+                "Signal: AI demand outstrips GPU supply; Direction: Bullish; Source: News; Supporting Evidence: CoreWeave, Lambda $1B debt, AWS 2M-GPU expansion",
+                "\"Prediction: Nvidia's Data Center Business Alone Clears $100 Billion in a Quarter This Fiscal Year\" (Motley Fool) \u2014 a bullish revenue-growth thesis.",
+                "The fundamental thesis is uniformly strong across all sources \u2014 stellar earnings, record data-center growth, unprecedented forward guidance, and sustained AI/GPU demand."
+              ],
+              "evidence_facts": [
+                {
+                  "evidence_fact_group_id": "01a70cde6edba1f2b781a347",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:21"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:21",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "069aa308fd5f9a3a522c32aa",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:29"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:29",
+                  "supporting_agents": [
+                    "bear_researcher"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "0e58ece82d61eada9144f55e",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:17",
+                  "supporting_agents": [
+                    "bull_researcher"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "1492652b18f75765b18ce084",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:67"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:67",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "262411e65b7db27c4bdf57db",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:9"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:9",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "31c5331bdc5d5da0fe9ddba1",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:17",
+                  "supporting_agents": [
+                    "bear_researcher"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "3338375b2433f331f4694ada",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:14"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:14",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "37c7d07a52b8ff395a429a66",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:17",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "3ef82200ab5847e5e849bc8e",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:80"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:80",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "45693a308f15fc90204045b8",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:11"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:11",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "564850da1e6f02746f3bd616",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:2"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:2",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "58628e748b8f86bc1a834956",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:4"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:4",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "5b7c787c4027679f4a769fe2",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:22"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:22",
+                  "supporting_agents": [
+                    "bull_researcher"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "72cb1d2f82f4c3983239ae26",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:56"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:56",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "75580f03f98e8f03bff76af7",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:77"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:77",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "771bd0ac339e98a3c19461b1",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:69"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:69",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "91290a6592bdf831a40d2e76",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:80"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:80",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "a11fb70a58bccb203abb2bcb",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:47"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:47",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "a6d64385cd6786a842451aec",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:17",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "b2fa9571c758965e92350fc6",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46",
+                  "supporting_agents": [
+                    "conservative_risk_analyst"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "b98da1ff7fab426e0560115e",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:90"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:90",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "c556417d80b7c73c6f2fb651",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:37"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:37",
+                  "supporting_agents": [
+                    "news_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "dc1fe31698e166022b574396",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:79"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:79",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "e2920a8562c8589c784df2d3",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:72"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:72",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "e8354f5a381a3373eea63fcc",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:49",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:90"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:49",
+                  "supporting_agents": [
+                    "sentiment_agent"
+                  ]
+                },
+                {
+                  "evidence_fact_group_id": "f4f2c1fbf5045a0273f9cd1b",
+                  "grouping_method": "evidence_fact_index.v1",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:96"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:96",
+                  "supporting_agents": [
+                    "fundamental_agent"
+                  ]
+                }
+              ],
+              "match_scores": [
+                0.1584,
+                0.2384,
+                0.6058,
+                0.2384,
+                0.2384,
+                0.0,
+                0.4181,
+                0.6058,
+                0.3423,
+                0.1584,
+                0.2723,
+                0.375,
+                0.08,
+                0.1684,
+                0.3057,
+                0.3223,
+                0.8588,
+                0.5646,
+                0.2358,
+                0.1684,
+                0.6281,
+                0.5096,
+                0.1684,
+                0.2384,
+                0.6346,
+                0.3135,
+                0.5896
+              ],
+              "source_agent_output_ids": [
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report",
+                "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+              ],
+              "status": "dominant"
+            },
+            "bull_unique_fact_count": 26,
+            "components": {
+              "activation_a": 80.4033,
+              "activation_b": 69.5188,
+              "alpha_a_evidence_strength": 0.3403,
+              "alpha_b_evidence_strength": 0.171,
+              "contradiction_weight": 0.9,
+              "evidence_strength": 0.2556,
+              "minimum_activation": 69.5188
+            },
+            "conflict_id": "A101__A304",
+            "conflict_level": "low",
+            "conflict_score": 15.9941,
+            "evidence_strength": 0.2556,
+            "evidence_ui": {
+              "bear_evidence": [
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "59fdd98df7e4ab439a14ac56",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Factor: Valuation Risk; Signal: Bearish; Evidence: Marvell sank 10% despite record results; $13T cap calls; Implication for NVDA: \"Priced for perfection\" risk",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:62"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:62",
+                  "representative_match_score": 0.7884,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "f973607ef8a0af0ff0c0533e",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Valuation risk: Marvell's post-earnings selloff despite record results shows how high expectations are for AI-tied names; NVDA as the bellwether carries the same \"priced for perfection\" risk.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:50",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:53"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:50",
+                  "representative_match_score": 0.7884,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "7ab2167486ae1167d02a80f8",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "WSJ notes this is \"the latest example of the high expectations that investors have for companies tied to the AI boom.\" This is a direct warning that even strong AI-linked results can disappoint at these valuation levels \u2014 a risk that applies to NVDA as the AI bellwether.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:24"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:24",
+                  "representative_match_score": 0.2441,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "fe96b18933427fd697106fa7",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Net assessment: The fundamental demand story for NVDA remains exceptionally strong (AI CapEx, GPU demand, data center growth), but the macro backdrop (hawkish Fed, no rate cuts, hot inflation) and extreme valuation expectations create a tension.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:52"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:52",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "fundamental_agent",
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "3837dc93b5560f0d8f77a084",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Any slowdown in AI spending growth could trigger significant multiple compression.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:75",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:30"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:75",
+                  "representative_match_score": 0.6896,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "35e7c76cb95d28d2d52ecbc8",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The primary risks are valuation sensitivity to any AI spending slowdown and geopolitical/supply chain factors.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:85"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:85",
+                  "representative_match_score": 0.2962,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "762ce52c866c1b6968787dee",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "However, this is tempered by: (1) the \"high expectations\" problem demonstrated by Marvell's sell-off, (2) a real post-earnings pullback (-4.6% Friday), (3) a persistent minority valuation/closed-loop skepticism, and (4) macro headwinds (rates, trade war, inflation).",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:92"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:92",
+                  "representative_match_score": 0.2962,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "f89c86eebb0f40617fb3391c",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Valuation / closed-loop risk.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:63"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:63",
+                  "representative_match_score": 0.2962,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "370cd5568131c904b4f980f8",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The PEG ratio of 0.59 is notably attractive, indicating that NVIDIA's growth rate more than justifies its current valuation.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:65"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:65",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "8e847508028595afe185ff7d",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Category: Valuation; Metric: PEG Ratio; Value: 0.59; Signal: Undervalued vs growth",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:94"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:94",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "a3e834426dc859ec09a736c4",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Despite the attractive PEG, NVIDIA trades at a substantial absolute valuation with a market cap of $5.25 trillion.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:74"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:74",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "36a62c2a91d543561ec931fd",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Higher rates (Warsh), trade war, Iran war, and a hot inflation print are background risks that bulls dismiss but that could pressure the multiple.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:65"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:65",
+                  "representative_match_score": 0.052,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "79426f122d26cfe679c67dc9",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.llm.v1",
+                  "evidence_text": "AI trade context: Marvell posted record earnings but shares sank 10-11% \u2014 high expectations for AI-tied companies.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:5"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:5",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": null,
+                  "stance_method": "llm",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                }
+              ],
+              "bull_evidence": [
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "72cb1d2f82f4c3983239ae26",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Factor: AI CapEx / GPU Demand; Signal: Bullish; Evidence: CoreWeave-HRT deal (Vera Rubin); Lambda $1B debt for Nvidia chips; demand outpacing supply; Implication for NVDA: Sustained demand & pricing power",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:56"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:56",
+                  "representative_match_score": 0.8588,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "e8354f5a381a3373eea63fcc",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Alignment: All three sources agree that NVDA's fundamentals are strong \u2014 stellar earnings, record data-center growth, first-ever one-year-ahead guidance, and sustained AI/GPU demand.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:49",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:90"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:49",
+                  "representative_match_score": 0.6281,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "bull_researcher"
+                  ],
+                  "evidence_fact_group_id": "0e58ece82d61eada9144f55e",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The CoreWeave-Hudson River Trading deal using the Vera Rubin platform and Lambda raising $1B in debt specifically to buy NVDA chips aren't just \"AI demand\" headlines\u2014they're contracted, capital-committed demand.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:17",
+                  "representative_match_score": 0.6058,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "bear_researcher"
+                  ],
+                  "evidence_fact_group_id": "069aa308fd5f9a3a522c32aa",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "He points to Lambda raising $1B in debt to buy NVDA chips to lease to Microsoft and Hudson River Trading as \"real, external, revenue-generating deployment.\" Let's examine that more carefully.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:29"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:29",
+                  "representative_match_score": 0.2384,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "bull_researcher"
+                  ],
+                  "evidence_fact_group_id": "5b7c787c4027679f4a769fe2",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Neoclouds like Lambda and CoreWeave are raising debt to buy NVDA chips to lease to Microsoft and Hudson River Trading.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:22"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:22",
+                  "representative_match_score": 0.2384,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "conservative_risk_analyst"
+                  ],
+                  "evidence_fact_group_id": "b2fa9571c758965e92350fc6",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The Aggressive Analyst is betting that NVDA's growth continues unabated.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46",
+                  "representative_match_score": 0.2384,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "bear_researcher"
+                  ],
+                  "evidence_fact_group_id": "31c5331bdc5d5da0fe9ddba1",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The bull dismisses Marvell's post-earnings selloff as a confirmation of NVDA's differentiation.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:17",
+                  "representative_match_score": 0.1584,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "91290a6592bdf831a40d2e76",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Signal: AI demand outstrips GPU supply; Direction: Bullish; Source: News; Supporting Evidence: CoreWeave, Lambda $1B debt, AWS 2M-GPU expansion",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:80"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:80",
+                  "representative_match_score": 0.6346,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "a11fb70a58bccb203abb2bcb",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Inventory has grown to $25.80B, up from $11.33B a year ago \u2014 this reflects NVIDIA building supply to meet surging AI demand, and is a positive signal of forward revenue expectations rather than a demand concern.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:47"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:47",
+                  "representative_match_score": 0.6058,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "45693a308f15fc90204045b8",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "\"Could CoreWeave (CRWV) Stock Win as AI Demand Continues to Outpace GPU Supply?\" \u2014 reinforces the GPU-demand-outstrips-supply narrative.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:11"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:11",
+                  "representative_match_score": 0.5646,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "1492652b18f75765b18ce084",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Sustained AI/GPU demand signals (CoreWeave, Lambda, AWS 2M-GPU expansion).",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:67"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:67",
+                  "representative_match_score": 0.5096,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "564850da1e6f02746f3bd616",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "NVIDIA Corporation is the world's leading designer of graphics processing units (GPUs) and accelerated computing platforms, and the dominant supplier of AI accelerators powering the global artificial intelligence buildout.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:2"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:2",
+                  "representative_match_score": 0.4181,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "b98da1ff7fab426e0560115e",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Traders should monitor hyperscaler capex commentary and any export-control developments as the primary fundamental catalysts/risks.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:90"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:90",
+                  "representative_match_score": 0.375,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "771bd0ac339e98a3c19461b1",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The revenue acceleration from $44.06B (Apr-2025 quarter) to $81.62B (Apr-2026 quarter) \u2014 an 85% YoY increase \u2014 reflects sustained, robust demand for AI compute.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:69"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:69",
+                  "representative_match_score": 0.3423,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "c556417d80b7c73c6f2fb651",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Trade war and Iran war: Barron's notes \"the Trade War and Iran War Aren't Stopping the Stock Market Rally,\" with Wall Street \"likely remain unfazed if earnings and the artificial-intelligence trade are robust.\" Geopolitical risk exists but is currently being ignored by markets.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:37"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:37",
+                  "representative_match_score": 0.3223,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "262411e65b7db27c4bdf57db",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "\"Prediction: Nvidia's Data Center Business Alone Clears $100 Billion in a Quarter This Fiscal Year\" (Motley Fool) \u2014 a bullish revenue-growth thesis.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:9"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:9",
+                  "representative_match_score": 0.3135,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "01a70cde6edba1f2b781a347",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Neocloud Lambda debt raise: Neocloud Lambda secured $1B in private debt to buy Nvidia AI chips and lease them to Microsoft \u2014 \"the latest in a string of loans, underscoring the high cost of the AI boom.\" This confirms continued capital deployment into Nvidia hardware.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:21"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:21",
+                  "representative_match_score": 0.3057,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "3ef82200ab5847e5e849bc8e",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Export controls on advanced AI chips to certain markets (notably China) represent an ongoing overhang, and any escalation could restrict addressable market.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:80"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:80",
+                  "representative_match_score": 0.2723,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "dc1fe31698e166022b574396",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Signal: Data-center >$100B/quarter prediction; Direction: Bullish; Source: News; Supporting Evidence: \"Prediction: Nvidia's Data Center Business Alone Clears $100 Billion\"",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:79"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:79",
+                  "representative_match_score": 0.2384,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "3338375b2433f331f4694ada",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "\"This AI Fund Is Crushing QQQ, and Nvidia Is Barely 2% of It\" \u2014 a subtle contrarian note suggesting AI profits may be accruing elsewhere.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:14"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:14",
+                  "representative_match_score": 0.2358,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "58628e748b8f86bc1a834956",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "\"Nvidia could hit a $13 trillion market cap, analyst says\" \u2014 an explicit bull case from an analyst.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:4"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:4",
+                  "representative_match_score": 0.1684,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "evidence_fact_group_id": "75580f03f98e8f03bff76af7",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Signal: Analyst $13T market-cap bull case; Direction: Bullish; Source: News; Supporting Evidence: \"Nvidia could hit a $13 trillion market cap, analyst says\"",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:77"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:77",
+                  "representative_match_score": 0.1684,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "evidence_fact_group_id": "a6d64385cd6786a842451aec",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Data center revenue trajectory: A Motley Fool prediction piece argues Nvidia's data center business alone could \"clear $100 billion in a quarter this fiscal year,\" noting it's \"closer than the headline growth rates suggest.\"",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:17",
+                  "representative_match_score": 0.1684,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "e2920a8562c8589c784df2d3",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "NVIDIA's next-generation platform transitions continue to drive demand, with customers upgrading to newer architectures.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:72"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:72",
+                  "representative_match_score": 0.1584,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "high",
+                  "stance_method": "deterministic_fallback",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "evidence_fact_group_id": "37c7d07a52b8ff395a429a66",
+                  "evidence_stance": "supports_alpha",
+                  "evidence_stance_version": "evidence_stance.llm.v1",
+                  "evidence_text": "The most recent quarter (Apr-2026) grew revenue to $81.62B, up 85% year-over-year from $44.06B in the same quarter a year prior.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:17",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": null,
+                  "stance_method": "llm",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                }
+              ],
+              "counter_evidence": [
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "59fdd98df7e4ab439a14ac56",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Factor: Valuation Risk; Signal: Bearish; Evidence: Marvell sank 10% despite record results; $13T cap calls; Implication for NVDA: \"Priced for perfection\" risk",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:62"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:62",
+                  "representative_match_score": 0.7884,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "f973607ef8a0af0ff0c0533e",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Valuation risk: Marvell's post-earnings selloff despite record results shows how high expectations are for AI-tied names; NVDA as the bellwether carries the same \"priced for perfection\" risk.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:50",
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:53"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:50",
+                  "representative_match_score": 0.7884,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "7ab2167486ae1167d02a80f8",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "WSJ notes this is \"the latest example of the high expectations that investors have for companies tied to the AI boom.\" This is a direct warning that even strong AI-linked results can disappoint at these valuation levels \u2014 a risk that applies to NVDA as the AI bellwether.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:24"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:24",
+                  "representative_match_score": 0.2441,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "fe96b18933427fd697106fa7",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Net assessment: The fundamental demand story for NVDA remains exceptionally strong (AI CapEx, GPU demand, data center growth), but the macro backdrop (hawkish Fed, no rate cuts, hot inflation) and extreme valuation expectations create a tension.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:52"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:52",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "bear_researcher"
+                  ],
+                  "counter_target_alpha_id": "A304",
+                  "evidence_fact_group_id": "31c5331bdc5d5da0fe9ddba1",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The bull dismisses Marvell's post-earnings selloff as a confirmation of NVDA's differentiation.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:17"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:17",
+                  "representative_match_score": 0.1584,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A101",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "conservative_risk_analyst"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "f86129006049e6648439b90b",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "NVDA is the most visible AI trade on the planet, which means it carries the highest expectation risk of all.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:10"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:10",
+                  "representative_match_score": 0.08,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "conservative_risk_analyst"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "08174d7e40f377f340a30907",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Let me be clear: that PEG ratio is based on forward estimates that assume NVDA maintains roughly 85% revenue growth indefinitely.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:6"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history:claim:6",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:conservative_risk_analyst:risk_debate_state.conservative_history"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "32b4ad8ff3ce09db6d3b0eda",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The single dominant theme: NVDA delivered a stellar report but the stock gave back the earnings candle (-4.6% Friday).",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:58"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:58",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": true
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "counter_target_alpha_id": "A304",
+                  "evidence_fact_group_id": "b98da1ff7fab426e0560115e",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Traders should monitor hyperscaler capex commentary and any export-control developments as the primary fundamental catalysts/risks.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:90"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:90",
+                  "representative_match_score": 0.375,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A101",
+                  "target_alpha_id": "A304",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "35e7c76cb95d28d2d52ecbc8",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The primary risks are valuation sensitivity to any AI spending slowdown and geopolitical/supply chain factors.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:85"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:85",
+                  "representative_match_score": 0.2962,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "762ce52c866c1b6968787dee",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "However, this is tempered by: (1) the \"high expectations\" problem demonstrated by Marvell's sell-off, (2) a real post-earnings pullback (-4.6% Friday), (3) a persistent minority valuation/closed-loop skepticism, and (4) macro headwinds (rates, trade war, inflation).",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:92"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:92",
+                  "representative_match_score": 0.2962,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "f89c86eebb0f40617fb3391c",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Valuation / closed-loop risk.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:63"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:63",
+                  "representative_match_score": 0.2962,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "370cd5568131c904b4f980f8",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The PEG ratio of 0.59 is notably attractive, indicating that NVIDIA's growth rate more than justifies its current valuation.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:65"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:65",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "8e847508028595afe185ff7d",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Category: Valuation; Metric: PEG Ratio; Value: 0.59; Signal: Undervalued vs growth",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:94"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:94",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "a3e834426dc859ec09a736c4",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Despite the attractive PEG, NVIDIA trades at a substantial absolute valuation with a market cap of $5.25 trillion.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:74"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:74",
+                  "representative_match_score": 0.2162,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "dda5355ca3812df3c4de7b9f",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Signal: High-expectations sell-off risk; Direction: Bearish; Source: News; Supporting Evidence: Marvell -10% despite beat; \"latest example of high expectations\"",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:81"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:81",
+                  "representative_match_score": 0.08,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "1035972f3636f96cb6bcd693",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Signal: Post-earnings -4.6% pullback; Direction: Bearish; Source: StockTwits; Supporting Evidence: \"Giving Back Earnings Candle\"; \"got slaughtered today\"",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:84"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:84",
+                  "representative_match_score": 0.028,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "5174f4ba333ea4048f861bab",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "fundamentals: The news framing is bullish on the long-term thesis but explicitly flags the \"high expectations\" problem (Marvell's sell-off as a read-across).",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:52"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:52",
+                  "representative_match_score": 0.028,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "e0c6bfab24fc3da54b02037f",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Signal: FCF dropped 56% QoQ; Direction: Bearish; Source: StockTwits; Supporting Evidence: \"free cash flow dropped 56% compared to last quarter\"",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:85"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:85",
+                  "representative_match_score": 0.028,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "f6748fade2c921a883dbf7ba",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The \"high expectations\" problem \u2014 Marvell's 10% sell-off despite a beat is a direct read-across.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:71"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:71",
+                  "representative_match_score": 0.028,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "79426f122d26cfe679c67dc9",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "AI trade context: Marvell posted record earnings but shares sank 10-11% \u2014 high expectations for AI-tied companies.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:5"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:5",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "7c011597ddf11727e61deb47",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The institutional/news framing is decidedly bullish on fundamentals but cautious on near-term price action.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:2"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:2",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "news_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "ae6976040ccb40ffcc6dc26a",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Marvell cautionary tale: Marvell posted record earnings and lifted guidance, yet shares sank 10-11%.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:23"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:23",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "fundamental_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "b8f7f5aa16c065be0c919565",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Metric: PEG Ratio; Value: 0.59; Interpretation: Below 1.0 = undervalued relative to growth",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:62"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report:claim:62",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:fundamental_agent:fundamentals_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "c15647a5c9fb7e2c6d83ca6c",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "Retail largely frames this as a normal, buyable pullback; news frames it as the \"high expectations\" problem.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:59"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:59",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                },
+                {
+                  "agents": [
+                    "sentiment_agent"
+                  ],
+                  "counter_target_alpha_id": "A101",
+                  "evidence_fact_group_id": "d8d23160d8c235bd04dd6bdf",
+                  "evidence_stance": "supports_counter_alpha",
+                  "evidence_stance_version": "evidence_stance.deterministic.v1",
+                  "evidence_text": "The dominant retail posture is to buy the post-earnings dip and expect gains in the weeks ahead, but the \"high expectations\" dynamic and macro backdrop argue for caution on near-term upside.",
+                  "member_claim_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:97"
+                  ],
+                  "representative_claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report:claim:97",
+                  "representative_match_score": 0.0,
+                  "source_agent_output_ids": [
+                    "a8d47429-a47a-446b-93c4-dd718b8e2ff9:sentiment_agent:sentiment_report"
+                  ],
+                  "stance_confidence_band": "medium",
+                  "stance_method": null,
+                  "supports_counter_alpha_id": "A304",
+                  "target_alpha_id": "A101",
+                  "ticker_specific": false
+                }
+              ],
+              "invalidation_conditions": {
+                "bear_alpha": {
+                  "alpha_id": "A304",
+                  "alpha_name": "Multiple Compression",
+                  "approval_status": "not_defined",
+                  "conditions": [],
+                  "source": null,
+                  "version": null
+                },
+                "bull_alpha": {
+                  "alpha_id": "A101",
+                  "alpha_name": "AI Expansion",
+                  "approval_status": "approved",
+                  "conditions": [
+                    {
+                      "condition_id": "A101_INV_1",
+                      "condition_text": "hyperscaler capex slows"
+                    },
+                    {
+                      "condition_id": "A101_INV_2",
+                      "condition_text": "GPU demand weakens"
+                    },
+                    {
+                      "condition_id": "A101_INV_3",
+                      "condition_text": "revenue growth decelerates"
+                    },
+                    {
+                      "condition_id": "A101_INV_4",
+                      "condition_text": "AI demand already priced in"
+                    }
+                  ],
+                  "source": "John",
+                  "version": "v0.1"
+                }
+              },
+              "missing_evidence": [],
+              "qualification_gaps": [],
+              "schema_version": "conflict_evidence_ui.v1"
+            },
+            "explanation": "AI Expansion and Multiple Compression present a bull-vs-bear structural tension in this run's Structure Graph, currently assessed at low conflict level.",
+            "reason_codes": [],
+            "shared_fact_group_count": 0,
+            "shared_fact_group_ids": [],
+            "shared_fact_resolution": "no_overlap"
+          },
+          "error": null,
+          "error_code": null,
+          "message": null,
+          "success": true,
+          "raw_response_keys": [
+            "agent_output_count",
+            "artifacts",
+            "cache_disposition",
+            "conflict_status",
+            "data_sanity_critical_count",
+            "data_sanity_numeric_semantics",
+            "data_sanity_status",
+            "data_sanity_warning_count",
+            "data_sanity_warnings",
+            "dominant_alphas",
+            "entity_alpha_exposure_status",
+            "entity_alpha_exposures",
+            "evidence_stance_summary",
+            "main_conflict",
+            "run_id",
+            "run_status",
+            "status",
+            "structure_graph_status",
+            "structured_output_count",
+            "summary",
+            "ticker",
+            "unclassified_findings_download_available",
+            "unclassified_findings_reason_counts",
+            "unclassified_findings_status",
+            "unclassified_findings_top20",
+            "unclassified_findings_total_count"
+          ]
+        }
+      ],
+      "final_run_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+      "dedup_hit_detected": false,
+      "force_refresh_needed": false,
+      "new_run_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+      "new_coverage": 0.9874301675977654,
+      "replacement": true
+    },
+    "MSFT": {
+      "old_run_id": "c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+      "attempts": [
+        {
+          "ticker": "MSFT",
+          "started_at": "2026-08-28T22:39:07.390434+00:00",
+          "ended_at": "2026-08-28T22:39:07.467960+00:00",
+          "elapsed_seconds": 0.1,
+          "response_status": "completed",
+          "run_id": "c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+          "structure_graph_status": "ready",
+          "conflict_status": "ready",
+          "main_conflict": null,
+          "error": null,
+          "error_code": null,
+          "message": null,
+          "success": true,
+          "raw_response_keys": [
+            "agent_output_count",
+            "artifacts",
+            "cache_disposition",
+            "conflict_status",
+            "data_sanity_critical_count",
+            "data_sanity_numeric_semantics",
+            "data_sanity_status",
+            "data_sanity_warning_count",
+            "data_sanity_warnings",
+            "dominant_alphas",
+            "entity_alpha_exposure_status",
+            "entity_alpha_exposures",
+            "evidence_stance_summary",
+            "main_conflict",
+            "run_id",
+            "run_status",
+            "status",
+            "structure_graph_status",
+            "structured_output_count",
+            "summary",
+            "ticker",
+            "unclassified_findings_download_available",
+            "unclassified_findings_reason_counts",
+            "unclassified_findings_status",
+            "unclassified_findings_top20",
+            "unclassified_findings_total_count"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "started_at": "2026-08-28T22:40:23.376838+00:00",
+          "ended_at": "2026-08-28T23:33:04.094961+00:00",
+          "elapsed_seconds": 3160.8,
+          "response_status": "completed",
+          "run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+          "cache_disposition": "force_refreshed",
+          "error": null,
+          "error_code": null,
+          "message": null,
+          "success": true
+        }
+      ],
+      "final_run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+      "dedup_hit_detected": true,
+      "dedup_hit_explanation": "First attempt returned the SAME run_id as the Step-10 degraded run in 0.1s -- request-fingerprint reuse/dedup, because analysis_date resolved identically to Step 10's later runs (both landed on the same calendar day after Step 10's own mid-run date rollover). Caught immediately by comparing the returned run_id against the known Step-10 degraded run_id before treating it as a valid rerun. Corrected by re-invoking with force_refresh=True (COMQUTOR_REAL_FORCE_REFRESH_ENABLED set in-process for this deliberate, explicit call only) -- disposition=force_refreshed confirmed on the successful retry.",
+      "force_refresh_needed": true,
+      "old_coverage": 0.03918722786647315,
+      "new_run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+      "new_coverage": 0.9891304347826086,
+      "replacement": true
+    },
+    "TSM": {
+      "old_run_id": "5be841d5-0924-4943-8d37-ccd4168228cb",
+      "attempts": [
+        {
+          "ticker": "TSM",
+          "started_at": "2026-08-28T22:39:07.471890+00:00",
+          "ended_at": "2026-08-28T22:39:07.541345+00:00",
+          "elapsed_seconds": 0.1,
+          "response_status": "completed",
+          "run_id": "5be841d5-0924-4943-8d37-ccd4168228cb",
+          "structure_graph_status": "ready",
+          "conflict_status": "ready",
+          "main_conflict": null,
+          "error": null,
+          "error_code": null,
+          "message": null,
+          "success": true,
+          "raw_response_keys": [
+            "agent_output_count",
+            "artifacts",
+            "cache_disposition",
+            "conflict_status",
+            "data_sanity_critical_count",
+            "data_sanity_numeric_semantics",
+            "data_sanity_status",
+            "data_sanity_warning_count",
+            "data_sanity_warnings",
+            "dominant_alphas",
+            "entity_alpha_exposure_status",
+            "entity_alpha_exposures",
+            "evidence_stance_summary",
+            "main_conflict",
+            "run_id",
+            "run_status",
+            "status",
+            "structure_graph_status",
+            "structured_output_count",
+            "summary",
+            "ticker",
+            "unclassified_findings_download_available",
+            "unclassified_findings_reason_counts",
+            "unclassified_findings_status",
+            "unclassified_findings_top20",
+            "unclassified_findings_total_count"
+          ]
+        },
+        {
+          "ticker": "TSM",
+          "started_at": "2026-08-28T23:33:04.095994+00:00",
+          "ended_at": "2026-08-29T00:19:55.952484+00:00",
+          "elapsed_seconds": 2811.9,
+          "response_status": "completed",
+          "run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+          "cache_disposition": "force_refreshed",
+          "error": null,
+          "error_code": null,
+          "message": null,
+          "success": true
+        }
+      ],
+      "final_run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+      "dedup_hit_detected": true,
+      "dedup_hit_explanation": "First attempt returned the SAME run_id as the Step-10 degraded run in 0.1s -- request-fingerprint reuse/dedup, because analysis_date resolved identically to Step 10's later runs (both landed on the same calendar day after Step 10's own mid-run date rollover). Caught immediately by comparing the returned run_id against the known Step-10 degraded run_id before treating it as a valid rerun. Corrected by re-invoking with force_refresh=True (COMQUTOR_REAL_FORCE_REFRESH_ENABLED set in-process for this deliberate, explicit call only) -- disposition=force_refreshed confirmed on the successful retry.",
+      "force_refresh_needed": true,
+      "old_coverage": 0.0,
+      "new_run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+      "new_coverage": 0.9852941176470589,
+      "replacement": true
+    }
+  },
+  "dedup_hit_finding": "MSFT and TSM's first rerun attempt each returned the SAME run_id as their Step-10 degraded run in ~0.1 seconds -- a request-fingerprint reuse/dedup hit (analysis_date resolved identically to Step 10's own later-running tickers, which had crossed a calendar-day boundary mid-sequence). This was NOT a genuine rerun and was caught immediately by comparing the returned run_id against the known Step-10 degraded run_id before treating it as valid, per this task's explicit instruction not to reuse degraded run_ids. Corrected via force_refresh=True (COMQUTOR_REAL_FORCE_REFRESH_ENABLED set for this explicit, deliberate in-process call only, never as a standing server configuration change) -- both retries succeeded with genuinely new run_ids and disposition=force_refreshed.",
+  "replacement_rule_verification": {
+    "NVDA": {
+      "technical_completeness_9_of_9": true,
+      "new_run_id_confirmed": true,
+      "semantic_execution_health_materially_healthy": true,
+      "no_configuration_invalid_condition": true,
+      "replacement_decision": "YES"
+    },
+    "MSFT": {
+      "technical_completeness_9_of_9": true,
+      "new_run_id_confirmed": true,
+      "semantic_execution_health_materially_healthy": true,
+      "no_configuration_invalid_condition": true,
+      "replacement_decision": "YES"
+    },
+    "TSM": {
+      "technical_completeness_9_of_9": true,
+      "new_run_id_confirmed": true,
+      "semantic_execution_health_materially_healthy": true,
+      "no_configuration_invalid_condition": true,
+      "replacement_decision": "YES"
+    }
+  },
+  "final_baseline_status": "REPAIRED",
+  "mixed_time_composite_set_justification": "The final composite six-ticker set mixes Step-10 runs (QQQ/SNDK/AMD) with Step-11 runs (NVDA/MSFT/TSM). This is acceptable because: (1) all six runs use the exact same production code state (verified by frozen-hash tests -- zero production semantic files changed between Step 10 and Step 11); (2) same semantic contract (Alpha Mapper v3, B1 v3, B2/B4 thresholds unchanged, Step-6/Step-7 unchanged); (3) same Provider/model configuration (deepseek/deepseek-v4-flash, same workload-aware budget, same concurrency); (4) only the three runs that were externally degraded by a genuine, since-resolved DeepSeek provider-error storm are being replaced -- the three healthy runs are retained unchanged, not rerun, per this task's explicit instruction not to rerun QQQ/SNDK/AMD absent a concrete consistency defect (none was found).",
+  "quick_reference_final_composite_six": {
+    "NVDA": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+    "QQQ": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+    "MSFT": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+    "SNDK": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+    "TSM": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+    "AMD": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+  },
+  "call_accounting": {
+    "step11_health_probe_provider_calls": 11,
+    "nvda_tradingagents_attempts": 1,
+    "msft_tradingagents_attempts": 2,
+    "tsm_tradingagents_attempts": 2,
+    "whole_ticker_retries": 2,
+    "week2_provider_attempts_step11_new_runs_only": 1777,
+    "week2_timeouts_step11_new_runs_only": 366,
+    "week2_transport_or_provider_errors_step11_new_runs_only": 1,
+    "week2_rate_limits_step11_new_runs_only": 0,
+    "week2_budget_exhaustion_step11_new_runs_only": 0,
+    "note": "Step-10 and Step-11 call counts are NOT merged above -- these are Step-11-only (new runs only). Cumulative (Step 10 all six + Step 11 new three) figures are in the r2 final E2E artifact."
+  },
+  "production_semantic_code_changed": false,
+  "taxonomy_changed": false,
+  "conflict_ontology_changed": false,
+  "regression_labels_changed": false,
+  "commit": false,
+  "push": false
+}

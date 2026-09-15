@@ -96,7 +96,15 @@ For all 53 deleted scripts: 0 production imports, 0 test imports/invocations, 0 
 
 `.venv/bin/python3 -m compileall -q comqutor_alpha cli tradingagents scripts tests` → exit 0.
 Direct import check of every production module + every one of the 18 kept scripts → all OK.
-Full offline suite pre/post comparison recorded in the Final Response below.
+
+Full offline suite, three checkpoints:
+| Checkpoint | Failed | Passed | Skipped | Time |
+|---|---:|---:|---:|---:|
+| Pre-cleanup (before Round 1) | 8 | 3714 | 47 | 720.91s |
+| Post-Round-1 | 7 | 3715 | 47 | 730.87s |
+| Post-Round-2 (final) | 7 | 3715 | 47 | 710.36s |
+
+Post-Round-2 failure identities are byte-identical to Post-Round-1 (same 7 tests, same names). **New failures caused by Round 2 deletion: 0.**
 
 ### Size impact
 
@@ -129,7 +137,6 @@ None remaining that were deleted or force-classified. All 71 re-examined scripts
 ## Git State
 
 - Branch: `comqutor-structure-layer`
-- HEAD: `c45424598e87a1f4187399236e62eddc6ecb1b39` (unchanged by this cleanup; moved once, externally, before Round 2 began)
-- Deleted files (working tree, uncommitted): `main.py`, `test.py`, 53 scripts (listed in Final Response), 35 `__pycache__` dirs, `.pytest_cache/`, `.ruff_cache/`, 11 `.DS_Store` files
-- Modified files: `README.md` (one-line stale-instruction removal)
-- No commit. No push.
+- HEAD: `9f228723fad5406c72e62beca67ec70ea0fdb004` ("clean 0.0.1") — moved a second time, again externally (author `xiangmao`, outside this conversation's tool calls), after the final post-Round-2 test run. This commit captured the entire cleanup (README fix, `main.py`/`test.py` deletion, all 53 script deletions) into history. Not made by this cleanup; noted for transparency, same as the earlier `c454245` move.
+- This cleanup itself never ran `git commit` or `git push` at any point in either round.
+- Only remaining uncommitted change at time of writing: this report file itself (edited after the external commit landed, to record the final test numbers).

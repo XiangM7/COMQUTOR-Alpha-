@@ -1,0 +1,807 @@
+{
+  "schema_version": "v0.2.six_run_gold_conformance.v1",
+  "task": "V0.2_SIX_RUN_JOHN_GOLD_CONFORMANCE_AUDIT_AND_EVIDENCE_FAILURE_ANALYSIS_COMPLETION",
+  "version_note": "Original v0.1.4 acceptance requirements were migrated into v0.2 and are fully represented here. No v0_1_4_* artifact was created. v0.1.4 is not treated as an active acceptance version anywhere in this task.",
+  "authority_verification": {
+    "v0_2_gold_operational_contract_json_sha256_expected": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_evidence_trigger_matrix_json_sha256_expected": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+    "v0_2_final_acceptance_table_json_sha256_expected": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_acceptance_adjudication_json_sha256_expected": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+    "v0_2_evidence_failure_analysis_json_sha256_expected": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+    "v0_2_evidence_failure_analysis_md_sha256_expected": "d92712bcb1d38ef622dc8c8686efaa7511a029f5d4294364880a75d996ab8ca5",
+    "v0_2_final_acceptance_closure_json_sha256_expected": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "all_verified_byte_identical_before_and_after_this_task": true,
+    "note": "Every SHA256 above was recomputed from the live file on disk and matched exactly, both immediately before this task began and again after writing this artifact. None was edited."
+  },
+  "gold_authority": {
+    "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+    "sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "schema_version": "gold_operational_contract.v0.2",
+    "gold_version": "v0.2",
+    "approval_authority": "John",
+    "approval_status": "APPROVED",
+    "freeze_status": "FROZEN_GOLD_V0_2",
+    "freeze_timestamp": "2026-09-10T21:04:41+00:00",
+    "total_rule_count": 19,
+    "model": "EVIDENCE_CONDITIONAL",
+    "model_note": "Gold v0.2 explicitly supersedes 'the previous model in which every ticker had a fixed mandatory Alpha set' -- it does not define a static per-ticker expected-Alpha list. Every rule is evidence-gated via its own frozen evidence_condition, independently adjudicated (Step 3, v0_2_evidence_trigger_matrix.json) as PRESENT/ABSENT/UNCERTAIN before any run result was inspected.",
+    "obsolete_v0_1_4_reference_resolved": "This task's original instructions referenced a v0.1.4 acceptance artifact filename; per the version-correction instruction, no such file is used, cited, or created -- v0_2_gold_operational_contract.json is the sole John-approved Gold authority for this audit.",
+    "no_ambiguity_between_old_fixed_rows_and_migrated_contract": "There is no old 'fixed expected rows' authority still in force for v0.2 -- the Gold contract's own text explicitly retires that model. The only authority used here is the frozen v0.2 contract plus the already-adjudicated Step-3 trigger states recorded in the frozen v0_2_final_acceptance_table.json."
+  },
+  "detection_authority": {
+    "path": "comqutor_alpha/regression/regression_report_v3.py",
+    "verified_from_source_line": "_DETECTED_LEVELS = frozenset({\"active\", \"dominant\", \"regime_level\"}) (line 38); used at line 46 via entry.get('level') in _DETECTED_LEVELS",
+    "reads": "outputs/runs/<run_id>/run_audit.json -> activation_summary.per_alpha[alpha_id]['level']",
+    "detected_levels": [
+      "active",
+      "dominant",
+      "regime_level"
+    ],
+    "not_detected_levels": [
+      "candidate",
+      "capped_active",
+      "blocked",
+      "unavailable"
+    ],
+    "detection_inferred_from_score_alone": false,
+    "verified_before_use": true
+  },
+  "expected_alphas_derivation_methodology": {
+    "definition": "expected_alphas (per ticker) = the sorted union of acceptable_alphas across every ALPHA_HIT / COMPOSITE_STRUCTURE_HIT / CONDITIONAL_ACCEPTANCE_HIT rule for that ticker whose frozen_trigger_state (as already adjudicated in Step 3 and recorded per-rule in the frozen v0_2_final_acceptance_table.json) is exactly 'PRESENT'. NEGATIVE_CONTROL_HIT rules are excluded from expected_alphas -- their acceptable_alphas field names a forbidden-dominant target, not an expected-detection target, and are instead used to derive forbidden_dominant_alphas.",
+    "why_not_a_naive_union_of_all_acceptable_alphas": "A naive union across every rule regardless of trigger state would silently resurrect exactly the fixed-mandatory-Alpha-set model Gold v0.2 explicitly retired (see gold_authority.model_note), and would contradict the frozen v0_2_final_acceptance_table.json's own anti_leakage.expected_alpha_set_model_used=false flag. Filtering to PRESENT-trigger rules only preserves the evidence-conditional model: an Alpha is only 'expected' when its own defining evidence condition was independently confirmed present before any run result was inspected.",
+    "uncertain_trigger_alphas_excluded": "Rules whose frozen_trigger_state is UNCERTAIN (e.g. QQQ-A003, QQQ-ETF-CONTEXT-CONTROL, MSFT-A102-INDIRECT-INFERENCE-SUPPORT) are excluded from expected_alphas (evidence not confirmed present) but are never silently dropped -- each appears in per-ticker notes.",
+    "expected_dominant_alphas_definition": "Gold v0.2's rule_type_semantics defines no 'must be dominant' rule type at all -- only 'forbidden_dominant_without_strong_evidence' (a negative constraint). Therefore expected_dominant_alphas = [] for every ticker, by design, not by omission. unexpected_dominant_alphas is instead computed as (actual_dominant_alphas intersect forbidden_dominant_alphas) -- i.e. a genuine forbidden-dominance violation.",
+    "main_conflict_match_definition": "true iff (actual_main_conflict is null AND allowed_main_conflicts is empty) [no conflict occurred, none was required -- a legitimate, non-violating state] OR (actual_main_conflict is a member of allowed_main_conflicts). false iff an actual_main_conflict exists that is not in a non-applicable/empty allowed list, OR an actual_main_conflict exists that is outside a non-empty allowed list. This distinguishes MSFT/SNDK's legitimate 'no conflict, none required' outcome from QQQ/TSM's 'an unaddressed real conflict emerged' outcome -- both are still fully adjudicated in conflict_mismatch_adjudication below regardless of the boolean's value.",
+    "reused_not_recomputed": "All frozen_trigger_state, acceptable_alphas, allowed_main_conflicts, forbidden_dominant_alphas, actual_detected_alphas, actual_dominant_alphas, and actual_main_conflict values are read directly, unmodified, from the frozen docs/audit_artifacts/v0_2_final_acceptance_table.json and docs/audit_artifacts/v0_2_gold_operational_contract.json -- none was recomputed from raw run artifacts, since the frozen tables already contain the full per-rule actual_alpha_states from the same six persisted runs."
+  },
+  "historical_acceptance_authority": {
+    "path": "docs/audit_artifacts/v0_2_final_acceptance_table.json",
+    "sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "modified_this_task": false,
+    "already_contains": [
+      "acceptable_alphas (per rule)",
+      "actual_alpha_states (per rule)",
+      "actual_detected_alphas (per ticker)",
+      "actual_dominant_alphas (per ticker)",
+      "allowed_main_conflicts (per rule)",
+      "actual_main_conflict (per ticker)",
+      "ticker_status",
+      "frozen_trigger_state (per rule)"
+    ],
+    "not_present_as_flat_fields_therefore_computed_here": [
+      "expected_alphas (ticker-level aggregate)",
+      "missing_expected_alphas",
+      "unexpected_detected_alphas",
+      "expected_dominant_alphas",
+      "unexpected_dominant_alphas",
+      "main_conflict_match (explicit boolean)"
+    ]
+  },
+  "runs": {
+    "ledger_path": "docs/audit_artifacts/v0_1_3_final_fresh_six_ticker_ledger.json",
+    "verified_against_ledger": true,
+    "run_ids": {
+      "NVDA": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "QQQ": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "MSFT": "43472ace-454f-4c69-892c-adca91c25be7",
+      "SNDK": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "TSM": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "AMD": "949f685a-3945-4fd0-b7b9-362b37c90721"
+    },
+    "post_fix_qqq_run_f239a53f_note": "f239a53f-4ebe-455c-bb76-5f5485903901 (the post-remediation QQQ run) is NOT used anywhere in this six-run historical comparison -- it is remediation evidence from a separate, later task (Step 7B), not the original six-run acceptance input. The historical QQQ run f88c8956 (FAIL) is used throughout, unchanged.",
+    "fresh_ticker_runs_executed_this_task": 0
+  },
+  "tickers": {
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "tier": "FORMAL_GOLD",
+      "expected": [
+        "A101",
+        "A103",
+        "A201",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "detected": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [
+        "A201"
+      ],
+      "unexpected_detected": [],
+      "expected_dominant": [],
+      "actual_dominant": [
+        "A301"
+      ],
+      "unexpected_dominant": [],
+      "forbidden_dominant_alphas": [],
+      "allowed_main_conflicts": [
+        "A101__A304",
+        "A301__A304"
+      ],
+      "actual_main_conflict": "A101__A304",
+      "main_conflict_match": true,
+      "historical_v0_2_status": "PASS",
+      "notes": "A201's own sub-trigger was UNCERTAIN (not PRESENT) per the frozen NVDA-SUPPORTING-STRUCTURES rule -- its non-detection is explicitly not a Gold miss per that rule's own frozen not_triggered_behavior, even though it appears in missing_expected under this artifact's strict evidence-conditional definition (expected = PRESENT-trigger acceptable_alphas only, which A201's own rule qualifies as PRESENT overall while A201 specifically sits at UNCERTAIN sub-trigger level -- reported here for completeness, not summarized away).",
+      "conflict_rule_governed": true,
+      "main_conflict_evaluation_reason": "GOVERNED_RULE_EVALUATED",
+      "governing_rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+      "governing_rule_type_note": "allowed_main_conflicts (composite bull/bear thesis)"
+    },
+    "QQQ": {
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "tier": "FORMAL_GOLD",
+      "expected": [
+        "A304",
+        "A601"
+      ],
+      "detected": [
+        "A001",
+        "A103",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [],
+      "unexpected_detected": [
+        "A001",
+        "A103"
+      ],
+      "expected_dominant": [],
+      "actual_dominant": [],
+      "unexpected_dominant": [],
+      "forbidden_dominant_alphas": [
+        "A301"
+      ],
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": "A304__A601",
+      "main_conflict_match": "NOT_APPLICABLE",
+      "historical_v0_2_status": "FAIL",
+      "notes": "A001 is expected=false here (frozen_trigger_state=ABSENT) yet detected=true -- this is the already-adjudicated conditional_force_violation / SYSTEM_ERROR (v0_2_acceptance_adjudication.json Case A), reused not re-derived. A003 (UNCERTAIN trigger, REVIEW) and A501 (ABSENT, correctly not detected) are excluded from expected per this artifact's methodology; A003's REVIEW status (Case B) is carried forward unchanged. A103 was detected but Gold never wrote any QQQ-A103 rule at all (positive or negative) -- an un-Gold-addressed detection, not itself a defect. Gold defines no allowed_main_conflicts for QQQ at all (no composite rule exists) -- see conflict_mismatch_adjudication.QQQ.",
+      "conflict_rule_governed": false,
+      "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+      "governing_rule_id": null,
+      "governing_rule_type_note": null
+    },
+    "MSFT": {
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "tier": "SILVER_DIAGNOSTIC",
+      "expected": [
+        "A101",
+        "A102",
+        "A304"
+      ],
+      "detected": [
+        "A001",
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "missing_expected": [
+        "A102",
+        "A304"
+      ],
+      "unexpected_detected": [
+        "A001",
+        "A103",
+        "A301"
+      ],
+      "expected_dominant": [],
+      "actual_dominant": [
+        "A103"
+      ],
+      "unexpected_dominant": [],
+      "forbidden_dominant_alphas": [],
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": null,
+      "main_conflict_match": "NOT_APPLICABLE",
+      "historical_v0_2_status": "FAIL",
+      "notes": "A102 missing_expected is the already-known, non-blocking Silver FAIL (MSFT-A102-DIRECT-INFERENCE-TRIGGER, must_detect_if_evidence_present, PRESENT/STRONG trigger, not detected -- remains candidate score=34.967). A304 missing_expected is directly explained by the already-adjudicated ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION finding (v0_2_acceptance_adjudication.json Case C) -- reused, not re-derived. A103 dominant is a genuinely un-Gold-addressed observation: MSFT has no rule (positive or negative) governing A103 at all, so this is neither expected nor forbidden. main_conflict_match=true here reflects a legitimate 'no conflict, none required' state (Gold never defined a composite conflict rule for MSFT) -- see conflict_mismatch_adjudication.MSFT for the full explanation of why no conflict formed.",
+      "conflict_rule_governed": false,
+      "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+      "governing_rule_id": null,
+      "governing_rule_type_note": null
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "tier": "FORMAL_GOLD",
+      "expected": [
+        "A201"
+      ],
+      "detected": [
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [],
+      "unexpected_detected": [
+        "A304",
+        "A601"
+      ],
+      "expected_dominant": [],
+      "actual_dominant": [
+        "A201"
+      ],
+      "unexpected_dominant": [],
+      "forbidden_dominant_alphas": [
+        "A101",
+        "A102"
+      ],
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": null,
+      "main_conflict_match": "NOT_APPLICABLE",
+      "historical_v0_2_status": "PASS",
+      "notes": "A201 expected and detected (dominant, score 84.22) -- SNDK's on-thesis leg satisfied. The negative control (A101/A102 forbidden-dominant) correctly held: neither reached dominant/regime_level (both candidate, score 0.0) -- PASS, this is SNDK's stronger, blocking Gold component per the frozen contract's own text. A304/A601 detected but Gold wrote no rule for either on SNDK. main_conflict_match=true reflects a legitimate 'no conflict, none required' state -- see conflict_mismatch_adjudication.SNDK for why three real candidate pairs were suppressed rather than admitted.",
+      "conflict_rule_governed": false,
+      "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+      "governing_rule_id": null,
+      "governing_rule_type_note": null
+    },
+    "TSM": {
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "tier": "SILVER_DIAGNOSTIC",
+      "expected": [
+        "A101",
+        "A201",
+        "A301"
+      ],
+      "detected": [
+        "A101",
+        "A103",
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [
+        "A301"
+      ],
+      "unexpected_detected": [
+        "A103 (Gold-acknowledged OPTIONAL_SUPPORTING_ALPHA -- contextual only, not a genuine gap)",
+        "A304",
+        "A601"
+      ],
+      "expected_dominant": [],
+      "actual_dominant": [],
+      "unexpected_dominant": [],
+      "forbidden_dominant_alphas": [],
+      "allowed_main_conflicts": null,
+      "actual_main_conflict": "A101__A304",
+      "main_conflict_match": "NOT_APPLICABLE",
+      "historical_v0_2_status": "PASS",
+      "notes": "Canonical transmission A101->A201 fully realized (both active); A301 remains candidate (not detected) but is explicitly conditional/not required simultaneously per the frozen rule -- non-blocking (Silver), consistent with historical PASS. A103 is Gold-acknowledged as OPTIONAL_SUPPORTING_ALPHA (contextual only, per the frozen contract's own resolution_note) -- listed in unexpected_detected for strict completeness but explicitly not treated as a genuine Gold gap. A304 and A601 are genuinely un-Gold-addressed for TSM (no rule mentions either). TSM's Gold rule is a supportive TRANSMISSION CHAIN, not a conflict rule -- Gold defines no allowed_main_conflicts for TSM at all, yet the real run admitted A101__A304 -- see conflict_mismatch_adjudication.TSM.",
+      "conflict_rule_governed": false,
+      "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+      "governing_rule_id": "TSM-AI-TO-FOUNDRY-TRANSMISSION",
+      "governing_rule_type_note": "conditional_only (supportive transmission chain, NOT a conflict-family rule)"
+    },
+    "AMD": {
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "tier": "SILVER_DIAGNOSTIC",
+      "expected": [
+        "A101",
+        "A201",
+        "A301",
+        "A304"
+      ],
+      "detected": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "missing_expected": [
+        "A201"
+      ],
+      "unexpected_detected": [
+        "A103",
+        "A601"
+      ],
+      "expected_dominant": [],
+      "actual_dominant": [
+        "A101"
+      ],
+      "unexpected_dominant": [],
+      "forbidden_dominant_alphas": [],
+      "allowed_main_conflicts": [
+        "A101__A304",
+        "A301__A304"
+      ],
+      "actual_main_conflict": "A101__A304",
+      "main_conflict_match": true,
+      "historical_v0_2_status": "PASS",
+      "notes": "Composite growth-vs-valuation conflict fully realized within the allowed family (A101 regime_level + A301 active vs A304 active) -- non-blocking (Silver), consistent with historical PASS. A201 (optional growth leg) not detected -- non-blocking, rule does not require it simultaneously with A101/A301. A103/A601 detected but Gold wrote no rule for either on AMD.",
+      "conflict_rule_governed": true,
+      "main_conflict_evaluation_reason": "GOVERNED_RULE_EVALUATED",
+      "governing_rule_id": "AMD-AI-GROWTH-VS-VALUATION",
+      "governing_rule_type_note": "allowed_main_conflicts (composite bull/bear thesis)"
+    }
+  },
+  "conflict_mismatch_adjudication": {
+    "QQQ": {
+      "expected_or_allowed_conflict": "NONE DEFINED -- QQQ has no COMPOSITE_STRUCTURE_HIT rule in the frozen Gold contract; every QQQ rule's allowed_main_conflicts field is an empty list.",
+      "actual_conflict": "A304__A601 (Multiple Compression vs Narrative Momentum), admitted, bull_score=54.31 (A601), bear_score=69.24 (A304)",
+      "candidate_conflict_list": "4 candidate pairs recorded in the historical run per v0_1_3_final_fresh_six_ticker_ledger.json (candidate_conflict_count=4); A304 and A601 were each independently confirmed PRESENT/STRONG by the frozen Step-3 evidence trigger matrix and both reached level=active (scores 69.243 and 54.306 respectively) per the frozen v0_2_final_acceptance_table.json.",
+      "primary_classification": "GOLD_LABEL_NEEDS_UPDATE",
+      "confidence": "MEDIUM",
+      "first_incorrect_stage": null,
+      "gold_update_recommended": true,
+      "reasoning_summary": "A304 (Multiple Compression) and A601 (Narrative Momentum) are both canonical taxonomy Alphas with an explicit canonical conflict_alphas pairing (weight 0.80 per alpha_taxonomy_v1.yaml, independently reconfirmed by the frozen Gold contract's own citation of PD-017's six mandatory conflict pairs). Both sides were independently adjudicated PRESENT/STRONG by Step 3 before any run result was inspected, and both were correctly detected at level=active by the system using the same, unmodified conflict admissibility (B2) authority already governing NVDA/AMD's composite rules. System behavior here is not defective: a real, canonical, evidence-backed conflict was correctly admitted. The mismatch is that Gold v0.2's QQQ rule set was authored as five independent single-Alpha rules (a 'menu of conditionally-relevant macro Alphas') with no accompanying COMPOSITE_STRUCTURE_HIT rule analogous to NVDA-GROWTH-VS-VALUATION-CONFLICT or AMD-AI-GROWTH-VS-VALUATION -- an authoring gap, not a system defect. This does not affect QQQ's historical FAIL, which is driven entirely by the separate, unrelated QQQ-A001 conditional-force violation (SYSTEM_ERROR, already adjudicated in v0_2_acceptance_adjudication.json Case A, reused here unchanged).",
+      "gold_not_modified": true,
+      "recommendation_if_ever_actioned": "A future Gold version (e.g. v0.3) could consider adding an explicit composite-conflict rule for QQQ analogous to NVDA/AMD's, defining an allowed_main_conflicts family (e.g. including A304__A601 and/or A001__A304, A501__A304) -- not implemented, not required, purely a forward-looking observation.",
+      "v0_2_contract_conflict_conformance_CORRECTED": {
+        "conflict_rule_governed": false,
+        "allowed_main_conflicts": null,
+        "actual_main_conflict": "A304__A601",
+        "main_conflict_match": "NOT_APPLICABLE",
+        "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+        "note": "SUPERSEDES the prior report's false/GOLD_LABEL_NEEDS_UPDATE contract-mismatch framing. Gold v0.2 authored no rule of rule_type allowed_main_conflicts for QQQ at all -- there is no contract requirement for A304__A601 to violate. This is NOT a Gold mismatch."
+      },
+      "diagnostic_observation": {
+        "status": "ADVISORY_ONLY_NOT_A_CONTRACT_VIOLATION",
+        "observation": "A304 and A601 are both canonical taxonomy Alphas with a real conflict_alphas pairing; both were independently PRESENT/STRONG at Step 3 and both reached level=active; the admitted A304__A601 conflict is genuine and well-evidenced.",
+        "forward_looking_recommendation": "GOLD_LABEL_NEEDS_UPDATE (non-blocking, advisory only)",
+        "confidence": "MEDIUM",
+        "recommendation_detail": "A future Gold version (v0.3+) could consider authoring an explicit allowed_main_conflicts rule for QQQ (e.g. including A304__A601 and/or A001__A304, A501__A304) -- not implemented, not required, does not affect current PASS/FAIL/REVIEW status, and is not itself a v0.2 contract violation."
+      },
+      "primary_classification_status": "REVISED: no longer reported as a current-contract GOLD_LABEL_NEEDS_UPDATE mismatch -- see v0_2_contract_conflict_conformance_CORRECTED and diagnostic_observation above. The prior version's classification is retained below, unmodified, purely as a historical record of what this artifact previously said."
+    },
+    "MSFT": {
+      "expected_or_allowed_conflict": "NONE DEFINED -- MSFT has no COMPOSITE_STRUCTURE_HIT rule in the frozen Gold contract; every MSFT rule's allowed_main_conflicts field is an empty list.",
+      "actual_conflict": "None admitted (actual_main_conflict=null)",
+      "candidate_conflict_list": "Not separately re-traced in this task -- directly explained by the already-adjudicated MSFT-CAPEX-BURDEN-CONDITIONAL finding below, since A304 (the only Alpha with any conflict-relevant Gold rule on MSFT) never reached a detected level and therefore could not participate in any admitted conflict at all.",
+      "primary_classification": "ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION",
+      "confidence": "MODERATE_TO_HIGH",
+      "first_incorrect_stage": null,
+      "gold_update_recommended": false,
+      "reasoning_summary": "REUSED, not re-derived, from v0_2_acceptance_adjudication.json Case C (MSFT-CAPEX-BURDEN-CONDITIONAL): 52 claims were matched to A304, including the exact capex-downside-linkage evidence the frozen trigger cited (e.g. 'Any slowdown in Azure growth could trigger multiple compression'), spanning 11 distinct raw agents. However, the evidence_source_role_v1 qualification policy correctly classified 25 of 39 raw unique evidence facts as SECONDARY_NOT_TICKER_SPECIFIC (debate-agent restatement of already-counted primary facts), leaving only 14 qualified groups from 4 distinct qualified agents. The resulting uncapped activation score (43.36) fell short of the 'active' threshold. This qualification behavior is the evidence_source_role_v1 policy operating as designed to prevent duplicate-evidence overweighting, not a mapping loss or code defect -- no claim was lost outright. Because A304 never reached a detected level, it could never participate in a MSFT conflict regardless of Gold's conflict-rule authoring gap -- the 'no conflict' outcome is a direct, mechanical consequence of this already-reasonable admissibility suppression, not a separate phenomenon requiring its own new classification.",
+      "gold_not_modified": true,
+      "reused_case_id": "v0_2_acceptance_adjudication.json Case C",
+      "v0_2_contract_conflict_conformance_CORRECTED": {
+        "conflict_rule_governed": false,
+        "allowed_main_conflicts": null,
+        "actual_main_conflict": null,
+        "main_conflict_match": "NOT_APPLICABLE",
+        "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+        "note": "Gold v0.2 authored no rule of rule_type allowed_main_conflicts for MSFT. No conflict occurred, and none was ever required -- NOT_APPLICABLE is the precise status, not a vacuous 'true'."
+      },
+      "primary_classification_status": "The existing ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION finding remains, but answers ONLY the separate, provenance-only John-original-Development-Plan question (A102 vs A304), never the current v0.2 contract-conformance question, which is NOT_APPLICABLE / not governed. See reporting_clarification_v1.per_ticker.MSFT for the full provenance trace."
+    },
+    "SNDK": {
+      "expected_or_allowed_conflict": "NONE DEFINED -- SNDK has no COMPOSITE_STRUCTURE_HIT rule in the frozen Gold contract; both SNDK rules' allowed_main_conflicts fields are empty lists.",
+      "actual_conflict": "None admitted (actual_main_conflict=null)",
+      "candidate_conflict_list": "3 candidate pairs (A101__A501, A003__A501 rejected with DIRECTION_ROLE_UNRESOLVED; A101__A304 rejected with MISSING_LEFT_EVIDENCE + DIRECTION_ROLE_UNRESOLVED; A301__A304 suppressed with BULL_SCORE_BELOW_THRESHOLD + NO_BULL_TICKER_SPECIFIC_SUPPORT + NO_BEAR_TICKER_SPECIFIC_SUPPORT) -- read directly from outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335/run_audit.json.conflict_summary.per_pair (declared_pair_count=6, evaluated=6, admitted=0, suppressed=3, rejected=3).",
+      "primary_classification": "ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION",
+      "confidence": "HIGH",
+      "first_incorrect_stage": null,
+      "gold_update_recommended": false,
+      "reasoning_summary": "Directly re-inspected from the persisted run_audit.json for this task (not merely reused): SNDK has a dominant A201 (score 84.22) and two active Alphas (A304 score 53.74, A601 score 60.66 per prior product-demo audit data), so real candidate structures existed. All 6 declared conflict pairs were evaluated; none was admitted. The most evidence-adjacent candidate (A301__A304) was suppressed with concrete, evidence-based reason codes -- BULL_SCORE_BELOW_THRESHOLD, NO_BULL_TICKER_SPECIFIC_SUPPORT, NO_BEAR_TICKER_SPECIFIC_SUPPORT -- indicating the bull side (A301, Revenue Expansion) genuinely lacked sufficient ticker-specific supporting evidence for SNDK in this run (A301 itself sits at level=candidate, score=36.90, per prior audit data, well below a qualifying bar). The remaining pairs were rejected for DIRECTION_ROLE_UNRESOLVED / MISSING_LEFT_EVIDENCE -- structural admissibility gaps, not evidence of a system mapping or scoring defect. This reflects the existing, unmodified B2 admissibility gate correctly declining to force a conflict where genuine qualifying evidence was thin, exactly matching Gold's own explicit design principle ('No conflict is forced when one side lacks sufficient evidence').",
+      "gold_not_modified": true,
+      "source_artifact_inspected_this_task": "outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335/run_audit.json",
+      "v0_2_contract_conflict_conformance_CORRECTED": {
+        "conflict_rule_governed": false,
+        "allowed_main_conflicts": null,
+        "actual_main_conflict": null,
+        "main_conflict_match": "NOT_APPLICABLE",
+        "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+        "note": "Gold v0.2 authored no rule of rule_type allowed_main_conflicts for SNDK. No conflict occurred, and none was ever required -- NOT_APPLICABLE is the precise status, not a vacuous 'true'."
+      },
+      "primary_classification_status": "The existing ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION finding is retained as a RELATED_DIAGNOSTIC observation only (per the prior clarification task) -- it does not answer any live contract or original-expectation question for SNDK, since neither exists. Current contract status is NOT_APPLICABLE / not governed."
+    },
+    "TSM": {
+      "expected_or_allowed_conflict": "NONE DEFINED -- TSM's sole Gold rule (TSM-AI-TO-FOUNDRY-TRANSMISSION) is a supportive TRANSMISSION CHAIN (A101->A201->A301), not a bull-vs-bear conflict rule; its allowed_main_conflicts field is an empty list, and A304 does not appear in any TSM rule's acceptable_alphas at all.",
+      "actual_conflict": "A101__A304 (AI Expansion vs Multiple Compression), admitted, main conflict; conflict_score=8.70, level=low; a second pair A304__A601 was also admitted (score 7.73, not main).",
+      "candidate_conflict_list": "Directly re-inspected from outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95/run_audit.json.conflict_summary this task: A304 (level=active, score=57.99, direction=negative) carries 51 raw supporting claims, 22 unique evidence facts, 6 distinct agents, 10 ticker-specific evidence items, and B2 admissibility scores bull=52.90/bear=57.99 for the A101__A304 pair (bull=54.18/bear=57.99 for A304__A601) -- a well-supported, ticker-specific, multi-agent evidence pool, not a thin or topically-mismatched one.",
+      "primary_classification": "GOLD_LABEL_NEEDS_UPDATE",
+      "confidence": "MEDIUM_TO_HIGH",
+      "first_incorrect_stage": null,
+      "gold_update_recommended": true,
+      "reasoning_summary": "TSM's real evidence corpus supports a genuine valuation-risk dimension (A304, Multiple Compression) with substantial, ticker-specific, multi-agent support (10 ticker-specific facts, 6 distinct agents, admissibility scores in the high-50s on both sides) -- this does not resemble the QQQ-A001 defect pattern (which was high-volume but direction-mixed and largely non-ticker-specific). TSM is a large, richly-valued foundry stock; a valuation-compression concern coexisting with its AI-driven growth thesis is a plausible, evidence-grounded structural finding, not an implausible attribution. The mismatch is that Gold's TSM thesis was authored narrowly around the AI-to-foundry TRANSMISSION chain (A101->A201->A301) and never contemplated a growth-vs-valuation conflict dimension the way NVDA/AMD's theses do, despite TSM sharing the same taxonomy conflict_alphas pairing (A101<->A304, weight 0.90) that anchors NVDA's own Gold conflict rule. This is a Gold authoring-scope gap, not a system defect -- flagged for review, Gold not modified.",
+      "gold_not_modified": true,
+      "source_artifact_inspected_this_task": "outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95/run_audit.json",
+      "recommendation_if_ever_actioned": "A future Gold version could consider adding a TSM growth-vs-valuation composite rule (A101/A201/A301 vs A304, mirroring NVDA/AMD's allowed_main_conflicts family) alongside the existing transmission-chain rule -- not implemented, not required, purely a forward-looking observation.",
+      "v0_2_contract_conflict_conformance_CORRECTED": {
+        "conflict_rule_governed": false,
+        "allowed_main_conflicts": null,
+        "actual_main_conflict": "A101__A304",
+        "main_conflict_match": "NOT_APPLICABLE",
+        "main_conflict_evaluation_reason": "NO_GOLD_CONFLICT_RULE",
+        "note": "SUPERSEDES the prior report's false/GOLD_LABEL_NEEDS_UPDATE contract-mismatch framing. TSM's sole rule (TSM-AI-TO-FOUNDRY-TRANSMISSION) is rule_type=conditional_only, a supportive transmission-chain thesis -- NOT a conflict-family rule (its own allowed_main_conflicts=[]). There is no contract requirement for A101__A304 to violate. This is NOT a Gold mismatch."
+      },
+      "diagnostic_observation": {
+        "status": "ADVISORY_ONLY_NOT_A_CONTRACT_VIOLATION",
+        "observation": "A304's admitted conflict with A101 is well-supported: 51 raw claims, 22 unique facts, 6 distinct agents, 10 ticker-specific items; bull=52.90/bear=57.99.",
+        "forward_looking_recommendation": "GOLD_LABEL_NEEDS_UPDATE (non-blocking, advisory only)",
+        "confidence": "MEDIUM_TO_HIGH",
+        "recommendation_detail": "A future Gold version could consider adding a TSM growth-vs-valuation composite rule (A101/A201/A301 vs A304) alongside the existing transmission-chain rule -- not implemented, not required, does not affect current PASS/FAIL/REVIEW status, and is not itself a v0.2 contract violation."
+      },
+      "primary_classification_status": "REVISED: no longer reported as a current-contract GOLD_LABEL_NEEDS_UPDATE mismatch -- see v0_2_contract_conflict_conformance_CORRECTED and diagnostic_observation above. The prior version's classification is retained below, unmodified, purely as a historical record of what this artifact previously said."
+    },
+    "classification_summary": {
+      "SYSTEM_ERROR_count": 0,
+      "ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION_count": 2,
+      "GOLD_LABEL_NEEDS_UPDATE_count": 2,
+      "MARKET_CONDITION_CHANGED_count": 0,
+      "note": "MARKET_CONDITION_CHANGED was considered for all four tickers and rejected in every case -- no persisted evidence in any of the four runs indicates the run's actual market state materially differs from the state Gold's authors assumed; every mismatch traces either to a reasonable, evidence-based admissibility suppression or to a genuine Gold rule-authoring scope gap, never to a stale market assumption. SYSTEM_ERROR (already established for the separate QQQ-A001 Alpha-detection defect, not the conflict-family question itself) is not additionally asserted for any of the four conflict-family mismatches -- each was independently re-examined against real persisted evidence and found not to indicate a system defect at the conflict-admission stage."
+    },
+    "NVDA_AMD_note": "NVDA and AMD are the only two tickers where Gold v0.2 governs a main-conflict family (both via a populated allowed_main_conflicts rule); both remain unchanged (conflict_rule_governed=true, main_conflict_match=true) -- this correction does not affect them."
+  },
+  "alpha_memory": {
+    "mode": "shadow",
+    "activation_modulation_applied": false,
+    "verified_for_all_six_historical_runs": {
+      "NVDA": {
+        "mode": "shadow",
+        "activation_modulation_applied": false
+      },
+      "QQQ": {
+        "mode": "shadow",
+        "activation_modulation_applied": false
+      },
+      "MSFT": {
+        "mode": "shadow",
+        "activation_modulation_applied": false
+      },
+      "SNDK": {
+        "mode": "shadow",
+        "activation_modulation_applied": false
+      },
+      "TSM": {
+        "mode": "shadow",
+        "activation_modulation_applied": false
+      },
+      "AMD": {
+        "mode": "shadow",
+        "activation_modulation_applied": false
+      }
+    },
+    "source": "docs/audit_artifacts/v0_2_final_acceptance_table.json alpha_memory_check (frozen, unmodified) plus docs/audit_artifacts/v0_1_3_final_fresh_six_ticker_ledger.json per-ticker alpha_memory blocks -- cross-checked, consistent.",
+    "may_be_displayed_audited_logged_compared": true,
+    "may_modify_activation_score_or_status": false,
+    "may_modify_dominant_or_regime_status": false,
+    "may_modify_conflict_admission_or_main_conflict": false,
+    "code_change_required": false,
+    "code_changed_this_task": 0
+  },
+  "evidence_failure_analysis_completion": {
+    "authority_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_failure_analysis.json",
+      "sha256": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+      "modified_this_task": false
+    },
+    "authority_md": {
+      "path": "docs/audit_artifacts/v0_2_evidence_failure_analysis.md",
+      "sha256": "d92712bcb1d38ef622dc8c8686efaa7511a029f5d4294364880a75d996ab8ca5",
+      "modified_this_task": false
+    },
+    "source_population_verified": {
+      "alpha_match": {
+        "evaluated": 200,
+        "correct": 166,
+        "failures": 34,
+        "accuracy": 0.83
+      },
+      "polarity": {
+        "evaluated": 61,
+        "correct": 52,
+        "failures": 9,
+        "accuracy": 0.8525
+      },
+      "critical_support_opposition_reversals": 0
+    },
+    "all_34_alpha_match_failures_individually_present": true,
+    "all_9_polarity_failures_individually_present": true,
+    "row_field_completeness": "Each of the 34 alpha_match_failures rows carries: sample_id, run_id, ticker, claim_id, agent, claim, evidence, system_alpha, reviewer_expected_alpha, system_match_method, system_match_score, system_confidence, reviewer_confidence, failure_category, root_cause, severity, actionable, critical_reversal, review_note, and more -- exceeding this task's requested field set (row ID, ticker, claim summary, expected/actual Alpha, confidence, failure category, root cause, better-expected-behavior, severity, high-confidence-wrong). Each of the 9 polarity_failures rows carries an equivalently complete field set (target_alpha, system_polarity, reviewer_expected_polarity, failure_category, root_cause, critical_reversal, severity, etc.).",
+    "aggregates_reverified_this_task": {
+      "TAXONOMY_OVERLAP": 12,
+      "A601_to_NONE_confusion_pair": 6,
+      "alpha_high_confidence_wrong_count": "15 / 34",
+      "MENTION_VS_OPPOSITION_OVERCALL": 5,
+      "all_match_prior_report_exactly": true
+    },
+    "cross_framework_analysis": {
+      "QQQ_A001_overlap": {
+        "count": 0,
+        "overlap": false,
+        "detail": "Zero rows in the 34-row alpha_match_failures sample involve ticker=QQQ with system_alpha or reviewer_expected_alpha = A001. The 200-row blind holdout sample's 12 distinct run_ids are entirely disjoint from all six historical acceptance run_ids (verified this task) -- the two evaluation frameworks use different units of analysis (row-level semantic correctness vs. ticker-level release acceptance) over different underlying runs, confirmed directly, not assumed."
+      },
+      "MSFT_A102_overlap": {
+        "count": 1,
+        "overlap": true,
+        "overlap_type": "pattern-level, opposite-direction",
+        "detail": "One row (sample_id holdout5-057, run_id 0cb43bae-1a4d-4003-bb29-55d420498842 -- not any of the six acceptance run_ids) shows system_alpha=A102 where reviewer_expected_alpha=A101 -- the system OVER-attributed A102, the opposite direction from MSFT's Gold finding (MSFT-A102-DIRECT-INFERENCE-TRIGGER: system under-detected A102 when it should have been detected). Same Alpha, same ticker, opposite error direction, different run -- a pattern-level echo, not a release-level failure appearing in the review sample."
+      },
+      "release_level_failure_not_required_to_appear_in_review_sample": true
+    },
+    "requirement_status": "EVIDENCE_FAILURE_ANALYSIS_REQUIREMENT=SATISFIED_BY_EXISTING_V0_2_AUTHORITY",
+    "supplement_created": false,
+    "supplement_creation_reason": "Not necessary -- every requested detail (individual 34+9 rows with full field sets, all requested aggregates, cross-framework QQQ-A001/MSFT-A102 overlap analysis) was independently re-verified present and correct in the existing, unmodified v0_2_evidence_failure_analysis.json/.md this task. No genuinely missing detail was found."
+  },
+  "final_check": {
+    "original_v0_1_4_requirements_fully_represented_under_v0_2": true,
+    "v0_1_4_artifacts_created": 0,
+    "existing_v0_2_authorities_byte_identical": true,
+    "six_historical_fresh_runs_strictly_compared_against_gold": true,
+    "expected_detected_missing_unexpected_fields_present": true,
+    "unexpected_dominant_field_present": true,
+    "allowed_main_conflicts_field_present": true,
+    "actual_main_conflict_field_present": true,
+    "main_conflict_match_field_present": true,
+    "QQQ_mismatch_adjudicated": true,
+    "MSFT_mismatch_adjudicated": true,
+    "SNDK_mismatch_adjudicated": true,
+    "TSM_mismatch_adjudicated": true,
+    "alpha_match_failures_34_accounted_for": true,
+    "polarity_failures_9_accounted_for": true,
+    "alpha_memory_shadow": true,
+    "activation_modulation_false": true,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "semantic_changes": 0,
+    "production_files_changed": 0,
+    "test_files_changed": 0
+  },
+  "anti_leakage": {
+    "gold_modified": false,
+    "trigger_matrix_modified": false,
+    "final_acceptance_table_modified": false,
+    "acceptance_adjudication_modified": false,
+    "evidence_failure_analysis_modified": false,
+    "final_acceptance_closure_modified": false,
+    "acceptance_results_changed_to_improve_outcome": false,
+    "fresh_ticker_runs_executed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "production_files_changed": 0,
+    "test_files_changed": 0,
+    "alpha_memory_code_changed": 0
+  },
+  "evaluation_status": "V0_2_SIX_RUN_GOLD_CONFORMANCE_AUDIT_COMPLETE_CONFLICT_GOVERNANCE_CORRECTED_V2",
+  "reporting_clarification_v1": {
+    "purpose": "Removes an apparent internal contradiction in conflict_mismatch_adjudication for MSFT/SNDK, where allowed_main_conflicts=[]/actual_main_conflict=null/main_conflict_match=true (current v0.2 contract, satisfied) coexisted with an ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION classification (which reads, out of context, like a violation). This clarification explicitly separates two independent questions per ticker: (A) does the run conform to the migrated v0.2 Gold contract's own conflict rules, and (B) what does the run say in answer to John's pre-v0.2, Development-Plan-era conflict expectation, when one was actually ever recorded for that ticker. No frozen v0.2 authority, no Gold semantics, no production code, and no prior six-run finding's underlying facts were changed -- this is a reporting-structure clarification only, applied solely to the additive completion artifact.",
+    "provenance_sources_consulted": {
+      "development_plan_v1_0_golden_test_cases_trace": {
+        "path": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md",
+        "sha256": "091630ed657e6b0fe8d309082f8ce86485ea2267cd9093e36226bedefe39cb33",
+        "companion_json": {
+          "path": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.json",
+          "sha256": "efbc284b7a67990737136511e9734205b5e8fd3888015602121b848ab0ec47c4"
+        },
+        "modified_this_task": false,
+        "summary": "A pre-v0.2 (v0.1.2.1-era) adjudication that traced every ticker's Development Plan v1.0 SS12 'Golden Test Cases' table (the table's own header is attributed to 'John supplies expectations') against canonical taxonomy legality and frozen reference-run evidence, before any v0.2 Gold contract existed. It found only 3 of 6 tickers (NVDA, QQQ, MSFT) had ANY worked Golden Test Case row at all -- SNDK, TSM, and AMD were never given an expected-conflict value by the Development Plan in the first place. Of the 3 with a row, only NVDA's candidate was ever confirmed by a real frozen reference run (and even then the confirmed pair, A301<->A304, differed from the Plan's own drafted A101<->A304 candidate). QQQ's candidate (A001<->A501) was never confirmed by any frozen reference run (run_bound_expectations=null). MSFT's candidate (A102<->A304) is structurally illegal in the canonical taxonomy (A102's conflict_alphas=[]) and was formally rejected via PD-017."
+      },
+      "pd_017_msft_a102_a304_rejection_analysis": {
+        "path": "docs/specs/product_decisions_and_unknowns.md",
+        "modified_this_task": false,
+        "summary": "Documents the formal rejection of A102<->A304 as a canonical conflict pair (PD-017) and separately observes that the Development Plan's own MSFT Golden Test Case row lists 'Bull A102 vs Bear A304' as the only one of the three worked rows that does not match SS4's six mandatory canonical pairs, and that the same row's own expected-dominant-alphas cell (A101, A102, A301, A304) would have supported the internally-consistent 'A101 vs A304' reading instead -- concluding the A102 attribution was most likely a drafting slip in the source document, not a deliberate special-case decision, though no ADR or further Product Decision has revisited or overturned this since."
+      }
+    },
+    "conflict_expectation_model": {
+      "current_v0_2_contract": "The frozen v0_2_gold_operational_contract.json's own rule set for this ticker -- what the migrated, John-approved Gold v0.2 rules actually require or allow today, evaluated against the six fresh historical runs. This is the authority already governing PASS/FAIL/REVIEW status.",
+      "john_original_expectation": "A separate, historical question: did the pre-v0.2 Development Plan v1.0 SS12 'Golden Test Cases' table (John-attributed) ever record an explicit expected main conflict for this ticker, independent of whether Gold v0.2 ultimately authored a matching rule. Populated only where an explicit, documented statement exists -- never inferred. Where none exists, the field reads NOT_EXPLICITLY_DEFINED and no conflict-mismatch classification is attached to this question for that ticker."
+    },
+    "per_ticker": {
+      "QQQ": {
+        "v0_2_contract_conflict_conformance": {
+          "allowed_main_conflicts": [],
+          "actual_main_conflict": "A304__A601",
+          "main_conflict_match": false,
+          "classification": "GOLD_LABEL_NEEDS_UPDATE",
+          "confidence": "MEDIUM",
+          "note": "The migrated v0.2 Gold contract authored no composite-conflict rule for QQQ at all (every QQQ rule's allowed_main_conflicts=[]); the run produced a real, canonical, correctly-admitted A304__A601 conflict (both legs independently PRESENT/STRONG at Step 3, both reached level=active). This is a live, current v0.2-contract mismatch -- unchanged from the prior report."
+        },
+        "john_original_conflict_expectation_adjudication": {
+          "john_original_expected_conflict": "A001 vs A501 (Development Plan v1.0 SS12 Golden Test Cases, John-attributed row)",
+          "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md -- table row 'QQQ | A001<->A501 | run_bound_expectations: null | Gold Evaluable: NO'",
+          "actual_conflict_relative_to_this_expectation": null,
+          "classification": "NOT_GOLD_EVALUABLE_HISTORICALLY",
+          "reasoning": "This candidate was never promoted to an evaluable Gold label even before v0.2 existed -- no frozen reference run ever confirmed it (run_bound_expectations=null per the v0.1.2.1 adjudication). Independently, in the current six-run historical QQQ run, A501 itself never reached a detected level (frozen_trigger_state=ABSENT, correctly not detected) -- so John's original A001-vs-A501 candidate could not have materialized as an admitted conflict in this run regardless of Gold version. This is reported as a distinct, historically-indeterminate finding and is NOT merged with, and does not change, the current v0.2 contract classification above (GOLD_LABEL_NEEDS_UPDATE for the real A304__A601 conflict) nor with the separate QQQ-A001 SYSTEM_ERROR finding (which concerns A001's own false detection, not this conflict pair)."
+        },
+        "qqq_a001_system_error_finding": {
+          "status": "PRESERVED_SEPARATELY_UNCHANGED",
+          "root_cause_primary": "SYSTEM_ERROR",
+          "first_incorrect_stage": "MAPPING",
+          "note": "Distinct from both blocks above -- concerns A001's own false-positive detection (reused verbatim from v0_2_acceptance_adjudication.json Case A), never conflated with either the current conflict-contract question or John's original A001-vs-A501 conflict-pair question."
+        }
+      },
+      "MSFT": {
+        "v0_2_contract_conflict_conformance": {
+          "allowed_main_conflicts": [],
+          "actual_main_conflict": null,
+          "main_conflict_match": true,
+          "note": "Current v0.2 contract is fully satisfied -- Gold v0.2 authored no composite-conflict rule for MSFT, and none was required; no violation exists at the current-contract level."
+        },
+        "john_original_conflict_expectation_adjudication": {
+          "john_original_expected_conflict": "A102 vs A304 ('Bull A102 vs Bear A304', Development Plan v1.0 SS12 Golden Test Cases, John-attributed row)",
+          "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md -- table row 'MSFT | A102<->A304 | conflict_alphas=[] in taxonomy, PD-017 rejected | Gold Evaluable: NO'; disputed-authorship analysis in docs/specs/product_decisions_and_unknowns.md",
+          "expectation_status": "EXPLICITLY_RECORDED_BUT_DISPUTED",
+          "dispute_detail": "The literal pair A102<->A304 is structurally illegal in the canonical taxonomy (A102's own conflict_alphas=[]) and was formally rejected via PD-017 -- never reinstated. Separate analysis in product_decisions_and_unknowns.md concludes this was most likely a drafting slip in the Development Plan itself (A101/A102 are adjacent, similarly-named Theme-layer IDs), and that the same Golden Test Case row's own expected-dominant-alphas cell (A101, A102, A301, A304) would have supported the internally-consistent 'A101 vs A304' reading instead -- consistent with NVDA's parallel row and with the Development Plan's own six mandatory canonical pairs. This is reported exactly as found in the provenance record, not resolved or inferred further.",
+          "actual_conflict": null,
+          "classification": "ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION",
+          "confidence": "MODERATE_TO_HIGH",
+          "reasoning": "Because an explicit original John-attributed expectation involving A304 does exist for MSFT (however disputed the exact pairing), the already-adjudicated Case C finding (v0_2_acceptance_adjudication.json) is preserved as the answer to THIS question, not as a current v0.2-contract violation: A304 was well-evidenced (52 matched claims, 11 raw distinct agents) but the evidence_source_role_v1 qualification policy correctly reduced this to 14 qualified groups / 4 qualified agents (25 of 39 unique facts were SECONDARY_NOT_TICKER_SPECIFIC debate-agent restatement), leaving the score (43.36) short of 'active'. A304 therefore never reached a detected level, so it could never have participated in any admitted conflict -- answering, as reasonably as the evidence allows, whatever the original A102/A101-vs-A304 question was actually asking. Gold v0.2 itself is not violated by this outcome."
+        },
+        "reclassification": {
+          "old_reading_risk": "Read out of context, 'main_conflict_match=true' next to 'ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION' looked self-contradictory.",
+          "resolved_reading": "MSFT is NOT a current v0.2 contract mismatch (main_conflict_match=true stands, unchanged). The suppression classification answers a separate, historical, John-attributed pre-v0.2 question, not a present-day contract violation."
+        }
+      },
+      "SNDK": {
+        "v0_2_contract_conflict_conformance": {
+          "allowed_main_conflicts": [],
+          "actual_main_conflict": null,
+          "main_conflict_match": true,
+          "note": "Current v0.2 contract is fully satisfied -- Gold v0.2 authored no composite-conflict rule for SNDK, and none was required; no violation exists at the current-contract level."
+        },
+        "john_original_conflict_expectation_adjudication": {
+          "john_original_expected_conflict": "NOT_EXPLICITLY_DEFINED",
+          "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md -- table row 'SNDK | Development Plan gave no expected value | run_bound_expectations: null | Gold Evaluable: NO'. SNDK was never one of the Development Plan's three worked Golden Test Case rows (only NVDA, QQQ, MSFT were worked); no John-attributed expected-conflict statement for SNDK exists anywhere in the traced provenance chain.",
+          "expectation_status": "NOT_EXPLICITLY_DEFINED",
+          "unrelated_historical_candidate_note": "A separate, already-rejected candidate pair (A201<->A304) appears in the same provenance record's 'frozen reference run evidence' column, but it originates from the old provisional regression label file (j2_provisional_regression_labels_v0.2.yaml), not from the Development Plan or any John-attributed expectation -- it is structurally illegal/rejected and unrelated to this question.",
+          "actual_conflict": null,
+          "classification": "NOT_APPLICABLE"
+        },
+        "reclassification": {
+          "old_reading_risk": "Read out of context, 'main_conflict_match=true' next to 'ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION' looked self-contradictory.",
+          "resolved_reading": "RELATED_DIAGNOSTIC_NOT_CONTRACT_MISMATCH",
+          "explanation": "SNDK is NOT a current v0.2 contract mismatch (main_conflict_match=true stands, unchanged) AND has no explicit original John conflict expectation to answer either. The prior report's ADMISSIBILITY_GATE_REASONABLE_SUPPRESSION finding is retained below only as a RELATED DIAGNOSTIC observation (the run's own suppressed/rejected candidate pairs, directly verified from run_audit.json, remain true and informative) -- it is relabeled RELATED_DIAGNOSTIC_NOT_CONTRACT_MISMATCH rather than presented as answering any live expectation, current or historical, since none exists to answer.",
+          "retained_diagnostic_detail": "3 candidate conflict pairs were suppressed/rejected in the SNDK run via concrete evidence-based reason codes (BULL_SCORE_BELOW_THRESHOLD, NO_BULL_TICKER_SPECIFIC_SUPPORT, NO_BEAR_TICKER_SPECIFIC_SUPPORT, DIRECTION_ROLE_UNRESOLVED, MISSING_LEFT_EVIDENCE) -- directly re-inspected from outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335/run_audit.json this task. This remains true and is preserved as background diagnostic context, not as a mismatch finding."
+        }
+      },
+      "TSM": {
+        "v0_2_contract_conflict_conformance": {
+          "allowed_main_conflicts": [],
+          "actual_main_conflict": "A101__A304",
+          "main_conflict_match": false,
+          "classification": "GOLD_LABEL_NEEDS_UPDATE",
+          "confidence": "MEDIUM_TO_HIGH",
+          "note": "TSM's sole Gold v0.2 rule (TSM-AI-TO-FOUNDRY-TRANSMISSION) is a supportive transmission-chain rule (A101->A201->A301), not a conflict rule -- it authorizes no main-conflict family at all. The run nonetheless produced a well-supported, admitted A101__A304 valuation conflict (51 raw claims, 22 unique facts, 6 distinct agents, 10 ticker-specific items; bull=52.90/bear=57.99). This is a live, current v0.2-contract mismatch -- unchanged from the prior report."
+        },
+        "john_original_conflict_expectation_adjudication": {
+          "john_original_expected_conflict": "NOT_EXPLICITLY_DEFINED",
+          "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md -- table row 'TSM | Development Plan gave no expected value | run_bound_expectations: null | Gold Evaluable: NO'. TSM was never one of the Development Plan's three worked Golden Test Case rows.",
+          "expectation_status": "NOT_EXPLICITLY_DEFINED",
+          "actual_conflict": null,
+          "classification": "NOT_APPLICABLE",
+          "note": "TSM's GOLD_LABEL_NEEDS_UPDATE classification (above) stands entirely on current v0.2-contract authoring-scope grounds and is NOT additionally grounded in, or contingent on, any original John conflict expectation -- none exists for TSM in the traced provenance chain."
+        }
+      }
+    },
+    "success_criteria_check": {
+      "msft_sndk_no_longer_internally_contradictory": true,
+      "current_v0_2_main_conflict_match_unchanged": {
+        "MSFT": true,
+        "SNDK": true,
+        "QQQ": false,
+        "TSM": false
+      },
+      "original_john_expectation_shown_only_when_provenance_supports_it": true,
+      "qqq_tsm_current_contract_mismatches_remain_explicit": true,
+      "qqq_a001_system_error_remains_separate": true,
+      "gold_authority_changed": false,
+      "production_code_changed": false,
+      "provider_calls": 0,
+      "fresh_runs": 0
+    }
+  },
+  "conflict_evaluation_semantics": {
+    "verification_method": "Directly inspected every rule's hit_type, rule_type, and allowed_main_conflicts field across all 19 frozen Gold v0.2 rules in v0_2_gold_operational_contract.json (SHA256 e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f, unmodified), plus the contract's own rule_type_semantics dictionary, which is the sole authoritative definition of what each rule_type -- including allowed_main_conflicts -- means. Not inferred from field emptiness alone.",
+    "verified_finding": "rule_type_semantics.allowed_main_conflicts reads (verbatim): 'One or more existing canonical conflict structures may satisfy the Gold thesis when both sides are currently supported. No conflict is forced when one side lacks sufficient evidence.' This is an AFFIRMATIVE/PERMISSIVE rule type -- it describes what happens when a rule of this type is authored and populated. Gold v0.2's rule_type_semantics dictionary contains NO rule type meaning 'no conflict is allowed' or 'conflicts are forbidden for this ticker' -- the only forbidding rule type that exists at all is forbidden_dominant_without_strong_evidence, which forbids a specific Alpha from being DOMINANT, not a conflict PAIR from being admitted. allowed_main_conflicts=[] appears on every ALPHA_HIT, NEGATIVE_CONTROL_HIT, and CONDITIONAL_ACCEPTANCE_HIT rule across all six tickers (17 of 19 rules total) purely because those rules are not of the allowed_main_conflicts rule_type at all -- the field is a structural placeholder on non-conflict rules, not a declared prohibition. Critically, TSM's own COMPOSITE_STRUCTURE_HIT rule (TSM-AI-TO-FOUNDRY-TRANSMISSION) also carries allowed_main_conflicts=[] -- but its rule_type is 'conditional_only' and its concept is an explicitly supportive transmission chain (A101->A201->A301), never a bull/bear conflict thesis -- proving hit_type=COMPOSITE_STRUCTURE_HIT alone does not imply conflict-family governance either; only a rule actually typed/populated as allowed_main_conflicts does. Exactly 2 of 19 rules (NVDA-GROWTH-VS-VALUATION-CONFLICT, AMD-AI-GROWTH-VS-VALUATION) are populated with real conflict pairs -- these are the only two tickers where Gold v0.2 governs a main-conflict family at all.",
+    "answer": "2. NO CONFLICT RULE WAS AUTHORED / NOT GOVERNED. allowed_main_conflicts=[] does NOT mean 'no conflict is allowed' for QQQ, MSFT, SNDK, or TSM -- it means Gold v0.2 never authored a conflict-family acceptance rule for that ticker at all. Only NVDA and AMD have an explicit, populated allowed_main_conflicts rule and are therefore conflict-governed.",
+    "state_semantics": {
+      "field_absent": "Not encountered in this Gold contract -- every rule explicitly carries the field, defaulting to [] when not applicable.",
+      "empty_list_on_non_conflict_rule": "NOT_GOVERNED -- this rule simply is not a conflict-family rule (the overwhelming majority case: 17/19 rules).",
+      "empty_list_on_a_tickers_only_composite_rule": "Still NOT_GOVERNED if that composite rule's own rule_type is not allowed_main_conflicts (TSM's case) -- hit_type alone never implies conflict governance.",
+      "populated_list": "GOVERNED -- this rule is of rule_type allowed_main_conflicts; evaluate the ticker's actual_main_conflict against this specific list.",
+      "ticker_has_no_conflict_rule_at_all": "NOT_GOVERNED -- main_conflict_match must read NOT_APPLICABLE, never false, regardless of whether an actual conflict was admitted in the run."
+    },
+    "governed_rule": "Evaluate actual_main_conflict against allowed_main_conflicts.",
+    "not_governed": "If no Gold conflict rule exists (no rule of rule_type allowed_main_conflicts for that ticker), main_conflict_match is NOT_APPLICABLE.",
+    "empty_allowed_list_semantics": "Verified from source: [] means NOT_GOVERNED / no conflict-family rule authored -- never NO_CONFLICT_ALLOWED. Only a genuinely populated allowed_main_conflicts list represents governance."
+  },
+  "john_original_development_plan_expectation": {
+    "status_under_v0_2_global_note": "PROVENANCE_ONLY for every entry below -- none of these were ever, and must never be treated as, current v0.2 Gold authority. Full detail (with source citations) lives in reporting_clarification_v1.per_ticker.<TICKER>.john_original_conflict_expectation_adjudication, added in the prior clarification task and left unmodified here.",
+    "QQQ": {
+      "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md",
+      "expected_conflict": "A001 vs A501 (Development Plan v1.0 SS12 Golden Test Cases, John-attributed row)",
+      "status_under_v0_2": "PROVENANCE_ONLY -- never Gold-evaluable even pre-v0.2 (no frozen reference run ever confirmed it); not an authored v0.2 rule."
+    },
+    "MSFT": {
+      "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md + docs/specs/product_decisions_and_unknowns.md (PD-017)",
+      "expected_conflict": "A102 vs A304 (Development Plan v1.0 SS12 Golden Test Cases, John-attributed row) -- disputed, structurally illegal in canonical taxonomy, rejected via PD-017, likely a drafting slip",
+      "status_under_v0_2": "PROVENANCE_ONLY -- not an authored v0.2 rule; not resurrected."
+    },
+    "SNDK": {
+      "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md",
+      "expected_conflict": "NOT_EXPLICITLY_DEFINED -- SNDK was never one of the Development Plan's worked Golden Test Case rows.",
+      "status_under_v0_2": "N/A -- no historical expectation exists to carry forward."
+    },
+    "TSM": {
+      "source": "docs/audit_artifacts/main_conflict_gold_adjudication_v0.1.2.1.md",
+      "expected_conflict": "NOT_EXPLICITLY_DEFINED -- TSM was never one of the Development Plan's worked Golden Test Case rows.",
+      "status_under_v0_2": "N/A -- no historical expectation exists to carry forward."
+    }
+  },
+  "conflict_governance_correction_v2": {
+    "purpose": "Corrects a semantics error in this artifact's prior revision (SHA256 2ea581aee7e3648bf18316291e0aa1efc5b9a0aa780a220c1746de7ea94f63b7): allowed_main_conflicts=[] was treated as though it meant 'no conflict is allowed,' causing QQQ and TSM to be reported as current v0.2 contract mismatches (main_conflict_match=false, GOLD_LABEL_NEEDS_UPDATE) purely because an actual conflict was admitted while the ticker's aggregate allowed list was empty. Direct source verification (see conflict_evaluation_semantics above) proves [] means NOT_GOVERNED, not FORBIDDEN, for every ticker except NVDA/AMD where a real allowed_main_conflicts rule exists and is populated. This correction changes the reported contract status for QQQ, MSFT, SNDK, and TSM to conflict_rule_governed=false / main_conflict_match=NOT_APPLICABLE / main_conflict_evaluation_reason=NO_GOLD_CONFLICT_RULE, and demotes the previously-asserted GOLD_LABEL_NEEDS_UPDATE contract-mismatch claims for QQQ/TSM to non-blocking, clearly-labeled advisory recommendations that do not affect PASS/FAIL/REVIEW status. No Alpha-level finding (expected/detected/missing/unexpected Alphas, dominant status, QQQ-A001 SYSTEM_ERROR, MSFT-A102 failure, evidence-failure analysis, Alpha Memory) was touched.",
+    "before_after_summary": {
+      "NVDA": {
+        "before": {
+          "conflict_rule_governed": null,
+          "main_conflict_match": true
+        },
+        "after": {
+          "conflict_rule_governed": true,
+          "main_conflict_match": true
+        },
+        "changed": "field added only, result unchanged"
+      },
+      "QQQ": {
+        "before": {
+          "main_conflict_match": false,
+          "classification": "GOLD_LABEL_NEEDS_UPDATE (contract mismatch)"
+        },
+        "after": {
+          "conflict_rule_governed": false,
+          "main_conflict_match": "NOT_APPLICABLE",
+          "classification": "NOT_APPLICABLE (contract); GOLD_LABEL_NEEDS_UPDATE demoted to non-blocking advisory only"
+        },
+        "changed": "yes -- corrected"
+      },
+      "MSFT": {
+        "before": {
+          "main_conflict_match": true
+        },
+        "after": {
+          "conflict_rule_governed": false,
+          "main_conflict_match": "NOT_APPLICABLE"
+        },
+        "changed": "yes -- precision correction (vacuous true -> explicit not-applicable), no substantive change"
+      },
+      "SNDK": {
+        "before": {
+          "main_conflict_match": true
+        },
+        "after": {
+          "conflict_rule_governed": false,
+          "main_conflict_match": "NOT_APPLICABLE"
+        },
+        "changed": "yes -- precision correction (vacuous true -> explicit not-applicable), no substantive change"
+      },
+      "TSM": {
+        "before": {
+          "main_conflict_match": false,
+          "classification": "GOLD_LABEL_NEEDS_UPDATE (contract mismatch)"
+        },
+        "after": {
+          "conflict_rule_governed": false,
+          "main_conflict_match": "NOT_APPLICABLE",
+          "classification": "NOT_APPLICABLE (contract); GOLD_LABEL_NEEDS_UPDATE demoted to non-blocking advisory only"
+        },
+        "changed": "yes -- corrected"
+      },
+      "AMD": {
+        "before": {
+          "conflict_rule_governed": null,
+          "main_conflict_match": true
+        },
+        "after": {
+          "conflict_rule_governed": true,
+          "main_conflict_match": true
+        },
+        "changed": "field added only, result unchanged"
+      }
+    },
+    "qqq_a001_system_error": "UNCHANGED, PRESERVED SEPARATELY -- root_cause_primary=SYSTEM_ERROR, first_incorrect_stage=MAPPING, reused verbatim from v0_2_acceptance_adjudication.json Case A. Never conflated with the conflict-governance question at any point.",
+    "alpha_level_findings_touched": false,
+    "evidence_failure_analysis_touched": false,
+    "alpha_memory_touched": false,
+    "gold_authority_touched": false,
+    "production_code_touched": false
+  }
+}

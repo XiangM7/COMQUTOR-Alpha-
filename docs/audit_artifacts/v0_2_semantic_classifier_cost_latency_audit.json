@@ -1,0 +1,1213 @@
+{
+  "schema_version": "v0.2.semantic_classifier_cost_latency_audit.v1",
+  "task": "JOHN_FOLLOW_UP_REQUIREMENT_B_PHASE_B1_SEMANTIC_CLASSIFIER_COST_LATENCY_FORENSIC_AUDIT",
+  "phase": "B1_ANALYSIS_ONLY",
+  "active_acceptance_version": "v0.2",
+  "gold_acceptance_status": "CLOSED",
+  "product_demo_hardening_status": "CLOSED",
+  "john_requirement_a_status": "PASS",
+  "scope": {
+    "analysis_only": true,
+    "production_semantic_changes": 0,
+    "gold_changes": 0,
+    "provider_calls": 0,
+    "fresh_ticker_runs": 0,
+    "ephemeral_tooling_created": [
+      "scripts/audit_tools/semantic_classifier_cost_latency_analysis.py",
+      "scripts/audit_tools/semantic_call_accounting_raw.json"
+    ],
+    "note": "Read-only analysis against persisted outputs/runs/<run_id>/llm_semantic_calls.jsonl, llm_semantic_manifest.json, run_audit.json, and production source files. No production file was edited."
+  },
+  "runs_analyzed": {
+    "NVDA": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "QQQ_historical": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+    "MSFT": "43472ace-454f-4c69-892c-adca91c25be7",
+    "SNDK": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+    "TSM": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+    "AMD": "949f685a-3945-4fd0-b7b9-362b37c90721",
+    "QQQ_postfix": "f239a53f-4ebe-455c-bb76-5f5485903901",
+    "count": 7,
+    "primary_reference": "QQQ_postfix (f239a53f-4ebe-455c-bb76-5f5485903901)"
+  },
+  "historical_measurements_verification": {
+    "claimed_total_wall_clock_s": 3141,
+    "measured_semantic_pipeline_span_s": 2937.6,
+    "measured_metadata_created_at_to_pipeline_status_updated_at_s": 2939,
+    "reconciliation": "metadata.json.created_at (17:10:46Z) to week3_pipeline_status.json.updated_at (17:59:45Z) spans ~2939s, and the semantic-call log's own first-start-to-last-end span is 2937.6s -- both closely corroborate each other. The residual ~200s gap versus the claimed ~3141s total is consistent with TradingAgents' own upstream raw-output generation (~200s), which completes BEFORE metadata.json's created_at timestamp and is therefore not captured inside the semantic-call log at all. VERIFIED, not contradicted.",
+    "claimed_structured_adapter_s": 597,
+    "measured_structured_adapter_task_span_s": 596.0,
+    "claimed_structured_adapter_pct": "19%",
+    "measured_structured_adapter_pct": "19.05% of 3129s (596.0+706.5+1604.4+15.8=2922.7s + ~200s TradingAgents + ~3s deterministic post-processing implied)",
+    "claimed_alpha_evidence_structure_bucket_s": 2325,
+    "measured_alpha_evidence_structure_bucket_s": 2326.7,
+    "measured_bucket_detail": {
+      "alpha_classifier_span_s": 706.5,
+      "evidence_stance_classifier_span_s": 1604.4,
+      "structure_extractor_span_s": 15.8
+    },
+    "claimed_bucket_pct": "74%",
+    "measured_bucket_pct": "74.05%",
+    "claimed_deterministic_stage_s": 3,
+    "verdict": "VERIFIED. All headline historical figures in the task's Section 4 are corroborated to within rounding by direct measurement of this run's own persisted timestamps -- not blindly assumed.",
+    "claimed_semantic_record_count": 595,
+    "measured_semantic_record_count": 595,
+    "claimed_task_distribution": {
+      "structured_adapter": 8,
+      "alpha_classifier": 550,
+      "evidence_stance_classifier": 33,
+      "structure_extractor": 4
+    },
+    "measured_task_distribution": {
+      "structured_adapter": 8,
+      "alpha_classifier": 550,
+      "evidence_stance_classifier": 33,
+      "structure_extractor": 4
+    },
+    "task_distribution_verdict": "EXACT MATCH.",
+    "important_methodological_note": "task_span_s (wall-clock, first-call-start to last-call-end within a task) is the correct metric for stage-attribution -- NOT sum_latency_s (sum of each call's own latency_ms), which can exceed the wall-clock span whenever calls overlap (see Concurrency Analysis). Summing sum_latency_s across tasks (595.3+1105.2+1604.2+15.6=3320.3s) would OVERSTATE total time and must not be used for the 74%/19% breakdown."
+  },
+  "pipeline_call_topology": {
+    "structured_adapter": {
+      "caller": "comqutor_alpha/structure_engine/structured_output_adapter.py: adapt_run_outputs -> adapt_raw_agent_output -> adapt_raw_agent_outputs",
+      "unit_of_work": "One batch of up to LLM_CLAIM_BATCH_SIZE=64 raw text segments from ONE agent's report, per call (`for batch in _chunk_segments(segments, LLM_CLAIM_BATCH_SIZE)`, per `for agent_key, bucket in sorted(per_agent.items())`).",
+      "prompt_construction": "prompt_version week2.claim_batch_enrichment.v1; input_schema_version week2.claim_batch_enrichment.input.v1; payload = {agent, ticker, segments:[{claim, evidence, segment_id, source_section}, ...]}.",
+      "provider_client": "Week2LLMGateway (comqutor_alpha/structure_engine/week2_llm.py) -> deepseek provider, model deepseek-v4-flash.",
+      "sync_async": "Synchronous per-call (ThreadPoolExecutor is used only for the timeout wrapper `call_with_timeout`, not for concurrent batches).",
+      "concurrency_mechanism": "NONE. Plain serial `for` loop over agents/batches -- confirmed by source inspection and by directly measured max-observed-concurrent-calls = 1 across every analyzed run.",
+      "retry_policy": "Shared Week2LLMGateway default (DEFAULT_MAX_RETRIES=1), via `_resolve_task_max_retries` (this task is not the one component-specific exception).",
+      "timeout_policy": "DEFAULT_TIMEOUT_SECONDS=20.0s (current code); historical acceptance runs show evidence of an older, longer ~90s timeout window (max latencies of ~90035-90048ms observed) -- current code is a later, already-improved configuration.",
+      "fallback_behavior": "On gateway failure, adapt_raw_agent_outputs falls back to a deterministic per-segment enrichment (claim=evidence=segment text, neutral direction) -- confirmed via code comment 'TradingAgents' own, single existing LLM call for this agent may have...' context; this fallback enters production semantics as a lower-quality but structurally valid claim record, not a dropped claim.",
+      "cache_lookup": "SemanticRuntimeSession.cache.get(cache_key) is called (session.py) but the injected cache is NullLLMResponseCache by default in every observed run -- always a miss.",
+      "cache_write": "SemanticRuntimeSession.cache.put(...) is called on success but NullLLMResponseCache.put is a no-op.",
+      "batch_capability": "YES, already implemented (LLM_CLAIM_BATCH_SIZE=64 segments per call) -- this task is already the most heavily batched of the four.",
+      "deterministic_pre_filter_before_llm": "None specific to this task -- every raw segment from an agent's report is included in a batch.",
+      "deterministic_post_filter_after_llm": "claim_quality.py's shared is_claim_eligible gate (ANALYTICAL/CONTEXT_ONLY/NON_SUBSTANTIVE classification) runs downstream on the enriched claims, before they reach the Alpha Mapper -- not before this call."
+    },
+    "alpha_classifier": {
+      "caller": "comqutor_alpha/structure_engine/alpha_mapper.py: map_claim_to_alpha -> _classify_alpha_with_llm (single-claim) / _classify_alpha_batch_with_llm / _classify_alpha_concurrent_with_llm (concurrent wrapper).",
+      "unit_of_work": "ONE claim evaluated against the FULL canonical Alpha taxonomy (all 10 MVP Alphas) in a single call -- single-claim semantics, NOT one call per (claim, Alpha) pair. Confirmed directly from persisted input_payload: `{alpha_taxonomy: [10 Alpha entries], claim, direction, evidence, factors, ticker}` -> output `{decision, selected_alpha_id}`.",
+      "prompt_construction": "prompt_version week2.alpha_classifier.v3; input_schema_version week2.alpha_classifier.input.v2.",
+      "provider_client": "Week2LLMGateway -> deepseek / deepseek-v4-flash.",
+      "sync_async": "Synchronous calls dispatched via `_classify_alpha_concurrent_with_llm`, which uses a ThreadPoolExecutor-backed worker pool.",
+      "concurrency_mechanism": "ThreadPoolExecutor with resolve_alpha_classifier_concurrency() workers. DEFAULT_ALPHA_CLASSIFIER_CONCURRENCY=4 (env-overridable, MAX_ALPHA_CLASSIFIER_CONCURRENCY=8), chosen from a real controlled 3-way benchmark (1 vs 4 vs 8) documented in docs/audit_artifacts/week2_single_claim_concurrency_benchmark_v0.1.2.1.json. Directly confirmed this task: max observed concurrent calls = 4 in the QQQ post-fix run, matching the configured default exactly.",
+      "retry_policy": "Shared default (DEFAULT_MAX_RETRIES=1) -- NOT the component-specific exception; code comment cites a historical 72.2% retry-recovery rate for this task, already judged 'well-served by 1 retry.'",
+      "timeout_policy": "DEFAULT_TIMEOUT_SECONDS=20.0s, explicitly benchmarked against this exact task's own historical p50 (~1.87s) / p90 (~3.47s) single-claim latency -- 20s is ~6x p50 and comfortably above p90.",
+      "fallback_behavior": "On persistent gateway failure, the claim's `llm_outcome['outcome']` becomes 'unavailable' -> match status becomes 'unavailable' / alpha_match_method='llm_unavailable' -- the claim is left UNMATCHED, never silently assigned a deterministic-keyword substitute. Per the explicit 'Pure-LLM Alpha semantic authority' invariant in alpha_mapper.py, deterministic keyword/factor scoring is computed alongside every claim but is NEVER used as a fallback source for the semantic result -- only as a diagnostic/counterfactual field.",
+      "cache_lookup": "Same session-level cache.get(cache_key) path as the other three tasks -- NullLLMResponseCache, always a miss.",
+      "cache_write": "Same no-op NullLLMResponseCache.put path.",
+      "batch_capability": "EXPLICITLY EVALUATED AND DEFERRED. Code comment (week2_llm.py) documents a real controlled benchmark against DeepSeek deepseek-v4-flash: 40-item batches -> 22.9% coverage (most items silently dropped/malformed); 15-item batches -> repeated >60s timeouts even with a fresh client per call (ruling out connection reuse). Single-claim calls were 'consistently fast and reliable.' Batching for this task is therefore NOT a live, untested option -- it has real negative evidence against it.",
+      "deterministic_pre_filter_before_llm": "NONE at the Alpha-candidate level, BY DESIGN. A claim-level substantiveness gate (is_claim_eligible: ANALYTICAL/CONTEXT_ONLY/NON_SUBSTANTIVE, comqutor_alpha/structure_engine/claim_quality.py) already excludes NON_SUBSTANTIVE claims from ever reaching the Alpha Mapper at all -- this explains why only 515 of the ~766-767 deduplicated eligible claims in the QQQ post-fix run were ever sent to alpha_classifier. But WITHIN a claim that does reach the mapper, deterministic keyword/factor/AI-gate scoring is computed and is explicitly NEVER used to skip or narrow which Alphas the LLM considers -- every call presents the FULL 10-Alpha taxonomy, unconditionally, specifically to avoid the class of false-negative risk the QQQ-A001 defect exposed.",
+      "deterministic_post_filter_after_llm": "The v0.2 QQQ A001 remediation (Step 7A): a narrow, alpha_id-keyed invalidation-pattern veto (claim_semantics.ALPHA_SPECIFIC_INVALIDATION_PATTERNS, currently registered only for A001) that can veto an LLM-selected match back to no_match when a high-precision contrary-evidence pattern fires for that specific Alpha. A no-op for every other Alpha."
+    },
+    "evidence_stance_classifier": {
+      "caller": "comqutor_alpha/structure_engine/evidence_stance_llm.py: apply_llm_stance_upgrade -> _process_batch, iterating `for batch in chunk_items(items, BATCH_SIZE)`.",
+      "unit_of_work": "A batch of up to BATCH_SIZE=10 (claim, target_alpha_id) stance-classification items per call.",
+      "prompt_construction": "prompt_version evidence_stance.llm_classifier.v3; input_schema_version evidence_stance.llm_classifier.input.v1; payload = {items: [{claim, claim_id, evidence, target_alpha_id, target_alpha_name, target_alpha_definition, counter_alphas, ticker}, ...]}.",
+      "provider_client": "Week2LLMGateway -> deepseek / deepseek-v4-flash.",
+      "sync_async": "Synchronous, one batch per call.",
+      "concurrency_mechanism": "NONE. Plain serial `for batch in chunk_items(...)` loop -- confirmed by source and by directly measured max-observed-concurrent-calls = 1 in every analyzed run.",
+      "retry_policy": "COMPONENT-SPECIFIC INCREASE: EVIDENCE_STANCE_CLASSIFIER_MAX_RETRIES = min(2, MAX_SERVER_RETRIES) = 2, versus the shared default of 1 for every other task. Explicitly justified in code by a prior audit (v0_1_3_provider_final_orphan_reliability_audit) finding this task alone contributed 74.4% of all final semantic orphans historically, with only 2.7% retry recovery at 1 retry -- an already evidence-driven, deliberate policy.",
+      "timeout_policy": "Same shared DEFAULT_TIMEOUT_SECONDS=20.0s as the other tasks (no component-specific override found).",
+      "fallback_behavior": "On failure, _apply_fallback() stamps stance_method=DETERMINISTIC_FALLBACK and reuses the pre-existing deterministic.v1 stance value that alpha_mapper._attach_evidence_stance already computed UNCONDITIONALLY before this LLM stage ever runs -- i.e. this task's fallback is a genuine, already-computed, already-accepted deterministic classification, not a placeholder or a dropped result. This DOES enter production semantics on fallback (by design), unlike alpha_classifier's fallback.",
+      "cache_lookup": "Same NullLLMResponseCache no-op path.",
+      "cache_write": "Same NullLLMResponseCache no-op path.",
+      "batch_capability": "Already implemented (BATCH_SIZE=10 items/call) -- no evidence found of this batch size itself having been stress-tested the way alpha_classifier's was; no negative finding on record either.",
+      "deterministic_pre_filter_before_llm": "build_stance_request_items only includes (claim, target_alpha_id) pairs already retained as a match's secondary/target Alphas from the Alpha Mapper stage -- i.e. it inherits whatever the mapper already decided, adding no new filtering logic of its own.",
+      "deterministic_post_filter_after_llm": "None found beyond the existing per-item response validation (_validate_response_item) and requested-item reconciliation (`requested_by_key`)."
+    },
+    "structure_extractor": {
+      "caller": "comqutor_alpha/structure_engine/structure_extractor.py (invoked per-claim during relation extraction; see relation_grammar.py's own cross-reference).",
+      "unit_of_work": "ONE claim per call (input_payload = {allowed_factors, claim, claim_id, evidence} -- no batching, no taxonomy injection).",
+      "prompt_construction": "prompt_version week2.structure_extractor.v1; input_schema_version week2.structure_extractor.input.v1.",
+      "provider_client": "Week2LLMGateway -> deepseek / deepseek-v4-flash.",
+      "sync_async": "Synchronous, single-claim, no concurrency wrapper found for this task.",
+      "concurrency_mechanism": "NONE -- confirmed by directly measured max-observed-concurrent-calls = 1 in every analyzed run. (Low call volume, 2-11 calls/run, makes this a minor lever regardless.)",
+      "retry_policy": "Shared default (DEFAULT_MAX_RETRIES=1). Code comment notes this task's failures are 'schema/validation-driven, not attempt-count-driven,' i.e. more retries would not meaningfully help.",
+      "timeout_policy": "Same shared DEFAULT_TIMEOUT_SECONDS=20.0s.",
+      "fallback_behavior": "Not traced in full this task (low call volume, low total time contribution: 15.6-55.4s/run, under 2% of semantic wall clock in every analyzed run) -- validation_status shows 100% 'rejected' for this task in the QQQ post-fix run's 4 calls, meaning its relation-extraction output failed schema validation in every observed instance for this run; this is a pre-existing, already-visible signal (not newly introduced by this audit), and its low call volume makes it a low-priority optimization target regardless of cause.",
+      "cache_lookup": "Same NullLLMResponseCache no-op path.",
+      "cache_write": "Same NullLLMResponseCache no-op path.",
+      "batch_capability": "Not batched; no evidence found of batching having been evaluated for this task specifically.",
+      "deterministic_pre_filter_before_llm": "Only called for claims with `allowed_factors` present (i.e. a claim already resolved to at least one taxonomy factor) -- not traced further this task.",
+      "deterministic_post_filter_after_llm": "Standard schema validation only (validated_output is null/rejected on failure, per the QQQ post-fix sample)."
+    }
+  },
+  "call_accounting_by_run": {
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "raw_claim_count": 733,
+      "valid_claim_count": 733,
+      "analytical_claim_count": 428,
+      "semantic_record_count": 549,
+      "provider_call_count": 591,
+      "cache_hit_count": 0,
+      "fallback_count": 47,
+      "rejected_count": 11,
+      "overall_semantic_span_s": 4789.9,
+      "task_stats": {
+        "structured_adapter": {
+          "count": 7,
+          "sum_latency_s": 621.9,
+          "mean_ms": 88847,
+          "median_ms": 90035,
+          "p50_ms": 90035,
+          "p90_ms": 90038,
+          "p95_ms": 90039,
+          "max_ms": 90039,
+          "task_span_s": 622.5,
+          "retry_calls": 7,
+          "fallback_calls": 7,
+          "timeouts": 0,
+          "validation_rejections": 1
+        },
+        "alpha_classifier": {
+          "count": 499,
+          "sum_latency_s": 1619.3,
+          "mean_ms": 3245,
+          "median_ms": 2182,
+          "p50_ms": 2182,
+          "p90_ms": 6547,
+          "p95_ms": 8605,
+          "max_ms": 34159,
+          "task_span_s": 1308.3,
+          "retry_calls": 1,
+          "fallback_calls": 0,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "evidence_stance_classifier": {
+          "count": 32,
+          "sum_latency_s": 2739.9,
+          "mean_ms": 85622,
+          "median_ms": 90034,
+          "p50_ms": 90034,
+          "p90_ms": 90043,
+          "p95_ms": 90047,
+          "max_ms": 90048,
+          "task_span_s": 2740.0,
+          "retry_calls": 30,
+          "fallback_calls": 30,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "structure_extractor": {
+          "count": 11,
+          "sum_latency_s": 55.1,
+          "mean_ms": 5007,
+          "median_ms": 3335,
+          "p50_ms": 3335,
+          "p90_ms": 11711,
+          "p95_ms": 18630,
+          "max_ms": 18630,
+          "task_span_s": 55.4,
+          "retry_calls": 4,
+          "fallback_calls": 10,
+          "timeouts": 0,
+          "validation_rejections": 10
+        }
+      }
+    },
+    "QQQ_historical": {
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "raw_claim_count": 647,
+      "valid_claim_count": 647,
+      "analytical_claim_count": 401,
+      "semantic_record_count": 485,
+      "provider_call_count": 518,
+      "cache_hit_count": 0,
+      "fallback_count": 39,
+      "rejected_count": 9,
+      "overall_semantic_span_s": 3669.7,
+      "task_stats": {
+        "structured_adapter": {
+          "count": 7,
+          "sum_latency_s": 560.1,
+          "mean_ms": 80017,
+          "median_ms": 90035,
+          "p50_ms": 90035,
+          "p90_ms": 90043,
+          "p95_ms": 90045,
+          "max_ms": 90045,
+          "task_span_s": 560.6,
+          "retry_calls": 6,
+          "fallback_calls": 6,
+          "timeouts": 0,
+          "validation_rejections": 1
+        },
+        "alpha_classifier": {
+          "count": 445,
+          "sum_latency_s": 861.6,
+          "mean_ms": 1936,
+          "median_ms": 1361,
+          "p50_ms": 1361,
+          "p90_ms": 3377,
+          "p95_ms": 4663,
+          "max_ms": 15969,
+          "task_span_s": 802.9,
+          "retry_calls": 0,
+          "fallback_calls": 0,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "evidence_stance_classifier": {
+          "count": 25,
+          "sum_latency_s": 2216.4,
+          "mean_ms": 88656,
+          "median_ms": 90038,
+          "p50_ms": 90038,
+          "p90_ms": 90047,
+          "p95_ms": 90047,
+          "max_ms": 90051,
+          "task_span_s": 2216.5,
+          "retry_calls": 25,
+          "fallback_calls": 25,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "structure_extractor": {
+          "count": 8,
+          "sum_latency_s": 46.4,
+          "mean_ms": 5798,
+          "median_ms": 2260,
+          "p50_ms": 2399,
+          "p90_ms": 6540,
+          "p95_ms": 28045,
+          "max_ms": 28045,
+          "task_span_s": 46.6,
+          "retry_calls": 2,
+          "fallback_calls": 8,
+          "timeouts": 0,
+          "validation_rejections": 8
+        }
+      }
+    },
+    "MSFT": {
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "raw_claim_count": 750,
+      "valid_claim_count": 750,
+      "analytical_claim_count": 435,
+      "semantic_record_count": 542,
+      "provider_call_count": 585,
+      "cache_hit_count": 0,
+      "fallback_count": 39,
+      "rejected_count": 4,
+      "overall_semantic_span_s": 4956.5,
+      "task_stats": {
+        "structured_adapter": {
+          "count": 8,
+          "sum_latency_s": 699.0,
+          "mean_ms": 87373,
+          "median_ms": 90033,
+          "p50_ms": 90035,
+          "p90_ms": 90035,
+          "p95_ms": 90039,
+          "max_ms": 90039,
+          "task_span_s": 699.5,
+          "retry_calls": 8,
+          "fallback_calls": 8,
+          "timeouts": 0,
+          "validation_rejections": 1
+        },
+        "alpha_classifier": {
+          "count": 499,
+          "sum_latency_s": 1260.2,
+          "mean_ms": 2525,
+          "median_ms": 1560,
+          "p50_ms": 1560,
+          "p90_ms": 4706,
+          "p95_ms": 6916,
+          "max_ms": 34604,
+          "task_span_s": 1453.1,
+          "retry_calls": 1,
+          "fallback_calls": 0,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "evidence_stance_classifier": {
+          "count": 30,
+          "sum_latency_s": 2671.3,
+          "mean_ms": 89044,
+          "median_ms": 90037,
+          "p50_ms": 90037,
+          "p90_ms": 90042,
+          "p95_ms": 90048,
+          "max_ms": 90049,
+          "task_span_s": 2671.4,
+          "retry_calls": 30,
+          "fallback_calls": 28,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "structure_extractor": {
+          "count": 5,
+          "sum_latency_s": 41.1,
+          "mean_ms": 8218,
+          "median_ms": 7256,
+          "p50_ms": 7256,
+          "p90_ms": 14805,
+          "p95_ms": 14805,
+          "max_ms": 14805,
+          "task_span_s": 41.2,
+          "retry_calls": 4,
+          "fallback_calls": 3,
+          "timeouts": 0,
+          "validation_rejections": 3
+        }
+      }
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "raw_claim_count": 918,
+      "valid_claim_count": 918,
+      "analytical_claim_count": 485,
+      "semantic_record_count": 683,
+      "provider_call_count": 730,
+      "cache_hit_count": 0,
+      "fallback_count": 47,
+      "rejected_count": 3,
+      "overall_semantic_span_s": 6157.9,
+      "task_stats": {
+        "structured_adapter": {
+          "count": 9,
+          "sum_latency_s": 723.3,
+          "mean_ms": 80362,
+          "median_ms": 90036,
+          "p50_ms": 90036,
+          "p90_ms": 90040,
+          "p95_ms": 90046,
+          "max_ms": 90046,
+          "task_span_s": 723.9,
+          "retry_calls": 8,
+          "fallback_calls": 8,
+          "timeouts": 0,
+          "validation_rejections": 1
+        },
+        "alpha_classifier": {
+          "count": 630,
+          "sum_latency_s": 1638.4,
+          "mean_ms": 2601,
+          "median_ms": 1781,
+          "p50_ms": 1780,
+          "p90_ms": 4474,
+          "p95_ms": 6903,
+          "max_ms": 33386,
+          "task_span_s": 1767.1,
+          "retry_calls": 0,
+          "fallback_calls": 0,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "evidence_stance_classifier": {
+          "count": 42,
+          "sum_latency_s": 3629.3,
+          "mean_ms": 86412,
+          "median_ms": 90036,
+          "p50_ms": 90035,
+          "p90_ms": 90043,
+          "p95_ms": 90045,
+          "max_ms": 90047,
+          "task_span_s": 3629.6,
+          "retry_calls": 39,
+          "fallback_calls": 37,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "structure_extractor": {
+          "count": 2,
+          "sum_latency_s": 2.8,
+          "mean_ms": 1416,
+          "median_ms": 1416,
+          "p50_ms": 1179,
+          "p90_ms": 1653,
+          "p95_ms": 1653,
+          "max_ms": 1653,
+          "task_span_s": 2.9,
+          "retry_calls": 0,
+          "fallback_calls": 2,
+          "timeouts": 0,
+          "validation_rejections": 2
+        }
+      }
+    },
+    "TSM": {
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "raw_claim_count": 767,
+      "valid_claim_count": 766,
+      "analytical_claim_count": 480,
+      "semantic_record_count": 571,
+      "provider_call_count": 616,
+      "cache_hit_count": 0,
+      "fallback_count": 40,
+      "rejected_count": 4,
+      "overall_semantic_span_s": 8564.4,
+      "task_stats": {
+        "structured_adapter": {
+          "count": 8,
+          "sum_latency_s": 658.4,
+          "mean_ms": 82304,
+          "median_ms": 90022,
+          "p50_ms": 90024,
+          "p90_ms": 90043,
+          "p95_ms": 90048,
+          "max_ms": 90048,
+          "task_span_s": 659.0,
+          "retry_calls": 7,
+          "fallback_calls": 7,
+          "timeouts": 0,
+          "validation_rejections": 1
+        },
+        "alpha_classifier": {
+          "count": 528,
+          "sum_latency_s": 1432.0,
+          "mean_ms": 2712,
+          "median_ms": 1622,
+          "p50_ms": 1625,
+          "p90_ms": 5328,
+          "p95_ms": 7530,
+          "max_ms": 46356,
+          "task_span_s": 3229.5,
+          "retry_calls": 4,
+          "fallback_calls": 0,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "evidence_stance_classifier": {
+          "count": 32,
+          "sum_latency_s": 2805.3,
+          "mean_ms": 87665,
+          "median_ms": 90034,
+          "p50_ms": 90034,
+          "p90_ms": 90040,
+          "p95_ms": 90043,
+          "max_ms": 90046,
+          "task_span_s": 4600.4,
+          "retry_calls": 31,
+          "fallback_calls": 30,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "structure_extractor": {
+          "count": 3,
+          "sum_latency_s": 38.2,
+          "mean_ms": 12724,
+          "median_ms": 5897,
+          "p50_ms": 5897,
+          "p90_ms": 28928,
+          "p95_ms": 28928,
+          "max_ms": 28928,
+          "task_span_s": 38.2,
+          "retry_calls": 3,
+          "fallback_calls": 3,
+          "timeouts": 0,
+          "validation_rejections": 3
+        }
+      }
+    },
+    "AMD": {
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "raw_claim_count": 787,
+      "valid_claim_count": 787,
+      "analytical_claim_count": 467,
+      "semantic_record_count": 580,
+      "provider_call_count": 626,
+      "cache_hit_count": 0,
+      "fallback_count": 46,
+      "rejected_count": 1,
+      "overall_semantic_span_s": 3442.2,
+      "task_stats": {
+        "structured_adapter": {
+          "count": 9,
+          "sum_latency_s": 653.8,
+          "mean_ms": 72645,
+          "median_ms": 90036,
+          "p50_ms": 90036,
+          "p90_ms": 90042,
+          "p95_ms": 90046,
+          "max_ms": 90046,
+          "task_span_s": 669.3,
+          "retry_calls": 8,
+          "fallback_calls": 8,
+          "timeouts": 0,
+          "validation_rejections": 1
+        },
+        "alpha_classifier": {
+          "count": 533,
+          "sum_latency_s": 1318.2,
+          "mean_ms": 2473,
+          "median_ms": 1567,
+          "p50_ms": 1567,
+          "p90_ms": 4712,
+          "p95_ms": 7177,
+          "max_ms": 26435,
+          "task_span_s": 1280.5,
+          "retry_calls": 0,
+          "fallback_calls": 0,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "evidence_stance_classifier": {
+          "count": 33,
+          "sum_latency_s": 405.4,
+          "mean_ms": 12286,
+          "median_ms": 4,
+          "p50_ms": 4,
+          "p90_ms": 90028,
+          "p95_ms": 90028,
+          "max_ms": 90032,
+          "task_span_s": 1452.5,
+          "retry_calls": 33,
+          "fallback_calls": 33,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "structure_extractor": {
+          "count": 5,
+          "sum_latency_s": 0.0,
+          "mean_ms": 4,
+          "median_ms": 4,
+          "p50_ms": 4,
+          "p90_ms": 4,
+          "p95_ms": 4,
+          "max_ms": 4,
+          "task_span_s": 0.1,
+          "retry_calls": 5,
+          "fallback_calls": 5,
+          "timeouts": 0,
+          "validation_rejections": 0
+        }
+      }
+    },
+    "QQQ_postfix": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "raw_claim_count": 826,
+      "valid_claim_count": 826,
+      "analytical_claim_count": 437,
+      "semantic_record_count": 595,
+      "provider_call_count": 617,
+      "cache_hit_count": 0,
+      "fallback_count": 11,
+      "rejected_count": 5,
+      "overall_semantic_span_s": 2937.6,
+      "task_stats": {
+        "structured_adapter": {
+          "count": 8,
+          "sum_latency_s": 595.3,
+          "mean_ms": 74412,
+          "median_ms": 83475,
+          "p50_ms": 84193,
+          "p90_ms": 90028,
+          "p95_ms": 90036,
+          "max_ms": 90036,
+          "task_span_s": 596.0,
+          "retry_calls": 7,
+          "fallback_calls": 3,
+          "timeouts": 0,
+          "validation_rejections": 1
+        },
+        "alpha_classifier": {
+          "count": 550,
+          "sum_latency_s": 1105.2,
+          "mean_ms": 2009,
+          "median_ms": 1779,
+          "p50_ms": 1778,
+          "p90_ms": 3067,
+          "p95_ms": 3709,
+          "max_ms": 7027,
+          "task_span_s": 706.5,
+          "retry_calls": 0,
+          "fallback_calls": 0,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "evidence_stance_classifier": {
+          "count": 33,
+          "sum_latency_s": 1604.2,
+          "mean_ms": 48612,
+          "median_ms": 34206,
+          "p50_ms": 34206,
+          "p90_ms": 135053,
+          "p95_ms": 135056,
+          "max_ms": 135057,
+          "task_span_s": 1604.4,
+          "retry_calls": 12,
+          "fallback_calls": 4,
+          "timeouts": 0,
+          "validation_rejections": 0
+        },
+        "structure_extractor": {
+          "count": 4,
+          "sum_latency_s": 15.6,
+          "mean_ms": 3905,
+          "median_ms": 3759,
+          "p50_ms": 3918,
+          "p90_ms": 4852,
+          "p95_ms": 4852,
+          "max_ms": 4852,
+          "task_span_s": 15.8,
+          "retry_calls": 3,
+          "fallback_calls": 4,
+          "timeouts": 0,
+          "validation_rejections": 4
+        }
+      }
+    }
+  },
+  "duplicate_request_analysis": {
+    "method": "Exact-duplicate detection via the system's OWN already-computed input_sha256 field (sha256 of the full input_payload) -- not a new hashing scheme invented for this audit.",
+    "within_run_exact_duplicates": {
+      "NVDA": {
+        "alpha_classifier": {
+          "total": 499,
+          "unique": 499,
+          "duplicate_extra_calls": 0,
+          "duplicate_ratio": 0.0
+        }
+      },
+      "QQQ_historical": {
+        "alpha_classifier": {
+          "total": 445,
+          "unique": 443,
+          "duplicate_extra_calls": 2,
+          "duplicate_ratio": 0.0045
+        }
+      },
+      "MSFT": {
+        "alpha_classifier": {
+          "total": 499,
+          "unique": 498,
+          "duplicate_extra_calls": 1,
+          "duplicate_ratio": 0.002
+        }
+      },
+      "SNDK": {
+        "alpha_classifier": {
+          "total": 630,
+          "unique": 623,
+          "duplicate_extra_calls": 7,
+          "duplicate_ratio": 0.0111
+        }
+      },
+      "TSM": {
+        "alpha_classifier": {
+          "total": 528,
+          "unique": 526,
+          "duplicate_extra_calls": 2,
+          "duplicate_ratio": 0.0038
+        }
+      },
+      "AMD": {
+        "alpha_classifier": {
+          "total": 533,
+          "unique": 533,
+          "duplicate_extra_calls": 0,
+          "duplicate_ratio": 0.0
+        }
+      },
+      "QQQ_postfix": {
+        "alpha_classifier": {
+          "total": 550,
+          "unique": 515,
+          "duplicate_extra_calls": 35,
+          "duplicate_ratio": 0.0636
+        }
+      },
+      "note": "structured_adapter, evidence_stance_classifier, and structure_extractor show ZERO within-run exact duplicates in every analyzed run -- the opportunity is concentrated entirely in alpha_classifier.",
+      "median_alpha_classifier_duplicate_ratio": 0.0038,
+      "worst_observed_alpha_classifier_duplicate_ratio": 0.0636
+    },
+    "cross_run_exact_duplicates": {
+      "method": "input_sha256 values compared across all 7 runs' full call sets, per task.",
+      "structured_adapter": {
+        "total_calls_all_runs": 56,
+        "distinct_cross_run_hashes": 0,
+        "calls_touched": 0
+      },
+      "alpha_classifier": {
+        "total_calls_all_runs": 3684,
+        "distinct_cross_run_hashes": 1,
+        "calls_touched": 2,
+        "detail": "The one cross-run exact match is between QQQ_historical and QQQ_postfix (same ticker, different dates) -- likely a static/definitional claim unaffected by daily market data."
+      },
+      "evidence_stance_classifier": {
+        "total_calls_all_runs": 227,
+        "distinct_cross_run_hashes": 0,
+        "calls_touched": 0
+      },
+      "structure_extractor": {
+        "total_calls_all_runs": 38,
+        "distinct_cross_run_hashes": 0,
+        "calls_touched": 0
+      },
+      "conclusion": "EXACT_DUPLICATE cross-run reuse is NEGLIGIBLE in this dataset (2 of 3684 alpha_classifier calls, ~0.05%) -- daily market-data-driven claim text differs enough day-to-day that cross-run exact caching offers no measured benefit here, even though the cache-key design already supports it for free. This is a measured finding, not a guess."
+    },
+    "exact_vs_semantically_similar": "This analysis measured EXACT_DUPLICATE only (byte-identical input_sha256). No SEMANTICALLY_SIMILAR (near-duplicate, paraphrase, or high-lexical-similarity-but-not-identical) claims were treated as cacheable or counted as duplicates -- per the task's explicit instruction, semantically-similar inputs are NOT claimed to be safely cacheable by this audit.",
+    "cross_agent_duplication": {
+      "method": "structured_agent_outputs.json's own pre-existing duplicate_group_id field (already computed by the pipeline, not invented for this audit), cross-referenced with each record's agent field.",
+      "QQQ_postfix_example": {
+        "total_structured_claims": 826,
+        "distinct_duplicate_groups": 766,
+        "groups_spanning_more_than_one_agent": 56,
+        "example_group": "dupgroup_969f3e2d167a: identical text 'That pattern is more consistent with momentum stabilizing at a low level than with accelerating down' verbatim in both market_agent's market_report and bull_researcher's investment_debate_state.bull_history -- confirming real, exact, cross-agent claim-text duplication exists (e.g. a bull/bear/risk analyst restating a market/news agent's finding verbatim)."
+      },
+      "important_caveat": "These duplicate_group_id groupings are CURRENTLY INFORMATIONAL ONLY -- every one of the 826 QQQ post-fix structured claims has analysis_eligible=True regardless of group membership. No existing deterministic gate excludes a cross-agent-duplicate claim from being separately sent through structured_adapter's enrichment or the downstream Alpha Mapper today. This is a real, measured, additional duplicate-elimination surface distinct from (and larger than) the exact input_sha256 duplicates found directly in the alpha_classifier call log, but was NOT deduped in this task per the explicit instruction not to dedupe during Phase B1.",
+      "same_claim_ids_revisited": "Not observed as a separate phenomenon in this dataset -- call_sequence/call_id values are unique per call; no evidence of the same claim_id being independently reprocessed outside the duplicate_group_id mechanism described above."
+    }
+  },
+  "cache_analysis": {
+    "cache_key_construction": "comqutor_alpha/llm_runtime/cache.py: build_llm_cache_key(task, prompt_version, prompt_sha256, provider, model, input_schema_version, output_schema_version, input_sha256, taxonomy_version, semantic_call_schema_version) -> 'comqutor:llm:v1:' + sha256(canonical_json(identity)).",
+    "fields_included": [
+      "task",
+      "prompt_version",
+      "prompt_sha256",
+      "provider",
+      "model",
+      "input_schema_version",
+      "output_schema_version",
+      "input_sha256",
+      "taxonomy_version",
+      "semantic_call_schema_version",
+      "cache_key_version"
+    ],
+    "task_included": true,
+    "model_included": true,
+    "prompt_schema_version_included": true,
+    "taxonomy_version_included": true,
+    "input_normalization": "input_sha256 is computed over the full, already-constructed input_payload (canonical JSON) -- not a separately-normalized text field.",
+    "run_id_included": false,
+    "run_id_exclusion_is_deliberate": "Explicit in source: 'run_id is accepted solely to make the cross-run rule explicit; it is intentionally excluded from the hashed key material.' The key design is ALREADY cross-run-safe by construction.",
+    "persistent_vs_in_memory": "Two implementations exist: NullLLMResponseCache (no-op, always misses) and RedisLLMResponseCache (a real, persistent, injected-client adapter with strict JSON validation via validate_cache_entry -- fully implemented, not a stub).",
+    "cache_scope_as_designed": "CROSS-RUN capable by design (run_id excluded from the key) -- scope is determined entirely by which backend is injected, not by the key design itself.",
+    "ttl": "RedisLLMResponseCache.put accepts an optional ttl_seconds parameter (validated: positive int or None/no-expiry) -- TTL support exists in the adapter but no default TTL value was found configured anywhere in the traced call path.",
+    "why_cache_hit_count_is_zero": "SemanticRuntimeSession.__init__ (comqutor_alpha/llm_runtime/session.py) resolves `self.cache = cache or NullLLMResponseCache()`. A repo-wide search found ZERO call sites anywhere in production code that ever construct a RedisLLMResponseCache or pass any other real cache client into a SemanticRuntimeSession -- every session, in every one of the seven analyzed runs, therefore runs with the default no-op cache, which always returns None on get() and does nothing on put(). This is not a miskeyed cache and not a broken cache -- it is a fully-built, unused capability.",
+    "classification": "IMPLEMENTED_BUT_NOT_USED",
+    "classification_confidence": "HIGH -- based on direct source inspection of session.py's constructor default and a repo-wide grep for every RedisLLMResponseCache/LLMResponseCache instantiation site, not inference from behavior alone."
+  },
+  "safe_cacheability_analysis": {
+    "structured_adapter": {
+      "classification": "SAFE_EXACT_CACHE",
+      "reasoning": "Cache key already includes model, prompt_version+hash, both schema versions, and a full input_sha256 of the batch payload (agent+ticker+segments). No taxonomy_version dependency (this task doesn't consume the Alpha taxonomy). Any change to model/prompt/schema automatically produces a different key -- no stale-reuse risk from a prompt/version bump."
+    },
+    "alpha_classifier": {
+      "classification": "SAFE_EXACT_CACHE",
+      "reasoning": "Cache key includes model, prompt_version+hash, both schema versions, input_sha256 (which itself covers the embedded alpha_taxonomy block, so a taxonomy content change changes input_sha256 even without a separate taxonomy_version bump), and taxonomy_version when supplied. A Gold/taxonomy update that changes the injected taxonomy content is automatically a cache-miss via input_sha256 alone."
+    },
+    "evidence_stance_classifier": {
+      "classification": "SAFE_EXACT_CACHE",
+      "reasoning": "Same key structure; input_sha256 covers the full items[] batch including each item's target_alpha_id/counter_alphas/definitions, so a taxonomy or prompt change is automatically a miss."
+    },
+    "structure_extractor": {
+      "classification": "SAFE_EXACT_CACHE",
+      "reasoning": "Same key structure; input_sha256 covers claim/evidence/allowed_factors."
+    },
+    "overall_conclusion": "All four tasks are SAFE_EXACT_CACHE under the EXISTING, unmodified cache-key design -- the safety work has already been done in comqutor_alpha/llm_runtime/cache.py. No task is classified NOT_SAFE_TO_CACHE or UNKNOWN. The only gap is that no real backend is wired to this already-safe key. This audit does NOT recommend caching on a normalized/paraphrased/semantically-similar key -- only on the existing byte-exact input_sha256-based key."
+  },
+  "within_run_memoization_opportunity": {
+    "distinct_from_cross_run_cache": "Mechanically the SAME code path (both use build_llm_cache_key, which excludes only run_id) -- the only difference is backend LIFETIME/SCOPE (a cache instantiated fresh per run-process would only ever catch within-run duplicates; a persistent backend shared across runs would catch both). This audit reports them separately because their MEASURED benefit differs sharply (see Cross-Run vs Within-Run duplicate findings above).",
+    "calls_avoidable_with_exact_memoization": {
+      "QQQ_postfix": 35,
+      "median_across_7_runs": 2,
+      "worst_case_observed": 35
+    },
+    "percentage_of_total_alpha_classifier_calls": {
+      "QQQ_postfix": "6.36%",
+      "median": "0.38%"
+    },
+    "provider_requests_saved_estimate": "35 (QQQ post-fix, conservative single-run estimate) to ~2-7 per run typically (see per-run duplicate_extra_calls above).",
+    "wall_clock_impact_estimate": "SMALL. alpha_classifier already runs at concurrency=4; removing ~6.4% of its 550 calls in the QQQ post-fix run would proportionally shrink its 706.5s task_span_s by roughly the same order (rough estimate: ~45-65s), i.e. under 2% of the run's total ~2937.6s semantic wall clock. This is a genuine but modest latency benefit -- its primary value is COST (fewer provider calls), not latency.",
+    "risk": "LOW",
+    "risk_reasoning": "Memoizing on the exact same input_sha256-keyed request that already exists in the codebase's own cache-key design; returning the previously-validated output for a byte-identical input introduces no new semantic behavior."
+  },
+  "batching_analysis": {
+    "alpha_classifier": {
+      "classification": "NOT_RECOMMENDED",
+      "reasoning": "Already evaluated with real controlled Provider tests (documented in week2_llm.py source comments): 40-item batches produced only 22.9% coverage (most items dropped/malformed); 15-item batches produced repeated >60s timeouts even with a fresh client per call. Single-claim calls were reliable and fast. Reopening batching for this task would be re-litigating an already-answered, evidence-backed question without new information."
+    },
+    "structured_adapter": {
+      "classification": "SAFE_CANDIDATE (already implemented)",
+      "reasoning": "Already batches up to 64 segments/call. No further batch-size increase was evaluated this task; not recommended to change without a dedicated experiment given alpha_classifier's cautionary precedent for this same provider/model."
+    },
+    "evidence_stance_classifier": {
+      "classification": "SAFE_CANDIDATE (already implemented)",
+      "reasoning": "Already batches up to 10 items/call. Its fallback path (deterministic.v1 reuse) makes a partial-batch failure lower-risk than alpha_classifier's (no claim is left fully unclassified), which somewhat de-risks any future batch-size experiment relative to alpha_classifier's precedent -- but this audit does not recommend changing the existing size without a controlled test."
+    },
+    "structure_extractor": {
+      "classification": "NOT_RECOMMENDED",
+      "reasoning": "Call volume is already tiny (2-11/run); no meaningful cost/latency benefit available from batching this task."
+    },
+    "general_risk_dimensions_considered": {
+      "prompt_size_growth": "Large batches (as tested for alpha_classifier) directly caused coverage/timeout failures for this provider/model.",
+      "output_validation_complexity": "Batch responses require per-item reconciliation (`requested_by_key` in evidence_stance_llm.py) -- already implemented for the two tasks that batch.",
+      "partial_failure_behavior": "A whole-batch failure currently falls back task-appropriately (deterministic reuse for evidence_stance; degraded-but-valid enrichment for structured_adapter) -- larger batches increase the blast radius of a single failure.",
+      "retry_blast_radius": "A failed large batch must be retried in full, re-spending tokens on already-correct items within it -- a real cost consideration against further batch-size growth.",
+      "ordering_and_schema_risk": "Already mitigated by explicit claim_id/segment_id keying in both existing batched tasks, not by response order."
+    }
+  },
+  "concurrency_analysis": {
+    "measured_max_concurrent_calls_per_task_qqq_postfix": {
+      "structured_adapter": 1,
+      "alpha_classifier": 4,
+      "evidence_stance_classifier": 1,
+      "structure_extractor": 1
+    },
+    "why_summed_latency_can_exceed_stage_wall_clock": "When N calls run concurrently, their individual latency_ms values overlap in wall-clock time -- summing them counts the same wall-clock second N times. alpha_classifier's sum_latency_s (1105.2s) exceeds its task_span_s (706.5s) by a factor of ~1.56x specifically because up to 4 calls were in flight simultaneously (directly confirmed via a timestamp sweep-line, not inferred from the ratio alone). structured_adapter, evidence_stance_classifier, and structure_extractor show sum_latency_s approximately EQUAL to task_span_s (ratios ~1.0) because they run with max concurrency = 1 -- fully serial, confirmed the same way.",
+    "current_concurrency_summary": "Only alpha_classifier has real concurrency infrastructure (ThreadPoolExecutor, resolve_alpha_classifier_concurrency(), default 4, already selected via a real controlled 1-vs-4-vs-8 benchmark). structured_adapter and evidence_stance_classifier are each a bare serial `for` loop over independent batches with NO concurrency mechanism at all -- not a lower concurrency setting, an ABSENT one.",
+    "additional_concurrency_opportunity": "HIGH. evidence_stance_classifier's 33 independent batch calls (median task_span_s across 7 runs: 2671.4s, i.e. roughly half of total semantic wall clock in every run) and structured_adapter's 7-9 independent per-agent batch calls (median task_span_s: 659.0s) are both currently serialized for no architectural reason other than absent concurrency code -- the SAME already-proven ThreadPoolExecutor pattern used for alpha_classifier could, in principle, be applied to both. This is a LATENCY-only lever (does not change provider_call_count).",
+    "cost_vs_latency_separation": "Concurrency changes provider_call_count by ZERO -- the same number of requests are made, only their wall-clock scheduling changes. This is explicitly a latency lever, not a cost lever, and is kept analytically separate from the cache/memoization/batching levers above, which are cost levers (fewer or larger requests) with only secondary latency effects.",
+    "validation_caveat": "The MAGNITUDE of latency benefit from adding concurrency to these two tasks cannot be fully proven offline -- unlike exact-memoization (whose correctness and savings can be proven from the persisted call log alone), a genuine wall-clock improvement claim requires measuring real concurrent execution against the live provider, which is out of scope for Phase B1 (zero Provider calls) and would require at least a small live timing validation in Phase B2."
+  },
+  "retry_timeout_fallback_analysis": {
+    "already_evidence_tuned": true,
+    "detail": "Both the per-task retry-count policy (evidence_stance_classifier boosted to 2 retries based on a documented 74.4%-of-orphans / 2.7%-recovery-at-1-retry finding from a prior dedicated reliability audit) and the shared 20.0s timeout (derived from this exact codebase's own measured p50~1.87s/p90~3.47s single-claim latency) are ALREADY the product of prior, dedicated, evidence-based tuning work -- not naive defaults this audit is discovering fresh.",
+    "historical_vs_current_reliability_evidence": "The six original acceptance runs (NVDA, QQQ_historical, MSFT, SNDK, TSM, AMD) show markedly higher fallback counts (39-47 per run) and a much longer apparent per-call timeout ceiling (~90s max latencies observed) than the QQQ post-fix run (11 fallbacks, ~7s max alpha_classifier latency, ~135s max evidence_stance latency) -- direct evidence that a reliability/timeout improvement was ALREADY deployed between the six-run acceptance baseline and the QQQ post-fix run, independent of this audit.",
+    "retry_generated_provider_calls_qqq_postfix": 22,
+    "retry_generated_provider_calls_by_task_qqq_postfix": {
+      "structured_adapter": 7,
+      "alpha_classifier": 0,
+      "evidence_stance_classifier": 12,
+      "structure_extractor": 3
+    },
+    "timeout_generated_wasted_latency": "Not separately isolable from the persisted schema alone (no explicit is_timeout boolean; error_code/error_message were inspected but no record in the QQQ post-fix run carries an explicit timeout error_code -- its 6 errors were validation/fallback-classified, not timeout-classified). Reported honestly as NOT DIRECTLY MEASURABLE from this run's persisted fields, rather than estimated.",
+    "fallback_count_qqq_postfix": 11,
+    "fallback_count_by_task_qqq_postfix": {
+      "structured_adapter": 3,
+      "alpha_classifier": 0,
+      "evidence_stance_classifier": 4,
+      "structure_extractor": 4
+    },
+    "retry_policy_verdict": "REASONABLE. Already differentiated per task based on real historical reliability data; no change recommended without new evidence. This audit explicitly does NOT recommend reducing retries to save cost, per the task's own instruction not to trade reliability for cost."
+  },
+  "fallback_analysis": {
+    "structured_adapter": {
+      "trigger": "Gateway failure (timeout/error/exhausted retries) on a segment batch.",
+      "avoids_another_provider_call": "Yes -- fallback is deterministic, no further Provider call is attempted for that batch.",
+      "enters_production_semantics": true,
+      "changes_acceptance_sensitive_results": "Possibly, at reduced quality: fallback claims use neutral direction and evidence=claim verbatim, which could weaken downstream Alpha/direction detection for the affected segments -- an existing, already-accepted tradeoff, not newly introduced."
+    },
+    "alpha_classifier": {
+      "trigger": "Gateway failure (timeout/error/exhausted retries) on a single claim.",
+      "avoids_another_provider_call": "Yes.",
+      "enters_production_semantics": true,
+      "changes_acceptance_sensitive_results": "The claim becomes UNMATCHED/unavailable rather than substituted -- a conservative outcome (a missed potential match, never a wrong forced match)."
+    },
+    "evidence_stance_classifier": {
+      "trigger": "Gateway failure on a stance batch.",
+      "avoids_another_provider_call": "Yes.",
+      "enters_production_semantics": true,
+      "changes_acceptance_sensitive_results": "Reuses the pre-existing deterministic.v1 stance already computed unconditionally upstream -- by design, this is the SAME mechanism already governing the frozen 52/61 (85.25%) Polarity benchmark; not a new or additional risk."
+    },
+    "structure_extractor": {
+      "trigger": "Gateway failure or schema-validation rejection on a single claim's relation extraction.",
+      "avoids_another_provider_call": "Yes.",
+      "enters_production_semantics": "Not fully traced this task (low call volume, low priority)."
+    },
+    "recommendation": "Do not expand fallback usage or change fallback substitution logic for any task without new semantic-risk evidence -- consistent with the task's own instruction."
+  },
+  "safe_pre_filter_analysis": {
+    "existing_pre_filter_found": "YES, at the CLAIM level, not the Alpha-candidate level: claim_quality.is_claim_eligible's ANALYTICAL/CONTEXT_ONLY/NON_SUBSTANTIVE gate already excludes NON_SUBSTANTIVE claims from ever reaching alpha_classifier -- directly evidenced by the QQQ post-fix run sending only 515 of ~766-767 deduplicated eligible structured claims to alpha_classifier.",
+    "alpha_candidate_level_pre_filter": "DOES NOT EXIST, AND SHOULD NOT BE ADDED. alpha_mapper.py contains an explicit, deliberate 'Pure-LLM Alpha semantic authority' architectural invariant: deterministic keyword/factor/AI-gate scoring is computed for every claim, but is NEVER used to narrow which Alphas the LLM considers, and NEVER substituted as the semantic answer on LLM failure. The code's own comment states this exists specifically to avoid reopening a 'weak-recall gap' this exact design closed.",
+    "classification": "NOT_SAFE (for any new Alpha-candidate-level pre-filter)",
+    "reasoning": "This is not a caution assessment invented for this audit -- it is a direct restatement of an already-settled, already-documented architectural decision in the production code, reinforced by the QQQ-A001 lesson (Section 20/21 below): the A001 defect arose from imprecise SEMANTIC MAPPING despite full-taxonomy LLM access, not from too many candidates being considered -- narrowing candidates deterministically would only make that class of error easier to reproduce, not harder.",
+    "safe_pre_filter_that_does_exist_and_should_be_preserved": "The claim-level substantiveness gate (is_claim_eligible) is SAFE and already reduces call volume by roughly a third relative to the full deduplicated claim set, without touching which Alphas are considered for a claim that does pass it. No change recommended to this gate."
+  },
+  "semantic_risk_constraints": {
+    "qqq_a001_lesson": {
+      "summary": "The already-adjudicated QQQ-A001 defect (v0_2_acceptance_adjudication.json Case A, SYSTEM_ERROR/MAPPING) showed that a volume/breadth-based activation formula, fed a large pool of topically-adjacent-but-direction-mixed claims, can push an Alpha to an incorrectly 'active' status even when the true evidence opposes it.",
+      "relevance_to_this_audit": "Any candidate optimization touching request consolidation, candidate pruning, fallback substitution, or batching for alpha_classifier must not (a) increase the volume of claims pooled per Alpha without direction-awareness, (b) narrow Alpha candidates deterministically (undoing 'Pure-LLM Alpha semantic authority'), or (c) substitute a deterministic guess for a failed LLM call. This audit's opportunity register was screened against all three -- none of the LOW/NONE-risk recommendations (memoization on exact input, concurrency reordering) touches semantic content, candidate scope, or fallback substitution at all.",
+      "alpha_specific_negative_veto_preserved": "The A001-specific invalidation-pattern veto (claim_semantics.ALPHA_SPECIFIC_INVALIDATION_PATTERNS) and the positive directional-requirement architecture are untouched by every recommendation in this audit."
+    },
+    "evidence_stance_accuracy_constraint": {
+      "frozen_benchmark": "52/61 correct (85.25%), 9 failures, 0 critical support/opposition reversals (v0_2_evidence_failure_analysis.json, verified unchanged this task).",
+      "constraint_applied": "No recommendation in this audit proposes replacing the LLM classifier with keyword logic, changing its prompt, or altering its fallback substitution mechanism. The recommended concurrency-only change (if pursued in B2) would need to preserve critical_reversal_count=0 as a hard non-regression gate."
+    },
+    "alpha_match_accuracy_constraint": {
+      "frozen_benchmark": "166/200 correct (83.00%), 34 failures (TAXONOMY_OVERLAP=12, A601->NONE=6, high-confidence-wrong=15/34) -- verified unchanged this task.",
+      "constraint_applied": "This audit's recommendations reduce provider CALLS or reorder EXECUTION, never the set of claims classified or the taxonomy presented to the classifier -- none of them could mechanically hide or improve these known failure counts, by construction. Cost optimization and semantic accuracy are treated as fully separate axes throughout this audit, as instructed."
+    }
+  },
+  "opportunity_register": [
+    {
+      "id": "OPP-A",
+      "description": "Wire a real, persistent LLMResponseCache backend (reusing the existing, unmodified build_llm_cache_key/LLMResponseCache protocol) into SemanticRuntimeSession, replacing the default NullLLMResponseCache.",
+      "task_affected": "all four",
+      "cost_reduction_estimate": "~0.05% cross-run (measured negligible in this dataset) + ~0.4-6.4% of alpha_classifier calls within-run (measured, task-specific)",
+      "latency_reduction_estimate": "Small (<2% of total semantic wall clock, QQQ post-fix estimate)",
+      "implementation_complexity": "LOW",
+      "semantic_risk": "NONE",
+      "validation_burden": "LOW",
+      "requires_provider_experiment": "no",
+      "requires_fresh_run_validation": "no",
+      "recommended": "yes",
+      "priority": "P0"
+    },
+    {
+      "id": "OPP-B",
+      "description": "Within-run exact memoization (mechanically identical to OPP-A; reported separately because its measured benefit is the well-evidenced part of the same change).",
+      "task_affected": "alpha_classifier primarily",
+      "cost_reduction_estimate": "0.38% median / up to 6.36% worst-observed of alpha_classifier calls",
+      "latency_reduction_estimate": "~1-2% of total semantic wall clock",
+      "implementation_complexity": "LOW",
+      "semantic_risk": "NONE",
+      "validation_burden": "LOW",
+      "requires_provider_experiment": "no",
+      "requires_fresh_run_validation": "no",
+      "recommended": "yes",
+      "priority": "P0"
+    },
+    {
+      "id": "OPP-C",
+      "description": "Deduplicate exact cross-agent claim-text restatements (using the already-computed duplicate_group_id) before sending claims through structured_adapter enrichment / Alpha Mapper, so a claim repeated verbatim by e.g. a bull/bear/risk analyst is classified once, not once per agent.",
+      "task_affected": "structured_adapter, alpha_classifier, evidence_stance_classifier (all downstream of claim volume)",
+      "cost_reduction_estimate": "UNQUANTIFIED this task -- 56 of 766 duplicate groups (7.3%) span >1 agent in QQQ post-fix, but the resulting call-count reduction was not modeled (would require tracing exactly which downstream calls each duplicate member currently triggers)",
+      "latency_reduction_estimate": "UNQUANTIFIED",
+      "implementation_complexity": "MEDIUM",
+      "semantic_risk": "LOW_TO_MEDIUM",
+      "validation_burden": "MEDIUM",
+      "requires_provider_experiment": "no",
+      "requires_fresh_run_validation": "yes",
+      "recommended": "needs further scoping before a yes/no",
+      "priority": "P1"
+    },
+    {
+      "id": "OPP-D1",
+      "description": "Increase alpha_classifier batch size beyond 1 (single-claim).",
+      "task_affected": "alpha_classifier",
+      "cost_reduction_estimate": "N/A -- already tested and failed",
+      "latency_reduction_estimate": "N/A",
+      "implementation_complexity": "N/A",
+      "semantic_risk": "HIGH (real, already-measured: 40-item batch -> 22.9% coverage)",
+      "validation_burden": "N/A",
+      "requires_provider_experiment": "already done, negative result",
+      "requires_fresh_run_validation": "no",
+      "recommended": "no",
+      "priority": "NOT_RECOMMENDED"
+    },
+    {
+      "id": "OPP-D2",
+      "description": "Increase structured_adapter/evidence_stance_classifier batch sizes further.",
+      "task_affected": "structured_adapter, evidence_stance_classifier",
+      "cost_reduction_estimate": "UNQUANTIFIED",
+      "latency_reduction_estimate": "UNQUANTIFIED",
+      "implementation_complexity": "MEDIUM",
+      "semantic_risk": "MEDIUM (alpha_classifier's negative batching precedent on the same provider/model is a real cautionary signal, though not identical tasks)",
+      "validation_burden": "HIGH",
+      "requires_provider_experiment": "yes",
+      "requires_fresh_run_validation": "yes",
+      "recommended": "no (not without a dedicated controlled experiment)",
+      "priority": "P2"
+    },
+    {
+      "id": "OPP-E1",
+      "description": "Add ThreadPoolExecutor-based bounded concurrency to evidence_stance_classifier's currently-serial batch loop, mirroring alpha_classifier's already-proven pattern.",
+      "task_affected": "evidence_stance_classifier",
+      "cost_reduction_estimate": "0% (provider_call_count unchanged)",
+      "latency_reduction_estimate": "POTENTIALLY LARGE -- this stage is a median 2671.4s span (roughly half of total semantic wall clock) currently at concurrency=1; even a conservative concurrency=4 could plausibly cut this stage's span substantially, though the true magnitude requires live measurement",
+      "implementation_complexity": "LOW (reuses existing pattern/code)",
+      "semantic_risk": "LOW",
+      "validation_burden": "MEDIUM (offline: code/semantic-equivalence review; online: a live timing measurement is genuinely needed to prove wall-clock benefit)",
+      "requires_provider_experiment": "yes (for latency proof only, not for semantic correctness)",
+      "requires_fresh_run_validation": "yes (small-scale, timing-only)",
+      "recommended": "yes, as the P1 (second) B2 slice",
+      "priority": "P1"
+    },
+    {
+      "id": "OPP-E2",
+      "description": "Add the same bounded concurrency to structured_adapter's currently-serial per-agent-batch loop.",
+      "task_affected": "structured_adapter",
+      "cost_reduction_estimate": "0%",
+      "latency_reduction_estimate": "Moderate -- median 659.0s span, currently concurrency=1, only 7-9 independent calls/run",
+      "implementation_complexity": "LOW",
+      "semantic_risk": "LOW",
+      "validation_burden": "MEDIUM",
+      "requires_provider_experiment": "yes (timing only)",
+      "requires_fresh_run_validation": "yes (timing only)",
+      "recommended": "yes, bundled with OPP-E1",
+      "priority": "P1"
+    },
+    {
+      "id": "OPP-F",
+      "description": "Tune provider retry counts.",
+      "task_affected": "all",
+      "cost_reduction_estimate": "N/A",
+      "latency_reduction_estimate": "N/A",
+      "implementation_complexity": "N/A",
+      "semantic_risk": "N/A",
+      "validation_burden": "N/A",
+      "requires_provider_experiment": "no",
+      "requires_fresh_run_validation": "no",
+      "recommended": "no -- already evidence-tuned per task, no new evidence found to justify a change",
+      "priority": "NOT_RECOMMENDED"
+    },
+    {
+      "id": "OPP-G",
+      "description": "Tune provider timeouts.",
+      "task_affected": "all",
+      "cost_reduction_estimate": "N/A",
+      "latency_reduction_estimate": "N/A",
+      "implementation_complexity": "N/A",
+      "semantic_risk": "N/A",
+      "validation_burden": "N/A",
+      "requires_provider_experiment": "no",
+      "requires_fresh_run_validation": "no",
+      "recommended": "no -- already evidence-tuned (20.0s derived from this exact task's own p50/p90), and already shows a real, already-realized improvement between the six-run baseline and QQQ post-fix",
+      "priority": "NOT_RECOMMENDED"
+    },
+    {
+      "id": "OPP-H",
+      "description": "Add deterministic Alpha-candidate pre-filtering to alpha_classifier (exclude 'obviously impossible' Alphas before the LLM call).",
+      "task_affected": "alpha_classifier",
+      "cost_reduction_estimate": "UNQUANTIFIED",
+      "latency_reduction_estimate": "UNQUANTIFIED",
+      "implementation_complexity": "MEDIUM",
+      "semantic_risk": "HIGH",
+      "validation_burden": "HIGH",
+      "requires_provider_experiment": "no",
+      "requires_fresh_run_validation": "yes",
+      "recommended": "no -- contradicts the explicit, already-documented 'Pure-LLM Alpha semantic authority' invariant and directly risks recreating the QQQ-A001 class of defect",
+      "priority": "NOT_RECOMMENDED"
+    },
+    {
+      "id": "OPP-I",
+      "description": "Reduce repeated Alpha-taxonomy/context injection per alpha_classifier call (e.g. via provider-side prompt/context caching) -- taxonomy block is 87.6% of each call's character payload (measured), ~839,300 redundant characters resent across 550 calls in the QQQ post-fix run alone.",
+      "task_affected": "alpha_classifier",
+      "cost_reduction_estimate": "UNQUANTIFIED without token pricing/provider capability data; character-proxy suggests real but unverified token savings if provider-side context caching is supported",
+      "latency_reduction_estimate": "UNQUANTIFIED",
+      "implementation_complexity": "MEDIUM_TO_HIGH (depends entirely on provider capability)",
+      "semantic_risk": "LOW if implemented via provider-native context caching with no prompt content change; MEDIUM_TO_HIGH if implemented via prompt restructuring (out of this phase's authorization anyway)",
+      "validation_burden": "HIGH",
+      "requires_provider_experiment": "yes",
+      "requires_fresh_run_validation": "yes",
+      "recommended": "needs experiment before any yes/no",
+      "priority": "P2"
+    },
+    {
+      "id": "OPP-J",
+      "description": "Reuse alpha_mapper's deterministic keyword/factor/AI-gate scoring result as (or to short-circuit) the semantic answer, instead of always calling the LLM.",
+      "task_affected": "alpha_classifier",
+      "cost_reduction_estimate": "N/A",
+      "latency_reduction_estimate": "N/A",
+      "implementation_complexity": "N/A",
+      "semantic_risk": "HIGH",
+      "validation_burden": "N/A",
+      "requires_provider_experiment": "no",
+      "requires_fresh_run_validation": "yes",
+      "recommended": "no -- this is exactly the architectural invariant ('Pure-LLM Alpha semantic authority') the codebase already deliberately rejected; reopening it is out of scope for a cost/latency task and risks Gold-acceptance-sensitive behavior",
+      "priority": "NOT_RECOMMENDED"
+    }
+  ],
+  "quantified_savings_scenarios": {
+    "qqq_postfix_baseline": {
+      "provider_calls": 617,
+      "semantic_stage_wall_clock_s": 2937.6
+    },
+    "conservative": {
+      "description": "OPP-A/B only: wire real cache, eliminate measured within-run exact duplicates.",
+      "provider_calls_before": 617,
+      "provider_calls_after": 582,
+      "call_reduction_pct": "5.7%",
+      "semantic_wall_clock_before_s": 2937.6,
+      "semantic_wall_clock_after_s": "~2890-2900 (est.)",
+      "latency_reduction_pct_est": "~1-2%",
+      "semantic_risk": "NONE"
+    },
+    "moderate": {
+      "description": "Conservative + OPP-E1 (add concurrency=4 to evidence_stance_classifier, the largest serial stage).",
+      "provider_calls_before": 617,
+      "provider_calls_after": 582,
+      "call_reduction_pct": "5.7% (concurrency does not change call count)",
+      "semantic_wall_clock_before_s": 2937.6,
+      "semantic_wall_clock_after_s": "~2000-2150 (est., assuming evidence_stance_classifier's 1604.4s span compresses toward ~700-850s under concurrency=4, bounded below by its own ~135s single-call max latency and real scheduling overhead)",
+      "latency_reduction_pct_est": "~27-32%",
+      "semantic_risk": "LOW -- reuses an already-validated concurrency pattern; requires a live timing measurement to confirm the magnitude (not the correctness) of the benefit."
+    },
+    "aggressive": {
+      "description": "Moderate + OPP-E2 (structured_adapter concurrency) + speculative provider-side context-caching (OPP-I) + a fresh, smaller-scale alpha_classifier batching re-experiment (contradicting the current negative finding on record; NOT recommended for production without new controlled evidence).",
+      "provider_calls_before": 617,
+      "provider_calls_after": "~500-560 (speculative, IF a smaller alpha_classifier batch size were found to work, which current evidence argues against)",
+      "call_reduction_pct": "~10-19% (speculative)",
+      "semantic_wall_clock_before_s": 2937.6,
+      "semantic_wall_clock_after_s": "~1400-1700 (speculative, if all three stages reach comparable concurrency and structured_adapter's 596-723s span also compresses substantially)",
+      "latency_reduction_pct_est": "~40-52% (speculative)",
+      "semantic_risk": "MEDIUM_TO_HIGH -- explicitly includes options (further alpha_classifier batching) this audit does NOT recommend for production without dedicated new controlled testing, presented only because the task's Section 25 explicitly allows an Aggressive scenario to include non-recommended options."
+    },
+    "caveat": "All 'after' wall-clock figures beyond the Conservative scenario are ESTIMATES requiring live validation -- none are presented as billing facts or guaranteed outcomes, per the task's explicit instruction not to overstate estimates."
+  },
+  "recommended_first_implementation_slice": {
+    "chosen": "OPP-A/OPP-B: wire a real, persistent LLMResponseCache implementation into SemanticRuntimeSession, using the existing, unmodified build_llm_cache_key/LLMResponseCache protocol (comqutor_alpha/llm_runtime/cache.py) -- replacing the default NullLLMResponseCache with a real backend (need not be Redis; any implementation satisfying the existing Protocol, including a simple local persistent store, qualifies).",
+    "why_this_one_and_not_concurrency": "Both OPP-A/B (cache) and OPP-E1/E2 (concurrency) satisfy 'deterministic infrastructure optimization, low semantic risk, small surface, easy rollback, does not require changing Gold semantics.' The deciding factor is Section 27's explicit preference for offline-validatable work: cache/memoization correctness and its measured savings can be FULLY proven offline by replaying the persisted call logs through the real cache implementation (no Provider call needed at all), whereas concurrency's core claim -- a wall-clock latency improvement -- cannot be proven without at least a small LIVE timing measurement. OPP-E1/E2 (concurrency for evidence_stance_classifier and structured_adapter) is recorded as the clear, high-confidence P1/second slice for immediately after, once a small live timing validation is authorized.",
+    "highest_useful_benefit": "Modest but real and fully quantifiable from existing evidence (0.4-6.4% of alpha_classifier calls); the cache key design itself was already built and proven safe, so this is closer to 'turning on an existing safety-checked feature' than building something new.",
+    "lowest_semantic_risk": "NONE -- byte-identical input produces byte-identical previously-validated output by construction.",
+    "small_implementation_surface": "One dependency-injection change (pass a real cache into SemanticRuntimeSession's constructor) plus the choice/implementation of one concrete cache backend satisfying the existing Protocol -- zero changes to any prompt, model, schema, taxonomy, or the four task modules themselves.",
+    "easy_rollback": "Revert to NullLLMResponseCache (the current default) -- a one-line change.",
+    "easy_offline_validation": "YES -- fully offline: replay each persisted run's llm_semantic_calls.jsonl through the real cache, verify every within-run exact-duplicate input_sha256 now yields a cache hit whose returned validated_output matches the previously-recorded validated_output byte-for-byte, and verify every non-duplicate input still misses (no false-positive hits). No Provider call is needed.",
+    "does_not_require_gold_changes": true
+  },
+  "b2_validation_plan": {
+    "chosen_slice": "Real LLMResponseCache backend wired into SemanticRuntimeSession.",
+    "fresh_provider_run_genuinely_necessary": false,
+    "fresh_provider_run_reasoning": "Cache-hit correctness (does a hit return the exact previously-validated output?) and cache-key stability (does a semantically-irrelevant field like run_id correctly NOT affect the key, while a relevant field like model/prompt_version/taxonomy content correctly DOES?) can both be fully exercised by replaying the seven ALREADY-PERSISTED runs' call logs offline. A fresh run would only be useful later, to observe a live cache-hit rate under production traffic patterns -- not required to validate correctness or the B2 change itself.",
+    "offline_semantic_equivalence_validation_possible": true,
+    "validation_requirements": {
+      "unit_tests": "New unit tests for the chosen cache backend implementation (get/put/delete/healthcheck) against the existing LLMResponseCache Protocol -- mirroring RedisLLMResponseCache's own existing test coverage pattern.",
+      "cache_key_version_tests": "Confirm build_llm_cache_key (UNCHANGED) still produces the exact same cache_key values already recorded in every persisted run's llm_semantic_calls.jsonl `cache.cache_key` field, for the same recorded inputs -- a direct, offline, byte-exact regression check against real historical data.",
+      "offline_replay_comparison": "Feed each of the 7 persisted runs' llm_semantic_calls.jsonl records through the new cache (in input order, by call_sequence) and confirm: (a) every exact within-run duplicate input_sha256 after its first occurrence is served from cache, (b) the served value is byte-identical to the originally recorded validated_output, (c) no non-duplicate record is ever incorrectly served from cache.",
+      "semantic_output_equivalence": "For every cache-hit record in the replay, assert validated_output, validation_status, and (where applicable) matched_alpha/stance/factor fields are unchanged from the original live-call result.",
+      "alpha_detection_equivalence": "Re-run the existing six-run Gold acceptance derivation (docs/audit_artifacts/v0_2_six_run_gold_conformance_audit.json's own expected/detected/missing/unexpected computation) against the cache-replayed outputs and confirm zero change to any ticker's detected/dominant/PASS-FAIL status.",
+      "conflict_equivalence": "Confirm zero change to any run's admitted main_conflict from the same replay.",
+      "a001_remediation_preservation": "Confirm the QQQ post-fix run's A001 outcome (and the invalidation-pattern veto path) is unaffected when replayed through the new cache -- byte-identical selected_alpha_id/decision fields expected.",
+      "34_plus_9_benchmark_non_regression": "Not directly exercised by this change (the 34+9 evidence-review sample uses a separate, older 8-ticker holdout with its own run_ids, per the already-established cross-framework disclosure) -- explicitly note this as N/A for this slice rather than silently skipping it.",
+      "provider_call_count_comparison": "Compare provider_call_count in the cache-enabled replay (should show cache-hit-count > 0 and a correspondingly reduced live-call count) against the original recorded provider_call_count for each run -- fully computable offline from persisted logs plus the new cache's own hit/miss counters.",
+      "latency_comparison": "Not meaningfully measurable offline for this slice (removing an already-fast, already-completed call cannot be timed retroactively) -- flag as qualitative/estimated only until observed in a future live run, consistent with this slice's COST-primary (not latency-primary) nature.",
+      "failure_fallback_comparison": "Confirm the cache never intercepts a fallback_used=True record's input as if it were a cacheable success (a fallback result must not be cached and replayed as if it were a genuine provider answer, to avoid silently propagating a degraded result as a false cache hit for a claim that later succeeds) -- an explicit new test case."
+    }
+  },
+  "alpha_memory": {
+    "mode": "shadow",
+    "activation_modulation_applied": false,
+    "touched_this_task": false
+  },
+  "no_live_execution": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0
+  },
+  "production_and_test_files_changed": {
+    "production_files_changed": 0,
+    "test_files_changed": 0,
+    "ephemeral_analysis_tooling_created": [
+      "scripts/audit_tools/semantic_classifier_cost_latency_analysis.py",
+      "scripts/audit_tools/semantic_call_accounting_raw.json"
+    ]
+  },
+  "next_recommended_task": "Phase B2, Slice 1: implement and offline-validate a real LLMResponseCache backend wired into SemanticRuntimeSession (per the B2 Validation Plan above), with Phase B2 Slice 2 (evidence_stance_classifier + structured_adapter concurrency) queued immediately after, pending authorization for a small live timing validation.",
+  "repository_safety": {
+    "branch": "comqutor-structure-layer",
+    "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "commits_created": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  },
+  "immutable_authorities_verified_unchanged": {
+    "v0_2_gold_operational_contract.json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_final_acceptance_table.json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_evidence_failure_analysis.json": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+    "v0_2_final_acceptance_closure.json": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "v0_2_six_run_gold_conformance_audit.json": "65c4f51ed6f96d7d15372ae0b99d1f3860eb1925b7b69641751673f0908cb173",
+    "v0_2_invalidation_condition_coverage.json": "9f8605474f27a22e1c61d70c3cfda52702fca2b5d1bcd42a6be0c0afe0523669"
+  },
+  "success_criteria_self_check": {
+    "semantic_call_topology_explicitly_understood": true,
+    "dominant_cost_source_quantified": true,
+    "duplicate_cache_opportunities_measured_not_guessed": true,
+    "concurrency_separated_from_cost_reduction": true,
+    "retry_overhead_quantified": true,
+    "batching_risk_assessed": true,
+    "safe_pre_filter_potential_risk_assessed": true,
+    "semantic_acceptance_constraints_preserved": true,
+    "exactly_one_first_b2_slice_recommended": true,
+    "zero_production_semantic_changes": true,
+    "zero_provider_calls": true,
+    "zero_fresh_research": true
+  },
+  "evaluation_status": "V0_2_JOHN_REQUIREMENT_B_PHASE_B1_SEMANTIC_COST_LATENCY_AUDIT_COMPLETE"
+}

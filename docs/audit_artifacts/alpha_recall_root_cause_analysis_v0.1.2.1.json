@@ -1,0 +1,1610 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Step 5B - Alpha Recall Root-Cause Analysis (analysis only, no repair)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-08-27T00:00:37.551427+00:00",
+  "authority_inputs": {
+    "semantic_coverage_validation": "docs/audit_artifacts/six_ticker_semantic_coverage_validation_v0.1.2.1.json",
+    "overall_coverage": 0.992,
+    "per_ticker_coverage": {
+      "NVDA": 0.9961,
+      "QQQ": 0.9943,
+      "MSFT": 0.9875,
+      "SNDK": 0.9959,
+      "TSM": 0.9842,
+      "AMD": 0.9953
+    }
+  },
+  "authority_rule": "John's 12 callouts are diagnostic targets, NOT automatically approved gold labels. Each is judged on actual fresh source evidence and actual successful LLM results, not on 'John expected it' alone.",
+  "targets_analyzed": [
+    "QQQ:A001",
+    "QQQ:A003",
+    "MSFT:A101",
+    "MSFT:A102",
+    "MSFT:A304",
+    "SNDK:A201",
+    "SNDK:A301",
+    "SNDK:A304",
+    "TSM:A103",
+    "TSM:A304",
+    "AMD:A101",
+    "AMD:A201"
+  ],
+  "per_target_analysis": {
+    "QQQ_A001": {
+      "ticker": "QQQ",
+      "target_alpha_id": "A001",
+      "canonical_name": "Rate Cut Cycle",
+      "canonical_thesis": "Falling rates lower discount rates and support long-duration growth assets.",
+      "classification": "DETECTED",
+      "reason": "35 successfully-evaluated claims mapped to A001 (rate-cut/discount-rate theme), including explicit Fed-policy/rate-cut-probability claims from news_agent, fundamental_agent, bull/bear researchers, and risk analysts. Direction is mostly hawkish (no cuts priced), which is a valid A001-themed claim under negative direction, not a different Alpha.",
+      "total_successfully_matched_claims_for_this_alpha": 35,
+      "representative_claims": [
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:news_agent:news_report:claim:27",
+          "agent": "news_agent",
+          "claim_excerpt": "86% probability of NO Fed rate cuts in 2026 ($7.5M volume \u2014 deep, reliable market).",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.08
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:news_agent:news_report:claim:28",
+          "agent": "news_agent",
+          "claim_excerpt": "Fed rate cut by September 2026 meeting: 2%; by October: 4%; by December: 12%.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:news_agent:news_report:claim:61",
+          "agent": "news_agent",
+          "claim_excerpt": "Theme: Fed policy; Key Data Point: 86% no rate cuts in 2026; Direction for QQQ: Hawkish; no liquidity tailwind; Confidence: High",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.08
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:fundamental_agent:fundamentals_report:claim:58",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "A rate cut cycle would support valuations (lower discount rates), while rising rates could pressure the high-multiple holdings.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.6716
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:bull_researcher:investment_debate_state.bull_history:claim:58",
+          "agent": "bull_researcher",
+          "claim_excerpt": "The bear will say \"the Fed is hawkish, no rate cuts priced for 2026, that's a headwind.\" Let me reframe:",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.08
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:bear_researcher:investment_debate_state.bear_history:claim:70",
+          "agent": "bear_researcher",
+          "claim_excerpt": "The Fed has priced out rate cuts for 2026 \u2014 86% probability of no cuts.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:bear_researcher:investment_debate_state.bear_history:claim:126",
+          "agent": "bear_researcher",
+          "claim_excerpt": "And with 86% probability of no rate cuts in 2026, the market has already accepted a hawkish backdrop.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.08
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:conservative_risk_analyst:risk_debate_state.conservative_history:claim:52",
+          "agent": "conservative_risk_analyst",
+          "claim_excerpt": "The prediction markets price an 86% probability of NO Fed rate cuts in 2026.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.08
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:conservative_risk_analyst:risk_debate_state.conservative_history:claim:55",
+          "agent": "conservative_risk_analyst",
+          "claim_excerpt": "Its valuation is sensitive to discount rates.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:neutral_risk_analyst:risk_debate_state.neutral_history:claim:31",
+          "agent": "neutral_risk_analyst",
+          "claim_excerpt": "The Conservative Analyst's macro argument \u2014 86% probability of no rate cuts in 2026 \u2014 is factually correct but analytically incomplete.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A001",
+          "target_alpha": "A001",
+          "deterministic_diagnostic_score": 0.08
+        }
+      ],
+      "recall_type": null
+    },
+    "QQQ_A003": {
+      "ticker": "QQQ",
+      "target_alpha_id": "A003",
+      "canonical_name": "Liquidity Expansion",
+      "canonical_thesis": "Improving liquidity supports risk appetite and equity inflows.",
+      "classification": "DETECTED",
+      "reason": "9 successfully-evaluated claims mapped to A003 (liquidity/risk-appetite theme), including sentiment_agent's high-beta risk-appetite claims and explicit 'no liquidity tailwind' claims from news_agent/bull_researcher/bear_researcher.",
+      "total_successfully_matched_claims_for_this_alpha": 9,
+      "representative_claims": [
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:sentiment_agent:sentiment_report:claim:8",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "\"Quantum Stocks Unwind a Revenue-Headline Rally\" and \"Drone Stocks Slide as Risk Appetite Fades\" \u2014 high-beta speculative names cratering at 5\u201310x the rate of broad tech, signaling risk-off rotation.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:sentiment_agent:sentiment_report:claim:14",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "\"Carvana Jumps 5% as Risk Appetite Returns to High-Beta Names\" \u2014 some risk appetite returning to high-beta names.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:sentiment_agent:sentiment_report:claim:78",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Fragile risk appetite \u2014 high-beta names cratering at 5\u201310x the rate of broad tech.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:news_agent:news_report:claim:38",
+          "agent": "news_agent",
+          "claim_excerpt": "The hawkish Fed backdrop means QQQ's upside depends on earnings delivery, not liquidity.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.1923
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:news_agent:news_report:claim:67",
+          "agent": "news_agent",
+          "claim_excerpt": "Theme: Risk appetite; Key Data Point: High-beta names whipsaw; Direction for QQQ: Fragile, sentiment-driven; Confidence: Medium",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:bull_researcher:investment_debate_state.bull_history:claim:67",
+          "agent": "bull_researcher",
+          "claim_excerpt": "The bear will say \"no liquidity tailwind.\" I say: we don't need one.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.3123
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:bear_researcher:investment_debate_state.bear_history:claim:71",
+          "agent": "bear_researcher",
+          "claim_excerpt": "That means no liquidity tailwind.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.3123
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:sentiment_agent:sentiment_report:claim:68",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "foreign central banks selling Treasuries and buying gold (bearish de-risking signal).",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:bear_researcher:investment_debate_state.bear_history:claim:82",
+          "agent": "bear_researcher",
+          "claim_excerpt": "And let's not forget the macro cross-currents the bull ignores: foreign central banks (UK, China, Japan, South Korea, India) sold U.S.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A003",
+          "target_alpha": "A003",
+          "deterministic_diagnostic_score": 0.0
+        }
+      ],
+      "recall_type": null
+    },
+    "MSFT_A101": {
+      "ticker": "MSFT",
+      "target_alpha_id": "A101",
+      "canonical_name": "AI Expansion",
+      "canonical_thesis": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "classification": "DETECTED",
+      "reason": "28 matched claims genuinely engage AI/cloud demand mechanism (e.g. Google Cloud growth 'validates the AI cloud demand thesis that benefits MSFT', Nvidia beat 'validates AI demand thesis').",
+      "total_successfully_matched_claims_for_this_alpha": 28,
+      "representative_claims": [
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:news_agent:news_report:claim:11",
+          "agent": "news_agent",
+          "claim_excerpt": "This is consistent with a stock that is a core AI/cloud beneficiary trading in a supportive tape.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.1873
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:news_agent:news_report:claim:31",
+          "agent": "news_agent",
+          "claim_excerpt": "Alphabet (GOOGL): Delivered 24% overall revenue growth in Q2 2026, with Google Cloud surging 82% \u2014 direct competitive pressure on Azure, but also validates the AI cloud demand thesis that benefits MSFT.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.2543
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:news_agent:news_report:claim:40",
+          "agent": "news_agent",
+          "claim_excerpt": "AI demand durability: Nvidia 97% beat probability and strong cloud growth across peers validate sustained AI demand.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.6058
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:news_agent:news_report:claim:49",
+          "agent": "news_agent",
+          "claim_excerpt": "Factor: Nvidia earnings beat; Signal: Bullish; Data Point: 97% probability; Implication for MSFT: Validates AI demand thesis",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.6058
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:news_agent:news_report:claim:54",
+          "agent": "news_agent",
+          "claim_excerpt": "The near-term picture for MSFT is constructive: low recession risk, contained inflation, strong AI demand validation (Nvidia 97% beat probability), and bullish prediction-market technicals (71% probability of hitting $495 this week).",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.6058
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:fundamental_agent:fundamentals_report:claim:61",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Azure Cloud Growth: Intelligent Cloud segment continues to be the fastest-growing major segment, driven by AI workloads.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.2673
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:fundamental_agent:fundamentals_report:claim:74",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "The market is watching for evidence of AI revenue acceleration to validate this.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.2623
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:fundamental_agent:fundamentals_report:claim:76",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Traders should monitor whether AI-driven revenue growth can outpace the capex ramp.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.3423
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:fundamental_agent:fundamentals_report:claim:101",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "The investment thesis hinges on whether AI-driven revenue growth (Azure, Copilot, inference workloads) can validate the unprecedented capital investment.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.3423
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:bull_researcher:investment_debate_state.bull_history:claim:35",
+          "agent": "bull_researcher",
+          "claim_excerpt": "Google Cloud grew 82% last quarter\u2014that's competition, yes, but it also validates the size of the AI cloud opportunity.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.0673
+        }
+      ],
+      "recall_type": null
+    },
+    "MSFT_A102": {
+      "ticker": "MSFT",
+      "target_alpha_id": "A102",
+      "canonical_name": "Inference Explosion",
+      "canonical_thesis": "Enterprise AI applications and AI agents increase inference compute demand.",
+      "classification": "DETECTED",
+      "reason": "Only 3 matches, but all genuinely on-thesis: Copilot/GitHub Copilot 'driving incremental revenue and inference demand', 'AI demand (Azure, Copilot, inference workloads)', and depreciation framed as 'the cost of building an asset base that will generate AI inference revenue'.",
+      "total_successfully_matched_claims_for_this_alpha": 3,
+      "representative_claims": [
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:fundamental_agent:fundamentals_report:claim:62",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Copilot Monetization: AI assistant products (Microsoft 365 Copilot, GitHub Copilot) are driving incremental revenue and inference demand.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A102",
+          "target_alpha": "A102",
+          "deterministic_diagnostic_score": 0.5257
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:fundamental_agent:fundamentals_report:claim:73",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "This is a bet that AI demand (Azure, Copilot, inference workloads) will generate returns that justify the spending.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A102",
+          "target_alpha": "A102",
+          "deterministic_diagnostic_score": 0.2258
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:19",
+          "agent": "aggressive_risk_analyst",
+          "claim_excerpt": "The conservative view treats depreciation as a threat to margins, but it ignores that this depreciation is the cost of building an asset base that will generate AI inference revenue for the next decade.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A102",
+          "target_alpha": "A102",
+          "deterministic_diagnostic_score": 0.4181
+        }
+      ],
+      "recall_type": null
+    },
+    "MSFT_A304": {
+      "ticker": "MSFT",
+      "target_alpha_id": "A304",
+      "canonical_name": "Multiple Compression",
+      "canonical_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "classification": "DETECTED",
+      "reason": "69 matches include explicit de-rating/priced-for-perfection language ('AI trade valuation skepticism... priced for perfection', 'if the broader AI infrastructure complex de-rates, MSFT... is exposed') -- satisfies the Section 10 mechanism bar, not just 'expensive'.",
+      "total_successfully_matched_claims_for_this_alpha": 69,
+      "representative_claims": [
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:sentiment_agent:sentiment_report:claim:18",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Bubble will NOT last til midterms.\"",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:sentiment_agent:sentiment_report:claim:34",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "AI trade valuation skepticism: Multiple institutional pieces question whether AI infrastructure names are priced for perfection \u2014 a cautionary backdrop for MSFT.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.7084
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:sentiment_agent:sentiment_report:claim:40",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "AI trade valuation concerns \u2014 if the broader AI infrastructure complex de-rates, MSFT as a major player is exposed.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.2262
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:news_agent:news_report:claim:21",
+          "agent": "news_agent",
+          "claim_excerpt": "Prediction markets price only a 13% probability of an AI bubble burst in 2026 \u2014 the crowd does not see an imminent collapse, but the risk is being actively debated.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:news_agent:news_report:claim:38",
+          "agent": "news_agent",
+          "claim_excerpt": "Valuation risk: Mega-cap tech concentration (four stocks control nearly half of VIGAX) and \"priced for perfection\" concerns across the AI complex.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.7884
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:bull_researcher:investment_debate_state.bull_history:claim:17",
+          "agent": "bull_researcher",
+          "claim_excerpt": "The bear will say MSFT trades at 27.3x trailing earnings and is \"priced for perfection.\" Let's look at what the market is actually paying for.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:bull_researcher:investment_debate_state.bull_history:claim:23",
+          "agent": "bull_researcher",
+          "claim_excerpt": "The market has already de-rated this stock.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:bull_researcher:investment_debate_state.bull_history:claim:54",
+          "agent": "bull_researcher",
+          "claim_excerpt": "The market sees only a 13% probability of an AI bubble burst in 2026.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:bear_researcher:investment_debate_state.bear_history:claim:33",
+          "agent": "bear_researcher",
+          "claim_excerpt": "And the bull's claim that \"the market has already de-rated the stock\" is misleading.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:bear_researcher:investment_debate_state.bear_history:claim:36",
+          "agent": "bear_researcher",
+          "claim_excerpt": "The de-rating the bull cites is a partial pullback from an overextended peak, not a reset to fair value.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        }
+      ],
+      "recall_type": null
+    },
+    "SNDK_A201": {
+      "ticker": "SNDK",
+      "target_alpha_id": "A201",
+      "canonical_name": "Semiconductor Supercycle",
+      "canonical_thesis": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand.",
+      "classification": "DETECTED",
+      "reason": "Of 134 matches, most are company/competitive-specific (weaker fit), but several explicitly invoke the industry-cycle mechanism required by Section 13: 'AI-driven memory supercycle', 'Goldman Sachs flag on the memory shortage being unprecedented', NAND ASP trend/peak-and-revert framing, and inventory time series -- satisfies DETECTED even though overall matched-claim quality is mixed (see note).",
+      "total_successfully_matched_claims_for_this_alpha": 134,
+      "representative_claims": [
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:46",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Metric: Inventory; 2025-03-31: $2.160 B; 2025-06-30: $2.079 B; 2025-09-30: $1.907 B; 2025-12-31: $1.970 B; 2026-03-31: $2.238 B",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:79",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Cyclicality Risk (Semiconductor Cycle): The current earnings explosion is driven by a powerful memory upcycle.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:84",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Concentration in Memory Pricing: The company's fortunes are heavily tied to NAND flash ASPs (average selling prices).",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:97",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Any softening in NAND ASPs would hit margins hard given the operating leverage",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.052
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:129",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Traders should monitor NAND flash ASP trends as the primary leading indicator and be prepared for high volatility given the stock's extended position.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.3123
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:2",
+          "agent": "aggressive_risk_analyst",
+          "claim_excerpt": "They are treating a cyclical peak as a structural ceiling, and in doing so, they are ignoring the most powerful force in this market: the AI-driven memory supercycle.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:neutral_risk_analyst:risk_debate_state.neutral_history:claim:3",
+          "agent": "neutral_risk_analyst",
+          "claim_excerpt": "You've built an elegant thesis around the \"AI-driven memory supercycle\" and the Goldman Sachs flag on the memory shortage being \"unprecedented.\" But I need to challenge you on three specific points.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:neutral_risk_analyst:risk_debate_state.neutral_history:claim:11",
+          "agent": "neutral_risk_analyst",
+          "claim_excerpt": "That's not a conservative assumption; that's an aggressive one that ignores the historical pattern of memory ASPs peaking and reverting within 2-3 quarters of a supply response.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:20",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "@graph (2026-08-25): cites Lynx Equity Research arguing the China/CXMT threat is overblown \u2014 China can't produce chips at the quality Apple needs.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:56",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "The China / CXMT memory-supply threat \u2014 the single most-discussed SNDK-specific topic.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        }
+      ],
+      "recall_type": null
+    },
+    "SNDK_A301": {
+      "ticker": "SNDK",
+      "target_alpha_id": "A301",
+      "canonical_name": "Revenue Expansion",
+      "canonical_thesis": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+      "classification": "DETECTED",
+      "reason": "48 matches include explicit revenue-expansion mechanism: 'Revenue has exploded from $1.695B... to $5.950B... a 251% year-over-year increase', 'explosive revenue and earnings growth'.",
+      "total_successfully_matched_claims_for_this_alpha": 48,
+      "representative_claims": [
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:25",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Revenue Growth: Revenue has exploded from $1.695B in Q1 2025 to $5.950B in Q1 2026 \u2014 a 251% year-over-year increase.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.7596
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:88",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Explosive revenue and earnings growth (251% YoY revenue growth in Q1 2026)",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.7596
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:123",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "The company has transformed from a loss-making entity into a highly profitable, cash-generative business with explosive revenue growth, extraordinary margins, rapid deleveraging, and aggressive capital returns.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.7596
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:bull_researcher:investment_debate_state.bull_history:claim:50",
+          "agent": "bull_researcher",
+          "claim_excerpt": "Bear Point: \"The 78% gross margin is a peak-cycle anomaly that will revert.\" Bull Response: Even if margins normalize to, say, 50%\u2014which would still be historically high\u2014the revenue growth alone would support a much higher earnings base than the market is pricing.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.6896
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:bear_researcher:investment_debate_state.bear_history:claim:89",
+          "agent": "bear_researcher",
+          "claim_excerpt": "The bull is focused on the $11.5 billion in trailing free cash flow and the 251% revenue growth.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.7596
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:research_manager:investment_plan:claim:2",
+          "agent": "research_manager",
+          "claim_excerpt": "The bull made a strong case on the numbers: $11.5B trailing FCF, a 5.57x forward P/E, 251% YoY revenue growth, 91.5% debt reduction, and a 91.6% ROE.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.7596
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:4",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "\"Why Sandisk Stock Popped, Then Dropped Today\" (Motley Fool, 2026-08-25) \u2014 explicitly flags that Mizuho just started cutting estimates on Sandisk.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:10",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "\"One Reason to Be Bullish on SanDisk Stock\" (24/7 Wall St., 2026-08-25) \u2014 argues a structural shift in how Sandisk sells storage could extend the rally.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.052
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:16",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "The Mizuho estimate cut is the key bearish counterweight.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:55",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "The Mizuho estimate cut is the institutional signal that directly contradicts the retail bullish thesis.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A301",
+          "target_alpha": "A301",
+          "deterministic_diagnostic_score": 0.08
+        }
+      ],
+      "recall_type": null
+    },
+    "SNDK_A304": {
+      "ticker": "SNDK",
+      "target_alpha_id": "A304",
+      "canonical_name": "Multiple Compression",
+      "canonical_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "classification": "DETECTED",
+      "reason": "43 matches include explicit compression mechanism: 'any disappointment could trigger multiple compression', 'reversal in memory pricing... would compress margins and trigger multiple compression given the rich price-to-book valuation'.",
+      "total_successfully_matched_claims_for_this_alpha": 43,
+      "representative_claims": [
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:26",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "@Traidn: \"FMV = 370/share\" \u2014 a stark valuation argument comparing MU's forward P/E (5.87) to SNDK's (23.20), implying SNDK is 4x overvalued.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.2162
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:42",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "\"Is rapidly increasing volatility among memory stocks not a sign of a potential bubble popping?\" (2026-08-19) \u2014 directly questions whether memory-stock volatility signals a bubble about to burst.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:63",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Memory-stock bubble concern \u2014 WSB explicitly questions whether memory-stock volatility signals a bubble.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:75",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Memory-stock bubble concerns on WSB.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:83",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "The market is pricing in sustained high earnings; any disappointment could trigger multiple compression.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.6896
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:fundamental_agent:fundamentals_report:claim:127",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "The key risk is a reversal in memory pricing, which would compress margins and trigger multiple compression given the rich price-to-book valuation.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.7858
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:market_agent:market_report:claim:13",
+          "agent": "market_agent",
+          "claim_excerpt": "The current price of $1,477.92 sits well above this long-term benchmark \u2014 roughly 55% above it.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:60",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Retail expects a run \"with nvda\" after earnings; the broad AI sell-off is the macro headwind.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.08
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:61",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Valuation debate \u2014 @Traidn's \"FMV = 370/share\" (MU P/E comparison) vs.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.2162
+        },
+        {
+          "claim_id": "e4309acb-22c6-475e-a357-1e47db587202:sentiment_agent:sentiment_report:claim:71",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Broad AI/semiconductor sell-off ahead of Nvidia earnings and Jackson Hole.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.08
+        }
+      ],
+      "recall_type": null
+    },
+    "TSM_A103": {
+      "ticker": "TSM",
+      "target_alpha_id": "A103",
+      "canonical_name": "AI Infrastructure",
+      "canonical_thesis": "AI buildout drives datacenter, power, cooling, networking, and server demand.",
+      "classification": "DETECTED",
+      "reason": "27 matches include the canonical infrastructure-buildout mechanism: 'Hyperscalers are spending billions on data centers... every one of those data centers needs advanced-node chips'.",
+      "total_successfully_matched_claims_for_this_alpha": 27,
+      "representative_claims": [
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:sentiment_agent:sentiment_report:claim:46",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Continued AI infrastructure/CapEx spending by hyperscalers.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.7661
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:news_agent:news_report:claim:29",
+          "agent": "news_agent",
+          "claim_excerpt": "Bullish: Jensen Huang calls AI demand \"parabolic.\" AI infrastructure spending is fueling surging data-center demand and strong adoption of Nvidia's newest AI platforms.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.8654
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bull_researcher:investment_debate_state.bull_history:claim:71",
+          "agent": "bull_researcher",
+          "claim_excerpt": "TSM is the picks-and-shovels play on a multi-year infrastructure buildout, not a consumer fad.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bull_researcher:investment_debate_state.bull_history:claim:72",
+          "agent": "bull_researcher",
+          "claim_excerpt": "The bear is conflating end-user monetization with upstream infrastructure demand.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bull_researcher:investment_debate_state.bull_history:claim:95",
+          "agent": "bull_researcher",
+          "claim_excerpt": "Low recession risk supports sustained corporate capex, which is the fuel for AI infrastructure spending.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.8461
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bull_researcher:investment_debate_state.bull_history:claim:102",
+          "agent": "bull_researcher",
+          "claim_excerpt": "AI is a multi-year infrastructure buildout.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bull_researcher:investment_debate_state.bull_history:claim:103",
+          "agent": "bull_researcher",
+          "claim_excerpt": "Jensen Huang calls demand \"parabolic.\" Hyperscalers are spending billions on data centers.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bull_researcher:investment_debate_state.bull_history:claim:104",
+          "agent": "bull_researcher",
+          "claim_excerpt": "Every one of those data centers needs advanced-node chips.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bear_researcher:investment_debate_state.bear_history:claim:86",
+          "agent": "bear_researcher",
+          "claim_excerpt": "Bear Response: The \"picks and shovels\" argument is exactly what investors said about every infrastructure boom in history \u2014 right before the bust.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bear_researcher:investment_debate_state.bear_history:claim:102",
+          "agent": "bear_researcher",
+          "claim_excerpt": "But the palm pilot era was characterized by massive investment in infrastructure with minimal consumer adoption.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A103",
+          "target_alpha": "A103",
+          "deterministic_diagnostic_score": 0.0
+        }
+      ],
+      "recall_type": null
+    },
+    "TSM_A304": {
+      "ticker": "TSM",
+      "target_alpha_id": "A304",
+      "canonical_name": "Multiple Compression",
+      "canonical_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+      "classification": "DETECTED",
+      "reason": "90 matches include explicit compression mechanism: 'stock is priced for perfection', 'vulnerable to multiple compression', 'any disappointment... will trigger multiple compression'.",
+      "total_successfully_matched_claims_for_this_alpha": 90,
+      "representative_claims": [
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bear_researcher:investment_debate_state.bear_history:claim:77",
+          "agent": "bear_researcher",
+          "claim_excerpt": "Any disruption \u2014 geopolitical, technological, or competitive \u2014 would trigger massive multiple compression.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.6896
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bear_researcher:investment_debate_state.bear_history:claim:142",
+          "agent": "bear_researcher",
+          "claim_excerpt": "TSM's trailing P/E of 31x is vulnerable to multiple compression in this environment.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.6796
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bear_researcher:investment_debate_state.bear_history:claim:158",
+          "agent": "bear_researcher",
+          "claim_excerpt": "The stock is priced for perfection.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.6123
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:bear_researcher:investment_debate_state.bear_history:claim:160",
+          "agent": "bear_researcher",
+          "claim_excerpt": "Any disappointment \u2014 in Nvidia's earnings, in AI capex, in the macro environment \u2014 will trigger multiple compression.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.6796
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:sentiment_agent:sentiment_report:claim:43",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Sector-wide profit-taking / valuation caution \u2014 chips selling off at twice the rate of broad tech ahead of Nvidia earnings; some retail warns of a 2022-style correction.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.2962
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:sentiment_agent:sentiment_report:claim:50",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Sector-wide profit-taking and valuation concerns (chips selling off at 2x the rate of broad tech).",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.2962
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:sentiment_agent:sentiment_report:claim:61",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Signal: Valuation / correction warning; Direction: Bearish; Source: StockTwits (@KingWarsh); Supporting Evidence: \"massive correction like 2022\"",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.2441
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:news_agent:news_report:claim:28",
+          "agent": "news_agent",
+          "claim_excerpt": "The market has already priced in a beat, so the bar is high.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:news_agent:news_report:claim:44",
+          "agent": "news_agent",
+          "claim_excerpt": "Valuation risk \u2014 elevated tech valuations with no rate cuts expected in 2026.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.5961
+        },
+        {
+          "claim_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8:news_agent:news_report:claim:49",
+          "agent": "news_agent",
+          "claim_excerpt": "The 97% priced-in beat probability means the \"good news\" is largely in the price; the asymmetric risk is to the downside if Nvidia merely meets (rather than crushes) expectations.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A304",
+          "target_alpha": "A304",
+          "deterministic_diagnostic_score": 0.052
+        }
+      ],
+      "recall_type": null
+    },
+    "AMD_A101": {
+      "ticker": "AMD",
+      "target_alpha_id": "A101",
+      "canonical_name": "AI Expansion",
+      "canonical_thesis": "AI training and adoption increase demand for accelerators and AI-related equities.",
+      "classification": "DETECTED",
+      "reason": "42 matches include genuine AI-expansion-theme claims (AMD framed as 'the chip maker positioned to outperform Nvidia or capitalize on the AI buildout', AI complex linkage to Nvidia earnings).",
+      "total_successfully_matched_claims_for_this_alpha": 42,
+      "representative_claims": [
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:sentiment_agent:sentiment_report:claim:17",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Notable unlabeled commentary: @Jack90 questioned where the \"AI drama revenue\" is (\"Last 6 quarters revenue not big jump, slight improvement\"), and @koas578 asked whether AMD finishes at $485 or $478 \u2014 implying a strong intraday move.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.0673
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:sentiment_agent:sentiment_report:claim:34",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "AMD as the Nvidia alternative / challenger: Multiple headlines frame AMD as the chip maker positioned to \"outperform Nvidia\" or capitalize on the AI buildout, with 24/7 Wall St.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.2258
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:sentiment_agent:sentiment_report:claim:45",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Nvidia earnings disappointment \u2014 could drag the entire AI complex, including AMD, lower.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.2358
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:news_agent:news_report:claim:7",
+          "agent": "news_agent",
+          "claim_excerpt": "AI/semiconductor landscape: Nvidia earnings Wednesday (96% probability of beat).",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.3057
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:news_agent:news_report:claim:38",
+          "agent": "news_agent",
+          "claim_excerpt": "AMD's near-term direction is heavily tied to this event \u2014 a strong Nvidia print typically lifts the entire AI complex, including AMD.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.3057
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:news_agent:news_report:claim:50",
+          "agent": "news_agent",
+          "claim_excerpt": "This highlights export-control risk in the AI hardware supply chain, though the companies themselves were not indicted.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.0673
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:news_agent:news_report:claim:62",
+          "agent": "news_agent",
+          "claim_excerpt": "The near-term catalyst stack is constructive for AMD: a fresh Strong Buy upgrade, a differentiated AI narrative, robust sector demand, and a likely-positive Nvidia print.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.3057
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:news_agent:news_report:claim:72",
+          "agent": "news_agent",
+          "claim_excerpt": "Factor: Export Controls / Geopolitics; Signal: Risk; Evidence: Taiwan AI server smuggling indictments; Iran sanctions; Implication for AMD: Supply-chain uncertainty",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.1873
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:fundamental_agent:fundamentals_report:claim:32",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Gross margin expansion: Gross profit margin improved to 53.8% in the latest quarter (from 39.8% a year ago), reflecting a favorable product mix shift toward high-margin data center/AI products.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.1873
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:fundamental_agent:fundamentals_report:claim:43",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "R&D investment is substantial and growing: $8.091B in 2025 (up from $6.456B in 2024), underscoring heavy reinvestment in AI/accelerator technology.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A101",
+          "target_alpha": "A101",
+          "deterministic_diagnostic_score": 0.3796
+        }
+      ],
+      "recall_type": null
+    },
+    "AMD_A201": {
+      "ticker": "AMD",
+      "target_alpha_id": "A201",
+      "canonical_name": "Semiconductor Supercycle",
+      "canonical_thesis": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand.",
+      "classification": "DETECTED",
+      "reason": "Weakest of the 12: most of the 16 matches are AMD's own company-specific balance-sheet line items (inventory dollar figures, capex, margins) rather than an industry-wide cycle claim, which Section 13 explicitly warns is insufficient alone. However at least one match is genuinely industry-level ('BofA flagged eight chip stocks as enhanced buying opportunities... semiconductors despite near-term pressure') and one explicitly frames AMD's own inventory build against 'the semiconductor industry' cycle pattern ('inventory build-ups have historically preceded downturns') -- meets the Section 4 DETECTED bar (at least one materially relevant successful mapping), but this is the one target where match QUALITY/precision is genuinely mixed and worth a future look during any precision-focused audit (out of scope here).",
+      "total_successfully_matched_claims_for_this_alpha": 16,
+      "representative_claims": [
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:fundamental_agent:fundamentals_report:claim:80",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Working capital is absorbing cash (inventory build of $423M and receivables increase of $1.246B in the latest quarter), reflecting rapid growth.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.08
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:fundamental_agent:fundamentals_report:claim:103",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Inventory Build: Rising inventory ($8.47B) could signal either growth preparation or potential demand softness \u2014 needs monitoring.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.052
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:fundamental_agent:fundamentals_report:claim:139",
+          "agent": "fundamental_agent",
+          "claim_excerpt": "Category: Risk; Metric: Inventory; Value: $8.468B; Signal: Building",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:bull_researcher:investment_debate_state.bull_history:claim:65",
+          "agent": "bull_researcher",
+          "claim_excerpt": "Bear: \"The balance sheet has heavy goodwill and rising inventory.\"",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:bear_researcher:investment_debate_state.bear_history:claim:58",
+          "agent": "bear_researcher",
+          "claim_excerpt": "Inventory of $8.47 billion is building.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:bear_researcher:investment_debate_state.bear_history:claim:61",
+          "agent": "bear_researcher",
+          "claim_excerpt": "In the semiconductor industry, inventory build-ups have historically preceded downturns.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.3123
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:bear_researcher:investment_debate_state.bear_history:claim:104",
+          "agent": "bear_researcher",
+          "claim_excerpt": "Carrying $41.1 billion in goodwill and rising inventory.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.0
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:sentiment_agent:sentiment_report:claim:6",
+          "agent": "sentiment_agent",
+          "claim_excerpt": "Barron's \"Strong Buy\" upgrade headline reinforces the same theme: \"AMD Stock Gets a 'Strong Buy' Upgrade: Why It Could Outperform Nvidia,\" explicitly framing AMD as the chip maker that could capitalize on booming CPU demand.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.1973
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:news_agent:news_report:claim:21",
+          "agent": "news_agent",
+          "claim_excerpt": "Barron's published \"AMD Stock Gets a 'Strong Buy' Upgrade: Why It Could Outperform Nvidia,\" reinforcing the narrative that AMD can capitalize on booming CPU demand even as Nvidia dominates GPU/AI infrastructure.",
+          "ticker_specific": true,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.052
+        },
+        {
+          "claim_id": "eb714c04-645c-41e2-8292-a4739915f940:news_agent:news_report:claim:48",
+          "agent": "news_agent",
+          "claim_excerpt": "BofA flagged eight chip stocks as \"enhanced buying opportunities,\" citing positive risk/reward in semiconductors despite near-term pressure.",
+          "ticker_specific": false,
+          "successful_semantic_execution": true,
+          "llm_result": "MATCHED",
+          "llm_selected_alpha": "A201",
+          "target_alpha": "A201",
+          "deterministic_diagnostic_score": 0.2153
+        }
+      ],
+      "recall_type": null
+    }
+  },
+  "result_table": [
+    {
+      "ticker": "QQQ",
+      "target_alpha": "A001",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "35 successfully-evaluated claims mapped to A001 (rate-cut/discount-rate theme), including explicit Fed-policy/rate-cut-probability claims from news_agent, fundamental_agent, bull/bear researchers, and"
+    },
+    {
+      "ticker": "QQQ",
+      "target_alpha": "A003",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "9 successfully-evaluated claims mapped to A003 (liquidity/risk-appetite theme), including sentiment_agent's high-beta risk-appetite claims and explicit 'no liquidity tailwind' claims from news_agent/b"
+    },
+    {
+      "ticker": "MSFT",
+      "target_alpha": "A101",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "28 matched claims genuinely engage AI/cloud demand mechanism (e.g. Google Cloud growth 'validates the AI cloud demand thesis that benefits MSFT', Nvidia beat 'validates AI demand thesis')."
+    },
+    {
+      "ticker": "MSFT",
+      "target_alpha": "A102",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "Only 3 matches, but all genuinely on-thesis: Copilot/GitHub Copilot 'driving incremental revenue and inference demand', 'AI demand (Azure, Copilot, inference workloads)', and depreciation framed as 't"
+    },
+    {
+      "ticker": "MSFT",
+      "target_alpha": "A304",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "69 matches include explicit de-rating/priced-for-perfection language ('AI trade valuation skepticism... priced for perfection', 'if the broader AI infrastructure complex de-rates, MSFT... is exposed')"
+    },
+    {
+      "ticker": "SNDK",
+      "target_alpha": "A201",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "Of 134 matches, most are company/competitive-specific (weaker fit), but several explicitly invoke the industry-cycle mechanism required by Section 13: 'AI-driven memory supercycle', 'Goldman Sachs fla"
+    },
+    {
+      "ticker": "SNDK",
+      "target_alpha": "A301",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "48 matches include explicit revenue-expansion mechanism: 'Revenue has exploded from $1.695B... to $5.950B... a 251% year-over-year increase', 'explosive revenue and earnings growth'."
+    },
+    {
+      "ticker": "SNDK",
+      "target_alpha": "A304",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "43 matches include explicit compression mechanism: 'any disappointment could trigger multiple compression', 'reversal in memory pricing... would compress margins and trigger multiple compression given"
+    },
+    {
+      "ticker": "TSM",
+      "target_alpha": "A103",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "27 matches include the canonical infrastructure-buildout mechanism: 'Hyperscalers are spending billions on data centers... every one of those data centers needs advanced-node chips'."
+    },
+    {
+      "ticker": "TSM",
+      "target_alpha": "A304",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "90 matches include explicit compression mechanism: 'stock is priced for perfection', 'vulnerable to multiple compression', 'any disappointment... will trigger multiple compression'."
+    },
+    {
+      "ticker": "AMD",
+      "target_alpha": "A101",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "42 matches include genuine AI-expansion-theme claims (AMD framed as 'the chip maker positioned to outperform Nvidia or capitalize on the AI buildout', AI complex linkage to Nvidia earnings)."
+    },
+    {
+      "ticker": "AMD",
+      "target_alpha": "A201",
+      "detected": true,
+      "relevant_source_evidence": true,
+      "successfully_semantically_evaluated": true,
+      "primary_outcome": "DETECTED",
+      "recall_candidate": false,
+      "reason": "Weakest of the 12: most of the 16 matches are AMD's own company-specific balance-sheet line items (inventory dollar figures, capex, margins) rather than an industry-wide cycle claim, which Section 13 "
+    }
+  ],
+  "provider_failure_check": {
+    "total_unavailable_rows_across_six_tickers": 39,
+    "checked_against_all_12_targets": true,
+    "finding": "None of the 39 UNAVAILABLE rows (across all six tickers) constitute the sole or primary evidence for any of John's 12 target Alphas -- every target already has multiple independently successful, on-thesis MATCHED claims. A small number of UNAVAILABLE rows are topically adjacent (e.g. QQQ: 'no tailwind, no cliff' macro scenario relevant to A001; MSFT: a forward-P/E/AI-monetization claim relevant to A304), but since each target's DETECTED status does not depend on these specific rows, this is reported as a minor completeness note, not a PROVIDER_FAILURE classification for any target."
+  },
+  "counts": {
+    "john_callouts_total": 12,
+    "DETECTED": 12,
+    "TRUE_SEMANTIC_NONE_WITH_RELEVANT_SOURCE": 0,
+    "FALSE_NONE": 0,
+    "WRONG_ALPHA": 0,
+    "SOURCE_EVIDENCE_INSUFFICIENT": 0,
+    "PROVIDER_FAILURE": 0,
+    "AMBIGUOUS_NEEDS_ADJUDICATION": 0
+  },
+  "high_value_none_discovery": {
+    "scope": "Diagnostic scan of the 2764 valid NONE results across all six tickers for claims materially compatible with one of the 10 canonical Alphas despite receiving NONE. Excludes all UNAVAILABLE rows. Preliminary only -- no repair, no claim of >=20 recoverable rows.",
+    "raw_keyword_scan_count": 23,
+    "reviewed_strong_candidates": [
+      {
+        "ticker": "AMD",
+        "claim_snippet": "Macro context: Lower Treasury yields, easing selling pressure, positive Asian markets.",
+        "candidate_alpha": "A001",
+        "assessment": "STRONG candidate",
+        "reasoning": "Genuine macro data point (falling Treasury yields) directly on A001's discount-rate mechanism, received NONE. Worth a closer look in a future precision-tuning pass."
+      }
+    ],
+    "reviewed_weak_borderline_candidates": [
+      {
+        "ticker": "NVDA",
+        "claim_snippet": "Competitors (AMD, custom ASIC providers, and in-house silicon efforts at hyperscalers) are increasing competition in the AI accelerator market, which could pressure NVIDIA's dominance.",
+        "candidate_alpha": "A101",
+        "assessment": "WEAK/borderline",
+        "reasoning": "AI-themed but framed as a competitive RISK to NVDA, not an AI-expansion demand claim -- NONE is plausibly correct."
+      },
+      {
+        "ticker": "AMD",
+        "claim_snippet": "AMD faces intense competition from NVIDIA in AI accelerators and from Intel in CPUs.",
+        "candidate_alpha": "A101",
+        "assessment": "WEAK/borderline",
+        "reasoning": "Same pattern as above -- competitive-risk framing, not demand-expansion."
+      },
+      {
+        "ticker": "AMD",
+        "claim_snippet": "AMD's market share in data center GPUs is still a fraction of Nvidia's.",
+        "candidate_alpha": "A103",
+        "assessment": "WEAK/borderline",
+        "reasoning": "Mentions data center GPUs but is a competitive-share statement, not an infrastructure-buildout demand claim -- NONE is plausibly correct."
+      }
+    ],
+    "rejected_false_positive_pattern": {
+      "pattern": "Company-level balance-sheet liquidity (current ratio, cash position, net-cash) superficially keyword-matches 'liquidity' but is semantically UNRELATED to A003's macro monetary-liquidity-expansion thesis.",
+      "count_rejected": 15,
+      "tickers_affected": [
+        "NVDA",
+        "MSFT",
+        "SNDK",
+        "TSM",
+        "AMD"
+      ],
+      "conclusion": "These NONE results are almost certainly CORRECT, not recall misses -- a useful confirmation of classifier precision on this specific false-positive-prone keyword collision, not a defect."
+    }
+  },
+  "recommended_future_semantic_repair_investigation_areas": [
+    "AMD A201 match precision (company-specific balance-sheet metrics vs. genuine industry-cycle claims) -- a PRECISION concern, not a recall miss, out of scope for repair here.",
+    "One STRONG high-value-NONE candidate (AMD Treasury-yield claim -> A001) worth a closer look in a future recall-precision pass."
+  ],
+  "production_semantic_code_changed": false,
+  "taxonomy_changed": false,
+  "b1_b2_b4_changed": false,
+  "conflict_ontology_changed": false,
+  "regression_labels_changed": false,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false
+}

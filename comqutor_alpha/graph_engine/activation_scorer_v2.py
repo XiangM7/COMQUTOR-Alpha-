@@ -41,6 +41,10 @@ from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
+from comqutor_alpha.graph_engine.evidence_source_role import (
+    EVIDENCE_SOURCE_ROLE_CONTRACT_VERSION,
+    qualify_evidence_group,
+)
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     ALPHA_ACTIVATION_EVIDENCE_V1,
     EVIDENCE_FACT_INDEX_VERSION,
@@ -56,6 +60,7 @@ from comqutor_alpha.graph_engine.graph_schema import (
     clamp_percent,
     is_finite_number,
 )
+from comqutor_alpha.graph_engine.issuer_aliases import CANONICAL_ISSUER_ALIASES
 from comqutor_alpha.structure_engine.claim_quality import (
     CONSUMER_ACTIVATION,
     is_claim_eligible,
@@ -252,6 +257,75 @@ def _is_ticker_specific(
     return any(_token_boundary_match(term, text) for term in terms)
 
 
+FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL = "FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL"
+
+
+def _foreign_issuer_only_reason(record: Mapping[str, Any], ticker: str | None) -> str | None:
+    """P0 Evidence Ownership Gate (Cross-Company Evidence Integrity Fix).
+
+    A semantic Alpha match alone is never sufficient to make a claim count
+    as activation-qualifying evidence for the current run ticker -- see
+    docs/audit_artifacts/v0_1_3_a102_cross_company_integrity_audit.md's
+    AMD A201 case study (a Silicon Motion/SanDisk claim was admitted as
+    AMD A201 evidence via the Pure-LLM Semantic Authority override, despite
+    the deterministic Alpha Mapper finding zero eligible candidates for it
+    at all). Returns ``FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL`` only when ALL
+    three conditions hold, else ``None``:
+
+      1. the current ticker's own symbol/issuer aliases are absent from
+         the claim text;
+      2. at least one OTHER ticker this system covers (``issuer_aliases.
+         CANONICAL_ISSUER_ALIASES``) has its symbol/issuer alias PRESENT
+         in the claim text;
+      3. every canonical Alpha's ``keyword_score`` AND ``factor_score`` are
+         exactly zero in the claim's own ``candidate_scores`` -- i.e. the
+         deterministic taxonomy engine recognized no signal of any kind,
+         so the claim's Alpha attribution rests entirely on the LLM's
+         broad semantic authority with zero corroborating deterministic
+         evidence.
+
+    Deliberately narrow and empirically validated against all six
+    persisted FINAL_FRESH_SELECTED runs (see the audit above): a broader
+    "another company is named" veto was proven to misclassify legitimate
+    relational/competitive/ETF-constituent evidence (e.g. a competitor's
+    capex guidance cited as corroborating industry-wide AI demand, or an
+    ETF's named constituents) -- this three-condition conjunction fires on
+    exactly the one confirmed contamination case across the full six-run
+    corpus and nothing else. Never touches B1 stance, Alpha Mapper
+    eligibility/thresholds, or Primary/Secondary role qualification --
+    this is an independent, orthogonal veto applied only to the activation
+    evidence-qualification stage.
+    """
+    own_ticker = str(ticker or "").strip().upper()
+    text = str(record.get("claim") or record.get("evidence") or "")
+    if not text:
+        return None
+    own_terms = ((own_ticker,) if own_ticker else ()) + CANONICAL_ISSUER_ALIASES.get(own_ticker, ())
+    if any(_token_boundary_match(term, text) for term in own_terms):
+        return None
+    foreign_hit = False
+    for other_ticker, aliases in CANONICAL_ISSUER_ALIASES.items():
+        if other_ticker == own_ticker:
+            continue
+        if any(_token_boundary_match(term, text) for term in (other_ticker,) + aliases):
+            foreign_hit = True
+            break
+    if not foreign_hit:
+        return None
+    candidate_scores = record.get("candidate_scores") or ()
+    if not candidate_scores:
+        return None
+    zero_signal = all(
+        float(candidate.get("keyword_score") or 0.0) == 0.0
+        and float(candidate.get("factor_score") or 0.0) == 0.0
+        for candidate in candidate_scores
+        if isinstance(candidate, Mapping)
+    )
+    if not zero_signal:
+        return None
+    return FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL
+
+
 # ---------------------------------------------------------------------------
 # Evidence gathering
 # ---------------------------------------------------------------------------
@@ -351,6 +425,66 @@ def _group_evidence(
         group_key = evidence_fact_group_id(str(run_id or ""), str(ticker or ""), claim_ids)
         groups[group_key] = [by_claim_id[cid] for cid in claim_ids]
     return groups
+
+
+def _qualify_groups_for_activation(
+    groups: Mapping[str, list[dict[str, Any]]],
+    *,
+    ticker: str | None,
+    company_names: Sequence[str],
+    entities_by_claim: Mapping[str, Sequence[str]],
+) -> tuple[dict[str, list[dict[str, Any]]], dict[str, list[dict[str, Any]]], dict[str, int]]:
+    """Primary vs Secondary Evidence Qualification (Step 6, John's
+    requirement): trader/portfolio_manager/debate/risk-analyst restatement
+    of a Primary analyst's fact must not independently inflate activation.
+
+    Returns ``(qualified_groups, all_groups_with_role_detail, reason_counts)``.
+    ``qualified_groups`` is the SAME group keys/shape as ``groups`` but
+    filtered down to only ``activation_eligible`` members, with any group
+    left with zero eligible members dropped entirely -- this is what
+    actually feeds the EvidenceQuality/AgentIndependence/TickerSpecificity
+    scoring components below. ``all_groups_with_role_detail`` keeps every
+    original member (nothing deleted -- Secondary evidence remains fully
+    auditable/visible) annotated with ``source_agent``/``source_role``/
+    ``activation_eligible``/``activation_qualification_reason``. Does not
+    change B1 stance, Alpha Mapper semantics, or any B2/B4 threshold value
+    -- only which evidence inputs reach the unchanged formulas below.
+    """
+
+    def _is_ticker_specific_member(member: Mapping[str, Any]) -> bool:
+        return _is_ticker_specific(member["record"], ticker, company_names, entities_by_claim)
+
+    all_groups_with_role_detail: dict[str, list[dict[str, Any]]] = {}
+    qualified_groups: dict[str, list[dict[str, Any]]] = {}
+    reason_counts: dict[str, int] = {}
+    for group_key, members in groups.items():
+        qualified_members = qualify_evidence_group(
+            members, is_ticker_specific=_is_ticker_specific_member
+        )
+        # P0 Evidence Ownership Gate: an independent, orthogonal veto
+        # applied AFTER Primary/Secondary role qualification -- never
+        # weakens qualify_evidence_group's own PRIMARY_QUALIFIED/SECONDARY_*
+        # decision, only narrows it further for the specific,
+        # deterministically-identified foreign-issuer-with-zero-taxonomy-
+        # signal case (see _foreign_issuer_only_reason's docstring). A
+        # member already ineligible for its existing reason is left alone
+        # -- this only ever downgrades an eligible member, never upgrades
+        # one.
+        for member in qualified_members:
+            if not member.get("activation_eligible"):
+                continue
+            veto_reason = _foreign_issuer_only_reason(member["record"], ticker)
+            if veto_reason:
+                member["activation_eligible"] = False
+                member["activation_qualification_reason"] = veto_reason
+        all_groups_with_role_detail[group_key] = qualified_members
+        for member in qualified_members:
+            reason = str(member["activation_qualification_reason"])
+            reason_counts[reason] = reason_counts.get(reason, 0) + 1
+        eligible_members = [m for m in qualified_members if m["activation_eligible"]]
+        if eligible_members:
+            qualified_groups[group_key] = eligible_members
+    return qualified_groups, all_groups_with_role_detail, reason_counts
 
 
 # ---------------------------------------------------------------------------
@@ -901,6 +1035,19 @@ def score_alpha_v2(
     )
     run_id = alpha_matches_payload.get("run_id") if isinstance(alpha_matches_payload, Mapping) else None
     groups = _group_evidence(qualifying, ticker, run_id)
+    # Step 6 (Primary vs Secondary Evidence Qualification): compute the
+    # role-qualified subset of `groups` -- ONLY this subset feeds the
+    # scoring components below. `groups` itself (raw, unfiltered) is kept
+    # for evidence_fact_groups audit visibility so nothing is hidden.
+    qualified_groups, all_groups_role_detail, qualification_reason_counts = (
+        _qualify_groups_for_activation(
+            groups, ticker=ticker, company_names=company_names, entities_by_claim=entities_by_claim
+        )
+    )
+    qualified_claim_ids = {
+        str(m["claim_id"]) for members in qualified_groups.values() for m in members
+    }
+    qualifying_for_scoring = [item for item in qualifying if item["claim_id"] in qualified_claim_ids]
     # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
     # Track A2: a pure, additive extraction of the SAME grouping `groups`
     # already computed above for scoring -- never a second grouping pass,
@@ -908,6 +1055,9 @@ def score_alpha_v2(
     # below. Exists so evidence_facts.json can be built by extraction
     # only (comqutor_alpha.api.artifact_export), since this grouping
     # detail was previously discarded after scoring rather than exposed.
+    # Step 6: additively annotated with each member's source_role/
+    # activation_eligible/activation_qualification_reason -- every member
+    # (Primary and Secondary) stays visible here regardless of eligibility.
     evidence_fact_groups = sorted(
         (
             {
@@ -917,17 +1067,31 @@ def score_alpha_v2(
                 )["claim_id"],
                 "member_claim_ids": sorted(str(m["claim_id"]) for m in members),
                 "supporting_agents": sorted({str(m["agent"]) for m in members if m.get("agent")}),
+                "activation_eligible": any(m["activation_eligible"] for m in members),
+                "members_source_role_detail": sorted(
+                    (
+                        {
+                            "claim_id": str(m["claim_id"]),
+                            "source_agent": m["source_agent"],
+                            "source_role": m["source_role"],
+                            "activation_eligible": m["activation_eligible"],
+                            "activation_qualification_reason": m["activation_qualification_reason"],
+                        }
+                        for m in members
+                    ),
+                    key=lambda d: d["claim_id"],
+                ),
             }
-            for group_key, members in groups.items()
+            for group_key, members in all_groups_role_detail.items()
         ),
         key=lambda g: g["evidence_fact_group_id"],
     )
 
-    evidence_quality_raw, evidence_quality_meta = _evidence_quality_component(groups)
-    agent_independence_raw, agent_meta = _agent_independence_component(groups)
-    local_raw, local_meta = _local_structure_component(qualifying, graph_edges, alpha_id)
+    evidence_quality_raw, evidence_quality_meta = _evidence_quality_component(qualified_groups)
+    agent_independence_raw, agent_meta = _agent_independence_component(qualified_groups)
+    local_raw, local_meta = _local_structure_component(qualifying_for_scoring, graph_edges, alpha_id)
     ticker_raw, ticker_meta = _ticker_specificity_component(
-        groups,
+        qualified_groups,
         ticker=ticker,
         company_names=company_names,
         entities_by_claim=entities_by_claim,
@@ -938,11 +1102,30 @@ def score_alpha_v2(
     )
     direction_raw, direction_meta = _direction_consistency_component(direction_groups)
 
-    has_qualifying_evidence = len(groups) > 0
+    # Step 6: gated on QUALIFIED evidence -- a group made up entirely of
+    # ineligible Secondary/Unknown restatement is not genuine activation
+    # evidence at all.
+    has_qualifying_evidence = len(qualified_groups) > 0
     # Recency is a run-level signal: with no qualifying evidence its
     # contribution is zero (and the whole score is zero anyway).
     recency_contribution = (
         round(recency_raw * ACTIVATION_V2_WEIGHTS["recency"], 4) if has_qualifying_evidence else 0.0
+    )
+    # Step 6: direction_consistency is gathered from a separate, broader
+    # pool (_gather_direction_evidence, unfiltered by source-role
+    # qualification -- it groups by semantic key, not by Evidence Fact,
+    # and existed before this qualification layer). Before Step 6, an
+    # empty `groups` reliably implied an empty direction pool too (same
+    # underlying qualifying-claim source); qualification can now make
+    # `qualified_groups` empty while raw direction evidence still exists
+    # (all of it Secondary/ineligible), which would otherwise leave this
+    # component contributing a nonzero score with zero qualifying
+    # evidence -- gated here exactly like recency already was, so
+    # components always sum to activation_score.
+    direction_contribution = (
+        round(direction_raw * ACTIVATION_V2_WEIGHTS["direction_consistency"], 4)
+        if has_qualifying_evidence
+        else 0.0
     )
 
     components = {
@@ -984,14 +1167,13 @@ def score_alpha_v2(
         "direction_consistency": {
             "raw": direction_raw,
             "weight": ACTIVATION_V2_WEIGHTS["direction_consistency"],
-            "contribution": round(
-                direction_raw * ACTIVATION_V2_WEIGHTS["direction_consistency"], 4
-            ),
+            "contribution": direction_contribution,
+            "evidence_gated": not has_qualifying_evidence,
             **direction_meta,
         },
     }
 
-    unique_evidence_count = len(groups)
+    unique_evidence_count = len(qualified_groups)
     distinct_agents = agent_meta["distinct_agents"]
     ticker_specific_count = ticker_meta["ticker_specific_evidence_count"]
     local_edge_count = local_meta["local_edge_count"]
@@ -1016,7 +1198,7 @@ def score_alpha_v2(
         cap_reason_codes = [REASON_NO_QUALIFYING_EVIDENCE]
         binding_cap_reason_codes = []
     else:
-        keyword_only = _keyword_only_support(qualifying, local_edge_count)
+        keyword_only = _keyword_only_support(qualifying_for_scoring, local_edge_count)
         (
             activation_score,
             eligible_cap,
@@ -1111,6 +1293,21 @@ def score_alpha_v2(
         # evidence_facts.json exportable by extraction only, never a
         # second grouping computation.
         "evidence_fact_groups": evidence_fact_groups,
+        # Step 6 (Primary vs Secondary Evidence Qualification): audit
+        # summary of the role-based activation-input filter applied above.
+        # `raw_unique_evidence_fact_count` is the pre-qualification group
+        # count (same quantity `unique_evidence_fact_count` reported before
+        # Step 6); `unique_evidence_fact_count`/`unique_evidence_count`
+        # above are now POST-qualification. Nothing is deleted -- see
+        # evidence_fact_groups[*].members_source_role_detail for the full
+        # per-claim breakdown, including ineligible Secondary/Unknown
+        # members.
+        "evidence_qualification": {
+            "policy_version": EVIDENCE_SOURCE_ROLE_CONTRACT_VERSION,
+            "raw_unique_evidence_fact_count": len(groups),
+            "qualified_unique_evidence_fact_count": len(qualified_groups),
+            "qualification_reason_counts": dict(sorted(qualification_reason_counts.items())),
+        },
         # Transient canonical representatives consumed by the Exposure
         # productization seam. The graph pipeline removes this internal
         # helper after attaching the public entity_exposure record.

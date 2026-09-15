@@ -272,6 +272,13 @@ def test_fake_real_execution_completes_with_server_side_config(tmp_path, monkeyp
     from comqutor_alpha.research_jobs import JobManager
 
     monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    # Live-semantic-pipeline readiness guard (operational safety fix): a
+    # real submission now also requires Week2's LLM classifier to be
+    # enabled and its own provider ready -- see test_scenario_b/c/d above
+    # for the guard's own dedicated tests.
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "deepseek-v4-flash")
 
     app = create_app(output_root=str(tmp_path))
     with TestClient(app) as client:
@@ -349,6 +356,169 @@ def test_real_force_refresh_disabled_by_default_returns_403(tmp_path, monkeypatc
         response = client.post("/api/research", json={"ticker": "NVDA", "force_refresh": True})
     assert response.status_code == 403
     assert response.json()["error_code"] == "REAL_FORCE_REFRESH_DISABLED"
+
+
+# ---------------------------------------------------------------------------
+# Live-semantic-pipeline readiness guard (operational safety fix)
+#
+# Two fresh live runs (NVDA 40bd7e3d-2759-45bc-97ec-8f1cf96c2266, SNDK
+# 52c23371-c374-4064-a91c-20c599ffa79c) were allowed to execute real
+# TradingAgents research while COMQUTOR_WEEK2_LLM_ENABLED was false,
+# producing zero committed Alpha matches and zero Activation despite a
+# fully completed, expensive TradingAgents session. These tests prove
+# TradingAgents is never dispatched (no job manager worker ever runs, since
+# the request is rejected before any research_runs row is claimed) whenever
+# this guard fails, at the real HTTP boundary.
+# ---------------------------------------------------------------------------
+
+
+def _clean_week2_env(monkeypatch):
+    for var in ("COMQUTOR_WEEK2_LLM_ENABLED", "COMQUTOR_WEEK2_LLM_PROVIDER", "COMQUTOR_WEEK2_LLM_MODEL"):
+        monkeypatch.delenv(var, raising=False)
+
+
+def test_scenario_a_real_false_week2_false_offline_still_allowed(app_client):
+    """A: Real=false / Week2=false -> existing saved-output/read-only
+    behavior remains allowed. app_client's own fixture already clears
+    COMQUTOR_REAL_TRADINGAGENTS_ENABLED; this guard must never touch the
+    offline path at all."""
+    client, _tmp_path = app_client
+    response = client.post("/api/research", json=_offline_body())
+    assert response.status_code == 202
+    body = response.json()
+    assert body.get("error_code") not in ("LIVE_SEMANTIC_PIPELINE_NOT_READY", "LIVE_SEMANTIC_PROVIDER_NOT_READY")
+
+    ready = client.get("/ready")
+    assert ready.json()["live_semantic_pipeline"] == "not_applicable"
+
+
+def test_scenario_b_real_true_week2_false_rejects_before_dispatch(tmp_path, monkeypatch):
+    """B: Real=true / Week2=false -> live submission rejected, TradingAgents
+    call count = 0 (no job manager worker is ever given the request -- the
+    request never reaches a queued/claimed state at all)."""
+    from fastapi.testclient import TestClient
+
+    from comqutor_alpha.api.main import create_app
+
+    _clean_week2_env(monkeypatch)
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    app = create_app(output_root=str(tmp_path))
+    with TestClient(app) as client:
+        response = client.post("/api/research", json={"ticker": "NVDA"})
+        assert response.status_code == 503
+        body = response.json()
+        assert body["error_code"] == "LIVE_SEMANTIC_PIPELINE_NOT_READY"
+        assert body["run_status"] == "failed"
+        # No run was ever claimed for this rejected request.
+        assert client.get(f"/api/research/{body.get('run_id') or 'unknown'}/status").status_code in (404, 200)
+
+        ready = client.get("/ready")
+        ready_body = ready.json()
+        assert ready_body["live_semantic_pipeline"] == "not_ready"
+        assert ready_body["live_semantic_pipeline_reason"] == "week2_llm_disabled"
+        assert ready.status_code == 503
+
+
+def test_scenario_c_real_true_week2_true_provider_missing_rejects_before_dispatch(tmp_path, monkeypatch):
+    """C: Real=true / Week2=true / Provider missing -> live submission
+    rejected, TradingAgents call count = 0."""
+    from fastapi.testclient import TestClient
+
+    from comqutor_alpha.api.main import create_app
+
+    _clean_week2_env(monkeypatch)
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    # A DIFFERENT provider than the (DeepSeek) default TradingAgents profile
+    # -- isolates Week2's own credential check from TradingAgents' own,
+    # already-satisfied one (DEEPSEEK_API_KEY stays present via the
+    # autouse placeholder fixture).
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "claude-haiku")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    app = create_app(output_root=str(tmp_path))
+    with TestClient(app) as client:
+        response = client.post("/api/research", json={"ticker": "NVDA"})
+        assert response.status_code == 503
+        body = response.json()
+        assert body["error_code"] == "LIVE_SEMANTIC_PROVIDER_NOT_READY"
+        assert body["run_status"] == "failed"
+
+        ready = client.get("/ready")
+        ready_body = ready.json()
+        assert ready_body["live_semantic_pipeline"] == "not_ready"
+        assert ready_body["live_semantic_pipeline_reason"] == "week2_provider_not_ready"
+
+
+def test_scenario_d_real_true_week2_true_provider_ready_accepts_submission(tmp_path, monkeypatch):
+    """D: Real=true / Week2=true / Provider ready -> live submission
+    accepted under existing behavior (still never touches a real
+    TradingAgentsGraph -- the fake worker entrypoint proves the request
+    reached the same "created + would dispatch" path as before this
+    guard existed)."""
+    from fastapi.testclient import TestClient
+
+    from comqutor_alpha.api.main import create_app
+    from comqutor_alpha.research_jobs import JobManager
+
+    _clean_week2_env(monkeypatch)
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_MODEL", "deepseek-v4-flash")
+
+    app = create_app(output_root=str(tmp_path))
+    with TestClient(app) as client:
+        client.app.state.job_manager.shutdown()
+        fake_manager = JobManager(
+            max_workers=1,
+            queue_capacity=2,
+            timeout_seconds=60,
+            shutdown_grace_seconds=5,
+            output_root=str(tmp_path),
+            worker_entrypoint=_fake_real_worker_entrypoint,
+            poll_interval=0.02,
+        )
+        fake_manager.start()
+        client.app.state.job_manager = fake_manager
+
+        response = client.post("/api/research", json={"ticker": "NVDA"})
+        assert response.status_code == 202
+        body = response.json()
+        assert body.get("error_code") not in ("LIVE_SEMANTIC_PIPELINE_NOT_READY", "LIVE_SEMANTIC_PROVIDER_NOT_READY")
+        run_id = body["run_id"]
+
+        final = _poll_status(client, run_id, until_statuses={"completed", "partial", "failed"})
+        assert final["status"] == "completed"
+        marker_path = tmp_path / f"{run_id}.fake_worker_marker.json"
+        marker = json.loads(marker_path.read_text())
+        assert marker["allow_real_tradingagents_run"] is True
+
+        ready = client.get("/ready")
+        assert ready.json()["live_semantic_pipeline"] == "ready"
+
+
+def test_scenario_e_read_only_status_unaffected_by_live_semantic_readiness(app_client, monkeypatch):
+    """E: read-only existing completed runs remain viewable regardless of
+    live semantic readiness -- GET /status for an already-completed
+    (offline) run must still succeed even once real execution is enabled
+    with Week2 disabled."""
+    client, _tmp_path = app_client
+    created = client.post("/api/research", json=_offline_body())
+    assert created.status_code == 202
+    run_id = created.json()["run_id"]
+    final = _poll_status(client, run_id, until_statuses={"completed", "partial", "failed"})
+    assert final["status"] == "completed"
+
+    # Now flip on real execution (Week2 still off) and confirm the
+    # already-completed run is still fully readable.
+    _clean_week2_env(monkeypatch)
+    monkeypatch.setenv("COMQUTOR_REAL_TRADINGAGENTS_ENABLED", "true")
+    status = client.get(f"/api/research/{run_id}/status")
+    assert status.status_code == 200
+    assert status.json()["status"] == "completed"
+    history = client.get("/api/research")
+    assert history.status_code == 200
 
 
 # ---------------------------------------------------------------------------

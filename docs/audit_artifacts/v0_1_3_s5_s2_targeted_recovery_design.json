@@ -1,0 +1,631 @@
+{
+  "schema_version": "v0_1_3_s5_s2_targeted_recovery_design.v1",
+  "gold_benchmark_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_benchmark_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_unchanged": true,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "test_files_changed": [],
+  "commit": false,
+  "push": false,
+  "section2_qqq_a201_end_to_end_trace": {
+    "mapper_considered_alpha_ids_for_lineage_anchor_claim": [
+      "A001",
+      "A003",
+      "A101",
+      "A102",
+      "A103",
+      "A301"
+    ],
+    "A201_present_before_graph_attribution": "NOT for the lineage-anchor claim (claim:13, 'Dell is up 300%...') -- A201 never appears in that claim's own candidate_scores at all. BUT A201 IS genuinely present elsewhere in the SAME evidentiary context: claim:10 ('you are ignoring the semiconductor resilience') and claim:62 ('...semiconductor complex...') from the SAME agent output (aggressive_risk_analyst risk-debate) both have matched_alpha=A201, and claim:62 is independently PRIMARY/SECONDARY-qualified (SECONDARY_QUALIFIED_CAUSAL_EVIDENCE, activation_eligible=True) for A201.",
+    "field_with_full_alpha_mapping": "candidate_scores (list, per-claim, each entry has alpha_id/eligible/evidence_stance) -- alpha_matches.json",
+    "field_with_singular_matched_alpha": "matched_alpha (string, mutually exclusive across alphas) -- alpha_matches.json, requires match_status=='matched'",
+    "why_committed_alpha_ids_chose_A301_only": "graph_builder.py::_committed_alpha_ids_for_claim() reads ONLY claim_info['matched_alpha'] for the ONE claim (claim:13) that lineage resolution happened to anchor the canonical relation to. That claim's own matched_alpha is A301 -- even though A301's own candidate_scores entry for THAT claim shows eligible=False, score=0.08, evidence_stance=neutral_background (i.e. even A301 is a weak/arbitrary pick for this specific claim, not a confident match).",
+    "is_A201_lost_to_data_shape_narrowing": true,
+    "is_A201_lost_because_only_one_committed_alpha_retained": true,
+    "is_A201_absent_due_to_relation_compatibility_rejection": false,
+    "proof": "Verified directly: (1) claim:13's candidate_scores contains 6 alphas, none is A201, confirming A201 was never even considered a candidate for THIS specific claim; (2) claim:10 and claim:62 in the SAME agent-output ARE matched_alpha=A201 and claim:62 is activation_eligible=True for A201; (3) NEITHER claim:10 nor claim:62 is the source_claim_id of any edge in structure_graph.json at all -- A201's own genuinely-qualifying evidence never produced its own structural edge either. This is a DUAL gap: (a) an S5 misattribution on the semiconductor_cycle edge (wrong lineage anchor claim), AND (b) a separate S2-like extraction-recall gap where A201's OWN best evidence (claim:62) never became any node/edge at all.",
+    "conclusion": "QQQ A201 is NOT a pure, single-mechanism S5 case as originally framed -- it requires BOTH a relation-compatible re-attribution fix (or better lineage resolution) AND separately extracting a new edge from claim:62 (or equivalent) to be fully recovered. A single-mechanism fix addresses only part of the gap."
+  },
+  "section3_attribution_contract_evaluation": {
+    "A_singular_matched_alpha_only": {
+      "description": "current behavior",
+      "verdict": "INSUFFICIENT -- proven to lose real, independently-qualified Alpha associations (QQQ A201)"
+    },
+    "B_all_mapper_candidate_alpha_ids": {
+      "description": "attribute edge to every alpha with eligible=True on the lineage claim",
+      "verdict": "UNSAFE -- blast radius audit (Section 5) found candidate_scores frequently marks multiple alphas eligible+supports_alpha on the SAME claim (24 such claims across six runs) where the underlying content only substantively supports ONE of them; blind adoption would create real false multi-Alpha attribution"
+    },
+    "C_all_canonically_qualified_alpha_ids": {
+      "description": "attribute edge to every alpha for which this claim is in qualified_claim_ids",
+      "verdict": "SAFER than B (already passed Primary/Secondary+ticker-specific screening) but still risks attributing a structurally-generic edge to multiple alphas whose RELATION content the edge doesn't actually represent (e.g. a claim eligible for both A301 and A304 doesn't mean an edge built from it represents BOTH a revenue-expansion AND a multiple-compression relation)"
+    },
+    "D_relation_compatible_subset_of_canonical_mapped_alpha_ids": {
+      "description": "intersect the claim's canonically-qualified alpha set with an explicit, auditable relation-compatibility table keyed on the edge's source/target node semantics (e.g. a 'semiconductor_cycle' target node is compatible with A201; an edge whose target is a generic 'X_revenue_growth' node is compatible with A301 but not automatically A201)",
+      "verdict": "SAFEST -- preserves relation compatibility explicitly, never blindly unions, bounded and auditable"
+    },
+    "E_another_existing_authority": {
+      "description": "e.g. re-run lineage resolution to prefer the claim with the HIGHEST matched_alpha confidence among all claims in the same canonical relation's supporting quote, rather than the first/only text-match found",
+      "verdict": "COMPLEMENTARY, not a replacement -- improves WHICH claim anchors an edge, addressing the QQQ A201 dual-gap's first half (S5) but not attribution logic itself"
+    },
+    "recommended_contract": "Combine D (relation-compatible subset, for attribution safety) with a bounded form of E (lineage resolution should prefer a canonically-qualified, higher-confidence claim over a weak/arbitrary one when multiple candidate claims exist in the same supporting quote) -- see Section 12 Option recommendation.",
+    "safety_requirement_confirmed": "A structure edge MUST NOT automatically inherit every Alpha candidate -- confirmed necessary by the Section 5 blast-radius data (0 of 7 audited multi-eligible-claim edges would be 'obviously correct' under a blind full-union rule)."
+  },
+  "section4_qqq_a201_counterfactual": {
+    "if_edge_correctly_attributed_to_A201": {
+      "local_structural_edges": "1 (the ai_capex->semiconductor_cycle edge, IF correctly re-attributed)",
+      "qualifying_activation_support_edges": "UNKNOWN -- depends on whether the edge's OWN claim (claim:13, weak/arbitrary for any alpha) would also need to pass A201's qualified_claim_ids intersection (current rule) or benefit from the Section-prior 'Option B' alpha-level fallback (A201 DOES have a non-empty qualified pool: 5 members including claim:62). Under the prior audit's recommended Option B fallback, this edge (causal/asserted, contribution 1.00) WOULD qualify.",
+      "activation_score": "46.2329 (current) + 10.0 (causal/asserted, raw=50, contribution 1.00) = 56.23 IF the Option B fallback also applies",
+      "qualification_ceiling_changes": "No -- eligible_cap remains 70.0, not binding either before or after (uncapped_score never approaches it)",
+      "final_level": "candidate -> active, IF both the S5 re-attribution AND the Option B evidence-fallback are applied together",
+      "official_alpha_hit": "YES, but ONLY under a COMBINED fix (S5 attribution repair + the previously-designed Option B fallback) -- attribution repair ALONE, without also addressing whether claim:13 itself ever qualifies, leaves the eligibility question open, since claim:13 is NOT independently qualified for A201 (it isn't even a candidate)."
+    },
+    "single_repair_sufficient": "UNCERTAIN -- explicitly NOT a confident YES. S5 attribution repair alone re-labels the edge as 'for A201' but does not by itself make claim:13 canonically qualifying evidence for A201 (it never was). Recovery requires EITHER (a) pairing the S5 fix with the already-designed Option B alpha-level fallback (since A201 independently has a non-empty qualified pool via claim:62), OR (b) separately extracting a new edge from claim:62 itself (a distinct S2-like fix). Neither is 'the single repair' the task's Section 4 asks about in isolation."
+  },
+  "section5_blast_radius_audit": {
+    "method": "Scanned all six FINAL_FRESH_SELECTED runs' alpha_matches.json for every claim with >=2 alphas simultaneously eligible=True AND evidence_stance=='supports_alpha' in candidate_scores, then checked whether any structure_graph.json edge traces (via source_claim_ids) to such a claim and whether that edge's alpha_ids captures the full eligible set, a subset, or something else.",
+    "total_multi_eligible_claims_across_six_runs": 24,
+    "total_edges_tracing_to_such_claims": 7,
+    "currently_correct_full_union_cases": 0,
+    "ambiguous_multi_alpha_cases": 4,
+    "ambiguous_examples": [
+      {
+        "ticker": "QQQ",
+        "eligible_alphas": [
+          "A301",
+          "A501"
+        ],
+        "edge_alpha_ids": [],
+        "edge": "ai_capex--supportive-->qqq_revenue_growth",
+        "classification": "AMBIGUOUS_MULTI_ALPHA_CASE -- edge lost ALL alpha attribution despite the claim being eligible for 2 alphas"
+      },
+      {
+        "ticker": "MSFT",
+        "eligible_alphas": [
+          "A102",
+          "A301"
+        ],
+        "edge_alpha_ids": [],
+        "edge": "ai_capex--causal-->inference_demand",
+        "classification": "AMBIGUOUS_MULTI_ALPHA_CASE"
+      },
+      {
+        "ticker": "AMD",
+        "eligible_alphas": [
+          "A301",
+          "A304",
+          "A501",
+          "A601"
+        ],
+        "edge_alpha_ids": [
+          "A304"
+        ],
+        "edge": "ai_demand--causal-->valuation_risk / valuation_risk--conflicting-->amd_revenue_growth",
+        "classification": "AMBIGUOUS_MULTI_ALPHA_CASE -- only 1 of 4 eligible alphas retained, and given the target nodes (valuation_risk), A304 (Multiple Compression) IS the relation-compatible choice -- this happens to already be CORRECT under a relation-compatible-subset contract, not evidence of loss"
+      }
+    ],
+    "safe_multi_alpha_attribution_candidates_found": 0,
+    "affected_tickers": [
+      "QQQ",
+      "MSFT",
+      "AMD"
+    ],
+    "affected_alpha_ids": [
+      "A102",
+      "A103",
+      "A201",
+      "A301",
+      "A304",
+      "A501",
+      "A601"
+    ],
+    "conclusion": "A blind union or blanket 'all-eligible-alphas' attribution rule (Options B/C as literally stated) would touch AT LEAST 7 edges across 3 tickers beyond QQQ A201, with ZERO currently-observed cases where full union would be obviously correct -- confirming the Section 3 finding that only a relation-compatible SUBSET rule (Option D) is safe. A naive fix scoped only to 'QQQ A201' would, if implemented as a general rule change, silently also alter these other 7 edges' attribution -- this must be explicitly bounded/tested before any implementation."
+  },
+  "section6_msft_a304_claim_families": [
+    {
+      "family": "capex_burden_and_growth_vs_valuation",
+      "claim_count": 1,
+      "strongest_claim": "Any slowdown in Azure growth could trigger multiple compression. (fundamental_agent, claim:82)",
+      "mapped_alpha": "A304",
+      "ticker_specific": "Not literally (no 'MSFT'/'Microsoft' token), but 'Azure' is an MSFT-specific product -- see Section 8 caveat",
+      "source_role": "PRIMARY_RESEARCH",
+      "evidence_qualification": "PRIMARY_QUALIFIED, activation_eligible=True, factor_score=1.0, evidence_stance=supports_alpha, relation=conditional",
+      "passed_to_structure_extractor": false,
+      "produced_nodes": false,
+      "produced_edge": false,
+      "structural_classification": "STRUCTURALLY_EXPLICIT"
+    },
+    {
+      "family": "high_rates_discount_rate_pressure",
+      "claim_count": 3,
+      "strongest_claim": "For a stock trading at 27.8x trailing earnings and 21.2x forward earnings, with a PEG of 1.66, rising discount rates are a direct [multiple compression risk] (bear_researcher, paraphrased)",
+      "mapped_alpha": "A304",
+      "ticker_specific": "Partially (metrics are MSFT's own, but text doesn't restate the ticker)",
+      "source_role": "SECONDARY_DECISION_OR_DEBATE (bear_researcher)",
+      "evidence_qualification": "Likely SECONDARY_NOT_TICKER_SPECIFIC or SECONDARY_CAUSALITY_UNPROVEN (not independently verified per-claim in this audit)",
+      "passed_to_structure_extractor": false,
+      "produced_nodes": "Partial ('valuation_risk' node exists from OTHER claims/relations)",
+      "produced_edge": false,
+      "structural_classification": "STRUCTURALLY_IMPLICIT"
+    },
+    {
+      "family": "priced_for_perfection_valuation_pressure",
+      "claim_count": 6,
+      "strongest_claim": "Valuation (PEG 1.66) leaves limited margin of safety if growth disappoints. (fundamental_agent)",
+      "mapped_alpha": "A304",
+      "ticker_specific": "Implicit (MSFT's own metrics)",
+      "source_role": "PRIMARY_RESEARCH",
+      "evidence_qualification": "Likely qualified (not individually re-verified beyond claim:82 in this audit)",
+      "passed_to_structure_extractor": false,
+      "produced_nodes": false,
+      "produced_edge": false,
+      "structural_classification": "STRUCTURALLY_IMPLICIT"
+    },
+    {
+      "family": "descriptive_multiple_statistics",
+      "claim_count": 8,
+      "strongest_claim": "Metric: P/E (TTM); Value: 27.8x; Assessment: Moderately rich (fundamental_agent)",
+      "mapped_alpha": "A304",
+      "ticker_specific": "Yes (MSFT's own reported metric)",
+      "source_role": "PRIMARY_RESEARCH",
+      "evidence_qualification": "Qualified in several cases",
+      "passed_to_structure_extractor": false,
+      "produced_nodes": false,
+      "produced_edge": false,
+      "structural_classification": "DESCRIPTIVE_ONLY -- correctly not extraction-worthy (states a value, no relation)"
+    },
+    {
+      "family": "macro_fed_hike_multiple_compression_debate",
+      "claim_count": 20,
+      "strongest_claim": "The re-rating risk is asymmetric: if the Fed hikes and growth slows (even modestly), the multiple compression on a $3.7 trillion market cap... (bear_researcher)",
+      "mapped_alpha": "A304",
+      "ticker_specific": "Mixed",
+      "source_role": "SECONDARY_DECISION_OR_DEBATE (bear/bull/research_manager/risk analysts/portfolio_manager debate)",
+      "evidence_qualification": "Mostly Secondary, largely NOT ticker-specific per this audit's spot checks",
+      "passed_to_structure_extractor": "Partially -- some rate_cut_cycle/valuation_risk canonical relations DID extract from this family (existing edges tagged A001)",
+      "produced_nodes": true,
+      "produced_edge": "Yes, but tagged A001 (Rate Cut Cycle), not A304",
+      "structural_classification": "STRUCTURALLY_EXPLICIT in places (e.g. 'the Fed hikes... the multiple compresses') but attributed to the macro alpha (A001), not A304"
+    }
+  ],
+  "msft_a304_first_break": "The first, and cleanest, break is at the STRUCTURE EXTRACTOR INPUT stage for the single strongest claim (claim:82, PRIMARY_QUALIFIED, STRUCTURALLY_EXPLICIT, factor_score=1.0) -- it never appears anywhere in extracted_structures.json. This is upstream of any alpha-attribution or evidence-qualification question; the claim simply never reached extraction at all.",
+  "section7_msft_a601_claim_families": [
+    {
+      "family": "retail_sentiment_scorecards",
+      "claim_count": 15,
+      "strongest_examples": [
+        "Overall Sentiment: Mildly Bearish (Score: 3.8/10)",
+        "The StockTwits sample... heavily weighted toward momentum chatter"
+      ],
+      "passed_to_extractor": false,
+      "nodes": false,
+      "edges": false,
+      "why_not_structural": "Pure numeric/scorecard reporting -- no asserted mechanism connecting sentiment to price/momentum outcome"
+    },
+    {
+      "family": "price_target_and_analyst_narrative",
+      "claim_count": 8,
+      "strongest_examples": [
+        "Stifel lifted its MSFT price target to $530 -- described as a 'jaw-dropping' hike"
+      ],
+      "passed_to_extractor": false,
+      "nodes": false,
+      "edges": false,
+      "why_not_structural": "Reports an event/fact, does not assert a momentum-driving mechanism"
+    },
+    {
+      "family": "retail_vs_institutional_divergence",
+      "claim_count": 10,
+      "strongest_examples": [
+        "retail leaning bearish while institutions stay constructive",
+        "The $500 psychological battleground -- dominates retail chatter"
+      ],
+      "passed_to_extractor": false,
+      "nodes": false,
+      "edges": false,
+      "why_not_structural": "Descriptive characterization of a divergence, not a causal narrative-momentum chain"
+    },
+    {
+      "family": "ai_narrative_conditional_collapse",
+      "claim_count": 1,
+      "strongest_examples": [
+        "If OpenAI loses its edge, Azure's AI-driven demand narrative collapses. (bear_researcher)"
+      ],
+      "passed_to_extractor": false,
+      "nodes": false,
+      "edges": false,
+      "why_not_structural": "The ONE claim with explicit causal language in the entire 46-claim A601 pool -- but it asserts narrative COLLAPSE (a negative/conditional risk), not the positive momentum-building mechanism Gold's A601 thesis requires, and is Secondary-sourced (bear_researcher)"
+    }
+  ],
+  "msft_a601_first_break": "Different in character from A304: this audit found NO clean, PRIMARY-qualified, structurally-explicit claim asserting a positive narrative-momentum mechanism anywhere in the 46-claim pool. The single causal-language claim found argues the OPPOSITE (narrative risk/collapse) and is Secondary-sourced. The 'break' here is less a pure extraction-recall failure and more that the underlying generated content for this run genuinely leans descriptive/scorecard rather than mechanistic for this specific Alpha.",
+  "section8_description_vs_structure_classification": {
+    "A304": {
+      "STRUCTURALLY_EXPLICIT": [
+        "Any slowdown in Azure growth could trigger multiple compression. (claim:82)"
+      ],
+      "STRUCTURALLY_IMPLICIT": [
+        "Valuation (PEG 1.66) leaves limited margin of safety if growth disappoints.",
+        "rising discount rates are a direct [pressure] on a rich multiple"
+      ],
+      "DESCRIPTIVE_ONLY": [
+        "Metric: P/E (TTM); Value: 27.8x; Assessment: Moderately rich",
+        "The PEG ratio of 1.66 suggests the stock is priced at a premium"
+      ],
+      "NON_STRUCTURAL": []
+    },
+    "A601": {
+      "STRUCTURALLY_EXPLICIT": [],
+      "STRUCTURALLY_IMPLICIT": [
+        "If OpenAI loses its edge, Azure's AI-driven demand narrative collapses."
+      ],
+      "DESCRIPTIVE_ONLY": [
+        "Overall Sentiment: Mildly Bearish (Score: 3.8/10)",
+        "Stifel lifted its MSFT price target to $530"
+      ],
+      "NON_STRUCTURAL": [
+        "RSI peaked above 79 in early August",
+        "generic retail chatter/positioning commentary"
+      ]
+    },
+    "conclusion": "A304 has at least ONE clean STRUCTURALLY_EXPLICIT, PRIMARY-qualified claim that should have produced an edge -- a genuine extraction-recall defect on the evidence. A601's content is overwhelmingly DESCRIPTIVE_ONLY/NON_STRUCTURAL with only one STRUCTURALLY_IMPLICIT claim (itself negatively-framed and Secondary-sourced) -- extraction recall is NOT clearly defective here; the underlying generated content may simply not contain a qualifying structural relation this period. Do not call A601 an extraction defect on the same footing as A304."
+  },
+  "section9_extractor_blind_spots": [
+    {
+      "mechanism": "relation vocabulary not recognized for conditional/hedged phrasing ('could trigger', 'may cause')",
+      "observed_evidence": "claim:82 uses hedged conditional language ('could trigger') and never entered extracted_structures.json, despite being PRIMARY_QUALIFIED and matching an existing edge_type ('causal') the schema already supports",
+      "affected": "MSFT A304",
+      "confidence": "MEDIUM -- plausible given the specific phrasing, but not proven against the extractor's actual pattern rules (not inspected in this audit, would require reading the Structure Extractor's own relation-recognition code, out of scope for this pass)"
+    },
+    {
+      "mechanism": "claim selection before extractor (fundamentals_report claims systematically under-sampled)",
+      "observed_evidence": "fundamental_agent DOES appear as a source for SOME extracted edges elsewhere in the same run (disproving a blanket exclusion), so this is not a categorical block -- but claim:82 specifically was skipped",
+      "affected": "MSFT A304",
+      "confidence": "LOW (disproven as a categorical explanation, though a per-claim selection heuristic gap remains possible)"
+    },
+    {
+      "mechanism": "valuation/narrative concepts absent from node ontology",
+      "observed_evidence": "A 'valuation_risk' node ALREADY EXISTS in the same run's extracted_structures.json (from other claims/relations) -- the ontology already has a slot for this concept; it was simply not populated FROM claim:82",
+      "affected": "MSFT A304",
+      "confidence": "LOW (ontology gap ruled out -- the concept-node already exists)"
+    },
+    {
+      "mechanism": "underlying content genuinely lacks a positive-momentum causal assertion",
+      "observed_evidence": "Only 1 of 46 A601 claims contains any causal language at all, and it argues narrative COLLAPSE, not construction -- a content-availability issue, not an extractor defect",
+      "affected": "MSFT A601",
+      "confidence": "HIGH"
+    },
+    {
+      "mechanism": "source-role/ticker-specificity screening happening BEFORE (not after) extraction, silently dropping Secondary-sourced macro-debate claims",
+      "observed_evidence": "Many A304-relevant claims (the 20-claim 'macro Fed hike' family) are Secondary-sourced and largely not independently ticker-specific -- consistent with evidence_source_role.py's existing, correct design, not a Structure-side defect",
+      "affected": "MSFT A304 (partially)",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "section10_node_edge_type_expressiveness": {
+    "A304_earnings_expectations_to_multiple_compression": {
+      "can_current_types_represent_it": "YES -- edge_type='causal' + a target node conceptually equivalent to 'valuation_risk' or 'multiple_compression' already exist in this exact run's node set",
+      "classification": "EXTRACTION_RECALL_GAP, not REPRESENTATIONAL_GAP"
+    },
+    "A304_higher_yields_to_discount_rate_pressure": {
+      "can_current_types_represent_it": "YES -- 'rate_cut_cycle --causal--> valuation_risk' already exists as a real edge in this exact run, proving the type system already expresses this exact relation shape",
+      "classification": "EXTRACTION_RECALL_GAP, not REPRESENTATIONAL_GAP (the relation type clearly works; A304 specifically wasn't the attributed alpha on it)"
+    },
+    "A601_ai_narrative_to_investor_attention_to_momentum": {
+      "can_current_types_represent_it": "UNKNOWN/UNTESTED -- no node resembling 'investor_attention' or 'narrative_momentum' exists in ANY of the six runs inspected across this audit series; the edge_type vocabulary (causal/supportive/conflicting) could in principle represent it, but no node ontology precedent exists to confirm fit",
+      "classification": "AMBIGUOUS between EXTRACTION_RECALL_GAP and REPRESENTATIONAL_GAP -- leans REPRESENTATIONAL_GAP given zero precedent anywhere in the corpus, but not proven since the underlying content itself was also found to be weak (Section 8)"
+    },
+    "A601_market_leadership_to_narrative_momentum": {
+      "can_current_types_represent_it": "Same as above -- UNTESTED, no precedent found",
+      "classification": "AMBIGUOUS, leans REPRESENTATIONAL_GAP"
+    }
+  },
+  "section11_s2_counterfactual_recoverability": {
+    "MSFT_A304": {
+      "current_score": 43.3642,
+      "one_edge_causal_conditional_contribution_0_50": {
+        "new_score": 48.36,
+        "crosses_50": false
+      },
+      "one_edge_supportive_asserted_contribution_0_80": {
+        "new_score": 51.36,
+        "crosses_50": true
+      },
+      "two_edges_causal_conditional": {
+        "new_score": 53.36,
+        "crosses_50": true
+      },
+      "conclusion": "Whether ONE edge suffices depends on how strongly the extractor would classify claim:82's assertion_status -- 'conditional' framing ('could trigger') is more conservative (insufficient alone), while a claim like the ALSO-EXPLICIT PEG/margin-of-safety family could plausibly support a second, independent edge. Two qualifying edges of at least conditional strength WOULD cross. Reported honestly as a range, not a single invented number."
+    },
+    "MSFT_A601": {
+      "current_score": 32.7558,
+      "one_edge_causal_asserted_contribution_1_00": {
+        "new_score": 42.76,
+        "crosses_50": false
+      },
+      "two_edges_causal_asserted": {
+        "new_score": 52.76,
+        "crosses_50": true
+      },
+      "conclusion": "Even the strongest possible single edge does not cross (42.76). Two strong edges would (52.76) -- but Section 8 found only ONE weak, negatively-framed, Secondary-sourced causal claim exists in the entire pool, well short of what two genuinely qualifying edges would require. LOW confidence this is achievable without inventing content the underlying evidence doesn't support."
+    }
+  },
+  "section12_s5_design_options": [
+    {
+      "option": "S5 Option A -- Use relation-compatible canonical Mapper Alpha IDs instead of singular matched_alpha",
+      "files": [
+        "comqutor_alpha/graph_engine/graph_builder.py::_committed_alpha_ids_for_claim()"
+      ],
+      "functions": [
+        "_committed_alpha_ids_for_claim",
+        "new: _relation_compatible_alpha_ids()"
+      ],
+      "semantic_impact": "Attribution would consider the claim's full candidate_scores (eligible+supports_alpha) INTERSECTED with a new, explicit relation-compatibility table keyed on edge source/target node semantics",
+      "false_positive_risk": "LOW if the compatibility table is narrow and explicit (not fuzzy)",
+      "multi_alpha_contamination_risk": "LOW-MEDIUM, bounded by the compatibility table",
+      "auditability": "HIGH (explicit table, logged decisions)",
+      "QQQ_A201_recovery": "PARTIAL -- would still require claim:13 to be a genuine A201 candidate, which it is not (Section 2); this option alone does not fix QQQ A201 without ALSO improving lineage resolution",
+      "blast_radius": "Bounded to the 24 multi-eligible claims found in Section 5, but requires building and maintaining a new compatibility table -- non-trivial ongoing maintenance surface"
+    },
+    {
+      "option": "S5 Option B -- Keep matched_alpha as primary, allow secondary canonical Alpha IDs when edge target/source semantics match taxonomy relation",
+      "files": [
+        "comqutor_alpha/graph_engine/graph_builder.py"
+      ],
+      "functions": [
+        "_committed_alpha_ids_for_claim (extended)"
+      ],
+      "semantic_impact": "Similar to Option A but framed as an ADDITIVE secondary attribution rather than a replacement -- matched_alpha remains authoritative, secondary alphas are clearly marked as such (e.g. a new 'secondary_alpha_ids' field, not merged into alpha_ids)",
+      "false_positive_risk": "LOW (secondary alphas are distinguishable from primary, can be excluded from scoring-eligibility by default)",
+      "multi_alpha_contamination_risk": "LOW (opt-in secondary marking, not automatic scoring inclusion)",
+      "auditability": "HIGH",
+      "QQQ_A201_recovery": "SAME LIMITATION as Option A -- does not fix the underlying fact that claim:13 isn't a genuine A201 match",
+      "blast_radius": "Smaller than A (additive field, not a behavior change to existing alpha_ids) -- SAFEST of the three from a backward-compatibility standpoint"
+    },
+    {
+      "option": "S5 Option C -- At graph attribution time, query canonical Mapper result object and intersect with a structure relation compatibility table",
+      "files": [
+        "comqutor_alpha/graph_engine/graph_builder.py"
+      ],
+      "functions": [
+        "_committed_alpha_ids_for_claim, new compatibility-table module"
+      ],
+      "semantic_impact": "Functionally similar to Option A, described from the 'query + intersect' angle rather than 'extend the function' angle -- same underlying mechanism",
+      "false_positive_risk": "LOW, same as A",
+      "multi_alpha_contamination_risk": "LOW-MEDIUM, same as A",
+      "auditability": "HIGH",
+      "QQQ_A201_recovery": "SAME LIMITATION",
+      "blast_radius": "Same as A"
+    },
+    {
+      "option": "S5 Option D (this audit's addition) -- Improve LINEAGE RESOLUTION to prefer a canonically-qualified, higher-confidence claim among all candidate claims in the same canonical-relation supporting quote, rather than accepting the first/weakest text match",
+      "files": [
+        "Structure Extractor's lineage resolution module (not yet located precisely in this audit -- likely comqutor_alpha/structure_engine/ or a graph_engine lineage-resolution helper)"
+      ],
+      "functions": [
+        "the lineage-claim-selection function (not identified by exact name in this pass)"
+      ],
+      "semantic_impact": "Changes WHICH claim anchors a canonical relation's edge -- directly addresses QQQ A201's actual root cause (weak lineage anchor) rather than attribution logic downstream of it",
+      "false_positive_risk": "MEDIUM -- requires care that 'higher confidence' doesn't mean 'any claim mentioning similar keywords', must stay within the SAME agent-output's supporting-quote context, not search globally",
+      "multi_alpha_contamination_risk": "LOW if scoped to the same agent-output/quote context",
+      "auditability": "MEDIUM (requires new logging of why a different claim was chosen)",
+      "QQQ_A201_recovery": "YES, this DIRECTLY addresses the actual identified root cause (Section 2) -- but requires locating and modifying code NOT precisely traced in this audit pass",
+      "blast_radius": "UNKNOWN -- would require the same file/function investigation as Options A-C before scoping could be bounded; NOT recommended for immediate implementation without that follow-up trace"
+    }
+  ],
+  "section12_preferred_s5_option": {
+    "preferred": "Option B (additive secondary-alpha marking)",
+    "reasoning": "Safest backward-compatibility profile (does not alter existing alpha_ids semantics), lowest contamination risk (opt-in, clearly separated field), and highest auditability. HOWEVER, explicitly acknowledged: Option B (and A/C) do NOT by themselves recover QQQ A201, because the actual root cause (Section 2) is a WEAK LINEAGE ANCHOR CLAIM, not merely restrictive attribution logic. Option D more directly addresses QQQ A201's real mechanism but requires further code-location work this audit did not complete. RECOMMENDATION: implement Option B first (safe, general-purpose improvement, addresses the OTHER 7 blast-radius cases found in Section 5 more cleanly than QQQ A201 itself), and treat QQQ A201 as requiring separate Option D follow-up investigation before any recovery claim is made for it specifically."
+  },
+  "section13_s2_design_options": [
+    {
+      "option": "S2 Option A -- Improve extraction coverage using existing ontology/schema only (recognize additional deterministic causal patterns like 'X could trigger Y', 'X compresses Y' from PRIMARY_RESEARCH claims already flowing through the pipeline)",
+      "problem_addressed": "MSFT A304's claim:82-type extraction-recall gap",
+      "files_functions": "Structure Extractor's deterministic-rules pattern set (extraction_method='deterministic_rules', observed in extracted_structures.json but not traced to an exact file/function in this audit pass)",
+      "taxonomy_changes_required": false,
+      "ontology_changes_required": false,
+      "regression_risk": "LOW-MEDIUM -- adding a new deterministic pattern could also newly extract edges from OTHER runs' similarly-phrased claims, requiring the same kind of blast-radius check as Section 5",
+      "A304_recovery_likelihood": "MEDIUM-HIGH (directly targets the proven gap)",
+      "A601_recovery_likelihood": "LOW (the underlying A601 content doesn't contain a comparable clean pattern to recognize -- Section 8)"
+    },
+    {
+      "option": "S2 Option B -- Expand relation compatibility/edge vocabulary for valuation and narrative relations (e.g. explicit 'multiple_compression', 'narrative_momentum' node/edge archetypes)",
+      "problem_addressed": "Would help IF a REPRESENTATIONAL_GAP existed -- Section 10 found this is NOT the case for A304 (existing types already sufficient, proven by the pre-existing valuation_risk node and rate_cut_cycle->valuation_risk edge)",
+      "files_functions": "Node/edge ontology definitions (not located precisely -- likely a schema/taxonomy-adjacent config, distinct from B1/B4 taxonomy)",
+      "taxonomy_changes_required": "Possibly for A601 only (unproven, Section 10 marks it AMBIGUOUS/leans REPRESENTATIONAL_GAP), NOT for A304",
+      "ontology_changes_required": "Same caveat",
+      "regression_risk": "MEDIUM-HIGH -- broadening the ontology is a wider, harder-to-bound change than pattern recognition alone",
+      "A304_recovery_likelihood": "LOW marginal benefit over Option A (A304 doesn't need new ontology)",
+      "A601_recovery_likelihood": "UNCERTAIN -- might help IF a genuine narrative-momentum relation existed in the content to represent, but Section 8 found the content itself is weak, so ontology expansion alone would extract nothing new"
+    },
+    {
+      "option": "S2 Option C -- Pre-normalize structurally implicit claims into extractor-compatible relation candidates using deterministic logic (e.g. a rule that rewrites 'X leaves limited margin of safety if Y' into a conditional causal candidate before extraction)",
+      "problem_addressed": "The STRUCTURALLY_IMPLICIT family (3-6 claims) that Section 6 found for A304, beyond just the one STRUCTURALLY_EXPLICIT claim",
+      "files_functions": "A new pre-extraction normalization pass (does not currently exist as identified in this audit)",
+      "taxonomy_changes_required": false,
+      "ontology_changes_required": false,
+      "regression_risk": "MEDIUM-HIGH -- a general-purpose implicit-to-explicit rewriter is the most complex, highest-effort, and highest-risk of the three options; a poorly-scoped rewrite rule could manufacture false causal claims from genuinely non-causal text elsewhere in the six-ticker corpus",
+      "A304_recovery_likelihood": "HIGH in principle (would catch more of A304's implicit family) but HIGHEST implementation/regression risk of the three",
+      "A601_recovery_likelihood": "LOW (the one A601 implicit claim is negatively-framed and Secondary -- normalizing it would still fail Primary/Secondary+ticker-specific screening)"
+    }
+  ],
+  "section13_preferred_s2_option": {
+    "preferred": "Option A (recognize existing causal-language patterns from PRIMARY_RESEARCH claims already in the pipeline)",
+    "reasoning": "Directly, narrowly targets the ONE proven, clean extraction-recall gap (claim:82) without requiring ontology changes (Section 10 confirmed the existing types already suffice) or the higher-risk implicit-claim rewriting of Option C. Explicitly does NOT promise A601 recovery -- Section 8's finding that A601's content is overwhelmingly descriptive/non-structural means no extraction-pattern improvement can manufacture a relation the underlying evidence doesn't assert."
+  },
+  "section14_can_one_fix_solve_both": {
+    "answer": "NO",
+    "reasoning": "S5 (QQQ A201) is an attribution-and-lineage-resolution problem in comqutor_alpha/graph_engine/graph_builder.py, operating on an EDGE THAT ALREADY EXISTS. S2 (MSFT A304/A601) is a claim-to-structure EXTRACTION problem, operating BEFORE any edge exists at all, in the Structure Extractor's own pattern-recognition layer. They touch different files, different pipeline stages, and different failure modes (misattribution of an existing relation vs. non-existence of a relation). Keeping them as separate remediation tracks, per the task's own Section 14 instruction."
+  },
+  "section15_prioritization": [
+    {
+      "case": "TSM A301",
+      "priority": "P0",
+      "rationale": "Highest legitimacy (Gold-expected, strong evidence, evidence_quality raw=56.56 the highest of any miss), closest to threshold (5.23pp), HIGHEST diagnostic certainty (fully traced to a specific, already-designed fix -- the prior audit's Option B), LOWEST implementation complexity and regression risk of any case. Confirmed recoverable."
+    },
+    {
+      "case": "MSFT A304",
+      "priority": "P1",
+      "rationale": "Strong legitimacy (39 raw claims, one PRIMARY_QUALIFIED structurally-explicit claim proven never extracted), meaningful evidence strength, HIGH diagnostic certainty on the root cause, MEDIUM implementation complexity (new deterministic pattern), MEDIUM regression risk (blast radius not bounded). Plausibly recoverable, contingent on extraction-quality (1 vs 2 edges)."
+    },
+    {
+      "case": "QQQ A201",
+      "priority": "P2",
+      "rationale": "Legitimate Gold expectation, genuine underlying evidence exists (Section 2's dual-gap finding), but LOWER diagnostic certainty on the SINGLE fix needed (requires combining an attribution fix with either the Option B evidence-fallback OR a new extraction from claim:62) and HIGHER implementation complexity (touches lineage resolution, not yet precisely located in code) than TSM A301 or MSFT A304."
+    },
+    {
+      "case": "SNDK A103",
+      "priority": "P2",
+      "rationale": "Legitimate, close near-miss (0.97pt short even under the already-designed Option B fix per the prior audit), independently corroborated by the recovery audit (no hidden recall defect) -- but the prior audit already showed Option B alone does NOT cross it; would need an ADDITIONAL small boost (e.g. a second qualifying claim) not currently identified, making full recovery UNCERTAIN despite high diagnostic clarity."
+    },
+    {
+      "case": "QQQ A301",
+      "priority": "P3",
+      "rationale": "Legitimate expectation, but the prior audit's Option B fix leaves it 2.22pt short, AND this audit's blast-radius check flags it as touching a multi-eligible-claim pattern requiring careful, bounded handling. Lower expected value given the gap remaining even after the best currently-designed fix."
+    },
+    {
+      "case": "MSFT A601",
+      "priority": "P3",
+      "rationale": "Legitimate Gold expectation in principle, but this audit's Section 8 finding (content overwhelmingly descriptive, only one weak/negative causal claim) suggests EXPECTED_CONSERVATIVE_BEHAVIOR rather than a clean, fixable defect. Lowest diagnostic confidence that ANY safe fix would recover it without manufacturing structure the evidence doesn't support."
+    }
+  ],
+  "section16_path_to_75_scenarios": [
+    {
+      "scenario": "Scenario 1 (HIGH_CONFIDENCE): TSM A301 only",
+      "conversions": 1,
+      "macro_average_percent": 63.8095,
+      "confidence": "HIGH_CONFIDENCE"
+    },
+    {
+      "scenario": "Scenario 2 (MEDIUM_CONFIDENCE): TSM A301 + MSFT A304",
+      "conversions": 2,
+      "macro_average_percent": 66.5873,
+      "confidence": "MEDIUM_CONFIDENCE"
+    },
+    {
+      "scenario": "Scenario 3 (SPECULATIVE): TSM A301 + MSFT A304 + QQQ A201 (combined attribution+evidence fix)",
+      "conversions": 3,
+      "macro_average_percent": 69.3651,
+      "confidence": "SPECULATIVE"
+    },
+    {
+      "scenario": "Scenario 4 (SPECULATIVE, upper theoretical bound): all 7 structure-starvation cases recover (requires SNDK A103/A301 and MSFT A601 to ALSO recover, none of which current evidence supports with confidence)",
+      "conversions": 7,
+      "macro_average_percent": 81.5873,
+      "confidence": "SPECULATIVE -- NOT credible given Sections 8/11/13's findings on A601 and the prior audit's finding that SNDK falls short even under its best-designed fix"
+    }
+  ],
+  "section16_conclusion": "No credible (HIGH or MEDIUM confidence) scenario reaches the minimum 5 additional hits or the 75% target using structure-side work alone. The most defensible realistic ceiling is Scenario 3 (3 conversions, 69.37%, itself SPECULATIVE) -- still 2 conversions and 5.63 percentage points short.",
+  "section17_b_side_necessity": {
+    "can_structure_alone_reach_75": "NO",
+    "b_side_recoveries_likely_needed": "At least 2, more likely 3-4, additional legitimate recoveries from the 7 Evidence Starvation cases (NVDA A102, NVDA A201, QQQ A101, MSFT A102, SNDK A102, AMD A102, AMD A201) would be needed even under the most optimistic credible structure-side scenario (Scenario 3, 3 conversions) to reach the minimum 5 total and approach 75%. This audit does NOT investigate B-side cases further, per the task's own Section 17 instruction."
+  },
+  "section18_regression_safety_plan": {
+    "required_negative_controls": [
+      "All 23 currently-hit Gold Alphas across the six runs -- must remain at their current level under any S5 or S2 change",
+      "Non-Gold candidate Alphas in each run's activation_summary -- must not newly cross to active/dominant/regime_level as a side effect",
+      "Admitted main conflicts (NVDA/QQQ/TSM/AMD A101__A304 or A304__A601 pairs) -- conflict admissibility must remain byte-identical; no evidence found in this audit that local_structure_support feeds conflict_detector.py directly, but this must be explicitly re-verified before implementation",
+      "QQQ A301 -- must not silently 'fix itself' via an S5 change not intended for it (the blast-radius audit shows it IS one of the 7 multi-eligible-claim-affected edges)",
+      "SNDK A301 -- must remain unaffected by S5 changes (its issue is edge-type exclusion, unrelated to attribution)",
+      "Currently-correct single-Alpha edges (the vast majority of edges in all six runs) -- must retain identical alpha_ids under any S5 attribution change",
+      "Neutral/opposing evidence (evidence_stance != supports_alpha) -- must never newly qualify for structural support under any S2 extraction change",
+      "Secondary evidence -- SECONDARY_NOT_TICKER_SPECIFIC/SECONDARY_CAUSALITY_UNPROVEN claims must remain ineligible; only PRIMARY_RESEARCH-sourced or already-qualified-Secondary claims may ever produce a NEW extracted edge under S2 Option A",
+      "Multi-Alpha claims (the 24 identified in Section 5) -- each must be individually reviewed post-change, not assumed safe by the aggregate count alone"
+    ],
+    "must_remain_byte_or_semantically_unchanged": [
+      "B1 stance labels and thresholds",
+      "B4 activation thresholds (50.0/70.0/86.0)",
+      "Primary/Secondary qualification logic (evidence_source_role.py, completely untouched by S5 or S2)",
+      "ticker-specificity logic (_is_ticker_specific, completely untouched)",
+      "Gold benchmark v1 and its SHA-256",
+      "conflict admissibility scores (pending explicit re-verification)"
+    ]
+  },
+  "section19_implementation_sequencing": [
+    {
+      "phase": 1,
+      "name": "S5 Option B implementation (additive secondary-alpha marking)",
+      "steps": [
+        "implement additive field",
+        "offline replay against all six runs",
+        "targeted regression tests for the 7 blast-radius cases",
+        "verify zero change to the 23 currently-hit Alphas"
+      ],
+      "expected_outcome": "Safer attribution visibility; does NOT by itself claim QQQ A201 recovery"
+    },
+    {
+      "phase": 2,
+      "name": "S5 Option D follow-up investigation (separate, not yet scoped)",
+      "steps": [
+        "locate exact lineage-resolution code",
+        "trace its blast radius the same way Section 5 did for attribution",
+        "design a bounded fix"
+      ],
+      "expected_outcome": "Only after this phase can QQQ A201 recovery be credibly claimed"
+    },
+    {
+      "phase": 3,
+      "name": "S2 Option A implementation (MSFT A304-type pattern recognition)",
+      "steps": [
+        "identify the exact deterministic-rules extraction module",
+        "add the narrow 'X could trigger/cause Y' pattern",
+        "offline replay against all six runs",
+        "targeted fixtures for MSFT A304 plus negative controls"
+      ],
+      "expected_outcome": "Plausible MSFT A304 recovery, contingent on resulting assertion_status strength"
+    },
+    {
+      "phase": 4,
+      "name": "Targeted regression tests for all four changes combined",
+      "steps": [
+        "unit tests per prior audit's Section 16 test plan plus this audit's Section 18 controls"
+      ],
+      "expected_outcome": "Full offline confidence before any live validation"
+    },
+    {
+      "phase": 5,
+      "name": "Offline replay against all six FINAL_FRESH_SELECTED runs' persisted artifacts",
+      "steps": [
+        "recompute activation levels under combined S5+S2 changes with zero Provider/TradingAgents calls"
+      ],
+      "expected_outcome": "Confirms or revises this audit's Scenario 3 estimate (69.37%) before committing to a fresh six-ticker run"
+    },
+    {
+      "phase": 6,
+      "name": "Only then, a fresh six-ticker production regression",
+      "steps": [
+        "explicit new authorization required",
+        "not performed or scheduled by this audit"
+      ],
+      "expected_outcome": "End-to-end confirmation in a genuinely fresh pipeline execution"
+    }
+  ],
+  "section20_stop_conditions_check": {
+    "requires_changing_gold": false,
+    "requires_lowering_activation_threshold": false,
+    "requires_counting_candidate_or_capped_active_as_hit": false,
+    "requires_bypassing_evidence_authority": false,
+    "creates_uncontrolled_multi_alpha_attribution": "AVOIDED by explicitly recommending Option B (bounded, additive) over a blind union -- Section 5's blast-radius data would make an uncontrolled union approach a genuine stop-condition trigger if it were chosen instead",
+    "requires_broad_taxonomy_rewrite": false,
+    "introduces_cross_ticker_leakage": false,
+    "cannot_preserve_primary_secondary_semantics": false,
+    "blast_radius_cannot_be_bounded": "PARTIALLY -- S5's blast radius (7 edges, 3 tickers) IS bounded and enumerated in this audit (Section 5); S2 Option A's blast radius is NOT yet bounded (would require the same kind of scan against all six runs' claim text for the target pattern before implementation)",
+    "overall_recommendation": "NO hard STOP triggered for either S5 Option B or S2 Option A as scoped. Proceed only to the offline investigation/enumeration phases (1 and the S2-equivalent of Section 5) before any code change, consistent with the prior audit's own sequencing discipline."
+  },
+  "validation_checks": {
+    "gold_sha256_unchanged": true,
+    "no_code_changes": true,
+    "no_test_changes": true,
+    "no_ticker_runs": true,
+    "no_provider_calls": true,
+    "no_tradingagents_calls": true,
+    "no_threshold_changes": true,
+    "no_taxonomy_changes": true,
+    "no_gold_changes": true,
+    "s5_s2_mechanisms_kept_separate": true,
+    "all_counterfactuals_use_persisted_data": true,
+    "no_manufactured_recoverability": true,
+    "no_pass_claim_from_hypothetical_scores": true
+  }
+}

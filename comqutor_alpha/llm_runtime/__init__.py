@@ -2,6 +2,7 @@
 
 from comqutor_alpha.llm_runtime.cache import (
     LLM_CACHE_KEY_VERSION,
+    InMemoryLLMResponseCache,
     LLMResponseCache,
     NullLLMResponseCache,
     RedisLLMResponseCache,
@@ -53,6 +54,7 @@ __all__ = [
     "SEMANTIC_MANIFEST_FILENAME",
     "SEMANTIC_MANIFEST_SCHEMA_VERSION",
     "CacheMetadata",
+    "InMemoryLLMResponseCache",
     "LLMCacheEntry",
     "LLMResponseCache",
     "NullLLMResponseCache",

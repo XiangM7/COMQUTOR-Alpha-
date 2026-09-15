@@ -1,0 +1,99 @@
+{
+  "schema_version": "alpha_memory_feedback_loop_proof.v1",
+  "purpose": "Concrete, real-data evidence for John's v0.1.3 QA issue #6 ('the attached materials do not show the core v0.1.3 feedback-loop functionality') -- this artifact shows the actual, already-implemented cross-run memory feedback loop operating on a real, selected, healthy NVDA production run.",
+  "mode": "shadow",
+  "activation_modulation_applied": false,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+
+  "current_run_id": "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d",
+  "ticker": "NVDA",
+
+  "current_phi_count": 15,
+  "recurring_phi_count": 6,
+  "first_seen_phi_count": 9,
+  "prior_observation_total": 13,
+
+  "recurring_phi_structures": [
+    {
+      "alpha_id": "A001",
+      "source": "rate_cut_cycle",
+      "edge_type": "conflicting",
+      "target": "valuation_risk",
+      "prior_run_ids": ["a8d47429-a47a-446b-93c4-dd718b8e2ff9"],
+      "first_seen": "2026-08-28T21:53:44Z",
+      "last_seen_prior": "2026-08-28T21:53:44Z"
+    },
+    {
+      "alpha_id": "A101",
+      "source": "ai_capex",
+      "edge_type": "causal",
+      "target": "gpu_demand",
+      "prior_run_ids": [
+        "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+        "948be419-b542-4096-a536-ff567ef459c2",
+        "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+        "c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6",
+        "e3eb3909-3744-4a02-9b32-b225cf6ef665"
+      ],
+      "first_seen": "2026-08-11T23:02:05Z",
+      "last_seen_prior": "2026-09-02T01:36:04Z"
+    },
+    {
+      "alpha_id": "A102",
+      "source": "inference_demand",
+      "edge_type": "supportive",
+      "target": "nvda_revenue_growth",
+      "prior_run_ids": ["c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6", "e3eb3909-3744-4a02-9b32-b225cf6ef665"],
+      "first_seen": "2026-08-11T23:02:05Z",
+      "last_seen_prior": "2026-09-02T01:36:04Z"
+    },
+    {
+      "alpha_id": "A103",
+      "source": "ai_capex",
+      "edge_type": "causal",
+      "target": "gpu_demand",
+      "prior_run_ids": ["a8d47429-a47a-446b-93c4-dd718b8e2ff9", "e3eb3909-3744-4a02-9b32-b225cf6ef665"],
+      "first_seen": "2026-08-11T23:02:05Z",
+      "last_seen_prior": "2026-08-28T21:53:44Z"
+    },
+    {
+      "alpha_id": "A103",
+      "source": "ai_capex",
+      "edge_type": "supportive",
+      "target": "nvda_revenue_growth",
+      "prior_run_ids": ["948be419-b542-4096-a536-ff567ef459c2", "a8d47429-a47a-446b-93c4-dd718b8e2ff9"],
+      "first_seen": "2026-08-27T23:40:28Z",
+      "last_seen_prior": "2026-08-28T21:53:44Z"
+    },
+    {
+      "alpha_id": "A301",
+      "source": "gpu_demand",
+      "edge_type": "causal",
+      "target": "nvda_revenue_growth",
+      "prior_run_ids": ["a8d47429-a47a-446b-93c4-dd718b8e2ff9"],
+      "first_seen": "2026-08-28T21:53:44Z",
+      "last_seen_prior": "2026-08-28T21:53:44Z"
+    }
+  ],
+
+  "aggregate_fingerprint_match_status": {
+    "alphas_with_an_aggregate_match_against_any_prior_run": ["A301"],
+    "alphas_with_atomic_recurrence_but_no_aggregate_match": ["A001", "A101", "A102", "A103"],
+    "interpretation": "For 4 of the 5 Alphas showing real recurrence, the WHOLE-Alpha aggregate structure changed across runs (a different, coarser fingerprint each time) while individual atomic causal relations demonstrably recurred. This is exactly why atomic edge phi -- not the whole-Alpha aggregate -- is the primary feedback-loop signal: the aggregate alone would have shown almost no memory at all (only A301 trivially matches, since it has just 1 edge)."
+  },
+
+  "how_to_read_this_as_proof_of_the_feedback_loop": [
+    "current structure: NVDA run 2f8ee897 (the currently selected, healthy production baseline) contains 15 distinct atomic causal-relation structures (phi) across 6 Alphas.",
+    "matched stable phi identity: 6 of those 15 are byte-identical, exact-match structures already computed and hashed deterministically (ticker + alpha_id + source + edge_type + target + taxonomy/identity version).",
+    "prior persisted run(s): each recurring structure lists the REAL, already-persisted NVDA run_ids where the identical structure was independently observed before -- e.g. the ai_capex-causal->gpu_demand relation for A101 was seen in 5 separate prior runs spanning 2026-08-11 through 2026-09-02.",
+    "recurrence/history summary: 6 recurring + 9 first-seen = 15 current; 13 total prior observations across those 6 recurring structures.",
+    "this does NOT change current research conclusions: activation_modulation_applied is false throughout -- every number above is a descriptive, audit-only observation computed AFTER Activation/Conflict/Evidence already finished, never an input to them."
+  ],
+
+  "files_used": [
+    "outputs/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/structure_graph.json (current run)",
+    "outputs/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/tradingagents_comqutor_vocabulary_snapshot.json (current run's taxonomy authority)",
+    "outputs/runs/{5ffe121a,948be419,a8d47429,c9abf687,e3eb3909}.../structure_graph.json (prior runs where recurrence was found)"
+  ]
+}

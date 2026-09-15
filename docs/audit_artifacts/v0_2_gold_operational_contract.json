@@ -1,0 +1,688 @@
+{
+  "schema_version": "gold_operational_contract.v0.2",
+  "gold_version": "v0.2",
+  "package_scope": "STEP 2 -- Gold Labels v0.2 FROZEN operational contract. All 9 Step-1 REVIEW_BEFORE_FREEZE items have been resolved per John's final Step-2 decisions. This is the authoritative, frozen acceptance rule set for Gold v0.2. It contains NO current run outcomes, no PASS/FAIL, and no acceptance computation.",
+  "authority": {
+    "approval_authority": "John",
+    "approval_status": "APPROVED",
+    "model": "EVIDENCE_CONDITIONAL",
+    "supersedes": "The previous model in which every ticker had a fixed mandatory Alpha set -- Gold v0.2 does not recreate fixed expected-Alpha lists; every rule is evidence-gated.",
+    "taxonomy_authority_sources": [
+      "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (canonical Alpha definitions, conflict_alphas, relations)",
+      "docs/specs/product_decisions_and_unknowns.md PD-017 (Development Plan v1.0 Section 4's six mandatory conflict pairs, cross-confirming the taxonomy's own conflict_alphas)",
+      "docs/specs/product_decisions_and_unknowns.md PD-011/012/013/014 (Alpha mapping cardinality, score semantics, threshold, no-match behavior -- reused conceptually for evidence-condition language, not re-derived)"
+    ]
+  },
+  "tiers": {
+    "formal_gold": [
+      "NVDA",
+      "QQQ",
+      "SNDK"
+    ],
+    "silver_diagnostic": [
+      "MSFT",
+      "TSM",
+      "AMD"
+    ]
+  },
+  "hit_types": [
+    "ALPHA_HIT",
+    "COMPOSITE_STRUCTURE_HIT",
+    "NEGATIVE_CONTROL_HIT",
+    "CONDITIONAL_ACCEPTANCE_HIT"
+  ],
+  "hit_type_counts": {
+    "ALPHA_HIT": 12,
+    "COMPOSITE_STRUCTURE_HIT": 3,
+    "CONDITIONAL_ACCEPTANCE_HIT": 2,
+    "NEGATIVE_CONTROL_HIT": 2
+  },
+  "rule_type_semantics": {
+    "must_detect_if_evidence_present": "If the defining current-evidence condition is present, the system must detect an acceptable existing Alpha/structure at an official detected level (active/dominant/regime_level). If the condition is absent, the rule's outcome is NOT_TRIGGERED -- never a forced detection.",
+    "should_detect_if_supported": "If meaningful current evidence supports the concept, the system should surface an appropriate Alpha/structure. Dominance is not required unless explicitly specified.",
+    "conditional_only": "The Alpha/structure is valid only when its defining evidence condition is present. If absent, the system should not force it.",
+    "do_not_force": "Ticker identity, historical exposure, seed status, or stereotype alone can never satisfy a Gold rule -- current evidence is always required. This is a cross-cutting constraint applied wherever noted, not a standalone rule_type of its own.",
+    "allowed_main_conflicts": "One or more existing canonical conflict structures may satisfy the Gold thesis when both sides are currently supported. No conflict is forced when one side lacks sufficient evidence.",
+    "forbidden_dominant_without_strong_evidence": "If a specified Alpha reaches dominant/regime_level status, there must be strong current evidence supporting it, or a future acceptance result should be FAIL for that rule. The actual PASS/FAIL determination is explicitly NOT made in this task."
+  },
+  "detected_level_authority": {
+    "detected_levels": [
+      "active",
+      "dominant",
+      "regime_level"
+    ],
+    "not_detected_levels": [
+      "candidate",
+      "capped_active",
+      "blocked",
+      "unavailable"
+    ],
+    "source": "comqutor_alpha.regression.regression_report_v3._DETECTED_LEVELS / alpha_level_classifier.py's canonical level vocabulary -- reused unmodified, not redefined by this contract."
+  },
+  "evidence_authority_reuse_statement": "'Current evidence' throughout this contract means evidence already surfaced by the EXISTING, unmodified evidence qualification contract: ticker-specific evidence recognition, Primary/Secondary source-role qualification, fact-group deduplication, agent-independence counting, structure (local edge) support, and B1 stance qualification. This contract defines acceptance RULES over that existing evidence authority -- it does not define a second scoring engine, invent new numeric thresholds, or add new evidence-qualification logic.",
+  "tickers": {
+    "NVDA": {
+      "tier": "FORMAL_GOLD",
+      "blocking": true,
+      "thesis": "AI leader growth-vs-valuation conflict",
+      "rules": [
+        {
+          "rule_id": "NVDA-A101-AI-GROWTH",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "AI training/compute demand growth",
+          "rule_type": "must_detect_if_evidence_present",
+          "evidence_condition": "Current NVDA-specific evidence (ticker-specific, qualified, Primary/Secondary-role-aware, deduplicated fact groups) materially describes AI training / AI compute / GPU accelerator demand growth relevant to NVDA's role as an AI accelerator supplier.",
+          "acceptable_alphas": [
+            "A101"
+          ],
+          "required_behavior": "If the evidence condition is present, the system must detect A101 at an official detected level (active, dominant, or regime_level).",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no material NVDA-specific AI/GPU demand evidence exists in a given run, A101 is NOT_TRIGGERED -- no forced detection.",
+          "blocking": true,
+          "rationale": "NVDA's identity as 'the AI leader' is precisely the AI Expansion (A101) core thesis -- when the evidence genuinely exists (expected to be common for NVDA), failing to detect it would be a real capability gap, not an acceptable miss.",
+          "taxonomy_basis": {
+            "alpha_id": "A101",
+            "alpha_name": "AI Expansion",
+            "layer": "Theme",
+            "taxonomy_core_function": "AI training and adoption increase demand for accelerators and AI-related equities.",
+            "mapping_reason": "Direct match to John's 'AI leader growth' concept -- NVDA is A101's own named beneficiary_asset in the taxonomy."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "NVDA-A301-FUNDAMENTAL-GROWTH",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Company fundamental/revenue growth",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "evidence_condition": "Current NVDA-specific evidence supports company revenue growth, raised guidance, or fundamental demand-driven revenue transmission -- not merely NVDA's identity as an AI leader.",
+          "acceptable_alphas": [
+            "A301"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): should_detect_if_supported + conditional_only. A301 is NOT mandatory merely because NVDA is an AI leader. Trigger requires current NVDA-specific company revenue / guidance / fundamental-growth transmission evidence. If meaningful current evidence supports the concept, the system should surface A301 at an appropriate detected level; dominance is not required unless the evidence itself is that strong.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If revenue/guidance/fundamental evidence is genuinely absent or thin, A301 should not be forced -- NVDA's AI-leader identity alone is not sufficient evidence (do_not_force).",
+          "blocking": true,
+          "rationale": "A301 (Revenue Expansion) is a distinct, company-fundamental concept from A101 (thematic AI demand) -- John's Gold explicitly separates 'AI growth' from 'fundamental growth' as two legs of the same conflict thesis, so A301 must be evidence-gated on its own fundamental terms.",
+          "taxonomy_basis": {
+            "alpha_id": "A301",
+            "alpha_name": "Revenue Expansion",
+            "layer": "Fundamental",
+            "taxonomy_core_function": "Strong demand raises revenue guidance, EPS revisions, and repricing potential.",
+            "mapping_reason": "Matches the 'fundamental growth' leg of John's growth-vs-valuation thesis; distinct from A101's thematic-demand framing."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (2026-09 Gold v0.2 freeze, item A) -- should_detect_if_supported + conditional_only, confirmed."
+        },
+        {
+          "rule_id": "NVDA-A304-VALUATION-RISK",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Valuation downside / multiple compression risk",
+          "rule_type": "must_detect_if_evidence_present",
+          "evidence_condition": "Current NVDA-specific evidence materially supports valuation compression, rich valuation, or multiple downside risk.",
+          "acceptable_alphas": [
+            "A304"
+          ],
+          "required_behavior": "If the evidence condition is present, the system must detect A304 at an official detected level.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no material valuation-risk evidence exists, A304 is NOT_TRIGGERED.",
+          "blocking": true,
+          "rationale": "NVDA's premium valuation is a persistent, widely-discussed market topic -- the 'valuation' leg of John's growth-vs-valuation thesis is expected to have genuine supporting evidence whenever the conflict thesis is meant to be tested at all.",
+          "taxonomy_basis": {
+            "alpha_id": "A304",
+            "alpha_name": "Multiple Compression",
+            "layer": "Valuation",
+            "taxonomy_core_function": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+            "mapping_reason": "Direct match to the 'valuation' leg of John's NVDA thesis."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "concept": "AI-leader growth-vs-valuation conflict",
+          "rule_type": "conditional_only",
+          "evidence_condition": "Both a supported growth side (A101 and/or A301 reaching a qualified/detected level) and a supported valuation-risk side (A304 reaching a qualified/detected level) are present in the same run.",
+          "acceptable_alphas": [
+            "A101",
+            "A301",
+            "A304"
+          ],
+          "required_behavior": "When both sides coexist, an admissible growth-vs-valuation conflict (one of the allowed pairs) should be surfaced via the existing, unmodified conflict admissibility (B2) authority -- this rule does not itself define or alter B2's admission logic.",
+          "allowed_main_conflicts": [
+            "A101__A304",
+            "A301__A304"
+          ],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If only one side is present (growth without valuation-risk evidence, or vice versa), the system must NOT force a conflict.",
+          "blocking": true,
+          "rationale": "This is the composite expression of John's core NVDA thesis -- a bull/bear structural tension, not a single Alpha. Both allowed pairs are canonical conflict_alphas entries in the frozen taxonomy (A101<->A304 weight 0.90; A301<->A304 weight 0.85), independently reconfirmed by the Development Plan's own six mandatory conflict pairs (PD-017).",
+          "taxonomy_basis": {
+            "source": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml conflict_alphas; cross-confirmed by docs/specs/product_decisions_and_unknowns.md PD-017's citation of Development Plan v1.0 Section 4's six mandatory pairs"
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "NVDA-SUPPORTING-STRUCTURES",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+          "concept": "Supporting AI-adjacent structures (infrastructure, cycle, narrative)",
+          "rule_type": "should_detect_if_supported",
+          "evidence_condition": "Current NVDA-specific evidence supports AI infrastructure buildout (A103), semiconductor-cycle conditions (A201), and/or narrative/momentum dynamics (A601) -- each a canonical downstream beneficiary of A101 in the taxonomy's relations graph.",
+          "acceptable_alphas": [
+            "A103",
+            "A201",
+            "A601"
+          ],
+          "required_behavior": "May be surfaced when supported by current evidence; explicitly NOT unconditional NVDA requirements -- do_not_force applies to each independently.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "Absence of any of A103/A201/A601 is not itself a Gold miss for NVDA.",
+          "blocking": false,
+          "rationale": "The taxonomy's relations graph (A101->A103 supportive 0.85, A101->A201 supportive 0.75, A101->A601 supportive 0.65) shows these are legitimate, expected downstream structures when AI growth evidence is strong -- but John's Gold framing treats only A101/A301/A304 (and their composite conflict) as the formal, blocking core.",
+          "taxonomy_basis": {
+            "source": "alpha_taxonomy_v1.yaml A101.relations"
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        }
+      ]
+    },
+    "QQQ": {
+      "tier": "FORMAL_GOLD",
+      "blocking": true,
+      "thesis": "Macro / liquidity / valuation / narrative ETF case",
+      "rules": [
+        {
+          "rule_id": "QQQ-A001-RATE-CUT-CYCLE",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Rate-cut / easing-cycle transmission",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "evidence_condition": "Current macro evidence relevant to QQQ's constituent basis supports falling-rate / easing / discount-rate-relief transmission.",
+          "acceptable_alphas": [
+            "A001"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): should_detect_if_supported + conditional_only. Do not require Rate Cut Cycle unless current macro/rate evidence supports it.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no easing-cycle evidence exists, A001 is NOT_TRIGGERED -- QQQ's identity as a growth-heavy ETF does not itself imply an active rate-cut thesis.",
+          "blocking": true,
+          "rationale": "A001 is one of several possible macro drivers for a growth/tech-heavy ETF; John's Gold framing treats QQQ's macro exposure set as a menu of conditionally-relevant Alphas, not five simultaneous mandatory hits.",
+          "taxonomy_basis": {
+            "alpha_id": "A001",
+            "alpha_name": "Rate Cut Cycle",
+            "layer": "Macro",
+            "taxonomy_core_function": "Falling rates lower discount rates and support long-duration growth assets.",
+            "mapping_reason": "QQQ is explicitly named as a beneficiary_asset of A001 in the taxonomy."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item B) -- should_detect_if_supported + conditional_only, confirmed."
+        },
+        {
+          "rule_id": "QQQ-A003-LIQUIDITY-EXPANSION",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Liquidity expansion / risk-appetite transmission",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "evidence_condition": "Current macro evidence supports liquidity expansion, liquidity release, or broad risk-appetite transmission.",
+          "acceptable_alphas": [
+            "A003"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): should_detect_if_supported + conditional_only. Do not require Liquidity Expansion unless current liquidity evidence supports it.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no liquidity-expansion evidence exists, A003 is NOT_TRIGGERED.",
+          "blocking": true,
+          "rationale": "Same menu-of-conditional-macro-drivers logic as A001.",
+          "taxonomy_basis": {
+            "alpha_id": "A003",
+            "alpha_name": "Liquidity Expansion",
+            "layer": "Macro",
+            "taxonomy_core_function": "Improving liquidity supports risk appetite and equity inflows.",
+            "mapping_reason": "QQQ is explicitly named as a beneficiary_asset of A003 in the taxonomy."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item C) -- should_detect_if_supported + conditional_only, confirmed."
+        },
+        {
+          "rule_id": "QQQ-A304-VALUATION-RISK",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Valuation compression / richly-valued-asset downside",
+          "rule_type": "conditional_only",
+          "evidence_condition": "Current QQQ/market-relevant evidence supports valuation compression or richly-valued-asset downside risk.",
+          "acceptable_alphas": [
+            "A304"
+          ],
+          "required_behavior": "Should be surfaced when evidence supports it.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no valuation-risk evidence exists, A304 is NOT_TRIGGERED.",
+          "blocking": true,
+          "rationale": "QQQ's constituent base (growth/tech mega-caps) makes valuation-compression risk a plausible, evidence-gated concern, not an automatic ETF-identity conclusion.",
+          "taxonomy_basis": {
+            "alpha_id": "A304",
+            "alpha_name": "Multiple Compression",
+            "layer": "Valuation",
+            "taxonomy_core_function": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+            "mapping_reason": "Direct match to the 'valuation' leg of John's QQQ macro/liquidity/valuation/narrative thesis."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "QQQ-A501-RECESSION-RISK",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Recession / earnings-downturn risk",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "evidence_condition": "Current macro evidence supports recession risk or an earnings-downturn transmission channel.",
+          "acceptable_alphas": [
+            "A501"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): should_detect_if_supported + conditional_only. Do not require Recession Risk unless current macro/earnings-downturn evidence supports it.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no recession-risk evidence exists, A501 is NOT_TRIGGERED.",
+          "blocking": true,
+          "rationale": "Completes the macro-driver menu; A501 is the taxonomy's designated conflict partner for both A001 and A003.",
+          "taxonomy_basis": {
+            "alpha_id": "A501",
+            "alpha_name": "Recession Risk",
+            "layer": "MacroRisk",
+            "taxonomy_core_function": "Widening credit spreads and economic slowdown pressure earnings and risk appetite.",
+            "mapping_reason": "Direct match to the 'macro' leg of John's QQQ thesis; canonical conflict partner of A001 and A003."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item D) -- should_detect_if_supported + conditional_only, confirmed."
+        },
+        {
+          "rule_id": "QQQ-A601-NARRATIVE-MOMENTUM",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "ETF/mega-cap/AI-market narrative or momentum",
+          "rule_type": "should_detect_if_supported",
+          "evidence_condition": "Current ETF/mega-cap/AI-market narrative or momentum evidence supports a reflexive narrative structure.",
+          "acceptable_alphas": [
+            "A601"
+          ],
+          "required_behavior": "Should be surfaced when meaningful evidence supports it; dominance not required unless the evidence itself is that strong.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no narrative/momentum evidence exists, A601 is NOT_TRIGGERED.",
+          "blocking": true,
+          "rationale": "Matches the 'narrative' leg of John's QQQ thesis directly.",
+          "taxonomy_basis": {
+            "alpha_id": "A601",
+            "alpha_name": "Narrative Momentum",
+            "layer": "Sentiment",
+            "taxonomy_core_function": "Investor attention and crowded narratives drive reflexive flows and momentum.",
+            "mapping_reason": "Direct match to the 'narrative' leg of John's QQQ thesis."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "QQQ-ETF-CONTEXT-CONTROL",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "NEGATIVE_CONTROL_HIT",
+          "concept": "ETF-identity misclassification guard (do not treat QQQ as a single operating company)",
+          "rule_type": "forbidden_dominant_without_strong_evidence",
+          "evidence_condition": "A single-company-fundamental Alpha (named example: A301, Revenue Expansion) reaches dominant/regime_level status for QQQ without a defensible ETF-level current-evidence interpretation (e.g. broad, cross-constituent revenue-growth evidence, not a single holding's earnings).",
+          "acceptable_alphas": [
+            "A301"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): Primary forbidden-dominant Alpha is A301 (Revenue Expansion) ONLY. QQQ is an ETF, not an operating issuer -- A301 must not become dominant/regime_level from QQQ identity, constituent-company revenue claims, or generic mega-cap growth alone. A301 is NOT absolutely forbidden: if strong current ETF-level evidence provides a defensible aggregate fundamental/revenue transmission interpretation, later evaluation may accept it. A101, A103, A304, A501, and A601 are explicitly NOT automatically forbidden under this control, because those can legitimately operate at ETF/theme/macro level.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [
+            "A301"
+          ],
+          "not_triggered_behavior": "If A301 is merely candidate/active with ordinary evidence, this control is not triggered at all.",
+          "blocking": true,
+          "rationale": "QQQ is an ETF, not an operating company -- a company-fundamental Alpha reaching dominance for QQQ needs either genuinely broad, ETF-appropriate evidence or should be treated with suspicion (over-attribution from a single loud constituent). The rule is a forbidden-dominant-without-strong-evidence guard, never a blanket 'never detect A301' rule, per explicit instruction.",
+          "taxonomy_basis": {
+            "source": "John's Gold v0.2 QQQ thesis + forbidden_dominant_without_strong_evidence semantics (task section 6)"
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item E) -- scope locked to A301 only; A101/A103/A304/A501/A601 explicitly excluded from this control's forbidden-dominant list.",
+          "explicitly_not_forbidden": [
+            "A101",
+            "A103",
+            "A304",
+            "A501",
+            "A601"
+          ]
+        }
+      ]
+    },
+    "SNDK": {
+      "tier": "FORMAL_GOLD",
+      "blocking": true,
+      "thesis": "Semiconductor/storage cycle and anti-over-AI false-positive control",
+      "rules": [
+        {
+          "rule_id": "SNDK-A201-SEMICONDUCTOR-CYCLE",
+          "ticker": "SNDK",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Semiconductor/storage cycle conditions",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "evidence_condition": "Current SNDK-specific evidence supports semiconductor/storage-cycle conditions -- inventory, orders, ASP, capex, or demand recovery/deterioration consistent with A201's taxonomy definition.",
+          "acceptable_alphas": [
+            "A201"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): should_detect_if_supported + conditional_only. A201 must not be forced from semiconductor/storage industry membership alone -- current SNDK-specific semiconductor/storage-cycle evidence is required.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no material SNDK-specific semiconductor/storage-cycle evidence exists, A201 is NOT_TRIGGERED -- industry membership alone is not sufficient (do_not_force).",
+          "blocking": true,
+          "rationale": "A201 is SNDK's most directly on-thesis Alpha (storage is a semiconductor-adjacent, cycle-sensitive business) -- this is the 'semiconductor/storage cycle' leg of John's SNDK Gold.",
+          "taxonomy_basis": {
+            "alpha_id": "A201",
+            "alpha_name": "Semiconductor Supercycle",
+            "layer": "Industry",
+            "taxonomy_core_function": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand.",
+            "mapping_reason": "Direct, unambiguous match to SNDK's core semiconductor/storage-cycle business."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item F) -- should_detect_if_supported + conditional_only, confirmed."
+        },
+        {
+          "rule_id": "SNDK-ANTI-OVER-AI-CONTROL",
+          "ticker": "SNDK",
+          "tier": "FORMAL_GOLD",
+          "hit_type": "NEGATIVE_CONTROL_HIT",
+          "concept": "Anti-over-AI false-positive guard",
+          "rule_type": "forbidden_dominant_without_strong_evidence",
+          "evidence_condition": "A101 (AI Expansion) and/or A102 (Inference Explosion) reach dominant/regime_level status for SNDK without strong, SNDK-specific current AI evidence -- i.e. purely from technology/datacenter/storage/AI-adjacent narrative association.",
+          "acceptable_alphas": [
+            "A101",
+            "A102"
+          ],
+          "required_behavior": "If A101/A102 become dominant, the acceptance evaluation must require strong SNDK-specific AI evidence (not just sector/technology-adjacency narrative) before treating it as legitimate. This is NOT a permanent ban on A101/A102 for SNDK -- if strong current SNDK-specific AI evidence genuinely exists, the negative control is not triggered.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [
+            "A101",
+            "A102"
+          ],
+          "not_triggered_behavior": "If A101/A102 remain candidate/active with only ordinary/narrative-adjacent evidence, this control is satisfied without needing to fire.",
+          "blocking": true,
+          "rationale": "SNDK is a storage/memory company, not a primary AI-compute company -- the taxonomy's own A101 (GPU/accelerator-centric) and A102 (enterprise inference-centric) core theses do not naturally center on storage/memory. This is a blocking negative control measuring whether the system correctly resists over-crediting SNDK with AI themes merely from datacenter-adjacent narrative exposure -- a legitimate Gold Hit type in its own right, per the task's own explicit framing. CONFIRMED AT FREEZE (Gold v0.2 freeze, item F): this negative control remains BLOCKING and is the STRONGER of SNDK's two Gold components -- SNDK's Gold case is anchored more on correctly refusing unsupported AI dominance than on A201's own (should-level) detection.",
+          "taxonomy_basis": {
+            "source": "alpha_taxonomy_v1.yaml A101/A102 core_thesis and beneficiary_assets (neither names SNDK or storage/memory specifically)"
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        }
+      ]
+    },
+    "MSFT": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "blocking": false,
+      "thesis": "Enterprise AI / inference / capex burden",
+      "rules": [
+        {
+          "rule_id": "MSFT-A101-ENTERPRISE-AI-CONDITIONAL",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Enterprise AI / cloud AI expansion (conditional mapping only)",
+          "rule_type": "conditional_only",
+          "evidence_condition": "Current MSFT-specific evidence describes AI training/cloud-AI demand growth genuinely attributable to MSFT (e.g. Azure AI infrastructure, Copilot-driven cloud demand) -- not a generic 'MSFT does AI' inference from company identity alone.",
+          "acceptable_alphas": [
+            "A101"
+          ],
+          "required_behavior": "should_detect_if_supported when the evidence genuinely fits A101's training/cloud-AI-demand core thesis specifically (as opposed to A102's inference/enterprise-application framing, which is the more natural MSFT-specific fit -- see MSFT-A102 below).",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If evidence is better characterized as enterprise inference/application demand rather than training/cloud-AI-demand growth, A101 is NOT_TRIGGERED and MSFT-A102 is the appropriate rule instead.",
+          "blocking": false,
+          "rationale": "John's MSFT thesis explicitly separates 'enterprise AI' from 'inference' -- A101's core thesis (training/accelerator/cloud-AI demand) is a plausible but secondary fit for MSFT compared to A102's inference/enterprise-application framing; this rule exists so a genuine training/cloud-AI-demand claim is not left unrepresented, without over-claiming A101 as MSFT's primary AI thesis.",
+          "taxonomy_basis": {
+            "alpha_id": "A101",
+            "alpha_name": "AI Expansion",
+            "layer": "Theme",
+            "taxonomy_core_function": "AI training and adoption increase demand for accelerators and AI-related equities.",
+            "mapping_reason": "Conditional secondary fit for MSFT's cloud-AI-infrastructure angle; A102 is the primary enterprise-AI fit (see below)."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Direct inference-mechanism evidence",
+          "rule_type": "must_detect_if_evidence_present",
+          "evidence_condition": "Current MSFT-specific evidence explicitly describes: inference workloads, inference compute demand, serving AI applications/models, agent/application inference, or inference-side compute consumption.",
+          "acceptable_alphas": [
+            "A102"
+          ],
+          "required_behavior": "If the evidence condition is present, the system must detect A102 at an official detected level (active/dominant/regime_level).",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If evidence does not explicitly engage the inference mechanism, this rule is NOT_TRIGGERED -- see MSFT-A102-INDIRECT-INFERENCE-SUPPORT instead.",
+          "blocking": false,
+          "rationale": "John's Step 2 freeze decision splits A102's evidence-strength behavior: evidence that explicitly names the inference mechanism (workloads, compute demand, serving models, agent/application inference) is strong enough to require detection, matching A102's core thesis directly.",
+          "taxonomy_basis": {
+            "alpha_id": "A102",
+            "alpha_name": "Inference Explosion",
+            "layer": "Theme",
+            "taxonomy_core_function": "Enterprise AI applications and AI agents increase inference compute demand.",
+            "mapping_reason": "Direct match when evidence explicitly names the inference mechanism."
+          },
+          "review_notes": null,
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item G) -- splits the prior single MSFT-A102-INFERENCE rule into DIRECT_INFERENCE_TRIGGER (this rule, must_detect) and INDIRECT_INFERENCE_SUPPORT (should_detect) based on evidence-strength/specificity.",
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "MSFT-A102-INDIRECT-INFERENCE-SUPPORT",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "hit_type": "ALPHA_HIT",
+          "concept": "Indirect/generic enterprise-AI-adoption evidence",
+          "rule_type": "should_detect_if_supported",
+          "evidence_condition": "Current MSFT-specific evidence describes only broader enterprise AI adoption, Copilot usage, AI application adoption, or generic AI demand, WITHOUT clearly engaging the inference mechanism (no explicit inference workload/compute/serving language).",
+          "acceptable_alphas": [
+            "A102"
+          ],
+          "required_behavior": "Should be surfaced when meaningful evidence supports it; A102 must NOT be forced from generic AI adoption alone (do_not_force).",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If no enterprise-AI-adoption evidence at all exists, this rule is NOT_TRIGGERED.",
+          "blocking": false,
+          "rationale": "Generic enterprise-AI/Copilot-adoption language plausibly implies inference demand but does not explicitly prove it -- John's Step 2 decision treats this as a softer, should-level trigger, distinct from the direct/must-level trigger above.",
+          "taxonomy_basis": {
+            "alpha_id": "A102",
+            "alpha_name": "Inference Explosion",
+            "layer": "Theme",
+            "taxonomy_core_function": "Enterprise AI applications and AI agents increase inference compute demand.",
+            "mapping_reason": "Indirect/plausible fit when evidence describes adoption without naming the inference mechanism explicitly."
+          },
+          "review_notes": null,
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item G) -- companion should-level rule to MSFT-A102-DIRECT-INFERENCE-TRIGGER.",
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        },
+        {
+          "rule_id": "MSFT-CAPEX-BURDEN-CONDITIONAL",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+          "concept": "AI capex burden (not automatically a valuation-risk Alpha)",
+          "rule_type": "conditional_only",
+          "evidence_condition": "Current MSFT-specific evidence connects AI/cloud capex burden to one or more of: margin pressure, free-cash-flow pressure, return-on-invested-capital/return pressure, valuation downside, multiple compression, or economically equivalent downside transmission. Capex spending alone, without one of these linked consequences, does not satisfy this condition.",
+          "acceptable_alphas": [
+            "A304"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): do_not_force -- capex by itself does NOT imply A304. A304 becomes an acceptable conditional mapping only if current evidence connects capex burden to one of the named downstream pressure channels above. If evidence merely says Microsoft is spending heavily on AI infrastructure, do_not_force A304.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If capex is discussed only as a growth investment (without a linked margin/FCF/returns/valuation pressure narrative), CAPEX_BURDEN_CONDITIONAL is NOT_TRIGGERED and A304 must not be inferred from capex mentions alone.",
+          "blocking": false,
+          "rationale": "Capex spending by itself is a NEUTRAL or even bullish signal (investment in future capacity) -- John's 'capex burden' concept specifically means capex becoming a financial BURDEN, which is a distinct, additional condition beyond capex simply existing. Encoding this as its own named conditional rule (rather than silently equating capex-mention with A304) prevents a systematic over-triggering of Multiple Compression for any capex-heavy narrative.",
+          "taxonomy_basis": {
+            "alpha_id": "A304",
+            "alpha_name": "Multiple Compression",
+            "layer": "Valuation",
+            "taxonomy_core_function": "Rich valuation and high multiples create downside risk despite strong fundamentals.",
+            "mapping_reason": "A304 is the correct corresponding Alpha ONLY once capex burden is linked to a valuation/margin/FCF/returns consequence -- never from capex volume alone."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item H) -- confirmed do_not_force with the finalized downside-linkage list; MSFT remains SILVER/non-blocking."
+        }
+      ]
+    },
+    "TSM": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "blocking": false,
+      "thesis": "Semiconductor foundry / AI infrastructure transmission",
+      "rules": [
+        {
+          "rule_id": "TSM-AI-TO-FOUNDRY-TRANSMISSION",
+          "ticker": "TSM",
+          "tier": "SILVER_DIAGNOSTIC",
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "concept": "AI/infrastructure demand -> semiconductor/foundry demand -> TSM-specific company impact",
+          "rule_type": "conditional_only",
+          "evidence_condition": "Current evidence supports at least one leg of the transmission chain: AI expansion demand (A101) and/or AI infrastructure buildout (A103) driving semiconductor-cycle conditions (A201), optionally continuing to TSM-specific company revenue impact (A301) when company-fundamental evidence exists.",
+          "acceptable_alphas": [
+            "A101",
+            "A201",
+            "A301"
+          ],
+          "required_behavior": "FINAL (resolved Step 2): canonical acceptable transmission paths are A101 -> A201 and A101 -> A201 -> A301 (both hops directly confirmed by the taxonomy's own relations graph, weights 0.75/0.75), where A301 remains conditional on TSM-specific fundamental/revenue evidence. A103 -> A201 is explicitly NOT treated as a canonical taxonomy path -- the current canonical taxonomy does not define that edge, and no new taxonomy edge is invented here. A103 may appear as an OPTIONAL_SUPPORTING_ALPHA when current evidence supports AI infrastructure build-out -- it may contribute contextual evidence but is not itself proof of a canonical A103->A201 structural edge. Do not require every upstream Alpha simultaneously.",
+          "allowed_main_conflicts": [],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If none of A101/A201/A301 show supporting current evidence (with A103 only ever contextual, never load-bearing on its own), AI_TO_FOUNDRY_TRANSMISSION is NOT_TRIGGERED.",
+          "blocking": false,
+          "rationale": "TSM's role as the foundry underlying the AI buildout is a multi-hop structural thesis, not a single Alpha -- the taxonomy's own directed relations graph directly confirms two of the chain's legs (A101->A201, A201->A301) plus a direct A103->A301 shortcut, giving this composite a genuine taxonomy basis rather than an invented structure.",
+          "taxonomy_basis": {
+            "source": "alpha_taxonomy_v1.yaml A101.relations (->A201, weight 0.75), A201.relations (->A301, weight 0.75)",
+            "excluded_path": "A103 -> A201 is NOT present in alpha_taxonomy_v1.yaml's A103.relations (A103's only listed relation is ->A301, weight 0.65) -- confirmed excluded from canonical transmission paths at freeze; no new taxonomy edge was created."
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1",
+          "optional_supporting_alphas": [
+            "A103"
+          ],
+          "resolution_note": "RESOLVED_STEP_2: John's final decision (Gold v0.2 freeze, item I) -- A103->A201 removed as canonical; canonical paths limited to A101->A201->A301; A103 downgraded to OPTIONAL_SUPPORTING_ALPHA (contextual only)."
+        }
+      ]
+    },
+    "AMD": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "blocking": false,
+      "thesis": "AI semiconductor competitor / valuation conflict",
+      "rules": [
+        {
+          "rule_id": "AMD-AI-GROWTH-VS-VALUATION",
+          "ticker": "AMD",
+          "tier": "SILVER_DIAGNOSTIC",
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "concept": "AI semiconductor competitor growth-vs-valuation conflict",
+          "rule_type": "conditional_only",
+          "evidence_condition": "Current AMD-specific evidence supports AI/semiconductor growth (A101 and/or A301, optionally A201) AND valuation-risk evidence (A304) coexisting in the same run.",
+          "acceptable_alphas": [
+            "A101",
+            "A201",
+            "A301",
+            "A304"
+          ],
+          "required_behavior": "When both a supported growth side and a supported valuation-risk side coexist, an admissible conflict (one of the allowed pairs) should be surfaced via the existing, unmodified conflict admissibility (B2) authority. Do not force either pair.",
+          "allowed_main_conflicts": [
+            "A101__A304",
+            "A301__A304"
+          ],
+          "forbidden_dominant_alphas": [],
+          "not_triggered_behavior": "If only one side is present, the system must NOT force a conflict.",
+          "blocking": false,
+          "rationale": "AMD is the taxonomy's second most direct AI-semiconductor-competitor thesis after NVDA -- the same growth-vs-valuation composite structure applies, using the same two canonical conflict pairs already confirmed for NVDA, but as a Silver (non-blocking) diagnostic rather than Formal Gold.",
+          "taxonomy_basis": {
+            "source": "alpha_taxonomy_v1.yaml conflict_alphas (A101<->A304 weight 0.90; A301<->A304 weight 0.85), same canonical pairs as NVDA-GROWTH-VS-VALUATION-CONFLICT"
+          },
+          "review_notes": null,
+          "evaluation_status": "NOT_EVALUATED_STEP_1"
+        }
+      ]
+    }
+  },
+  "human_review_flags": {
+    "count": 0,
+    "rule_ids": [],
+    "purpose": "All 9 Step-1 ambiguities were resolved by John's final Step-2 decisions (see each rule's resolution_note). No ambiguity remains unresolved at freeze.",
+    "resolved_at_freeze": [
+      "NVDA-A301-FUNDAMENTAL-GROWTH",
+      "QQQ-A001-RATE-CUT-CYCLE",
+      "QQQ-A003-LIQUIDITY-EXPANSION",
+      "QQQ-A501-RECESSION-RISK",
+      "QQQ-ETF-CONTEXT-CONTROL",
+      "SNDK-A201-SEMICONDUCTOR-CYCLE",
+      "MSFT-A102-INFERENCE (split into MSFT-A102-DIRECT-INFERENCE-TRIGGER + MSFT-A102-INDIRECT-INFERENCE-SUPPORT)",
+      "MSFT-CAPEX-BURDEN-CONDITIONAL",
+      "TSM-AI-TO-FOUNDRY-TRANSMISSION"
+    ]
+  },
+  "anti_leakage": {
+    "actual_run_results_inspected": false,
+    "actual_detected_alphas_inspected": false,
+    "actual_main_conflicts_inspected": false,
+    "acceptance_results_computed": false,
+    "gold_rules_modified_after_result_inspection": false,
+    "fresh_run_results_inspected": false,
+    "acceptance_computed": false,
+    "leakage_incident": null,
+    "statement": "Only comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (canonical Alpha definitions/conflicts/relations) and docs/specs/product_decisions_and_unknowns.md (design-decision records, not run results) were read in this task. No alpha_activations.json, no fresh-run structure_graph.json, no final acceptance report, no prior Gold-validation outcome, and no retrospective benchmark percentage were inspected. Step 2 (this freeze) applied only John's already-supplied final decisions and re-consulted the same taxonomy file for the TSM A103/A201 relation check -- no fresh-run artifact, detected-Alpha set, actual conflict, or acceptance result was inspected during freeze."
+  },
+  "evaluation_status": "NOT_EVALUATED",
+  "freeze_status": "FROZEN_GOLD_V0_2",
+  "freeze_timestamp": "2026-09-10T21:04:41+00:00",
+  "review_items_resolved": 9,
+  "remaining_review_items": [],
+  "anti_leakage_status": "CLEAN -- no fresh-run results, detected Alpha sets, actual conflicts, or acceptance results were inspected in Step 1 or Step 2.",
+  "gold_immutability_rule": "After this freeze, Gold v0.2 rules must NOT be edited in response to actual Alpha results, conflict mismatches, low Gold Hit, unexpected failures, or release outcome. Any future semantic change to Gold requires a NEW Gold version (e.g. v0.3) -- Gold v0.2 must never be silently mutated once comparison against real run results begins.",
+  "total_rule_count": 19
+}

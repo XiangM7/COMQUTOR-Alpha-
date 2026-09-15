@@ -132,5 +132,176 @@
   },
   "total_present": 54,
   "total_required": 54,
-  "all_complete": true
+  "all_complete": true,
+  "v0_1_2_1_fresh_baseline": {
+    "as_of": "2026-08-25T20:17:38.170873+00:00",
+    "note": "Fresh Step-4-retry production runs (real TradingAgents + real DeepSeek Provider calls), verified against the same 9-artifact A2 contract. The block above (tickers/total_present/etc.) is the ORIGINAL v0.1.2 snapshot and is left untouched.",
+    "tickers": {
+      "NVDA": {
+        "run_id": "6f4e07f9-e7fb-4637-9105-5d6936e28f81",
+        "run_dir": "outputs/runs/6f4e07f9-e7fb-4637-9105-5d6936e28f81",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "QQQ": {
+        "run_id": "57244747-7237-4cb6-a01c-cb8dd95d122f",
+        "run_dir": "outputs/runs/57244747-7237-4cb6-a01c-cb8dd95d122f",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "MSFT": {
+        "run_id": "ce6b9628-b23f-4933-9fde-2568b315adf7",
+        "run_dir": "outputs/runs/ce6b9628-b23f-4933-9fde-2568b315adf7",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "SNDK": {
+        "run_id": "e4309acb-22c6-475e-a357-1e47db587202",
+        "run_dir": "outputs/runs/e4309acb-22c6-475e-a357-1e47db587202",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "TSM": {
+        "run_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8",
+        "run_dir": "outputs/runs/43660d9d-5993-4d2d-a7d8-9b3a47fd59b8",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "AMD": {
+        "run_id": "eb714c04-645c-41e2-8292-a4739915f940",
+        "run_dir": "outputs/runs/eb714c04-645c-41e2-8292-a4739915f940",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      }
+    },
+    "total_present": 54,
+    "total_required": 54,
+    "all_complete": true
+  },
+  "v0_1_2_1_step10_final_production_e2e": {
+    "as_of": "2026-08-28",
+    "note": "Step 10 FINAL fresh six-ticker production E2E runs (real TradingAgents + real DeepSeek Provider calls), verified against the same 9-artifact A2 contract. Recomputed fresh from these new run_ids -- not reusing any historical 54/54 count. The block(s) above are earlier snapshots and are left untouched.",
+    "tickers": {
+      "NVDA": {
+        "run_id": "948be419-b542-4096-a536-ff567ef459c2",
+        "run_dir": "outputs/runs/948be419-b542-4096-a536-ff567ef459c2",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "QQQ": {
+        "run_id": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+        "run_dir": "outputs/runs/defeb528-673e-44f7-8d94-c0abdfef03d4",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "MSFT": {
+        "run_id": "c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+        "run_dir": "outputs/runs/c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "SNDK": {
+        "run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+        "run_dir": "outputs/runs/519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "TSM": {
+        "run_id": "5be841d5-0924-4943-8d37-ccd4168228cb",
+        "run_dir": "outputs/runs/5be841d5-0924-4943-8d37-ccd4168228cb",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "AMD": {
+        "run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+        "run_dir": "outputs/runs/4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      }
+    },
+    "total_present": 54,
+    "total_required": 54,
+    "all_complete": true
+  },
+  "v0_1_2_1_step11_final_production_e2e_r2": {
+    "as_of": "2026-08-29",
+    "note": "Step 11 composite repaired final production E2E run set (NVDA/MSFT/TSM replaced after a real provider-error storm degraded the Step-10 originals; QQQ/SNDK/AMD retained from Step 10). Recomputed fresh -- not reusing any historical count. Earlier blocks are left untouched.",
+    "tickers": {
+      "NVDA": {
+        "run_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+        "run_dir": "outputs/runs/a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "QQQ": {
+        "run_id": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+        "run_dir": "outputs/runs/defeb528-673e-44f7-8d94-c0abdfef03d4",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "MSFT": {
+        "run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+        "run_dir": "outputs/runs/6cd2566d-e0f1-4306-995f-74f39efb21eb",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "SNDK": {
+        "run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+        "run_dir": "outputs/runs/519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "TSM": {
+        "run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+        "run_dir": "outputs/runs/0a44ec41-c181-488d-94b8-00a333e85ddb",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      },
+      "AMD": {
+        "run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+        "run_dir": "outputs/runs/4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+        "present": 9,
+        "required": 9,
+        "missing": [],
+        "complete": true
+      }
+    },
+    "total_present": 54,
+    "total_required": 54,
+    "all_complete": true
+  }
 }

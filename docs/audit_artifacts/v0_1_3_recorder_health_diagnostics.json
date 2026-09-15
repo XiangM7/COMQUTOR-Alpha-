@@ -1,0 +1,73 @@
+{
+  "schema_version": "v0_1_3_recorder_health_diagnostics.v1",
+  "scope": "MEASUREMENT_ONLY -- diagnostics, never mutates recorder/session behavior",
+  "architecture_role": "AUDIT_TRACE_ONLY",
+  "canonical_semantic_losses_proof": "See docs/audit_artifacts/v0_1_3_tsm_recorder_variance_audit.md Section 3 -- recorder.append() failures are caught inside SemanticRuntimeSession.finalize_call() and again inside Week2LLMGateway.finalize_semantic_invocation(), never reaching any of the 4 task-level callers (alpha_mapper.py, structure_extractor.py, evidence_stance_llm.py) whose semantic result (invocation.validated_output) was already fixed before the recorder/finalize call ran.",
+  "data_source_investigation": {
+    "run_scoped_persisted_artifact_available": false,
+    "reason": "SemanticRuntimeSession._degraded_reason_codes is a deduplicated list (a reason code is appended at most once per session) and is never written into llm_semantic_manifest.json (verified: no 'degraded_reason_codes' key in the manifest schema). The manifest's own 'complete' field does flip to False when ANY incomplete-flagged degradation occurs, but this is not recorder-specific (both the OLD and NEW TSM runs show complete=False for different reasons) and carries no count.",
+    "only_available_source": "process-level launcher log (e.g. /tmp/comqutor_live_start.log), which is ephemeral and non-run-scoped -- never assumed canonical or durable by this module.",
+    "recorder_source_durability_default": "EPHEMERAL_LOG_ONLY (when a log source is supplied) or UNAVAILABLE (when none is)"
+  },
+  "tickers": {
+    "TSM": {
+      "runs": {
+        "dfc7ceb3-3584-4514-bd84-6c371aab3e95": {
+          "ticker": "TSM",
+          "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+          "recorder_failure_events": null,
+          "recorder_health": null,
+          "audit_trace_loss_events": null,
+          "canonical_semantic_losses": null,
+          "recorder_failure_error_types": {},
+          "recorder_failure_components": null,
+          "recorder_traceability_unknown_count": null,
+          "recorder_source": null,
+          "recorder_source_durability": "UNAVAILABLE",
+          "architecture_role": "AUDIT_TRACE_ONLY"
+        },
+        "0aeea938-97a8-49c8-97e1-409f6dadad30": {
+          "ticker": "TSM",
+          "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+          "recorder_failure_events": 247,
+          "recorder_health": "RECORDER_DEGRADED",
+          "audit_trace_loss_events": 247,
+          "canonical_semantic_losses": 0,
+          "recorder_failure_error_types": {
+            "RecorderIntegrityError": 247
+          },
+          "recorder_failure_components": null,
+          "recorder_traceability_unknown_count": 247,
+          "recorder_source": "/tmp/comqutor_live_start.log",
+          "recorder_source_durability": "EPHEMERAL_LOG_ONLY",
+          "architecture_role": "AUDIT_TRACE_ONLY"
+        }
+      }
+    }
+  },
+  "provider_recorder_separation_check": {
+    "recorder_events_counted_as_provider_failures": false,
+    "recorder_events_counted_as_provider_orphans": false,
+    "recorder_events_create_impacted_alpha": false,
+    "recorder_failure_events": 247,
+    "provider_health_independent_value": "PROVIDER_DEGRADED",
+    "provider_failure_events_independent_value": 117,
+    "provider_final_orphans_independent_value": 42,
+    "impacted_alpha_ids_independent_value": [
+      "A101"
+    ]
+  },
+  "invariant_confirmed": "SEMANTIC_RECORDER_APPEND_FAILED does not increment provider_failure_events, provider_final_orphans_total, claims_orphaned_by_provider_failure, or alphas_impacted_by_provider_failure -- confirmed via tests/test_recorder_health_diagnostics.py (test_recorder_events_do_not_become_provider_failures, test_separation_holds_even_when_provider_is_independently_degraded) and via direct comparison on the real new TSM run (247 recorder failures, impacted_alpha_ids independently confirmed unchanged at ['A101']).",
+  "final_validation": {
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+    "recorder_py_modified": false,
+    "session_py_modified": false,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "schema_version": "v0.1.3_qa_closure.section_i.v1",
+  "task": "COMQUTOR Alpha v0.1.3 QA Closure, Section I: one fresh live smoke test",
+  "run_id": "c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6",
+  "ticker": "NVDA",
+  "analysis_date": "2026-09-02",
+  "cache_disposition": "force_refreshed",
+  "execution_mode": "real",
+  "created_at": "2026-09-02T01:31:38.346936+00:00",
+  "completed_at": "2026-09-02T02:38:44.259291+00:00",
+  "elapsed_seconds": 4025,
+  "smoke_health_checklist": {
+    "week2_llm_enabled": {
+      "required": true,
+      "observed": true,
+      "pass": true
+    },
+    "alpha_coverage_not_100_percent_unavailable": {
+      "required": "not 100% UNAVAILABLE",
+      "observed": {
+        "matched": 230,
+        "no_match": 185,
+        "unavailable": 408,
+        "total": 823,
+        "unavailable_percent": 49.6,
+        "matched_plus_no_match_coverage_percent": 50.4
+      },
+      "pass": true,
+      "note": "Passes the literal checklist bar (not 100% unavailable, matched>0), but 49.6% UNAVAILABLE is far below the Step 5A healthy baseline (0.8% UNAVAILABLE, 99.2% coverage) -- see anomaly below."
+    },
+    "committed_alpha_matches_gt_0": {
+      "required": ">0",
+      "observed": {
+        "active_count": 2,
+        "dominant_count": 2,
+        "candidate_count": 6,
+        "scored_alpha_count": 10
+      },
+      "pass": true
+    },
+    "evidence_facts_gt_0": {
+      "required": ">0",
+      "observed": 114,
+      "pass": true
+    },
+    "graph_edges_gte_3": {
+      "required": ">=3",
+      "observed": 8,
+      "pass": true
+    }
+  },
+  "checklist_verdict": "PASS (every literal required bullet is satisfied)",
+  "unresolved_anomaly": {
+    "finding": "61.3% of all LLM semantic calls in this run (434 of 708 records in llm_semantic_manifest.json) returned provider_status=\"provider_error\" from DeepSeek (WEEK2_LLM_TRANSPORT_ERROR, error_message always null in the persisted logs -- no HTTP status/exception text is captured anywhere), triggering deterministic_fallback. A further 22 hit WEEK2_LLM_TIMEOUT and 3 WEEK2_LLM_VALIDATION_FAILED. llm_semantic_manifest.json itself reports complete=false.",
+    "comparison_to_precedent": "Step 11's own live health probe (10/10 single-claim alpha_classifier requests, 0 errors, 0 timeouts, latencies 1.1-3.3s) is the last verified-healthy DeepSeek baseline for this exact provider/model/profile. This run's 61% provider_error rate is a dramatic regression from that baseline.",
+    "root_cause_status": "NOT DIAGNOSED. Candidates not yet ruled out: (a) a transient DeepSeek-side outage/rate-limit during this specific hour, unrelated to any code in this repository; (b) the request concurrency introduced by the pre-existing (session-predating) alpha_mapper.py/week2_llm.py ThreadPoolExecutor change interacting badly with DeepSeek's actual rate limits under real multi-claim-type concurrent load (this run exercises claim_batch_enrichment, alpha_classifier, evidence_stance_classifier, and structure_extractor concurrently -- a combination Step 5A's more narrowly-scoped repair validation did not test); (c) something specific to NVDA's unusually large claim volume (823 claims) versus the tickers previously validated.",
+    "no_code_in_this_session_touches_this_path": "Sections A-H of this v0.1.3 session touched entity-exposure API overlay, alpha_level_classifier.py's Active-level gate, and conflict_detector.py's display filter -- none of these are anywhere near the LLM transport/retry/concurrency layer. This anomaly is not attributable to this session's own changes."
+  },
+  "recommendation": "The literal Section I checklist passes, but the 61% provider_error rate is a real, materially degraded signal that the checklist was not designed to catch (it only guards against total failure, not degraded quality). Proceeding to Section J's five additional real ticker runs at this same error rate risks the same kind of wasted live-run spend this session's Section A guard was built to prevent, and produces a NVDA baseline with roughly half the semantic coverage of the last known-healthy baseline. Recommend a fast, cheap re-probe of current DeepSeek health (10 single-claim requests, matching the Step 11 precedent) before deciding whether to proceed to Section J now or wait/retry.",
+  "provider_calls_this_section": "~708 (all counted in llm_semantic_manifest.json's provider_call_count field, which reports 1149 total including retries) + 10 for the follow-up health probe below",
+  "tradingagents_calls_this_section": 1,
+  "follow_up_deepseek_health_probe": {
+    "method": "10 single-claim alpha_classifier requests via the real production call path (_classify_alpha_with_llm + build_server_week2_llm_gateway), concurrency 4, over real persisted NVDA claims from this same run -- exactly matching the Step 11 precedent methodology.",
+    "run_at": "2026-09-02, immediately after the NVDA smoke run completed",
+    "result": "10/10 success, 0 errors, 0 timeouts. Latencies 1.91-5.61s (vs. Step 11's established healthy baseline of 1.1-3.3s -- still comfortably healthy, no transport errors of any kind).",
+    "conclusion": "DeepSeek is confirmed currently healthy. The 61% provider_error rate observed during the NVDA run was most likely a transient condition -- possibly related to the real sustained concurrent load of four different LLM task types (claim_batch_enrichment, alpha_classifier, evidence_stance_classifier, structure_extractor) running together for over an hour, which this light 4-concurrent single-shot probe does not reproduce -- rather than a persistent provider outage or a defect introduced by this session's own code changes. Root cause of the sustained-load failure mode remains undiagnosed at the mechanism level, but current provider health is verified good enough to proceed."
+  },
+  "commit": false,
+  "push": false,
+  "second_nvda_run_reproducibility_check": {
+    "run_id": "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d",
+    "purpose": "User-requested re-run to check whether the first run (c9abf687) 61% provider_error rate reproduces, before committing to the five-ticker Section J run set.",
+    "result": {
+      "provider_status_breakdown": {
+        "success": 547,
+        "timeout": 42,
+        "provider_error": 0
+      },
+      "alpha_match_coverage": {
+        "matched": 372,
+        "no_match": 397,
+        "unavailable": 7,
+        "total": 776,
+        "coverage_percent": 99.1
+      },
+      "graph_edges": 13,
+      "main_conflict_id": "A101__A304",
+      "elapsed_seconds": 6001
+    },
+    "conclusion": "CONFIRMED_TRANSIENT: the first run is anomalous, not representative. Second run matches the Step 5A/Step 11 healthy baseline (~99% coverage, 0% provider_error). Section J may proceed with normal confidence."
+  },
+  "nvda_selected_run_id_decision": {
+    "selected_run_id": "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d",
+    "superseded_run_id": "c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6",
+    "rule_applied": "Replacement Rule (same rule already established and used in docs/audit_artifacts/step11_provider_health_and_rerun_v0.1.2.1.md: a rerun with materially healthier semantic execution health and all required artifacts replaces a degraded run for the SAME ticker).",
+    "rationale": "2f8ee897 (99.1% coverage, 0% provider_error, 13 graph_edges) is materially healthier than c9abf687 (50.4% coverage, 61% provider_error, 8 graph_edges). c9abf687 is preserved on disk as historical/superseded -- never used as the source for regression_report_v3.json, evidence_review_summary_v2.json, or qa_closure_v0.1.3.json.",
+    "user_confirmed": true
+  }
+}

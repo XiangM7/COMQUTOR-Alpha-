@@ -1,0 +1,309 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Six-Ticker Semantic Coverage Validation (Step 5A follow-on)",
+  "purpose": "Validates the repaired Week2 Alpha Mapper RUNTIME EXECUTION COVERAGE on all six real Step-4 ticker workloads. Tests semantic execution coverage ONLY -- this is a temporary internal engineering runtime-health benchmark (classified coverage >= 95%), NOT a John-approved product/release acceptance metric. It must never be represented as one.",
+  "benchmark_definition": {
+    "classified_coverage": "(MATCHED + NONE) / eligible_claim_count",
+    "threshold": 0.95,
+    "authority": "internal_engineering",
+    "use_for_john_release_acceptance": false
+  },
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-08-26T23:39:03.384317+00:00",
+  "runtime_configuration": {
+    "semantic_unit": "single_claim",
+    "request_shape": "one claim + FULL canonical Alpha taxonomy -> one LLM decision (select/none)",
+    "claim_concurrency": 4,
+    "ticker_concurrency": 1,
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "call_budget_model": "workload-aware (Step 5A) -- not the old fixed 32-call budget",
+    "batching": "DEFERRED_FOR_V0.1.2.1 (not used in this validation)",
+    "tradingagents_calls": 0,
+    "deterministic_semantic_fallback": false,
+    "ticker_specific_configuration": false
+  },
+  "run_order": [
+    "NVDA",
+    "QQQ",
+    "MSFT",
+    "SNDK",
+    "TSM",
+    "AMD"
+  ],
+  "per_ticker": {
+    "NVDA": {
+      "ticker": "NVDA",
+      "source_run_id": "6f4e07f9-e7fb-4637-9105-5d6936e28f81",
+      "validation_directory": "outputs/runs/_step5a_coverage_nvda/",
+      "eligible_claim_count": 768,
+      "matched_count": 377,
+      "none_count": 388,
+      "unavailable_count": 3,
+      "classified_claim_count": 765,
+      "classified_coverage": 0.99609375,
+      "unavailable_rate": 0.00390625,
+      "unavailable_reason_counts": {
+        "invalid_output": 3
+      },
+      "matched_alpha_id_counts": {
+        "A601": 69,
+        "A301": 70,
+        "A101": 54,
+        "A103": 42,
+        "A304": 99,
+        "A201": 15,
+        "A001": 14,
+        "A501": 14
+      },
+      "provider_error_code_counts": {
+        "WEEK2_LLM_TIMEOUT": 113
+      },
+      "timeouts": 113,
+      "transport_or_provider_errors": 0,
+      "rate_limit_errors": 0,
+      "validation_failures": 0,
+      "budget_exhaustions": 0,
+      "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+      "wall_clock_seconds": 2580,
+      "wall_clock_approximate": true,
+      "semantic_execution_health_status": "PASS",
+      "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "note": null
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "source_run_id": "57244747-7237-4cb6-a01c-cb8dd95d122f",
+      "validation_directory": "outputs/runs/_step5a_coverage_qqq/",
+      "eligible_claim_count": 874,
+      "matched_count": 305,
+      "none_count": 564,
+      "unavailable_count": 5,
+      "classified_claim_count": 869,
+      "classified_coverage": 0.994279176201373,
+      "unavailable_rate": 0.005720823798627002,
+      "unavailable_reason_counts": {
+        "invalid_output": 5
+      },
+      "matched_alpha_id_counts": {
+        "A601": 59,
+        "A201": 8,
+        "A101": 18,
+        "A304": 85,
+        "A003": 9,
+        "A501": 14,
+        "A001": 35,
+        "A103": 38,
+        "A301": 38,
+        "A102": 1
+      },
+      "provider_error_code_counts": {
+        "WEEK2_LLM_TIMEOUT": 92,
+        "WEEK2_LLM_PROVIDER_ERROR": 1
+      },
+      "timeouts": 92,
+      "transport_or_provider_errors": 1,
+      "rate_limit_errors": 0,
+      "validation_failures": 0,
+      "budget_exhaustions": 0,
+      "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+      "wall_clock_seconds": 2100,
+      "wall_clock_approximate": true,
+      "semantic_execution_health_status": "PASS",
+      "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "note": null
+    },
+    "MSFT": {
+      "ticker": "MSFT",
+      "source_run_id": "ce6b9628-b23f-4933-9fde-2568b315adf7",
+      "validation_directory": "outputs/runs/_step5a_coverage_msft/",
+      "eligible_claim_count": 721,
+      "matched_count": 342,
+      "none_count": 370,
+      "unavailable_count": 9,
+      "classified_claim_count": 712,
+      "classified_coverage": 0.9875173370319001,
+      "unavailable_rate": 0.012482662968099861,
+      "unavailable_reason_counts": {
+        "invalid_output": 9
+      },
+      "matched_alpha_id_counts": {
+        "A601": 28,
+        "A103": 128,
+        "A304": 69,
+        "A201": 2,
+        "A101": 28,
+        "A301": 54,
+        "A001": 19,
+        "A501": 11,
+        "A102": 3
+      },
+      "provider_error_code_counts": {
+        "WEEK2_LLM_TIMEOUT": 93,
+        "WEEK2_LLM_TRANSPORT_ERROR": 14
+      },
+      "timeouts": 93,
+      "transport_or_provider_errors": 14,
+      "rate_limit_errors": 0,
+      "validation_failures": 0,
+      "budget_exhaustions": 0,
+      "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+      "wall_clock_seconds": 2100,
+      "wall_clock_approximate": true,
+      "semantic_execution_health_status": "PASS",
+      "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "note": null
+    },
+    "SNDK": {
+      "ticker": "SNDK",
+      "source_run_id": "e4309acb-22c6-475e-a357-1e47db587202",
+      "validation_directory": "outputs/runs/_step5a_coverage_sndk/",
+      "eligible_claim_count": 736,
+      "matched_count": 332,
+      "none_count": 401,
+      "unavailable_count": 3,
+      "classified_claim_count": 733,
+      "classified_coverage": 0.9959239130434783,
+      "unavailable_rate": 0.004076086956521739,
+      "unavailable_reason_counts": {
+        "invalid_output": 3
+      },
+      "matched_alpha_id_counts": {
+        "A304": 43,
+        "A601": 60,
+        "A301": 48,
+        "A001": 13,
+        "A201": 134,
+        "A101": 18,
+        "A103": 8,
+        "A501": 8
+      },
+      "provider_error_code_counts": {
+        "WEEK2_LLM_VALIDATION_FAILED": 1,
+        "WEEK2_LLM_TIMEOUT": 90
+      },
+      "timeouts": 90,
+      "transport_or_provider_errors": 0,
+      "rate_limit_errors": 0,
+      "validation_failures": 1,
+      "budget_exhaustions": 0,
+      "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+      "wall_clock_seconds": 2176.3,
+      "wall_clock_approximate": false,
+      "semantic_execution_health_status": "PASS",
+      "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "note": "SNDK's first attempt (not counted in these results) failed with a transient real-Provider error storm: 1416 WEEK2_LLM_PROVIDER_ERROR events, 3.8% coverage, over ~44 minutes. A direct health-check call to DeepSeek confirmed the Provider had recovered before retrying, and TSM's own partial log from the interrupted first pass had already shown a return to normal timeout-only behavior immediately after SNDK's bad window -- consistent with a transient Provider-side blip, not a code or configuration defect. SNDK was retried once with the exact same, unmodified configuration and passed at 99.59% coverage."
+    },
+    "TSM": {
+      "ticker": "TSM",
+      "source_run_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8",
+      "validation_directory": "outputs/runs/_step5a_coverage_tsm/",
+      "eligible_claim_count": 949,
+      "matched_count": 391,
+      "none_count": 543,
+      "unavailable_count": 15,
+      "classified_claim_count": 934,
+      "classified_coverage": 0.9841938883034773,
+      "unavailable_rate": 0.015806111696522657,
+      "unavailable_reason_counts": {
+        "invalid_output": 15
+      },
+      "matched_alpha_id_counts": {
+        "A101": 70,
+        "A301": 63,
+        "A601": 58,
+        "A201": 52,
+        "A304": 90,
+        "A103": 27,
+        "A001": 20,
+        "A501": 11
+      },
+      "provider_error_code_counts": {
+        "WEEK2_LLM_PROVIDER_ERROR": 1,
+        "WEEK2_LLM_TIMEOUT": 135
+      },
+      "timeouts": 135,
+      "transport_or_provider_errors": 1,
+      "rate_limit_errors": 0,
+      "validation_failures": 0,
+      "budget_exhaustions": 0,
+      "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+      "wall_clock_seconds": 2801.7,
+      "wall_clock_approximate": false,
+      "semantic_execution_health_status": "PASS",
+      "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "note": null
+    },
+    "AMD": {
+      "ticker": "AMD",
+      "source_run_id": "eb714c04-645c-41e2-8292-a4739915f940",
+      "validation_directory": "outputs/runs/_step5a_coverage_amd/",
+      "eligible_claim_count": 846,
+      "matched_count": 344,
+      "none_count": 498,
+      "unavailable_count": 4,
+      "classified_claim_count": 842,
+      "classified_coverage": 0.9952718676122931,
+      "unavailable_rate": 0.004728132387706856,
+      "unavailable_reason_counts": {
+        "invalid_output": 4
+      },
+      "matched_alpha_id_counts": {
+        "A601": 57,
+        "A103": 32,
+        "A201": 16,
+        "A102": 28,
+        "A001": 27,
+        "A304": 80,
+        "A101": 42,
+        "A301": 48,
+        "A501": 10,
+        "A003": 4
+      },
+      "provider_error_code_counts": {
+        "WEEK2_LLM_TIMEOUT": 92
+      },
+      "timeouts": 92,
+      "transport_or_provider_errors": 0,
+      "rate_limit_errors": 0,
+      "validation_failures": 0,
+      "budget_exhaustions": 0,
+      "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+      "wall_clock_seconds": 2262.4,
+      "wall_clock_approximate": false,
+      "semantic_execution_health_status": "PASS",
+      "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "note": null
+    }
+  },
+  "aggregate": {
+    "total_eligible_claims": 4894,
+    "total_matched": 2091,
+    "total_none": 2764,
+    "total_unavailable": 39,
+    "total_classified": 4855,
+    "overall_classified_coverage": 0.9920310584389048,
+    "tickers_at_or_above_95pct": 6,
+    "semantic_coverage_pass_count": "6/6",
+    "total_timeouts": 615,
+    "total_transport_or_provider_errors": 16,
+    "total_rate_limit_errors": 0,
+    "total_validation_failures": 1,
+    "total_budget_exhaustions": 0,
+    "total_wall_clock_seconds": 14020.4,
+    "total_wall_clock_human": "3.89 hours",
+    "tradingagents_calls": 0
+  },
+  "invariants_verified": {
+    "unavailable_never_converted_to_none": true,
+    "disabled_config_caused_unavailable": 0,
+    "deterministic_semantic_fallback_used": false,
+    "same_configuration_across_all_six_tickers": true
+  },
+  "production_semantic_meaning_changed": false,
+  "regression_labels_changed": false,
+  "conflict_ontology_changed": false,
+  "commit": false,
+  "push": false
+}

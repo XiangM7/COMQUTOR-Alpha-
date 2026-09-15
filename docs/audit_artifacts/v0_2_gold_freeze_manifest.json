@@ -1,0 +1,103 @@
+{
+  "schema_version": "gold_freeze_manifest.v0.2",
+  "gold_version": "v0.2",
+  "freeze_status": "FROZEN_GOLD_V0_2",
+  "freeze_timestamp": "2026-09-10T21:04:41+00:00",
+  "contract_json_path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+  "contract_md_path": "docs/audit_artifacts/v0_2_gold_operational_contract.md",
+  "frozen_contract_json_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+  "frozen_contract_md_sha256": "8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04",
+  "prior_draft_json_sha256": "1ddbb9c538be83c79fdb02110afd798ed83cd59469e48412183dbcaa1f0cd8b1",
+  "formal_gold_tickers": [
+    "NVDA",
+    "QQQ",
+    "SNDK"
+  ],
+  "silver_diagnostic_tickers": [
+    "MSFT",
+    "TSM",
+    "AMD"
+  ],
+  "blocking_policy": {
+    "formal_gold_blocking": true,
+    "silver_diagnostic_blocking": false,
+    "note": "Silver failures can later produce diagnostic FAIL, but cannot alone cause release-blocking FAIL."
+  },
+  "hit_types": [
+    "ALPHA_HIT",
+    "COMPOSITE_STRUCTURE_HIT",
+    "NEGATIVE_CONTROL_HIT",
+    "CONDITIONAL_ACCEPTANCE_HIT"
+  ],
+  "hit_type_counts": {
+    "ALPHA_HIT": 12,
+    "COMPOSITE_STRUCTURE_HIT": 3,
+    "CONDITIONAL_ACCEPTANCE_HIT": 2,
+    "NEGATIVE_CONTROL_HIT": 2
+  },
+  "total_rule_count": 19,
+  "rule_count_change_from_draft": "18 -> 19 (MSFT-A102-INFERENCE split into MSFT-A102-DIRECT-INFERENCE-TRIGGER + MSFT-A102-INDIRECT-INFERENCE-SUPPORT per John's final decision, item G)",
+  "resolved_review_items": 9,
+  "resolved_review_item_ids": [
+    "NVDA-A301-FUNDAMENTAL-GROWTH",
+    "QQQ-A001-RATE-CUT-CYCLE",
+    "QQQ-A003-LIQUIDITY-EXPANSION",
+    "QQQ-A501-RECESSION-RISK",
+    "QQQ-ETF-CONTEXT-CONTROL",
+    "SNDK-A201-SEMICONDUCTOR-CYCLE",
+    "MSFT-A102-INFERENCE (split at freeze)",
+    "MSFT-CAPEX-BURDEN-CONDITIONAL",
+    "TSM-AI-TO-FOUNDRY-TRANSMISSION"
+  ],
+  "remaining_review_items": [],
+  "final_decisions_applied": {
+    "A_NVDA_A301": "should_detect_if_supported + conditional_only",
+    "B_QQQ_A001": "should_detect_if_supported + conditional_only",
+    "C_QQQ_A003": "should_detect_if_supported + conditional_only",
+    "D_QQQ_A501": "should_detect_if_supported + conditional_only",
+    "E_QQQ_ETF_CONTROL": "forbidden_dominant scope locked to A301 only; A101/A103/A304/A501/A601 explicitly not forbidden",
+    "F_SNDK_A201": "should_detect_if_supported + conditional_only; anti-over-AI control confirmed as the stronger, blocking component of SNDK Gold",
+    "G_MSFT_A102": "split into DIRECT_INFERENCE_TRIGGER (must_detect_if_evidence_present) and INDIRECT_INFERENCE_SUPPORT (should_detect_if_supported)",
+    "H_MSFT_CAPEX_BURDEN": "do_not_force A304 from capex alone; requires linkage to margin/FCF/ROIC-return/valuation/multiple-compression/equivalent downside transmission",
+    "I_TSM_A103_TO_A201": "confirmed NOT canonical; removed from acceptable transmission paths; A103 downgraded to OPTIONAL_SUPPORTING_ALPHA; canonical paths limited to A101->A201->A301"
+  },
+  "gold_immutability_rule": "After this freeze, Gold v0.2 rules must NOT be edited in response to actual Alpha results, conflict mismatches, low Gold Hit, unexpected failures, or release outcome. Any future semantic change to Gold requires a NEW Gold version (e.g. v0.3) -- Gold v0.2 must never be silently mutated once comparison against real run results begins.",
+  "anti_leakage": {
+    "actual_run_results_inspected": false,
+    "actual_detected_alphas_inspected": false,
+    "actual_main_conflicts_inspected": false,
+    "acceptance_computed": false,
+    "gold_rules_modified_after_result_inspection": false,
+    "sources_consulted_this_task": [
+      "docs/audit_artifacts/v0_2_gold_operational_contract.json (existing draft, own prior output)",
+      "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (re-checked for the A103/A201 relation question, item I)"
+    ],
+    "statement": "This freeze applied only John's already-supplied final decisions (Section 1 of the task) and re-consulted the same frozen taxonomy file used in Step 1 to confirm the A103->A201 relation question. No fresh-run artifact, alpha_activations.json, detected-Alpha set, actual conflict, final acceptance report, or retrospective benchmark result was inspected in Step 2."
+  },
+  "no_acceptance_yet": {
+    "v0_2_final_acceptance_table_created": false,
+    "v0_2_evidence_trigger_matrix_created": false,
+    "note": "Both belong to later steps and were explicitly not created in this task."
+  },
+  "final_validation": {
+    "exactly_6_tickers": true,
+    "exactly_3_formal_gold": true,
+    "exactly_3_silver": true,
+    "all_9_review_items_resolved": true,
+    "no_unresolved_mapping_remaining": true,
+    "no_new_production_alpha_id": true,
+    "no_new_taxonomy_edge": true,
+    "a103_to_a201_represented_as_canonical": false,
+    "fixed_expected_alpha_model_recreated": false,
+    "actual_run_result_inspected": false,
+    "pass_fail_calculated": false,
+    "production_files_changed": 0,
+    "test_files_changed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Step 4 (retry) issue candidates -- observation only, no repair",
+  "generated_at": "2026-08-25T20:16:34.957908+00:00",
+  "candidates": [
+    {
+      "id": "ISSUE-1",
+      "category": "PROVIDER_OR_CONFIG_FAILURE",
+      "title": "Week2 LLM classifier call-budget/timeout undersized for real claim volume",
+      "observation": "Across every fresh ticker run, comqutor_alpha.structure_engine.week2_llm.Week2LLMGateway hit its fixed per-run call budget (max_calls default 32, MAX_SERVER_CALLS cap 100) and per-call timeout (DEFAULT_TIMEOUT_SECONDS 15.0s) against DeepSeek deepseek-v4-flash. Each ticker generated 700-930+ raw claims needing alpha_classifier calls, but only ~14-20 of the 32 allotted calls succeeded (mostly WEEK2_LLM_TIMEOUT on claim_batch_enrichment), then WEEK2_LLM_CALL_BUDGET_EXHAUSTED fired once per ticker, after which all remaining claims fell back to match_status=unavailable / alpha_unavailable_reason=invalid_output. This produced 80-98%+ UNAVAILABLE rates on every one of the 5 (6, pending NVDA) completed tickers -- not a semantic-matching defect and not the earlier 'classifier disabled' failure mode.",
+      "affected_tickers": [
+        "NVDA",
+        "QQQ",
+        "MSFT",
+        "SNDK",
+        "TSM",
+        "AMD"
+      ],
+      "downstream_effects": [
+        "Alpha Mapper recall near-zero on all tickers (Section 7)",
+        "Evidence Facts / B1 committed evidence near-empty despite abundant raw claims (Section 9)",
+        "Activation scores at or near 0.0 for all Alphas on all tickers (Section 11)",
+        "No dominant/active/regime-level Alphas; no admitted conflicts on any ticker (Sections 12-13)"
+      ],
+      "not_a_repair_note": "Baseline collection only -- timeout/budget values were NOT changed in this task."
+    },
+    {
+      "id": "ISSUE-2",
+      "category": "EVIDENCE_PROMOTION_CANDIDATE",
+      "title": "Evidence Facts near-empty as a direct downstream consequence of ISSUE-1",
+      "observation": "unique_evidence_fact_count is 0 or 1 for every completed fresh ticker (evidence_facts.json), even though a separate deterministic evidence-stance shadow classifier (evidence_stance.deterministic.v1, effect_mode=shadow) independently produced thousands of claim-alpha stance judgments per ticker (e.g. QQQ: 4370 claim-alpha pairs, 517 supports_alpha) from the SAME raw claims. This shows the raw source material is not scarce -- committed Evidence Facts are scarce only because they require a successful alpha_classifier match first, which ISSUE-1 starves.",
+      "affected_tickers": [
+        "NVDA",
+        "QQQ",
+        "MSFT",
+        "SNDK",
+        "TSM",
+        "AMD"
+      ],
+      "not_a_repair_note": "Observation only -- shadow-mode stance classifier was not promoted or altered."
+    },
+    {
+      "id": "ISSUE-3",
+      "category": "NO_CURRENT_PROBLEM",
+      "title": "Negative constraints (PD-017 A102__A304, A201__A304) hold on every fresh run",
+      "observation": "No fresh ticker's admitted or candidate conflict set contains a rejected/non-canonical pair. Verified from real conflicts.json, not assumed.",
+      "affected_tickers": [
+        "NVDA",
+        "QQQ",
+        "MSFT",
+        "SNDK",
+        "TSM",
+        "AMD"
+      ]
+    },
+    {
+      "id": "ISSUE-4",
+      "category": "ALPHA_MAPPER_RECALL_CANDIDATE",
+      "title": "Large high-value no_alpha_match/unavailable claim volume per ticker (source-side observation)",
+      "observation": "184-262 claims per ticker look ticker-specific/substantive/causal by source-side keyword heuristics (rate, liquidity, AI, inference, infrastructure, semiconductor, revenue, capex, guidance, recession, cloud, chip, etc.) but ended up no_match or unavailable. The large majority are downstream of ISSUE-1 (never reached a real classifier decision); a residual portion (the true no_match rows, e.g. QQQ none_count=16) are genuine classifier no-match decisions worth a Step 5 recall review once ISSUE-1 is fixed and the signal is clean.",
+      "affected_tickers": [
+        "NVDA",
+        "QQQ",
+        "MSFT",
+        "SNDK",
+        "TSM",
+        "AMD"
+      ],
+      "not_a_repair_note": "Provisional observation list only, per Section 8 -- not remapped in this step."
+    }
+  ]
+}

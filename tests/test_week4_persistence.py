@@ -398,7 +398,12 @@ class TestConflictPersistence:
         assert {row["outcome"] for row in rows} == {"admitted", "suppressed", "rejected"}
         admitted = repo.get_alpha_conflicts("w42_run", outcome="admitted")
         assert len(admitted) == conflict["arbitration"]["admitted_count"] == 1
-        assert admitted[0]["conflict_json"] == conflict["conflicts"][0]
+        # Step 6 (Primary vs Secondary Evidence Qualification): evidence_qualification
+        # is an in-memory/API-only additive diagnostic field, not yet persisted through
+        # the Week4 DB whitelist -- documented gap, stripped here exactly like other
+        # additive fields are stripped before an API-vs-DB-reconstruction comparison.
+        expected_conflict = {k: v for k, v in conflict["conflicts"][0].items() if k != "evidence_qualification"}
+        assert admitted[0]["conflict_json"] == expected_conflict
         assert admitted[0]["conflict_rank"] == 0
         assert admitted[0]["is_main_conflict"] is True
         assert admitted[0]["conflict_score"] is not None
@@ -513,9 +518,19 @@ class TestReconstruction:
         _, repo = _engine_and_repo()
         _, conflict = _persist(repo)
         reconstructed = repo.get_week4_conflict_result("w42_run")
-        assert reconstructed == conflict
-        assert reconstructed["main_conflict"] == conflict["main_conflict"]
-        assert reconstructed["arbitration"] == conflict["arbitration"]
+        # Step 6 (Primary vs Secondary Evidence Qualification): evidence_qualification
+        # is an in-memory/API-only additive diagnostic field, not yet persisted through
+        # the Week4 DB whitelist -- documented gap, stripped from every conflict dict
+        # here exactly like other additive fields are stripped before an
+        # API-vs-DB-reconstruction comparison.
+        expected = copy.deepcopy(conflict)
+        for c in expected["conflicts"]:
+            c.pop("evidence_qualification", None)
+        if expected["main_conflict"] is not None:
+            expected["main_conflict"].pop("evidence_qualification", None)
+        assert reconstructed == expected
+        assert reconstructed["main_conflict"] == expected["main_conflict"]
+        assert reconstructed["arbitration"] == expected["arbitration"]
 
     def test_no_admitted_conflicts_reconstructs_all_candidate_audit(self):
         _, repo = _engine_and_repo()

@@ -1,0 +1,213 @@
+{
+  "schema_version": "v0.2.demo_persisted_run_serveability_hardening.v1",
+  "phase": "PRODUCT_DEMO_HARDENING_PHASE_2A",
+  "objective": "Make NVDA/QQQ/SNDK persisted demo runs reliably servable through the existing COMQUTOR API/UI without rerunning TradingAgents or Provider semantics.",
+  "authority_verification": {
+    "phase1_audit_json_sha256_expected": "f6905337d4697a85fb30b9419ec165b90b629d42c1927e3297eccb54f6ad9c1c",
+    "phase1_audit_json_sha256_actual": "f6905337d4697a85fb30b9419ec165b90b629d42c1927e3297eccb54f6ad9c1c",
+    "phase1_audit_md_sha256_expected": "a5df210cd3481b15b79ab9d793554fadcbf62dd241b353ea26fc9786964291fd",
+    "phase1_audit_md_sha256_actual": "a5df210cd3481b15b79ab9d793554fadcbf62dd241b353ea26fc9786964291fd",
+    "gold_closure_json_sha256_expected": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "gold_closure_json_sha256_actual": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "all_verified_unchanged": true
+  },
+  "active_database_investigation": {
+    "method": "Read-only inspection of env resolution code, .env (key presence/scheme only, never full DSN or credentials), file mtimes, the sanctioned live-launcher script, and a direct read-only Postgres query using the project's own resolve_database_url()/repository code.",
+    "findings": [
+      "COMQUTOR_DATABASE_URL is unset in this shell's exported environment (no ad-hoc override).",
+      "comqutor_alpha/storage/db/engine.py::resolve_database_url() falls back to a local SQLite file (outputs/runs/_comqutor_alpha_graph.db) whenever COMQUTOR_DATABASE_URL is empty/unset in the process environment.",
+      "outputs/runs/_comqutor_alpha_graph.db has mtime 2026-08-19 11:49 -- it has not been written to since that date.",
+      "All three candidate run directories were created after that date: NVDA (57d7b4c4-...) 2026-09-03, SNDK (e8e0f398-...) 2026-09-04, QQQ (f239a53f-...) 2026-09-11. None of their data could ever have reached the SQLite fallback file.",
+      ".env (repo root) DOES set a non-empty COMQUTOR_DATABASE_URL -- confirmed length 108 chars, scheme prefix 'postgresql+psyc' (full DSN never printed; credentials never inspected or logged).",
+      "scripts/start_live_comqutor.sh -- the one sanctioned launcher for live COMQUTOR research (per its own header comment) -- sources .env with `set -a` (auto-export) before starting comqutor-api, so any server started through it inherits the Postgres COMQUTOR_DATABASE_URL.",
+      "The comqutor-api server already running in this environment (PID confirmed via lsof on port 8000) reports via GET /ready: database=ready, real_execution=configured, live_semantic_pipeline=ready -- consistent with having been started through the correct, .env-sourcing launcher.",
+      "A direct read-only query against the Postgres DSN from .env (postgresql+psycopg://127.0.0.1:5433/comqutor_alpha, docker container 'comqutor-alpha--postgres-1' confirmed running) found COMPLETE rows for all three candidate run_ids across research_runs, research_run_progress, structure_graphs, alpha_conflicts (6 rows each, matching the 6 canonical taxonomy conflict pairs), agent_outputs, alpha_activations (10 rows each, matching the 10-Alpha MVP taxonomy), alpha_matches, and entity_alpha_exposures (10 rows each).",
+      "research_runs.status='completed' with a real, non-null completed_at timestamp for all three runs, each matching (to the second) the corresponding run_audit.json file artifact's own recorded completion time."
+    ],
+    "conclusion": "The runs' data was never missing from the authoritative database. The Phase-1 audit's ad-hoc read checks (and/or any bare `comqutor-api` process started without .env loaded) resolved to the stale, irrelevant local SQLite fallback file instead of the Postgres database the sanctioned live-launcher (and the currently-running server) actually use and that already holds this data."
+  },
+  "root_cause_classification": {
+    "primary_result": "RUNS_ORIGINATED_IN_DIFFERENT_DB",
+    "certainty": "HIGH for 'the runs' authoritative data lives correctly in Postgres, not in the SQLite fallback used by Phase-1's checks' (directly proven by querying Postgres and finding complete, correct rows). MEDIUM for the precise mechanism of Phase-1's own check process (its exact environment was not captured/logged at the time, so this audit infers rather than directly observes that it lacked COMQUTOR_DATABASE_URL) -- not overstated as certain.",
+    "explicitly_not_concluded": [
+      "ORIGINAL_PERSISTENCE_DEFECT is NOT the cause -- the original persistence succeeded correctly and completely in the authoritative DB.",
+      "POST_RUN_DB_DELETION is NOT the cause -- no evidence of deletion; rows are present, complete, and internally consistent.",
+      "CURRENT_DB_RESET_OR_REPLACED is NOT the cause for the authoritative (Postgres) DB -- it was never reset; only the unrelated, already-stale SQLite fallback file predates these runs, which is expected/by-design for a file that was never the active DB for these runs."
+    ]
+  },
+  "per_run_before_state": {
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "file_state": "complete",
+      "postgres_db_state": "complete (research_runs=1, research_run_progress=1, structure_graphs=1, alpha_conflicts=6, agent_outputs=733, alpha_activations=10, alpha_matches=733, entity_alpha_exposures=10)",
+      "classification": "FULLY_LIVE_SERVABLE (already, before any Phase-2A action)"
+    },
+    "QQQ": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "file_state": "complete",
+      "postgres_db_state": "complete (research_runs=1, research_run_progress=1, structure_graphs=1, alpha_conflicts=6, agent_outputs=826, alpha_activations=10, alpha_matches=826, entity_alpha_exposures=10)",
+      "classification": "FULLY_LIVE_SERVABLE (already, before any Phase-2A action) -- contradicts the Phase-1 finding, which queried a different (stale SQLite) database"
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "file_state": "complete",
+      "postgres_db_state": "complete (research_runs=1, research_run_progress=1, structure_graphs=1, alpha_conflicts=6, agent_outputs=918, alpha_activations=10, alpha_matches=918, entity_alpha_exposures=10)",
+      "classification": "FULLY_LIVE_SERVABLE (already, before any Phase-2A action)"
+    }
+  },
+  "existing_restore_reindex_mechanisms_search": {
+    "searched_for": [
+      "replay",
+      "rehydrate",
+      "reindex",
+      "backfill",
+      "import run",
+      "persist graph",
+      "persist conflict",
+      "restore run",
+      "artifact migration",
+      "DB rebuild"
+    ],
+    "found": "No dedicated rehydrate/reindex/backfill/restore-from-artifacts write mechanism exists in the repository today. POST /api/replay-all (routes_replay_all.py) exists but creates NEW replay run_ids by reprocessing raw_agent_outputs.json through the current pipeline -- it does not, and was correctly NOT used to, restore/preserve the original accepted demo run_ids' own DB rows.",
+    "conclusion": "Moot in practice: because the empirical investigation (above) found the authoritative database already contains complete, correct rows for all three run_ids, no restore/reindex/rehydration mechanism -- existing or new -- was actually needed to close the P0 items."
+  },
+  "rehydration_utility_built": false,
+  "rehydration_utility_rationale": "The task anticipated needing a narrowly-scoped persisted-run rehydration utility (Section 8) if no adequate existing mechanism could restore missing DB rows from artifacts. Investigation (required first, in Section 3) disproved the premise: no DB rows are actually missing from the authoritative database for any of the three candidate runs. Building a rehydration/write utility for data that is not missing would be unnecessary, unauthorized-scope machinery carrying its own risk (a write path capable of inserting DB rows, however narrowly gated) for a problem that does not exist. The smallest safe fix for the real problem found -- an environment/DB-selection mismatch during ad-hoc verification -- is a read-only verification tool, not a write/rehydration tool.",
+  "mechanism_used": "VERIFICATION_ONLY -- no persistence write/rehydration was necessary. A new read-only diagnostic script was added to make this verification repeatable and environment-safe going forward (see below).",
+  "code_files_added": [
+    {
+      "path": "scripts/verify_persisted_run_serveability.py",
+      "sha256": "03650c06baf5f437c64bac0affffa1f6c5652a978e34e93ce488a5d82f96bf0b",
+      "purpose": "Read-only operator/demo-preparation CLI. Loads .env the same safe way scripts/start_live_comqutor.sh does, then calls the exact existing, unmodified production read functions (get_research_run_status / build_research_response / get_persisted_structure_graph / get_persisted_conflicts from comqutor_alpha.api.routes_research) against a single explicitly-resolved read-only repository (build_repository_from_env). Classifies each requested run_id as FULLY_LIVE_SERVABLE / FILE_COMPLETE_DB_INCOMPLETE / DB_PRESENT_BUT_INCONSISTENT / FILE_INCOMPLETE / OTHER. Zero writes, zero Provider calls, zero TradingAgents calls, zero semantic recomputation. Reports the resolved database identity with credentials always redacted (scheme + host/db name only).",
+      "writes_performed": 0,
+      "provider_calls": 0,
+      "tradingagents_calls": 0
+    }
+  ],
+  "code_files_modified_semantic": [],
+  "code_files_modified_infrastructure": [],
+  "test_files_added": [
+    {
+      "path": "tests/test_persisted_run_serveability.py",
+      "sha256": "143c9c08b15325c475c7e4e41a33457ae82dffa574695923e1ab2ad414368729",
+      "test_count": 13,
+      "result": "13 passed",
+      "coverage": [
+        "classify_run_serveability: fully-ready -> FULLY_LIVE_SERVABLE",
+        "classify_run_serveability: optional artifacts False (final_report, error logs) does not block FULLY_LIVE_SERVABLE",
+        "classify_run_serveability: missing DB row + file artifacts present -> FILE_COMPLETE_DB_INCOMPLETE",
+        "classify_run_serveability: DB row present but partial -> DB_PRESENT_BUT_INCONSISTENT",
+        "classify_run_serveability: malformed/missing main_response -> OTHER",
+        "classify_run_serveability: no DB row and no artifacts -> OTHER (never fabricates success)",
+        "_safe_database_identity: Postgres DSN never leaks user/password",
+        "_safe_database_identity: SQLite DSN handled safely",
+        "_safe_database_identity: malformed DSN reported 'unknown', never raises",
+        "verify_run end-to-end against a synthetic, fully-persisted run (in-memory SQLite + offline_raw_agent_outputs, zero Provider/TradingAgents calls) -> FULLY_LIVE_SERVABLE",
+        "zero Provider/TradingAgents calls confirmed structurally for verify_run",
+        "verify_run is idempotent: two calls against the same run produce identical output, no corruption or duplication (no writes are performed at all)",
+        "unknown run_id does not crash and is never misreported as FULLY_LIVE_SERVABLE"
+      ]
+    }
+  ],
+  "broader_regression_check": {
+    "command": "pytest tests/test_persisted_run_serveability.py tests/test_research_runs_api.py tests/test_research_jobs.py tests/test_graph_api.py tests/test_graph_persistence.py",
+    "result": "144 passed, 0 failed",
+    "new_regressions": 0
+  },
+  "zero_provider_proof": {
+    "provider_calls_this_phase": 0,
+    "tradingagents_calls_this_phase": 0,
+    "fresh_ticker_runs_this_phase": 0,
+    "semantic_recomputation_performed": false,
+    "basis": "All verification was performed via read-only DB queries and read-only production GET-route function calls against already-persisted data. The new script imports no LLM/Provider/TradingAgents client. The new test's only pipeline execution is a synthetic, offline (offline_raw_agent_outputs) fixture using a separate throwaway run_id in an in-memory SQLite database, following the pre-existing test_graph_api.py/test_research_runs_api.py convention already used throughout this test suite -- it never touches the real NVDA/QQQ/SNDK run_ids, their files, or the real Postgres database."
+  },
+  "per_run_after_api_state": {
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "status": "completed",
+      "structure_graph_status": "ready",
+      "conflict_status": "ready",
+      "dominant_alphas": [
+        "A301"
+      ],
+      "main_conflict": {
+        "alpha_a": "A101",
+        "alpha_b": "A304"
+      },
+      "num_conflicts": 3,
+      "classification": "FULLY_LIVE_SERVABLE",
+      "matches_expected_accepted_structural_story": true
+    },
+    "QQQ": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "status": "completed",
+      "structure_graph_status": "ready",
+      "conflict_status": "ready",
+      "dominant_alphas": [],
+      "main_conflict": {
+        "alpha_a": "A301",
+        "alpha_b": "A304"
+      },
+      "num_conflicts": 2,
+      "classification": "FULLY_LIVE_SERVABLE",
+      "no_dominant_state_preserved": true,
+      "a001_exposed_as_detected": false,
+      "matches_expected_accepted_structural_story": true,
+      "note": "This is serving validation only, not a Gold reevaluation. A001's non-detected state and the A301__A304 main conflict are read verbatim from the existing, already-adjudicated persisted data -- nothing was recomputed."
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "status": "completed",
+      "structure_graph_status": "ready",
+      "conflict_status": "ready",
+      "dominant_alphas": [
+        "A201"
+      ],
+      "main_conflict": null,
+      "num_conflicts": 0,
+      "classification": "FULLY_LIVE_SERVABLE",
+      "no_admitted_conflict_state_preserved": true,
+      "renders_as_legitimate_result_not_broken": true,
+      "matches_expected_accepted_structural_story": true
+    }
+  },
+  "p0_closure": {
+    "P0_1_STATUS": "CLOSED",
+    "P0_1_BASIS": "QQQ (f239a53f-4ebe-455c-bb76-5f5485903901) is reliably live-servable via the existing, unmodified API/UI contract -- confirmed via both direct HTTP GET calls against the running comqutor-api server and the new in-process verification script -- with zero semantic recomputation.",
+    "P0_2_STATUS": "CLOSED",
+    "P0_2_BASIS": "NVDA, QQQ, and SNDK are all independently verified FULLY_LIVE_SERVABLE via the same method."
+  },
+  "remaining_risks": [
+    "If a future comqutor-api server is started without .env loaded (or without COMQUTOR_DATABASE_URL otherwise exported), it will silently resolve to the local SQLite fallback and reproduce the exact appearance of the Phase-1 finding -- not because data is missing, but because the wrong database is being queried. Operators should always start the server via scripts/start_live_comqutor.sh (or otherwise ensure COMQUTOR_DATABASE_URL is exported) for any demo-serving session, and can run scripts/verify_persisted_run_serveability.py <run_id> beforehand as a pre-demo check.",
+    "Whether other, non-candidate historical runs also depend on the same Postgres instance being up (docker container 'comqutor-alpha--postgres-1') was not exhaustively audited -- if that container is stopped, all three demo runs would revert to appearing NOT_READY, for the same underlying reason (DB unreachable / fallback resolution), not because their data changed.",
+    "The GraphPersistenceRepository's database_url is not publicly exposed as an attribute (confirmed private during this investigation); the verification script re-resolves it independently via resolve_database_url() rather than reading it off the repository instance, which is correct but means the two must be kept resolving identically if the resolution function is ever refactored."
+  ],
+  "not_authorized_actions_confirmed_avoided": [
+    "No Alpha taxonomy change.",
+    "No Alpha mapping semantics change.",
+    "No evidence stance semantics change.",
+    "No activation threshold change.",
+    "No conflict semantics/admissibility change.",
+    "No TradingAgents rerun.",
+    "No Provider call.",
+    "No fresh ticker research execution.",
+    "No Gold v0.2 acceptance artifact modified.",
+    "No file fallback invented inside the user-facing GET routes (routes_research.py was not modified at all)."
+  ],
+  "next_recommended_step": "PRODUCT DEMO HARDENING -- PHASE 2B: Structured top-level result summary (Alpha list, dominant Alpha / explicit no-dominant state, main conflict / explicit no-conflict state) directly on ResearchRunPage.tsx, per the Phase-1 recommended first implementation slice. Not implemented in this phase.",
+  "final_validation": {
+    "gold_closure_unchanged": true,
+    "phase1_audit_unchanged": true,
+    "alpha_semantic_change": false,
+    "activation_semantic_change": false,
+    "conflict_semantic_change": false,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_research": 0,
+    "all_restored_data_from_already_persisted_artifacts": "N/A -- no data restoration was performed; all three runs' data was already correctly and completely persisted in the authoritative database",
+    "nvda_serveability_checked": true,
+    "qqq_serveability_checked": true,
+    "sndk_serveability_checked": true,
+    "infrastructure_tests_pass": true
+  }
+}

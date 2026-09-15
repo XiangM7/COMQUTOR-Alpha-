@@ -1,0 +1,80 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Step 5A Section 4 - Week2 Alpha Mapper runtime capacity root-cause model",
+  "authorized_scope": "execution capacity only -- no semantic prompt/taxonomy/threshold/label change",
+  "evidence_sources": [
+    "outputs/runs/<6 fresh Step-4 run_ids>/llm_semantic_calls.jsonl (per-invocation trace with started_at/completed_at/latency_ms/error_code/task/retry_count/provider_attempt_count)",
+    "outputs/runs/<...>/error_logs/week2_llm_errors.jsonl",
+    "outputs/runs/<...>/llm_semantic_manifest.json (provider_call_count/accepted_count/fallback_count/tasks breakdown)",
+    "comqutor_alpha/structure_engine/week2_llm.py (Week2LLMGateway.invoke_json_with_trace, lines ~516-639)",
+    "comqutor_alpha/structure_engine/alpha_mapper.py (_classify_alpha_with_llm, map_structured_records)",
+    "comqutor_alpha/structure_engine/structured_output_adapter.py (_llm_batch_enrichment, _chunk_segments, LLM_CLAIM_BATCH_SIZE)",
+    "git log -S\"DEFAULT_MAX_CALLS = 32\" (commit 652a628, 2026-07-13, 'w2v4' -- original introduction, no rationale comment found)"
+  ],
+  "questions": {
+    "1_what_consumes_one_call_budget_unit": {
+      "answer": "One reserved Provider ATTEMPT (one Week2LLMGateway._reserve_call() -> one self._model.invoke(prompt) call), regardless of task or how much content that single HTTP request carries.",
+      "evidence": "week2_llm.py:433-438 _reserve_call(); invoke_json_with_trace's attempt loop (line 583) calls _reserve_call() once per iteration, before each self._model.invoke(prompt) at line 592-595."
+    },
+    "2_call_granularity": {
+      "answer": "Depends entirely on the TASK, and the two Alpha-relevant tasks currently use DIFFERENT granularities: claim_batch_enrichment is one claim BATCH per call (up to LLM_CLAIM_BATCH_SIZE=64 claims/call); alpha_classifier (the Pure-LLM Alpha semantic decision) is one INDIVIDUAL CLAIM per call. There is no agent-batch or whole-stage granularity anywhere in this gateway.",
+      "evidence": "structured_output_adapter.py:1198-1203 chunks segments via _chunk_segments(segments, LLM_CLAIM_BATCH_SIZE) before calling _llm_batch_enrichment once per chunk. alpha_mapper.py:548 _classify_alpha_with_llm(record, ...) is called once per record inside map_structured_records' per-record loop (alpha_mapper.py:696-719) -- no batching parameter exists on this path at all."
+    },
+    "3_current_batch_size": {
+      "answer": "claim_batch_enrichment: 64 (LLM_CLAIM_BATCH_SIZE, structured_output_adapter.py:57). alpha_classifier: 1 (unbatched -- this is the core defect).",
+      "evidence": "structured_output_adapter.py:57,860-861"
+    },
+    "4_calls_required_for_800_claims_no_timeouts": {
+      "answer": "claim_batch_enrichment: ceil(800/64) = 13 calls. alpha_classifier (current, unbatched): 800 calls (1:1). Combined with ~10-20 calls for structure_extractor/evidence_stance/structured_adapter (observed range in Step-4 manifests), the CURRENT architecture needs on the order of 820-840+ calls for an 800-claim ticker even under perfect zero-timeout conditions -- more than 25x the current DEFAULT_MAX_CALLS=32.",
+      "evidence": "Step-4 manifests: QQQ tasks={'alpha_classifier': 874, 'structure_extractor': 10, 'structured_adapter': 8, 'evidence_stance_classifier': 1} against provider_call_count capped at 32."
+    },
+    "5_why_default_max_calls_32": {
+      "answer": "No rationale found anywhere in the codebase (comments, ADRs, or commit message). Introduced at module creation with the value already set to 32, no explanatory comment.",
+      "evidence": "git log -S\"DEFAULT_MAX_CALLS = 32\" -> single hit, commit 652a6281 ('w2v4', 2026-07-13), the file's own initial commit -- diff shows the constant appearing fully-formed with no comment above or below it."
+    },
+    "6_original_workload_assumption": {
+      "answer": "No evidence of a deliberate workload sizing calculation. Classified as HISTORICAL_TEST_DEFAULT (most likely picked for early small-scale/offline smoke testing, long before any real ~700-950-claim production ticker run existed to validate against) rather than an intentional safety/cost/rate-limit-derived figure.",
+      "evidence": "Same commit also introduced 3 tasks only (structured_claims/alpha_classifier/structure_extractor) with a much simpler v2-era alpha_classifier prompt (select/defer, no taxonomy block) -- consistent with an early-development-scale default that was never revisited as the real workload and prompt grew (v3 Pure-LLM taxonomy-aware alpha_classifier, claim_batch_enrichment, evidence_stance_classifier were all added later without DEFAULT_MAX_CALLS being reassessed)."
+    },
+    "7_call_budget_purpose_classification": {
+      "answer": "HISTORICAL_TEST_DEFAULT. Not evidenced as Provider rate-limit protection (no rate-limit-specific logic anywhere in week2_llm.py), not cost protection (no cost/pricing reference in repo), not recursion protection (that is TradingAgents' own LangGraph recursion limit, an entirely separate mechanism -- see the Step-4 NVDA GraphRecursionError, which is unrelated to this budget). It functions today only as an accidental hard cap that starves a real production workload.",
+      "evidence": "No occurrences of 'rate_limit'/'rate limit'/pricing in comqutor_alpha/structure_engine/week2_llm.py; MAX_SERVER_CALLS=100 (the absolute ceiling) is likewise unexplained in the same commit."
+    },
+    "8_what_happens_when_budget_exhausted": {
+      "answer": "_reserve_call() returns False. The gateway logs WEEK2_LLM_CALL_BUDGET_EXHAUSTED exactly once per run (first occurrence only, via _log_budget_exhausted_once), then every subsequent invocation for the rest of the run silently receives provider_status='budget_exhausted'/validation_accepted=False with no further logging. At the Alpha Mapper layer, _classify_alpha_with_llm unconditionally collapses EVERY non-accepted outcome (timeout, budget_exhausted, validation_failed, provider_error alike) to fallback_reason='invalid_output' -- this is itself a real observability defect being fixed in this Step (Section 10/11): the true cause was recoverable from the gateway's own invocation.error_code but was being discarded before reaching alpha_matches.json/run_audit.json.",
+      "evidence": "week2_llm.py:584-589 (_log_budget_exhausted_once, only logs once); alpha_mapper.py:407-421 'if response is None: return _unavailable(\"invalid_output\")' regardless of invocation.error_code."
+    },
+    "9_does_timeout_consume_budget": {
+      "answer": "YES. _reserve_call() is called BEFORE the provider attempt, so a call that subsequently times out has already consumed one budget unit.",
+      "evidence": "week2_llm.py:583-595: '_reserve_call()' at line 584 precedes 'call_with_timeout(...)' at line 592 within the same attempt iteration."
+    },
+    "10_are_retries_counted_separately": {
+      "answer": "YES. Each retry attempt is a separate iteration of the same for-loop and calls _reserve_call() again, consuming an additional, independent budget unit. With DEFAULT_MAX_RETRIES=1, one logical invocation can consume up to 2 budget units.",
+      "evidence": "week2_llm.py:583 'for attempt in range(1, self.max_retries + 2): ... if not self._reserve_call(): ...'"
+    },
+    "11_sequential_or_concurrent": {
+      "answer": "Strictly SEQUENTIAL. One attempt runs at a time inside a single-worker ThreadPoolExecutor (max_workers=1) used only to enforce the wall-clock deadline, not for concurrency; the outer attempt loop and the outer per-claim/per-batch loop in alpha_mapper.py/structured_output_adapter.py are plain synchronous Python loops with no parallelism.",
+      "evidence": "week2_llm.py:250-260 call_with_timeout uses ThreadPoolExecutor(max_workers=1); alpha_mapper.py:696 'for record in records:' is a plain sequential loop."
+    },
+    "12_timeout_applied_at_what_level": {
+      "answer": "Per Provider HTTP attempt (one self._model.invoke(prompt) call), not per batch content size and not per entire semantic stage. A batch call and a single-claim call use the exact same self.timeout_seconds window per attempt today, which is itself part of the problem once claim_batch_enrichment batches are large/slow.",
+      "evidence": "week2_llm.py:592-595 'call_with_timeout(lambda: self._model.invoke(prompt), self.timeout_seconds)' inside the per-attempt loop; the same self.timeout_seconds is shared by every task."
+    }
+  },
+  "measured_latency_evidence_from_step4_fresh_runs": {
+    "successful_calls_n": 104,
+    "successful_latency_ms": {"min": 1168.0, "p50": 1894.4, "p90": 3472.4, "max": 11033.8},
+    "successful_latency_ms_by_task": {
+      "alpha_classifier": {"n": 101, "min_ms": 1168.0, "p50_ms": 1871.8, "max_ms": 11033.8},
+      "structured_adapter_claim_batch_enrichment": {"n": 3, "min_ms": 4135.6, "p50_ms": 9319.8, "max_ms": 10595.7}
+    },
+    "timeout_events_n": 43,
+    "timeout_observed_total_elapsed_ms": {"min": 30013.8, "max": 30047.0},
+    "interpretation": "Individual successful alpha_classifier calls are fast (p50 < 2s, p90 < 3.5s) and comfortably fit a 15s per-attempt timeout -- the per-claim call is not itself a latency problem. claim_batch_enrichment (64-claim batches) is materially slower (observed p50 ~9.3s, up to ~10.6s even when it succeeds) and close enough to the 15s single-attempt budget that real-world variance pushes many attempts over it. Each 'timeout' trace entry reflects a full invocation (init attempt + 1 retry, each independently timed) totaling ~30s elapsed, consistent with DEFAULT_MAX_RETRIES=1 at DEFAULT_TIMEOUT_SECONDS=15.0 per attempt. Because claim_batch_enrichment's repeated timeouts alone can consume most/all of the shared 32-call budget before the numerous (700-950 per ticker) alpha_classifier calls even begin, alpha_classifier is starved primarily by (a) sharing one undersized global budget with a slower batched stage, compounded by (b) alpha_classifier itself needing ~1 call/claim with no batching at all."
+  },
+  "root_cause_summary": {
+    "primary": "alpha_classifier (the Pure-LLM Alpha semantic decision) makes exactly one Provider call per claim with no batching, requiring 700-950+ calls per real ticker for full coverage.",
+    "compounding": "All Week2 tasks (claim_batch_enrichment, alpha_classifier, structure_extractor, evidence_stance_classifier) share ONE global per-run call budget (DEFAULT_MAX_CALLS=32, itself an unexplained historical test default). claim_batch_enrichment's own real-world latency (p50 ~9.3s) is close to the shared 15s per-attempt timeout, so its timeouts alone can exhaust most/all of that shared budget before alpha_classifier's much larger, unbatched call volume gets any chance to execute.",
+    "not_the_cause": "The classifier gate itself (COMQUTOR_WEEK2_LLM_ENABLED) was correctly enabled throughout Step 4 -- disabled/config-caused UNAVAILABLE = 0 on all six fresh runs. This is a pure execution-capacity/architecture problem, not a configuration-gate problem and not (yet proven to be) a semantic recall problem."
+  }
+}

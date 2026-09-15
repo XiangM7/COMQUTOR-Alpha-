@@ -1,0 +1,396 @@
+{
+  "schema_version": "v0_1_3_structure_starvation_root_cause.v1",
+  "task": "V0.1.3 STRUCTURE STARVATION ROOT-CAUSE AUDIT -- OFFLINE / READ-ONLY / NO FIXES",
+  "gold_benchmark_version": "alpha_conflict_gold.v1",
+  "gold_benchmark_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_benchmark_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_unchanged": true,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "test_files_changed": [],
+  "commit": false,
+  "push": false,
+  "cases_audited": [
+    {
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "alpha": "A201"
+    },
+    {
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "alpha": "A301"
+    },
+    {
+      "ticker": "MSFT",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "alpha": "A304"
+    },
+    {
+      "ticker": "MSFT",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "alpha": "A601"
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "alpha": "A103"
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "alpha": "A301"
+    },
+    {
+      "ticker": "TSM",
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "alpha": "A301"
+    }
+  ],
+  "reconfirmation": {
+    "all_7_confirmed_structure_cases": true,
+    "misclassified_structure_cases": [],
+    "method": "For each case verified: cap_was_binding=false (from alpha_activations.json); Gold expected=yes; Alpha Mapper produced candidate_scores for the alpha (25-819 attempts); local_structure_support component raw=0/contribution=0 in every case; final level=candidate, never active/dominant/regime_level.",
+    "note_on_QQQ_A301": "QQQ A301 carries a secondary NO_TICKER_SPECIFIC_EVIDENCE code alongside NO_LOCAL_STRUCTURE_SUPPORT. Verified via component math that ticker-specificity alone (max +10) cannot cross the 12.22pp gap while structure alone (a single causal/asserted edge, +10 realistic) also falls short by 2.22pp -- structure remains the larger, still-necessary lever, so this case legitimately remains classified as Structure Starvation, not reclassified to Evidence Starvation, but the secondary factor is disclosed."
+  },
+  "shared_root_cause": {
+    "shared_root_cause": true,
+    "mechanism": "The Structure Extractor / graph-builder's edge-to-alpha_ids attribution and the Alpha Mapper / Evidence-Source-Role qualification pipeline that feeds activation scoring are two INDEPENDENT classification passes over the same underlying claims, and they frequently disagree. comqutor_alpha/graph_engine/activation_scorer_v2.py::_local_structure_component() only credits an edge if its own source_claim_ids intersect the SAME claim_ids that independently survived the stricter, later evidence_source_role_v1 Primary/Secondary qualification (comqutor_alpha/graph_engine/evidence_source_role.py) used for evidence_quality/ticker_specificity scoring. An edge can be correctly alpha_ids-tagged, lineage-resolved, and asserted in structure_graph.json while the ONE claim that produced it is independently rejected as SECONDARY_NOT_TICKER_SPECIFIC (risk-debate/investment-debate rounds are classified SECONDARY_DECISION_OR_DEBATE and require their own ticker-specificity bar) or was never independently matched to that alpha by the Alpha Mapper's own claim-level candidate scoring at all (the graph builder's alpha_ids tagging appears to use a more liberal, node/relation-level semantic association than the Alpha Mapper's per-claim scoring). Only claims that satisfy BOTH systems simultaneously ever produce a qualifying local structure edge -- a double-gate that is rarely satisfied even when substantial, correctly-labeled evidence and edges exist.",
+    "affected_cases": [
+      "QQQ A301",
+      "SNDK A103",
+      "SNDK A301",
+      "TSM A301"
+    ],
+    "supporting_evidence": "Directly traced 4 of 7 cases' sole/best candidate edge to a specific claim_id and confirmed via alpha_activations.json's evidence_fact_groups: TSM A301's and QQQ A301's edge-claims are tagged source_role=SECONDARY_DECISION_OR_DEBATE / activation_qualification_reason=SECONDARY_NOT_TICKER_SPECIFIC; SNDK A103's and SNDK A301's edge-claims are entirely ABSENT from evidence_fact_groups for those alphas (never independently Alpha-Mapper-attributed), despite the graph tagging the resulting edge with that exact alpha_id.",
+    "not_covered_by_shared_cause": [
+      "QQQ A201 (S5, wrong-alpha attribution, not a qualification mismatch)",
+      "MSFT A304 (S2, no edge extracted at all)",
+      "MSFT A601 (S2, no edge extracted at all)"
+    ]
+  },
+  "per_case": [
+    {
+      "ticker": "QQQ",
+      "alpha": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "final_level": "candidate",
+      "score": 46.2329,
+      "gap_to_threshold": 3.7671,
+      "pipeline_trace": {
+        "evidence_facts": "PRESENT -- 5 raw supporting claims, evidence_quality raw=40.27 (moderate)",
+        "alpha_mapping": "PRESENT -- Alpha Mapper produced candidate_scores for A201 across 30 claims, 26 eligible",
+        "structure_extraction_input": "PRESENT -- extracted_structures.json contains 'ai_capex --causal--> semiconductor_cycle' (lineage=resolved)",
+        "structure_nodes": "PRESENT -- 'semiconductor_cycle' node exists",
+        "structure_edges": "PRESENT -- the edge survives into structure_graph.json unchanged",
+        "alpha_edge_association": "PRESENT BUT WRONG ALPHA -- edge is tagged alpha_ids=['A301'] only, never 'A201', despite the target node being literally named 'semiconductor_cycle'",
+        "ticker_local_qualification": "NOT_REACHED -- never evaluated for A201 since the edge isn't associated with A201 at all",
+        "qualifying_activation_support_edge": "ABSENT for A201 (qualifying_local_edge_count=0)",
+        "citations": [
+          "outputs/runs/f88c8956-cb62-48aa-9951-89f8e8a95f83/extracted_structures.json",
+          "outputs/runs/f88c8956-cb62-48aa-9951-89f8e8a95f83/structure_graph.json (edge: ai_capex->semiconductor_cycle)"
+        ]
+      },
+      "root_cause_primary": "S5",
+      "root_cause_secondary": [],
+      "judgment": "DESIGN_GAP",
+      "diagnosis": "The exact relation Gold's A201 thesis requires ('AI CapEx causally drives the Semiconductor Cycle') IS extracted, lineage-resolved, and asserted -- but the graph's alpha-linking step attributed it ONLY to A301 (Revenue Expansion), never to A201 (Semiconductor Supercycle), despite the target node being literally named 'semiconductor_cycle'. This is a clean alpha-edge misalignment, not missing evidence or extraction failure.",
+      "counterfactual": {
+        "one_edge_would_cross_50": "YES",
+        "new_score_if_reattributed": 56.23,
+        "margin": 6.23,
+        "structure_necessary_blocker": true,
+        "reasoning": "If this same existing edge (causal/asserted, contribution 1.00) were additionally attributed to A201, raw local-structure=50, +10.0 to score: 46.23+10.0=56.23, crossing 50 with 6.23pp to spare."
+      },
+      "recoverability": "HIGH_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha": "A301",
+      "alpha_name": "Revenue Expansion",
+      "final_level": "candidate",
+      "score": 37.7754,
+      "gap_to_threshold": 12.2246,
+      "pipeline_trace": {
+        "evidence_facts": "PRESENT -- 6 raw supporting claims, evidence_quality raw=25.07 (weak-moderate)",
+        "alpha_mapping": "PRESENT -- 36 candidate-scoring attempts, 26 eligible",
+        "structure_extraction_input": "PRESENT -- 'ai_capex --causal--> semiconductor_cycle' and 'valuation_risk --conflicting--> qqq_revenue_growth' both extracted",
+        "structure_nodes": "PRESENT",
+        "structure_edges": "PRESENT -- both edges survive into structure_graph.json, both alpha_ids-tagged including A301",
+        "alpha_edge_association": "PRESENT -- correctly tagged alpha_ids includes 'A301' on both edges",
+        "ticker_local_qualification": "FAILED -- edge1's sole source_claim (risk_debate_state.aggressive_history:claim:13) is source_role=SECONDARY_DECISION_OR_DEBATE, activation_qualification_reason=SECONDARY_NOT_TICKER_SPECIFIC; edge2's 4 source_claims are ALL absent from A301's evidence_fact_groups entirely (never independently Alpha-Mapper-matched to A301)",
+        "qualifying_activation_support_edge": "ABSENT (qualifying_local_edge_count=0, exclusion reason RELATION_OR_ASSERTION_NOT_QUALIFYING)",
+        "citations": [
+          "outputs/runs/f88c8956-cb62-48aa-9951-89f8e8a95f83/structure_graph.json",
+          "outputs/runs/f88c8956-cb62-48aa-9951-89f8e8a95f83/alpha_activations.json (evidence_fact_groups for A301)"
+        ]
+      },
+      "root_cause_primary": "S6",
+      "root_cause_secondary": [
+        "B (secondary evidence gap: ticker_specific_evidence_count=0)"
+      ],
+      "judgment": "DESIGN_GAP",
+      "diagnosis": "Two edges ARE correctly alpha_ids-tagged to A301 and lineage-resolved, but their underlying claims independently fail the stricter Evidence-Source-Role qualification used for scoring (one is a SECONDARY debate-round claim judged not ticker-specific enough; the other three claims were never even matched to A301 by the Alpha Mapper's own per-claim scoring, despite the graph attributing the resulting edge to A301). This is the cross-system qualification mismatch shared with 3 other cases.",
+      "counterfactual": {
+        "one_edge_would_cross_50": "NO",
+        "new_score_if_qualified": 47.78,
+        "margin": -2.22,
+        "structure_necessary_blocker": true,
+        "reasoning": "Requalifying the single causal/asserted edge alone (contribution 1.00, +10.0) reaches only 47.78, short by 2.22pp. Ticker-specificity alone (max +10) is also insufficient (47.78). Both together, or two qualifying edges, would be needed."
+      },
+      "recoverability": "LOW_CONFIDENCE"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha": "A304",
+      "alpha_name": "Multiple Compression",
+      "final_level": "candidate",
+      "score": 43.3642,
+      "gap_to_threshold": 6.6358,
+      "pipeline_trace": {
+        "evidence_facts": "PRESENT -- 39 raw supporting claims, 14 unique, 5 ticker-specific, evidence_quality raw=32.17",
+        "alpha_mapping": "PRESENT -- 141 candidate-scoring attempts, 22 eligible",
+        "structure_extraction_input": "ABSENT for this relation -- extracted_structures.json's only valuation-related node ('valuation_risk') appears solely in edges to 'rate_cut_cycle' (tagged A001), never to 'msft_revenue_growth' or any MSFT-outcome node",
+        "structure_nodes": "PARTIAL -- 'valuation_risk' node exists but is never connected to an MSFT outcome node",
+        "structure_edges": "ABSENT -- no edge connecting valuation/multiple-compression content to an MSFT outcome node exists anywhere in extracted_structures.json or structure_graph.json",
+        "alpha_edge_association": "NOT_APPLICABLE -- no candidate edge exists to associate",
+        "ticker_local_qualification": "NOT_REACHED",
+        "qualifying_activation_support_edge": "ABSENT (qualifying_local_edge_count=0, incident_graph_edge_count=0)",
+        "citations": [
+          "outputs/runs/43472ace-454f-4c69-892c-adca91c25be7/extracted_structures.json (12 raw edges, none MSFT-valuation-outcome)",
+          "outputs/runs/43472ace-454f-4c69-892c-adca91c25be7/structure_graph.json"
+        ]
+      },
+      "root_cause_primary": "S2",
+      "root_cause_secondary": [],
+      "judgment": "DESIGN_GAP",
+      "diagnosis": "Despite 39 raw supporting claims and 5 ticker-specific facts -- substantial real evidence about MSFT's valuation/multiple-compression risk -- the Structure Extractor never produced ANY edge connecting valuation-risk concepts to an MSFT outcome node. The only valuation-related node ('valuation_risk') is extracted solely in the context of macro rate-cut-cycle relations (tagged A001), not as a company-specific multiple-compression relation. This is a genuine extraction-recall gap, not a qualification or attribution failure -- the relation never reached the graph at all.",
+      "counterfactual": {
+        "one_edge_would_cross_50": "YES (hypothetical)",
+        "new_score_if_extracted_and_qualified": 53.36,
+        "margin": 3.36,
+        "structure_necessary_blocker": true,
+        "reasoning": "If a single causal/asserted valuation_risk->msft_revenue_growth-type edge were extracted AND its claim passed qualification, raw=50, +10.0: 43.36+10.0=53.36, crossing with 3.36pp to spare. This is a larger hypothetical than the other cases since it requires new extraction, not just requalification of an existing edge."
+      },
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha": "A601",
+      "alpha_name": "Narrative Momentum",
+      "final_level": "candidate",
+      "score": 32.7558,
+      "gap_to_threshold": 17.2442,
+      "pipeline_trace": {
+        "evidence_facts": "PRESENT -- 21 raw supporting claims, 8 unique, evidence_quality raw=21.02",
+        "alpha_mapping": "PRESENT -- 98 candidate-scoring attempts, 54 eligible",
+        "structure_extraction_input": "ABSENT -- extracted_structures.json contains no node or edge with any narrative/momentum/sentiment semantics for MSFT at all",
+        "structure_nodes": "ABSENT -- no narrative/momentum-type node exists",
+        "structure_edges": "ABSENT",
+        "alpha_edge_association": "NOT_APPLICABLE",
+        "ticker_local_qualification": "NOT_REACHED",
+        "qualifying_activation_support_edge": "ABSENT (qualifying_local_edge_count=0, incident_graph_edge_count=0)",
+        "citations": [
+          "outputs/runs/43472ace-454f-4c69-892c-adca91c25be7/extracted_structures.json (12 raw edges, none narrative/momentum-related)"
+        ]
+      },
+      "root_cause_primary": "S2",
+      "root_cause_secondary": [],
+      "judgment": "DESIGN_GAP",
+      "diagnosis": "21 raw claims exist discussing MSFT sentiment/momentum dynamics, but none were ever extracted into a structural node or edge at all -- narrative/momentum content appears to fall entirely outside what the Structure Extractor's relation-extraction rules currently represent as graph structure, as opposed to a qualification or attribution problem downstream. The gap (17.24pp) is also the largest among the structure-only cases relative to a single edge's maximum realistic contribution.",
+      "counterfactual": {
+        "one_edge_would_cross_50": "NO",
+        "new_score_if_extracted_and_qualified": 42.76,
+        "margin": -7.24,
+        "structure_necessary_blocker": true,
+        "reasoning": "Even a hypothetical single causal/asserted edge (+10.0) only reaches 42.76, short by 7.24pp -- would need roughly two such edges' worth of structural credit, a larger and less certain recovery than the other cases."
+      },
+      "recoverability": "LOW_CONFIDENCE"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha": "A103",
+      "alpha_name": "AI Infrastructure",
+      "final_level": "candidate",
+      "score": 39.0305,
+      "gap_to_threshold": 10.9695,
+      "pipeline_trace": {
+        "evidence_facts": "PRESENT -- 13 raw supporting claims, 6 unique, evidence_quality raw=37.23 (moderate)",
+        "alpha_mapping": "PRESENT -- 698 candidate-scoring attempts, 5 eligible",
+        "structure_extraction_input": "PRESENT -- 'ai_demand --causal--> sndk_revenue_growth' extracted",
+        "structure_nodes": "PRESENT",
+        "structure_edges": "PRESENT -- survives into structure_graph.json, alpha_ids=['A103','A201']",
+        "alpha_edge_association": "PRESENT -- correctly tagged A103",
+        "ticker_local_qualification": "FAILED -- both of the edge's source_claim_ids (aggressive_risk_analyst and neutral_risk_analyst risk-debate claims) are entirely ABSENT from A103's evidence_fact_groups -- never independently matched to A103 by the Alpha Mapper's own claim scoring",
+        "qualifying_activation_support_edge": "ABSENT (RELATION_OR_ASSERTION_NOT_QUALIFYING). Independently cross-checked against docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3_final.json -- its ONE borderline candidate across the entire fresh six-run set is this exact ticker/alpha (SNDK A103), judged comparative/meta-argumentative and NOT actioned, confirming no hidden recall defect.",
+        "citations": [
+          "outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335/structure_graph.json",
+          "outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335/alpha_activations.json (evidence_fact_groups for A103)",
+          "docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3_final.json"
+        ]
+      },
+      "root_cause_primary": "S6",
+      "root_cause_secondary": [],
+      "judgment": "DESIGN_GAP",
+      "diagnosis": "Same cross-system qualification mismatch as TSM A301/QQQ A301: a correctly alpha_ids-tagged, lineage-resolved edge exists, but neither of its two source claims (both risk-debate-round commentary) was ever independently matched to A103 by the Alpha Mapper's own scoring, so neither enters the qualifying claim pool the local-structure component requires.",
+      "counterfactual": {
+        "one_edge_would_cross_50": "NO (essentially a rounding-distance miss)",
+        "new_score_if_qualified": 49.03,
+        "margin": -0.97,
+        "structure_necessary_blocker": true,
+        "reasoning": "The existing causal/asserted edge, if requalified, contributes +10.0: 39.03+10.0=49.03 -- short of 50 by only 0.97pp, the closest near-miss of any structure counterfactual in this set."
+      },
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha": "A301",
+      "alpha_name": "Revenue Expansion",
+      "final_level": "candidate",
+      "score": 36.9042,
+      "gap_to_threshold": 13.0958,
+      "pipeline_trace": {
+        "evidence_facts": "PRESENT -- 23 raw supporting claims, 10 unique, evidence_quality raw=34.26",
+        "alpha_mapping": "PRESENT -- 88 candidate-scoring attempts, 61 eligible",
+        "structure_extraction_input": "PRESENT -- 'valuation_risk --conflicting--> sndk_revenue_growth' extracted",
+        "structure_nodes": "PRESENT",
+        "structure_edges": "PRESENT -- survives into structure_graph.json, alpha_ids=['A201','A301']",
+        "alpha_edge_association": "PRESENT BUT LOW-VALUE -- edge_type is 'conflicting' (an opposing/risk relation), and comqutor_alpha/graph_engine/activation_scorer_v2.py's EDGE_CONTRIBUTIONS table has NO entry for 'conflicting' edges at all (only causal/supportive score), so this edge contributes ZERO to local_structure_support regardless of claim qualification",
+        "ticker_local_qualification": "FAILED (moot) -- its 4 source claims are also all absent from A301's evidence_fact_groups, but even if they were present, the edge_type itself is excluded from scoring by design",
+        "qualifying_activation_support_edge": "ABSENT",
+        "citations": [
+          "outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335/structure_graph.json",
+          "comqutor_alpha/graph_engine/activation_scorer_v2.py EDGE_CONTRIBUTIONS table"
+        ]
+      },
+      "root_cause_primary": "S6",
+      "root_cause_secondary": [],
+      "judgment": "DESIGN_GAP",
+      "diagnosis": "The only candidate edge is a 'conflicting'-type relation (valuation risk opposing revenue growth) -- a real, correctly-extracted relation, but one the local-structure-support formula never scores regardless of claim qualification, since only causal/supportive edge types carry a nonzero contribution weight. Its claims also independently fail the same cross-system qualification pattern as the other S6 cases. A genuinely different (causal or supportive) A301-linked edge would be needed, not merely requalification of this one.",
+      "counterfactual": {
+        "one_edge_would_cross_50": "NO",
+        "new_score_if_this_edge_qualified": 36.9,
+        "margin": -13.1,
+        "structure_necessary_blocker": true,
+        "reasoning": "Requalifying THIS specific edge changes nothing (contribution=0 by edge-type design). A hypothetical NEW causal/asserted A301 edge (+10.0) would reach 46.90, still short by 3.10pp -- would need more than one new qualifying edge of the right type."
+      },
+      "recoverability": "LOW_CONFIDENCE"
+    },
+    {
+      "ticker": "TSM",
+      "alpha": "A301",
+      "alpha_name": "Revenue Expansion",
+      "final_level": "candidate",
+      "score": 44.7724,
+      "gap_to_threshold": 5.2276,
+      "pipeline_trace": {
+        "evidence_facts": "PRESENT -- 23 raw supporting claims, 13 unique, evidence_quality raw=56.56 (the strongest of any missed Alpha in the full 14-miss diagnosis)",
+        "alpha_mapping": "PRESENT -- 70 candidate-scoring attempts, 45 eligible; 13 of 23 unique facts PRIMARY_QUALIFIED",
+        "structure_extraction_input": "PRESENT -- 'ai_demand --supportive--> tsm_revenue_growth' extracted (canonical relation, TradingAgents own output)",
+        "structure_nodes": "PRESENT",
+        "structure_edges": "PRESENT -- survives into structure_graph.json, lineage=resolved, alpha_ids=['A301']",
+        "alpha_edge_association": "PRESENT -- correctly tagged A301, no alpha_link_reason_codes",
+        "ticker_local_qualification": "FAILED -- the edge's sole source claim (neutral_risk_analyst:risk_debate_state.neutral_history:claim:28, 'The fundamentals are genuinely exceptional...') is source_role=SECONDARY_DECISION_OR_DEBATE, activation_qualification_reason=SECONDARY_NOT_TICKER_SPECIFIC, per evidence_qualification.qualification_reason_counts (13 PRIMARY_QUALIFIED, 10 SECONDARY_NOT_TICKER_SPECIFIC)",
+        "qualifying_activation_support_edge": "ABSENT (RELATION_OR_ASSERTION_NOT_QUALIFYING) -- none of the 13 PRIMARY_QUALIFIED claims independently produced their own graph edge linked to A301",
+        "citations": [
+          "outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95/structure_graph.json",
+          "outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95/alpha_activations.json (evidence_qualification, evidence_fact_groups for A301)"
+        ]
+      },
+      "root_cause_primary": "S6",
+      "root_cause_secondary": [],
+      "judgment": "DESIGN_GAP",
+      "diagnosis": "This is the closest miss in the entire 14-case diagnosis (5.23pp gap) with the strongest evidence_quality of any missed Alpha. The pipeline trace shows exactly why: TSM's 23 raw claims split into 13 PRIMARY_QUALIFIED (feeding evidence_quality/ticker_specificity scoring) and 10 SECONDARY_NOT_TICKER_SPECIFIC (excluded from scoring) -- but the ONE claim that happened to independently produce a structural edge was drawn from the REJECTED 10, not the qualified 13. This is not extraction recall failure (the relation was cleanly extracted, lineage-resolved, and correctly alpha-tagged) and not evidence starvation (evidence_quality is strong) -- it is specifically that the claim generating the edge and the claims passing evidence qualification are disjoint sets for this Alpha.",
+      "counterfactual": {
+        "one_edge_would_cross_50": "YES",
+        "new_score_if_qualified": 52.77,
+        "margin": 2.77,
+        "structure_necessary_blocker": true,
+        "reasoning": "Requalifying this exact supportive/asserted edge (contribution 0.80, +8.0): 44.77+8.0=52.77, crossing 50 with 2.77pp to spare."
+      },
+      "recoverability": "HIGH_CONFIDENCE_RECOVERABLE"
+    }
+  ],
+  "aggregate_root_cause_distribution": {
+    "S1_input_handoff": 0,
+    "S2_extraction_recall": 2,
+    "S3_node_normalization": 0,
+    "S4_edge_semantic": 0,
+    "S5_alpha_edge_alignment": 1,
+    "S6_locality_qualification": 4,
+    "S7_evidence_not_structural_enough": 0,
+    "S8_traceability_gap": 0,
+    "sum": 7
+  },
+  "aggregate_judgment_distribution": {
+    "IMPLEMENTATION_DEFECT": 0,
+    "DESIGN_GAP": 7,
+    "EXPECTED_CONSERVATIVE_BEHAVIOR": 0,
+    "INSUFFICIENT_TRACEABILITY": 0,
+    "sum": 7
+  },
+  "recoverability_summary": {
+    "HIGH_CONFIDENCE_RECOVERABLE": [
+      "QQQ A201",
+      "TSM A301"
+    ],
+    "MEDIUM_CONFIDENCE_RECOVERABLE": [
+      "MSFT A304",
+      "SNDK A103"
+    ],
+    "LOW_CONFIDENCE": [
+      "QQQ A301",
+      "MSFT A601",
+      "SNDK A301"
+    ],
+    "counts": {
+      "high": 2,
+      "medium": 2,
+      "low": 3
+    }
+  },
+  "can_structure_alone_reach_75_percent": {
+    "answer": "UNCERTAIN",
+    "quantification": {
+      "high_confidence_only_2_conversions": "66.59% -- still short of 75%",
+      "high_plus_medium_4_conversions": "72.70% -- still short of 75%, and 4 conversions is also short of the minimum 5 needed",
+      "all_7_structure_cases_recovered": "81.59% -- exceeds 75%, and 7 conversions exceeds the minimum 5 needed"
+    },
+    "explanation": "The confidently-legitimate subset (2 HIGH + 2 MEDIUM = 4 conversions) falls short both of the 75% target (72.70%) and of the minimum 5 hits required. Reaching >=75% via structure fixes alone requires at least 1 of the 3 LOW-confidence cases (QQQ A301, MSFT A601, SNDK A301) to also legitimately resolve -- each of which requires more than a single qualifying edge or a different edge type/extraction than currently exists. This is not guaranteed by current data, hence UNCERTAIN rather than YES or NO."
+  },
+  "priority_cases_detail": {
+    "TSM_A301": "Closest miss overall (5.23pp), strongest evidence (evidence_quality raw=56.56), precisely traced to a single disjoint claim-pool issue (S6) -- the highest-confidence, smallest-effort legitimate recovery candidate in the entire 14-miss diagnosis.",
+    "QQQ_A201": "Cleanest case: the exact needed relation already exists, correctly extracted and lineage-resolved, just attributed to the wrong Alpha (S5) -- a one-line semantic misattribution, not a recall or evidence problem.",
+    "MSFT_A304": "Highest evidence volume (39 raw claims) of any S2 case, yet zero extraction of the valuation->outcome relation -- suggests the extractor's relation vocabulary may not represent 'multiple compression'-type causal chains as readily as AI-capex-type ones.",
+    "SNDK_A103": "Near-miss by less than 1 point; independently corroborated by the high-value recovery audit's own borderline flag on this exact ticker/alpha, reinforcing that no hidden evidence would rescue it -- the fix, if any, is purely in the qualification-crossing mechanism.",
+    "SNDK_A301": "The only case where the candidate edge's TYPE itself (conflicting) is structurally excluded from scoring by design, regardless of claim qualification -- a distinct sub-pattern worth separate design attention."
+  },
+  "next_step_categories": [
+    "investigate why the graph-builder's alpha_ids attribution for a node literally named 'semiconductor_cycle' excludes A201 (Semiconductor Supercycle) -- QQQ A201 case",
+    "investigate whether risk-debate-round (SECONDARY_DECISION_OR_DEBATE) claims that produce a canonical-relation edge should be eligible to feed local-structure-support even when they fail the SECONDARY_NOT_TICKER_SPECIFIC bar used for evidence_quality -- affects QQQ A301, SNDK A103, TSM A301",
+    "investigate why the graph builder attributes alpha_ids to an edge using claims the Alpha Mapper's own per-claim scoring never independently matched to that alpha -- affects SNDK A103, SNDK A301, and partially QQQ A301",
+    "investigate extractor coverage for valuation/multiple-compression-type causal chains for MSFT (A304)",
+    "investigate extractor coverage for narrative/momentum-type structural content generally (A601, MSFT case)",
+    "investigate whether 'conflicting'-type edges should ever be alpha_ids-tagged to a bullish revenue Alpha at all, given they never score in local_structure_support by design -- SNDK A301 case",
+    "no change recommended to Gold v1, thresholds, taxonomy, B1/B2/B4, or qualification ceilings"
+  ],
+  "validation_checks": {
+    "exactly_7_cases_analyzed": true,
+    "no_other_gold_misses_included": true,
+    "gold_sha256_unchanged": true,
+    "selected_run_ids_unchanged": true,
+    "no_code_modifications": true,
+    "no_provider_calls": true,
+    "no_tradingagents_calls": true,
+    "no_ticker_runs": true,
+    "no_threshold_changes": true,
+    "no_taxonomy_changes": true,
+    "no_gold_changes": true,
+    "primary_S1_S8_counts_sum_to_7": true,
+    "judgment_counts_sum_to_7": true,
+    "every_diagnosis_cites_persisted_evidence": true,
+    "no_unsupported_causal_claim": true
+  }
+}

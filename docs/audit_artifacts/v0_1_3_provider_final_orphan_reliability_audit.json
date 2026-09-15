@@ -1,0 +1,986 @@
+{
+  "schema_version": "v0_1_3_provider_final_orphan_reliability_audit.v1",
+  "scope": "OFFLINE_READ_ONLY_ROOT_CAUSE_AND_DESIGN",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "official_alpha_hit": "61.0317%",
+  "executive_summary": {
+    "six_authoritative_runs_audited": 6,
+    "tsm_validation_comparison_included": true,
+    "raw_semantic_critical_failures": 621,
+    "final_semantic_orphans": 246,
+    "retry_recovered_calls": 129,
+    "overall_retry_recovery_rate_pct": 34.4,
+    "highest_orphan_component": "evidence_stance_classifier",
+    "highest_orphan_component_share_pct": 74.39,
+    "dominant_terminal_failure_type": "WEEK2_LLM_TIMEOUT (81.7% of all final orphans)",
+    "timeout_evidence_supports_adjustment": "YES (evidence_stance_classifier specifically); NO (alpha_classifier); NOT_APPLICABLE (structure_extractor)",
+    "retry_evidence_supports_adjustment": "YES (evidence_stance_classifier specifically -- component-specific extra attempt)",
+    "concurrency_contribution": "NO (alpha_classifier is the only concurrent component and has the BEST recovery/orphan profile; the sequential components are worse -- inversely correlated, not causally supportive of a concurrency-driven theory)",
+    "input_size_contribution": "PARTIAL (evidence_stance_classifier final-orphan inputs run ~10-25% larger than successful-call inputs on average -- a real but modest secondary factor, not the dominant explanation)",
+    "preferred_bounded_fix": "Component-specific retry-count increase for evidence_stance_classifier only (max_retries 1->2, i.e. 3 total attempts), timeout and all other components' policy unchanged",
+    "implementation_readiness": "READY_FOR_BOUNDED_IMPLEMENTATION",
+    "recommended_next_plan": "PLAN_A",
+    "code_changes": 0,
+    "provider_calls": 0,
+    "ticker_runs": 0
+  },
+  "architecture_trace": {
+    "alpha_classifier": {
+      "caller": "comqutor_alpha/structure_engine/alpha_mapper.py (_classify_alpha_with_llm / _classify_alpha_batch_with_llm)",
+      "request_builder": "week2_llm.py::invoke_json_with_trace -- builds prompt via _TASK_INSTRUCTIONS['alpha_classifier'] + json.dumps(payload)",
+      "provider_client": "self._model (created via tradingagents.llm_clients.create_llm_client(..., max_retries=0) -- the SDK-level client itself never retries; ALL retry logic is Week2LLMGateway's own loop)",
+      "timeout_source": "Week2LLMGateway.timeout_seconds, set at construction from COMQUTOR_WEEK2_LLM_TIMEOUT_SECONDS env var (bounded 1-120s), currently 45s in this repo's .env; call_with_timeout() enforces it via a fresh single-worker ThreadPoolExecutor per attempt",
+      "retry_wrapper": "week2_llm.py::invoke_json_with_trace, `for attempt in range(1, self.max_retries + 2)`",
+      "retry_count": "self.max_retries, set at construction from COMQUTOR_WEEK2_LLM_MAX_RETRIES env var (bounded 0-2 via MAX_SERVER_RETRIES=2), currently 1 in this repo's .env -> 2 total attempts",
+      "retry_conditions": "ALL exception types are retryable (TimeoutError, json.JSONDecodeError, TypeError/ValueError/KeyError validation failures, and any other Exception sub-classified into RATE_LIMIT/TRANSPORT_ERROR/PROVIDER_ERROR) -- no error type is treated as non-retryable",
+      "backoff": "NONE -- no time.sleep/asyncio.sleep call exists anywhere between attempts in week2_llm.py",
+      "concurrency": "ThreadPoolExecutor(max_workers=concurrency) in alpha_mapper.py:646, concurrency resolved via resolve_alpha_classifier_concurrency() -> COMQUTOR_WEEK2_LLM_CONCURRENCY env var, default 4 (not overridden in this repo's .env)",
+      "exception_classes": "TimeoutError (from call_with_timeout's FutureTimeoutError translation), json.JSONDecodeError, TypeError/ValueError/KeyError (schema validation), generic Exception (sub-classified via _transient_provider_error_reason into HTTP_429->RATE_LIMIT or other->TRANSPORT_ERROR, else PROVIDER_ERROR)",
+      "parser_schema_validation": "_strict_json_object(response) then validator(last_parsed) inside the try block -- a validation failure (TypeError/ValueError/KeyError) is caught and retried exactly like a transport failure",
+      "fallback_behavior": "NONE -- Pure-LLM Semantic Authority: alpha_classifier has no deterministic fallback path; final failure surfaces as match_status='unavailable' in alpha_matches.json",
+      "final_orphan_creation_point": "alpha_mapper.py's outcome-recording path when invoke_json_with_trace exhausts all attempts -> match_status='unavailable' persisted to alpha_matches.json",
+      "persisted_logging": "error_logs/week2_llm_errors.jsonl (one line per failed attempt, via self._log(task, error_code, attempt)); llm_semantic_calls.jsonl only for the FINAL attempt's outcome (via finalize_semantic_invocation, audit-trace only per the prior recorder audit)"
+    },
+    "evidence_stance_classifier": {
+      "caller": "comqutor_alpha/structure_engine/evidence_stance_llm.py",
+      "request_builder": "week2_llm.py::invoke_json_with_trace (same shared method as alpha_classifier, different _TASK_INSTRUCTIONS entry)",
+      "provider_client": "same shared self._model instance",
+      "timeout_source": "same shared Week2LLMGateway.timeout_seconds (45s) -- NO per-task override exists for this task in invoke_json_with_trace",
+      "retry_wrapper": "same shared invoke_json_with_trace loop",
+      "retry_count": "same shared self.max_retries=1 (2 total attempts) -- NOT component-specific in the current architecture",
+      "retry_conditions": "identical to alpha_classifier -- all error types retryable",
+      "backoff": "NONE (shared with all tasks)",
+      "concurrency": "NONE FOUND -- no ThreadPoolExecutor wraps evidence_stance_classifier's invocation; calls run sequentially, one at a time",
+      "exception_classes": "identical to alpha_classifier",
+      "parser_schema_validation": "identical mechanism",
+      "fallback_behavior": "HAS a deterministic fallback baseline -- on final exhaustion, `fallback_used=True` is recorded in llm_semantic_calls.jsonl and a deterministic (non-LLM) stance result is used instead",
+      "final_orphan_creation_point": "llm_semantic_calls.jsonl per-call record where task='evidence_stance_classifier' and fallback_used=True",
+      "persisted_logging": "same shared error_logs/week2_llm_errors.jsonl and llm_semantic_calls.jsonl"
+    },
+    "structure_extractor": {
+      "caller": "comqutor_alpha/structure_engine/structure_extractor.py",
+      "request_builder": "week2_llm.py::invoke_json_with_trace (same shared method)",
+      "provider_client": "same shared self._model instance",
+      "timeout_source": "same shared 45s timeout, no per-task override",
+      "retry_wrapper": "same shared loop",
+      "retry_count": "same shared self.max_retries=1",
+      "retry_conditions": "identical to the other two tasks",
+      "backoff": "NONE",
+      "concurrency": "NONE FOUND -- sequential, same as evidence_stance_classifier",
+      "exception_classes": "identical",
+      "parser_schema_validation": "identical mechanism",
+      "fallback_behavior": "HAS a deterministic fallback baseline, same mechanism as evidence_stance_classifier",
+      "final_orphan_creation_point": "llm_semantic_calls.jsonl per-call record where task='structure_extractor' and fallback_used=True",
+      "persisted_logging": "same shared logs"
+    },
+    "shared_infrastructure_notes": [
+      "All three tasks share ONE Week2LLMGateway instance per run, and therefore ONE timeout value and ONE retry count -- there is currently no per-task override plumbed into invoke_json_with_trace (the per-call override parameters timeout_seconds/max_retries exist only on the separate invoke_prebuilt_json_prompt method, used exclusively by the Phase 1B.1 Shadow evaluation path, never by the three production tasks).",
+      "call_with_timeout() creates a FRESH single-worker ThreadPoolExecutor for EVERY attempt and calls future.cancel() on timeout -- since ThreadPoolExecutor cannot forcibly interrupt a running thread, a timed-out call's underlying model invocation may continue running in the background after the caller moves on; any late response is simply discarded, never observed or logged. This means the log record NEVER reveals how long an orphaned call's true completion would have taken.",
+      "The retry loop reuses the IDENTICAL prompt string on every attempt -- no input truncation, no prompt modification, no request-shape change between attempts.",
+      "provider_attempts/retry_count in llm_semantic_calls.jsonl is per LOGICAL call across all its attempts; the persisted 'latency_ms' field for a call that succeeded on a retry is the TOTAL wall-clock duration across ALL prior failed attempts plus the successful one -- NOT the successful attempt's own duration alone. This was empirically confirmed (e.g. a TSM_OLD alpha_classifier retried-success shows latency_ms=76136, i.e. ~45000ms consumed by the failed first attempt's timeout plus ~31000ms for the successful second attempt)."
+    ]
+  },
+  "final_orphan_definitions": {
+    "alpha_classifier": "match_status == 'unavailable' in alpha_matches.json (Pure-LLM Semantic Authority has no fallback for this task)",
+    "evidence_stance_classifier": "task == 'evidence_stance_classifier' AND fallback_used == True in llm_semantic_calls.jsonl",
+    "structure_extractor": "task == 'structure_extractor' AND fallback_used == True in llm_semantic_calls.jsonl",
+    "raw_failure_event": "one line in error_logs/week2_llm_errors.jsonl -- one per FAILED attempt (never per logical call)",
+    "recovered_after_retry": "a logical call whose FIRST attempt failed (logged) but a LATER attempt succeeded (not logged, since only failures are logged) -- derived as count(attempt==1 failures) minus count(attempt==2 failures) per task, and cross-validated exactly against the ground-truth final-orphan counts (fallback_used/match_status) for every component in the TSM_OLD run (9==9, 30==30, 3==3)."
+  },
+  "retry_state_machine": {
+    "attempts_total_default": 2,
+    "attempts_total_max_possible": 3,
+    "attempts_total_observed_in_practice": 2,
+    "retry_count_shared_or_different_per_component": "SHARED -- one Gateway instance, one max_retries value, applied identically to all 3 tasks",
+    "all_errors_retryable": true,
+    "timeout_retryable": true,
+    "transport_error_retryable": true,
+    "parse_schema_failure_retryable": true,
+    "rate_limit_retryable": true,
+    "backoff_exists": false,
+    "jitter_exists": false,
+    "retries_reuse_identical_request": true,
+    "timeout_resets_each_attempt": true,
+    "state_diagram": "attempt 1 (fresh 45s window, identical prompt) -> [success -> DONE] | [failure, any type -> attempt 2 (fresh 45s window, IDENTICAL prompt, no delay) -> [success -> DONE, retry_count=1] | [failure, any type -> FINAL ORPHAN, retry_count=1, provider_attempt_count=2]]"
+  },
+  "raw_failure_to_final_orphan_table": [
+    {
+      "ticker": "NVDA",
+      "component": "alpha_classifier",
+      "raw_failures": 32,
+      "failed_calls": 27,
+      "recovered": 22,
+      "final_orphans": 5,
+      "recovery_pct": 81.48
+    },
+    {
+      "ticker": "NVDA",
+      "component": "evidence_stance_classifier",
+      "raw_failures": 60,
+      "failed_calls": 30,
+      "recovered": 0,
+      "final_orphans": 30,
+      "recovery_pct": 0.0
+    },
+    {
+      "ticker": "NVDA",
+      "component": "structure_extractor",
+      "raw_failures": 7,
+      "failed_calls": 4,
+      "recovered": 1,
+      "final_orphans": 3,
+      "recovery_pct": 25.0
+    },
+    {
+      "ticker": "QQQ",
+      "component": "alpha_classifier",
+      "raw_failures": 17,
+      "failed_calls": 12,
+      "recovered": 7,
+      "final_orphans": 5,
+      "recovery_pct": 58.33
+    },
+    {
+      "ticker": "QQQ",
+      "component": "evidence_stance_classifier",
+      "raw_failures": 50,
+      "failed_calls": 25,
+      "recovered": 0,
+      "final_orphans": 25,
+      "recovery_pct": 0.0
+    },
+    {
+      "ticker": "QQQ",
+      "component": "structure_extractor",
+      "raw_failures": 4,
+      "failed_calls": 2,
+      "recovered": 0,
+      "final_orphans": 2,
+      "recovery_pct": 0.0
+    },
+    {
+      "ticker": "MSFT",
+      "component": "alpha_classifier",
+      "raw_failures": 45,
+      "failed_calls": 36,
+      "recovered": 27,
+      "final_orphans": 9,
+      "recovery_pct": 75.0
+    },
+    {
+      "ticker": "MSFT",
+      "component": "evidence_stance_classifier",
+      "raw_failures": 58,
+      "failed_calls": 30,
+      "recovered": 2,
+      "final_orphans": 28,
+      "recovery_pct": 6.67
+    },
+    {
+      "ticker": "MSFT",
+      "component": "structure_extractor",
+      "raw_failures": 7,
+      "failed_calls": 4,
+      "recovered": 1,
+      "final_orphans": 3,
+      "recovery_pct": 25.0
+    },
+    {
+      "ticker": "SNDK",
+      "component": "alpha_classifier",
+      "raw_failures": 52,
+      "failed_calls": 37,
+      "recovered": 22,
+      "final_orphans": 15,
+      "recovery_pct": 59.46
+    },
+    {
+      "ticker": "SNDK",
+      "component": "evidence_stance_classifier",
+      "raw_failures": 76,
+      "failed_calls": 39,
+      "recovered": 2,
+      "final_orphans": 37,
+      "recovery_pct": 5.13
+    },
+    {
+      "ticker": "SNDK",
+      "component": "structure_extractor",
+      "raw_failures": 0,
+      "failed_calls": 0,
+      "recovered": 0,
+      "final_orphans": 0,
+      "recovery_pct": null
+    },
+    {
+      "ticker": "TSM_OLD",
+      "component": "alpha_classifier",
+      "raw_failures": 47,
+      "failed_calls": 38,
+      "recovered": 29,
+      "final_orphans": 9,
+      "recovery_pct": 76.32
+    },
+    {
+      "ticker": "TSM_OLD",
+      "component": "evidence_stance_classifier",
+      "raw_failures": 61,
+      "failed_calls": 31,
+      "recovered": 1,
+      "final_orphans": 30,
+      "recovery_pct": 3.23
+    },
+    {
+      "ticker": "TSM_OLD",
+      "component": "structure_extractor",
+      "raw_failures": 6,
+      "failed_calls": 3,
+      "recovered": 0,
+      "final_orphans": 3,
+      "recovery_pct": 0.0
+    },
+    {
+      "ticker": "AMD",
+      "component": "alpha_classifier",
+      "raw_failures": 23,
+      "failed_calls": 19,
+      "recovered": 15,
+      "final_orphans": 4,
+      "recovery_pct": 78.95
+    },
+    {
+      "ticker": "AMD",
+      "component": "evidence_stance_classifier",
+      "raw_failures": 66,
+      "failed_calls": 33,
+      "recovered": 0,
+      "final_orphans": 33,
+      "recovery_pct": 0.0
+    },
+    {
+      "ticker": "AMD",
+      "component": "structure_extractor",
+      "raw_failures": 10,
+      "failed_calls": 5,
+      "recovered": 0,
+      "final_orphans": 5,
+      "recovery_pct": 0.0
+    },
+    {
+      "ticker": "TSM_NEW",
+      "component": "alpha_classifier",
+      "raw_failures": 33,
+      "failed_calls": 27,
+      "recovered": 21,
+      "final_orphans": 6,
+      "recovery_pct": 77.78
+    },
+    {
+      "ticker": "TSM_NEW",
+      "component": "evidence_stance_classifier",
+      "raw_failures": 64,
+      "failed_calls": 32,
+      "recovered": 0,
+      "final_orphans": 32,
+      "recovery_pct": 0.0
+    },
+    {
+      "ticker": "TSM_NEW",
+      "component": "structure_extractor",
+      "raw_failures": 6,
+      "failed_calls": 3,
+      "recovered": 0,
+      "final_orphans": 3,
+      "recovery_pct": 0.0
+    }
+  ],
+  "global_final_orphan_distribution": {
+    "by_component_six_original_runs": {
+      "alpha_classifier": {
+        "raw": 216,
+        "failed_calls": 169,
+        "recovered": 122,
+        "final_orphans": 47,
+        "recovery_pct": 72.19,
+        "orphan_share_pct": 19.11
+      },
+      "evidence_stance_classifier": {
+        "raw": 371,
+        "failed_calls": 188,
+        "recovered": 5,
+        "final_orphans": 183,
+        "recovery_pct": 2.66,
+        "orphan_share_pct": 74.39
+      },
+      "structure_extractor": {
+        "raw": 34,
+        "failed_calls": 18,
+        "recovered": 2,
+        "final_orphans": 16,
+        "recovery_pct": 11.11,
+        "orphan_share_pct": 6.5
+      }
+    },
+    "grand_totals_six_original_runs": {
+      "raw": 621,
+      "failed_calls": 375,
+      "recovered": 129,
+      "final_orphans": 246,
+      "overall_recovery_rate_pct": 34.4
+    },
+    "by_ticker_final_orphans": {
+      "NVDA": 38,
+      "QQQ": 32,
+      "MSFT": 40,
+      "SNDK": 52,
+      "TSM_OLD": 42,
+      "AMD": 42
+    },
+    "by_error_type_terminal_cause_all_246_orphans": {
+      "WEEK2_LLM_TIMEOUT": 201,
+      "WEEK2_LLM_TRANSPORT_ERROR": 34,
+      "WEEK2_LLM_VALIDATION_FAILED": 11,
+      "pct": {
+        "WEEK2_LLM_TIMEOUT": 81.7,
+        "WEEK2_LLM_TRANSPORT_ERROR": 13.8,
+        "WEEK2_LLM_VALIDATION_FAILED": 4.5
+      }
+    },
+    "alpha_classifier_final_orphans_by_source_agent": {
+      "bear_researcher": 10,
+      "news_agent": 6,
+      "fundamental_agent": 6,
+      "neutral_risk_analyst": 6,
+      "conservative_risk_analyst": 5,
+      "research_manager": 4,
+      "sentiment_agent": 4,
+      "bull_researcher": 3,
+      "aggressive_risk_analyst": 1,
+      "trader": 1,
+      "portfolio_manager": 1,
+      "interpretation": "fairly evenly distributed across agents -- no single agent dominates alpha_classifier orphans"
+    },
+    "evidence_stance_structure_extractor_final_orphans_by_source_agent": "UNAVAILABLE -- llm_semantic_calls.jsonl carries no agent field; not reconstructable without fabrication",
+    "by_timestamp_window": "AMD's 67 TRANSPORT_ERROR events all share the EXACT SAME logged timestamp (2026-09-07T00:09:51Z), spanning both attempt=1 (33) and attempt=2 (34) across evidence_stance_classifier (58) and structure_extractor (10) -- a single, brief, shared-infrastructure outage window, not a per-request deterministic defect. No comparable single-instant clustering was found for TIMEOUT-classified failures in any other run (those are spread across each run's full execution window).",
+    "by_retry_count": "By construction, every final orphan has retry_count=1 (2 total attempts) -- no final orphan in any of the 7 runs shows any other retry_count, confirming max_retries=1 (MAX_SERVER_RETRIES=2 ceiling) was never exceeded in practice.",
+    "by_input_size": "see input_size_audit section below"
+  },
+  "error_taxonomy": {
+    "TIMEOUT_EXHAUSTED": 201,
+    "TRANSPORT_EXHAUSTED": 34,
+    "SCHEMA_EXHAUSTED": 11,
+    "RATE_LIMIT_EXHAUSTED": 0,
+    "HTTP_EXHAUSTED": 0,
+    "PARSE_EXHAUSTED": 0,
+    "EMPTY_RESPONSE_EXHAUSTED": 0,
+    "UNKNOWN_PROVIDER_ERROR": 0,
+    "TRACEABILITY_UNKNOWN": 0,
+    "note": "SCHEMA_EXHAUSTED corresponds to WEEK2_LLM_VALIDATION_FAILED as terminal cause (structure_extractor's dominant failure mode); no PARSE_EXHAUSTED (WEEK2_LLM_INVALID_JSON) or RATE_LIMIT_EXHAUSTED (WEEK2_LLM_RATE_LIMIT) ever appeared as a TERMINAL (attempt-2) cause in any of the 6 original runs, though both codes exist in the taxonomy and appear as non-terminal attempt-1 events in small numbers."
+  },
+  "timeout_root_cause_audit": {
+    "configured_timeout_seconds": 45,
+    "per_component_verdict": {
+      "alpha_classifier": {
+        "verdict": "NO",
+        "reasoning": "Prompts are small (~1800-1850 chars mean), successful calls typically complete in low single-digit seconds; retried-success latencies are mostly 1-6s for the second attempt, with only 2 of many recovered calls (TSM_OLD) taking a second attempt close to the 45s ceiling. High recovery rate (72%) is consistent with transient blips, not systematic under-provisioning."
+      },
+      "evidence_stance_classifier": {
+        "verdict": "YES",
+        "reasoning": "Terminal cause is 100% WEEK2_LLM_TIMEOUT in 5 of 6 runs (AMD's cluster is the transport-error exception). Retried-successes' TOTAL latency (first failed 45s attempt + second attempt) frequently lands at 76-90 SECONDS across MSFT/SNDK/TSM_OLD, meaning the second attempt alone often consumes 31-45 seconds -- right up against the SAME 45s ceiling it just cleared. This component's typical successful latency profile runs close enough to the current timeout that a nontrivial fraction of attempts land on the losing side of the boundary purely by chance, which is consistent with (though not proof of) the observed near-zero (2.66%) recovery rate."
+      },
+      "structure_extractor": {
+        "verdict": "NOT_APPLICABLE",
+        "reasoning": "Terminal cause is dominated by WEEK2_LLM_VALIDATION_FAILED (schema/parse), not timeout, in 5 of 6 runs. Timeout is not the binding constraint for this component's final orphans."
+      }
+    },
+    "overall_answer": "UNCERTAIN -- YES specifically and only for evidence_stance_classifier; NO for alpha_classifier; NOT_APPLICABLE for structure_extractor. This audit does not recommend a blanket timeout increase."
+  },
+  "transport_error_audit": {
+    "ticker": "AMD",
+    "total_transport_error_events": 67,
+    "clustering": "ALL 67 events share the identical logged timestamp 2026-09-07T00:09:51Z, spanning attempt=1 (33) and attempt=2 (34), across evidence_stance_classifier (58) and structure_extractor (10 events, wait 57+10=67 -- evidence_stance=57 raw total per earlier count, 58 total-including-1-timeout-at-that-instant)",
+    "retry_behavior": "Of calls whose FIRST attempt hit this transport-error window, essentially none recovered on the second attempt (evidence_stance_classifier's overall AMD recovery rate is 0%) -- consistent with an outage that was still in effect (or had just ended without a delay to let it clear) when the immediate, no-backoff retry fired.",
+    "final_orphans_disproportionately_transport": "YES for AMD specifically (29 of evidence_stance_classifier's 33 AMD final orphans are TRANSPORT_ERROR-terminal, vs TIMEOUT-terminal in every other run) -- AMD is a genuine outlier, not representative of the other 5 runs.",
+    "transient_vs_deterministic": "TRANSIENT -- the single-instant clustering strongly indicates a brief, shared network/connection-layer disruption (e.g. a dropped connection pool or DNS blip) rather than a per-request deterministic defect. A short backoff delay before retry (not implemented, not proposed as active in this task) would plausibly have let such a brief outage clear before the retry fired -- but this is inference from the clustering pattern, not directly measured.",
+    "connection_reuse_note": "Not directly inspectable from these logs -- the LLM client's internal connection/session handling is inside tradingagents.llm_clients.create_llm_client, not modified or executed in this task."
+  },
+  "retry_effectiveness": {
+    "alpha_classifier": {
+      "retry_recovery_rate_pct": 72.19,
+      "verdict": "Retries are already doing SUBSTANTIAL useful work for this component -- do not characterize alpha_classifier as having no retry reliability."
+    },
+    "evidence_stance_classifier": {
+      "retry_recovery_rate_pct": 2.66,
+      "verdict": "Retries recover only a small fraction of failures for this component -- the CURRENT single retry provides real but very limited value (5 calls recovered across 6 runs) relative to the 183 final orphans it did not prevent."
+    },
+    "structure_extractor": {
+      "retry_recovery_rate_pct": 11.11,
+      "verdict": "Retries recover a small fraction; low absolute volume limits impact either way."
+    },
+    "cases_where_all_retries_fail": "246 final orphans across the six runs by definition are exactly this population."
+  },
+  "retry_count_counterfactual": {
+    "methodology": "Using only historically OBSERVED attempt outcomes -- no extrapolation beyond what was actually logged.",
+    "orphans_under_1_attempt_truncation": {
+      "alpha_classifier": 169,
+      "evidence_stance_classifier": 188,
+      "structure_extractor": 18,
+      "note": "equals unique_calls_with_failure per component -- with no retry at all, every attempt-1 failure becomes final."
+    },
+    "orphans_under_2_attempt_current_policy": {
+      "alpha_classifier": 47,
+      "evidence_stance_classifier": 183,
+      "structure_extractor": 16
+    },
+    "orphans_under_3_attempt_counterfactual": "NO_HISTORICAL_DATA -- max_retries=1 (2 total attempts) was the applied policy for all 7 runs; no attempt=3 was ever logged, so there is no observed outcome to replay for a 3rd attempt. This audit does NOT extrapolate a guessed recovery rate for a hypothetical 3rd attempt.",
+    "demonstrated_retry_value": "The CURRENT single retry already prevents 122 alpha_classifier orphans (169->47, a 72% reduction) and 2 structure_extractor orphans (18->16) that a 1-attempt policy would have produced -- retries are not merely theoretical, they are measurably working for those two components. For evidence_stance_classifier the current retry prevents only 5 orphans (188->183, a 2.7% reduction)."
+  },
+  "extra_retry_recoverability": {
+    "alpha_classifier": {
+      "classification": "SUPPORTED_BY_COMPONENT_RECOVERY_PATTERN",
+      "reasoning": "This component already shows strong (72%) recovery from a single retry with small/fast prompts and transient-looking terminal timeouts; a further attempt is plausible to capture some fraction of the remaining 47 orphans, though this is not proven."
+    },
+    "evidence_stance_classifier": {
+      "classification": "UNSUPPORTED",
+      "reasoning": "Near-zero (2.66%) observed recovery already at attempt 2, with terminal-cause TIMEOUT and a latency profile that runs close to the ceiling on both attempts -- no historical evidence that an identical, un-modified 3rd attempt behaves differently from the 2nd."
+    },
+    "structure_extractor": {
+      "classification": "UNSUPPORTED",
+      "reasoning": "Terminal cause is predominantly WEEK2_LLM_VALIDATION_FAILED (a deterministic-model schema/parse mismatch, not a transient network condition) -- retrying an IDENTICAL prompt at temperature 0.0 against a schema failure has no clear mechanism to produce a different result."
+    },
+    "clarification": "NONE of these classifications assert that an extra retry WOULD definitely succeed -- see 'extra_retry_recoverability_caveat'.",
+    "extra_retry_recoverability_caveat": "SUPPORTED_BY_COMPONENT_RECOVERY_PATTERN describes only that the historical PATTERN for this component is consistent with retries helping, not a guarantee for any specific future call."
+  },
+  "timeout_extension_counterfactual": {
+    "alpha_classifier": {
+      "classification": "NO_EVIDENCE",
+      "reasoning": "No evidence the current 45s ceiling binds this component's actual workload -- prompts and successful latencies are small/fast."
+    },
+    "evidence_stance_classifier": {
+      "classification": "POSSIBLY_RECOVERABLE",
+      "reasoning": "Population-level evidence (retried-success TOTAL latencies of 76-90s across three runs, implying 31-45s SECOND-attempt durations already near the ceiling) suggests SOME fraction of currently-orphaned calls might complete within a longer window. This is NOT direct per-orphan completion-time evidence -- call_with_timeout() cancels and discards the underlying thread on timeout, so no orphaned call's true completion time was ever measured. Classified POSSIBLY_RECOVERABLE, not LIKELY_RECOVERABLE_WITH_LONGER_TIMEOUT, given this evidentiary gap."
+    },
+    "structure_extractor": {
+      "classification": "NOT_APPLICABLE",
+      "reasoning": "Terminal cause is schema/validation, not timeout."
+    }
+  },
+  "concurrency_audit": {
+    "alpha_classifier_concurrency": "ThreadPoolExecutor with max_workers=resolve_alpha_classifier_concurrency() (env COMQUTOR_WEEK2_LLM_CONCURRENCY, default 4, not overridden in this repo's .env, bounded 1-8)",
+    "evidence_stance_classifier_concurrency": "NONE -- sequential",
+    "structure_extractor_concurrency": "NONE -- sequential",
+    "failures_rise_during_high_concurrency": "NO EVIDENCE OF THIS -- the only concurrent component (alpha_classifier, concurrency=4) has the BEST recovery rate (72%) and a moderate orphan share (19%); the two SEQUENTIAL, non-concurrent components have far worse recovery (2.66%, 11.11%) and dominate final-orphan volume (81% combined). If anything this is an INVERSE correlation with the theory that concurrency drives failures.",
+    "retries_synchronize_into_bursts": "UNKNOWN for alpha_classifier's 4-way pool (not directly measured in this audit); NOT APPLICABLE for the two sequential components.",
+    "provider_rate_limits_observed": "WEEK2_LLM_RATE_LIMIT (HTTP 429) appears in the raw error taxonomy in small numbers as a non-terminal (attempt-1) event in a few runs, but never as a terminal (final-orphan) cause in any of the 6 original runs.",
+    "timeout_density_vs_concurrency_correlation": "NOT SUPPORTED BY THIS DATA -- see inverse-correlation note above.",
+    "recommendation": "Do not lower concurrency -- no evidence supports it, and the concurrent component is the best-performing one."
+  },
+  "input_size_audit": {
+    "alpha_classifier": {
+      "orphan_input_size_chars_mean": null,
+      "success_input_size_chars_mean": "~1800-1850 across runs",
+      "note": "Failed-call input_payload is not consistently persisted in llm_semantic_calls.jsonl for this task's final-orphan records (Pure-LLM Semantic Authority path does not carry a fallback record the way the other two tasks do) -- comparison not directly reconstructable; small, stable ~1800-1850 char size across every run for successful calls suggests prompts are NOT the driver of alpha_classifier's occasional timeouts."
+    },
+    "evidence_stance_classifier": {
+      "orphan_input_size_chars_mean_range": "7381-8583 across runs",
+      "success_input_size_chars_mean_range": "5760-7727 across runs",
+      "verdict": "Orphan-call inputs run roughly 10-25% LARGER than successful-call inputs on average -- a real, consistent, but MODEST secondary factor. Not large enough alone to explain a 97%-orphan-rate-given-failure outcome; the dominant explanation remains the component's overall latency profile running close to the timeout ceiling regardless of input size."
+    },
+    "structure_extractor": {
+      "orphan_input_size_chars_mean_range": "416-559 across runs",
+      "success_input_size_chars_mean_range": "394-560 across runs",
+      "verdict": "No meaningful difference -- orphan and successful inputs are essentially the same size. Input size is not a contributing factor for this component; its failures are schema/validation-driven, not size/latency-driven."
+    }
+  },
+  "component_specific_failure_rates": {
+    "ranking": [
+      {
+        "rank": 1,
+        "component": "evidence_stance_classifier",
+        "call_attempts_with_failure": 188,
+        "final_orphans": 183,
+        "final_orphan_rate_given_failure_pct": 97.34,
+        "orphan_share_of_all_final_orphans_pct": 74.39,
+        "impacted_alpha_count_traceable": "UNKNOWN -- no alpha-level attribution tool exists for this component (see gold_impact section)"
+      },
+      {
+        "rank": 2,
+        "component": "alpha_classifier",
+        "call_attempts_with_failure": 169,
+        "final_orphans": 47,
+        "final_orphan_rate_given_failure_pct": 27.81,
+        "orphan_share_of_all_final_orphans_pct": 19.11,
+        "impacted_alpha_count_traceable": "6 alpha IDs across 6 runs (A301 x3, A601 x2, A501 x1), only 1 causally tied to a Gold miss (TSM_OLD A301)"
+      },
+      {
+        "rank": 3,
+        "component": "structure_extractor",
+        "call_attempts_with_failure": 18,
+        "final_orphans": 16,
+        "final_orphan_rate_given_failure_pct": 88.89,
+        "orphan_share_of_all_final_orphans_pct": 6.5,
+        "impacted_alpha_count_traceable": "UNKNOWN -- no alpha-level attribution tool exists for this component"
+      }
+    ],
+    "engineering_priority_driven_by_this_ranking": "evidence_stance_classifier first (74% of all orphan volume, near-total orphan-rate-given-failure), alpha_classifier second (already well-served by existing retry, but the only component with confirmed Gold-miss-causal impact), structure_extractor third (small absolute volume, different failure mode entirely -- schema, not reliability)."
+  },
+  "gold_impact": {
+    "attribution_tool_limitation": "compute_impacted_alphas() (provider_health_diagnostics.py) traces Gold-alpha impact ONLY via alpha_matches.json's deterministic_top_alpha field for alpha_classifier final orphans. It has NO equivalent mechanism for evidence_stance_classifier or structure_extractor final orphans -- these two components produce 90.9% of all final orphans (199 of 246) across the six runs, yet their downstream Gold-alpha consequence, if any, is CURRENTLY UNMEASURED, not zero. This is the single most important adequacy gap identified in this audit (see provider_health_metric_adequacy).",
+    "per_run_impacted_alpha_classification": {
+      "NVDA": {
+        "ticker": "NVDA",
+        "impacted_alpha_ids": [],
+        "gold_alpha_ids": [
+          "A101",
+          "A102",
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "detected_alpha_ids": [
+          "A101",
+          "A103",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "impacted_rows": [],
+        "claims_orphaned_by_provider_failure": 5,
+        "traceability_unknown_count": 5,
+        "alpha_classifier_final_orphans": 5
+      },
+      "QQQ": {
+        "ticker": "QQQ",
+        "impacted_alpha_ids": [
+          "A501",
+          "A601"
+        ],
+        "gold_alpha_ids": [
+          "A101",
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "detected_alpha_ids": [
+          "A001",
+          "A103",
+          "A304",
+          "A601"
+        ],
+        "impacted_rows": [
+          {
+            "alpha": "A501",
+            "gold_expected": false,
+            "detected_hit": false
+          },
+          {
+            "alpha": "A601",
+            "gold_expected": true,
+            "detected_hit": true
+          }
+        ],
+        "claims_orphaned_by_provider_failure": 5,
+        "traceability_unknown_count": 3,
+        "alpha_classifier_final_orphans": 5
+      },
+      "MSFT": {
+        "ticker": "MSFT",
+        "impacted_alpha_ids": [
+          "A301"
+        ],
+        "gold_alpha_ids": [
+          "A101",
+          "A102",
+          "A103",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "detected_alpha_ids": [
+          "A001",
+          "A101",
+          "A103",
+          "A301"
+        ],
+        "impacted_rows": [
+          {
+            "alpha": "A301",
+            "gold_expected": true,
+            "detected_hit": true
+          }
+        ],
+        "claims_orphaned_by_provider_failure": 9,
+        "traceability_unknown_count": 8,
+        "alpha_classifier_final_orphans": 9
+      },
+      "SNDK": {
+        "ticker": "SNDK",
+        "impacted_alpha_ids": [
+          "A201"
+        ],
+        "gold_alpha_ids": [
+          "A102",
+          "A103",
+          "A201",
+          "A301",
+          "A601"
+        ],
+        "detected_alpha_ids": [
+          "A201",
+          "A304",
+          "A601"
+        ],
+        "impacted_rows": [
+          {
+            "alpha": "A201",
+            "gold_expected": true,
+            "detected_hit": true
+          }
+        ],
+        "claims_orphaned_by_provider_failure": 15,
+        "traceability_unknown_count": 14,
+        "alpha_classifier_final_orphans": 15
+      },
+      "TSM_OLD": {
+        "ticker": "TSM",
+        "impacted_alpha_ids": [
+          "A301",
+          "A601"
+        ],
+        "gold_alpha_ids": [
+          "A101",
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "detected_alpha_ids": [
+          "A101",
+          "A103",
+          "A201",
+          "A304",
+          "A601"
+        ],
+        "impacted_rows": [
+          {
+            "alpha": "A301",
+            "gold_expected": true,
+            "detected_hit": false
+          },
+          {
+            "alpha": "A601",
+            "gold_expected": true,
+            "detected_hit": true
+          }
+        ],
+        "claims_orphaned_by_provider_failure": 9,
+        "traceability_unknown_count": 6,
+        "alpha_classifier_final_orphans": 9
+      },
+      "AMD": {
+        "ticker": "AMD",
+        "impacted_alpha_ids": [
+          "A301"
+        ],
+        "gold_alpha_ids": [
+          "A101",
+          "A102",
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "detected_alpha_ids": [
+          "A101",
+          "A103",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "impacted_rows": [
+          {
+            "alpha": "A301",
+            "gold_expected": true,
+            "detected_hit": true
+          }
+        ],
+        "claims_orphaned_by_provider_failure": 4,
+        "traceability_unknown_count": 3,
+        "alpha_classifier_final_orphans": 4
+      },
+      "TSM_NEW": {
+        "ticker": "TSM",
+        "impacted_alpha_ids": [
+          "A101"
+        ],
+        "gold_alpha_ids": [
+          "A101",
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "detected_alpha_ids": [
+          "A101",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "impacted_rows": [
+          {
+            "alpha": "A101",
+            "gold_expected": true,
+            "detected_hit": true
+          }
+        ],
+        "claims_orphaned_by_provider_failure": 6,
+        "traceability_unknown_count": 5,
+        "alpha_classifier_final_orphans": 6
+      }
+    },
+    "classification_summary": {
+      "IMPACTED_AND_MISS_CAUSAL": [
+        "TSM_OLD:A301"
+      ],
+      "IMPACTED_BUT_REDUNDANT": [
+        "QQQ:A601",
+        "MSFT:A301",
+        "SNDK:A201",
+        "TSM_OLD:A601",
+        "AMD:A301",
+        "TSM_NEW:A101 (diagnostic only)"
+      ],
+      "IMPACTED_BUT_NON_GOLD": [
+        "QQQ:A501"
+      ],
+      "UNKNOWN": [
+        "ALL evidence_stance_classifier and structure_extractor final orphans (199 of 246, 80.9% of total) -- no attribution tool exists"
+      ]
+    },
+    "tsm_old_a301_reconfirmed": "IMPACTED_AND_MISS_CAUSAL -- unchanged from prior audit; deterministic candidate existed (deterministic_top_alpha=A301, deterministic score 0.7596), match_status='unavailable' after both attempts timed out, and A301 had no other qualifying lineage to fall back on in that run."
+  },
+  "tsm_old_vs_new_reliability_control": {
+    "alpha_classifier": {
+      "old": {
+        "raw": 47,
+        "failed_calls": 38,
+        "recovered": 29,
+        "final_orphans": 9,
+        "orphan_rate_pct": 23.68
+      },
+      "new": {
+        "raw": 33,
+        "failed_calls": 27,
+        "recovered": 21,
+        "final_orphans": 6,
+        "orphan_rate_pct": 22.22
+      }
+    },
+    "a301_lineage_specifically": {
+      "old_claim": "fundamentals_report:claim:42 -- deterministic score 0.7596, match_status='unavailable' (both attempts timed out)",
+      "new_claim": "fundamentals_report:claim:29 -- deterministic score 0.7596 (identical), match_status='matched', alpha_match_method='llm', matched_alpha='A301'"
+    },
+    "what_changed_operationally": "Nothing in configuration. Both runs used the same .env-configured timeout (45s) and retry count (1), the same model/provider, the same concurrency setting, and produced near-identical alpha_classifier recovery rates (76.3% old vs 77.8% new) and orphan rates (23.7% old vs 22.2% new) -- statistically indistinguishable given the small sample sizes involved. The specific A301-carrying claim happened to land in the ~22-24% tail that exhausts both attempts in the old run, and in the ~76-78% majority that recovers (or in this case succeeds outright) in the new run. This is the expected behavior of a probabilistic retry-exhaustion process operating on two DIFFERENT claim instances (different research content -> different claim_id) carrying the SAME underlying economic thesis and deterministic strength.",
+    "same_config_different_outcome": true,
+    "verdict": "SAME_CONFIG_DIFFERENT_EXECUTION_OUTCOME"
+  },
+  "research_variance_vs_provider_reliability_disambiguation": {
+    "a103_new_miss": "research-content / extraction variance (per v0_1_3_tsm_recorder_variance_audit) -- NOT in either run's impacted_alpha_ids; not used as Provider reliability evidence in this audit.",
+    "a201_new_miss": "structure-extraction variance (per v0_1_3_tsm_recorder_variance_audit) -- NOT in either run's impacted_alpha_ids; not used as Provider reliability evidence in this audit.",
+    "a301_old_miss": "the clean, confirmed Provider-reliability positive control -- used throughout this audit as the canonical Gold-miss-causal case."
+  },
+  "provider_health_metric_adequacy": {
+    "current_metrics_sufficient_to_guide_a_fix": false,
+    "reasoning": "Current Provider Health metrics (provider_failure_events, semantic_critical_failure_events, final_orphans, claims_orphaned, impacted_alpha_ids) correctly identify THAT a problem exists and roughly WHERE (which component has the most final orphans, via final-orphan counts already broken out per component), but cannot answer WHY retries are or are not working, nor trace evidence_stance_classifier/structure_extractor orphans to specific Alpha IDs.",
+    "recommended_additions": [
+      "retry_recovery_count / retry_recovery_rate per component -- directly answers 'are retries working' (this audit had to derive this manually from raw attempt-1/attempt-2 counts; it is not a first-class metric today)",
+      "terminal_error_type per final orphan (or aggregated per component) -- distinguishes TIMEOUT vs TRANSPORT vs VALIDATION as the terminal cause, which this audit found to differ sharply by component and drives entirely different fixes",
+      "attempts_to_success distribution -- would make the 'total latency includes prior failed attempts' subtlety (discovered during this audit) visible without manual reconstruction",
+      "orphan_rate_by_component (final_orphans / failed_calls, not final_orphans / all_calls) -- the current metrics report absolute final-orphan counts but not the RATE relative to failure exposure, which is what actually distinguishes evidence_stance_classifier's 97% orphan-rate-given-failure from alpha_classifier's 28%",
+      "an alpha-level attribution mechanism for evidence_stance_classifier / structure_extractor final orphans, analogous to alpha_matches.json's deterministic_top_alpha for alpha_classifier -- currently the single largest metric gap, since 90.9% of final orphans have NO Gold-impact traceability at all"
+    ],
+    "not_implemented_in_this_task": true
+  },
+  "fix_design_options": {
+    "option_a_timeout_adjustment": {
+      "summary": "Increase timeout only for evidence_stance_classifier (proven latency-sensitive)",
+      "root_cause_addressed": "evidence_stance_classifier's TIMEOUT-dominant terminal cause",
+      "files_functions_likely_touched": [
+        "comqutor_alpha/structure_engine/week2_llm.py (invoke_json_with_trace would need a per-task timeout override, currently only invoke_prebuilt_json_prompt has this)"
+      ],
+      "expected_raw_failure_effect": "Likely reduces raw TIMEOUT events for this component",
+      "expected_final_orphan_effect": "Plausible reduction, but NOT proven by direct per-orphan evidence -- only population-level latency-clustering evidence (see timeout_extension_counterfactual: POSSIBLY_RECOVERABLE, not LIKELY)",
+      "semantic_behavior_changed": false,
+      "provider_behavior_changed": "Marginally (longer per-attempt wall-clock wait)",
+      "latency_impact": "Increases worst-case per-claim wall-clock time for this component",
+      "cost_impact": "Likely minimal (same call, longer wait, no extra Provider tokens)",
+      "regression_risk": "LOW-MEDIUM -- untested effect size, could increase total run duration if many calls now wait longer before falling back",
+      "observability": "Would need the retry_recovery_rate addition (above) to actually measure impact",
+      "tsm_a301_benefit": "NONE -- A301's issue was alpha_classifier, not evidence_stance_classifier",
+      "amd_transport_benefit": "NONE -- AMD's issue was transport, not timeout, for this component in that run",
+      "blast_radius": "Component-scoped if implemented correctly, but requires new plumbing not yet present",
+      "implementation_readiness": "DESIGN_NOT_READY -- insufficient direct evidence per task section 24's caution against increasing timeout without strong evidence"
+    },
+    "option_b_retry_policy_adjustment_blanket": {
+      "summary": "Increase max_retries for ALL 3 components uniformly",
+      "root_cause_addressed": "Would help evidence_stance_classifier but is not targeted -- alpha_classifier and structure_extractor show no evidence of needing it (alpha_classifier already recovers well; structure_extractor's failures are schema-driven, not attempt-count-driven)",
+      "files_functions_likely_touched": [
+        "week2_llm.py (self.max_retries)",
+        ".env (COMQUTOR_WEEK2_LLM_MAX_RETRIES)"
+      ],
+      "expected_raw_failure_effect": "More raw failure events logged overall (more attempts made)",
+      "expected_final_orphan_effect": "Reduces evidence_stance_classifier orphans somewhat; negligible effect on structure_extractor (schema failures repeat); marginal additional benefit for alpha_classifier (already near-saturated benefit from 1 retry)",
+      "semantic_behavior_changed": false,
+      "provider_behavior_changed": "YES -- more total Provider calls per run across all 3 tasks",
+      "latency_impact": "Increases worst-case latency for ALL 3 tasks, including the two (alpha_classifier, structure_extractor) with no evidence of needing it",
+      "cost_impact": "Increases total token/call cost broadly, not targeted",
+      "regression_risk": "MEDIUM -- untargeted change touching a shared code path",
+      "observability": "same as option A",
+      "tsm_a301_benefit": "Marginal (alpha_classifier already at 72% recovery; a further retry has some plausible but unproven benefit)",
+      "amd_transport_benefit": "Marginal -- an untargeted extra attempt fired immediately (no backoff) may still land inside the same outage window",
+      "blast_radius": "ALL 3 semantic-critical tasks, every ticker",
+      "implementation_readiness": "DESIGN_NOT_READY -- not targeted to the evidence"
+    },
+    "option_c_component_specific_retry_policy": {
+      "summary": "Component-specific retry policy: increase max_retries for evidence_stance_classifier ONLY (1->2, i.e. 3 total attempts), leave alpha_classifier and structure_extractor untouched",
+      "root_cause_addressed": "evidence_stance_classifier's dominant (74% of all orphans) near-zero (2.66%) retry recovery rate, directly and only",
+      "files_functions_likely_touched": [
+        "comqutor_alpha/structure_engine/week2_llm.py -- invoke_json_with_trace's retry loop would need a per-task max_retries lookup (mirroring the pattern invoke_prebuilt_json_prompt already uses for its own override parameter), plus a new bounded config surface (e.g. an env var read only for this one task, clamped to the existing MAX_SERVER_RETRIES=2 ceiling -- NO new ceiling required)"
+      ],
+      "expected_raw_failure_effect": "More raw failure events logged for evidence_stance_classifier specifically (one more attempt per still-failing call)",
+      "expected_final_orphan_effect": "Plausible reduction in evidence_stance_classifier's 183 orphans by however many benefit from a 3rd independent attempt at the same 45s window -- unproven magnitude, but the mechanism (an additional independent roll of a stochastic completion-time distribution) is the SAME mechanism already proven to recover 122 alpha_classifier orphans via its first retry",
+      "semantic_behavior_changed": false,
+      "provider_behavior_changed": "YES, but SCOPED to one task only -- more attempts before falling back to the SAME already-existing deterministic fallback",
+      "latency_impact": "Increases worst-case latency ONLY for evidence_stance_classifier calls that would otherwise have already failed twice (i.e. only the already-slow tail, not the common case)",
+      "cost_impact": "Small, scoped increase (up to 1 extra call for currently-orphaned evidence_stance_classifier calls only, ~183/run at most)",
+      "regression_risk": "LOW -- bounded by the EXISTING MAX_SERVER_RETRIES=2 ceiling (no new safety bound needed), touches one task's retry count only, preserves the exact existing fallback semantics",
+      "observability": "Testable fully offline via synthetic 3-attempt fixtures; final-orphan count is the direct, already-existing success metric",
+      "tsm_a301_benefit": "NONE DIRECTLY (A301 is alpha_classifier), but TSM's own evidence_stance_classifier orphans (30 old / 32 new) would benefit",
+      "amd_transport_benefit": "PARTIAL -- an extra attempt might land outside AMD's brief outage window even without backoff, though a backoff (Option F) would more directly address that specific pattern",
+      "blast_radius": "evidence_stance_classifier only, across all tickers",
+      "implementation_readiness": "READY_FOR_BOUNDED_IMPLEMENTATION"
+    },
+    "option_d_deterministic_fallback_preservation": {
+      "summary": "When Provider fails, preserve a safe deterministic result if current architecture already has sufficiently strong deterministic authority",
+      "root_cause_addressed": "N/A for evidence_stance_classifier/structure_extractor -- BOTH ALREADY HAVE this exact behavior today (fallback_used=True is the current final-orphan outcome, not a gap). For alpha_classifier, this option would mean giving Pure-LLM Semantic Authority a deterministic fallback it deliberately does not have today.",
+      "files_functions_likely_touched": [
+        "alpha_mapper.py -- would require introducing a NEW fallback path where none exists by design"
+      ],
+      "semantic_behavior_changed": "YES for the alpha_classifier variant -- this is a SEMANTIC AUTHORITY change (Pure-LLM Semantic Authority currently has no intermediate fallback BY DESIGN), not a reliability-only change. Per task section 24, this belongs to a different semantic-design task, not this reliability-only audit.",
+      "tsm_a301_benefit": "Would have masked, not fixed, the OLD run's A301 miss by substituting a non-LLM decision -- explicitly NOT recommended per task section 24's warning against using TSM A301's deterministic eligibility to justify a global bypass of Pure-LLM Semantic Authority",
+      "implementation_readiness": "OUT_OF_SCOPE for alpha_classifier (semantic-design task); ALREADY_EXISTS for evidence_stance_classifier/structure_extractor (no action needed)"
+    },
+    "option_e_concurrency_rate_smoothing": {
+      "summary": "Reduce/smooth concurrency to avoid Provider-side rate limiting or contention",
+      "root_cause_addressed": "NONE -- concurrency_audit found no evidence concurrency causes failures; if anything the only concurrent component (alpha_classifier) performs best",
+      "implementation_readiness": "DESIGN_NOT_READY -- not supported by evidence, not recommended"
+    },
+    "option_f_transport_retry_hardening": {
+      "summary": "Add a short backoff delay before retry specifically for TRANSPORT_ERROR-classified attempts (not a blanket backoff for all error types)",
+      "root_cause_addressed": "AMD's 67-event single-instant TRANSPORT_ERROR cluster -- a brief shared-infrastructure outage that an immediate, no-delay retry could not outlast",
+      "files_functions_likely_touched": [
+        "week2_llm.py's retry loop -- would need a conditional short sleep only in the TRANSPORT_ERROR/RATE_LIMIT branch"
+      ],
+      "expected_final_orphan_effect": "Plausible reduction in AMD-pattern transport clusters specifically (13.8% of all final orphans, concentrated in AMD)",
+      "semantic_behavior_changed": false,
+      "provider_behavior_changed": "YES -- adds a delay between attempts for transport-classified failures only",
+      "regression_risk": "LOW-MEDIUM -- adds wall-clock time only on an already-failing path; needs care to keep the delay short and bounded",
+      "tsm_a301_benefit": "NONE (A301's old miss was TIMEOUT, not transport)",
+      "amd_transport_benefit": "DIRECT -- this is the AMD-specific fix",
+      "blast_radius": "Narrow -- only fires on TRANSPORT_ERROR/RATE_LIMIT classified attempts, all components",
+      "implementation_readiness": "DESIGN_NOT_READY (not this task) -- but well-supported by evidence as a SECONDARY, lower-priority future candidate given its narrower scope (13.8% of orphans, effectively one run's worth of evidence) vs Option C's 74%"
+    }
+  },
+  "preferred_reliability_fix": {
+    "chosen_option": "OPTION_C -- component-specific retry-count increase for evidence_stance_classifier only",
+    "selection_criteria_match": {
+      "reduces_final_orphans_not_just_logs": true,
+      "supported_by_observed_historical_data": true,
+      "bounded_code_surface": true,
+      "no_alpha_semantic_change": true,
+      "regression_risk": "LOW",
+      "testable_without_provider_calls": true,
+      "validatable_with_one_ticker_run": true
+    },
+    "not_chosen_based_on_alpha_hit_gain": "Correct -- evidence_stance_classifier's Gold-alpha impact is currently UNKNOWN (no attribution tool exists, per gold_impact section). This fix is chosen purely because it addresses the dominant (74%) source of final-orphan volume with the best-supported, lowest-risk mechanism, not because it is expected to move the 61.0317% Alpha Hit number in any particular direction."
+  },
+  "implementation_test_design": {
+    "note": "DESIGN ONLY -- not implemented in this task.",
+    "tests": [
+      "first_attempt_timeout_then_retry_succeeds -- existing pattern, reused for the 3rd-attempt case: attempt 1 timeout, attempt 2 timeout, attempt 3 succeeds -> call succeeds, retry_count=2, no fallback used",
+      "all_attempts_timeout_evidence_stance -- attempts 1,2,3 all timeout -> fallback_used=True, final orphan recorded exactly once (no double counting)",
+      "transport_retry -- attempt 1 transport error, attempt 2 succeeds -> unaffected by this change (structure/alpha_classifier untouched); for evidence_stance_classifier, same pattern extended to attempt 3",
+      "non_retryable_error_unaffected -- confirm WEEK2_LLM_INPUT_TOO_LARGE (pre-provider-call rejection) is untouched by the retry-count change (it never entered the retry loop)",
+      "parse_schema_behavior_unchanged_for_structure_extractor -- confirm structure_extractor's retry count is NOT changed by this evidence_stance_classifier-only fix",
+      "retry_event_counting -- exactly 1 error_logs/week2_llm_errors.jsonl line per failed attempt, still true with 3 attempts possible",
+      "final_orphan_counting_no_double_counting -- a call that exhausts 3 attempts produces exactly ONE fallback_used=True record, not one per attempt",
+      "no_semantic_output_mutation -- the deterministic fallback VALUE used on final exhaustion is byte-identical to today's fallback value; only the NUMBER of attempts before reaching it changes",
+      "tsm_a301_historical_fixture_unaffected -- confirm this change does not alter alpha_classifier's retry count or A301's already-established outcome in either historical TSM run (regression fixture, replayed offline)",
+      "provider_health_metrics_update_correctly -- confirm provider_failure_events/semantic_critical_failure_events counts increase by exactly the new attempt-3 raw events for calls that use them, and that alpha_classifier_final_orphans/structure_extractor_final_orphans remain unaffected by an evidence_stance_classifier-only change",
+      "max_retries_ceiling_respected -- confirm the new evidence_stance_classifier-specific value is still clamped to MAX_SERVER_RETRIES=2 (no new global ceiling introduced)"
+    ]
+  },
+  "future_validation_ticker": {
+    "recommended": "TSM",
+    "reasoning": "TSM has BOTH a proven alpha_classifier reliability-sensitive lineage (A301, already the canonical positive control) AND meaningful evidence_stance_classifier orphan volume (30 old-run / 32 new-run final orphans) to observe the preferred fix's effect on directly. Selected from evidence, not merely because TSM was mentioned first in the task."
+  },
+  "success_criteria_for_future_fix": {
+    "not_raw_failures_equal_zero": true,
+    "preferred_metrics": [
+      "evidence_stance_classifier final-orphan rate decreases (from the current 97.34% orphan-rate-given-failure)",
+      "evidence_stance_classifier final_orphans count decreases run-over-run for the same ticker profile",
+      "claims_orphaned_by_provider_failure (currently alpha_classifier-scoped) remains unaffected or improves, never worsens",
+      "impacted Gold Alphas do not increase",
+      "no semantic regression (P0/P1, B1/B2/B4, activation formulas all byte-identical in behavior)",
+      "no Alpha threshold changes"
+    ],
+    "tsm_specific_control": "A301 remains NOT Provider-impacted (i.e. this evidence_stance-scoped fix must not touch alpha_classifier's independent A301 lineage) -- an important negative control to check post-fix."
+  },
+  "should_provider_reliability_block_msft_a304": {
+    "answer": "NO",
+    "reasoning": "MSFT A304 was independently confirmed NOT Provider-caused in the prior Phase 2 recall recovery audit -- MSFT's own impacted_alpha_ids is [A301], not [A304], and A301 is already a Gold hit for MSFT (IMPACTED_BUT_REDUNDANT, confirmed again in this audit's Section 19 table). There is no causal or resourcing dependency between the evidence_stance_classifier reliability fix proposed here and MSFT A304's own blocker (a regex/negation-aware extraction capability gap, per the prior audit)."
+  },
+  "development_plan_recommendation": {
+    "chosen": "PLAN_A",
+    "label": "Implement bounded Provider reliability fix next (Option C, evidence_stance_classifier retry increase), then validate on TSM, then proceed to MSFT A304",
+    "reasoning": "The preferred fix is READY_FOR_BOUNDED_IMPLEMENTATION, well-evidenced, low-risk, and offline-testable. It does not block or depend on MSFT A304 work (confirmed NO above), so the two tracks could in principle run in parallel -- but per the task's sequential framing, PLAN_A (fix, then TSM validation, then MSFT A304) is recommended as the cleaner, one-track-at-a-time execution order, not because MSFT A304 requires waiting."
+  },
+  "gold_measurement_safety_confirmation": {
+    "gold_unchanged": true,
+    "gold_validity_unchanged": true,
+    "official_alpha_hit_unchanged": "61.0317%",
+    "multi_run_evaluator_unchanged": true,
+    "recorder_health_unchanged": true,
+    "old_tsm_remains_authoritative": true,
+    "new_tsm_remains_validation_only": true
+  },
+  "final_validation": {
+    "production_code_changed": 0,
+    "tests_changed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "retry_changed": false,
+    "timeout_changed": false,
+    "concurrency_changed": false,
+    "prompts_changed": false,
+    "thresholds_changed": false,
+    "taxonomy_changed": false,
+    "gold_changed": false,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0,
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf"
+  }
+}

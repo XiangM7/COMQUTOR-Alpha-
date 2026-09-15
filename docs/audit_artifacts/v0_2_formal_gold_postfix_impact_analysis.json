@@ -1,0 +1,231 @@
+{
+  "schema_version": "v0.2.formal_gold_postfix_impact.v1",
+  "task": "V0.2_FORMAL_GOLD_POSTFIX_IMPACT_ANALYSIS_STEP_7C",
+  "authorities_verified": {
+    "gold_contract_json": {
+      "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+      "expected_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "actual_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "match": true
+    },
+    "evidence_trigger_matrix_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+      "expected_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "actual_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "match": true
+    },
+    "final_acceptance_json": {
+      "path": "docs/audit_artifacts/v0_2_final_acceptance_table.json",
+      "expected_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "actual_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "match": true
+    },
+    "acceptance_adjudication_json": {
+      "path": "docs/audit_artifacts/v0_2_acceptance_adjudication.json",
+      "expected_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "actual_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "match": true
+    },
+    "step7a_remediation_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_mapping_remediation.json",
+      "expected_sha256": "ab3e4558167bcd5186678e53c7b9cbbd7621d9d5e910c1294e977e9ffba819d0",
+      "actual_sha256": "ab3e4558167bcd5186678e53c7b9cbbd7621d9d5e910c1294e977e9ffba819d0",
+      "match": true
+    },
+    "step7a1_residual_audit_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_residual_mapping_audit.json",
+      "expected_sha256": "f8d6b59e1b717db32bb00e6ac2f68ff81ea5803925fe3993fd3689439337015c",
+      "actual_sha256": "f8d6b59e1b717db32bb00e6ac2f68ff81ea5803925fe3993fd3689439337015c",
+      "match": true
+    },
+    "step7a2_remediation_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_positive_requirement_remediation.json",
+      "expected_sha256": "9c5efb6238e832dc5b9fbdcebb64342dcc1e7b31567725dd1e42d917eef87bf5",
+      "actual_sha256": "9c5efb6238e832dc5b9fbdcebb64342dcc1e7b31567725dd1e42d917eef87bf5",
+      "match": true
+    },
+    "postfix_run_manifest_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_postfix_fresh_run_manifest.json",
+      "expected_sha256": "ea08fe5ac9b0c6b138d1e89192235b332a404df15160663255a7fe7a9802c8b2",
+      "actual_sha256": "ea08fe5ac9b0c6b138d1e89192235b332a404df15160663255a7fe7a9802c8b2",
+      "match": true
+    },
+    "postfix_trigger_matrix_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_postfix_evidence_trigger_matrix.json",
+      "expected_sha256": "4527adeb0218ffde3de16d3665919314ae85fee48b2f5056a62cb2426af968c1",
+      "actual_sha256": "4527adeb0218ffde3de16d3665919314ae85fee48b2f5056a62cb2426af968c1",
+      "match": true
+    },
+    "postfix_acceptance_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_postfix_acceptance.json",
+      "expected_sha256": "ad2b841424cb539547d8ba09f36bb5117977d13bb900b71de0cf7d7227ceb864",
+      "actual_sha256": "ad2b841424cb539547d8ba09f36bb5117977d13bb900b71de0cf7d7227ceb864",
+      "match": true
+    }
+  },
+  "patch_scope": {
+    "production_files": [
+      "comqutor_alpha/structure_engine/claim_semantics.py",
+      "comqutor_alpha/structure_engine/alpha_mapper.py"
+    ],
+    "intended_alpha": "A001",
+    "call_sites_traced": [
+      {
+        "function": "alpha_specific_invalidation_matched(text, alpha_id)",
+        "location": "alpha_mapper.py::map_claim_to_alpha, immediately after the LLM outcome resolution block",
+        "keyed_by": "matched_alpha (the already-finalized Alpha ID for this claim)",
+        "registry": "ALPHA_SPECIFIC_INVALIDATION_PATTERNS = {'A001': _RATE_CUT_INVALIDATION_PATTERN}",
+        "behavior_for_non_registered_alpha_id": "returns False unconditionally -- confirmed a pure no-op for every alpha_id other than 'A001'"
+      },
+      {
+        "function": "alpha_positive_requirement_satisfied(text, alpha_id)",
+        "location": "alpha_mapper.py::map_claim_to_alpha, immediately after the negative-veto check",
+        "keyed_by": "matched_alpha (the already-finalized Alpha ID for this claim, post-veto)",
+        "registry": "ALPHA_POSITIVE_REQUIREMENT_CLASSIFIERS = {'A001': classify_a001_directional_semantics}",
+        "behavior_for_non_registered_alpha_id": "returns True unconditionally -- confirmed a pure no-op for every alpha_id other than 'A001'"
+      }
+    ],
+    "fallthrough_behavior_traced": {
+      "what_happens_when_a_gate_rejects_a_claim": "status is reset to 'no_match', matched_alpha/matched_alpha_name reset to None. No second-ranked candidate is selected, no fallback classifier is invoked, no top-k re-ranking occurs, and no other Alpha's candidate entry is touched. The claim becomes genuinely unmatched.",
+      "code_evidence": "candidates/eligible_candidates/top/second/ambiguous-detection are all computed via the deterministic _candidate_score() layer BEFORE either new gate runs, and are never recomputed or mutated afterward -- confirmed by direct inspection of map_claim_to_alpha's control flow.",
+      "graph_builder_evidence": "graph_engine/graph_builder.py::_committed_alpha_ids_for_claim() reads a single, exclusive matched_alpha per claim_id. When a claim's matched_alpha becomes None, the function returns [] for that claim -- the associated graph edge is marked with a reason code (e.g. NO_COMMITTED_ALPHA_MATCH), never silently re-attributed to a different Alpha. A claim can only ever be committed to the one Alpha its own matched_alpha field names, so no other Alpha's local_structure_support can gain evidence from a rejected A001 claim.",
+      "conclusion": "Rejecting an A001 match cannot redirect that claim's evidence into another Alpha, at either the Alpha Mapper layer or the graph-edge/local-structure-support layer."
+    },
+    "shared_helper_side_effects": "None found. Both gates are called with alpha_id=matched_alpha (a per-claim, single value) and are structurally no-ops for any value other than the literal string 'A001'. No shared tokenization, claim normalization, or evidence-qualification helper was modified by this patch -- confirmed via `git diff --stat` showing changes confined to two functions plus their call sites."
+  },
+  "qqq": {
+    "postfix_status": "PASS",
+    "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+    "rerun_needed": false,
+    "diagnostic_open_item": {
+      "actual_main_conflict": "A301__A304",
+      "a601_a304_admitted": false,
+      "conflict_gold_diagnostic": "REVIEW",
+      "blocks_qqq_postfix_status": false,
+      "note": "QQQ's frozen Gold v0.2 contract has no blocking composite/conflict-family rule; this remains an open, non-blocking diagnostic item carried forward unchanged from Step 7B.3."
+    }
+  },
+  "nvda": {
+    "ticker": "NVDA",
+    "historical_run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "historical_status": "PASS",
+    "a001_historical_state": {
+      "level": "candidate",
+      "score": 38.8213,
+      "unique_semantic_groups": 14,
+      "distinct_agents": 5,
+      "detected": false
+    },
+    "a001_historical_matched_claim_count": 36,
+    "offline_replay": {
+      "method": "Historical persisted alpha_matches.json matched_alpha field (the actual recorded LLM decision per claim, same methodology validated in Step 7A/7A.1) re-evaluated through the CURRENT post-fix deterministic gates (alpha_specific_invalidation_matched, alpha_positive_requirement_satisfied). No Provider call; no live rerun.",
+      "a001_vetoed_by_negative_pattern": 25,
+      "a001_vetoed_by_positive_requirement_gate": 11,
+      "a001_offline_postfix_survivor_count": 0,
+      "a001_offline_postfix_survivor_claim_ids": [],
+      "non_a001_matched_claim_count": 277,
+      "non_a001_matched_alpha_distribution": {
+        "A601": 40,
+        "A101": 62,
+        "A301": 41,
+        "A304": 81,
+        "A103": 28,
+        "A501": 6,
+        "A003": 1,
+        "A201": 12,
+        "A102": 6
+      },
+      "non_a001_claims_affected_by_new_gates": [],
+      "non_a001_mapping_unchanged": true
+    },
+    "blocking_path_impact": {
+      "A101": {
+        "level": "active",
+        "score": 70.0
+      },
+      "A301": {
+        "level": "dominant",
+        "score": 78.4902
+      },
+      "A304": {
+        "level": "active",
+        "score": 67.637
+      },
+      "main_conflict_historical": "A101__A304",
+      "a101_a304_independent_of_a001": true,
+      "a101_a304_independence_rationale": "Conflict admissibility (conflict_admissibility.py) computes bull_score/bear_score for a given pair from ONLY that pair's own two Alphas' evidence fact groups -- A001 never participates as a pair member in NVDA's A101__A304 conflict, and the empirical replay confirms zero A101/A304 claims are affected by the new gates, so the conflict's input evidence is byte-for-byte identical to the historical run."
+    },
+    "impact_level": "NONE",
+    "decision": "NO_RERUN_REQUIRED",
+    "decision_rationale": "A001 was already non-detected (level=candidate, score=38.82) in the historical run and remains non-detected offline post-fix (0 survivors). All 277 non-A001 matched claims, including every A101 (62), A301 (41), and A304 (81) claim, are empirically unaffected by the new gates. A101__A304 conflict admissibility depends only on A101's and A304's own evidence, both unaffected."
+  },
+  "sndk": {
+    "ticker": "SNDK",
+    "historical_run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+    "historical_status": "PASS",
+    "a001_historical_state": {
+      "level": "candidate",
+      "score": 26.5915,
+      "unique_semantic_groups": 10,
+      "distinct_agents": 2,
+      "detected": false
+    },
+    "a001_historical_matched_claim_count": 38,
+    "offline_replay": {
+      "method": "Historical persisted alpha_matches.json matched_alpha field (the actual recorded LLM decision per claim, same methodology validated in Step 7A/7A.1) re-evaluated through the CURRENT post-fix deterministic gates (alpha_specific_invalidation_matched, alpha_positive_requirement_satisfied). No Provider call; no live rerun.",
+      "a001_vetoed_by_negative_pattern": 24,
+      "a001_vetoed_by_positive_requirement_gate": 14,
+      "a001_offline_postfix_survivor_count": 0,
+      "a001_offline_postfix_survivor_claim_ids": [],
+      "non_a001_matched_claim_count": 375,
+      "non_a001_matched_alpha_distribution": {
+        "A601": 76,
+        "A304": 55,
+        "A003": 2,
+        "A201": 160,
+        "A103": 22,
+        "A501": 12,
+        "A301": 39,
+        "A101": 9
+      },
+      "non_a001_claims_affected_by_new_gates": [],
+      "non_a001_mapping_unchanged": true
+    },
+    "blocking_path_impact": {
+      "A201": {
+        "level": "dominant",
+        "score": 84.22
+      },
+      "A101": {
+        "level": "candidate",
+        "score": 0.0
+      },
+      "A102": {
+        "level": "candidate",
+        "score": 0.0
+      },
+      "main_conflict_historical": null,
+      "a201_independent_of_a001": true,
+      "negative_controls_independent_of_a001": true,
+      "rationale": "A201's own activation (160 matched claims, level=dominant) and the A101/A102 negative controls (9 and 6 matched claims respectively) depend only on their own matched-claim evidence pools. The empirical replay confirms zero A101/A102/A201 claims are affected by the new gates."
+    },
+    "impact_level": "NONE",
+    "decision": "NO_RERUN_REQUIRED",
+    "decision_rationale": "A001 was already non-detected (level=candidate, score=26.59) in the historical run and remains non-detected offline post-fix (0 survivors). All 375 non-A001 matched claims, including every A201 (160), A101 (9), and A102 (6) claim, are empirically unaffected by the new gates. SNDK's negative controls and A201 blocking state depend only on their own evidence, both unaffected."
+  },
+  "test_infrastructure_debt": {
+    "id": "TEST_INFRASTRUCTURE_ARTIFACT_39_REPLAY_FIXTURE_ERRORS",
+    "material_to_this_impact_analysis": false,
+    "rationale": "That issue is confined to one shared, synthetic pytest fixture (tests/replay/conftest.py) whose mock canned-selects the alphabetically-first taxonomy Alpha (A001) for a fixed, non-rate-related synthetic claim ('AI demand drives GPU demand...') -- it never touches real persisted production data. This impact analysis instead replays the REAL, persisted historical alpha_matches.json records from the actual NVDA/SNDK production runs, which is a completely independent data source and code path from that test fixture. The fixture issue does not reduce confidence in, or otherwise bear on, the empirical findings above.",
+    "prevents_reliable_offline_replay": false
+  },
+  "revalidation_scope": "QQQ_ONLY_REVALIDATION_SUFFICIENT",
+  "revalidation_scope_rationale": "Both NVDA and SNDK show impact_level=NONE, established through (1) static code tracing proving the patch is structurally A001-specific with zero fallthrough/redirect mechanism, and (2) empirical offline replay of the actual historical persisted claim-mapping data showing 0 of 277 (NVDA) and 0 of 375 (SNDK) non-A001 matched claims are affected, with A001 itself already non-detected in both historical runs and remaining non-detected (0 survivors) under the post-fix gates. No credible causal path from the patch to either ticker's blocking Formal Gold outcome exists. QQQ has already been independently, freshly revalidated and shown PASS. No further reruns are required before full v0.2 release closure evaluation.",
+  "release_closure_ready": true,
+  "release_closure_ready_note": "This reports READINESS only -- it does not itself declare full v0.2 release PASS, per explicit instruction. Next step is Step 8, a separate task.",
+  "production_files_changed": 0,
+  "test_files_changed": 0,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_ticker_runs": 0
+}

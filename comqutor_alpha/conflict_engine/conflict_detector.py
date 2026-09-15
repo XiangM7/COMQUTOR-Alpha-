@@ -85,17 +85,32 @@ from comqutor_alpha.conflict_engine.conflict_schema import (
 from comqutor_alpha.graph_engine.activation_scorer import _relation_for_match
 from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     ACTIVATION_V2_FORMULA_VERSION,
+    _candidate_for_match,
+    _is_ticker_specific,
 )
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     EvidenceFactCandidate,
     evidence_fact_group_id,
     group_evidence_candidates,
 )
+from comqutor_alpha.graph_engine.evidence_source_role import (
+    EVIDENCE_SOURCE_ROLE_CONTRACT_VERSION,
+    qualify_evidence_group,
+)
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
 from comqutor_alpha.structure_engine.claim_quality import (
     CONSUMER_CONFLICT,
     is_claim_eligible,
 )
+
+# conflict_detector.py must never import comqutor_alpha.structure_engine.
+# evidence_stance (test_evidence_stance_integration.py's own architectural
+# invariant -- this deterministic engine consumes B1's already-written
+# stance verdicts, never the classifier module itself). Redefined locally
+# as a frozen literal, exactly like comqutor_alpha/regression/
+# semantic_benchmark.py's own SUPPORTS_ALPHA does for the same reason --
+# never re-imported, never re-derived.
+SUPPORTS_ALPHA = "supports_alpha"
 
 # The detector consumes the run's *primary* activation payload: the frozen
 # v1 formula (historical runs) or Activation v2 (new runs). The conflict
@@ -540,6 +555,12 @@ def _gather_qualifying_evidence(
                         "agent": (
                             str(record.get("agent")) if record.get("agent") else None
                         ),
+                        # Step 6 (Primary vs Secondary Evidence
+                        # Qualification): the relation already computed
+                        # above to gate eligibility, additively exposed so
+                        # the source-role qualification layer can reuse it
+                        # (never re-derived, never a second relation calc).
+                        "relation": relation,
                         # Evidence Integrity Completion Sprint, Track B:
                         # additive facts the shared canonical Evidence Fact
                         # Index needs to detect a cross-agent near-paraphrase
@@ -554,6 +575,23 @@ def _gather_qualifying_evidence(
                         "semantic_polarity": str(
                             record.get("semantic_polarity") or "unknown"
                         ).strip().lower(),
+                        # v0.1.3 QA Closure, Section D: this claim's OWN B1
+                        # stance toward THIS alpha_id specifically (the same
+                        # final field conflict_evidence_ui.py's B5 layer
+                        # already reads from candidate_scores, never
+                        # re-derived) -- additive, never used to change
+                        # admission/exclusion or evidence_strength/
+                        # conflict_score (both stay computed from the full,
+                        # unfiltered qualifying pool, byte-identical to
+                        # before). Used only to build a stance-correct
+                        # DISPLAY subset (see _display_qualifying_evidence)
+                        # so a claim that topically matches alpha_id but
+                        # REBUTS its thesis (evidence_stance=opposes_alpha)
+                        # is never shown as if it were that Alpha's own
+                        # supporting bull/bear structure evidence.
+                        "evidence_stance": (
+                            (_candidate_for_match(record, alpha_id) or {}).get("evidence_stance")
+                        ),
                     }
                 )
 
@@ -653,6 +691,41 @@ def _group_qualifying_claims_into_facts(
         overlap_ratio=overlap_ratio,
         representative_scores=representative_scores,
     )
+
+
+def _qualify_and_filter_evidence(
+    qualifying_claims: list[dict[str, Any]],
+    *,
+    run_id: str,
+    ticker: str,
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Step 6 (Primary vs Secondary Evidence Qualification): group
+    already-qualifying claims into canonical Evidence Facts (the SAME
+    shared grouping algorithm ``_group_qualifying_claims_into_facts`` itself
+    uses), qualify each group's members by source role, and return only the
+    activation-eligible claims -- so B2's ``unique_fact_count``/evidence
+    strength/ticker-specific-support counts can never be inflated by a
+    Secondary agent's restatement of an already-counted Primary fact. Does
+    not change B1 stance, the conflict score formula, or any threshold
+    value -- only which evidence claims reach those unchanged computations.
+    The caller's original ``qualifying_claims`` is untouched (this returns a
+    new, filtered list) so raw evidence remains available for audit."""
+    if not qualifying_claims:
+        return [], {}
+    fact_summary = _group_qualifying_claims_into_facts(qualifying_claims, run_id=run_id, ticker=ticker)
+    reason_counts: dict[str, int] = {}
+    filtered: list[dict[str, Any]] = []
+    for members in fact_summary.fact_groups:
+        qualified_members = qualify_evidence_group(
+            members, is_ticker_specific=lambda m: _is_ticker_specific(m, ticker, (), {})
+        )
+        for member in qualified_members:
+            reason = str(member["activation_qualification_reason"])
+            reason_counts[reason] = reason_counts.get(reason, 0) + 1
+            if member["activation_eligible"]:
+                filtered.append(member)
+    filtered.sort(key=lambda c: c["claim_id"])
+    return filtered, reason_counts
 
 
 def _fact_grouped_strength(summary: _FactSummary) -> float:
@@ -805,8 +878,20 @@ def _evaluate_candidate(
     if fields_a.status not in ADMISSIBLE_STATUSES or fields_b.status not in ADMISSIBLE_STATUSES:
         reason_codes.append(REASON_BELOW_ACTIVATION_THRESHOLD)
 
-    qualifying_a = evidence_a.qualifying
-    qualifying_b = evidence_b.qualifying
+    # Step 6 (Primary vs Secondary Evidence Qualification): qualifying_a/b
+    # feed evidence-strength, fact counts, and B2 admissibility below --
+    # only the role-qualified (activation_eligible) subset of each side's
+    # raw evidence is used from this point on, so a Secondary agent's
+    # restatement of an already-counted Primary fact can never inflate
+    # either side's unique_fact_count. evidence_a.qualifying/
+    # evidence_b.qualifying (raw, unfiltered) remain available on
+    # evidence_a/evidence_b themselves for audit visibility.
+    qualifying_a, qualification_reasons_a = _qualify_and_filter_evidence(
+        evidence_a.qualifying, run_id=run_id, ticker=ticker
+    )
+    qualifying_b, qualification_reasons_b = _qualify_and_filter_evidence(
+        evidence_b.qualifying, run_id=run_id, ticker=ticker
+    )
     if not qualifying_a:
         reason_codes.append(
             REASON_AMBIGUOUS_ONLY
@@ -858,6 +943,27 @@ def _evaluate_candidate(
         (fields_b, qualifying_b, fact_summary_b) if bull_id == alpha_a else (fields_a, qualifying_a, fact_summary_a)
     )
 
+    # v0.1.3 QA Closure, Section D: a DISPLAY-ONLY stance-filtered view of
+    # each side's qualifying evidence, for _structure_block's actual
+    # evidence text/claim_ids/agents/evidence_facts fields only -- never
+    # for evidence_strength/conflict_score/admissibility/shared_fact_
+    # group_ids/the bull_*/bear_*_raw_claim_count|unique_fact_count|
+    # distinct_agent_count|overlap_ratio|fact_group_ids audit fields below,
+    # all of which stay computed from bull_qualifying/bull_facts (the full,
+    # unfiltered pool) exactly as before -- this fixes only what a claim
+    # whose OWN B1 stance toward this alpha is opposes_alpha (rebuts its
+    # thesis) is DISPLAYED as, never the Activation/Conflict-Score formula
+    # inputs, which are untouched. John's exact reported case: a claim
+    # topically matched to A304 (Multiple Compression) but whose stance
+    # opposes A304's thesis must never render as A304's own bull/bear
+    # supporting evidence -- conflict_evidence_ui.py's bull_evidence/
+    # bear_evidence already correctly excluded it; bull_structure/
+    # bear_structure did not, until now.
+    bull_display_qualifying = [c for c in bull_qualifying if c.get("evidence_stance") == SUPPORTS_ALPHA]
+    bear_display_qualifying = [c for c in bear_qualifying if c.get("evidence_stance") == SUPPORTS_ALPHA]
+    bull_display_facts = _group_qualifying_claims_into_facts(bull_display_qualifying, run_id=run_id, ticker=ticker)
+    bear_display_facts = _group_qualifying_claims_into_facts(bear_display_qualifying, run_id=run_id, ticker=ticker)
+
     minimum_activation = min(fields_a.score, fields_b.score)
     conflict_score_raw = minimum_activation * float(contradiction_weight) * evidence_strength_raw
     score_public = clamp_percent(conflict_score_raw)
@@ -894,8 +1000,8 @@ def _evaluate_candidate(
         "alpha_b": alpha_b,
         "bull_alpha_id": bull_id,
         "bear_alpha_id": bear_id,
-        "bull_structure": _structure_block(bull_id, bull_fields, "positive", bull_qualifying, bull_facts),
-        "bear_structure": _structure_block(bear_id, bear_fields, "negative", bear_qualifying, bear_facts),
+        "bull_structure": _structure_block(bull_id, bull_fields, "positive", bull_display_qualifying, bull_display_facts),
+        "bear_structure": _structure_block(bear_id, bear_fields, "negative", bear_display_qualifying, bear_display_facts),
         "components": components,
         "alpha_a_strength": round(strength_a_raw, 4),
         "alpha_b_strength": round(strength_b_raw, 4),
@@ -921,6 +1027,20 @@ def _evaluate_candidate(
         "shared_fact_group_ids": shared_fact_group_ids,
         "shared_fact_group_count": len(shared_fact_group_ids),
         "shared_fact_resolution": shared_fact_resolution,
+        # Step 6 (Primary vs Secondary Evidence Qualification): audit
+        # summary of the role-based filter already applied to
+        # qualifying_a/qualifying_b above (bull_*/bear_* fact counts here
+        # are already POST-qualification). Raw (pre-qualification) counts
+        # remain on evidence_a/evidence_b's own audit block.
+        "evidence_qualification": {
+            "policy_version": EVIDENCE_SOURCE_ROLE_CONTRACT_VERSION,
+            "bull_qualification_reason_counts": dict(
+                sorted((qualification_reasons_a if bull_id == alpha_a else qualification_reasons_b).items())
+            ),
+            "bear_qualification_reason_counts": dict(
+                sorted((qualification_reasons_b if bull_id == alpha_a else qualification_reasons_a).items())
+            ),
+        },
         # Internal (unrounded) sort keys -- never displayed as "the" score,
         # kept alongside so main-conflict arbitration never re-derives them
         # from the rounded public values (display rounding must not be able

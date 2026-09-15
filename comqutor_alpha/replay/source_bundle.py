@@ -87,6 +87,11 @@ _SEMANTIC_TASKS = frozenset(
         # lookup the first time a real evidence_stance_classifier record
         # reaches an exact-replay bundle.
         "evidence_stance_classifier",
+        # Step 5A (v0.1.2.1) execution-capacity repair: batched sibling of
+        # "alpha_classifier" -- a later-added, conditionally-present task
+        # exactly like evidence_stance_classifier above (never one of the
+        # three MANIFEST_ORIGINAL_TASKS, which stay unchanged).
+        "alpha_classifier_batch",
     }
 )
 # Must stay exactly equal to llm_runtime/manifest.py's own
@@ -224,6 +229,20 @@ _SUPPORTED_CALL_IDENTITIES = {
         "input_schema_version": "week2.structure_extractor.input.v1",
         "output_schema_version": "week2.structure_extractor.output.v1",
         "taxonomy_version": None,
+    },
+    # Added (Step 5A v0.1.2.1 execution-capacity repair): batched sibling of
+    # "alpha_classifier" -- IDENTICAL semantic decision criteria, only the
+    # I/O envelope changed (one claim per call -> many claims per call,
+    # matched by claim_id). A genuinely distinct request/response contract,
+    # so it gets its own registered identity here rather than being merged
+    # into "alpha_classifier"'s. prompt_sha256 computed live via
+    # Week2LLMGateway.prompt_identity_sha256("alpha_classifier_batch").
+    "alpha_classifier_batch": {
+        "prompt_version": "week2.alpha_classifier_batch.v1",
+        "prompt_sha256": "6885e15f5a5578e6d6050a8cef6af5e3d5c75891ef183da564754d98afb5bf7b",
+        "input_schema_version": "week2.alpha_classifier_batch.input.v1",
+        "output_schema_version": "week2.alpha_classifier_batch.output.v1",
+        "taxonomy_version": "alpha_taxonomy_v1",
     },
     # Added (post-Alpha-Authority-Migration registry cleanup): B1 Evidence
     # Stance's own LLM upgrade task, registered here for the first time

@@ -14,6 +14,13 @@ const ANALYST_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
 interface ResearchFormProps {
   isSubmitting: boolean;
   onSubmit: (request: ResearchSubmissionRequest) => void;
+  /** Live-research readiness guard (operational safety fix): when set, the
+   * Start research button is disabled and shows this reason instead of
+   * "Start research" -- never let the user submit a live run that is
+   * doomed to record zero Alpha activation because Week2's semantic
+   * pipeline isn't ready yet. Undefined/null when there is nothing to
+   * block on (offline-only server, or a fully-ready live pipeline). */
+  disabledReason?: string | null;
 }
 
 function normalizeTicker(raw: string): string {
@@ -36,7 +43,7 @@ function todayIsoDate(): string {
  * Profile controls all execution configuration). Client-side validation
  * only normalizes/guides input; it never replaces server-side validation.
  */
-export function ResearchForm({ isSubmitting, onSubmit }: ResearchFormProps) {
+export function ResearchForm({ isSubmitting, onSubmit, disabledReason }: ResearchFormProps) {
   const [ticker, setTicker] = useState("");
   const [analysisDate, setAnalysisDate] = useState(todayIsoDate);
   const [selectedAnalysts, setSelectedAnalysts] = useState<string[]>(
@@ -54,7 +61,7 @@ export function ResearchForm({ isSubmitting, onSubmit }: ResearchFormProps) {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || disabledReason) return;
 
     const normalizedTicker = normalizeTicker(ticker);
     if (!normalizedTicker) {
@@ -139,9 +146,14 @@ export function ResearchForm({ isSubmitting, onSubmit }: ResearchFormProps) {
         </p>
       ) : null}
 
-      <button type="submit" className="button button-primary" disabled={isSubmitting}>
+      <button type="submit" className="button button-primary" disabled={isSubmitting || Boolean(disabledReason)}>
         {isSubmitting ? "Submitting…" : "Start research"}
       </button>
+      {!isSubmitting && disabledReason ? (
+        <p className="form-validation-error" role="alert">
+          {disabledReason}
+        </p>
+      ) : null}
     </form>
   );
 }

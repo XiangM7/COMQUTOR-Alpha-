@@ -1,0 +1,104 @@
+{
+  "release_version": "v0.1.2.1",
+  "schema_version": "qa_source_consistency_report.v1",
+  "generated_at": "2026-08-25T18:18:15Z",
+  "run_id_contradictions": [
+    {
+      "ticker": "NVDA",
+      "current_selected_run_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "stale_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "stale_source": "docs/audit_artifacts/a4_regression_runner_report.json (six_ticker_coverage)",
+      "agreeing_sources": [
+        "outputs/regression/regression_report.json",
+        "docs/audit_artifacts/item6_a2_artifact_completeness.json"
+      ],
+      "status_before_step3": "OUTSTANDING",
+      "repair_applied": "a4_regression_runner_report.json: added current_selection (mirrors qa_closure_index.json) while preserving the original six_ticker_coverage/expected_vs_detected_summary as an explicitly labeled historical_snapshot_notice. No run_id was string-replaced in place; the stale value remains readable as history.",
+      "status_after_step3": "RESOLVED_BY_ALIGNMENT"
+    },
+    {
+      "ticker": "MSFT",
+      "current_selected_run_id": "07ddc074-9ab2-4b16-8957-acbf94012144",
+      "stale_run_id": "0cb43bae-1a4d-4003-bb29-55d420498842",
+      "stale_source": "docs/audit_artifacts/a4_regression_runner_report.json (six_ticker_coverage)",
+      "agreeing_sources": [
+        "outputs/regression/regression_report.json",
+        "docs/audit_artifacts/item6_a2_artifact_completeness.json"
+      ],
+      "status_before_step3": "OUTSTANDING",
+      "repair_applied": "a4_regression_runner_report.json: added current_selection (mirrors qa_closure_index.json) while preserving the original six_ticker_coverage/expected_vs_detected_summary as an explicitly labeled historical_snapshot_notice. No run_id was string-replaced in place; the stale value remains readable as history.",
+      "status_after_step3": "RESOLVED_BY_ALIGNMENT"
+    }
+  ],
+  "metric_contradictions": [
+    {
+      "area": "evidence_review acceptance metrics",
+      "artifact": "docs/audit_artifacts/evidence_review_summary.json",
+      "contradiction": "Top-level legacy fields report a 50-row result (reviewed_count=50, alpha_match_accuracy=0.72, polarity_accuracy=0.78, both target_met=false) while the nested v0.1.2_qa_summary block reports a 200-row H5 result (Alpha 166/200=83.00%, Polarity 52/62=83.87%, both status=pass) and a further item2_200row_development_re_review block reports a third, 200-row/47-row development-re-review result (77.00% / 82.98%). Three differently-scoped metric sets coexist as if all current in the same file.",
+      "status_before_step3": "OUTSTANDING",
+      "repair_applied": "Not in scope for Step 3 (evidence_review_summary_v2.json creation remains a Step-4+ item).",
+      "status_after_step3": "OUTSTANDING"
+    },
+    {
+      "area": "regression main-conflict metric authority",
+      "artifact": "outputs/regression/regression_report.json",
+      "contradiction": "main_conflict_match is computed against j2.provisional.v0.1's allowed_main_conflicts, which still lists MSFT A102__A304 -- a pair Step 1's audit (backed by PD-017 and direct taxonomy verification) classifies REJECTED_OR_SUPERSEDED. The live metric's field name ('match') implies a validity judgment the underlying label no longer has.",
+      "status_before_step3": "OUTSTANDING",
+      "repair_applied": "comqutor_alpha.regression.authority_contract now wraps main_conflict_match with an explicit acceptance_status derived from the Step 1 authority audit; a REJECTED_OR_SUPERSEDED expectation (e.g. MSFT A102__A304) is now reported as NOT_GOLD_EVALUABLE and excluded from the acceptance denominator, never as a match/no-match production judgment. The underlying v0.1 YAML field is unchanged -- this is a reporting-layer fix, not a label-file fix.",
+      "status_after_step3": "RESOLVED_BY_AUTHORITY_CLASSIFICATION"
+    }
+  ],
+  "authority_contradictions": [
+    {
+      "ticker": "MSFT",
+      "contradiction": "j2_provisional_regression_labels_v0.1.yaml (still the regression evaluator's live default) lists A102__A304 as an allowed_main_conflict, while PD-017 (docs/specs/product_decisions_and_unknowns.md) and j2_provisional_regression_labels_v0.2.yaml both classify it remove_while_undeclared / REJECTED_OR_SUPERSEDED.",
+      "status_before_step3": "OUTSTANDING",
+      "repair_applied": "comqutor_alpha.regression.authority_contract now classifies this pair's acceptance_status from the Step 1 audit (REJECTED_OR_SUPERSEDED) regardless of which raw label file (v0.1 or v0.2) is loaded, and comqutor_alpha.regression.authority_contract.check_negative_constraints treats it as an enforceable negative constraint. The underlying j2_provisional_regression_labels_v0.1.yaml file itself is intentionally left unmodified (task section 6/step 3 scope).",
+      "status_after_step3": "RESOLVED_BY_AUTHORITY_CLASSIFICATION"
+    },
+    {
+      "ticker": "SNDK/TSM/AMD",
+      "contradiction": "Same pattern for A201__A304: present as allowed_main_conflicts in v0.1 (still live default), removed in v0.2, not canonical in the live taxonomy.",
+      "status_before_step3": "OUTSTANDING",
+      "repair_applied": "comqutor_alpha.regression.authority_contract now classifies this pair's acceptance_status from the Step 1 audit (REJECTED_OR_SUPERSEDED) regardless of which raw label file (v0.1 or v0.2) is loaded, and comqutor_alpha.regression.authority_contract.check_negative_constraints treats it as an enforceable negative constraint. The underlying j2_provisional_regression_labels_v0.1.yaml file itself is intentionally left unmodified (task section 6/step 3 scope).",
+      "status_after_step3": "RESOLVED_BY_AUTHORITY_CLASSIFICATION"
+    }
+  ],
+  "stale_source_references": [
+    {
+      "artifact": "docs/audit_artifacts/a4_regression_runner_report.json",
+      "field": "six_ticker_coverage[ticker=NVDA].run_id",
+      "stale_value": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "current_value": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "reason": "Snapshot from A4's initial implementation run; superseded by the later, currently-generated regression_report.json without this historical report being regenerated."
+    },
+    {
+      "artifact": "docs/audit_artifacts/a4_regression_runner_report.json",
+      "field": "six_ticker_coverage[ticker=MSFT].run_id",
+      "stale_value": "0cb43bae-1a4d-4003-bb29-55d420498842",
+      "current_value": "07ddc074-9ab2-4b16-8957-acbf94012144",
+      "reason": "Snapshot from A4's initial implementation run; superseded by the later, currently-generated regression_report.json without this historical report being regenerated."
+    }
+  ],
+  "pending_v0.1.2.1_artifacts": [
+    {
+      "artifact": "evidence_review_summary_v2.json",
+      "status": "PENDING_V2",
+      "blocks": "v0.1.2.1 evidence-review acceptance source selection"
+    },
+    {
+      "artifact": "v0.1.2.1 Final QA Closure Report",
+      "status": "PENDING",
+      "blocks": "final_qa_run_id cross-check in run_id_consistency; final release sign-off"
+    }
+  ],
+  "contradiction_count": 6,
+  "step3_repair_summary": {
+    "run_id_contradictions_resolved": 2,
+    "authority_contradictions_resolved_by_classification": 2,
+    "metric_contradictions_resolved": 1,
+    "metric_contradictions_still_outstanding": 1,
+    "note": "Nothing was deleted from this report during repair -- every original contradiction entry is preserved with status_before_step3/repair_applied/status_after_step3 added."
+  },
+  "contradiction_count_after_step3": 1
+}

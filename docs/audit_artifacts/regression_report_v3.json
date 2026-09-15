@@ -1,0 +1,618 @@
+{
+  "schema_version": "regression_report.v3",
+  "tickers": [
+    {
+      "schema_version": "regression_report.v3",
+      "ticker": "NVDA",
+      "selected_run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "run_status": "completed",
+      "actual_detected_alphas": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "expected_alphas": {
+        "diagnostic": [
+          "A101",
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A102",
+          "A601"
+        ],
+        "approved_gold": [],
+        "rejected": []
+      },
+      "expected_alpha_hits": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "expected_alpha_misses": [
+        "A102",
+        "A201"
+      ],
+      "actual_alpha_hit_rate": 0.7142857142857143,
+      "alpha_hit_rate_evaluation_mode": "diagnostic",
+      "actual_admitted_main_conflict": "A101__A304",
+      "expected_main_conflict": null,
+      "main_conflict_match_result": "NOT_GOLD_EVALUABLE",
+      "graph_edge_count": 9,
+      "artifact_completeness": "pass",
+      "ticker_consistency": "pass",
+      "semantic_execution_health": "PASS",
+      "semantic_execution_health_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 3,
+        "candidate": 0,
+        "suppressed": 0,
+        "rejected": 3
+      }
+    },
+    {
+      "schema_version": "regression_report.v3",
+      "ticker": "QQQ",
+      "selected_run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "run_status": "completed",
+      "actual_detected_alphas": [
+        "A001",
+        "A103",
+        "A304",
+        "A601"
+      ],
+      "expected_alphas": {
+        "diagnostic": [
+          "A001",
+          "A003",
+          "A304",
+          "A501",
+          "A101",
+          "A601"
+        ],
+        "approved_gold": [],
+        "rejected": []
+      },
+      "expected_alpha_hits": [
+        "A001",
+        "A304",
+        "A601"
+      ],
+      "expected_alpha_misses": [
+        "A003",
+        "A101",
+        "A501"
+      ],
+      "actual_alpha_hit_rate": 0.5,
+      "alpha_hit_rate_evaluation_mode": "diagnostic",
+      "actual_admitted_main_conflict": "A304__A601",
+      "expected_main_conflict": null,
+      "main_conflict_match_result": "NOT_GOLD_EVALUABLE",
+      "graph_edge_count": 9,
+      "artifact_completeness": "pass",
+      "ticker_consistency": "pass",
+      "semantic_execution_health": "PASS",
+      "semantic_execution_health_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 1,
+        "candidate": 4,
+        "suppressed": 4,
+        "rejected": 1
+      }
+    },
+    {
+      "schema_version": "regression_report.v3",
+      "ticker": "MSFT",
+      "selected_run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "run_status": "completed",
+      "actual_detected_alphas": [
+        "A001",
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "expected_alphas": {
+        "diagnostic": [
+          "A101",
+          "A102",
+          "A301",
+          "A304",
+          "A103",
+          "A601"
+        ],
+        "approved_gold": [],
+        "rejected": []
+      },
+      "expected_alpha_hits": [
+        "A101",
+        "A103",
+        "A301"
+      ],
+      "expected_alpha_misses": [
+        "A102",
+        "A304",
+        "A601"
+      ],
+      "actual_alpha_hit_rate": 0.5,
+      "alpha_hit_rate_evaluation_mode": "diagnostic",
+      "actual_admitted_main_conflict": null,
+      "expected_main_conflict": null,
+      "main_conflict_match_result": "NOT_GOLD_EVALUABLE",
+      "graph_edge_count": 7,
+      "artifact_completeness": "pass",
+      "ticker_consistency": "pass",
+      "semantic_execution_health": "PASS",
+      "semantic_execution_health_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 0,
+        "candidate": 5,
+        "suppressed": 5,
+        "rejected": 1
+      }
+    },
+    {
+      "schema_version": "regression_report.v3",
+      "ticker": "SNDK",
+      "selected_run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "run_status": "completed",
+      "actual_detected_alphas": [
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "expected_alphas": {
+        "diagnostic": [
+          "A201",
+          "A301",
+          "A304",
+          "A103",
+          "A601"
+        ],
+        "approved_gold": [],
+        "rejected": []
+      },
+      "expected_alpha_hits": [
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "expected_alpha_misses": [
+        "A103",
+        "A301"
+      ],
+      "actual_alpha_hit_rate": 0.6,
+      "alpha_hit_rate_evaluation_mode": "diagnostic",
+      "actual_admitted_main_conflict": null,
+      "expected_main_conflict": null,
+      "main_conflict_match_result": "NOT_GOLD_EVALUABLE",
+      "graph_edge_count": 7,
+      "artifact_completeness": "pass",
+      "ticker_consistency": "pass",
+      "semantic_execution_health": "PASS",
+      "semantic_execution_health_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 0,
+        "candidate": 3,
+        "suppressed": 3,
+        "rejected": 3
+      }
+    },
+    {
+      "schema_version": "regression_report.v3",
+      "ticker": "TSM",
+      "selected_run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "run_status": "completed",
+      "actual_detected_alphas": [
+        "A101",
+        "A103",
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "expected_alphas": {
+        "diagnostic": [
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A101",
+          "A601"
+        ],
+        "approved_gold": [],
+        "rejected": []
+      },
+      "expected_alpha_hits": [
+        "A101",
+        "A103",
+        "A201",
+        "A304",
+        "A601"
+      ],
+      "expected_alpha_misses": [
+        "A301"
+      ],
+      "actual_alpha_hit_rate": 0.8333333333333334,
+      "alpha_hit_rate_evaluation_mode": "diagnostic",
+      "actual_admitted_main_conflict": "A101__A304",
+      "expected_main_conflict": null,
+      "main_conflict_match_result": "NOT_GOLD_EVALUABLE",
+      "graph_edge_count": 8,
+      "artifact_completeness": "pass",
+      "ticker_consistency": "pass",
+      "semantic_execution_health": "PASS",
+      "semantic_execution_health_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 2,
+        "candidate": 1,
+        "suppressed": 1,
+        "rejected": 3
+      }
+    },
+    {
+      "schema_version": "regression_report.v3",
+      "ticker": "AMD",
+      "selected_run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "run_status": "completed",
+      "actual_detected_alphas": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "expected_alphas": {
+        "diagnostic": [
+          "A101",
+          "A201",
+          "A301",
+          "A304",
+          "A102",
+          "A103",
+          "A601"
+        ],
+        "approved_gold": [],
+        "rejected": []
+      },
+      "expected_alpha_hits": [
+        "A101",
+        "A103",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "expected_alpha_misses": [
+        "A102",
+        "A201"
+      ],
+      "actual_alpha_hit_rate": 0.7142857142857143,
+      "alpha_hit_rate_evaluation_mode": "diagnostic",
+      "actual_admitted_main_conflict": "A101__A304",
+      "expected_main_conflict": null,
+      "main_conflict_match_result": "NOT_GOLD_EVALUABLE",
+      "graph_edge_count": 8,
+      "artifact_completeness": "pass",
+      "ticker_consistency": "pass",
+      "semantic_execution_health": "PASS",
+      "semantic_execution_health_reason": "COVERAGE_AT_OR_ABOVE_TARGET",
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 3,
+        "candidate": 1,
+        "suppressed": 1,
+        "rejected": 2
+      }
+    }
+  ],
+  "aggregate": {
+    "ticker_count": 6,
+    "ticker_consistency_pass_count": 6,
+    "artifact_completeness_pass_count": 6,
+    "graph_edges_gate_pass_count": 6,
+    "expected_alpha_hit_rate": null,
+    "expected_alpha_hit_rate_evaluable_ticker_count": 0,
+    "main_conflict_match_pass_count": 0,
+    "main_conflict_match_evaluable_count": 0
+  },
+  "extended_per_ticker_metrics": [
+    {
+      "ticker": "NVDA",
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "cache_disposition": "force_refreshed",
+      "run_status": "completed",
+      "analysis_date": "2026-09-04",
+      "semantic_execution_health_status": "PASS",
+      "classified_coverage": 0.9931787175989086,
+      "provider_semantic_call_count": 591,
+      "provider_timeouts": 104,
+      "tradingagents_role_count": 12,
+      "artifact_completeness": "pass",
+      "required_artifact_count": 9,
+      "present_required_artifact_count": 9,
+      "graph_edge_count": 9,
+      "alpha_states": {
+        "active": 4,
+        "candidate": 5,
+        "blocked": 1,
+        "ambiguous": 0,
+        "unavailable": 5
+      },
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 3,
+        "candidate_suppressed": 0,
+        "rejected": 3
+      },
+      "actual_main_conflict": {
+        "conflict_id": "A101__A304",
+        "status": "admitted",
+        "scores": {
+          "bull_score": 70.0,
+          "bear_score": 67.637
+        }
+      },
+      "alpha_memory": {
+        "mode": "shadow",
+        "identity_model": "atomic_edge_phi",
+        "activation_modulation_applied": false,
+        "current_phi_count": 9,
+        "recurring_phi_count": 4,
+        "first_seen_phi_count": 5,
+        "prior_observation_total": 9,
+        "num_alphas_in_summary": 6
+      },
+      "data_sanity_status": "disabled"
+    },
+    {
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "cache_disposition": "force_refreshed",
+      "run_status": "completed",
+      "analysis_date": "2026-09-04",
+      "semantic_execution_health_status": "PASS",
+      "classified_coverage": 0.9922720247295209,
+      "provider_semantic_call_count": 518,
+      "provider_timeouts": 77,
+      "tradingagents_role_count": 12,
+      "artifact_completeness": "pass",
+      "required_artifact_count": 9,
+      "present_required_artifact_count": 9,
+      "graph_edge_count": 9,
+      "alpha_states": {
+        "active": 4,
+        "candidate": 6,
+        "blocked": 0,
+        "ambiguous": 0,
+        "unavailable": 5
+      },
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 1,
+        "candidate_suppressed": 4,
+        "rejected": 1
+      },
+      "actual_main_conflict": {
+        "conflict_id": "A304__A601",
+        "status": "admitted",
+        "scores": {
+          "bull_score": 54.3062,
+          "bear_score": 69.243
+        }
+      },
+      "alpha_memory": {
+        "mode": "shadow",
+        "identity_model": "atomic_edge_phi",
+        "activation_modulation_applied": false,
+        "current_phi_count": 8,
+        "recurring_phi_count": 2,
+        "first_seen_phi_count": 6,
+        "prior_observation_total": 2,
+        "num_alphas_in_summary": 4
+      },
+      "data_sanity_status": "disabled"
+    },
+    {
+      "ticker": "MSFT",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "cache_disposition": "force_refreshed",
+      "run_status": "completed",
+      "analysis_date": "2026-09-04",
+      "semantic_execution_health_status": "PASS",
+      "classified_coverage": 0.988,
+      "provider_semantic_call_count": 585,
+      "provider_timeouts": 116,
+      "tradingagents_role_count": 12,
+      "artifact_completeness": "pass",
+      "required_artifact_count": 9,
+      "present_required_artifact_count": 9,
+      "graph_edge_count": 7,
+      "alpha_states": {
+        "active": 3,
+        "candidate": 6,
+        "blocked": 1,
+        "ambiguous": 0,
+        "unavailable": 9
+      },
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 0,
+        "candidate_suppressed": 5,
+        "rejected": 1
+      },
+      "actual_main_conflict": {
+        "conflict_id": null,
+        "status": "no_conflict_admitted",
+        "scores": null
+      },
+      "alpha_memory": {
+        "mode": "shadow",
+        "identity_model": "atomic_edge_phi",
+        "activation_modulation_applied": false,
+        "current_phi_count": 7,
+        "recurring_phi_count": 2,
+        "first_seen_phi_count": 5,
+        "prior_observation_total": 2,
+        "num_alphas_in_summary": 3
+      },
+      "data_sanity_status": "disabled"
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "cache_disposition": "force_refreshed",
+      "run_status": "completed",
+      "analysis_date": "2026-09-04",
+      "semantic_execution_health_status": "PASS",
+      "classified_coverage": 0.9836601307189542,
+      "provider_semantic_call_count": 730,
+      "provider_timeouts": 142,
+      "tradingagents_role_count": 12,
+      "artifact_completeness": "pass",
+      "required_artifact_count": 9,
+      "present_required_artifact_count": 9,
+      "graph_edge_count": 7,
+      "alpha_states": {
+        "active": 2,
+        "candidate": 7,
+        "blocked": 0,
+        "ambiguous": 0,
+        "unavailable": 15
+      },
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 0,
+        "candidate_suppressed": 3,
+        "rejected": 3
+      },
+      "actual_main_conflict": {
+        "conflict_id": null,
+        "status": "no_conflict_admitted",
+        "scores": null
+      },
+      "alpha_memory": {
+        "mode": "shadow",
+        "identity_model": "atomic_edge_phi",
+        "activation_modulation_applied": false,
+        "current_phi_count": 14,
+        "recurring_phi_count": 3,
+        "first_seen_phi_count": 11,
+        "prior_observation_total": 3,
+        "num_alphas_in_summary": 6
+      },
+      "data_sanity_status": "ok"
+    },
+    {
+      "ticker": "TSM",
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "cache_disposition": "force_refreshed",
+      "run_status": "completed",
+      "analysis_date": "2026-09-06",
+      "semantic_execution_health_status": "PASS",
+      "classified_coverage": 0.9882506527415144,
+      "provider_semantic_call_count": 616,
+      "provider_timeouts": 118,
+      "tradingagents_role_count": 12,
+      "artifact_completeness": "pass",
+      "required_artifact_count": 9,
+      "present_required_artifact_count": 9,
+      "graph_edge_count": 8,
+      "alpha_states": {
+        "active": 5,
+        "candidate": 5,
+        "blocked": 0,
+        "ambiguous": 0,
+        "unavailable": 9
+      },
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 2,
+        "candidate_suppressed": 1,
+        "rejected": 3
+      },
+      "actual_main_conflict": {
+        "conflict_id": "A101__A304",
+        "status": "admitted",
+        "scores": {
+          "bull_score": 52.9006,
+          "bear_score": 57.9945
+        }
+      },
+      "alpha_memory": {
+        "mode": "shadow",
+        "identity_model": "atomic_edge_phi",
+        "activation_modulation_applied": false,
+        "current_phi_count": 9,
+        "recurring_phi_count": 2,
+        "first_seen_phi_count": 7,
+        "prior_observation_total": 3,
+        "num_alphas_in_summary": 6
+      },
+      "data_sanity_status": "ok"
+    },
+    {
+      "ticker": "AMD",
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "cache_disposition": "force_refreshed",
+      "run_status": "completed",
+      "analysis_date": "2026-09-06",
+      "semantic_execution_health_status": "PASS",
+      "classified_coverage": 0.9949174078780177,
+      "provider_semantic_call_count": 626,
+      "provider_timeouts": 46,
+      "tradingagents_role_count": 12,
+      "artifact_completeness": "pass",
+      "required_artifact_count": 9,
+      "present_required_artifact_count": 9,
+      "graph_edge_count": 8,
+      "alpha_states": {
+        "active": 4,
+        "candidate": 5,
+        "blocked": 0,
+        "ambiguous": 0,
+        "unavailable": 4
+      },
+      "conflict_counts": {
+        "declared": 6,
+        "admitted": 3,
+        "candidate_suppressed": 1,
+        "rejected": 2
+      },
+      "actual_main_conflict": {
+        "conflict_id": "A101__A304",
+        "status": "admitted",
+        "scores": {
+          "bull_score": 90.3835,
+          "bear_score": 61.2803
+        }
+      },
+      "alpha_memory": {
+        "mode": "shadow",
+        "identity_model": "atomic_edge_phi",
+        "activation_modulation_applied": false,
+        "current_phi_count": 10,
+        "recurring_phi_count": 3,
+        "first_seen_phi_count": 7,
+        "prior_observation_total": 3,
+        "num_alphas_in_summary": 6
+      },
+      "data_sanity_status": "critical"
+    }
+  ],
+  "main_conflict_gold_status": "NOT_GOLD_EVALUABLE",
+  "main_conflict_gold_status_reason": "Zero of the referenced main-conflict expectations across all six tickers carry APPROVED_GOLD/valid_as_exact_regression_gold authority. A frozen-Golden >=4/6 comparison is not evaluable; only actual pipeline outcomes are reported.",
+  "excluded_orphaned_runs": [
+    {
+      "ticker": "TSM",
+      "run_id": "be4916f6-d319-4a1f-aa60-bebdc26d55ca",
+      "reason": "Orphaned by infrastructure interruption (Docker/Postgres/backend outage mid-run); reconciled to status=failed/SERVER_RESTARTED by server startup reconciliation. Consumed real Provider calls without producing a usable result. Excluded from all final metrics; superseded by dfc7ceb3-3584-4514-bd84-6c371aab3e95."
+    }
+  ]
+}

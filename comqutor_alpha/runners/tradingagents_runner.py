@@ -23,6 +23,8 @@ HTTP responses, run history, and the web UI keep saying ``sentiment``, and
 from __future__ import annotations
 
 import contextlib
+import logging
+import time
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -30,7 +32,10 @@ from comqutor_alpha.research_progress import (
     PUBLIC_ANALYST_ORDER,
     normalize_public_analysts,
 )
+from comqutor_alpha.runners.diagnostics import TradingAgentsDiagnosticCallback
 from comqutor_alpha.storage.file_store import resolve_output_root
+
+logger = logging.getLogger(__name__)
 
 
 def _deepseek_thinking_scope_for_config(config):
@@ -325,12 +330,35 @@ def run_streaming_tradingagents_research(
     except Exception as exc:
         raise RuntimeError(f"Unable to import COMQUTOR output writer: {exc}") from exc
 
+    # Observability-only (John Requirement B follow-up, docs/audit_artifacts/
+    # v0_2_instrument_identity_timeout_fix.json): the prior root-cause task
+    # proved the ~903s failure occurs somewhere between here and
+    # STREAM_LOOP_START, without pinning the exact step. These markers close
+    # that remaining gap -- if a future run fails again in this setup phase,
+    # the log shows exactly which step was in flight.
+    _setup_start = time.monotonic()
+    logger.info(
+        "tradingagents_diagnostic stage=GRAPH_CONSTRUCTION_START run=%s:%s elapsed=0.0s",
+        ticker, analysis_date,
+    )
     graph = (graph_factory or _default_streaming_graph_factory)(internal_analysts, config)
     graph.ticker = str(ticker)
+    logger.info(
+        "tradingagents_diagnostic stage=GRAPH_CONSTRUCTION_END run=%s:%s elapsed=%.3fs",
+        ticker, analysis_date, time.monotonic() - _setup_start,
+    )
 
     resolve_pending = getattr(graph, "_resolve_pending_entries", None)
     if callable(resolve_pending):
+        logger.info(
+            "tradingagents_diagnostic stage=PENDING_ENTRIES_START run=%s:%s elapsed=%.3fs",
+            ticker, analysis_date, time.monotonic() - _setup_start,
+        )
         resolve_pending(str(ticker))
+        logger.info(
+            "tradingagents_diagnostic stage=PENDING_ENTRIES_END run=%s:%s elapsed=%.3fs",
+            ticker, analysis_date, time.monotonic() - _setup_start,
+        )
 
     checkpointer_ctx = None
     checkpointer_entered = False
@@ -345,15 +373,31 @@ def run_streaming_tradingagents_research(
             checkpointer_entered = True
             graph.graph = graph.workflow.compile(checkpointer=saver)
 
+        logger.info(
+            "tradingagents_diagnostic stage=PAST_CONTEXT_START run=%s:%s elapsed=%.3fs",
+            ticker, analysis_date, time.monotonic() - _setup_start,
+        )
         memory_log = getattr(graph, "memory_log", None)
         get_past_context = getattr(memory_log, "get_past_context", None)
         past_context = str(get_past_context(str(ticker)) or "") if callable(get_past_context) else ""
+        logger.info(
+            "tradingagents_diagnostic stage=PAST_CONTEXT_END run=%s:%s elapsed=%.3fs",
+            ticker, analysis_date, time.monotonic() - _setup_start,
+        )
 
+        logger.info(
+            "tradingagents_diagnostic stage=INSTRUMENT_CONTEXT_START run=%s:%s elapsed=%.3fs",
+            ticker, analysis_date, time.monotonic() - _setup_start,
+        )
         resolve_context = getattr(graph, "resolve_instrument_context", None)
         instrument_context = (
             str(resolve_context(str(ticker), asset_type) or "")
             if callable(resolve_context)
             else ""
+        )
+        logger.info(
+            "tradingagents_diagnostic stage=INSTRUMENT_CONTEXT_END run=%s:%s elapsed=%.3fs",
+            ticker, analysis_date, time.monotonic() - _setup_start,
         )
 
         init_state = graph.propagator.create_initial_state(
@@ -363,7 +407,19 @@ def run_streaming_tradingagents_research(
             past_context=past_context,
             instrument_context=instrument_context,
         )
+        # Observability-only (John Requirement B root-cause instrumentation,
+        # docs/audit_artifacts/v0_2_tradingagents_timeout_root_cause.json): a
+        # passive diagnostic callback so a stall inside the stream loop below
+        # shows exactly which chain/tool/LLM call was in flight and for how
+        # long. It only logs (never raises, never inspects prompt/tool
+        # content beyond name/count) -- see comqutor_alpha.runners.diagnostics.
+        diagnostic_callback = TradingAgentsDiagnosticCallback(
+            run_label=f"{ticker}:{analysis_date}"
+        )
         stream_args = graph.propagator.get_graph_args()
+        stream_args.setdefault("config", {}).setdefault("callbacks", []).append(
+            diagnostic_callback
+        )
         if checkpoint_enabled:
             stream_args.setdefault("config", {}).setdefault("configurable", {})[
                 "thread_id"
@@ -380,16 +436,41 @@ def run_streaming_tradingagents_research(
 
         final_state: dict = {}
         reached: set[str] = set()
-        with comqutor_structure_output_contract_scope():
-            for chunk in graph.graph.stream(init_state, **stream_args):
-                if isinstance(chunk, Mapping):
-                    final_state.update(chunk)
-                    _report_stream_milestones(
-                        final_state,
-                        public_analysts,
-                        progress_reporter,
-                        reached,
-                    )
+        stream_start = time.monotonic()
+        chunk_count = 0
+        logger.info(
+            "tradingagents_diagnostic stage=STREAM_LOOP_START run=%s:%s elapsed=0.0s",
+            ticker, analysis_date,
+        )
+        try:
+            with comqutor_structure_output_contract_scope():
+                for chunk in graph.graph.stream(init_state, **stream_args):
+                    if isinstance(chunk, Mapping):
+                        chunk_count += 1
+                        final_state.update(chunk)
+                        logger.info(
+                            "tradingagents_diagnostic stage=STREAM_CHUNK run=%s:%s "
+                            "chunk_index=%d elapsed=%.3fs chunk_keys=%s",
+                            ticker, analysis_date, chunk_count,
+                            time.monotonic() - stream_start, sorted(chunk.keys()),
+                        )
+                        _report_stream_milestones(
+                            final_state,
+                            public_analysts,
+                            progress_reporter,
+                            reached,
+                        )
+        except Exception as exc:
+            logger.error(
+                "tradingagents_diagnostic stage=STREAM_LOOP_ERROR run=%s:%s "
+                "elapsed=%.3fs chunks_received=%d exc_type=%s exc_message=%s "
+                "chained_cause=%s",
+                ticker, analysis_date, time.monotonic() - stream_start,
+                chunk_count, type(exc).__name__, str(exc),
+                repr(exc.__cause__) if exc.__cause__ is not None else None,
+                exc_info=True,
+            )
+            raise
 
         if not final_state:
             raise RuntimeError("TradingAgents stream produced no state.")

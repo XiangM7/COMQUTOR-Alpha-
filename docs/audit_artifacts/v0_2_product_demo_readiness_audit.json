@@ -1,0 +1,480 @@
+{
+  "schema_version": "v0.2.product_demo_readiness.v1",
+  "phase": "PRODUCT_DEMO_HARDENING_PHASE_1_AUDIT",
+  "read_only": true,
+  "baseline": {
+    "closure_artifact": "docs/audit_artifacts/v0_2_final_acceptance_closure.json",
+    "closure_sha256": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "release_blocking_status": "PASS",
+    "overall_closure_status": "PASS_WITH_REVIEW",
+    "product_demo_hardening_previously_started": false,
+    "note": "Gold v0.2 acceptance is closed and not reopened by this audit. This audit is orthogonal: it evaluates live-serving/UI/UX demo readiness, not detection-semantics correctness."
+  },
+  "current_demo_flow": {
+    "startup": {
+      "backend": "console script `comqutor-api` (pyproject.toml) -> uvicorn on 127.0.0.1:8000 by default (never 0.0.0.0). Requires COMQUTOR_CORS_ORIGINS set explicitly (no wildcard allowed) for the frontend origin to be permitted. Falls back to local SQLite if COMQUTOR_DATABASE_URL unset (dev only).",
+      "frontend": "Vite dev server fixed at 127.0.0.1:5175 (`npm run dev` in frontend/), redirects `/` to `/research`.",
+      "live_execution_gate": "COMQUTOR_REAL_TRADINGAGENTS_ENABLED / COMQUTOR_WEEK2_LLM_ENABLED must be explicitly enabled (operator shell only, never .env) for a real live research run; scripts/start_live_comqutor.sh is the privileged launcher.",
+      "no_combined_docker_service": "docker-compose.yml only defines the upstream TradingAgents CLI container and an optional postgres profile -- there is no COMQUTOR API/frontend Docker service today."
+    },
+    "user_flow_stages": [
+      {
+        "stage": "ticker input",
+        "module": "frontend/src/components/ResearchForm.tsx",
+        "user_visible": true,
+        "notes": "ticker + analysis date + analyst checkboxes; no advanced options exposed"
+      },
+      {
+        "stage": "request submission",
+        "module": "frontend/src/hooks/useResearchSubmission.ts -> POST /api/research (routes_research.py)",
+        "user_visible": true,
+        "notes": "async job-queue model: returns run_id+status immediately (200/202), never blocks on the request thread"
+      },
+      {
+        "stage": "research execution (TradingAgents multi-agent debate)",
+        "module": "tradingagents/* orchestration, invoked by research_lifecycle.py",
+        "user_visible": "indirect (via progress stage)",
+        "expected_latency": "~3m20s (QQQ post-fix run)",
+        "failure_mode": "provider/network failure -> run marked failed with error_code",
+        "ux_treatment": "stage checklist + progress bar on ProcessingPage.tsx",
+        "demo_risk": "LOW -- well-instrumented"
+      },
+      {
+        "stage": "structured claims extraction (Week2 LLM structured_adapter)",
+        "module": "comqutor_alpha/structure_engine + Provider semantic layer",
+        "user_visible": "indirect",
+        "expected_latency": "~9m57s (QQQ post-fix run)",
+        "failure_mode": "WEEK2_LLM_TIMEOUT / fallback",
+        "ux_treatment": "progress bar advances only on real milestones, never a fake timer",
+        "demo_risk": "LOW"
+      },
+      {
+        "stage": "Alpha mapping + evidence-stance classification + structure extraction",
+        "module": "structure_engine/alpha_mapper.py, evidence_stance_llm.py, structure_extractor",
+        "user_visible": "indirect",
+        "expected_latency": "~38m45s (QQQ post-fix run) -- dominant latency source, ~74% of total wall clock",
+        "failure_mode": "provider timeout/validation failure -> internal retry/fallback, never surfaced raw to user",
+        "ux_treatment": "single generic stage message (\"Mapping claims to Alpha structures.\")",
+        "demo_risk": "MEDIUM -- longest, least-differentiated stage from the user's perspective; a demo viewer sees one static message for ~39 minutes"
+      },
+      {
+        "stage": "graph build / activation scoring / conflict detection / audit assembly",
+        "module": "graph_engine/*, conflict_engine/*, regression/*",
+        "user_visible": "indirect",
+        "expected_latency": "~3 seconds (deterministic, 0 Provider calls)",
+        "failure_mode": "schema/invariant failure -> PASS_WITH_WARNINGS or FAIL in run_audit.json",
+        "ux_treatment": "final stage messages only",
+        "demo_risk": "LOW"
+      },
+      {
+        "stage": "final response / result presentation",
+        "module": "frontend/src/pages/ResearchRunPage.tsx, StructureGraphPage.tsx, ConflictRadarPage.tsx",
+        "user_visible": true,
+        "failure_mode": "GRAPH_NOT_READY / CONFLICTS_NOT_READY if DB rows for the run are missing despite complete file artifacts (empirically confirmed for run f239a53f-4ebe-455c-bb76-5f5485903901 during this audit)",
+        "ux_treatment": "tabbed navigation across 3 separate pages (Research / Structure Graph / Conflict Radar)",
+        "demo_risk": "HIGH -- see P0 findings"
+      }
+    ],
+    "terminal_manual_intervention_points": [
+      "Enabling COMQUTOR_REAL_TRADINGAGENTS_ENABLED/COMQUTOR_WEEK2_LLM_ENABLED requires an operator shell, cannot be toggled from the UI (by design, for cost/safety control).",
+      "No discoverable UI affordance today to reliably 'load a known-good persisted run' for a demo -- a presenter would need to know a run_id and navigate to /runs/<run_id>/research directly, or use the Recent Runs table on /research (exists, but not framed as a demo tool)."
+    ]
+  },
+  "frontend": {
+    "framework": "React 18.3.1 + TypeScript 5.6.3 (strict) + Vite 5.4.8, react-router-dom 6.26.2, no UI component library (hand-written CSS)",
+    "entry_files": [
+      "frontend/src/main.tsx",
+      "frontend/src/App.tsx (router)"
+    ],
+    "state_management": "No global store; local component state + small custom hooks (useResearchSubmission, useRunPolling, useResearchRun); cross-page continuity via run_id in the URL",
+    "api_client": "frontend/src/api/client.ts; base URL from VITE_COMQUTOR_API_BASE_URL, defaults to same-origin; no hardcoded localhost found in src/; every response validated through adapters.ts before use (never a bare `as Type` cast)",
+    "loading_ux": "GOOD -- LoadingPanel spinner, real backend-driven progress bar + percent + ETA range + elapsed time + ordered stage checklist (ProcessingPage.tsx); polling via useRunPolling with [1000,2000,3000,5000]ms backoff",
+    "error_ux": "GOOD -- centralized ApiError type, curated safe copy table (KNOWN_ERROR_CODE_MESSAGES), ErrorPanel never renders raw error objects/stack traces/JSON; one minor nuance: ApiError.contractMismatch() message includes a dev-facing instruction ('Check VITE_COMQUTOR_API_BASE_URL and restart the frontend') that could confuse a non-technical demo viewer if the API base URL is ever misconfigured live",
+    "debug_admin_views": "No gated debug/admin route exists. ReplayAllPanel ('Reprocess saved outputs', triggers POST /api/replay-all) is embedded directly on the public /research landing page for every visitor with no access-control gate beyond a confirm dialog -- an operator-flavored batch action visible to any demo viewer.",
+    "responsive": "Multiple breakpoints (640px/768px/1024px), dark-mode support, prefers-reduced-motion support, e2e test asserting no horizontal overflow -- genuine responsive intent",
+    "security_sanity": "No hardcoded localhost/secrets/absolute paths in src/. One minor internal-detail leak: literal relative path 'outputs/runs/' appears in ReplayAllPanel copy. ReplayAllPanel's unguarded public exposure is the main demo-sanity flag (not a security vulnerability -- it makes 0 Provider/TradingAgents calls -- but a UX/accidental-trigger risk during a live demo)."
+  },
+  "backend_api": {
+    "entry_point": "POST /api/research (comqutor_alpha/api/routes_research.py) -- async job-queue model, returns {run_id,status,cache_disposition,...} immediately (200 reused-completed / 202 created-or-running / mapped 4xx-5xx for config/validation errors), pipeline runs in background never on the request thread",
+    "status_polling": "GET /api/research/{run_id}/status -- DB-only read, rich contract: progress_percent, current_stage, completed_units/total_units, elapsed_seconds, eta_status + estimated_remaining_seconds_min/max, progress_message (curated safe copy, never raw exception text)",
+    "final_result": "GET /api/research/{run_id} -- full canonical response (dominant_alphas, main_conflict, summary, entity_alpha_exposures, data_sanity_*, evidence_stance_summary, alpha_memory, unclassified_findings_*); status only becomes 'completed' if graph+conflict+ticker_consistency+artifact_completeness all pass, otherwise fail-closed to 'partial'",
+    "alpha_library_endpoint": "GET /api/alpha-library and /api/alpha-library/{alpha_id} DO expose the full ID->human-name(name_en/name_cn)+core_thesis+invalidation_conditions+conflict_alphas mapping to any API client -- the human-readable-name translation layer already exists at the API boundary, it is not merely a docs/audit-artifact convenience",
+    "provider_reliability_exposure": "Provider timeout/retry/validation-failure/fallback counts (per Step 7B.3's authoritative Provider-Health figures: 617 requests, 25 timeouts, 9 validation failures, 34 recoverable semantic-critical events, 0 fatal failures) are recorded only in an internal, non-API-exposed sidecar (llm_semantic_calls.jsonl / llm_semantic_manifest.json) -- never reachable via any public route, not even the generic artifact-download route (not in the download allowlist). A normal API client/demo viewer has zero visibility into retry noise -- by construction, not by UI-layer filtering.",
+    "security_sanity": "No hardcoded absolute local paths in comqutor_alpha/api/*.py; explicit _UNSAFE_DATA_SANITY_DETAIL_MARKERS scrubber strips path/credential/traceback-shaped substrings from any data_sanity warning before it reaches a client; no debug=True on the FastAPI app; .env files correctly gitignored and untracked; CORS defaults to no middleware at all unless explicitly configured, wildcard '*' is rejected at startup.",
+    "critical_finding_db_availability_gap": {
+      "description": "Empirically confirmed during this audit (read-only GET calls against already-persisted data, no Provider/TradingAgents calls): the QQQ post-fix run f239a53f-4ebe-455c-bb76-5f5485903901 has complete, rich file artifacts on disk (structure_graph.json, conflicts.json, run_audit.json all present and internally consistent) but its rows are MISSING from the current outputs/runs/_comqutor_alpha_graph.db. Because /status, /graph, and /conflicts are DB-only reads with no file-artifact fallback (by current design), calling them against this run_id returns RUN_STATUS_NOT_FOUND / GRAPH_NOT_READY / CONFLICTS_NOT_READY, and GET /api/research/{run_id} itself downgrades to status='partial', conflict_status='not_ready', dominant_alphas=[], main_conflict=null.",
+      "scope_unknown": "Not verified in this pass whether NVDA (57d7b4c4-...) and SNDK (e8e0f398-...) have the same DB-row gap -- this must be checked before selecting final demo run_ids.",
+      "not_a_gold_acceptance_issue": "This does not affect Gold v0.2 acceptance validity in any way -- Gold's authoritative source is the persisted file artifacts (run_audit.json), read directly, exactly as this entire acceptance process has done throughout. It is purely a live-API/demo-serving concern."
+    },
+    "manifest_inconsistency_minor_finding": "llm_semantic_manifest.json for the QQQ post-fix run reports complete:false/finalized_at:null despite week3_pipeline_status.json reporting outcome:success and run_audit.json reporting PASS_WITH_WARNINGS -- not user-visible today (this file isn't API-exposed), but worth root-causing."
+  },
+  "user_visible_output": {
+    "ticker": "GOOD",
+    "structural_thesis_summary": "GOOD -- research.summary rendered on ResearchRunPage",
+    "alpha_list": "PRESENT_BUT_UNCLEAR -- only on the separate Structure Graph tab, not the default Research results page",
+    "dominant_alpha": "PRESENT_BUT_UNCLEAR -- fetched into the research object already but not rendered on the main Research page; only shown on Structure Graph tab",
+    "main_conflict": "PRESENT_BUT_UNCLEAR -- fetched already but only rendered on the separate Conflict Radar tab",
+    "evidence_per_alpha": "GOOD -- claim text, agent, match score, relation, assertion status, matched factors, claim ID all shown per evidence item",
+    "evidence_against_thesis": "GOOD -- counter_evidence array (evidence_stance supports_counter_alpha) is populated in real runs and rendered in ConflictEvidenceSections",
+    "confidence_uncertainty": "PRESENT_BUT_UNCLEAR -- shown as many scattered per-claim/per-evidence percentages, no single aggregate 'how confident is this thesis' indicator",
+    "invalidation_conditions": "GOOD (with an honest gap) -- dedicated UI section exists and honestly shows 'not yet approved' when applicable; but the underlying approved-conditions registry currently only has ONE entry (A101), every other Alpha including A304/A601/A301/A001 is not_defined -- so the section will show the honest fallback state for most Alphas/tickers today, which is correct behavior but limits what a demo can show",
+    "misleading_risk_positioning": "PRESENT_BUT_UNCLEAR -- no single prominent 'research only, not financial advice' statement; only a header tagline and scattered explainer prose, plus a productLanguage test guardrail blocking phrases like 'guaranteed return'/'risk-free'"
+  },
+  "latency": {
+    "note": "Derived in this audit from existing artifact timestamps for the QQQ post-fix run f239a53f-4ebe-455c-bb76-5f5485903901; no new research was run.",
+    "total_wall_clock_seconds": 3141,
+    "total_wall_clock_human": "~52 minutes 21 seconds (consistent with the ~3140s figure already cited in prior acceptance work)",
+    "breakdown": [
+      {
+        "stage": "TradingAgents multi-agent research/debate",
+        "seconds": 200,
+        "pct_of_total": "~6%"
+      },
+      {
+        "stage": "Structured claims extraction (Week2 LLM structured_adapter, 8 calls)",
+        "seconds": 597,
+        "pct_of_total": "~19%"
+      },
+      {
+        "stage": "Alpha mapping + evidence-stance classification + structure extraction (587 semantic calls)",
+        "seconds": 2325,
+        "pct_of_total": "~74%",
+        "note": "dominant latency source; sum-of-call-latency exceeds this wall-clock figure, implying meaningful concurrency/overlap already exists"
+      },
+      {
+        "stage": "Graph build / activation scoring / conflict detection / audit assembly (deterministic, 0 Provider calls)",
+        "seconds": 3,
+        "pct_of_total": "<1%"
+      }
+    ],
+    "user_visible_latency": "The entire ~52 minutes is user-visible as elapsed progress-bar time if watched live; the dominant semantic-classification stage (~39 min) shows only one static stage message the whole time, which is the main risk of a viewer thinking the app has frozen -- mitigated somewhat by the live percent/elapsed/ETA display, but not eliminated.",
+    "provider_reliability_authoritative_figures": "617 requests, 25 timeouts, 9 validation failures, 34 recoverable semantic-critical events, 0 fatal failures (carried forward from the frozen Step 7B.3 acceptance record, not recomputed here) -- none of this is surfaced to an API client or the UI."
+  },
+  "failure_modes": [
+    {
+      "scenario": "backend unavailable",
+      "current_behavior": "fetch() network error -> ApiError kind=network",
+      "user_visible_symptom": "ErrorPanel with curated 'can't reach the server' style copy + retry button",
+      "severity": "LOW",
+      "recommended_product_behavior": "current handling is adequate for a demo"
+    },
+    {
+      "scenario": "frontend cannot reach backend (CORS/base-URL misconfig)",
+      "current_behavior": "ApiError.contractMismatch(), includes a dev-facing hint about VITE_COMQUTOR_API_BASE_URL",
+      "user_visible_symptom": "error panel with a technical instruction a non-technical viewer wouldn't act on",
+      "severity": "MEDIUM",
+      "recommended_product_behavior": "keep the dev hint in an operator/console log only; show a plain 'temporarily unavailable, please retry' message to the viewer"
+    },
+    {
+      "scenario": "ticker invalid",
+      "current_behavior": "validate_ticker() rejects at request time with INVALID_TICKER, mapped to 400",
+      "user_visible_symptom": "clear inline validation error (per ResearchForm)",
+      "severity": "LOW",
+      "recommended_product_behavior": "current handling is adequate"
+    },
+    {
+      "scenario": "Provider unavailable / real-execution not configured",
+      "current_behavior": "REAL_RUN_DISABLED / REAL_RUN_CREDENTIAL_MISSING / LIVE_SEMANTIC_PROVIDER_NOT_READY mapped to 503",
+      "user_visible_symptom": "error state on submission before any run is created",
+      "severity": "LOW for a pre-configured demo; HIGH if discovered live on stage",
+      "recommended_product_behavior": "verify readiness via GET /ready before the demo starts, never mid-demo"
+    },
+    {
+      "scenario": "research takes too long",
+      "current_behavior": "no hard timeout observed in the audited code paths; progress bar keeps advancing on real milestones",
+      "user_visible_symptom": "long wait (~52 min for QQQ) with one static message during the dominant semantic-classification stage",
+      "severity": "MEDIUM",
+      "recommended_product_behavior": "prefer a persisted-run/hybrid demo mode (see Demo Mode Options) rather than a live run in front of a stakeholder"
+    },
+    {
+      "scenario": "partial artifact generation",
+      "current_behavior": "status downgraded to 'partial' with per-artifact readiness flags -- fail-closed by design",
+      "user_visible_symptom": "run shows 'partial' rather than silently presenting incomplete data as complete",
+      "severity": "LOW (safe failure)",
+      "recommended_product_behavior": "current fail-closed behavior is correct; keep it"
+    },
+    {
+      "scenario": "malformed response / contract mismatch",
+      "current_behavior": "adapters.ts rejects non-conforming payloads -> ApiError.contractMismatch()",
+      "user_visible_symptom": "error panel rather than a broken/garbage render",
+      "severity": "LOW (safe failure)",
+      "recommended_product_behavior": "current handling is correct"
+    },
+    {
+      "scenario": "no dominant Alpha",
+      "current_behavior": "dominant_alphas: [] -- confirmed real state for the QQQ post-fix run",
+      "user_visible_symptom": "Structure Graph tab's 'Dominant alphas' bucket is simply empty; no explicit 'no single structure dominates' messaging found",
+      "severity": "MEDIUM",
+      "recommended_product_behavior": "add an explicit, confident empty-state message rather than an unexplained empty section"
+    },
+    {
+      "scenario": "no admitted conflict",
+      "current_behavior": "confirmed real state for the SNDK run (admitted_count: 0, main_conflict_id: null, all 3 candidate pairs suppressed)",
+      "user_visible_symptom": "ConflictRadarPage.tsx:143 already has explicit copy: 'No conflicts detected... This does not mean the position carries no risk.'",
+      "severity": "LOW -- already handled reasonably well",
+      "recommended_product_behavior": "keep and consider mirroring the same confident-messaging pattern for the no-dominant-Alpha state above"
+    },
+    {
+      "scenario": "all Alphas candidate/inactive",
+      "current_behavior": "would render as an empty/near-empty Structure Graph -- not observed in any of the three inspected runs (all had at least 3-4 active/dominant Alphas)",
+      "user_visible_symptom": "untested in this audit",
+      "severity": "UNKNOWN",
+      "recommended_product_behavior": "not urgent given no inspected demo-candidate ticker hits this state"
+    },
+    {
+      "scenario": "missing evidence source / DB row gap for an otherwise-complete run",
+      "current_behavior": "empirically confirmed for the QQQ post-fix run -- see backend_api.critical_finding_db_availability_gap",
+      "user_visible_symptom": "run appears 'partial'/broken via the live UI despite rich underlying data",
+      "severity": "HIGH -- directly demo-breaking if this exact run_id is used live",
+      "recommended_product_behavior": "verify/backfill DB rows for whichever run_ids are chosen for the stakeholder demo before demo day (P0)"
+    }
+  ],
+  "demo_modes": {
+    "LIVE_FULL_RESEARCH": {
+      "pros": "most impressive/credible if it works flawlessly ('watch it think in real time')",
+      "cons": "~52 minutes wall clock for QQQ-scale runs; ~39 minutes of that shows one static stage message; nonzero Provider timeout/retry risk (25 timeouts / 9 validation failures observed even in a successful run) with zero visibility into recovery, could look like nothing is happening",
+      "implementation_complexity": "N/A (already built)",
+      "credibility": "HIGH if it succeeds, LOW if it times out or looks frozen mid-demo",
+      "latency": "~52 minutes",
+      "failure_risk": "HIGH for a live stakeholder setting",
+      "recommended_use": "NOT recommended as the primary path for a time-boxed stakeholder demo; fine for a technical deep-dive session with time to spare"
+    },
+    "PERSISTED_RUN_DEMO": {
+      "pros": "instant, zero Provider/TradingAgents cost, zero timeout risk, fully reproducible/rehearsable",
+      "cons": "not 'live' -- a skeptical viewer may ask to see a fresh ticker; currently blocked for at least one candidate run_id by the DB-availability gap found in this audit",
+      "implementation_complexity": "LOW once the DB-availability gap is resolved for the chosen run_ids -- the routing/URL/component model already supports loading any completed run_id directly (/runs/:runId/research etc.)",
+      "credibility": "MEDIUM-HIGH if framed honestly as 'a completed run we ran earlier'",
+      "latency": "seconds",
+      "failure_risk": "LOW, contingent on the P0 DB-availability fix",
+      "recommended_use": "RECOMMENDED as the backbone of the stakeholder demo"
+    },
+    "HYBRID_DEMO": {
+      "pros": "shows a rich, rehearsed result immediately (credibility + speed) while still offering to run a fresh ticker live if time/interest allows",
+      "cons": "slightly more presenter choreography; still inherits LIVE_FULL_RESEARCH's latency/risk if the live option is actually exercised",
+      "implementation_complexity": "LOW-MEDIUM -- mostly a presentation/product-framing decision on top of already-existing persisted-run loading + submission flows",
+      "credibility": "HIGH -- offers both instant proof and an optional live proof-point",
+      "latency": "instant for the primary story, ~52 min if the optional live path is taken",
+      "failure_risk": "LOW for the primary path, HIGH only if the optional live path is exercised and something goes wrong",
+      "recommended_use": "RECOMMENDED -- best overall balance: lead with PERSISTED_RUN_DEMO, offer a live run only as an optional closer with an explicit 'this will take about 50 minutes' expectation set up front"
+    }
+  },
+  "recommended_demo_tickers": {
+    "PRIMARY_DEMO_TICKER": {
+      "ticker": "NVDA",
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "why": "Richest, clearest structural story: dominant Alpha (A301 Revenue Expansion, 78.49), 4 other active Alphas (A101 AI Expansion capped-active, A601 Narrative Momentum, A304 Multiple Compression, A103 AI Infrastructure), 3 admitted conflicts with a clear main conflict (A101__A304, bull-AI-thesis vs bear-valuation-risk), full evidence traceability. Formal Gold PASS (historical + impact-proof). Not chosen for being 'bullish' -- chosen because it has the most complete, legible structure/conflict/evidence story of the three inspected tickers."
+    },
+    "SECONDARY_DEMO_TICKER": {
+      "ticker": "QQQ",
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "why": "Demonstrates a genuinely different state (no dominant Alpha, 4 active Alphas including a capped/blocked one) plus a real, legitimate admitted conflict (A301__A304). Also carries the product's own remediation story (A001 false-positive fixed, now correctly non-detected) if a deeper technical narrative is wanted. Classified USABLE_WITH_CAVEAT (see Section 18) pending: (a) resolving the DB-availability gap for this specific run_id, and (b) disclosing the A301-evidence-strength REVIEW diagnostic if a technical stakeholder probes the conflict."
+    },
+    "EDGE_CASE_DEMO_TICKER": {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "why": "The only inspected run with a dominant Alpha (A201 Semiconductor Supercycle, 84.22) but ZERO admitted conflicts (all 3 candidate pairs suppressed, main_conflict_id: null) -- a genuinely different, legitimate product state that is valuable to show deliberately (per Section 17's guidance not to assume every ticker has a dominant Alpha or a main conflict) rather than avoid. Also demonstrates a different Alpha family (semiconductor cycle) for taxonomy variety."
+    },
+    "not_inspected_this_pass": [
+      "MSFT",
+      "TSM",
+      "AMD"
+    ],
+    "msft_note": "MSFT is a known Silver-tier FAIL (non-blocking to Gold v0.2, but not recommended as a demo ticker given its known direct-inference-trigger FAIL and capex REVIEW)."
+  },
+  "technical_debt_relevance": {
+    "synthetic_replay_test_errors_39": "NOT_DEMO_RELEVANT -- pure test-fixture issue (tests/replay/conftest.py), invisible to any user-facing flow, never touches a real demo run",
+    "alpha_match_accuracy_83pct": "DEMO_RELEVANT_NONBLOCKING -- doesn't block demoing any chosen ticker, but the presenter should be ready to answer a stakeholder question about overall classification accuracy honestly",
+    "polarity_accuracy_85_25pct": "DEMO_RELEVANT_NONBLOCKING -- same as above",
+    "msft_silver_failure_reviews": "NOT_DEMO_RELEVANT given MSFT is not a recommended demo ticker; would become DEMO_BLOCKING for MSFT specifically if MSFT were chosen",
+    "qqq_conflict_diagnostic_review": "DEMO_RELEVANT_NONBLOCKING -- does not block demoing QQQ, but is the specific reason QQQ is classified USABLE_WITH_CAVEAT rather than GOOD_DEMO_CASE; should be disclosed honestly if a technical stakeholder asks about the A301 side of the conflict"
+  },
+  "hardening_backlog": {
+    "P0": [
+      {
+        "id": "P0-1",
+        "problem": "The QQQ post-fix run (f239a53f-...) has complete file artifacts but is missing DB rows, causing the live API to report RUN_STATUS_NOT_FOUND/GRAPH_NOT_READY/CONFLICTS_NOT_READY and the UI to show it as 'partial' with no conflict/dominant-Alpha data -- despite the underlying data being rich and correct.",
+        "user_impact": "If this exact run_id is opened live in the UI during a demo, it will appear broken even though nothing is actually wrong with the research result.",
+        "likely_files_modules": [
+          "comqutor_alpha/research_lifecycle.py",
+          "DB layer / research_runs, structure_graphs, alpha_conflicts tables",
+          "possibly a new 'reindex artifacts into DB' utility"
+        ],
+        "backend_frontend_both": "backend",
+        "estimated_scope": "SMALL_TO_MEDIUM (depends on whether a resync/backfill utility already exists)",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO"
+      },
+      {
+        "id": "P0-2",
+        "problem": "Whichever run_ids are ultimately chosen for the stakeholder demo have not all been verified live-servable (only QQQ was directly checked in this audit and found broken; NVDA/SNDK are unverified).",
+        "user_impact": "A demo could break live if the presenter picks a run_id that also has this gap.",
+        "likely_files_modules": [
+          "same as P0-1"
+        ],
+        "backend_frontend_both": "backend",
+        "estimated_scope": "SMALL (a quick GET /status + /graph + /conflicts check against each candidate run_id before demo day)",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO"
+      }
+    ],
+    "P1": [
+      {
+        "id": "P1-1",
+        "problem": "The core 'what does the system see and why' story (Alpha list, dominant Alpha, main conflict) is split across three separate tabs (Research / Structure Graph / Conflict Radar) instead of appearing on the primary results page.",
+        "user_impact": "A demo viewer's first impression after a run completes is just a text summary -- they must know to click through tabs to see the actual structural findings.",
+        "likely_files_modules": [
+          "frontend/src/pages/ResearchRunPage.tsx",
+          "frontend/src/pages/StructureGraphPage.tsx",
+          "frontend/src/pages/ConflictRadarPage.tsx"
+        ],
+        "backend_frontend_both": "frontend",
+        "estimated_scope": "MEDIUM",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "PRESENTATION_ONLY"
+      },
+      {
+        "id": "P1-2",
+        "problem": "Internal jargon (regime_level, candidate, 'B2 Conflict Evidence Admissibility gate', raw reason codes inline, Alpha Memory/SHADOW/phi_id) is shown in the default view without translation, contradicting the stated demo persona (non-engineer stakeholder).",
+        "user_impact": "A stakeholder sees confusing internal vocabulary during a normal (non-advanced) view of results.",
+        "likely_files_modules": [
+          "frontend/src/components/AlphaCard.tsx",
+          "ConflictCard.tsx",
+          "StructureGraphPage.tsx",
+          "ResearchRunPage.tsx",
+          "CandidateConflictCard.tsx"
+        ],
+        "backend_frontend_both": "frontend",
+        "estimated_scope": "MEDIUM",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "PRESENTATION_ONLY"
+      },
+      {
+        "id": "P1-3",
+        "problem": "No single, prominent 'research only, not financial advice' disclaimer -- only scattered, implicit copy.",
+        "user_impact": "Positioning risk if a stakeholder or downstream audience mistakes output for investment advice.",
+        "likely_files_modules": [
+          "frontend/src/components/AppShell.tsx",
+          "ResearchRunPage.tsx"
+        ],
+        "backend_frontend_both": "frontend",
+        "estimated_scope": "SMALL",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "PRESENTATION_ONLY"
+      },
+      {
+        "id": "P1-4",
+        "problem": "ReplayAllPanel (batch operator action) is exposed unguarded on the public /research landing page.",
+        "user_impact": "Could be confused with, or accidentally triggered during, a stakeholder demo.",
+        "likely_files_modules": [
+          "frontend/src/pages/ResearchPage.tsx",
+          "ReplayAllPanel.tsx",
+          "App.tsx (new route)"
+        ],
+        "backend_frontend_both": "frontend",
+        "estimated_scope": "SMALL",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "PRESENTATION_ONLY / INFRASTRUCTURE"
+      },
+      {
+        "id": "P1-5",
+        "problem": "Confidence/uncertainty is scattered across many small per-claim percentages with no single aggregate 'how sure is the system' indicator.",
+        "user_impact": "Harder for a viewer to quickly gauge overall confidence in the thesis.",
+        "likely_files_modules": [
+          "frontend/src/components/AlphaCard.tsx",
+          "possibly a small aggregation addition"
+        ],
+        "backend_frontend_both": "likely frontend-only (aggregating already-persisted per-claim data)",
+        "estimated_scope": "MEDIUM",
+        "semantic_risk": "LOW -- must remain a pure display statistic, never feed back into Gold detection thresholds",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "PRESENTATION_ONLY"
+      },
+      {
+        "id": "P1-6",
+        "problem": "llm_semantic_manifest.json reports complete:false/finalized_at:null on the QQQ post-fix run despite the run succeeding overall.",
+        "user_impact": "Not user-visible today, but an unresolved internal inconsistency worth root-causing before it is ever surfaced.",
+        "likely_files_modules": [
+          "comqutor_alpha/api/routes_research.py (finalize_manifest call path)"
+        ],
+        "backend_frontend_both": "backend",
+        "estimated_scope": "SMALL",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "INFRASTRUCTURE"
+      }
+    ],
+    "P2": [
+      {
+        "id": "P2-1",
+        "problem": "The approved Invalidation Conditions registry only has one entry (A101); every other Alpha shows the honest 'not yet defined' fallback.",
+        "user_impact": "Limits what the Invalidation section can show for tickers/Alphas outside A101's family.",
+        "likely_files_modules": [
+          "comqutor_alpha/config/alpha_invalidation_conditions_v0.1.yaml"
+        ],
+        "backend_frontend_both": "backend (content, requires human/product sign-off per entry, same discipline as A101's)",
+        "estimated_scope": "MEDIUM (content work, not code)",
+        "semantic_risk": "LOW -- adding approved content doesn't change scoring, but must follow the same approval discipline",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "PRODUCT_LOGIC"
+      },
+      {
+        "id": "P2-2",
+        "problem": "Semantic classification (alpha_classifier: 550 calls, evidence_stance_classifier: 33 calls) dominates ~74% of run wall-clock time.",
+        "user_impact": "Long live-run latency; only relevant if LIVE_FULL_RESEARCH demo mode is used.",
+        "likely_files_modules": [
+          "structure_engine/alpha_mapper.py",
+          "evidence_stance_llm.py",
+          "possible caching/dedup layer"
+        ],
+        "backend_frontend_both": "backend",
+        "estimated_scope": "LARGE",
+        "semantic_risk": "MEDIUM if implemented carelessly (could change which/how many claims qualify); NONE if a byte-identical-output caching layer",
+        "provider_run_validation_required": "YES if implemented",
+        "presentation_or_logic": "INFRASTRUCTURE / SEMANTIC_LOGIC boundary"
+      },
+      {
+        "id": "P2-3",
+        "problem": "No progressive rendering -- results appear only after full assembly rather than streaming in as scoring completes.",
+        "user_impact": "Minor polish; current progress UX is already good enough that this is low priority.",
+        "likely_files_modules": [
+          "frontend result pages",
+          "backend streaming API surface"
+        ],
+        "backend_frontend_both": "both",
+        "estimated_scope": "LARGE",
+        "semantic_risk": "NONE",
+        "provider_run_validation_required": "NO",
+        "presentation_or_logic": "INFRASTRUCTURE"
+      }
+    ]
+  },
+  "recommended_first_implementation_slice": {
+    "title": "Structured top-level result summary on the primary Research results page",
+    "description": "Render the Alpha list, dominant Alpha (if any), and main conflict (if any) directly on ResearchRunPage.tsx using data that is already fetched into the `research` object but currently unrendered there (per the frontend audit finding) -- rather than requiring navigation to the separate Structure Graph / Conflict Radar tabs to see them.",
+    "why_this_one": "Directly fixes the single biggest first-impression clarity gap (P1-1), uses data the frontend already has in memory, is entirely frontend/PRESENTATION_ONLY, requires no backend or taxonomy change, requires no Provider rerun, and can be fully tested locally against the existing NVDA/QQQ/SNDK persisted runs.",
+    "semantic_risk": "NONE",
+    "requires_provider_rerun": false,
+    "likely_files": [
+      "frontend/src/pages/ResearchRunPage.tsx",
+      "possibly extracting a shared AlphaSummaryList/MainConflictCard subcomponent reused from StructureGraphPage.tsx/ConflictRadarPage.tsx"
+    ],
+    "testable_locally": true,
+    "caveat": "This slice does not address the P0 DB-availability gap -- that should be investigated/resolved in parallel (or first) since it affects whether any of these three tickers can even be opened live via the UI/API today."
+  },
+  "executive_assessment": "DEMO_READY_WITH_HARDENING",
+  "final_validation": {
+    "gold_v0_2_closure_unchanged": true,
+    "production_code_changed": 0,
+    "test_files_changed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "product_demo_hardening_implementation_started": false,
+    "product_demo_hardening_audit_started": true,
+    "audit_files_created": 2
+  }
+}

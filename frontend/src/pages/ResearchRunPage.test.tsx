@@ -382,6 +382,26 @@ describe("ResearchRunPage", () => {
     expect(screen.queryByText(/tied confidence claim with no separate evidence/i)).not.toBeInTheDocument();
   });
 
+  // Product Demo Hardening Phase 3B (F1): a long, colon-delimited claim_id
+  // (the real shape: "<run_id>:<agent>:<source>:claim:<n>") must render
+  // completely -- never truncated or ellipsized -- and must live inside the
+  // .analyst-output-card container that carries the overflow-wrap fix
+  // (see styles.layout.test.ts for the actual CSS rule assertion; jsdom
+  // does not apply styles.css, so real overflow cannot be verified here).
+  it("renders a long claim_id completely, never truncated, inside the wrap-protected finding card", async () => {
+    const longClaimId =
+      "57d7b4c4-dbb9-4134-b962-ee2a873941cc:fundamental_agent:fundamentals_report:claim:122";
+    mockAgentOutputs([
+      findingRecord({ claim_id: longClaimId, direction: "positive", claim: "Some claim text." }),
+    ]);
+    renderPage();
+    const codeEl = await waitFor(() => screen.getByText(longClaimId));
+    expect(codeEl.textContent).toBe(longClaimId);
+    expect(codeEl.textContent).not.toContain("…");
+    expect(codeEl.textContent).not.toContain("...");
+    expect(codeEl.closest(".analyst-output-card")).not.toBeNull();
+  });
+
   it("renders a partial run without failing", async () => {
     vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
       makeRunRecord({
@@ -838,6 +858,459 @@ describe("ResearchRunPage", () => {
         ).toBeInTheDocument()
       );
       expect(screen.queryByText(/Showing \d+ of \d+/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Alpha Memory panel (Implementation Step 4B)", () => {
+    function mockResearchWithMemory(alphaMemory: CanonicalResearchResponse["alpha_memory"]) {
+      vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+        makeRunRecord({
+          selected_analysts: ["market"],
+          status: "completed",
+          stage: "completed",
+          message: "Research run completed.",
+        })
+      );
+      vi.spyOn(client, "getResearchRun").mockResolvedValue({
+        run_id: "run-1",
+        ticker: "NVDA",
+        status: "completed",
+        artifacts: BASE_ARTIFACTS,
+        agent_output_count: 0,
+        structured_output_count: 0,
+        structure_graph_status: "ready",
+        dominant_alphas: [],
+        main_conflict: null,
+        conflict_status: "ready",
+        summary: "Summary.",
+        data_sanity_status: "not_available",
+        data_sanity_warning_count: 0,
+        data_sanity_critical_count: 0,
+        data_sanity_warnings: [],
+        alpha_memory: alphaMemory,
+      });
+      vi.spyOn(client, "getAgentOutputs").mockResolvedValue({
+        run_id: "run-1",
+        ticker: "NVDA",
+        status: "ok",
+        schema_version: "week1a.structured_agent_outputs.v2",
+        count: 0,
+        structured_agent_outputs: [],
+      });
+    }
+
+    const RECURRING_STRUCTURE = {
+      phi_id: "abc123def456",
+      ticker: "NVDA",
+      alpha_id: "A101",
+      source: "ai_capex",
+      edge_type: "causal",
+      target: "gpu_demand",
+      is_recurring: true,
+      has_prior_observation: true,
+      prior_observation_count: 5,
+      prior_run_ids: ["run-a", "run-b", "run-c", "run-d", "run-e"],
+      first_seen: "2026-08-01T00:00:00Z",
+      last_seen_prior: "2026-08-20T00:00:00Z",
+      current_seen_at: "2026-09-05T00:00:00Z",
+    };
+
+    const FIRST_SEEN_STRUCTURE = {
+      phi_id: "fedcba987654",
+      ticker: "NVDA",
+      alpha_id: "A101",
+      source: "rate_cut_cycle",
+      edge_type: "conflicting",
+      target: "valuation_risk",
+      is_recurring: false,
+      has_prior_observation: false,
+      prior_observation_count: 0,
+      prior_run_ids: [],
+      first_seen: "2026-09-05T00:00:00Z",
+      last_seen_prior: null,
+      current_seen_at: "2026-09-05T00:00:00Z",
+    };
+
+    it("renders the Alpha Memory panel with Shadow badge and modulation Off when data exists", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [RECURRING_STRUCTURE, FIRST_SEEN_STRUCTURE],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 5,
+            first_seen_phi_count: 3,
+            recurring_phi_count: 2,
+            recurrence_ratio: 0.4,
+            prior_observation_total: 7,
+          },
+        ],
+        aggregate_fingerprints: [],
+        instability_signals: { alpha_attribution_variance: [], edge_type_variance: [] },
+      });
+      renderPage();
+
+      await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+      // Product Demo Hardening Phase 2D: SHADOW/mode/activation_modulation_applied
+      // are no longer prominent by default -- the default copy states plainly
+      // that memory does not alter the current activation result, and the
+      // raw values are preserved verbatim under Technical details.
+      expect(screen.queryByText("SHADOW")).not.toBeInTheDocument();
+      expect(screen.getByText("Mode").closest("div")?.textContent).toContain("shadow");
+      expect(
+        screen.getByText("Historical memory is shown for context and does not alter the current activation result.")
+      ).toBeInTheDocument();
+    });
+
+    it("renders the recurring and first-seen counts correctly", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [RECURRING_STRUCTURE, FIRST_SEEN_STRUCTURE],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 5,
+            first_seen_phi_count: 3,
+            recurring_phi_count: 2,
+            recurrence_ratio: 0.4,
+            prior_observation_total: 7,
+          },
+        ],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+
+      await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+      const summaryText = screen.getByText(/current structure/).textContent ?? "";
+      expect(summaryText).toContain("A101");
+      expect(summaryText).toContain("5 current structures");
+      expect(summaryText).toContain("2 recurring");
+      expect(summaryText).toContain("3 first seen");
+      expect(summaryText).toContain("40% recurrence");
+    });
+
+    it("never uses bullish/bearish/confidence language anywhere in the panel", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [RECURRING_STRUCTURE],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 1,
+            first_seen_phi_count: 0,
+            recurring_phi_count: 1,
+            recurrence_ratio: 1,
+            prior_observation_total: 5,
+          },
+        ],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+
+      const panelText = screen.getByText("Alpha Memory").closest("section")?.textContent ?? "";
+      for (const forbidden of [
+        "bullish",
+        "bearish",
+        "confirmed thesis",
+        "stronger signal",
+        "higher confidence",
+        "validated alpha",
+        "memory boost",
+        "memory penalty",
+        "invalidated",
+        "expired",
+        "failed",
+      ]) {
+        expect(panelText.toLowerCase()).not.toContain(forbidden);
+      }
+    });
+
+    it("shows the actual source-to-target relation and real prior-observation details when expanded", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [RECURRING_STRUCTURE],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 1,
+            first_seen_phi_count: 0,
+            recurring_phi_count: 1,
+            recurrence_ratio: 1,
+            prior_observation_total: 5,
+          },
+        ],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText(/Recurring structures/)).toBeInTheDocument());
+
+      const user = userEvent.setup();
+      await user.click(screen.getByText(/Recurring structures/));
+
+      expect(screen.getByText("ai_capex")).toBeInTheDocument();
+      expect(screen.getByText("gpu_demand")).toBeInTheDocument();
+      expect(screen.getByText(/5 prior runs/)).toBeInTheDocument();
+      expect(screen.getByText("2026-08-01T00:00:00Z")).toBeInTheDocument();
+      expect(screen.getByText("2026-08-20T00:00:00Z")).toBeInTheDocument();
+      // The raw phi_id is available only inside the (closed-by-default)
+      // technical detail, never as the primary visible human-facing label.
+      expect(screen.getByText("abc123def456")).not.toBeVisible();
+      await user.click(screen.getByText("Technical detail"));
+      expect(screen.getByText("abc123def456")).toBeVisible();
+    });
+
+    it("renders a first-seen-only Alpha (no recurrence) honestly, without a fake recurring section", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [FIRST_SEEN_STRUCTURE],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 1,
+            first_seen_phi_count: 1,
+            recurring_phi_count: 0,
+            recurrence_ratio: 0,
+            prior_observation_total: 0,
+          },
+        ],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+      expect(screen.getByText("No exact historical recurrence found for this Alpha.")).toBeInTheDocument();
+      expect(screen.queryByText(/Recurring structures/)).not.toBeInTheDocument();
+    });
+
+    it("renders an honest empty state when there is no current Alpha structure to compare, never fabricated memory", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [],
+        alpha_memory_summary: [],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+      expect(
+        screen.getByText("No current Alpha structures to compare against history for this run.")
+      ).toBeInTheDocument();
+    });
+
+    it("renders an MSFT-style zero-recurrence result honestly, never as a failure", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: Array.from({ length: 12 }, (_, i) => ({
+          ...FIRST_SEEN_STRUCTURE,
+          phi_id: `msft-phi-${i}`,
+          alpha_id: i < 6 ? "A102" : "A103",
+        })),
+        alpha_memory_summary: [
+          {
+            alpha_id: "A102",
+            current_phi_count: 6,
+            first_seen_phi_count: 6,
+            recurring_phi_count: 0,
+            recurrence_ratio: 0,
+            prior_observation_total: 0,
+          },
+          {
+            alpha_id: "A103",
+            current_phi_count: 6,
+            first_seen_phi_count: 6,
+            recurring_phi_count: 0,
+            recurrence_ratio: 0,
+            prior_observation_total: 0,
+          },
+        ],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+      const panelText = screen.getByText("Alpha Memory").closest("section")?.textContent ?? "";
+      expect(panelText.toLowerCase()).not.toContain("memory failed");
+      expect(panelText.toLowerCase()).not.toContain("failed");
+      expect(screen.getAllByText("No exact historical recurrence found for this Alpha.")).toHaveLength(2);
+    });
+
+    it("never fabricates a timestamp when first_seen/last_seen_prior are unavailable", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [
+          { ...RECURRING_STRUCTURE, first_seen: null, last_seen_prior: null },
+        ],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 1,
+            first_seen_phi_count: 0,
+            recurring_phi_count: 1,
+            recurrence_ratio: 1,
+            prior_observation_total: 5,
+          },
+        ],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText(/Recurring structures/)).toBeInTheDocument());
+      const user = userEvent.setup();
+      await user.click(screen.getByText(/Recurring structures/));
+      expect(screen.getAllByText("Unavailable")).toHaveLength(2);
+    });
+
+    it("treats aggregate fingerprint information as secondary only, inside technical detail", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [RECURRING_STRUCTURE],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 1,
+            first_seen_phi_count: 0,
+            recurring_phi_count: 1,
+            recurrence_ratio: 1,
+            prior_observation_total: 5,
+          },
+        ],
+        aggregate_fingerprints: [{ aggregate_fingerprint_id: "agg123", alpha_id: "A101" }],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+      const diagnosticText = screen.getByText(/is a secondary diagnostic only/i);
+      // Not visible until the secondary-diagnostics detail is expanded.
+      expect(diagnosticText).not.toBeVisible();
+      const user = userEvent.setup();
+      await user.click(screen.getByText("Secondary diagnostics (technical)"));
+      expect(diagnosticText).toBeVisible();
+    });
+
+    it("does not render the Alpha Memory panel at all for a historical run predating Step 1 (no fabricated section)", async () => {
+      mockResearchWithMemory(null);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Summary.")).toBeInTheDocument());
+      expect(screen.queryByText("Alpha Memory")).not.toBeInTheDocument();
+    });
+
+    it("leaves the existing research summary and Unclassified findings panel unchanged when Alpha Memory is present", async () => {
+      mockResearchWithMemory({
+        mode: "shadow",
+        activation_modulation_applied: false,
+        identity_model: "atomic_edge_phi",
+        identity_version: "alpha_memory.phi_edge.v1",
+        phi_structures: [RECURRING_STRUCTURE],
+        alpha_memory_summary: [
+          {
+            alpha_id: "A101",
+            current_phi_count: 1,
+            first_seen_phi_count: 0,
+            recurring_phi_count: 1,
+            recurrence_ratio: 1,
+            prior_observation_total: 5,
+          },
+        ],
+        aggregate_fingerprints: [],
+      });
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Summary.")).toBeInTheDocument());
+      expect(
+        screen.getByText(/unclassified finding audit is not available for this historical run/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText("Alpha Memory")).toBeInTheDocument();
+    });
+
+    // Product Demo Hardening Phase 2D, Sections 13/21/30.
+    describe("Phase 2D: default-view jargon cleanup", () => {
+      function memoryFixture(overrides: Partial<NonNullable<CanonicalResearchResponse["alpha_memory"]>> = {}) {
+        return {
+          mode: "shadow" as const,
+          activation_modulation_applied: false as const,
+          identity_model: "atomic_edge_phi",
+          identity_version: "alpha_memory.phi_edge.v1",
+          phi_structures: [],
+          alpha_memory_summary: [],
+          aggregate_fingerprints: [],
+          ...overrides,
+        };
+      }
+
+      it("does not show SHADOW as default stakeholder copy", async () => {
+        mockResearchWithMemory(memoryFixture());
+        renderPage();
+        await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+        expect(screen.queryByText("SHADOW")).not.toBeInTheDocument();
+      });
+
+      it("does not show phi_id in default stakeholder copy", async () => {
+        mockResearchWithMemory(
+          memoryFixture({
+            phi_structures: [RECURRING_STRUCTURE],
+            alpha_memory_summary: [
+              { alpha_id: "A101", current_phi_count: 1, first_seen_phi_count: 0, recurring_phi_count: 1, recurrence_ratio: 1, prior_observation_total: 5 },
+            ],
+          })
+        );
+        renderPage();
+        await waitFor(() => expect(screen.getByText(/Recurring structures/)).toBeInTheDocument());
+        expect(screen.getByText(RECURRING_STRUCTURE.phi_id)).not.toBeVisible();
+      });
+
+      it("does not show activation_modulation_applied raw by default, and states plainly that memory does not alter the current activation result", async () => {
+        mockResearchWithMemory(memoryFixture({ activation_modulation_applied: false }));
+        renderPage();
+        await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+        expect(screen.queryByText(/activation_modulation_applied/)).not.toBeInTheDocument();
+        expect(
+          screen.getByText("Historical memory is shown for context and does not alter the current activation result.")
+        ).toBeInTheDocument();
+      });
+
+      it("exposes the exact technical mode/modulation values once Technical details is opened", async () => {
+        const user = userEvent.setup();
+        mockResearchWithMemory(memoryFixture());
+        renderPage();
+        await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+        const [firstSummary] = screen.getAllByText("Technical details");
+        await user.click(firstSummary!);
+        expect(screen.getByText("Mode").closest("div")?.textContent).toContain("shadow");
+        expect(screen.getByText("Activation modulation applied").closest("div")?.textContent).toContain("No");
+      });
+
+      it("never implies memory modifies current activation, even in the (currently type-constrained) modulation-applied branch", async () => {
+        mockResearchWithMemory(
+          memoryFixture({ activation_modulation_applied: true as unknown as false })
+        );
+        renderPage();
+        await waitFor(() => expect(screen.getByText("Alpha Memory")).toBeInTheDocument());
+        const panelText = screen.getByText("Alpha Memory").closest("section")?.textContent ?? "";
+        expect(panelText).toContain("Historical memory modulation is currently applied to this run's activation.");
+        expect(panelText).not.toContain("does not alter the current activation result");
+      });
     });
   });
 });

@@ -69,7 +69,18 @@ def test_structured_claim_shadow_policy_constants_are_the_approved_values():
 
 
 def test_shared_gateway_defaults_unchanged():
-    assert DEFAULT_TIMEOUT_SECONDS == 15.0
+    # DEFAULT_TIMEOUT_SECONDS: separately-authorized Step 5A (v0.1.2.1)
+    # execution-capacity repair raised this from the original 15.0. Final
+    # value (20.0) reflects the repair's final architecture -- single-claim
+    # semantics (multi-claim batching was evaluated and DEFERRED after
+    # proving unreliable against the configured Provider regardless of
+    # batch size/timeout) -- sized from real observed single-claim latency
+    # (~1.8-2s, p90 ~3.5s), not the larger multi-claim timeout an earlier
+    # iteration of this same repair briefly used. See docs/audit_artifacts/
+    # week2_runtime_capacity_root_cause_v0.1.2.1.json and
+    # week2_runtime_capacity_repair_v0.1.2.1.md. DEFAULT_MAX_RETRIES is
+    # untouched by that repair.
+    assert DEFAULT_TIMEOUT_SECONDS == 20.0
     assert DEFAULT_MAX_RETRIES == 1
 
 

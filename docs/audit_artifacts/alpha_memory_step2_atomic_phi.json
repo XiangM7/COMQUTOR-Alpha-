@@ -1,0 +1,147 @@
+{
+  "schema_version": "alpha_memory_step2_atomic_phi.v1",
+  "task": "Alpha Memory Implementation Step 2 -- Adopt Atomic Edge phi + Revise Cross-Run Memory Identity (SHADOW ONLY)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_ticker_research": false,
+  "commit": false,
+  "push": false,
+  "mode": "shadow",
+  "activation_modulation_applied": false,
+
+  "final_identity_formula": {
+    "primary_atomic_edge_phi": "phi_id = sha256(json_canonical({identity_version: 'alpha_memory.phi_edge.v1', ticker, alpha_id, taxonomy_version, taxonomy_sha256, source, edge_type, target}))",
+    "secondary_aggregate_fingerprint": "aggregate_fingerprint_id = sha256(json_canonical({identity_version: 'alpha_memory.aggregate_fingerprint.v1', ticker, alpha_id, taxonomy_version, taxonomy_sha256, chain_edges: sorted[(source, edge_type, target), ...]})) -- arithmetic BYTE-IDENTICAL to Step 1's original whole-set computation; only the name/classification and version string changed.",
+    "fields_never_dropped": "alpha_id and edge_type both remain part of the atomic identity, per the ablation audit's own finding that dropping either would silently merge structures with real, non-noise semantic content (intentional within-run multi-Alpha attribution; at least one genuine causal-vs-conflicting disagreement)."
+  },
+
+  "hierarchy": {
+    "level_1_primary": "Atomic edge phi (one per qualifying edge per Alpha) -- the durable, primary cross-run matching unit as of this step.",
+    "level_2_secondary": "Whole-Alpha aggregate fingerprint (Step 1's original computation, unchanged arithmetic) -- retained ONLY as a coarse diagnostic/QA signal, never the primary identity. Zero aggregate-fingerprint overlap must never be read as zero atomic-phi overlap.",
+    "motif_level": "DEFERRED, unchanged from Step 1.5/1.6 -- not implemented in this step."
+  },
+
+  "one_alpha_many_phi_behavior": {
+    "rule": "One Alpha with N qualifying edges produces N atomic phi records -- never hashed together as one primary identity.",
+    "proof": "tests/test_alpha_memory_phi_identity.py::test_one_alpha_with_n_qualifying_edges_produces_n_atomic_phi_tokens (3 edges -> 3 distinct phi_ids) and test_shared_edge_across_two_alphas_produces_two_distinct_phi_records (the same literal edge, linked to two Alphas, produces two separate records, never collapsed).",
+    "real_data_confirmation": "Real NVDA run 2f8ee897 (full historical scan against all persisted NVDA runs): A101 alone produced 5 atomic phi tokens from its 5 linked edges; A103 produced 4. Neither collapsed into a single per-Alpha identity."
+  },
+
+  "aggregate_fingerprint_behavior": {
+    "classification": "Explicitly reported under 'aggregate_fingerprints' in the run_audit.json alpha_memory section, using aggregate_fingerprint_id (never phi_id) and AGGREGATE_FINGERPRINT_VERSION (never PHI_EDGE_IDENTITY_VERSION) -- no artifact/consumer can mistake it for the primary identity.",
+    "arithmetic_unchanged": "tests/test_alpha_memory_phi_identity.py::test_aggregate_fingerprint_arithmetic_is_unchanged_from_step1 proves the hash formula is byte-identical to Step 1's original computation.",
+    "real_data_confirmation": "Real NVDA pair (2f8ee897 vs c9abf687): 0 of 6/5 aggregate fingerprints matched (same 0% finding as Step 1/1.5), while 2 atomic phi edges DID match -- direct proof that whole-Alpha aggregate matching materially understates real recurrence relative to atomic matching."
+  },
+
+  "cross_run_reader_changes": {
+    "primary_matching_unit": "find_prior_phi_edge_observations() now matches on atomic phi_id -- historical matching no longer requires an entire Alpha edge-set to agree.",
+    "new_functions": [
+      "load_phi_edges_for_run -- atomic phi per run (replaces Step 1's load_phi_structures_for_run for primary matching)",
+      "load_aggregate_fingerprints_for_run -- secondary, whole-Alpha diagnostic (renamed from Step 1's same function)",
+      "find_prior_phi_edge_observations -- atomic cross-run matching (renamed/retargeted from Step 1's find_prior_phi_observations)",
+      "summarize_phi_edge_history -- per-atomic-phi historical summary (renamed/retargeted from Step 1's summarize_phi_history)",
+      "build_phi_structures -- orchestrates identity + history into one combined record per atomic phi (new)",
+      "summarize_alpha_memory -- per-Alpha descriptive rollup, explicitly never a score (new)",
+      "detect_alpha_attribution_variance -- audit-only diagnostic (new)",
+      "detect_edge_type_variance -- audit-only diagnostic (new)"
+    ],
+    "unchanged": "find_ticker_run_ids (ticker-scoped run listing, current-run exclusion) -- behavior identical to Step 1."
+  },
+
+  "real_offline_verification": {
+    "method": "Same persisted NVDA x2 and MSFT x2 runs used throughout the audits. No new research, zero Provider/TradingAgents calls.",
+    "NVDA": {
+      "run_a": "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d", "run_b": "c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6",
+      "atomic_phi_count_a": 15, "atomic_phi_count_b": 6,
+      "atomic_exact_matches": 2,
+      "aggregate_fingerprint_count_a": 6, "aggregate_fingerprint_count_b": 5,
+      "aggregate_exact_matches": 0,
+      "alphas_with_at_least_one_atomic_match": ["A101", "A102"],
+      "qualitative_result": "ATOMIC MATCHING (2) > WHOLE-ALPHA AGGREGATE MATCHING (0) -- confirmed on real data, exactly the expected direction. Actual values reported, not manufactured."
+    },
+    "MSFT": {
+      "run_a": "07ddc074-9ab2-4b16-8957-acbf94012144", "run_b": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+      "atomic_phi_count_a": 1, "atomic_phi_count_b": 12,
+      "atomic_exact_matches": 0,
+      "aggregate_fingerprint_count_a": 1, "aggregate_fingerprint_count_b": 7,
+      "aggregate_exact_matches": 0,
+      "alphas_with_at_least_one_atomic_match": [],
+      "qualitative_result": "BOTH ZERO for this specific pair -- reported honestly, not smoothed over. Root cause (documented in Step 1.6): MSFT run_a (07ddc074) has only 1 edge with any alpha_ids attached at all, an independent data-quality/coverage limitation of that specific run predating this step, not a defect introduced by the atomic model. This pair does not demonstrate the expected qualitative improvement; the NVDA pair does."
+    },
+    "bonus_real_data_check_full_nvda_history": {
+      "description": "build_run_audit_payload() run against 2f8ee897 with the reader scanning ALL persisted NVDA runs (not just the one designated pair) -- the actual production behavior.",
+      "result": "15 current atomic phi tokens; alpha_memory_summary shows A001 1/2 matched, A101 1/5, A102 1/2, A103 2/4, A301 1/1, A501 0/1 historically matched against prior NVDA runs; 12 alpha_attribution_variance signals and 7 edge_type_variance signals detected across the full historical corpus -- substantially richer real recognition than the isolated 2-run comparison above, consistent with expectations for a reader that scans the complete persisted history rather than just one designated pair."
+    }
+  },
+
+  "instability_diagnostics": {
+    "alpha_attribution_variance": {
+      "definition": "For the same (ticker, source, edge_type, target), reports every distinct alpha_ids set observed across a ticker's persisted runs and which run_id(s) produced each variant.",
+      "audit_only_guarantees": "No merging, no equivalence inference, no scoring, no penalty, no reinforcement -- verified by tests/test_alpha_memory_history_reader.py::test_alpha_attribution_variance_is_detected_and_does_not_merge_phi_ids (both variants remain listed with their own phi_ids; no field labels one variant 'correct').",
+      "real_data_result": "12 signals detected scanning the complete real, persisted NVDA run history."
+    },
+    "edge_type_variance": {
+      "definition": "For the same (ticker, source, target), reports every distinct edge_type observed across a ticker's persisted runs and which run_id(s) produced each variant.",
+      "audit_only_guarantees": "Same guarantees as above -- verified by test_edge_type_variance_is_detected_and_does_not_merge_phi_ids.",
+      "real_data_result": "7 signals detected scanning the complete real, persisted NVDA run history."
+    }
+  },
+
+  "proof_b1_b2_b4_conflict_unchanged": {
+    "architectural_guarantee": "comqutor_alpha/memory/*.py remains never imported by activation_scorer_v2.py, alpha_level_classifier.py, conflict_detector.py, or conflict_admissibility.py -- re-verified by test_memory_package_never_imported_by_activation_or_conflict_modules after this step's rewrite.",
+    "integration_guarantee": "test_alpha_memory_instability_signals_are_detected_but_never_change_official_sections constructs a real attribution-variance case (an extra alpha_id added to a duplicated run) and asserts activation_summary/conflict_summary/audit_validation are byte-identical to what they would be without alpha_memory present.",
+    "full_regression_sweep": "tests/test_b4_activation_level_alignment.py, test_b2_admissibility_integration.py, test_conflict_admissibility.py, test_conflict_detector.py, test_evidence_stance_integration.py, test_activation_scorer_v2.py -- all pass exactly as before this step (431 passed across the full 14-file sweep, no new failures)."
+  },
+
+  "db_migration": {
+    "required": false,
+    "reasoning": "Unchanged from Step 1 -- every input (edges/alpha_ids/edge_type from structure_graph.json, taxonomy fields from the vocabulary snapshot, ticker/created_at from metadata.json) is already persisted for every run. No new column, table, or migration added or needed."
+  },
+
+  "files_changed": {
+    "rewritten_production_modules": [
+      "comqutor_alpha/memory/phi_identity.py -- PHI_EDGE_IDENTITY_VERSION (new primary), AGGREGATE_FINGERPRINT_VERSION (renamed from Step 1's PHI_IDENTITY_VERSION, arithmetic unchanged), compute_phi_edges (new, primary), compute_aggregate_fingerprints (renamed from compute_phi_structures)",
+      "comqutor_alpha/memory/history_reader.py -- rewritten around atomic edge matching as primary; adds detect_alpha_attribution_variance, detect_edge_type_variance, build_phi_structures, summarize_alpha_memory"
+    ],
+    "modified_production_files": [
+      "comqutor_alpha/api/routes_research.py -- _alpha_memory_section() rewritten to expose identity_model, phi_structures (atomic+history combined), alpha_memory_summary, aggregate_fingerprints, instability_signals; new imports; call site now also passes ticker"
+    ],
+    "rewritten_test_files": [
+      "tests/test_alpha_memory_phi_identity.py -- 16 tests (was 12), covering the full atomic-edge model plus aggregate-fingerprint separation",
+      "tests/test_alpha_memory_history_reader.py -- 13 tests (was 9), covering atomic cross-run matching, alpha-level summary, and both instability diagnostics"
+    ],
+    "modified_test_files": [
+      "tests/test_run_audit_v2.py -- 3 existing alpha_memory tests revised for the new output shape; 1 new test added for instability-signal detection + non-interference proof (26 tests total in this file, was 25)"
+    ],
+    "regenerated_artifacts_offline_zero_cost": [
+      "outputs/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/run_audit.json (additive fields only, no new Provider/TradingAgents call)",
+      "outputs/runs/c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6/run_audit.json (same)"
+    ]
+  },
+
+  "tests": {
+    "new_or_revised_tests_total": 33,
+    "new_or_revised_tests_passed": 33,
+    "new_or_revised_tests_failed": 0,
+    "full_targeted_sweep": "431 passed across test_run_audit_v2.py + both alpha_memory test files + B4/B2/Conflict/ActivationV2/EvidenceStance/EntityExposure/AlphaDisplay/OfflineReplay/RegressionReportV3/EvidenceReviewV2 (14 files) -- only the same 13 pre-existing, already-documented evidence_review_v2.json schema-stripping failures remain, unrelated to this step.",
+    "proof_points_covered": {
+      "1_same_edge_same_phi": "test_same_ticker_alpha_edge_across_two_runs_produces_the_same_atomic_phi_id",
+      "2_different_ticker": "test_different_ticker_produces_different_phi_id",
+      "3_different_alpha": "test_different_alpha_id_produces_different_phi_id",
+      "4_different_edge_type": "test_different_edge_type_produces_different_phi_id",
+      "5_different_source_or_target": "test_different_source_or_target_produces_different_phi_id",
+      "6_taxonomy_mismatch": "test_taxonomy_version_mismatch_produces_different_phi_id",
+      "7_n_edges_n_tokens": "test_one_alpha_with_n_qualifying_edges_produces_n_atomic_phi_tokens",
+      "8_subset_match_despite_differing_graph": "test_find_prior_phi_edge_observations_matches_a_subset_even_when_alpha_graph_differs",
+      "9_aggregate_differs_atomic_matches": "test_aggregate_fingerprints_differ_while_atomic_phi_still_matches",
+      "10_current_run_excluded": "test_find_ticker_run_ids_excludes_current_run_and_filters_by_ticker",
+      "11_alpha_variance_no_merge": "test_alpha_attribution_variance_is_detected_and_does_not_merge_phi_ids",
+      "12_edge_type_variance_no_merge": "test_edge_type_variance_is_detected_and_does_not_merge_phi_ids",
+      "13_14_15_diagnostics_dont_change_activation_alpha_level_conflict": "test_alpha_memory_instability_signals_are_detected_but_never_change_official_sections (test_run_audit_v2.py)",
+      "16_modulation_flag_remains_false": "assert alpha_memory['activation_modulation_applied'] is False -- present in every relevant test",
+      "17_deterministic_repeated_execution": "test_repeated_execution_is_deterministic (both phi_identity and history_reader test files)"
+    }
+  }
+}

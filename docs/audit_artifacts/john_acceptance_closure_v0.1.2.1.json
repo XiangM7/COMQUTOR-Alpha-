@@ -1,0 +1,335 @@
+{
+  "release": "v0.1.2.1",
+  "task": "John Item 10 -- Final v0.1.2.1 Acceptance Closure",
+  "final_selected_run_ids": {
+    "NVDA": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+    "QQQ": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+    "MSFT": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+    "SNDK": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+    "TSM": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+    "AMD": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+  },
+  "ticker_consistency": {
+    "pass_count": 6,
+    "required": 6,
+    "status": "PASS",
+    "detail": {
+      "NVDA": {
+        "expected_run_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+        "consistent_across_sources": true
+      },
+      "QQQ": {
+        "expected_run_id": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+        "consistent_across_sources": true
+      },
+      "MSFT": {
+        "expected_run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+        "consistent_across_sources": true
+      },
+      "SNDK": {
+        "expected_run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+        "consistent_across_sources": true
+      },
+      "TSM": {
+        "expected_run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+        "consistent_across_sources": true
+      },
+      "AMD": {
+        "expected_run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+        "consistent_across_sources": true
+      }
+    },
+    "sources_checked": [
+      "qa_closure_index.json (final_v0_1_2_1_production_e2e_r2)",
+      "a4_regression_runner_report.json (final r2 block)",
+      "final_six_ticker_production_e2e_v0.1.2.1_r2.json",
+      "item6_a2_artifact_completeness.json (r2 block)"
+    ]
+  },
+  "fresh_e2e_proof": {
+    "NVDA": {
+      "fresh_production_e2e": true,
+      "run_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+      "provenance": "Step 11 replacement run (genuine new dispatch, dedup_hit_detected=false)",
+      "evidence": "step11_provider_health_and_rerun_v0.1.2.1.json reruns.NVDA; real per-ticker provider_attempts=568/provider_successes=475 in final_six_ticker_production_e2e_v0.1.2.1_r2.json semantic_runtime_health.per_ticker_detail.NVDA"
+    },
+    "QQQ": {
+      "fresh_production_e2e": true,
+      "run_id": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+      "provenance": "Step 10 original run, retained unchanged in Step 11 (no consistency defect found; real post-credit-topup TradingAgents completion)",
+      "evidence": "final_six_ticker_production_e2e_v0.1.2.1.json call_accounting.tradingagents (post-topup batch, 5/5 succeeded); per-ticker provider_call_count=560, accepted=482/fallback=40/rejected=4"
+    },
+    "MSFT": {
+      "fresh_production_e2e": true,
+      "run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+      "provenance": "Step 11 replacement (force_refresh after a dedup non-execution hit)"
+    },
+    "SNDK": {
+      "fresh_production_e2e": true,
+      "run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+      "provenance": "Step 10 original, retained"
+    },
+    "TSM": {
+      "fresh_production_e2e": true,
+      "run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+      "provenance": "Step 11 replacement (force_refresh after a dedup non-execution hit)"
+    },
+    "AMD": {
+      "fresh_production_e2e": true,
+      "run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+      "provenance": "Step 10 original, retained"
+    }
+  },
+  "artifact_completeness": {
+    "present": 54,
+    "required": 54,
+    "status": "PASS",
+    "cross_check_consistent_with_item6_a2": true,
+    "required_artifacts_per_ticker": [
+      "metadata.json",
+      "raw_agent_outputs.json",
+      "structured_agent_outputs.json",
+      "evidence_facts.json",
+      "alpha_matches.json",
+      "structure_graph.json",
+      "alpha_activations.json",
+      "conflicts.json",
+      "run_audit.json"
+    ]
+  },
+  "expected_alpha_hit_rate": {
+    "numerator": 12,
+    "denominator": 12,
+    "percent": 100.0,
+    "threshold_percent": 75.0,
+    "meets_threshold_numerically": true,
+    "approved_gold_alpha_expectations": 0,
+    "authority_status": "PROVISIONAL_DIAGNOSTIC_ONLY -- never approved gold (approved_gold_alpha_expectations == 0)",
+    "status": "DIAGNOSTIC"
+  },
+  "main_conflict_match": {
+    "requirement": ">=4/6",
+    "gold_evaluable_ticker_count": 0,
+    "status": "NOT_GOLD_EVALUABLE",
+    "formal_gate_reference": {
+      "requested_target": ">=4/6",
+      "current_evaluable_gold_cases": 0,
+      "status": "PENDING_GOLD_CONTRACT",
+      "use_for_current_production_acceptance": false,
+      "gate_result": null
+    },
+    "table": [
+      {
+        "ticker": "NVDA",
+        "run_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+        "expected_candidates": [
+          {
+            "expected_conflict": "A101__A304",
+            "authority_level": "DOCUMENTED_EXPECTATION",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": true
+          },
+          {
+            "expected_conflict": "A301__A304",
+            "authority_level": "PROVISIONAL_AI_PREDICTED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          }
+        ],
+        "observed": "A101__A304",
+        "any_candidate_is_gold_eligible": false
+      },
+      {
+        "ticker": "QQQ",
+        "run_id": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+        "expected_candidates": [
+          {
+            "expected_conflict": "A001__A501",
+            "authority_level": "DOCUMENTED_EXPECTATION",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          }
+        ],
+        "observed": "A101__A304",
+        "any_candidate_is_gold_eligible": false
+      },
+      {
+        "ticker": "MSFT",
+        "run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+        "expected_candidates": [
+          {
+            "expected_conflict": "A102__A304",
+            "authority_level": "REJECTED_OR_SUPERSEDED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          }
+        ],
+        "observed": "A101__A304",
+        "any_candidate_is_gold_eligible": false
+      },
+      {
+        "ticker": "SNDK",
+        "run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+        "expected_candidates": [
+          {
+            "expected_conflict": "A201__A304",
+            "authority_level": "REJECTED_OR_SUPERSEDED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          },
+          {
+            "expected_conflict": "A301__A304",
+            "authority_level": "PROVISIONAL_AI_PREDICTED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          }
+        ],
+        "observed": "A304__A601",
+        "any_candidate_is_gold_eligible": false
+      },
+      {
+        "ticker": "TSM",
+        "run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+        "expected_candidates": [
+          {
+            "expected_conflict": "A201__A304",
+            "authority_level": "REJECTED_OR_SUPERSEDED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          },
+          {
+            "expected_conflict": "A301__A304",
+            "authority_level": "PROVISIONAL_AI_PREDICTED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          }
+        ],
+        "observed": "A101__A304",
+        "any_candidate_is_gold_eligible": false
+      },
+      {
+        "ticker": "AMD",
+        "run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+        "expected_candidates": [
+          {
+            "expected_conflict": "A201__A304",
+            "authority_level": "REJECTED_OR_SUPERSEDED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          },
+          {
+            "expected_conflict": "A101__A304",
+            "authority_level": "PROVISIONAL_AI_PREDICTED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": true
+          },
+          {
+            "expected_conflict": "A301__A304",
+            "authority_level": "PROVISIONAL_AI_PREDICTED",
+            "valid_as_exact_regression_gold": false,
+            "textual_match_to_observed": false
+          }
+        ],
+        "observed": "A101__A304",
+        "any_candidate_is_gold_eligible": false
+      }
+    ],
+    "explanation": "0 of 6 tickers have any expected_main_conflict entry with valid_as_exact_regression_gold == true in regression_label_authority_audit_v0.1.2.1.json. Every candidate expected pair is one of: REJECTED_OR_SUPERSEDED (MSFT A102__A304; SNDK/TSM/AMD A201__A304), DOCUMENTED_EXPECTATION but downgraded to conditional with no approval/no bound reference run (NVDA A101__A304; QQQ A001__A501), or PROVISIONAL_AI_PREDICTED with no formal approval (NVDA/SNDK/TSM/AMD A301__A304 family; AMD A101__A304). 'Main Conflict non-null' (6/6) is a diagnostic technical fact, never substituted for a gold match here."
+  },
+  "evidence_review": {
+    "source_of_truth_path": "docs/audit_artifacts/evidence_review_summary_v2.json",
+    "alpha_match_accuracy": {
+      "correct": 166,
+      "total": 200,
+      "value_percent": 83.0,
+      "threshold_percent": 80.0,
+      "status": "PASS",
+      "eligibility_basis": "Alpha-match accuracy is not directionally filtered -- it is not a polarity/reversal metric."
+    },
+    "polarity_accuracy_eligible": {
+      "correct": 52,
+      "eligible_denominator": 61,
+      "raw_material_fit_denominator_reference": 62,
+      "excluded_ambiguous_count": 1,
+      "excluded_other_eligibility_count": 0,
+      "value_percent": 85.25,
+      "threshold_percent": 80.0,
+      "status": "PASS",
+      "eligibility_basis": "DIRECTIONALLY_CLEAR rows only -- see directional_eligibility."
+    },
+    "critical_reversal_eligible": {
+      "eligible_value": 0,
+      "raw_historical_value": 1,
+      "excluded_ambiguous_sample_ids": [
+        "holdout5-005"
+      ],
+      "target": 0,
+      "status": "PASS",
+      "note": "The raw historical reversal (see raw_h5_metrics.critical_reversal_sample_ids and critical_reversal_adjudication) is preserved for audit provenance but excluded from this acceptance metric because its formal adjudication outcome maps to AMBIGUOUS_DIRECTION, which is not Gold-eligible for the reversal gate under the directional eligibility contract."
+    },
+    "directional_eligibility_contract_version": "v1",
+    "john_approved": false
+  },
+  "call_accounting": {
+    "fresh_production_selected_runs": {
+      "tradingagents_successful_executions_in_final_baseline": 6,
+      "tradingagents_successful_executions_definition": "One genuine TradingAgents ticker completion per final selected run_id (NVDA/MSFT/TSM via Step 11 replacement; QQQ/SNDK/AMD via Step 10 original).",
+      "tradingagents_attempted_executions_across_establishing_lineage": 14,
+      "tradingagents_attempted_executions_definition": "Genuine TradingAgents dispatches (success or failure) across the full Step 10 + Step 11 lineage that produced the current final six run_ids. Step 10: 11 (1 success NVDA pre-topup + 5 payment-failed pre-topup + 5 success post-topup [QQQ,MSFT,SNDK,TSM,AMD]). Step 11: 3 (NVDA 1 success + MSFT 1 forced-retry success + TSM 1 forced-retry success). Excludes 2 Step-11 request-fingerprint dedup hits, which never reached TradingAgents.",
+      "provider_semantic_call_attempts": 3639,
+      "provider_semantic_call_attempts_definition": "Week2/B1 semantic LLM (Alpha Mapper + evidence_stance_classifier) call attempts, summed from each FINAL selected run's own persisted llm_semantic_manifest.json (final_six_ticker_production_e2e_v0.1.2.1_r2.json semantic_runtime_health.aggregate).",
+      "provider_successful_semantic_calls": 3080,
+      "provider_timeouts": 679,
+      "provider_transport_or_provider_errors": 80,
+      "provider_rate_limits": 0,
+      "provider_validation_failures": 24,
+      "provider_budget_exhaustions": 0
+    },
+    "additional_qa_retry_probe_calls": {
+      "health_probes": 11,
+      "health_probes_definition": "Step 11 live Provider health probe (10 representative alpha_classifier requests over real persisted claims) before deciding to rerun -- not a TradingAgents call, not part of any final run's own execution.",
+      "degraded_run_retries": 3,
+      "degraded_run_retries_definition": "NVDA/MSFT/TSM whole-ticker Step-11 reruns triggered by Step-10 semantic-coverage degradation (a real DeepSeek provider-error storm), already counted within tradingagents_attempted_executions_across_establishing_lineage above.",
+      "payment_failed_attempts": 5,
+      "payment_failed_attempts_definition": "Step-10 pre-credit-topup TradingAgents dispatches that failed instantly with INTERNAL_ERROR/402 Payment Required (account credit exhaustion, not a code defect).",
+      "request_dedup_non_executions": 2,
+      "request_dedup_non_executions_definition": "Step-11 MSFT/TSM first rerun attempts that returned the SAME run_id as their Step-10 degraded run in ~0.1s (research_lifecycle fingerprint-reuse dedup) -- never reached TradingAgents or Provider; corrected via an explicit force_refresh=True retry."
+    },
+    "headline_provider_calls": {
+      "value": 3639,
+      "definition": "Sum of provider_attempts across the 6 FINAL selected runs' own persisted manifests (Week2/B1 semantic LLM calls only). Does NOT include the 11 Step-11 health-probe calls (reported separately above as an additional QA/probe cost, not a final-run execution cost).",
+      "including_health_probes": 3650
+    },
+    "headline_tradingagents_calls": {
+      "successful_executions_in_final_baseline": 6,
+      "genuine_dispatch_attempts_across_lineage": 14,
+      "definition": "successful_executions_in_final_baseline = 1 execution per final selected run_id (6 total). genuine_dispatch_attempts_across_lineage additionally counts payment-failed and later-superseded-but-genuine dispatches across Step 10 + Step 11; excludes 2 dedup non-executions that never reached TradingAgents."
+    }
+  },
+  "contradiction_audit": {
+    "current_acceptance_contradiction_count": 0,
+    "contradictions": []
+  },
+  "gates_summary": {
+    "fresh_e2e_smoke_test": "PASS",
+    "ticker_consistency": "PASS",
+    "artifact_completeness": "PASS",
+    "expected_alpha_hit_rate": "DIAGNOSTIC",
+    "main_conflict_match": "NOT_GOLD_EVALUABLE",
+    "evidence_polarity_accuracy": "PASS",
+    "alpha_match_accuracy": "PASS",
+    "internal_qa_contradictions": "PASS"
+  },
+  "john_approved": false,
+  "john_approval_status": "PENDING_JOHN_APPROVAL",
+  "overall_engineering_acceptance": "PARTIAL — AUTHORITY BLOCKER ONLY",
+  "overall_engineering_acceptance_reason": "Every mechanically-controllable engineering/QA gate is a clean PASS (fresh E2E for NVDA+QQQ and all six; 6/6 ticker consistency; 54/54 artifact completeness; 85.25% eligible polarity accuracy >= 80%; 83.00% alpha match accuracy >= 80%; 0 internal QA contradictions). The two items that are not a clean numeric PASS -- Expected Alpha hit rate (reported DIAGNOSTIC, 12/12=100%) and Main Conflict match (NOT_GOLD_EVALUABLE, 0/6 tickers have an approved gold expected label) -- are blocked exclusively by the absence of John's formal approval of a gold Alpha/Main-Conflict reference set (see john_v0.1.2.1_approval_sheet.md Sections A/B), not by any missing engineering work, code defect, or unresolved QA issue.",
+  "production_semantic_code_changed": false,
+  "alpha_taxonomy_changed": false,
+  "canonical_conflict_ontology_changed": false,
+  "b1_b2_b4_thresholds_changed": false,
+  "provider_calls_this_closure_task": 0,
+  "tradingagents_calls_this_closure_task": 0,
+  "commit": false,
+  "push": false
+}

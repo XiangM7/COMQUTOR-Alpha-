@@ -92,6 +92,88 @@ def is_real_force_refresh_enabled() -> bool:
     return _parse_bool_env("COMQUTOR_REAL_FORCE_REFRESH_ENABLED", default=False)
 
 
+def is_week2_llm_enabled() -> bool:
+    """Delegates to ``week2_llm.week2_llm_enabled()`` -- the single existing
+    source of truth for ``COMQUTOR_WEEK2_LLM_ENABLED`` -- never re-parsed
+    independently here."""
+    from comqutor_alpha.structure_engine.week2_llm import week2_llm_enabled
+
+    return week2_llm_enabled()
+
+
+def is_week2_semantic_provider_ready() -> bool:
+    """Presence-only check that Week2's own resolved LLM provider/model are
+    configured and that provider's API-key credential is present in the
+    server process environment. Mirrors
+    ``week2_llm.build_server_week2_llm_gateway``'s own provider/model
+    resolution exactly (``COMQUTOR_WEEK2_LLM_PROVIDER``/
+    ``TRADINGAGENTS_LLM_PROVIDER`` and ``COMQUTOR_WEEK2_LLM_MODEL``/
+    ``TRADINGAGENTS_QUICK_THINK_LLM``) -- never a second, independently
+    invented resolution. The credential value itself is never read, logged,
+    or returned -- see ``is_provider_credential_present``."""
+    provider = (
+        os.environ.get("COMQUTOR_WEEK2_LLM_PROVIDER") or os.environ.get("TRADINGAGENTS_LLM_PROVIDER") or ""
+    ).strip()
+    model_name = (
+        os.environ.get("COMQUTOR_WEEK2_LLM_MODEL") or os.environ.get("TRADINGAGENTS_QUICK_THINK_LLM") or ""
+    ).strip()
+    if not provider or not model_name:
+        return False
+    return is_provider_credential_present(provider)
+
+
+def build_live_semantic_readiness() -> dict[str, Any]:
+    """Live-research readiness gate (operational safety fix: two fresh live
+    runs -- NVDA ``40bd7e3d-2759-45bc-97ec-8f1cf96c2266`` and SNDK
+    ``52c23371-c374-4064-a91c-20c599ffa79c`` -- were allowed to execute real
+    TradingAgents research while ``COMQUTOR_WEEK2_LLM_ENABLED`` was false.
+    Alpha Mapper's Pure-LLM semantic authority (see ``alpha_mapper.py``)
+    never falls back to deterministic scoring when the LLM tier is
+    unavailable, so every claim in both runs recorded
+    ``match_status="unavailable"`` (reason ``disabled``), producing zero
+    committed Alpha matches and zero Activation despite a fully completed,
+    expensive TradingAgents research session).
+
+    When real TradingAgents execution is enabled, live research additionally
+    requires Week2's own LLM classifier to be enabled AND its provider
+    credential/config to be present -- checked and enforced BEFORE
+    TradingAgents is ever dispatched, never after.
+
+    Returns ``{"ready": bool, "error": None | "LIVE_SEMANTIC_PIPELINE_NOT_READY"
+    | "LIVE_SEMANTIC_PROVIDER_NOT_READY", "message": str | None}``.
+
+    When real TradingAgents execution itself is disabled, this guard does
+    not apply -- existing offline/read-only/replay behavior is entirely
+    unaffected, so ``ready`` is reported ``True`` (there is nothing live for
+    this guard to protect) with ``error=None``.
+    """
+    if not is_real_tradingagents_enabled():
+        return {"ready": True, "error": None, "message": None}
+
+    if not is_week2_llm_enabled():
+        return {
+            "ready": False,
+            "error": "LIVE_SEMANTIC_PIPELINE_NOT_READY",
+            "message": (
+                "Real TradingAgents is enabled, but Week2 semantic LLM is disabled. "
+                "Live research was not started."
+            ),
+        }
+
+    if not is_week2_semantic_provider_ready():
+        return {
+            "ready": False,
+            "error": "LIVE_SEMANTIC_PROVIDER_NOT_READY",
+            "message": (
+                "Real TradingAgents and Week2 semantic LLM are both enabled, but the "
+                "Week2 semantic Provider is not configured/credentialed. Live research "
+                "was not started."
+            ),
+        }
+
+    return {"ready": True, "error": None, "message": None}
+
+
 def resolve_asset_type(ticker: str) -> str:
     """Resolve one canonical ticker through TradingAgents' CLI classifier."""
     try:
@@ -328,6 +410,9 @@ __all__ = [
     "is_real_force_refresh_enabled",
     "is_provider_credential_present",
     "is_anthropic_credential_present",
+    "is_week2_llm_enabled",
+    "is_week2_semantic_provider_ready",
+    "build_live_semantic_readiness",
     "resolve_asset_type",
     "validate_real_selected_analysts",
     "resolve_real_analysis_date",

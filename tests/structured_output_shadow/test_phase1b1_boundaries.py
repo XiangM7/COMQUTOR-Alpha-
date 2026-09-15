@@ -101,12 +101,19 @@ def test_existing_three_task_instructions_text_unchanged():
     intended extension point every prior task used -- this is not a Phase
     1B.1 boundary violation, so the set assertion below reflects that
     real, sanctioned addition rather than re-freezing the original three.
+
+    Step 5A (v0.1.2.1) execution-capacity repair legitimately grew it again,
+    to five: "alpha_classifier_batch", the batched sibling of
+    "alpha_classifier" (IDENTICAL semantic decision criteria, only the I/O
+    envelope changed -- see week2_llm.py's own instruction text), added
+    through the same extension point once more.
     """
     from comqutor_alpha.structure_engine.week2_llm import _TASK_INSTRUCTIONS
 
     assert set(_TASK_INSTRUCTIONS) == {
         "claim_batch_enrichment",
         "alpha_classifier",
+        "alpha_classifier_batch",
         "structure_extractor",
         "evidence_stance_classifier",
     }

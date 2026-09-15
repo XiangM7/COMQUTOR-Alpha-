@@ -1,0 +1,158 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Main Conflict Gold Adjudication -- attempt to close John's >=4/6 Main Conflict acceptance gate",
+  "adjudication_method": "Independent, frozen-evidence-only adjudication performed BEFORE inspecting the current v0.1.2.1 final selected six-run production outputs' Main Conflict values. Sources consulted: (1) COMQUTOR_Alpha_Development_Plan_v1.0.docx section 12 golden test case table (extracted directly from the docx XML, SHA-256 cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9 per development_plan_v1.0_reference_index.md); (2) comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml (current authoritative label file, per-ticker run_bound_expectations); (3) comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml conflict_alphas relations (canonical legality); (4) docs/specs/product_decisions_and_unknowns.md PD-017 (MSFT A102__A304 rejection); (5) docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json (existing authority classification, cross-checked, not re-litigated).",
+  "candidate_criteria": [
+    "1. Must be a legal canonical conflict pair (non-empty conflict_alphas relation in alpha_taxonomy_v1.yaml).",
+    "2. Must not be rejected/superseded (e.g. PD-017, or a taxonomy-legality failure).",
+    "3. Must have both sides materially represented in FROZEN ticker-specific evidence -- i.e. an actual, already-frozen, run-bound historical observation, not merely a planning-time hypothesis.",
+    "4. Must satisfy the intended B2 conflict meaning (Bull structure vs Bear structure, taxonomy-declared).",
+    "5. Must be defensible independently of the final v0.1.2.1 production output -- sourced from Development Plan text, canonical taxonomy, or a frozen reference run that predates and is independent of the current final selected six-run set."
+  ],
+  "per_ticker_adjudication": {
+    "NVDA": {
+      "development_plan_documented_candidate": {
+        "pair": "A101__A304",
+        "source": "COMQUTOR_Alpha_Development_Plan_v1.0.docx section 12: \"NVDA ... Bull A101 vs Bear A304\"",
+        "canonical_legality": "LEGAL (A101 conflict_alphas includes A304, weight 0.9)",
+        "rejected": false,
+        "criterion_3_frozen_material_evidence": "NOT SATISFIED -- no frozen run has ever actually produced this pair as an observed conflict. It remains an untested planning-time hypothesis, downgraded by j2_provisional_regression_labels_v0.2.yaml to conditional_conflicts (not required_conflicts).",
+        "gold_eligible": false
+      },
+      "frozen_reference_run_candidate": {
+        "pair": "A301__A304",
+        "source": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml tickers.NVDA.run_bound_expectations: reference_run_id=e3eb3909-3744-4a02-9b32-b225cf6ef665, analysis_date=2026-08-11, observed_historical_main_conflict=A301__A304. This run is wholly independent of and predates the current v0.1.2.1 final selected six-run set.",
+        "canonical_legality": "LEGAL (A301 conflict_alphas includes A304, weight 0.85)",
+        "rejected": false,
+        "criterion_3_frozen_material_evidence": "SATISFIED -- this is an actual, already-frozen, run-bound historical observation: a real prior execution's own admitted conflict, not a hypothesis.",
+        "criterion_5_independent_of_final_output": "SATISFIED -- reference run e3eb3909 is a separate run from the current final NVDA run (a8d47429), generated earlier for a different evaluation purpose.",
+        "gold_eligible": true
+      },
+      "expected_main_conflict": "A301__A304",
+      "authority_basis": "FROZEN_REFERENCE_RUN (e3eb3909-3744-4a02-9b32-b225cf6ef665), PROVISIONAL_AI_PREDICTED label tier -- genuinely evidenced but never formally Product-Owner-approved.",
+      "rejected_alternatives": ["A101__A304 (Development-Plan-documented but never realized in any frozen evidence)"],
+      "gold_evaluable": true
+    },
+    "QQQ": {
+      "development_plan_documented_candidate": {
+        "pair": "A001__A501",
+        "source": "COMQUTOR_Alpha_Development_Plan_v1.0.docx section 12: \"QQQ ... Bull A001 vs Bear A501\"",
+        "canonical_legality": "LEGAL (A001 conflict_alphas includes A501, weight 0.85)",
+        "rejected": false,
+        "criterion_3_frozen_material_evidence": "NOT SATISFIED -- j2_provisional_regression_labels_v0.2.yaml tickers.QQQ.run_bound_expectations is explicitly null. No frozen reference run exists for QQQ at all.",
+        "gold_eligible": false
+      },
+      "expected_main_conflict": null,
+      "authority_basis": "NO_FROZEN_REFERENCE_EVIDENCE -- the only candidate is a Development-Plan planning-time hypothesis with zero frozen realized evidence.",
+      "rejected_alternatives": [],
+      "gold_evaluable": false
+    },
+    "MSFT": {
+      "development_plan_documented_candidate": {
+        "pair": "A102__A304",
+        "source": "COMQUTOR_Alpha_Development_Plan_v1.0.docx section 12: \"MSFT ... Bull A102 vs Bear A304\"",
+        "canonical_legality": "ILLEGAL -- A102 conflict_alphas == [] in alpha_taxonomy_v1.yaml. Not a canonical conflict pair.",
+        "rejected": true,
+        "rejection_authority": "PD-017 (docs/specs/product_decisions_and_unknowns.md): REJECTED_BY_INDEPENDENT_LLM_ADJUDICATION, not added to canonical taxonomy. Also carried in j2_provisional_regression_labels_v0.2.yaml tickers.MSFT.remove_while_undeclared.",
+        "gold_eligible": false
+      },
+      "expected_main_conflict": null,
+      "authority_basis": "REJECTED -- MSFT's only Development-Plan-documented candidate is formally rejected and canonically illegal. No other candidate exists (conditional_conflicts is empty for MSFT in the current label file).",
+      "rejected_alternatives": ["A102__A304 (REJECTED_OR_SUPERSEDED, PD-017)"],
+      "gold_evaluable": false
+    },
+    "SNDK": {
+      "development_plan_documented_candidate": null,
+      "development_plan_note": "SNDK does not appear in the Development Plan's section 12 golden test case table at all.",
+      "provisional_candidates": [
+        {
+          "pair": "A201__A304",
+          "canonical_legality": "ILLEGAL -- A201 conflict_alphas == [].",
+          "rejected": true,
+          "rejection_authority": "j2_provisional_regression_labels_v0.2.yaml tickers.SNDK.remove_while_undeclared."
+        },
+        {
+          "pair": "A301__A304",
+          "canonical_legality": "LEGAL",
+          "rejected": false,
+          "criterion_3_frozen_material_evidence": "NOT SATISFIED -- run_bound_expectations is null for SNDK. This is an unbound conditional_conflicts entry only, never realized by any frozen run."
+        }
+      ],
+      "expected_main_conflict": null,
+      "authority_basis": "NO_FROZEN_REFERENCE_EVIDENCE",
+      "rejected_alternatives": ["A201__A304 (illegal/rejected)"],
+      "gold_evaluable": false
+    },
+    "TSM": {
+      "development_plan_documented_candidate": null,
+      "development_plan_note": "TSM is named in the Development Plan's golden-ticker list but has no explicit section 12 table row.",
+      "provisional_candidates": [
+        {
+          "pair": "A201__A304",
+          "canonical_legality": "ILLEGAL -- A201 conflict_alphas == [].",
+          "rejected": true,
+          "rejection_authority": "j2_provisional_regression_labels_v0.2.yaml tickers.TSM.remove_while_undeclared."
+        },
+        {
+          "pair": "A301__A304",
+          "canonical_legality": "LEGAL",
+          "rejected": false,
+          "criterion_3_frozen_material_evidence": "NOT SATISFIED -- run_bound_expectations is null for TSM."
+        }
+      ],
+      "expected_main_conflict": null,
+      "authority_basis": "NO_FROZEN_REFERENCE_EVIDENCE",
+      "rejected_alternatives": ["A201__A304 (illegal/rejected)"],
+      "gold_evaluable": false
+    },
+    "AMD": {
+      "development_plan_documented_candidate": null,
+      "development_plan_note": "AMD is named in the Development Plan's golden-ticker list but has no explicit section 12 table row.",
+      "provisional_candidates": [
+        {
+          "pair": "A201__A304",
+          "canonical_legality": "ILLEGAL -- A201 conflict_alphas == [].",
+          "rejected": true,
+          "rejection_authority": "j2_provisional_regression_labels_v0.2.yaml tickers.AMD.remove_while_undeclared."
+        },
+        {
+          "pair": "A101__A304",
+          "canonical_legality": "LEGAL",
+          "rejected": false,
+          "criterion_3_frozen_material_evidence": "NOT SATISFIED -- run_bound_expectations is null for AMD; this is an unbound conditional_conflicts entry only."
+        },
+        {
+          "pair": "A301__A304",
+          "canonical_legality": "LEGAL",
+          "rejected": false,
+          "criterion_3_frozen_material_evidence": "NOT SATISFIED -- listed only under allowed_conflicts, explicitly 'never auto-promoted to required_conflicts without a complete, approved, version-locked AMD reference run (task section 8, AMD) -- none exists.'"
+        }
+      ],
+      "expected_main_conflict": null,
+      "authority_basis": "NO_FROZEN_REFERENCE_EVIDENCE",
+      "rejected_alternatives": ["A201__A304 (illegal/rejected)"],
+      "gold_evaluable": false
+    }
+  },
+  "summary": {
+    "gold_evaluable_ticker_count": 1,
+    "gold_evaluable_tickers": ["NVDA"],
+    "not_gold_evaluable_ticker_count": 5,
+    "not_gold_evaluable_tickers": ["QQQ", "MSFT", "SNDK", "TSM", "AMD"],
+    "not_gold_evaluable_reason_summary": "Per comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml's own header: 'NONE of the six tickers currently has a formally John-approved, artifact-complete, version-locked reference run.' Independently confirmed: run_bound_expectations is null for QQQ, MSFT, SNDK, TSM, and AMD. MSFT's only Development-Plan-documented candidate is additionally canonically illegal and formally rejected (PD-017). SNDK/TSM/AMD's only Development-Plan-adjacent candidate (A201__A304) is likewise canonically illegal and rejected. No fabricated, resurrected, or final-output-derived substitute was created for any of these five tickers."
+  },
+  "rejected_pairs_confirmed_non_canonical": {
+    "MSFT_A102__A304": "REJECTED_OR_SUPERSEDED (PD-017) -- remains rejected, not resurrected.",
+    "SNDK_A201__A304": "REJECTED_OR_SUPERSEDED -- remains rejected, not resurrected.",
+    "TSM_A201__A304": "REJECTED_OR_SUPERSEDED -- remains rejected, not resurrected.",
+    "AMD_A201__A304": "REJECTED_OR_SUPERSEDED -- remains rejected, not resurrected."
+  },
+  "canonical_ontology_modified": false,
+  "b1_b2_b4_semantics_modified": false,
+  "labels_derived_from_final_observed_main_conflict": false,
+  "labels_frozen_before_final_comparison": true,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false
+}

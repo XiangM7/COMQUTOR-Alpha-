@@ -1,0 +1,74 @@
+{
+  "benchmark_version": "alpha_conflict_gold.v1",
+  "benchmark_type": "external_analyst_gold",
+  "as_of_date": "2026-09-08",
+  "validation_mode_for_existing_runs": "RETROSPECTIVE_GOLD_VALIDATION",
+  "created_after_current_run_outputs": true,
+  "frozen": true,
+  "scope_statement": "This Gold Benchmark defines BOTH: (1) Expected Alpha Hit Gold, and (2) Main Conflict Gold, for the six tickers NVDA/QQQ/MSFT/SNDK/TSM/AMD. It is authored externally (analyst-provided expected sets), independent of the six FINAL_FRESH_SELECTED runs' own outputs, and is NOT derived from or copied from docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json (that file's own APPROVED_GOLD count remains zero and is untouched by this benchmark).",
+  "immutability_statement": "Once written, this file's content must not be silently changed after evaluation begins. Any correction requires a new version (alpha_conflict_gold.v2) rather than a silent edit to v1. Its SHA-256 is recorded in docs/audit_artifacts/v0_1_3_gold_validation.json/.md.",
+  "prospective_use_note": "The exact same frozen benchmark may be reused prospectively for a future six-ticker regression run without changing its labels -- freeze this file's SHA-256, run new research later, and compare the new outputs against this same file to obtain a genuinely blind/prospective result.",
+
+  "expected_alphas": {
+    "NVDA": [
+      {"alpha_id": "A101", "alpha_name": "AI Expansion"},
+      {"alpha_id": "A102", "alpha_name": "Inference Explosion"},
+      {"alpha_id": "A103", "alpha_name": "AI Infrastructure"},
+      {"alpha_id": "A201", "alpha_name": "Semiconductor Supercycle"},
+      {"alpha_id": "A301", "alpha_name": "Revenue Expansion"},
+      {"alpha_id": "A304", "alpha_name": "Multiple Compression"},
+      {"alpha_id": "A601", "alpha_name": "Narrative Momentum"}
+    ],
+    "QQQ": [
+      {"alpha_id": "A101", "alpha_name": "AI Expansion"},
+      {"alpha_id": "A103", "alpha_name": "AI Infrastructure"},
+      {"alpha_id": "A201", "alpha_name": "Semiconductor Supercycle"},
+      {"alpha_id": "A301", "alpha_name": "Revenue Expansion"},
+      {"alpha_id": "A304", "alpha_name": "Multiple Compression"},
+      {"alpha_id": "A601", "alpha_name": "Narrative Momentum"}
+    ],
+    "MSFT": [
+      {"alpha_id": "A101", "alpha_name": "AI Expansion"},
+      {"alpha_id": "A102", "alpha_name": "Inference Explosion"},
+      {"alpha_id": "A103", "alpha_name": "AI Infrastructure"},
+      {"alpha_id": "A301", "alpha_name": "Revenue Expansion"},
+      {"alpha_id": "A304", "alpha_name": "Multiple Compression"},
+      {"alpha_id": "A601", "alpha_name": "Narrative Momentum"}
+    ],
+    "SNDK": [
+      {"alpha_id": "A102", "alpha_name": "Inference Explosion"},
+      {"alpha_id": "A103", "alpha_name": "AI Infrastructure"},
+      {"alpha_id": "A201", "alpha_name": "Semiconductor Supercycle"},
+      {"alpha_id": "A301", "alpha_name": "Revenue Expansion"},
+      {"alpha_id": "A601", "alpha_name": "Narrative Momentum"}
+    ],
+    "TSM": [
+      {"alpha_id": "A101", "alpha_name": "AI Expansion"},
+      {"alpha_id": "A103", "alpha_name": "AI Infrastructure"},
+      {"alpha_id": "A201", "alpha_name": "Semiconductor Supercycle"},
+      {"alpha_id": "A301", "alpha_name": "Revenue Expansion"},
+      {"alpha_id": "A304", "alpha_name": "Multiple Compression"},
+      {"alpha_id": "A601", "alpha_name": "Narrative Momentum"}
+    ],
+    "AMD": [
+      {"alpha_id": "A101", "alpha_name": "AI Expansion"},
+      {"alpha_id": "A102", "alpha_name": "Inference Explosion"},
+      {"alpha_id": "A103", "alpha_name": "AI Infrastructure"},
+      {"alpha_id": "A201", "alpha_name": "Semiconductor Supercycle"},
+      {"alpha_id": "A301", "alpha_name": "Revenue Expansion"},
+      {"alpha_id": "A304", "alpha_name": "Multiple Compression"},
+      {"alpha_id": "A601", "alpha_name": "Narrative Momentum"}
+    ]
+  },
+
+  "expected_main_conflict": {
+    "NVDA": {"expected_main_conflict": "A101__A304", "expected_no_admitted_main_conflict": false},
+    "QQQ": {"expected_main_conflict": "A304__A601", "expected_no_admitted_main_conflict": false},
+    "MSFT": {"expected_main_conflict": "A301__A304", "expected_no_admitted_main_conflict": false},
+    "SNDK": {"expected_main_conflict": null, "expected_no_admitted_main_conflict": true},
+    "TSM": {"expected_main_conflict": "A101__A304", "expected_no_admitted_main_conflict": false},
+    "AMD": {"expected_main_conflict": "A101__A304", "expected_no_admitted_main_conflict": false}
+  },
+
+  "evaluator_authority_note": "Alpha 'hit' definition and hit-rate/aggregation arithmetic are NOT invented by this benchmark file -- they reuse, unmodified, comqutor_alpha.regression.regression_report_v3._detected_alphas() (a claim's Alpha counts as detected only at level in {active, dominant, regime_level}; candidate/blocked/ambiguous/unavailable never count) and comqutor_alpha.regression.authority_contract.apply_alpha_authority()/expected_alpha_gate() (per-ticker hit_rate = |gold ∩ detected| / |gold|; aggregate = macro-average of per-ticker hit rates across gold-evaluable tickers, exactly as regression_report_v3 already does for diagnostic expectations). Main-conflict matching reuses apply_main_conflict_authority() (exact string equality against the production system's own already-canonicalized conflict_id, sorted alpha_a<alpha_b per conflict_engine/conflict_schema.py -- never independently recanonicalized here). The SNDK NO_ADMITTED_MAIN_CONFLICT case is the one additive rule not present in apply_main_conflict_authority(): match = (actual admitted main conflict is None), applied only for this explicit null-expectation case."
+}

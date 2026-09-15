@@ -1,0 +1,945 @@
+{
+  "release": "v0.1.2.1",
+  "audit_type": "regression_label_authority",
+  "audit_task": "COMQUTOR Alpha v0.1.2.1 -- Step 1: Regression Label Authority Audit",
+  "generated_at_context": "read-only audit; no production code, labels, taxonomy, or QA metric was changed; no rerun; no commit/push",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "authority_definitions": {
+    "APPROVED_GOLD": "Explicitly approved by John/Product Owner or other formally authorized human; approval provenance exists; tied to a defined test case/reference input where applicable; not superseded; compatible with current canonical taxonomy.",
+    "DOCUMENTED_EXPECTATION": "Explicitly written in the Development Plan or similar product document, attributed to John/product expectations, but approval or reference-run provenance is incomplete/not formally frozen.",
+    "PROVISIONAL_AI_PREDICTED": "Generated/predicted by J2/J3/LLM or similar; the file itself declares provisional/AI-predicted/shadow status; no formal Product Owner approval. Must not be treated as exact production gold.",
+    "REJECTED_OR_SUPERSEDED": "A later Product Decision/adjudication explicitly rejected or replaced it.",
+    "UNKNOWN": "Source cannot be established confidently."
+  },
+  "expectation_type_definitions": {
+    "FROZEN_CASE_EXACT": "Applies to one specific fixed/frozen research input or reference run.",
+    "CONDITIONAL_TICKER_EXPECTATION": "Expected only if the run contains sufficient relevant evidence; not a per-run guarantee.",
+    "TICKER_WIDE_UNCONDITIONAL": "Claims every future run for this ticker must contain the Alpha/conflict regardless of research content -- methodologically suspicious unless explicit product authority supports it.",
+    "PROVISIONAL_PREDICTION": "An AI-generated expectation not approved as gold."
+  },
+  "canonical_conflict_pairs": [
+    {
+      "pair": "A101__A304",
+      "weight": 0.9
+    },
+    {
+      "pair": "A301__A304",
+      "weight": 0.85
+    },
+    {
+      "pair": "A001__A501",
+      "weight": 0.85
+    },
+    {
+      "pair": "A003__A501",
+      "weight": 0.85
+    },
+    {
+      "pair": "A601__A304",
+      "weight": 0.8
+    },
+    {
+      "pair": "A601__A501",
+      "weight": 0.8
+    }
+  ],
+  "canonical_conflict_pairs_source": "comqutor_alpha/alpha_library/alpha_loader.py:MANDATORY_CONFLICT_WEIGHTS, cross-verified against each Alpha's own conflict_alphas in the live-loaded alpha_taxonomy_v1.yaml",
+  "development_plan_golden_test_cases": {
+    "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+    "source_sha256": "cabf3381aaa633b7b88035ab6df2d7dac0def3d5ddd337f6384f23f4c439a8d9",
+    "section": "§12 Golden Test Cases and Definition of Done",
+    "golden_tickers_named": [
+      "NVDA",
+      "AMD",
+      "MSFT",
+      "AVGO",
+      "QQQ",
+      "SPY",
+      "TSM",
+      "SMCI",
+      "GOOGL",
+      "AMZN"
+    ],
+    "note": "Only NVDA, QQQ, and MSFT have an explicit table row with expected dominant alphas / expected main conflict. AMD, AVGO, SPY, TSM, SMCI, GOOGL, AMZN are named as golden tickers but have NO explicit expected-Alpha/expected-conflict values anywhere in the Development Plan. SNDK does not appear in the Development Plan at all.",
+    "exact_rows": [
+      {
+        "ticker": "NVDA",
+        "expected_dominant_alphas": [
+          "A101",
+          "A103",
+          "A201",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "expected_main_conflict": "Bull A101 vs Bear A304"
+      },
+      {
+        "ticker": "QQQ",
+        "expected_dominant_alphas": [
+          "A001",
+          "A003",
+          "A304",
+          "A501",
+          "A601"
+        ],
+        "expected_main_conflict": "Bull A001 vs Bear A501"
+      },
+      {
+        "ticker": "MSFT",
+        "expected_dominant_alphas": [
+          "A101",
+          "A102",
+          "A301",
+          "A304"
+        ],
+        "expected_main_conflict": "Bull A102 vs Bear A304"
+      }
+    ],
+    "internal_contradiction_flagged_by_pd017": "Development Plan §4 lists exactly six mandatory conflict pairs, none of which is A102 vs A304; the §12 golden table nonetheless names MSFT's expected main conflict as A102 vs A304 -- the only golden row not matching a §4 mandatory pair. PD-017 treats this as a likely drafting slip, not a deliberate decision."
+  },
+  "regression_label_files": {
+    "v0.1": {
+      "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+      "schema_version": "regression_labels.v1",
+      "label_version": "j2.provisional.v0.1",
+      "status": "provisional_ai_predicted",
+      "evaluation_mode": "shadow",
+      "evaluation_authority": "provisional",
+      "approved_by": null,
+      "approved_at": null,
+      "formal_product_owner_approval": "pending",
+      "self_declared_provenance": "\"Authored/authorized by the user as a provisional product judgment for the current development stage -- never John-approved, never formal gold, never final semantic accuracy.\"",
+      "still_the_default_used_by": "comqutor_alpha/regression/labels.py:DEFAULT_LABEL_PATH and evaluator.py's main_conflict_match computation (reads allowed_main_conflicts, a field that only exists in v0.1's schema)"
+    },
+    "v0.2": {
+      "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+      "schema_version": "regression_labels.v2",
+      "label_version": "j2.provisional.v0.2",
+      "status": "provisional_ai_predicted",
+      "evaluation_mode": "shadow",
+      "evaluation_authority": "provisional",
+      "approved_by": null,
+      "approved_at": null,
+      "formal_product_owner_approval": "pending",
+      "supersedes": null,
+      "explicit_statement": "\"NONE of the six tickers currently has a formally John-approved, artifact-complete, version-locked reference run -- so required_conflicts is correctly empty for every ticker in this file.\"",
+      "required_conflicts_per_ticker": {
+        "NVDA": [],
+        "QQQ": [],
+        "MSFT": [],
+        "SNDK": [],
+        "TSM": [],
+        "AMD": []
+      },
+      "used_by": "comqutor_alpha/regression/labels_v2.py + evaluation_contract.py, wired as an additional/parallel evaluation in scripts/run_regression.py -- does NOT replace v0.1's main_conflict_match metric"
+    },
+    "newer_replacement_found": false
+  },
+  "product_decisions": {
+    "PD-017": {
+      "title": "MSFT A102__A304 Canonical Conflict Taxonomy Adjudication",
+      "source": "User-authorized independent LLM product adjudication (Coding Agent). No human review performed. John did not personally review or approve this decision.",
+      "decision": "A102__A304 is not added to the canonical conflict taxonomy. A102 conflict_alphas remains []. Canonical set remains exactly the six MANDATORY_CONFLICT_WEIGHTS pairs.",
+      "verified_independently": "Confirmed directly from the live-loaded alpha_taxonomy_v1.yaml: A102.conflict_alphas == [].",
+      "required_resolution": "A future human Product Owner (John or delegate) may reopen with new formal evidence; until then A102__A304 must not be silently reintroduced."
+    },
+    "A201__A304_dedicated_decision": {
+      "exists": false,
+      "note": "No PD entry specifically adjudicates A201__A304. PD-017 §6 names it only as an analogous example of the same over-generalization risk it rejected for A102__A304, without a separate formal ruling. Its non-canonical status is nonetheless independently verifiable: A201.conflict_alphas == [] in the live taxonomy, and J2 v0.2 already removed it (remove_while_undeclared) for SNDK, TSM, and AMD identically."
+    }
+  },
+  "existing_regression_report_supporting_evidence": {
+    "path": "outputs/regression/regression_report.json",
+    "generated_at": "2026-08-19T19:51:38Z",
+    "label_version_used": "j2.provisional.v0.1",
+    "label_status_recorded_in_report": "provisional_ai_predicted",
+    "formal_product_owner_acceptance_recorded_in_report": "pending",
+    "undeclared_conflict_pairs_recorded_in_report": {
+      "MSFT": [
+        "A102__A304"
+      ],
+      "SNDK": [
+        "A201__A304"
+      ],
+      "TSM": [
+        "A201__A304"
+      ],
+      "AMD": [
+        "A201__A304"
+      ]
+    },
+    "observed_main_conflict_match_per_ticker": {
+      "NVDA": true,
+      "QQQ": false,
+      "MSFT": false,
+      "SNDK": false,
+      "TSM": false,
+      "AMD": false
+    },
+    "note": "Used only as supporting evidence per task instructions, not as authority. Confirms empirically that the currently-generated report is evaluated against v0.1 (provisional, unapproved) labels, and that it already self-flags the same undeclared pairs this audit independently found via the taxonomy and PD-017."
+  },
+  "tickers": {
+    "NVDA": {
+      "expected_alphas": [
+        {
+          "ticker": "NVDA",
+          "alpha_id": "A101",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "NVDA",
+          "alpha_id": "A103",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "NVDA",
+          "alpha_id": "A201",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "NVDA",
+          "alpha_id": "A301",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "NVDA",
+          "alpha_id": "A304",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "category_in_v0.2": "negative_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "NVDA",
+          "alpha_id": "A102",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas -- explicitly requires 'inference-specific demand or revenue evidence' before treated as dominant."
+        },
+        {
+          "ticker": "NVDA",
+          "alpha_id": "A601",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        }
+      ],
+      "expected_main_conflicts": [
+        {
+          "expected_conflict": "A101__A304",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+          "source_section": "§12 Golden Test Cases and Definition of Done (also reinforced at Week 4 Gate)",
+          "source_type": "development_plan",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": true,
+          "superseded": false,
+          "superseding_decision": null,
+          "expectation_type": "TICKER_WIDE_UNCONDITIONAL (as literally worded in the Development Plan; downgraded by J2 v0.2 to CONDITIONAL_TICKER_EXPECTATION -- see conditional_conflicts)",
+          "valid_as_exact_regression_gold": false,
+          "reason": "Development Plan wording (§12, 'Bull A101 vs Bear A304'; Week 4 Gate 'NVDA outputs A101 vs A304') is real and attributed to John's expectations, and the pair IS in the current canonical 6-pair set -- but it carries no approval signature/date, no bound reference run, and J2 v0.2 (the current label schema) explicitly demotes it from any 'required' status to merely conditional_conflicts. The one reference run v0.2 does bind for NVDA (e3eb3909-3744-4a02-9b32-b225cf6ef665) actually observed A301__A304, not A101__A304, which further weakens treating this as exact per-run gold."
+        },
+        {
+          "expected_conflict": "A301__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_section": "tickers.NVDA.conditional_conflicts / run_bound_expectations",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "reference_input_frozen": true,
+          "currently_canonical": true,
+          "superseded": false,
+          "superseding_decision": null,
+          "expectation_type": "FROZEN_CASE_EXACT (only for run e3eb3909-...; not a ticker-wide claim)",
+          "valid_as_exact_regression_gold": false,
+          "reason": "This is the pair the one bound NVDA reference run actually produced (observed_historical_main_conflict). It is a genuine, frozen single-run observation -- but the label file itself explicitly warns this is 'a single-run historical observation, not a claim that this run's full Alpha label set matches structural_expectations' and it has never been formally approved by John/Product Owner, so it cannot be promoted past PROVISIONAL_AI_PREDICTED on its own say-so."
+        }
+      ]
+    },
+    "QQQ": {
+      "expected_alphas": [
+        {
+          "ticker": "QQQ",
+          "alpha_id": "A001",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists. ETF-level ticker-general fact per the label file's own QQQ-specific comment."
+        },
+        {
+          "ticker": "QQQ",
+          "alpha_id": "A003",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists. ETF-level ticker-general fact per the label file's own QQQ-specific comment."
+        },
+        {
+          "ticker": "QQQ",
+          "alpha_id": "A304",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "negative_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "QQQ",
+          "alpha_id": "A501",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "negative_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "QQQ",
+          "alpha_id": "A101",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        },
+        {
+          "ticker": "QQQ",
+          "alpha_id": "A601",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        }
+      ],
+      "expected_main_conflicts": [
+        {
+          "expected_conflict": "A001__A501",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+          "source_section": "§12 Golden Test Cases and Definition of Done (also reinforced at Week 4 Gate)",
+          "source_type": "development_plan",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": true,
+          "superseded": false,
+          "superseding_decision": null,
+          "expectation_type": "TICKER_WIDE_UNCONDITIONAL (as literally worded); downgraded by J2 v0.2 to CONDITIONAL_TICKER_EXPECTATION",
+          "valid_as_exact_regression_gold": false,
+          "reason": "Real Development Plan provenance ('Bull A001 vs Bear A501'), pair is canonical today -- but no approval provenance, and J2 v0.2 leaves run_bound_expectations null for QQQ: there is no frozen reference run at all to test this against. v0.2 keeps it in conditional_conflicts, not required_conflicts."
+        }
+      ]
+    },
+    "MSFT": {
+      "expected_alphas": [
+        {
+          "ticker": "MSFT",
+          "alpha_id": "A101",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "MSFT",
+          "alpha_id": "A102",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists. Note: PD-017 rejected only the A102__A304 CONFLICT PAIR, not A102's standing as a structural positive Alpha for MSFT -- these are distinct claims and PD-017 does not touch this one."
+        },
+        {
+          "ticker": "MSFT",
+          "alpha_id": "A301",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "MSFT",
+          "alpha_id": "A304",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "development_plan + provisional_label_file",
+          "authority_level": "DOCUMENTED_EXPECTATION",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "negative_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "MSFT",
+          "alpha_id": "A103",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        },
+        {
+          "ticker": "MSFT",
+          "alpha_id": "A601",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        }
+      ],
+      "expected_main_conflicts": [
+        {
+          "expected_conflict": "A102__A304",
+          "source_file": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx; comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+          "source_section": "Development Plan §12 Golden Test Cases table; v0.1 tickers.MSFT.allowed_main_conflicts",
+          "source_type": "development_plan + provisional_label_file (v0.1, frozen/unchanged)",
+          "authority_level": "REJECTED_OR_SUPERSEDED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": false,
+          "superseded": true,
+          "superseding_decision": "PD-017 (docs/specs/product_decisions_and_unknowns.md) -- 'A102__A304 is not added to the canonical conflict taxonomy'; A102's conflict_alphas verified empty ([]) directly in alpha_taxonomy_v1.yaml.",
+          "expectation_type": "PROVISIONAL_PREDICTION (v0.1) -> REJECTED_OR_SUPERSEDED (current)",
+          "valid_as_exact_regression_gold": false,
+          "reason": "The only Development-Plan golden-case row that does not name one of the Plan's own §4 six mandatory pairs. PD-017 (an AI-adjudicated, user-authorized decision -- explicitly NOT reviewed or approved by John) rejected it, citing the Alpha definitions (A102's relations never target A304), the canonical taxonomy's own structural exclusion of A102 from all conflicts, and flags §12's MSFT row as a likely drafting slip. J2 v0.2 moved it to remove_while_undeclared. Directly verified against the live taxonomy: A102 conflict_alphas == []."
+        }
+      ]
+    },
+    "SNDK": {
+      "expected_alphas": [
+        {
+          "ticker": "SNDK",
+          "alpha_id": "A201",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "SNDK is absent from the Development Plan's golden-ticker list entirely -- zero Development Plan provenance. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "SNDK",
+          "alpha_id": "A301",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "SNDK is absent from the Development Plan. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "SNDK",
+          "alpha_id": "A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "negative_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "SNDK is absent from the Development Plan. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "SNDK",
+          "alpha_id": "A103",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        },
+        {
+          "ticker": "SNDK",
+          "alpha_id": "A601",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        }
+      ],
+      "expected_main_conflicts": [
+        {
+          "expected_conflict": "A201__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+          "source_section": "tickers.SNDK.allowed_main_conflicts (v0.1); remove_while_undeclared (v0.2)",
+          "source_type": "provisional_label_file",
+          "authority_level": "REJECTED_OR_SUPERSEDED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": false,
+          "superseded": true,
+          "superseding_decision": "No dedicated PD document (unlike MSFT/A102__A304's PD-017). Superseded structurally: A201's conflict_alphas verified empty ([]) directly in alpha_taxonomy_v1.yaml, and J2 v0.2 removed it (remove_while_undeclared). PD-017's own reasoning (§6) explicitly names A201__A304 as an example of the same over-generalization risk it rejected for A102__A304, without formally adjudicating it as its own numbered decision.",
+          "expectation_type": "PROVISIONAL_PREDICTION (v0.1) -> REJECTED_OR_SUPERSEDED (current, via direct taxonomy verification)",
+          "valid_as_exact_regression_gold": false,
+          "reason": "SNDK does not appear anywhere in the Development Plan's golden-ticker table or golden-ticker name list -- this expectation has zero Development Plan provenance, is purely a J2 v0.1 provisional inference, and is not a current canonical conflict pair."
+        },
+        {
+          "expected_conflict": "A301__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_section": "tickers.SNDK.conditional_conflicts",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": true,
+          "superseded": false,
+          "superseding_decision": null,
+          "expectation_type": "CONDITIONAL_TICKER_EXPECTATION",
+          "valid_as_exact_regression_gold": false,
+          "reason": "Canonical pair, but no frozen reference run exists for SNDK and no formal approval; v0.2 explicitly keeps it conditional, not required."
+        }
+      ]
+    },
+    "TSM": {
+      "expected_alphas": [
+        {
+          "ticker": "TSM",
+          "alpha_id": "A103",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "TSM is named in the Development Plan's golden-ticker list but has no explicit §12 table row -- zero Development Plan expected-alpha provenance. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "TSM",
+          "alpha_id": "A201",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "TSM has no Development Plan §12 table row. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "TSM",
+          "alpha_id": "A301",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "TSM has no Development Plan §12 table row. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "TSM",
+          "alpha_id": "A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "negative_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "TSM has no Development Plan §12 table row. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "TSM",
+          "alpha_id": "A101",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        },
+        {
+          "ticker": "TSM",
+          "alpha_id": "A601",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        }
+      ],
+      "expected_main_conflicts": [
+        {
+          "expected_conflict": "A201__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+          "source_section": "tickers.TSM.allowed_main_conflicts (v0.1); remove_while_undeclared (v0.2)",
+          "source_type": "provisional_label_file",
+          "authority_level": "REJECTED_OR_SUPERSEDED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": false,
+          "superseded": true,
+          "superseding_decision": "Same structural basis as SNDK's A201__A304 above -- no dedicated PD, but A201 conflict_alphas verified empty in taxonomy and removed in v0.2.",
+          "expectation_type": "PROVISIONAL_PREDICTION (v0.1) -> REJECTED_OR_SUPERSEDED (current, via direct taxonomy verification)",
+          "valid_as_exact_regression_gold": false,
+          "reason": "TSM is named in the Development Plan's golden-ticker list but has no explicit row in the §12 table -- zero Development Plan expected-conflict provenance. Purely a J2 v0.1 provisional inference, and not a current canonical pair."
+        },
+        {
+          "expected_conflict": "A301__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_section": "tickers.TSM.conditional_conflicts",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": true,
+          "superseded": false,
+          "superseding_decision": null,
+          "expectation_type": "CONDITIONAL_TICKER_EXPECTATION",
+          "valid_as_exact_regression_gold": false,
+          "reason": "Canonical pair, but no frozen reference run for TSM and no formal approval; v0.2 keeps it conditional only."
+        }
+      ]
+    },
+    "AMD": {
+      "expected_alphas": [
+        {
+          "ticker": "AMD",
+          "alpha_id": "A101",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "AMD is named in the Development Plan's golden-ticker list but has no explicit §12 table row -- zero Development Plan expected-alpha provenance. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "AMD",
+          "alpha_id": "A201",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "AMD has no Development Plan §12 table row. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "AMD",
+          "alpha_id": "A301",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "positive_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "AMD has no Development Plan §12 table row. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "AMD",
+          "alpha_id": "A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "negative_alphas",
+          "conditional_or_unconditional": "unconditional_structural",
+          "valid_as_exact_regression_gold": false,
+          "reason": "AMD has no Development Plan §12 table row. J2 v0.2 explicitly labels this a 'structural_expectations' entry -- a ticker-general exposure fact, not a per-run strict requirement. The label file itself warns this class of expectation 'must never be treated as a strict per-run active-Alpha requirement.' No formal Product Owner approval exists."
+        },
+        {
+          "ticker": "AMD",
+          "alpha_id": "A102",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        },
+        {
+          "ticker": "AMD",
+          "alpha_id": "A103",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        },
+        {
+          "ticker": "AMD",
+          "alpha_id": "A601",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "category_in_v0.2": "conditional_alphas",
+          "conditional_or_unconditional": "conditional",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 conditional_alphas."
+        }
+      ],
+      "expected_main_conflicts": [
+        {
+          "expected_conflict": "A201__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+          "source_section": "tickers.AMD.allowed_main_conflicts (v0.1); remove_while_undeclared (v0.2)",
+          "source_type": "provisional_label_file",
+          "authority_level": "REJECTED_OR_SUPERSEDED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": false,
+          "superseded": true,
+          "superseding_decision": "Same structural basis as SNDK/TSM -- A201 conflict_alphas verified empty in taxonomy; removed in v0.2.",
+          "expectation_type": "PROVISIONAL_PREDICTION (v0.1) -> REJECTED_OR_SUPERSEDED (current, via direct taxonomy verification)",
+          "valid_as_exact_regression_gold": false,
+          "reason": "AMD is named in the Development Plan's golden-ticker list but has no explicit §12 table row. Zero Development Plan provenance; purely a J2 v0.1 provisional inference; not a current canonical pair."
+        },
+        {
+          "expected_conflict": "A101__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_section": "tickers.AMD.conditional_conflicts",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": true,
+          "superseded": false,
+          "superseding_decision": null,
+          "expectation_type": "CONDITIONAL_TICKER_EXPECTATION",
+          "valid_as_exact_regression_gold": false,
+          "reason": "Canonical pair (shared globally with NVDA's row) but AMD itself has no Development Plan golden-case row naming this pair; purely a v0.1/v0.2 provisional inference with no frozen reference run."
+        },
+        {
+          "expected_conflict": "A301__A304",
+          "source_file": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+          "source_section": "tickers.AMD.allowed_conflicts",
+          "source_type": "provisional_label_file",
+          "authority_level": "PROVISIONAL_AI_PREDICTED",
+          "approved_by": null,
+          "approved_at": null,
+          "reference_run_id": null,
+          "reference_input_frozen": false,
+          "currently_canonical": true,
+          "superseded": false,
+          "superseding_decision": null,
+          "expectation_type": "PROVISIONAL_PREDICTION",
+          "valid_as_exact_regression_gold": false,
+          "reason": "v0.2 explicitly places this in the weakest 'allowed_conflicts' category (permitted to appear/reported when it does) and explicitly states it is 'never auto-promoted to required_conflicts without a complete, approved, version-locked AMD reference run' -- none exists."
+        }
+      ]
+    }
+  },
+  "summary": {
+    "approved_gold_alpha_expectations": 0,
+    "documented_expectations": 15,
+    "provisional_ai_predictions": 22,
+    "rejected_or_superseded": 0,
+    "unknown": 0,
+    "alpha_expectation_total_count": 37,
+    "main_conflict_authority_breakdown": {
+      "APPROVED_GOLD": 0,
+      "DOCUMENTED_EXPECTATION": 2,
+      "PROVISIONAL_AI_PREDICTED": 5,
+      "REJECTED_OR_SUPERSEDED": 4,
+      "UNKNOWN": 0
+    },
+    "main_conflict_expectation_total_count": 11,
+    "exact_main_conflict_gold_count": 0,
+    "exact_main_conflict_non_gold_count": 11,
+    "note": "0 of the 6 tickers currently has any expected main conflict qualifying as exact regression gold. 0 Alpha expectations qualify as exact per-run regression gold -- all current Alpha expectations are either structural/ticker-general (not per-run) or explicitly conditional."
+  }
+}

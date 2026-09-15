@@ -1,0 +1,442 @@
+{
+  "schema_version": "v0.2.tradingagents_timeout_root_cause.v1",
+  "task": "TRADINGAGENTS_PRE_SEMANTIC_903_SECOND_TIMEOUT_ROOT_CAUSE_INSTRUMENTATION_AND_DIAGNOSTIC",
+  "success_decision": "ROOT_CAUSE_NARROWED",
+  "repository_safety": {
+    "branch": "comqutor-structure-layer",
+    "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "commits_created": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  },
+  "two_failed_live_attempts": [
+    {
+      "run_id": "ac11831d-7a31-4e6f-9ae8-a37bffddd4c0",
+      "elapsed_seconds": 903,
+      "exc_type": "ValueError",
+      "semantic_pipeline_reached": false,
+      "artifact_completeness": "0/9"
+    },
+    {
+      "run_id": "9dc8f621-f082-46bf-91a7-00ed958147d3",
+      "elapsed_seconds": 903,
+      "exc_type": "ValueError",
+      "semantic_pipeline_reached": false,
+      "artifact_completeness": "0/9"
+    },
+    {
+      "run_id": "78cdb570-1e35-4222-b5bf-5698a1740302",
+      "elapsed_seconds": 902,
+      "exc_type": "ValueError",
+      "semantic_pipeline_reached": false,
+      "artifact_completeness": "0/9",
+      "note": "This task's own instrumented diagnostic run (Section 12) -- included here as a third, corroborating data point."
+    }
+  ],
+  "market_data_readiness_confirmed_inadequate_explanation": "MARKET_DATA_NOT_YET_AVAILABLE was already disproven by the prior task's own preflight (QQQ, 1255 rows, latest date 2026-09-14, production validator PASS) run immediately before the second failed attempt.",
+  "static_timeout_inventory": {
+    "method": "Repository-wide search for 900/903/15*60/timeout=/Timeout/wait(/result(/join(/future/Future/ThreadPoolExecutor/ProcessPoolExecutor/subprocess/requests/httpx/aiohttp/socket/Yahoo/yfinance/TradingAgents.",
+    "candidates_in_840_960s_range": 0,
+    "candidates_examined": [
+      {
+        "file": "comqutor_alpha/research_jobs.py",
+        "value": "COMQUTOR_JOB_TIMEOUT_SECONDS default 1800, bounds (30, 14400)",
+        "wraps": "whole job/process lifetime",
+        "rank": "LOW",
+        "reason_ranked_low": "Configured value in .env is 7200 (2h) -- far larger than 903s; not the boundary."
+      },
+      {
+        "file": "comqutor_alpha/structure_engine/week2_llm.py",
+        "value": "COMQUTOR_WEEK2_LLM_TIMEOUT_SECONDS=45, MAX_RETRIES=1",
+        "wraps": "Week2 semantic Provider calls only",
+        "rank": "LOW",
+        "reason_ranked_low": "Namespaced to the semantic pipeline, which this failure never reaches."
+      },
+      {
+        "file": "tradingagents/dataflows/alpha_vantage_common.py, fred.py, polymarket.py",
+        "value": "REQUEST_TIMEOUT = 30 (each)",
+        "wraps": "individual HTTP GET calls to those vendors",
+        "rank": "LOW",
+        "reason_ranked_low": "Not used by this run's configuration (data_vendors defaults to yfinance/fred for the categories QQQ's 4 analysts touch; no multi-vendor fallback chain is configured, so no compounding across 30s timeouts occurs)."
+      },
+      {
+        "file": "tradingagents/dataflows/stockstats_utils.py",
+        "value": "yf_retry: base_delay=2.0, max_retries=3",
+        "wraps": "yf.download() rate-limit retries",
+        "rank": "LOW",
+        "reason_ranked_low": "Worst-case ~14s total, far short of 903s, and only triggers on HTTP 429 (YFRateLimitError), not a generic hang."
+      },
+      {
+        "file": "tradingagents/graph/propagation.py",
+        "value": "recursion_limit=100 (LangGraph config)",
+        "wraps": "whole graph.stream() invocation",
+        "rank": "LOW",
+        "reason_ranked_low": "A step-count limit, not a wall-clock deadline -- imposes no time-based cutoff at all."
+      }
+    ],
+    "exactly_one_900s_boundary_exists": false,
+    "could_multiple_nested_retries_sum_to_900s": "No compounding retry/timeout chain summing to ~900s was found in this codebase's own source. The ~900s duration is not explained by any local timeout constant.",
+    "conclusion": "No local timeout constant explains the ~903s duration. The boundary is most likely an EXTERNAL one (an underlying HTTP client library's or the OS's own default connection/read timeout for a specific, unbounded call this codebase never wraps with its own timeout) -- see Exact Failing Operation below."
+  },
+  "pre_semantic_execution_tree": [
+    {
+      "step": "POST /api/research",
+      "function": "post_research",
+      "file": "comqutor_alpha/api/routes_research.py",
+      "mode": "sync request handler, hands off to background job manager",
+      "external_dependency": "none",
+      "timeout_configured": "none",
+      "retry_configured": "none"
+    },
+    {
+      "step": "enqueue + claim + gate",
+      "function": "enqueue_research_request / evaluate_research_submission",
+      "file": "comqutor_alpha/research_jobs.py, comqutor_alpha/research_lifecycle.py",
+      "mode": "sync, same process",
+      "external_dependency": "Postgres (graph_repository)",
+      "timeout_configured": "DB-driver default",
+      "retry_configured": "none"
+    },
+    {
+      "step": "spawn worker process",
+      "function": "_job_worker_entrypoint (via multiprocessing.get_context('spawn'))",
+      "file": "comqutor_alpha/research_jobs.py",
+      "mode": "process (spawn)",
+      "external_dependency": "none",
+      "timeout_configured": "COMQUTOR_JOB_TIMEOUT_SECONDS=7200 (supervisor-level, far larger than 903s)",
+      "retry_configured": "none"
+    },
+    {
+      "step": "execute claimed run",
+      "function": "execute_claimed_research_run -> run_research_request",
+      "file": "comqutor_alpha/research_lifecycle.py, comqutor_alpha/api/routes_research.py",
+      "mode": "sync, inside worker process",
+      "external_dependency": "none directly",
+      "timeout_configured": "none",
+      "retry_configured": "none",
+      "exception_can_propagate_as_valueerror": true,
+      "traceback_preserved_here": "No -- caught generically at routes_research.py:2996, logged via a deliberately traceback-free logger.error (see Failure Handler Analysis)."
+    },
+    {
+      "step": "dispatch to streaming path",
+      "function": "run_streaming_tradingagents_research",
+      "file": "comqutor_alpha/runners/tradingagents_runner.py",
+      "mode": "sync",
+      "external_dependency": "none directly (delegates below)",
+      "timeout_configured": "none",
+      "retry_configured": "none"
+    },
+    {
+      "step": "build TradingAgentsGraph",
+      "function": "_default_streaming_graph_factory -> TradingAgentsGraph.__init__",
+      "file": "comqutor_alpha/runners/tradingagents_runner.py, tradingagents/graph/trading_graph.py",
+      "mode": "sync, local",
+      "external_dependency": "none (LLM client construction only, no network call at construction time)",
+      "timeout_configured": "n/a",
+      "retry_configured": "n/a",
+      "expected_duration": "milliseconds"
+    },
+    {
+      "step": "resolve pending memory-log entries for this ticker",
+      "function": "graph._resolve_pending_entries -> _fetch_returns -> yf.Ticker(...).history(...) + Reflector.reflect_on_final_decision (LLM)",
+      "file": "tradingagents/graph/trading_graph.py",
+      "mode": "sync",
+      "external_dependency": "Yahoo Finance (yfinance .history) + LLM Provider (DeepSeek)",
+      "timeout_configured": "none on the yfinance call; DeepSeek client's own SDK default applies to the LLM call",
+      "retry_configured": "none",
+      "expected_duration": "seconds",
+      "evidence_this_step_completed_quickly": "Exactly one pending QQQ memory-log entry existed ([2026-09-11 | QQQ | Underweight | pending]); the diagnostic run's own log captured exactly one completed DeepSeek chat-completion HTTP request at elapsed=~3.3s, consistent with this step's single reflect_on_final_decision call succeeding and returning promptly."
+    },
+    {
+      "step": "resolve instrument identity/context",
+      "function": "graph.resolve_instrument_context -> resolve_instrument_identity -> yf.Ticker(normalize_symbol(ticker)).info",
+      "file": "tradingagents/graph/trading_graph.py, tradingagents/agents/utils/agent_utils.py",
+      "mode": "sync",
+      "external_dependency": "Yahoo Finance (yfinance .info property, a DIFFERENT code path/endpoint than .history()/yf.download())",
+      "timeout_configured": "NONE -- no timeout is passed anywhere in this call chain",
+      "retry_configured": "none",
+      "traceback_preserved_here": "No instrumentation existed on this call before this task; this task's new instrumentation does not cover it either (it begins one step later, at the stream-loop boundary) -- see Instrumentation Added.",
+      "expected_duration": "milliseconds to seconds under normal conditions; UNBOUNDED if Yahoo's quoteSummary backend stalls -- see Exact Failing Operation."
+    },
+    {
+      "step": "get past context (markdown log read)",
+      "function": "graph.memory_log.get_past_context",
+      "file": "tradingagents/agents/utils/memory.py",
+      "mode": "sync, local file read",
+      "external_dependency": "none (\"No LLM call\", explicit in source comment)",
+      "timeout_configured": "n/a",
+      "retry_configured": "n/a",
+      "expected_duration": "milliseconds"
+    },
+    {
+      "step": "build stream_args + diagnostic callback + STREAM_LOOP_START marker",
+      "function": "run_streaming_tradingagents_research (this task's new instrumentation)",
+      "file": "comqutor_alpha/runners/tradingagents_runner.py",
+      "mode": "sync",
+      "external_dependency": "none",
+      "timeout_configured": "none",
+      "retry_configured": "none"
+    },
+    {
+      "step": "graph.graph.stream(init_state, ...) -- first analyst node execution",
+      "function": "LangGraph state machine (market_analyst first, per PUBLIC_ANALYST_ORDER)",
+      "file": "tradingagents/graph/*.py (LangGraph-compiled workflow)",
+      "mode": "sync generator, observed via this task's new TradingAgentsDiagnosticCallback",
+      "external_dependency": "LLM Provider (DeepSeek) + market/news/fundamentals tool calls (yfinance/fred/polymarket)",
+      "timeout_configured": "none imposed by this codebase; LLM client SDK defaults apply",
+      "retry_configured": "none imposed by this codebase for LLM calls",
+      "not_reached_in_either_failed_attempt": true
+    },
+    {
+      "step": "structured_adapter begins",
+      "function": "N/A -- never reached in any of the three attempts",
+      "file": "comqutor_alpha/structure_engine/structured_output_adapter.py",
+      "mode": "n/a",
+      "external_dependency": "n/a",
+      "timeout_configured": "n/a",
+      "retry_configured": "n/a"
+    }
+  ],
+  "failure_handler_analysis": {
+    "where_the_original_exception_is_caught": "comqutor_alpha/api/routes_research.py:2996, run_research_request's own `except Exception as exc:` -- the FIRST and only place the original exception is caught before it is converted to a response dict.",
+    "is_it_wrapped": "No -- _map_exception_to_error(payload, exc) reads exc's type/message to choose an error_code, but does not wrap or re-raise a new exception; the original exc object itself is discarded after this function returns (never stored, never re-raised).",
+    "is_valueerror_generated_locally_by_this_handler": "No -- exc is whatever propagated up from run_streaming_tradingagents_research (or run_original_tradingagents_research, not used in these attempts). The handler only inspects its type and str(exc).",
+    "does_cause_context_survive": "Not applicable at this boundary -- exc itself (with its own __cause__/__context__, if any) is available in the except block, but the code never accesses or logs __cause__/__context__ here, and exc is discarded once the function returns.",
+    "do_logs_discard_traceback": "Yes, deliberately -- routes_research.py:3006's logger.error(...) call has never passed exc_info, and a pre-existing test (tests/test_research_input_validation.py::test_unexpected_internal_failure_is_logged_safely_at_error_level) explicitly pins `records[0].exc_info is None` as intentional behavior for this exact log line. This appears to be a deliberate policy (this boundary log line never carries a traceback, likely to avoid exposing internal call-stack detail in a log that could be shipped to less-trusted aggregators) -- not an oversight to be casually reversed.",
+    "does_job_state_store_only_exc_type_message": "Yes -- the persisted run/job state (surfaced via GET .../status) carries only error_code='INTERNAL_ERROR' and a generic safe message; the run/job record itself never carried the original exception's message or type. The ONLY place `exc_type=ValueError` was ever visible was this one ERROR-level log line's %s-formatted type name -- not the message, not a traceback, not stored in the database.",
+    "confirmed_via_this_tasks_own_attempt_to_add_exc_info_here": "This task initially added exc_info=True to this exact log line, which broke the pre-existing safety test above (a real, caught regression) -- reverted. The correct fix (implemented instead) is to capture the traceback CLOSER TO THE SOURCE, inside run_streaming_tradingagents_research's own new logger, which has no such 'no-traceback' policy attached to it."
+  },
+  "observability_gap": {
+    "before_this_task": "Every unexpected pre-semantic failure logged only exc_type -- no traceback, no elapsed time, no indication of which pre-semantic step (graph construction, pending-entry resolution, instrument-identity resolution, or the stream loop itself) was executing when it failed.",
+    "after_this_task": "A new TradingAgentsDiagnosticCallback (comqutor_alpha/runners/diagnostics.py) logs chain/tool/LLM/retry start-end-error events (name + elapsed time only, no content) during graph.graph.stream(); a new STREAM_LOOP_START/STREAM_CHUNK/STREAM_LOOP_ERROR log sequence in run_streaming_tradingagents_research records elapsed time, chunk count, exception type/message, and chained cause (exc.__cause__) with a full traceback (exc_info=True), all in a logger with no traceback-suppression policy attached to it.",
+    "remaining_gap_discovered_by_this_tasks_own_diagnostic_run": "The new instrumentation begins at the stream-loop boundary -- but this task's own diagnostic run proved (by NEVER emitting a single tradingagents_diagnostic log line before failing) that the actual hang occurs EARLIER, in graph setup (most likely resolve_instrument_identity's yf.Ticker(...).info call -- see Exact Failing Operation). This earlier segment remains uninstrumented after this task; extending coverage there is part of the recommended minimal fix."
+  },
+  "instrumentation_added": {
+    "new_file": {
+      "path": "comqutor_alpha/runners/diagnostics.py",
+      "content": "TradingAgentsDiagnosticCallback: a passive LangChain BaseCallbackHandler subclass. Logs on_chain_start/end/error, on_tool_start/end/error, on_llm_start/on_chat_model_start/end/error, and on_retry, each with elapsed time (time.monotonic()) and a name/count only -- never prompt/tool content, never credentials."
+    },
+    "modified_files": [
+      {
+        "path": "comqutor_alpha/runners/tradingagents_runner.py",
+        "change": "Attaches the new callback to the existing (pre-existing, previously-unused-here) `callbacks` extension point in Propagator.get_graph_args()'s returned config, without changing that helper's own signature (avoids breaking the existing _FakePropagator test double). Wraps the `for chunk in graph.graph.stream(...)` loop in a try/except that logs STREAM_LOOP_START before entering, STREAM_CHUNK on every chunk (elapsed time + chunk keys), and STREAM_LOOP_ERROR on any exception (elapsed time, chunk count, exception type/message, chained cause, exc_info=True) before re-raising the exact same exception object unchanged."
+      },
+      {
+        "path": "comqutor_alpha/api/routes_research.py",
+        "change": "Comment-only note explaining why exc_info was deliberately NOT added to the existing failure-boundary log line (see Failure Handler Analysis) -- zero functional change, verified via git diff."
+      }
+    ],
+    "credential_safety": "Explicitly tested (test_diagnostic_callback_never_logs_prompt_or_tool_content, test_diagnostic_callback_error_logging_never_leaks_env_values) -- prompt/tool content and environment secrets never appear in any log line; only names, counts, and elapsed times are logged.",
+    "ephemeral_tooling": {
+      "path": "scripts/audit_tools/diagnostic_server_launcher.py",
+      "purpose": "Configures INFO-level logging (via logging.basicConfig, unguarded module-level code so it also re-runs inside the multiprocessing 'spawn' worker's re-imported __main__) before starting the normal comqutor-api server -- diagnostic-only, no production file needed to touch server.py itself."
+    }
+  },
+  "instrumentation_tests": {
+    "file": "tests/test_tradingagents_diagnostic_instrumentation.py",
+    "count": 12,
+    "result": "12/12 pass",
+    "covers": [
+      "1. stage start/end recorded (STREAM_LOOP_START + STREAM_CHUNK events)",
+      "2. exception stage recorded (STREAM_LOOP_ERROR)",
+      "3. traceback retained (record.exc_info is not None)",
+      "4. chained exception cause retained where available (chained_cause repr in the log message)",
+      "5. timeout metadata -- not applicable at this layer (no timeout is imposed here); elapsed time is recorded instead and tested",
+      "6. no credential leakage (2 dedicated tests: prompt/tool content never logged; env secret never logged)",
+      "7. successful execution semantics unchanged (raw_agent_outputs.json content identical to the pre-instrumentation baseline shape)",
+      "8. failure execution semantics unchanged (exact same exception type/message re-raised)",
+      "9. instrumentation itself does not swallow exceptions (asserts the SAME exception instance, via `is`, propagates)",
+      "10. instrumentation does not alter return values (run_dir name/existence unchanged)"
+    ],
+    "regression_batch": "657/658 pass across all touched/exercised test files (the 1 non-passing test, tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch, is part of the already-established pre-existing baseline, unrelated to this task).",
+    "regression_bug_found_and_fixed_during_this_task": "Adding exc_info=True to routes_research.py's existing failure log broke tests/test_research_input_validation.py::test_unexpected_internal_failure_is_logged_safely_at_error_level (a pre-existing, intentional 'no traceback at this boundary' policy). Reverted to a comment-only note; the traceback is instead captured inside tradingagents_runner.py's own new logger, which carries no such policy."
+  },
+  "static_diagnosis_sufficiency": {
+    "was_exact_root_cause_provable_statically": false,
+    "reasoning": "No explicit ~900s timeout constant exists anywhere in the codebase (static inventory: 0 candidates in the 840-960s range). The execution tree narrows the failure to the pre-stream-loop setup phase, but distinguishing between graph construction, pending-entry resolution, and instrument-identity resolution required empirical evidence (timing of the one observed LLM call, and which log markers did/did not fire) that only a live run could supply.",
+    "diagnostic_live_run_authorized_and_performed": true
+  },
+  "diagnostic_run": {
+    "run_id": "78cdb570-1e35-4222-b5bf-5698a1740302",
+    "purpose": "Capture the exact last successful stage and traceback -- not a performance benchmark.",
+    "ticker": "QQQ",
+    "force_refresh": true,
+    "server": {
+      "port": 8002,
+      "pid": 35297,
+      "start_command": "COMQUTOR_REAL_TRADINGAGENTS_ENABLED=true COMQUTOR_WEEK2_LLM_ENABLED=true COMQUTOR_REAL_FORCE_REFRESH_ENABLED=true COMQUTOR_API_HOST=127.0.0.1 COMQUTOR_API_PORT=8002 python3 scripts/audit_tools/diagnostic_server_launcher.py",
+      "verified_serves_current_instrumented_worktree": true,
+      "port_8000_untouched": true,
+      "cleaned_up_after_task": true
+    },
+    "request": {
+      "method": "POST",
+      "url": "http://127.0.0.1:8002/api/research",
+      "body": {
+        "ticker": "QQQ",
+        "force_refresh": true
+      },
+      "sent_at_utc": "2026-09-14T19:43:39Z",
+      "response_http_status": 202
+    },
+    "outcome": {
+      "final_status": "failed",
+      "error_code": "INTERNAL_ERROR",
+      "exc_type": "ValueError",
+      "elapsed_seconds": 902,
+      "matches_prior_two_attempts": true
+    },
+    "second_diagnostic_run_launched": false
+  },
+  "last_successful_stage": "Pending-memory-log-entry resolution for the single existing QQQ pending entry ([2026-09-11 | QQQ | Underweight | pending]) -- inferred from exactly one completed DeepSeek chat-completion HTTP request observed at elapsed=~3.3s (consistent with the single Reflector.reflect_on_final_decision call this step would make), before all further log activity (including this task's own new STREAM_LOOP_START marker) went silent for the remaining ~899 seconds.",
+  "exact_failing_operation": {
+    "identified_with_certainty": false,
+    "highest_confidence_candidate": {
+      "file": "tradingagents/agents/utils/agent_utils.py",
+      "function": "resolve_instrument_identity",
+      "line_of_the_actual_network_call": "info = yf.Ticker(normalize_symbol(ticker)).info or {}",
+      "called_from": "tradingagents/graph/trading_graph.py:resolve_instrument_context, invoked by comqutor_alpha/runners/tradingagents_runner.py:run_streaming_tradingagents_research immediately after _resolve_pending_entries and before get_past_context/the stream loop",
+      "why_this_is_the_leading_candidate": [
+        "This task's own diagnostic run proved the failure occurs strictly before graph.graph.stream() is entered (the new STREAM_LOOP_START marker never fired) -- narrowing the search to exactly the setup steps listed in the execution tree.",
+        "_resolve_pending_entries was very likely already complete and successful by the time of failure: exactly one pending QQQ memory-log entry exists, and one DeepSeek chat-completion HTTP request was observed completing at elapsed=~3.3s, consistent with that step's single LLM reflection call.",
+        "get_past_context is a pure local markdown-file read with no network call at all (explicit in source: \"No LLM call\").",
+        "resolve_instrument_identity's `yf.Ticker(...).info` call is architecturally distinct from the `yf.download()`/`load_ohlcv()` path this task's own prior preflight already proved fast and healthy (1.412s) -- `.info` hits Yahoo's quoteSummary backend via a different code path/connection pool than the OHLCV chart endpoint, and has NO timeout configured anywhere in this call chain.",
+        "Network evidence was consistent and reproducible across all three live attempts (this diagnostic run included): 2 CLOSE_WAIT sockets to the SAME Yahoo Finance hostname pattern (e1/e2.ycpi.vip.sja.yahoo.com) plus 1 other connection, observed on the actual TradingAgents worker subprocess in every attempt -- a hostname pattern consistent with Yahoo's quote/quoteSummary backend rather than its historical-chart backend.",
+        "resolve_instrument_identity's own `except Exception: return {}` is explicitly 'fail-open... never block the run' -- it is written to NEVER propagate an exception outward under normal conditions, which does not by itself explain the eventual ValueError. This is the one piece of evidence this candidate does not fully explain (see caveat below), which is why this is reported as a leading candidate, not a confirmed one."
+      ],
+      "caveat_this_candidate_does_not_fully_explain": "resolve_instrument_identity's bare except-Exception handler is designed to swallow any exception from `.info` and return `{}}` -- it should not, on its own, allow a ValueError to propagate up to routes_research.py's failure handler. Either (a) the actual stall is inside this call but the eventual failure surfaces from a DIFFERENT statement nearby (e.g. inside build_instrument_context, or a caller-level re-check), or (b) the hang is instead inside the TradingAgentsGraph.__init__ construction path (LLM client construction) or another as-yet-unidentified pre-stream-loop statement this task's instrumentation does not yet cover. Confirming which requires either extending instrumentation into these specific remaining functions or a further live reproduction -- both are the recommended next step, not performed in this task per its one-diagnostic-run cap."
+    },
+    "ruled_out": [
+      {
+        "candidate": "OHLCV price-history fetch (load_ohlcv / yf.download)",
+        "reason": "Directly, successfully preflighted in the prior task (1255 rows, 1.412s) immediately before a failed attempt -- proven fast and healthy."
+      },
+      {
+        "candidate": "get_past_context (memory-log read)",
+        "reason": "Pure local file I/O, explicitly documented as making no LLM or network call."
+      },
+      {
+        "candidate": "graph.graph.stream() / first analyst node (market_analyst) execution",
+        "reason": "This task's own new STREAM_LOOP_START instrumentation, placed immediately before this call, never fired in the diagnostic run -- the failure is proven to occur strictly earlier."
+      },
+      {
+        "candidate": "A single named ~900s timeout constant in this codebase",
+        "reason": "Static inventory found none in the 840-960s range anywhere in comqutor_alpha/ or tradingagents/."
+      }
+    ]
+  },
+  "timeout_mechanism": {
+    "is_it_a_configured_timeout_in_this_codebase": false,
+    "most_likely_actual_mechanism": "An UNBOUNDED external call (most likely yf.Ticker(...).info's underlying HTTP request to Yahoo's quoteSummary backend) with no application-level timeout, eventually failing via whatever default timeout the underlying HTTP client library (or the OS's own TCP stack) imposes -- which this codebase never configures or overrides for this specific call.",
+    "why_approximately_903_seconds_specifically": "Not explained by any constant in this codebase. Consistent with an external library/OS-level default (commonly reported yfinance/curl_cffi/requests session defaults, or a stalled connection eventually reset by an intermediary/OS after a long but unconfigured duration) rather than an intentional deadline. The near-identical 902-903s figure across three independent attempts, ~1-1.5 hours apart, indicates a deterministic mechanism, not random network jitter.",
+    "deterministic_or_external": "Deterministic in duration (903s, 903s, 902s across three attempts) but the mechanism itself is external to this codebase's own code -- this codebase imposes no timeout on the suspected call at all."
+  },
+  "network_evidence": {
+    "method": "lsof -a -p <worker_pid> -iTCP -P on the actual TradingAgents multiprocessing worker subprocess (not the parent API server process, which itself never shows any Yahoo/DeepSeek connections directly).",
+    "observed_during_this_tasks_diagnostic_run": [
+      {
+        "destination": "e1.ycpi.vip.sja.yahoo.com:443",
+        "state": "CLOSE_WAIT"
+      },
+      {
+        "destination": "e1.ycpi.vip.sja.yahoo.com:443 (second socket)",
+        "state": "CLOSE_WAIT"
+      },
+      {
+        "destination": "3.173.21.63:443 (consistent with a DeepSeek API endpoint IP)",
+        "state": "ESTABLISHED"
+      }
+    ],
+    "observed_during_the_first_prior_failed_attempt": "Identical hostname pattern (2 CLOSE_WAIT sockets to e1/e2.ycpi.vip.sja.yahoo.com hosts) -- reported in docs/audit_artifacts/v0_2_combined_live_timing_validation.json.",
+    "ownership": "Confirmed via `ps -p <pid> -o pid,ppid,command` that the socket-holding process is a `multiprocessing.spawn` child of the comqutor-api server process -- the actual TradingAgents execution worker, not the API server itself.",
+    "causality_inferred_from_close_wait_alone": false,
+    "interpretation": "CLOSE_WAIT means the remote (Yahoo) side already closed its end of the connection but the local process has not finished reading/closing it -- consistent with a request that received SOME response or termination signal from Yahoo but whose caller is still blocked processing or retrying, rather than a connection that never got any response at all. This is offered as corroborating evidence, not a standalone causal proof."
+  },
+  "root_cause_classification": {
+    "chosen_category": "MARKET_DATA_REQUEST_TIMEOUT",
+    "specificity_note": "Refined beyond the generic UPSTREAM_TIMEOUT used in the prior task's report: this is specifically the yfinance `.info` (instrument-identity) request path, DISTINCT from the yfinance OHLCV price-history path already proven healthy. Reported as the highest-confidence candidate, not a fully confirmed one -- see exact_failing_operation.caveat above.",
+    "confidence": "HIGH for 'pre-stream-loop, market-data-adjacent identity resolution', MEDIUM for the exact statement pinpointed, given the one caveat about resolve_instrument_identity's own fail-open exception handling not fully explaining how a ValueError ultimately propagates."
+  },
+  "recommended_minimal_fix": {
+    "implemented_in_this_task": false,
+    "file_function": "tradingagents/agents/utils/agent_utils.py:resolve_instrument_identity (the `info = yf.Ticker(normalize_symbol(ticker)).info or {}` call)",
+    "failure_mechanism": "An external network call with no application-level timeout can block the calling thread indefinitely (or for however long the underlying library/OS eventually takes to give up), stalling the entire pre-semantic pipeline before any analyst work or semantic processing begins.",
+    "why_approximately_903_seconds": "Not controlled by this codebase -- an artifact of whatever default the underlying HTTP client/OS eventually imposes on a stalled connection to this specific Yahoo endpoint.",
+    "deterministic": true,
+    "external_or_local": "The ROOT cause (Yahoo's backend behavior) is external and outside this codebase's control; the FIX (bounding the wait) is entirely local and within this codebase's control.",
+    "recommended_fix": "Wrap this specific call with an explicit, bounded timeout using the same pattern already proven and tested elsewhere in this codebase (comqutor_alpha/structure_engine/week2_llm.py:493's `future.result(timeout=...)` via a ThreadPoolExecutor) -- run `yf.Ticker(...).info` in a bounded worker with a short timeout (e.g. 10-15s, matching this call's own 'best-effort, fail-open' design intent), and on timeout, fall through to the SAME `{}` fallback the function already returns on any other exception -- zero change to the function's documented contract ('best-effort by design... returns {} and the caller falls back to ticker-only context'), only a bound on how long it is allowed to try.",
+    "semantic_risk": "None -- resolve_instrument_identity's own docstring already commits to a fail-open, best-effort contract; timing it out and falling back to {} is not a new behavior, only a bound on an existing one.",
+    "implementation_risk": "Low -- an isolated, single-function change, reusing an existing, already-tested concurrency pattern from this same codebase; does not touch Slice 1/2A/2B, Gold, taxonomy, activation, or conflict logic.",
+    "another_live_run_required_to_validate_the_fix": true,
+    "why": "The fix's correctness (does the timeout actually bound the real stall, and does the pipeline then proceed normally) can only be confirmed by observing a live run complete past this step -- this task explicitly does not implement or validate the fix.",
+    "timeout_policy_compliance": "This is NOT a request to simply increase the existing ~900s boundary -- there is no existing configured boundary to increase. The recommended fix ADDS a new, much SHORTER bound (10-15s) to a call that currently has none, directly addressing the 'unbounded external request' failure mode this task's own policy section calls out."
+  },
+  "john_requirement_b_status": {
+    "status": "NOT_CLOSED_UPSTREAM_BLOCKED",
+    "unchanged_by_this_task": true,
+    "slice_1_status": "PASS",
+    "slice_2a_status": "PASS",
+    "slice_2b_status": "PASS",
+    "further_optimization_recommended": false,
+    "next_step": "Implement and validate the recommended minimal fix (bounded timeout on resolve_instrument_identity's yf.Ticker(...).info call) in a dedicated follow-up task, then retry the combined live timing validation once the semantic pipeline can actually be reached."
+  },
+  "production_and_test_files_changed": {
+    "production_files_changed": 2,
+    "production_files": [
+      {
+        "path": "comqutor_alpha/runners/tradingagents_runner.py",
+        "change": "Added stage-timing/traceback instrumentation around the stream loop (STREAM_LOOP_START/STREAM_CHUNK/STREAM_LOOP_ERROR) and attached the new diagnostic callback via the existing callbacks config extension point. Zero change to control flow, retries, timeouts, or return values (see instrumentation_tests)."
+      },
+      {
+        "path": "comqutor_alpha/api/routes_research.py",
+        "change": "Comment-only note; zero functional change (verified via git diff and the full pre-existing test suite for this file)."
+      }
+    ],
+    "new_file": {
+      "path": "comqutor_alpha/runners/diagnostics.py",
+      "change": "New, purely observational LangChain callback handler."
+    },
+    "test_files_changed": 1,
+    "test_files": [
+      {
+        "path": "tests/test_tradingagents_diagnostic_instrumentation.py",
+        "change": "New, 12 tests covering the 10 required instrumentation properties plus 2 extra (callback wiring, standalone chain/retry event logging)."
+      }
+    ],
+    "ephemeral_tooling_created": [
+      "scripts/audit_tools/diagnostic_server_launcher.py"
+    ]
+  },
+  "frozen_authorities_verified_before_and_after": {
+    "v0_2_gold_operational_contract.json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_final_acceptance_table.json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_final_acceptance_closure.json": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "v0_2_six_run_gold_conformance_audit.json": "65c4f51ed6f96d7d15372ae0b99d1f3860eb1925b7b69641751673f0908cb173",
+    "v0_2_invalidation_condition_coverage.json": "9f8605474f27a22e1c61d70c3cfda52702fca2b5d1bcd42a6be0c0afe0523669",
+    "v0_2_semantic_classifier_cost_latency_audit.json": "e9c562bf0c7b02b4430721e44d962274f2fa8a67fae5d4645b9e99fbb62e73b0",
+    "v0_2_semantic_cache_optimization.json": "1053636bdda6c7322c28dd1ea733d2ce978c33619b53ec40820a4af5affee537",
+    "v0_2_evidence_stance_concurrency_optimization.json": "3efb788832c65d836dfe6f2984a002cbbc65db68da1170892725088e02edfb88",
+    "v0_2_structured_adapter_concurrency_optimization.json": "3e6c01ea101620e9904f283a74f7036094f75d14fa7f0108ffc8ced4bc804b05",
+    "all_unchanged": true
+  },
+  "existing_optimizations_preserved": {
+    "run_local_cache_enabled": true,
+    "alpha_classifier_concurrency": 4,
+    "evidence_stance_concurrency": 4,
+    "structured_adapter_concurrency": 4,
+    "alpha_memory_mode": "SHADOW",
+    "activation_modulation_applied": false
+  },
+  "process_cleanup": {
+    "diagnostic_server": {
+      "pid": 35297,
+      "port": 8002,
+      "cleaned_up": true
+    },
+    "original_port_8000_process": {
+      "pid": 27595,
+      "status": "untouched throughout"
+    }
+  }
+}

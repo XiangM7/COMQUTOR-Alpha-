@@ -1,0 +1,2001 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Alpha-Level Display Normalization (Step 7)",
+  "schema_version": "alpha_level_display_normalization.v1",
+  "purpose": "Presentation/audit normalization of John's requested display vocabulary (candidate_active/active/capped_active/dominant/regime_level/blocked) on top of the existing, unmodified B4 activation authority. Does not change activation_score, B4 thresholds (50/70/86), B1 stance, B2 thresholds, Alpha Mapper semantics, or Step-6 evidence qualification.",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-08-27T21:38:10.427535+00:00",
+  "normalization_contract": {
+    "version": "alpha_display_normalization.v1",
+    "module": "comqutor_alpha/graph_engine/alpha_display_normalizer.py",
+    "function": "normalize_alpha_display_state / normalize_alpha_display_states",
+    "input": "one already-scored, already-B4-classified Activation v2 alpha entry (post alpha_level_classifier.classify_and_rebuild_collections) -- never raw evidence/claims",
+    "output_fields": [
+      "alpha_id",
+      "activation_score",
+      "authoritative_level",
+      "display_level",
+      "blocked",
+      "blocked_reason_codes",
+      "cap_reason_codes",
+      "display_explanation",
+      "ambiguous",
+      "normalization_contract_version"
+    ],
+    "recomputes_activation": false,
+    "rejudges_evidence": false
+  },
+  "source_authority": {
+    "b4_classifier": "comqutor_alpha.graph_engine.alpha_level_classifier (classify_alpha_level, classify_and_rebuild_collections) -- PRE-EXISTING, unmodified, wired into graph_engine/pipeline.py before this task started",
+    "b4_thresholds_unchanged": {
+      "active": 50.0,
+      "dominant": 70.0,
+      "regime_level": 86.0
+    },
+    "capped_active_pre_existing": true,
+    "blocked_orthogonal_shape_pre_existing": true
+  },
+  "inventory": [
+    {
+      "field": "qualified_level / target_level / is_blocked / blocked_from / blocked_reason_codes / diagnostic_reason_codes / activation_level / classification_version",
+      "file": "comqutor_alpha/graph_engine/alpha_level_classifier.py",
+      "producer": "classify_alpha_level / classify_and_rebuild_collections",
+      "consumer": "graph_engine/pipeline.py (writes into activation payload), api/routes_research.py, conflict_engine/conflict_detector.py (_structure_block), frontend/src/api/adapters.ts, frontend AlphaCard/ConflictCard",
+      "possible_values": {
+        "target_level/qualified_level": [
+          "candidate",
+          "active",
+          "dominant",
+          "regime_level"
+        ],
+        "activation_level": [
+          "candidate",
+          "active",
+          "capped_active",
+          "dominant",
+          "regime_level"
+        ],
+        "is_blocked": [
+          true,
+          false
+        ]
+      },
+      "semantic_meaning": "qualified_level is THE authoritative B4 final level. target_level is what the uncapped score alone would reach. activation_level is a presentation-only refinement adding capped_active. is_blocked/blocked_from/blocked_reason_codes are qualification-gate metadata, orthogonal to the four canonical levels.",
+      "authoritative_vs_presentation": "qualified_level/target_level/is_blocked/blocked_from/blocked_reason_codes: AUTHORITATIVE. activation_level: PRESENTATION-ONLY (module's own docstring/QA-Closure-v0.1.2-Item-4 comments confirm this explicitly).",
+      "currently_persisted": true,
+      "currently_exposed_to_api_ui": true,
+      "currently_tested": "tests/test_b4_activation_level_alignment.py (36 tests)"
+    },
+    {
+      "field": "status (raw, pre-classification)",
+      "file": "comqutor_alpha/graph_engine/activation_scorer_v2.py (score_alpha_v2, activation_status_band_v2)",
+      "producer": "score_alpha_v2",
+      "consumer": "OVERWRITTEN by classify_and_rebuild_collections in the real pipeline before any external consumer ever sees it (entry['status'] = classification.qualified_level). A caller that invokes score_alpha_v2/score_alpha_activations_v2 directly WITHOUT following up with classify_and_rebuild_collections (e.g. ad-hoc audit scripts, including this session's own Step 5A/Step 6 before/after scripts) will see this legacy value instead.",
+      "possible_values": [
+        "inactive",
+        "watch",
+        "active",
+        "dominant",
+        "regime_candidate"
+      ],
+      "semantic_meaning": "A LEGACY pre-B4-classifier band with DIFFERENT thresholds (30/50/70/85) and a DIFFERENT vocabulary (includes 'inactive'/'watch'/'regime_candidate', none of which exist in the B4 canonical vocabulary) than alpha_level_classifier's canonical bands (50/70/86, candidate/active/dominant/regime_level).",
+      "authoritative_vs_presentation": "LEGACY ALIAS -- superseded by qualified_level in the live pipeline. Flagged here per task section 3.3/3.5 (legacy alias, ambiguous terminology) -- NOT modified in Step 7 (out of scope; changing activation_scorer_v2.py's own status field/band function would touch B4-adjacent scoring code beyond presentation).",
+      "currently_persisted": "Only transiently, before classify_and_rebuild_collections overwrites it in the same in-memory payload.",
+      "currently_exposed_to_api_ui": false,
+      "currently_tested": "No dedicated test found; superseded before persistence in every real pipeline run."
+    },
+    {
+      "field": "candidate_active",
+      "file": "N/A -- searched exhaustively across comqutor_alpha/, frontend/src, tests/, docs/",
+      "producer": "none",
+      "consumer": "none",
+      "possible_values": "N/A",
+      "semantic_meaning": "No authoritative definition exists anywhere in this codebase for a state distinct from plain 'candidate'.",
+      "authoritative_vs_presentation": "NOT DEFINED. Prior investigation (B4_ACTIVATION_LEVEL_ALIGNMENT task) explicitly considered and rejected inventing one -- see alpha_level_classifier.py's CAPPED_ACTIVE docstring, frontend/src/api/types.ts's ACTIVATION_DISPLAY_LEVELS comment, and tests/test_b4_activation_level_alignment.py::test_i_candidate_shows_plain_candidate_no_authoritative_candidate_active_definition, all three independently confirming this same conclusion.",
+      "currently_persisted": false,
+      "currently_exposed_to_api_ui": false,
+      "currently_tested": "Negatively confirmed by the existing test above; also confirmed by this task's own test_case6."
+    },
+    {
+      "field": "capped_active",
+      "file": "comqutor_alpha/graph_engine/alpha_level_classifier.py (CAPPED_ACTIVE, _activation_level_for)",
+      "producer": "_activation_level_for (called from classify_alpha_level)",
+      "consumer": "conflict_detector._structure_block, frontend AlphaCard/ConflictCard (ACTIVATION_DISPLAY_LEVELS)",
+      "possible_values": [
+        "capped_active (a value of activation_level only, never of qualified_level/target_level/blocked_from)"
+      ],
+      "semantic_meaning": "Applies exactly when qualified_level=='active' AND is_blocked AND 'dominant' in blocked_from -- i.e. the Alpha's score/evidence would reach dominant (or regime_level) but an existing qualification ceiling held it at active.",
+      "authoritative_vs_presentation": "PRESENTATION-ONLY (explicit in the module's own docstring). Reused verbatim in Step 7 -- no new code needed for this label.",
+      "currently_persisted": true,
+      "currently_exposed_to_api_ui": true,
+      "currently_tested": "tests/test_b4_activation_level_alignment.py (multiple test_i_* cases)"
+    },
+    {
+      "field": "blocked / is_blocked, blocked_from, blocked_reason_codes, diagnostic_reason_codes",
+      "file": "comqutor_alpha/graph_engine/alpha_level_classifier.py",
+      "producer": "classify_alpha_level",
+      "consumer": "api/routes_research.py (blocked_alpha_count, entity-exposure invariant checks), conflict_detector, frontend",
+      "possible_values": {
+        "is_blocked": [
+          true,
+          false
+        ],
+        "blocked_from": [
+          "()",
+          "(dominant,)",
+          "(regime_level,)",
+          "(dominant, regime_level)"
+        ],
+        "blocked_reason_codes": [
+          "INSUFFICIENT_EVIDENCE",
+          "LOW_ENTITY_EXPOSURE",
+          "NO_LOCAL_STRUCTURE_SUPPORT",
+          "NO_TICKER_SPECIFIC_EVIDENCE"
+        ]
+      },
+      "semantic_meaning": "Already an orthogonal gating/reason dimension, separate from the four canonical levels -- exactly the shape task section 7 prefers, already implemented, no change needed.",
+      "authoritative_vs_presentation": "AUTHORITATIVE (is_blocked/blocked_from) plus a canonicalized presentation subset (blocked_reason_codes, mapped from diagnostic_reason_codes via a fixed, frozen 4-value table).",
+      "currently_persisted": true,
+      "currently_exposed_to_api_ui": true,
+      "currently_tested": "tests/test_b4_activation_level_alignment.py (test_b_*, test_e_*, test_i_* groups)"
+    },
+    {
+      "field": "cap_reason_codes (raw, activation_scorer_v2's own dominant-cap reasons)",
+      "file": "comqutor_alpha/graph_engine/activation_scorer_v2.py (_apply_caps)",
+      "producer": "score_alpha_v2",
+      "consumer": "alpha_level_classifier.classify_alpha_level (as dominant_cap_reason_codes input, read-only)",
+      "possible_values": [
+        "INSUFFICIENT_UNIQUE_EVIDENCE",
+        "INSUFFICIENT_AGENT_INDEPENDENCE",
+        "KEYWORD_ONLY_SUPPORT",
+        "NO_LOCAL_STRUCTURE_SUPPORT",
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "..."
+      ],
+      "semantic_meaning": "The FULL, uncanonicalized set of reasons a dominant-level cap applied -- a superset of what maps onto the 4 canonical blocked_reason_codes.",
+      "authoritative_vs_presentation": "AUTHORITATIVE, unchanged by Step 6 or Step 7.",
+      "currently_persisted": true,
+      "currently_exposed_to_api_ui": true,
+      "currently_tested": "tests/test_activation_scorer_v2.py"
+    }
+  ],
+  "candidate_active_definition": {
+    "status": "CANDIDATE_ACTIVE_REQUIRES_PRODUCT_DEFINITION",
+    "reasoning": "A dedicated prior investigation (B4_ACTIVATION_LEVEL_ALIGNMENT task) already asked this exact question and explicitly declined to invent a definition, permanently pinning that conclusion in tests/test_b4_activation_level_alignment.py::test_i_candidate_shows_plain_candidate_no_authoritative_candidate_active_definition and in frontend/src/api/types.ts's ACTIVATION_DISPLAY_LEVELS comment. Step 7 re-verified this is still true (grep across comqutor_alpha/, frontend/src, tests/, docs/) and did not override that deliberate precedent. display_level for a candidate-level Alpha remains exactly 'candidate'.",
+    "action_taken": "STOPPED implementing a distinct candidate_active state; reported as directed by task section 5."
+  },
+  "capped_active_definition": {
+    "status": "REUSED_EXACTLY_NO_NEW_CODE",
+    "rule": "display_level == 'capped_active' iff qualified_level == 'active' AND is_blocked AND 'dominant' in blocked_from (alpha_level_classifier._activation_level_for, pre-existing, unmodified).",
+    "invariant": "A genuinely dominant or regime_level Alpha is never downgraded to capped_active, even if itself blocked down from a still-higher target (e.g. dominant-blocked-from-regime_level stays plain 'dominant')."
+  },
+  "blocked_definition": {
+    "status": "REUSED_EXACTLY_NO_NEW_CODE",
+    "shape": "orthogonal: blocked (bool) + blocked_reason_codes (canonical 4-value subset) + cap_reason_codes (raw, uncanonicalized) exposed alongside display_level, never replacing it.",
+    "canonical_reason_codes": [
+      "NO_LOCAL_STRUCTURE_SUPPORT",
+      "INSUFFICIENT_EVIDENCE",
+      "LOW_ENTITY_EXPOSURE",
+      "NO_TICKER_SPECIFIC_EVIDENCE"
+    ]
+  },
+  "precedence": {
+    "rule": "regime_level > dominant > capped_active > active > candidate",
+    "confirmed_against_b4_model": true,
+    "implementation": "Implicit in alpha_level_classifier.classify_alpha_level's own Case A-D arbitration order (Case D checked before C before A/B) -- Step 7 does not reimplement or reorder this; normalize_alpha_display_state reads the already-arbitrated qualified_level/activation_level verbatim."
+  },
+  "truth_table": [
+    {
+      "row": "A",
+      "condition": "score >= 86, regime_gate_passed=True, no exposure block",
+      "authoritative_target_level": "regime_level",
+      "authoritative_qualified_level": "regime_level",
+      "is_blocked": false,
+      "display_level": "regime_level",
+      "blocked": false
+    },
+    {
+      "row": "B",
+      "condition": "70 <= score < 86, no dominant_cap_reason_codes, no exposure block",
+      "authoritative_target_level": "dominant",
+      "authoritative_qualified_level": "dominant",
+      "is_blocked": false,
+      "display_level": "dominant",
+      "blocked": false
+    },
+    {
+      "row": "C",
+      "condition": "50 <= score < 70, uncapped_score also < 70 (never targeted dominant)",
+      "authoritative_target_level": "active",
+      "authoritative_qualified_level": "active",
+      "is_blocked": false,
+      "display_level": "active",
+      "blocked": false
+    },
+    {
+      "row": "D",
+      "condition": "50 <= score < 70 but uncapped_score >= 70 and dominant_cap_reason_codes non-empty (or regime_gate failed while dominant also failed)",
+      "authoritative_target_level": "dominant or regime_level",
+      "authoritative_qualified_level": "active",
+      "is_blocked": true,
+      "display_level": "capped_active",
+      "blocked": true
+    },
+    {
+      "row": "E",
+      "condition": "score < 50",
+      "authoritative_target_level": "candidate",
+      "authoritative_qualified_level": "candidate",
+      "is_blocked": false,
+      "display_level": "candidate",
+      "blocked": false,
+      "note": "candidate_active never assigned -- see candidate_active_definition."
+    },
+    {
+      "row": "F",
+      "condition": "any of C/D/E above, blocked_reason_codes non-empty when is_blocked",
+      "authoritative_target_level": "n/a",
+      "authoritative_qualified_level": "n/a",
+      "is_blocked": "reflects underlying condition",
+      "display_level": "reflects underlying condition",
+      "blocked": "reflects underlying condition",
+      "note": "blocked is an orthogonal flag, never a fifth display_level."
+    },
+    {
+      "row": "G",
+      "condition": "zero qualifying evidence (activation_score forced to 0.0 by score_alpha_v2 when has_qualifying_evidence is False)",
+      "authoritative_target_level": "candidate",
+      "authoritative_qualified_level": "candidate",
+      "is_blocked": false,
+      "display_level": "candidate",
+      "blocked": false
+    },
+    {
+      "row": "H",
+      "condition": "score >= 50 (active-band) with an authoritative gating condition preventing active status",
+      "authoritative_target_level": "n/a",
+      "authoritative_qualified_level": "n/a",
+      "is_blocked": "N/A",
+      "display_level": "N/A",
+      "blocked": "N/A",
+      "note": "NOT REACHABLE in the current B4 model -- classify_alpha_level's Case A/B explicitly applies no qualification gate to candidate/active (John's own prior instruction, task section 7 of B4_ACTIVATION_LEVEL_ALIGNMENT: 'candidate/active have no qualification gate beyond the score itself'). Confirmed by test_b_candidate_and_active_never_gain_a_new_evidence_graph_or_exposure_gate."
+    },
+    {
+      "row": "I",
+      "condition": "score targets regime_level but BOTH regime_gate fails AND dominant_cap_reason_codes non-empty (multiple, distinct reason codes across dominant+regime diagnostics)",
+      "authoritative_target_level": "regime_level",
+      "authoritative_qualified_level": "active",
+      "is_blocked": true,
+      "blocked_from": [
+        "dominant",
+        "regime_level"
+      ],
+      "display_level": "capped_active",
+      "blocked": true,
+      "note": "All distinct diagnostic codes from both dominant and regime evaluation are preserved (deduped, never dropped) in diagnostic_reason_codes/blocked_reason_codes."
+    }
+  ],
+  "six_ticker_60_alpha_audit": {
+    "scope_note": "graph_edges=() and entity_exposure=None in this isolated audit -- these _step5a_coverage_<ticker> directories (Step 6's own persisted source data) hold no structure_graph.json/B3 Exposure output. This means local_structure_support contributes 0 for every alpha here and no B3-Exposure-driven blocking is reflected -- consistent with the SAME limitation already documented in Step 6's own before/after scoring scripts. Zero Provider/TradingAgents calls either way. The truth table and 27 new tests above independently prove capped_active/dominant/regime_level/blocked=true are produced correctly by the (unmodified) classifier when those signals ARE present.",
+    "total_records": 60,
+    "rows": [
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A001",
+        "activation_score": 20.9532,
+        "uncapped_score": 20.9532,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 2,
+          "qualified_unique_evidence_fact_count": 1,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 1
+          }
+        },
+        "unique_evidence_count": 1,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A003",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A101",
+        "activation_score": 63.1785,
+        "uncapped_score": 63.1785,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 19,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 15,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 4
+          }
+        },
+        "unique_evidence_count": 19,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A102",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A103",
+        "activation_score": 62.3588,
+        "uncapped_score": 62.3588,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 17,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 7,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+          }
+        },
+        "unique_evidence_count": 17,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A201",
+        "activation_score": 18.3369,
+        "uncapped_score": 18.3369,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 5,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 5
+          }
+        },
+        "unique_evidence_count": 5,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A301",
+        "activation_score": 61.2689,
+        "uncapped_score": 61.2689,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 49,
+          "qualified_unique_evidence_fact_count": 27,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 27,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 20,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 27,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A304",
+        "activation_score": 50.0002,
+        "uncapped_score": 50.0002,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 53,
+          "qualified_unique_evidence_fact_count": 15,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 13,
+            "SECONDARY_CAUSALITY_UNPROVEN": 5,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 35,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 15,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A501",
+        "activation_score": 20.113,
+        "uncapped_score": 20.113,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 6,
+          "qualified_unique_evidence_fact_count": 4,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 4,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          }
+        },
+        "unique_evidence_count": 4,
+        "ambiguous": false
+      },
+      {
+        "ticker": "NVDA",
+        "alpha_id": "A601",
+        "activation_score": 61.6742,
+        "uncapped_score": 61.6742,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 42,
+          "qualified_unique_evidence_fact_count": 23,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 21,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 19,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 23,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A001",
+        "activation_score": 35.1146,
+        "uncapped_score": 35.1146,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 14,
+          "qualified_unique_evidence_fact_count": 8,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 9,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 6
+          }
+        },
+        "unique_evidence_count": 8,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A003",
+        "activation_score": 37.9062,
+        "uncapped_score": 37.9062,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 4,
+          "qualified_unique_evidence_fact_count": 4,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 5
+          }
+        },
+        "unique_evidence_count": 4,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A101",
+        "activation_score": 41.2668,
+        "uncapped_score": 41.2668,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 11,
+          "qualified_unique_evidence_fact_count": 5,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 5,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 4
+          }
+        },
+        "unique_evidence_count": 5,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A102",
+        "activation_score": 13.3737,
+        "uncapped_score": 13.3737,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 1,
+          "qualified_unique_evidence_fact_count": 1,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1
+          }
+        },
+        "unique_evidence_count": 1,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A103",
+        "activation_score": 64.6321,
+        "uncapped_score": 64.6321,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 21,
+          "qualified_unique_evidence_fact_count": 13,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 13,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 8,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 13,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A201",
+        "activation_score": 27.9484,
+        "uncapped_score": 27.9484,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 7,
+          "qualified_unique_evidence_fact_count": 4,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 4,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          }
+        },
+        "unique_evidence_count": 4,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A301",
+        "activation_score": 46.8375,
+        "uncapped_score": 46.8375,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 7,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 7,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 15,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 7,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A304",
+        "activation_score": 56.3576,
+        "uncapped_score": 56.3576,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 49,
+          "qualified_unique_evidence_fact_count": 16,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 15,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 31,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 16,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A501",
+        "activation_score": 26.7752,
+        "uncapped_score": 26.7752,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          }
+        },
+        "unique_evidence_count": 2,
+        "ambiguous": false
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_id": "A601",
+        "activation_score": 52.7741,
+        "uncapped_score": 52.7741,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 36,
+          "qualified_unique_evidence_fact_count": 23,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 22,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 14,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 23,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A001",
+        "activation_score": 17.1778,
+        "uncapped_score": 17.1778,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 3,
+          "qualified_unique_evidence_fact_count": 2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 1
+          }
+        },
+        "unique_evidence_count": 2,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A003",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A101",
+        "activation_score": 41.5357,
+        "uncapped_score": 41.5357,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 12,
+          "qualified_unique_evidence_fact_count": 5,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 8,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 7
+          }
+        },
+        "unique_evidence_count": 5,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A102",
+        "activation_score": 21.2423,
+        "uncapped_score": 21.2423,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 3,
+          "qualified_unique_evidence_fact_count": 2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 1
+          }
+        },
+        "unique_evidence_count": 2,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A103",
+        "activation_score": 68.2389,
+        "uncapped_score": 68.2389,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 69,
+          "qualified_unique_evidence_fact_count": 31,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 35,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 38,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 4
+          }
+        },
+        "unique_evidence_count": 31,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A201",
+        "activation_score": 13.3737,
+        "uncapped_score": 13.3737,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 1,
+          "qualified_unique_evidence_fact_count": 1,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1
+          }
+        },
+        "unique_evidence_count": 1,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A301",
+        "activation_score": 54.2214,
+        "uncapped_score": 54.2214,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 31,
+          "qualified_unique_evidence_fact_count": 13,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 4,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 20
+          }
+        },
+        "unique_evidence_count": 13,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A304",
+        "activation_score": 47.8028,
+        "uncapped_score": 47.8028,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 27,
+          "qualified_unique_evidence_fact_count": 10,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 9,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 17,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 10,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A501",
+        "activation_score": 15.9818,
+        "uncapped_score": 15.9818,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          }
+        },
+        "unique_evidence_count": 2,
+        "ambiguous": false
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_id": "A601",
+        "activation_score": 44.2602,
+        "uncapped_score": 44.2602,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 17,
+          "qualified_unique_evidence_fact_count": 12,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 12,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 5
+          }
+        },
+        "unique_evidence_count": 12,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A001",
+        "activation_score": 21.4818,
+        "uncapped_score": 21.4818,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 8,
+          "qualified_unique_evidence_fact_count": 6,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 6,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2
+          }
+        },
+        "unique_evidence_count": 6,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A003",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A101",
+        "activation_score": 43.0649,
+        "uncapped_score": 43.0649,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 16,
+          "qualified_unique_evidence_fact_count": 11,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 11,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 4
+          }
+        },
+        "unique_evidence_count": 11,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A102",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A103",
+        "activation_score": 25.1786,
+        "uncapped_score": 25.1786,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 5,
+          "qualified_unique_evidence_fact_count": 2,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          }
+        },
+        "unique_evidence_count": 2,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A201",
+        "activation_score": 56.0598,
+        "uncapped_score": 56.0598,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 54,
+          "qualified_unique_evidence_fact_count": 28,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 27,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 26,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 28,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A301",
+        "activation_score": 56.25,
+        "uncapped_score": 56.25,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 34,
+          "qualified_unique_evidence_fact_count": 19,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 18,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 15,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 19,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A304",
+        "activation_score": 42.8131,
+        "uncapped_score": 42.8131,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 20,
+          "qualified_unique_evidence_fact_count": 11,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 12,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 9
+          }
+        },
+        "unique_evidence_count": 11,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A501",
+        "activation_score": 23.0576,
+        "uncapped_score": 23.0576,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_UNIQUE_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 3,
+          "qualified_unique_evidence_fact_count": 1,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2
+          }
+        },
+        "unique_evidence_count": 1,
+        "ambiguous": false
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_id": "A601",
+        "activation_score": 42.622,
+        "uncapped_score": 42.622,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 38,
+          "qualified_unique_evidence_fact_count": 26,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 26,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 12
+          }
+        },
+        "unique_evidence_count": 26,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A001",
+        "activation_score": 38.0057,
+        "uncapped_score": 38.0057,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 7,
+          "qualified_unique_evidence_fact_count": 4,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+          }
+        },
+        "unique_evidence_count": 4,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A003",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A101",
+        "activation_score": 68.2022,
+        "uncapped_score": 68.2022,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 39,
+          "qualified_unique_evidence_fact_count": 25,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 22,
+            "SECONDARY_CAUSALITY_UNPROVEN": 4,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 10,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 7
+          }
+        },
+        "unique_evidence_count": 25,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A102",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A103",
+        "activation_score": 31.022,
+        "uncapped_score": 31.022,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 9,
+          "qualified_unique_evidence_fact_count": 4,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 4,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 4
+          }
+        },
+        "unique_evidence_count": 4,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A201",
+        "activation_score": 36.0353,
+        "uncapped_score": 36.0353,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 23,
+          "qualified_unique_evidence_fact_count": 18,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 15,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 5,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+          }
+        },
+        "unique_evidence_count": 18,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A301",
+        "activation_score": 61.7499,
+        "uncapped_score": 61.7499,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 46,
+          "qualified_unique_evidence_fact_count": 29,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 21,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 19,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 8
+          }
+        },
+        "unique_evidence_count": 29,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A304",
+        "activation_score": 62.8655,
+        "uncapped_score": 62.8655,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 55,
+          "qualified_unique_evidence_fact_count": 19,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 11,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 34,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 8
+          }
+        },
+        "unique_evidence_count": 19,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A501",
+        "activation_score": 31.3072,
+        "uncapped_score": 31.3072,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_TICKER_SPECIFIC_EVIDENCE",
+          "INSUFFICIENT_AGENT_INDEPENDENCE",
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 6,
+          "qualified_unique_evidence_fact_count": 3,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 3,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 5
+          }
+        },
+        "unique_evidence_count": 3,
+        "ambiguous": false
+      },
+      {
+        "ticker": "TSM",
+        "alpha_id": "A601",
+        "activation_score": 48.5535,
+        "uncapped_score": 48.5535,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 42,
+          "qualified_unique_evidence_fact_count": 25,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 25,
+            "SECONDARY_CAUSALITY_UNPROVEN": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 16
+          }
+        },
+        "unique_evidence_count": 25,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A001",
+        "activation_score": 37.3104,
+        "uncapped_score": 37.3104,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 15,
+          "qualified_unique_evidence_fact_count": 12,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 11,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 12,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A003",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 2,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2
+          }
+        },
+        "unique_evidence_count": 0,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A101",
+        "activation_score": 65.3589,
+        "uncapped_score": 65.3589,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 29,
+          "qualified_unique_evidence_fact_count": 18,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 16,
+            "SECONDARY_CAUSALITY_UNPROVEN": 5,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 6,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 18,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A102",
+        "activation_score": 32.4528,
+        "uncapped_score": 32.4528,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 14,
+          "qualified_unique_evidence_fact_count": 8,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 8,
+            "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 6
+          }
+        },
+        "unique_evidence_count": 8,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A103",
+        "activation_score": 58.4228,
+        "uncapped_score": 58.4228,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 17,
+          "qualified_unique_evidence_fact_count": 15,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 2,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 15,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A201",
+        "activation_score": 29.8175,
+        "uncapped_score": 29.8175,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 13,
+          "qualified_unique_evidence_fact_count": 10,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 10,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 3
+          }
+        },
+        "unique_evidence_count": 10,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A301",
+        "activation_score": 51.468,
+        "uncapped_score": 51.468,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 33,
+          "qualified_unique_evidence_fact_count": 15,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 14,
+            "SECONDARY_CAUSALITY_UNPROVEN": 2,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 16,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 15,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A304",
+        "activation_score": 63.1329,
+        "uncapped_score": 63.1329,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 38,
+          "qualified_unique_evidence_fact_count": 14,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 12,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 24,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+          }
+        },
+        "unique_evidence_count": 14,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A501",
+        "activation_score": 33.5062,
+        "uncapped_score": 33.5062,
+        "authoritative_target_level": "candidate",
+        "authoritative_qualified_level": "candidate",
+        "display_level": "candidate",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 4,
+          "qualified_unique_evidence_fact_count": 4,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 3,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 4,
+        "ambiguous": false
+      },
+      {
+        "ticker": "AMD",
+        "alpha_id": "A601",
+        "activation_score": 63.4137,
+        "uncapped_score": 63.4137,
+        "authoritative_target_level": "active",
+        "authoritative_qualified_level": "active",
+        "display_level": "active",
+        "blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "cap_reason_codes": [
+          "NO_LOCAL_STRUCTURE_SUPPORT"
+        ],
+        "diagnostic_reason_codes": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 33,
+          "qualified_unique_evidence_fact_count": 24,
+          "qualification_reason_counts": {
+            "PRIMARY_QUALIFIED": 23,
+            "SECONDARY_NOT_TICKER_SPECIFIC": 9,
+            "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+          }
+        },
+        "unique_evidence_count": 24,
+        "ambiguous": false
+      }
+    ]
+  },
+  "display_state_counts": {
+    "candidate": 40,
+    "active": 20,
+    "capped_active": 0,
+    "dominant": 0,
+    "regime_level": 0,
+    "UNKNOWN_DISPLAY_STATE": 0
+  },
+  "blocked_count": 0,
+  "ambiguous_count": 0,
+  "threshold_invariance": {
+    "active": 50.0,
+    "dominant": 70.0,
+    "regime_level": 86.0,
+    "changed": false
+  },
+  "semantic_invariance": {
+    "b1_stance_changed": false,
+    "b2_thresholds_changed": false,
+    "b4_thresholds_changed": false,
+    "b4_criteria_changed": false,
+    "alpha_mapper_changed": false,
+    "step6_evidence_qualification_changed": false,
+    "activation_score_recomputed_by_normalizer": false
+  },
+  "test_results": {
+    "new_test_file": "tests/test_alpha_display_normalization.py",
+    "new_test_count": 27,
+    "new_test_result": "27 passed",
+    "existing_b4_test_file_reused_unmodified": "tests/test_b4_activation_level_alignment.py (36 tests, unchanged, still green)"
+  },
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false,
+  "full_suite_final_confirmation": {
+    "result": "3788 passed / 6 failed / 47 skipped / 69 subtests passed in 675.91s (0:11:15)",
+    "baseline_comparison": "Step 6 baseline was 3761 passed / 6 failed / 47 skipped. Step 7 adds exactly +27 passed (the new tests/test_alpha_display_normalization.py suite); the same 6 failures recur unchanged.",
+    "failures": [
+      "tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch",
+      "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence",
+      "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e42_head_unchanged_from_session_frozen_starting_commit",
+      "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical",
+      "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ],
+    "note": "Zero failures attributable to Step 7 -- identical failure set to the Step 6 confirmed baseline."
+  }
+}

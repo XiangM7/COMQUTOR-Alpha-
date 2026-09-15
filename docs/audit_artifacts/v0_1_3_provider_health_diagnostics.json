@@ -1,0 +1,625 @@
+{
+  "schema_version": "v0_1_3_provider_health_diagnostics.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "generated_by_module": "comqutor_alpha.regression.provider_health_diagnostics.compute_provider_health_diagnostics",
+  "methodology": "Pure offline replay against already-persisted run artifacts (error_logs/week2_llm_errors.jsonl, alpha_matches.json, llm_semantic_calls.jsonl, llm_semantic_manifest.json). No Provider calls, no TradingAgents calls, no fresh ticker runs. No historical artifact mutated (verified via byte-identical before/after hash in tests/test_provider_health_diagnostics.py's test_l_* tests).",
+  "per_run_diagnostics": {
+    "NVDA": {
+      "ticker": "NVDA",
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "run_dir": "outputs/runs/57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "semantic_status": "PASS",
+      "semantic_execution_health": {
+        "run_dir": "outputs/runs/57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+        "eligible_claim_count": 733,
+        "classified_claim_count": 728,
+        "matched_count": 313,
+        "none_count": 415,
+        "unavailable_count": 5,
+        "unavailable_rate": 0.0068212824010914054,
+        "unavailable_reason_counts": {
+          "provider_timeout": 5
+        },
+        "classified_coverage": 0.9931787175989086,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 591,
+        "provider_successes": 502,
+        "timeouts": 104,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 0,
+        "validation_failures": 9,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "provider_health": "PROVIDER_DEGRADED",
+      "provider_call_attempts_total": 591,
+      "provider_failure_events": 113,
+      "provider_failure_rate": 0.191201,
+      "semantic_critical_call_attempts": 542,
+      "semantic_critical_failure_events": 99,
+      "semantic_critical_failure_rate": 0.182657,
+      "alpha_classifier_call_attempts": 499,
+      "alpha_classifier_failure_events": 32,
+      "alpha_classifier_failure_rate": 0.064128,
+      "alpha_classifier_final_orphans": 5,
+      "evidence_stance_final_orphans": 30,
+      "structure_extractor_final_orphans": 10,
+      "provider_final_orphans_total": 45,
+      "claims_orphaned_by_provider_failure": 5,
+      "alphas_impacted_by_provider_failure": 0,
+      "impacted_alpha_ids": [],
+      "impacted_claims": [],
+      "traceability_unknown_count": 5,
+      "benchmark_review_required": false,
+      "benchmark_review_reasons": [],
+      "benchmark_auto_rejected": false,
+      "provider_failure_components": [
+        "alpha_classifier",
+        "claim_batch_enrichment",
+        "evidence_stance_classifier",
+        "structure_extractor"
+      ],
+      "provider_failure_error_types": {
+        "TIMEOUT": 104,
+        "SCHEMA_ERROR": 9
+      },
+      "provider_failure_events_by_task": {
+        "claim_batch_enrichment": 14,
+        "alpha_classifier": 32,
+        "evidence_stance_classifier": 60,
+        "structure_extractor": 7
+      },
+      "error_type_counts_by_task": {
+        "claim_batch_enrichment:TIMEOUT": 13,
+        "claim_batch_enrichment:SCHEMA_ERROR": 1,
+        "alpha_classifier:TIMEOUT": 31,
+        "alpha_classifier:SCHEMA_ERROR": 1,
+        "evidence_stance_classifier:TIMEOUT": 60,
+        "structure_extractor:SCHEMA_ERROR": 7
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "run_dir": "outputs/runs/f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "semantic_status": "PASS",
+      "semantic_execution_health": {
+        "run_dir": "outputs/runs/f88c8956-cb62-48aa-9951-89f8e8a95f83",
+        "eligible_claim_count": 647,
+        "classified_claim_count": 642,
+        "matched_count": 246,
+        "none_count": 396,
+        "unavailable_count": 5,
+        "unavailable_rate": 0.0077279752704791345,
+        "unavailable_reason_counts": {
+          "provider_timeout": 5
+        },
+        "classified_coverage": 0.9922720247295209,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 518,
+        "provider_successes": 446,
+        "timeouts": 77,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 1,
+        "validation_failures": 5,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "provider_health": "PROVIDER_DEGRADED",
+      "provider_call_attempts_total": 518,
+      "provider_failure_events": 83,
+      "provider_failure_rate": 0.160232,
+      "semantic_critical_call_attempts": 478,
+      "semantic_critical_failure_events": 71,
+      "semantic_critical_failure_rate": 0.148536,
+      "alpha_classifier_call_attempts": 445,
+      "alpha_classifier_failure_events": 17,
+      "alpha_classifier_failure_rate": 0.038202,
+      "alpha_classifier_final_orphans": 5,
+      "evidence_stance_final_orphans": 25,
+      "structure_extractor_final_orphans": 8,
+      "provider_final_orphans_total": 38,
+      "claims_orphaned_by_provider_failure": 5,
+      "alphas_impacted_by_provider_failure": 2,
+      "impacted_alpha_ids": [
+        "A501",
+        "A601"
+      ],
+      "impacted_claims": [
+        {
+          "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:10",
+          "agent": "news_agent",
+          "deterministic_top_alpha": "A601",
+          "alpha_match_fallback_reason": "provider_timeout"
+        },
+        {
+          "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:56",
+          "agent": "aggressive_risk_analyst",
+          "deterministic_top_alpha": "A501",
+          "alpha_match_fallback_reason": "provider_timeout"
+        }
+      ],
+      "traceability_unknown_count": 3,
+      "benchmark_review_required": true,
+      "benchmark_review_reasons": [
+        "PROVIDER_FAILURE_IMPACTED_ALPHA:A501",
+        "PROVIDER_FAILURE_IMPACTED_ALPHA:A601"
+      ],
+      "benchmark_auto_rejected": false,
+      "provider_failure_components": [
+        "alpha_classifier",
+        "claim_batch_enrichment",
+        "evidence_stance_classifier",
+        "structure_extractor"
+      ],
+      "provider_failure_error_types": {
+        "TIMEOUT": 77,
+        "SCHEMA_ERROR": 5,
+        "TRANSPORT_ERROR": 1
+      },
+      "provider_failure_events_by_task": {
+        "claim_batch_enrichment": 12,
+        "alpha_classifier": 17,
+        "evidence_stance_classifier": 50,
+        "structure_extractor": 4
+      },
+      "error_type_counts_by_task": {
+        "claim_batch_enrichment:TIMEOUT": 11,
+        "claim_batch_enrichment:SCHEMA_ERROR": 1,
+        "alpha_classifier:TIMEOUT": 17,
+        "evidence_stance_classifier:TIMEOUT": 49,
+        "evidence_stance_classifier:TRANSPORT_ERROR": 1,
+        "structure_extractor:SCHEMA_ERROR": 4
+      }
+    },
+    "MSFT": {
+      "ticker": "MSFT",
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "run_dir": "outputs/runs/43472ace-454f-4c69-892c-adca91c25be7",
+      "semantic_status": "PASS",
+      "semantic_execution_health": {
+        "run_dir": "outputs/runs/43472ace-454f-4c69-892c-adca91c25be7",
+        "eligible_claim_count": 750,
+        "classified_claim_count": 741,
+        "matched_count": 296,
+        "none_count": 445,
+        "unavailable_count": 9,
+        "unavailable_rate": 0.012,
+        "unavailable_reason_counts": {
+          "provider_timeout": 9
+        },
+        "classified_coverage": 0.988,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 585,
+        "provider_successes": 503,
+        "timeouts": 116,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 1,
+        "validation_failures": 9,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "provider_health": "PROVIDER_DEGRADED",
+      "provider_call_attempts_total": 585,
+      "provider_failure_events": 126,
+      "provider_failure_rate": 0.215385,
+      "semantic_critical_call_attempts": 534,
+      "semantic_critical_failure_events": 110,
+      "semantic_critical_failure_rate": 0.205993,
+      "alpha_classifier_call_attempts": 499,
+      "alpha_classifier_failure_events": 45,
+      "alpha_classifier_failure_rate": 0.09018,
+      "alpha_classifier_final_orphans": 9,
+      "evidence_stance_final_orphans": 28,
+      "structure_extractor_final_orphans": 3,
+      "provider_final_orphans_total": 40,
+      "claims_orphaned_by_provider_failure": 9,
+      "alphas_impacted_by_provider_failure": 1,
+      "impacted_alpha_ids": [
+        "A301"
+      ],
+      "impacted_claims": [
+        {
+          "claim_id": "43472ace-454f-4c69-892c-adca91c25be7:bear_researcher:investment_debate_state.bear_history:claim:67",
+          "agent": "bear_researcher",
+          "deterministic_top_alpha": "A301",
+          "alpha_match_fallback_reason": "provider_timeout"
+        }
+      ],
+      "traceability_unknown_count": 8,
+      "benchmark_review_required": true,
+      "benchmark_review_reasons": [
+        "PROVIDER_FAILURE_IMPACTED_ALPHA:A301"
+      ],
+      "benchmark_auto_rejected": false,
+      "provider_failure_components": [
+        "alpha_classifier",
+        "claim_batch_enrichment",
+        "evidence_stance_classifier",
+        "structure_extractor"
+      ],
+      "provider_failure_error_types": {
+        "TIMEOUT": 116,
+        "SCHEMA_ERROR": 8,
+        "TRANSPORT_ERROR": 1,
+        "PARSE_ERROR": 1
+      },
+      "provider_failure_events_by_task": {
+        "claim_batch_enrichment": 16,
+        "alpha_classifier": 45,
+        "evidence_stance_classifier": 58,
+        "structure_extractor": 7
+      },
+      "error_type_counts_by_task": {
+        "claim_batch_enrichment:TIMEOUT": 15,
+        "claim_batch_enrichment:SCHEMA_ERROR": 1,
+        "alpha_classifier:TIMEOUT": 43,
+        "alpha_classifier:TRANSPORT_ERROR": 1,
+        "alpha_classifier:PARSE_ERROR": 1,
+        "evidence_stance_classifier:TIMEOUT": 58,
+        "structure_extractor:SCHEMA_ERROR": 7
+      }
+    },
+    "SNDK": {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "run_dir": "outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "semantic_status": "PASS",
+      "semantic_execution_health": {
+        "run_dir": "outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335",
+        "eligible_claim_count": 918,
+        "classified_claim_count": 903,
+        "matched_count": 413,
+        "none_count": 490,
+        "unavailable_count": 15,
+        "unavailable_rate": 0.016339869281045753,
+        "unavailable_reason_counts": {
+          "provider_timeout": 15
+        },
+        "classified_coverage": 0.9836601307189542,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 730,
+        "provider_successes": 636,
+        "timeouts": 142,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 0,
+        "validation_failures": 2,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "provider_health": "PROVIDER_DEGRADED",
+      "provider_call_attempts_total": 730,
+      "provider_failure_events": 144,
+      "provider_failure_rate": 0.19726,
+      "semantic_critical_call_attempts": 674,
+      "semantic_critical_failure_events": 128,
+      "semantic_critical_failure_rate": 0.189911,
+      "alpha_classifier_call_attempts": 630,
+      "alpha_classifier_failure_events": 52,
+      "alpha_classifier_failure_rate": 0.08254,
+      "alpha_classifier_final_orphans": 15,
+      "evidence_stance_final_orphans": 37,
+      "structure_extractor_final_orphans": 2,
+      "provider_final_orphans_total": 54,
+      "claims_orphaned_by_provider_failure": 15,
+      "alphas_impacted_by_provider_failure": 1,
+      "impacted_alpha_ids": [
+        "A201"
+      ],
+      "impacted_claims": [
+        {
+          "claim_id": "e8e0f398-7b26-4462-8135-a1410ea5b335:news_agent:news_report:claim:40",
+          "agent": "news_agent",
+          "deterministic_top_alpha": "A201",
+          "alpha_match_fallback_reason": "provider_timeout"
+        }
+      ],
+      "traceability_unknown_count": 14,
+      "benchmark_review_required": true,
+      "benchmark_review_reasons": [
+        "PROVIDER_FAILURE_IMPACTED_ALPHA:A201"
+      ],
+      "benchmark_auto_rejected": false,
+      "provider_failure_components": [
+        "alpha_classifier",
+        "claim_batch_enrichment",
+        "evidence_stance_classifier"
+      ],
+      "provider_failure_error_types": {
+        "TIMEOUT": 142,
+        "SCHEMA_ERROR": 2
+      },
+      "provider_failure_events_by_task": {
+        "claim_batch_enrichment": 16,
+        "alpha_classifier": 52,
+        "evidence_stance_classifier": 76
+      },
+      "error_type_counts_by_task": {
+        "claim_batch_enrichment:TIMEOUT": 14,
+        "claim_batch_enrichment:SCHEMA_ERROR": 2,
+        "alpha_classifier:TIMEOUT": 52,
+        "evidence_stance_classifier:TIMEOUT": 76
+      }
+    },
+    "TSM": {
+      "ticker": "TSM",
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "run_dir": "outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "semantic_status": "PASS",
+      "semantic_execution_health": {
+        "run_dir": "outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+        "eligible_claim_count": 766,
+        "classified_claim_count": 757,
+        "matched_count": 317,
+        "none_count": 440,
+        "unavailable_count": 9,
+        "unavailable_rate": 0.01174934725848564,
+        "unavailable_reason_counts": {
+          "provider_timeout": 9
+        },
+        "classified_coverage": 0.9882506527415144,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 616,
+        "provider_successes": 531,
+        "timeouts": 118,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 2,
+        "validation_failures": 8,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "provider_health": "PROVIDER_DEGRADED",
+      "provider_call_attempts_total": 616,
+      "provider_failure_events": 128,
+      "provider_failure_rate": 0.207792,
+      "semantic_critical_call_attempts": 563,
+      "semantic_critical_failure_events": 114,
+      "semantic_critical_failure_rate": 0.202487,
+      "alpha_classifier_call_attempts": 528,
+      "alpha_classifier_failure_events": 47,
+      "alpha_classifier_failure_rate": 0.089015,
+      "alpha_classifier_final_orphans": 9,
+      "evidence_stance_final_orphans": 30,
+      "structure_extractor_final_orphans": 3,
+      "provider_final_orphans_total": 42,
+      "claims_orphaned_by_provider_failure": 9,
+      "alphas_impacted_by_provider_failure": 2,
+      "impacted_alpha_ids": [
+        "A301",
+        "A601"
+      ],
+      "impacted_claims": [
+        {
+          "claim_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95:sentiment_agent:sentiment_report:claim:70",
+          "agent": "sentiment_agent",
+          "deterministic_top_alpha": "A601",
+          "alpha_match_fallback_reason": "provider_timeout"
+        },
+        {
+          "claim_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95:fundamental_agent:fundamentals_report:claim:37",
+          "agent": "fundamental_agent",
+          "deterministic_top_alpha": "A301",
+          "alpha_match_fallback_reason": "provider_timeout"
+        },
+        {
+          "claim_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95:fundamental_agent:fundamentals_report:claim:42",
+          "agent": "fundamental_agent",
+          "deterministic_top_alpha": "A301",
+          "alpha_match_fallback_reason": "provider_timeout"
+        }
+      ],
+      "traceability_unknown_count": 6,
+      "benchmark_review_required": true,
+      "benchmark_review_reasons": [
+        "PROVIDER_FAILURE_IMPACTED_ALPHA:A301",
+        "PROVIDER_FAILURE_IMPACTED_ALPHA:A601"
+      ],
+      "benchmark_auto_rejected": false,
+      "provider_failure_components": [
+        "alpha_classifier",
+        "claim_batch_enrichment",
+        "evidence_stance_classifier",
+        "structure_extractor"
+      ],
+      "provider_failure_error_types": {
+        "TIMEOUT": 118,
+        "SCHEMA_ERROR": 8,
+        "TRANSPORT_ERROR": 2
+      },
+      "provider_failure_events_by_task": {
+        "claim_batch_enrichment": 14,
+        "alpha_classifier": 47,
+        "evidence_stance_classifier": 61,
+        "structure_extractor": 6
+      },
+      "error_type_counts_by_task": {
+        "claim_batch_enrichment:TIMEOUT": 13,
+        "claim_batch_enrichment:SCHEMA_ERROR": 1,
+        "alpha_classifier:SCHEMA_ERROR": 1,
+        "alpha_classifier:TIMEOUT": 44,
+        "alpha_classifier:TRANSPORT_ERROR": 2,
+        "evidence_stance_classifier:TIMEOUT": 61,
+        "structure_extractor:SCHEMA_ERROR": 6
+      }
+    },
+    "AMD": {
+      "ticker": "AMD",
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "run_dir": "outputs/runs/949f685a-3945-4fd0-b7b9-362b37c90721",
+      "semantic_status": "PASS",
+      "semantic_execution_health": {
+        "run_dir": "outputs/runs/949f685a-3945-4fd0-b7b9-362b37c90721",
+        "eligible_claim_count": 787,
+        "classified_claim_count": 783,
+        "matched_count": 319,
+        "none_count": 464,
+        "unavailable_count": 4,
+        "unavailable_rate": 0.005082592121982211,
+        "unavailable_reason_counts": {
+          "provider_timeout": 4
+        },
+        "classified_coverage": 0.9949174078780177,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 626,
+        "provider_successes": 534,
+        "timeouts": 46,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 67,
+        "validation_failures": 2,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "provider_health": "PROVIDER_DEGRADED",
+      "provider_call_attempts_total": 626,
+      "provider_failure_events": 115,
+      "provider_failure_rate": 0.183706,
+      "semantic_critical_call_attempts": 571,
+      "semantic_critical_failure_events": 99,
+      "semantic_critical_failure_rate": 0.17338,
+      "alpha_classifier_call_attempts": 533,
+      "alpha_classifier_failure_events": 23,
+      "alpha_classifier_failure_rate": 0.043152,
+      "alpha_classifier_final_orphans": 4,
+      "evidence_stance_final_orphans": 33,
+      "structure_extractor_final_orphans": 5,
+      "provider_final_orphans_total": 42,
+      "claims_orphaned_by_provider_failure": 4,
+      "alphas_impacted_by_provider_failure": 1,
+      "impacted_alpha_ids": [
+        "A301"
+      ],
+      "impacted_claims": [
+        {
+          "claim_id": "949f685a-3945-4fd0-b7b9-362b37c90721:bear_researcher:investment_debate_state.bear_history:claim:31",
+          "agent": "bear_researcher",
+          "deterministic_top_alpha": "A301",
+          "alpha_match_fallback_reason": "provider_timeout"
+        }
+      ],
+      "traceability_unknown_count": 3,
+      "benchmark_review_required": true,
+      "benchmark_review_reasons": [
+        "PROVIDER_FAILURE_IMPACTED_ALPHA:A301"
+      ],
+      "benchmark_auto_rejected": false,
+      "provider_failure_components": [
+        "alpha_classifier",
+        "claim_batch_enrichment",
+        "evidence_stance_classifier",
+        "structure_extractor"
+      ],
+      "provider_failure_error_types": {
+        "TIMEOUT": 46,
+        "SCHEMA_ERROR": 2,
+        "TRANSPORT_ERROR": 67
+      },
+      "provider_failure_events_by_task": {
+        "claim_batch_enrichment": 16,
+        "alpha_classifier": 23,
+        "evidence_stance_classifier": 66,
+        "structure_extractor": 10
+      },
+      "error_type_counts_by_task": {
+        "claim_batch_enrichment:TIMEOUT": 14,
+        "claim_batch_enrichment:SCHEMA_ERROR": 2,
+        "alpha_classifier:TIMEOUT": 23,
+        "evidence_stance_classifier:TIMEOUT": 9,
+        "evidence_stance_classifier:TRANSPORT_ERROR": 57,
+        "structure_extractor:TRANSPORT_ERROR": 10
+      }
+    }
+  },
+  "validation_against_prior_audit_expectations": {
+    "expected": {
+      "NVDA": {
+        "provider_failure_events": 113,
+        "semantic_critical_failure_events": 99
+      },
+      "QQQ": {
+        "provider_failure_events": 83,
+        "semantic_critical_failure_events": 71
+      },
+      "MSFT": {
+        "provider_failure_events": 126,
+        "semantic_critical_failure_events": 110
+      },
+      "SNDK": {
+        "provider_failure_events": 144,
+        "semantic_critical_failure_events": 128
+      },
+      "TSM": {
+        "provider_failure_events": 128,
+        "semantic_critical_failure_events": 114
+      },
+      "AMD": {
+        "provider_failure_events": 115,
+        "semantic_critical_failure_events": 99
+      }
+    },
+    "actual": {
+      "NVDA": {
+        "provider_failure_events": 113,
+        "semantic_critical_failure_events": 99
+      },
+      "QQQ": {
+        "provider_failure_events": 83,
+        "semantic_critical_failure_events": 71
+      },
+      "MSFT": {
+        "provider_failure_events": 126,
+        "semantic_critical_failure_events": 110
+      },
+      "SNDK": {
+        "provider_failure_events": 144,
+        "semantic_critical_failure_events": 128
+      },
+      "TSM": {
+        "provider_failure_events": 128,
+        "semantic_critical_failure_events": 114
+      },
+      "AMD": {
+        "provider_failure_events": 115,
+        "semantic_critical_failure_events": 99
+      }
+    },
+    "matches_exactly": true,
+    "note": "All six runs' recomputed provider_failure_events and semantic_critical_failure_events match the prior blast-radius audit's regression expectations exactly. provider_final_orphans_total figures are MORE PRECISE than the prior audit's raw-log-based approximation for evidence_stance_classifier/structure_extractor, since this implementation uses the canonical per-call llm_semantic_calls.jsonl fallback_used flag (a final-outcome signal) rather than raw retry-attempt counts for those two tasks -- this refinement is expected and documented, not a discrepancy."
+  },
+  "final_validation": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "production_files_changed_beyond_new_module": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0
+  }
+}

@@ -84,9 +84,9 @@ class TestConflictUsesSharedEvidenceFactIndex:
             # single fact (checked below by member_claim_ids, not by the
             # aggregate unique_fact_count alone), this just gets bull to
             # B2's >=2-unique-facts minimum so the conflict is admitted.
-            match_record("c1b", "A101", agent="fundamentals_agent", factors=["Revenue Growth"]),
-            match_record("c3", "A304", agent="bear_researcher", evidence="Valuation risk is elevated."),
-            match_record("c3b", "A304", agent="second_bear_agent"),
+            match_record("c1b", "A101", agent="fundamental_agent", factors=["Revenue Growth"]),
+            match_record("c3", "A304", agent="market_agent", evidence="Valuation risk is elevated."),
+            match_record("c3b", "A304", agent="sentiment_agent"),
         )
         result = evaluate_conflict_pair(
             "A101", "A304", activation_payload=activation, alpha_matches=matches,
@@ -108,11 +108,11 @@ class TestConflictUsesSharedEvidenceFactIndex:
             # >=1 ticker-specific supporting fact -- still fully distinct
             # text/factor from c1, so "no collapsing" is unaffected.
             match_record("c2", "A101", agent="news_agent", evidence="NVDA new supply agreements were announced.", factors=["AI Capex"]),
-            match_record("c3", "A304", agent="bear_researcher", evidence="Valuation multiples remain stretched.", factors=["Valuation Risk"]),
+            match_record("c3", "A304", agent="market_agent", evidence="Valuation multiples remain stretched.", factors=["Valuation Risk"]),
             # B2: a second, distinct, ticker-specific bear fact (bull already
             # has 2 distinct facts). Both sides remain "all claims distinct,
             # no collapsing".
-            match_record("c4", "A304", agent="second_bear_agent", evidence="NVDA insider selling has picked up.", factors=["Insider Activity"]),
+            match_record("c4", "A304", agent="sentiment_agent", evidence="NVDA insider selling has picked up.", factors=["Insider Activity"]),
         )
         result = evaluate_conflict_pair(
             "A101", "A304", activation_payload=activation, alpha_matches=matches,
@@ -134,9 +134,9 @@ class TestConflictUsesSharedEvidenceFactIndex:
             # agent, purely to clear the >=2-unique-facts minimum -- the
             # same-agent pair's own fact group is checked below by its
             # member claim ids, independent of this addition.
-            match_record("c1b", "A101", agent="fundamentals_agent", factors=["Revenue Growth"]),
-            match_record("c3", "A304", agent="bear_researcher", evidence="Valuation risk is elevated."),
-            match_record("c3b", "A304", agent="second_bear_agent"),
+            match_record("c1b", "A101", agent="fundamental_agent", factors=["Revenue Growth"]),
+            match_record("c3", "A304", agent="market_agent", evidence="Valuation risk is elevated."),
+            match_record("c3b", "A304", agent="sentiment_agent"),
         )
         result = evaluate_conflict_pair(
             "A101", "A304", activation_payload=activation, alpha_matches=matches,
@@ -154,9 +154,9 @@ class TestConflictUsesSharedEvidenceFactIndex:
     def test_evidence_fact_group_ids_are_present_on_structure_blocks(self):
         activation, matches = _payload(
             match_record("c1", "A101", agent="market_agent", evidence="Datacenter revenue is accelerating.", factors=["Revenue Growth"]),
-            match_record("c1b", "A101", agent="fundamentals_agent", factors=["AI Capex"]),
-            match_record("c2", "A304", agent="bear_researcher", evidence="Valuation risk is elevated.", factors=["Valuation Risk"]),
-            match_record("c2b", "A304", agent="second_bear_agent"),
+            match_record("c1b", "A101", agent="fundamental_agent", factors=["AI Capex"]),
+            match_record("c2", "A304", agent="market_agent", evidence="Valuation risk is elevated.", factors=["Valuation Risk"]),
+            match_record("c2b", "A304", agent="sentiment_agent"),
         )
         result = evaluate_conflict_pair(
             "A101", "A304", activation_payload=activation, alpha_matches=matches,
@@ -175,9 +175,9 @@ class TestConflictUsesSharedEvidenceFactIndex:
         computed as empty, not assumed."""
         activation, matches = _payload(
             match_record("c1", "A101", agent="market_agent", evidence="Datacenter revenue is accelerating.", factors=["Revenue Growth"]),
-            match_record("c1b", "A101", agent="fundamentals_agent", factors=["AI Capex"]),
-            match_record("c2", "A304", agent="bear_researcher", evidence="Valuation risk is elevated.", factors=["Valuation Risk"]),
-            match_record("c2b", "A304", agent="second_bear_agent"),
+            match_record("c1b", "A101", agent="fundamental_agent", factors=["AI Capex"]),
+            match_record("c2", "A304", agent="market_agent", evidence="Valuation risk is elevated.", factors=["Valuation Risk"]),
+            match_record("c2b", "A304", agent="sentiment_agent"),
         )
         result = evaluate_conflict_pair(
             "A101", "A304", activation_payload=activation, alpha_matches=matches,
@@ -197,9 +197,9 @@ class TestConflictUsesSharedEvidenceFactIndex:
         is byte-identical to what this test originally asserted."""
         activation, matches = _payload(
             match_record("c1", "A101", agent="market_agent", evidence="Datacenter revenue is accelerating.", score=0.9, factors=["Revenue Growth"]),
-            match_record("c1b", "A101", agent="fundamentals_agent", score=0.9, factors=["AI Capex"]),
-            match_record("c2", "A304", agent="bear_researcher", evidence="Valuation risk is elevated.", score=0.7, factors=["Valuation Risk"]),
-            match_record("c2b", "A304", agent="second_bear_agent", score=0.7),
+            match_record("c1b", "A101", agent="fundamental_agent", score=0.9, factors=["AI Capex"]),
+            match_record("c2", "A304", agent="market_agent", evidence="Valuation risk is elevated.", score=0.7, factors=["Valuation Risk"]),
+            match_record("c2b", "A304", agent="sentiment_agent", score=0.7),
         )
         result = evaluate_conflict_pair(
             "A101", "A304", activation_payload=activation, alpha_matches=matches,

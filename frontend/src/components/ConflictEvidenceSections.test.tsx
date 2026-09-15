@@ -188,8 +188,8 @@ describe("ConflictEvidenceSections", () => {
     expect(screen.getByText(/Insufficient supporting evidence/)).toBeInTheDocument();
   });
 
-  // 7. An admitted conflict's empty missing_evidence shows "no B2 evidence gaps".
-  it("shows 'No B2 evidence gaps identified' for an admitted conflict with an empty missing list", () => {
+  // 7. An admitted conflict's empty missing_evidence shows "no evidence gaps".
+  it("shows 'No evidence gaps identified' for an admitted conflict with an empty missing list", () => {
     render(
       <ConflictEvidenceSections
         evidenceUi={makeEvidenceUi({ missing_evidence: [] })}
@@ -197,7 +197,7 @@ describe("ConflictEvidenceSections", () => {
         bearAlphaId="A304"
       />
     );
-    expect(screen.getByText("No B2 evidence gaps identified.")).toBeInTheDocument();
+    expect(screen.getByText("No evidence gaps identified.")).toBeInTheDocument();
   });
 
   it("shows 'No qualification gaps identified' only when the (non-optional, present) array is genuinely empty", () => {
@@ -357,19 +357,23 @@ describe("ConflictEvidenceSections", () => {
 });
 
 describe("CandidateConflictCard", () => {
-  // 11 & 12. Candidate badge is distinct from Main/Admitted, and shows the
-  // exact B2 gate it failed.
-  it("never shows a Main or Admitted badge, and shows the exact B2 gate the pair failed", () => {
+  // 11 & 12. Candidate badge is distinct from Main/Admitted; the exact B2
+  // gate it failed is preserved verbatim under Technical details (Product
+  // Demo Hardening Phase 2D: no longer prominent in the default copy).
+  it("never shows a Main or Admitted badge, and preserves the exact B2 gate detail under Technical details", () => {
     render(<CandidateConflictCard evaluation={makeCandidateEvaluation()} />);
     expect(screen.queryByText("Main conflict")).not.toBeInTheDocument();
     expect(screen.queryByText("Admitted conflict")).not.toBeInTheDocument();
-    expect(screen.getByText("Candidate conflict")).toBeInTheDocument();
-    expect(screen.getByText(/did not clear the B2 Conflict Evidence/)).toBeInTheDocument();
-    expect(screen.getByText(/BULL_SCORE_BELOW_THRESHOLD/)).toBeInTheDocument();
-    expect(screen.getByText("34.0")).toBeInTheDocument();
+    expect(screen.getByText("Potential conflict")).toBeInTheDocument();
+    expect(
+      screen.getByText("Evidence is not yet strong enough for inclusion as the main structural conflict.")
+    ).toBeInTheDocument();
+    expect(screen.getByText(/\bB2\b/)).not.toBeVisible();
+    expect(screen.getByText(/BULL_SCORE_BELOW_THRESHOLD/)).not.toBeVisible();
+    expect(screen.getByText("34.0")).not.toBeVisible();
   });
 
-  it("shows 'Not evaluated' (never a fabricated B2 verdict) for a pair rejected before B2", () => {
+  it("shows 'Not evaluated' (never a fabricated B2 verdict) for a pair rejected before B2, with the raw reason code preserved under Technical details", () => {
     render(
       <CandidateConflictCard
         evaluation={makeCandidateEvaluation({
@@ -384,9 +388,11 @@ describe("CandidateConflictCard", () => {
       />
     );
     expect(screen.getByText("Not evaluated")).toBeInTheDocument();
-    expect(screen.queryByText("Candidate conflict")).not.toBeInTheDocument();
-    expect(screen.getByText(/rejected before B2 evaluation/)).toBeInTheDocument();
-    expect(screen.getByText(/DIRECTION_ROLE_UNRESOLVED/)).toBeInTheDocument();
+    expect(screen.queryByText("Potential conflict")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("This declared pair did not have enough evidence to be evaluated as a potential conflict.")
+    ).toBeInTheDocument();
+    expect(screen.getByText(/DIRECTION_ROLE_UNRESOLVED/)).not.toBeVisible();
   });
 
   it("renders the full evidence_ui block for a candidate pair when the backend provides one", () => {

@@ -40,37 +40,304 @@
     "approved_by": null,
     "formal_product_owner_approval": "pending",
     "env_var_upgrade_possible": false,
-    "canonical_conflict_pairs": ["A001__A501", "A003__A501", "A101__A304", "A301__A304", "A304__A601", "A501__A601"],
+    "canonical_conflict_pairs": [
+      "A001__A501",
+      "A003__A501",
+      "A101__A304",
+      "A301__A304",
+      "A304__A601",
+      "A501__A601"
+    ],
     "undeclared_conflict_pairs": {
-      "MSFT": ["A102__A304"],
-      "SNDK": ["A201__A304"],
-      "TSM": ["A201__A304"],
-      "AMD": ["A201__A304"]
+      "MSFT": [
+        "A102__A304"
+      ],
+      "SNDK": [
+        "A201__A304"
+      ],
+      "TSM": [
+        "A201__A304"
+      ],
+      "AMD": [
+        "A201__A304"
+      ]
     },
     "undeclared_pairs_taxonomy_modified": false,
     "undeclared_pairs_silently_dropped": false
   },
   "run_selection_rule": {
-    "hard_requirement": ["metadata.json", "raw_agent_outputs.json"],
+    "hard_requirement": [
+      "metadata.json",
+      "raw_agent_outputs.json"
+    ],
     "preference": "file_artifact_completeness == pass (A2 9-artifact contract, read-only check)",
-    "tie_break_order": ["analysis_date desc", "created_at desc", "run_id desc"],
+    "tie_break_order": [
+      "analysis_date desc",
+      "created_at desc",
+      "run_id desc"
+    ],
     "database_status": "reported independently, never gates selection"
   },
+  "historical_snapshot_notice": "This entire file (including six_ticker_coverage, expected_vs_detected_summary below, and label_schema.undeclared_conflict_pairs above) is a POINT-IN-TIME SNAPSHOT from the original A4 implementation task (report_created: 2026-08-13, head: b5837e80a4550fc35165d0013a8ef0f27ccb4c8f). It is preserved below UNCHANGED as historical provenance and must not be read as the current v0.1.2.1 selected-run set. See current_selection (added by v0.1.2.1 Step 3: Regression QA Contract Cleanup) for the active selection, which is a mirror of the single authoritative source docs/audit_artifacts/qa_closure_index.json:selected_runs -- never edit run_ids independently here.",
+  "current_selection": {
+    "as_of": "v0.1.2.1 Step 3 (Regression QA Contract Cleanup + Current Run Alignment)",
+    "authoritative_source": "docs/audit_artifacts/qa_closure_index.json:selected_runs",
+    "note": "Mirrors qa_closure_index.json for at-a-glance reading. qa_closure_index.json remains the single source of truth for selected run_ids -- do not edit run_ids independently in this file.",
+    "selected_runs": {
+      "NVDA": {
+        "run_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+        "artifact_directory": "outputs/runs/5ffe121a-68fd-473b-82b5-c9465332d8a2/"
+      },
+      "QQQ": {
+        "run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+        "artifact_directory": "outputs/runs/a364e0ee-3bb4-4032-88b7-5cd82e379805/"
+      },
+      "MSFT": {
+        "run_id": "07ddc074-9ab2-4b16-8957-acbf94012144",
+        "artifact_directory": "outputs/runs/07ddc074-9ab2-4b16-8957-acbf94012144/"
+      },
+      "SNDK": {
+        "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "artifact_directory": "outputs/runs/183b04dd-aae3-4b33-bbb0-3c9bc3bc942f/"
+      },
+      "TSM": {
+        "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+        "artifact_directory": "outputs/runs/1a338ced-118e-44d2-b3f6-2444bfb9d7e6/"
+      },
+      "AMD": {
+        "run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+        "artifact_directory": "outputs/runs/b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6/"
+      }
+    },
+    "changed_from_historical_snapshot": {
+      "NVDA": {
+        "was": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+        "now": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+        "reason": "Regenerated regression selection since the original A4 implementation snapshot; matches item6_a2_artifact_completeness.json and outputs/regression/regression_report.json."
+      },
+      "MSFT": {
+        "was": "0cb43bae-1a4d-4003-bb29-55d420498842",
+        "now": "07ddc074-9ab2-4b16-8957-acbf94012144",
+        "reason": "Same."
+      },
+      "QQQ": {
+        "was": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+        "now": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+        "reason": "Unchanged since the original snapshot."
+      },
+      "SNDK": {
+        "was": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "now": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "reason": "Unchanged since the original snapshot."
+      },
+      "TSM": {
+        "was": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+        "now": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+        "reason": "Unchanged since the original snapshot."
+      },
+      "AMD": {
+        "was": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+        "now": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+        "reason": "Unchanged since the original snapshot."
+      }
+    }
+  },
+  "current_regression_diagnostic_baseline": {
+    "note": "Authority-aware per-ticker diagnostic baseline, computed by comqutor_alpha.regression.authority_contract from the already-persisted outputs/regression/regression_report.json (no rerun) against the Step 1 Regression Label Authority Audit. main_conflict_match-style fields below must never be read as production PASS/FAIL for a non-gold expectation -- see acceptance_status on each entry.",
+    "source_regression_report": "outputs/regression/regression_report.json",
+    "source_authority_audit": "docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json",
+    "expected_alpha_gate": {
+      "target": 0.75,
+      "current_status": "PENDING_APPROVED_GOLD_OR_VALIDATED_CONTRACT",
+      "current_gold_hit_rate": null,
+      "gate_result": null
+    },
+    "main_conflict_gate": {
+      "requested_target": ">=4/6",
+      "current_evaluable_gold_cases": 0,
+      "status": "PENDING_GOLD_CONTRACT",
+      "use_for_current_production_acceptance": false,
+      "gate_result": null
+    },
+    "detail_artifact": "See docs/audit_artifacts/qa_closure_index.json for the full per-ticker authority-aware breakdown."
+  },
+  "v0_1_2_1_fresh_baseline_selection": {
+    "as_of": "2026-08-25T20:17:38.170873+00:00",
+    "authoritative_source": "docs/audit_artifacts/qa_closure_index.json:selected_runs (post-Step-4 promotion)",
+    "generated_by": "Step 4 retry -- real production runs via COMQUTOR_REAL_TRADINGAGENTS_ENABLED / COMQUTOR_WEEK2_LLM_ENABLED, DeepSeek deepseek-v4-flash",
+    "selected_runs": {
+      "NVDA": {
+        "run_id": "6f4e07f9-e7fb-4637-9105-5d6936e28f81",
+        "artifact_directory": "outputs/runs/6f4e07f9-e7fb-4637-9105-5d6936e28f81/"
+      },
+      "QQQ": {
+        "run_id": "57244747-7237-4cb6-a01c-cb8dd95d122f",
+        "artifact_directory": "outputs/runs/57244747-7237-4cb6-a01c-cb8dd95d122f/"
+      },
+      "MSFT": {
+        "run_id": "ce6b9628-b23f-4933-9fde-2568b315adf7",
+        "artifact_directory": "outputs/runs/ce6b9628-b23f-4933-9fde-2568b315adf7/"
+      },
+      "SNDK": {
+        "run_id": "e4309acb-22c6-475e-a357-1e47db587202",
+        "artifact_directory": "outputs/runs/e4309acb-22c6-475e-a357-1e47db587202/"
+      },
+      "TSM": {
+        "run_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8",
+        "artifact_directory": "outputs/runs/43660d9d-5993-4d2d-a7d8-9b3a47fd59b8/"
+      },
+      "AMD": {
+        "run_id": "eb714c04-645c-41e2-8292-a4739915f940",
+        "artifact_directory": "outputs/runs/eb714c04-645c-41e2-8292-a4739915f940/"
+      }
+    },
+    "changed_from_step3_current_selection": {
+      "NVDA": {
+        "step3_current_selection_run_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+        "step4_fresh_run_id": "6f4e07f9-e7fb-4637-9105-5d6936e28f81"
+      },
+      "QQQ": {
+        "step3_current_selection_run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+        "step4_fresh_run_id": "57244747-7237-4cb6-a01c-cb8dd95d122f"
+      },
+      "MSFT": {
+        "step3_current_selection_run_id": "07ddc074-9ab2-4b16-8957-acbf94012144",
+        "step4_fresh_run_id": "ce6b9628-b23f-4933-9fde-2568b315adf7"
+      },
+      "SNDK": {
+        "step3_current_selection_run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+        "step4_fresh_run_id": "e4309acb-22c6-475e-a357-1e47db587202"
+      },
+      "TSM": {
+        "step3_current_selection_run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+        "step4_fresh_run_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8"
+      },
+      "AMD": {
+        "step3_current_selection_run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+        "step4_fresh_run_id": "eb714c04-645c-41e2-8292-a4739915f940"
+      }
+    },
+    "note": "The Step-3 current_selection block (the v0.1.2 selected set) and the original 2026-08-13 six_ticker_coverage snapshot are both preserved unchanged below -- this is an additive new section, nothing overwritten."
+  },
   "six_ticker_coverage": [
-    {"ticker": "NVDA", "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665", "analysis_date": "2026-08-11", "file_artifact_completeness": "pass", "database_record_status": "found:completed", "offline_reprocess_status": "completed"},
-    {"ticker": "QQQ", "run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805", "analysis_date": "2026-07-31", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
-    {"ticker": "MSFT", "run_id": "0cb43bae-1a4d-4003-bb29-55d420498842", "analysis_date": "2026-07-31", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
-    {"ticker": "SNDK", "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f", "analysis_date": "2026-07-27", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
-    {"ticker": "TSM", "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6", "analysis_date": "2026-08-03", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"},
-    {"ticker": "AMD", "run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6", "analysis_date": "2026-07-31", "file_artifact_completeness": "fail", "database_record_status": "not_found", "offline_reprocess_status": "completed"}
+    {
+      "ticker": "NVDA",
+      "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "analysis_date": "2026-08-11",
+      "file_artifact_completeness": "pass",
+      "database_record_status": "found:completed",
+      "offline_reprocess_status": "completed"
+    },
+    {
+      "ticker": "QQQ",
+      "run_id": "a364e0ee-3bb4-4032-88b7-5cd82e379805",
+      "analysis_date": "2026-07-31",
+      "file_artifact_completeness": "fail",
+      "database_record_status": "not_found",
+      "offline_reprocess_status": "completed"
+    },
+    {
+      "ticker": "MSFT",
+      "run_id": "0cb43bae-1a4d-4003-bb29-55d420498842",
+      "analysis_date": "2026-07-31",
+      "file_artifact_completeness": "fail",
+      "database_record_status": "not_found",
+      "offline_reprocess_status": "completed"
+    },
+    {
+      "ticker": "SNDK",
+      "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "analysis_date": "2026-07-27",
+      "file_artifact_completeness": "fail",
+      "database_record_status": "not_found",
+      "offline_reprocess_status": "completed"
+    },
+    {
+      "ticker": "TSM",
+      "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "analysis_date": "2026-08-03",
+      "file_artifact_completeness": "fail",
+      "database_record_status": "not_found",
+      "offline_reprocess_status": "completed"
+    },
+    {
+      "ticker": "AMD",
+      "run_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6",
+      "analysis_date": "2026-07-31",
+      "file_artifact_completeness": "fail",
+      "database_record_status": "not_found",
+      "offline_reprocess_status": "completed"
+    }
   ],
   "expected_vs_detected_summary": [
-    {"ticker": "NVDA", "missing_expected": ["A103", "A201"], "unexpected_alphas": ["A001"], "main_conflict": "A301__A304", "main_conflict_match": true},
-    {"ticker": "QQQ", "missing_expected": ["A001", "A003"], "unexpected_alphas": ["A301"], "main_conflict": null, "main_conflict_match": false},
-    {"ticker": "MSFT", "missing_expected": ["A101", "A102", "A304"], "unexpected_alphas": [], "main_conflict": null, "main_conflict_match": false},
-    {"ticker": "SNDK", "missing_expected": ["A201", "A301", "A304"], "unexpected_alphas": [], "main_conflict": null, "main_conflict_match": false},
-    {"ticker": "TSM", "missing_expected": ["A103", "A304"], "unexpected_alphas": [], "main_conflict": null, "main_conflict_match": false},
-    {"ticker": "AMD", "missing_expected": ["A101", "A201"], "unexpected_alphas": ["A501"], "main_conflict": "A301__A304", "main_conflict_match": false}
+    {
+      "ticker": "NVDA",
+      "missing_expected": [
+        "A103",
+        "A201"
+      ],
+      "unexpected_alphas": [
+        "A001"
+      ],
+      "main_conflict": "A301__A304",
+      "main_conflict_match": true
+    },
+    {
+      "ticker": "QQQ",
+      "missing_expected": [
+        "A001",
+        "A003"
+      ],
+      "unexpected_alphas": [
+        "A301"
+      ],
+      "main_conflict": null,
+      "main_conflict_match": false
+    },
+    {
+      "ticker": "MSFT",
+      "missing_expected": [
+        "A101",
+        "A102",
+        "A304"
+      ],
+      "unexpected_alphas": [],
+      "main_conflict": null,
+      "main_conflict_match": false
+    },
+    {
+      "ticker": "SNDK",
+      "missing_expected": [
+        "A201",
+        "A301",
+        "A304"
+      ],
+      "unexpected_alphas": [],
+      "main_conflict": null,
+      "main_conflict_match": false
+    },
+    {
+      "ticker": "TSM",
+      "missing_expected": [
+        "A103",
+        "A304"
+      ],
+      "unexpected_alphas": [],
+      "main_conflict": null,
+      "main_conflict_match": false
+    },
+    {
+      "ticker": "AMD",
+      "missing_expected": [
+        "A101",
+        "A201"
+      ],
+      "unexpected_alphas": [
+        "A501"
+      ],
+      "main_conflict": "A301__A304",
+      "main_conflict_match": false
+    }
   ],
   "dominance_guard_review_required_total": 0,
   "evidence_polarity_errors_total": 0,
@@ -136,11 +403,27 @@
       "file": "tests/test_a4_regression_runner.py",
       "passed": 41,
       "failed": 0,
-      "sections": {"A_labels": 7, "B_run_selection": 6, "C_alpha_comparison": 7, "D_conflict_comparison": 4, "E_evidence_polarity": 4, "F_safety": 6, "report_assembly_and_stance_source": 7}
+      "sections": {
+        "A_labels": 7,
+        "B_run_selection": 6,
+        "C_alpha_comparison": 7,
+        "D_conflict_comparison": 4,
+        "E_evidence_polarity": 4,
+        "F_safety": 6,
+        "report_assembly_and_stance_source": 7
+      }
     },
     "backend_full_regression": {
-      "before_a4_own_tests": {"passed": 3415, "failed": 3, "skipped": 47},
-      "after_a4_own_tests": {"passed": 3456, "failed": 3, "skipped": 47},
+      "before_a4_own_tests": {
+        "passed": 3415,
+        "failed": 3,
+        "skipped": 47
+      },
+      "after_a4_own_tests": {
+        "passed": 3456,
+        "failed": 3,
+        "skipped": 47
+      },
       "new_a4_regressions": 0
     },
     "frontend": "not re-run this segment (no shared type/API contract change; task section 19 step 10 explicitly says not to touch/test frontend 'just for form')",
@@ -175,5 +458,35 @@
     "new ticker beyond the fixed 6",
     "real Provider run"
   ],
-  "report_created": "2026-08-13"
+  "report_created": "2026-08-13",
+  "final_v0_1_2_1_production_e2e_step10": {
+    "as_of": "v0.1.2.1 Step 10 (FINAL Fresh Six-Ticker Production E2E)",
+    "note": "ADDITIVE, new block -- does NOT overwrite current_selection above (which still correctly mirrors qa_closure_index.json:selected_runs, itself still NO_CURRENT_VALID_SEMANTIC_BASELINE since not all six tickers passed semantic execution health in this run: NVDA/MSFT/TSM failed the internal 95% benchmark). This block records the technically-complete (54/54 artifact) final E2E run_ids for run-id-consistency purposes per Step 10 section 23.",
+    "run_ids": {
+      "NVDA": "948be419-b542-4096-a536-ff567ef459c2",
+      "QQQ": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+      "MSFT": "c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+      "SNDK": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+      "TSM": "5be841d5-0924-4943-8d37-ccd4168228cb",
+      "AMD": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+    },
+    "technical_e2e_status": "PASS",
+    "semantic_runtime_health_status": "FAIL (3/6 tickers below internal 95% benchmark)",
+    "authoritative_report": "docs/audit_artifacts/final_six_ticker_production_e2e_v0.1.2.1.json"
+  },
+  "final_v0_1_2_1_production_e2e_r2_step11": {
+    "as_of": "v0.1.2.1 Step 11 (Provider Health Recheck + Degraded-Ticker Clean Rerun)",
+    "note": "ADDITIVE, new block -- repairs final_v0_1_2_1_production_e2e_step10 above by replacing the three provider-degraded runs (NVDA/MSFT/TSM). Does not overwrite current_selection (still correctly mirrors qa_closure_index.json:selected_runs, a separate, stricter regression-baseline gate not addressed by this task).",
+    "run_ids": {
+      "NVDA": "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+      "QQQ": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+      "MSFT": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+      "SNDK": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+      "TSM": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+      "AMD": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+    },
+    "technical_e2e_status": "PASS",
+    "semantic_runtime_health_status": "PASS (6/6 tickers meet the internal 95% benchmark)",
+    "authoritative_report": "docs/audit_artifacts/final_six_ticker_production_e2e_v0.1.2.1_r2.json"
+  }
 }

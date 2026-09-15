@@ -315,6 +315,14 @@ _SAFE_ERROR_MESSAGES = {
     ),
     "REAL_FORCE_REFRESH_DISABLED": "force_refresh is not enabled for real TradingAgents execution.",
     "INVALID_ANALYST_SELECTION": "selected_analysts contains an analyst not supported for real execution.",
+    "LIVE_SEMANTIC_PIPELINE_NOT_READY": (
+        "Real TradingAgents is enabled, but Week2 semantic LLM is disabled. "
+        "Live research was not started."
+    ),
+    "LIVE_SEMANTIC_PROVIDER_NOT_READY": (
+        "Real TradingAgents and Week2 semantic LLM are both enabled, but the Week2 "
+        "semantic Provider is not configured/credentialed. Live research was not started."
+    ),
 }
 
 
@@ -639,7 +647,24 @@ def prepare_research_submission(
             elif force_refresh and not server_execution.is_real_force_refresh_enabled():
                 real_gate_error = "REAL_FORCE_REFRESH_DISABLED"
             elif real_gate_error is None:
-                real_config = ctx["config"]
+                # Live-semantic-pipeline readiness guard (operational safety
+                # fix): TradingAgents' own config/credential are fine, but a
+                # real run must ALSO never be dispatched while Week2's LLM
+                # classifier is disabled or its own provider isn't ready --
+                # otherwise TradingAgents completes a full, expensive
+                # research session whose evidence can never be committed to
+                # any Alpha (see server_execution.build_live_semantic_
+                # readiness's docstring for the two incidents this closes).
+                # Checked and enforced HERE, strictly before real_config is
+                # ever set -- real_config is the only thing that lets
+                # execution_payload carry allow_real_tradingagents_run=True
+                # further below, so a failure here guarantees TradingAgents
+                # is never dispatched.
+                live_semantic_readiness = server_execution.build_live_semantic_readiness()
+                if live_semantic_readiness["error"] is not None:
+                    real_gate_error = live_semantic_readiness["error"]
+                else:
+                    real_config = ctx["config"]
 
     if graph_repository is None:
         try:

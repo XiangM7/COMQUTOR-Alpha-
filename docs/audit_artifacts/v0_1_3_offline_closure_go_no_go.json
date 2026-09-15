@@ -1,0 +1,169 @@
+{
+  "schema_version": "v0.1.3_offline_closure_go_no_go.v1",
+  "task": "COMQUTOR Alpha v0.1.3 QA Closure -- Offline Closure (Items 1-10), per explicit user STOP instruction halting all further Provider/TradingAgents spend until this closure is proven",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "commit": false,
+  "push": false,
+  "provider_calls_this_closure_phase": 0,
+  "tradingagents_calls_this_closure_phase": 0,
+  "note_on_prior_spend": "Two real NVDA smoke-test runs (c9abf687, degraded/superseded; 2f8ee897, healthy/selected) plus a 10-call DeepSeek health probe were executed BEFORE this STOP instruction arrived, as an explicitly user-authorized Section I smoke test. Zero additional Provider/TradingAgents calls have been made since the STOP instruction -- this report is 100% offline.",
+
+  "issue_status": {
+    "issue_1_six_ticker_regression_results": "FIXED",
+    "issue_2_formal_evidence_review_metrics": "FIXED",
+    "issue_3_entity_exposure_seed_status_consistency": "FIXED",
+    "issue_4_alpha_level_alignment_a301": "FIXED",
+    "issue_5_evidence_polarity": "FIXED",
+    "issue_6_v0_1_3_feedback_loop": "SPEC BLOCKED",
+    "conflict_state_separation": "FIXED",
+    "high_value_unclassified_recovery_audit": "COMPLETE"
+  },
+
+  "issue_1_detail": {
+    "complaint": "Current material shows expected labels but not actual regression results.",
+    "scope_per_instruction": "Report/schema/testing only -- final six-ticker report NOT populated (no valid fresh v0.1.3 six-ticker run set exists yet; populating one now would mean 'stale mixed runs', explicitly forbidden).",
+    "delivered": [
+      "comqutor_alpha/regression/regression_report_v3.py -- new module. build_regression_report_v3_entry() produces one ticker's full result (actual detected Alphas, expected Alphas split diagnostic/gold/rejected, hits, misses, actual hit rate with explicit evaluation_mode, actual admitted main conflict, expected main conflict ONLY where an APPROVED_GOLD expectation exists, match result, graph edge count, artifact completeness, ticker consistency, semantic execution health, conflict counts). build_regression_report_v3() aggregates into the 6 top-level acceptance gates.",
+      "Reuses, never reimplements: comqutor_alpha.regression.authority_contract's apply_alpha_authority/apply_main_conflict_authority (Step 1's GOLD/DOCUMENTED/PROVISIONAL/REJECTED classification) -- guarantees a non-gold expectation can never masquerade as a gold PASS.",
+      "tests/test_regression_report_v3.py -- 10 new tests, all synthetic fixtures (per instruction), covering: actual-results-not-just-labels, no-gold-never-fakes-gold-pass, gold-evaluated-correctly, main-conflict-none-when-no-authority, main-conflict-match/mismatch, no-selected-run-degrades-to-None, semantic-health passthrough, conflict-counts passthrough, 6-ticker aggregate gate arithmetic, no-Provider-import guard.",
+      "Wiring verified against REAL historical data (docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json + a real persisted run_audit.json) via a manual scratch check -- confirms the module runs cleanly end-to-end on real inputs without exception. This check is NOT written into any final report artifact (would be exactly the 'stale mixed run' the instruction forbids)."
+    ],
+    "still_pending": "Actual population of docs/audit_artifacts/regression_report_v3.json/.md requires the fresh v0.1.3 six-ticker run set (Section J), which is blocked pending explicit re-authorization per the STOP instruction."
+  },
+
+  "issue_2_detail": {
+    "complaint": "Evidence Review exports a sample but does not expose formal accuracy metrics.",
+    "delivered": [
+      "docs/audit_artifacts/evidence_review_summary_v2.json gains an additive 'formal_metrics' block with the exact 7 named fields requested: alpha_match_accuracy, alpha_match_reviewed_count, alpha_match_correct_count, polarity_accuracy, polarity_reviewed_count, polarity_correct_count, critical_support_opposition_reversal_count.",
+      "Every value is a direct alias of the pre-existing, frozen acceptance_results numbers (166/200, 52/61, 0) -- never recomputed, never a second source of truth, no frozen human-reviewed label touched.",
+      "tests/test_evidence_review_v2.py +3 tests: fields exist, values are a pure alias of acceptance_results, and meet acceptance targets."
+    ],
+    "acceptance_targets": {
+      "alpha_match_accuracy": {"value": 0.83, "target": ">=0.80", "status": "PASS"},
+      "polarity_accuracy": {"value": 0.8525, "target": ">=0.80", "status": "PASS"},
+      "critical_support_opposition_reversal_count": {"value": 0, "target": "==0", "status": "PASS"}
+    }
+  },
+
+  "issue_3_detail": {
+    "complaint": "Entity exposure gating appears inconsistently as approved_gating vs shadow vs draft.",
+    "root_cause": "Historical per-run artifacts (persisted before a ticker's approval date) were served verbatim forever after by get_entity_alpha_exposures(), with no re-check against the live seed file. The canonical B3 vocabulary (draft_shadow/approved_gating/disabled, via resolve_exposure_mode) was already correct and unified everywhere else -- this was the one gap.",
+    "delivered": [
+      "comqutor_alpha/api/routes_research.py: _current_seed_status(ticker) helper (resolved fresh from the live seed file every call, never cached) overlaid on get_entity_alpha_exposures()'s response AND on run_audit.json's entity_exposure_audit block.",
+      "New _seed_status_consistency_invariant() accounting invariant: proves entity_exposure_audit.current_seed_status is byte-identical to an independently-resolved call against the live seed for the same ticker -- one canonical code path, not two that happen to agree.",
+      "tests/test_entity_alpha_exposure_productization.py +3 tests (API layer), tests/test_run_audit_v2.py +2 tests (audit layer, including the literal seed_status_consistency invariant PASS)."
+    ],
+    "frontend_finding": "Traced end-to-end: AlphaCard.tsx already uses the canonical vocabulary consistently (configured_status/effective_status, resolveLifecycleStatus()) and correctly shows a completed run's OWN historical status snapshot -- by design, a completed run's audit trail must never be silently rewritten just because the seed was promoted since. current_seed_status is intentionally an additive QA/API-layer field (for detecting staleness), not wired into the per-run product card, which has a different, correct job (historical truth). No frontend code change was needed or made.",
+    "verification_on_real_data": "Regenerated run_audit.json (offline, zero Provider/TradingAgents calls, additive fields only) for both real NVDA runs (2f8ee897 selected, c9abf687 superseded) -- seed_status_consistency=PASS, current_seed_status=approved_gating on both, matching the live seed file."
+  },
+
+  "issue_4_detail": {
+    "complaint": "A301 (or any Alpha) can appear as active despite lacking ticker-specific evidence AND local structure support.",
+    "bug_classification": "A (scorer/classifier-stage decision-logic bug) -- specifically in comqutor_alpha/graph_engine/alpha_level_classifier.py's Case A/B qualification logic. NOT a persistence bug, NOT an API serialization bug, NOT a display normalization bug, NOT a frontend rendering bug -- all four traced and confirmed correct-by-construction (see trace below).",
+    "trace": {
+      "activation_scorer_v2.py": "UNCHANGED. Already correctly computed the score and cap_reason_codes (NO_TICKER_SPECIFIC_EVIDENCE, NO_LOCAL_STRUCTURE_SUPPORT) -- the caps only reduced the score ceiling to 60/70, both still above ACTIVE_THRESHOLD=50, which is exactly why an under-qualified Alpha could still clear 'active'.",
+      "alpha_level_classifier.py (THE BUG, NOW FIXED)": "Case A/B previously never gated 'active' at all (a prior, now-superseded Product decision). Fixed: when BOTH required signals are absent, qualified_level demotes ACTIVE -> CANDIDATE (the only lower canonical level), is_blocked=True, blocked_from=('active',). A single missing signal alone does NOT gate (matches John's literal 'lacks both' wording). B4 thresholds (50/70/86) untouched.",
+      "persistence (week4_persistence.py)": "Verified: generic _text()/_bool() pass-through of qualified_level/is_blocked/blocked_from -- no remapping logic exists that could rewrite the fixed classifier's output.",
+      "API serialization (routes_research.py)": "Verified: activation_summary/entity_exposure sections reuse v2_alphas verbatim, never recompute a second qualification algorithm.",
+      "display normalization (alpha_display_normalizer.py)": "Verified via _activation_level_for(): returns CAPPED_ACTIVE only when qualified_level==ACTIVE and blocked from DOMINANT; otherwise returns qualified_level verbatim. For the fixed case (qualified_level=CANDIDATE), it correctly falls through to 'candidate' -- proven by a new end-to-end test running the REAL classifier into the REAL normalizer.",
+      "frontend (AlphaCard.tsx)": "Verified: `const displayLevel = activation?.activation_level ?? status` reads the authoritative field directly, no independent score-threshold logic; already has a built-in 'Held at {qualified_level}, blocked from {blocked_from}' rendering path for exactly this scenario (target_level !== qualified_level)."
+    },
+    "tests_added": [
+      "tests/test_alpha_display_normalization.py::test_case6b_a301_style_active_gated_alpha_displays_as_candidate_not_active -- real classifier -> real normalizer, score=55 with both cap reasons, proves display_level==candidate (never active/capped_active).",
+      "tests/test_v0_1_3_offline_replay_proof.py::test_section_c_a301_real_msft_run_was_incorrectly_active_before_the_fix_now_gates_to_candidate -- uses a REAL historical MSFT run's real, on-disk A301 record (score=58.8715, 0/16 ticker-specific evidence, 0 local structure edges, OLD status='active') and proves the CURRENT code correctly gates it to candidate/blocked."
+    ],
+    "thresholds_preserved": "ACTIVE_THRESHOLD=50.0, DOMINANT_THRESHOLD=70.0, REGIME_LEVEL_THRESHOLD=86.0 -- byte-identical, untouched."
+  },
+
+  "issue_5_detail": {
+    "complaint": "Evidence rebutting A304 may be displayed as A304 bear evidence.",
+    "bug_classification": "PRESENTATION-SIDE ONLY. B1 stance classification, Evidence Fact grouping, and B5's conflict_evidence_ui.py (bull_evidence/bear_evidence/counter_evidence) were ALREADY correct -- confirmed by full-file reading before any change was made. The bug was isolated to conflict_detector.py's _structure_block()-built TOP-LEVEL bull_structure/bear_structure fields (the ones frontend/src/components/ConflictCard.tsx actually renders), which were built from the unfiltered qualifying-claim pool regardless of evidence_stance.",
+    "fix": "Added a stance-filtered display-only subset (bull_display_qualifying/bear_display_qualifying, keeping only evidence_stance==supports_alpha) feeding ONLY bull_structure/bear_structure's display fields. evidence_strength_raw, conflict_score_raw, admissibility, shared_fact_group_ids, and every *_raw_claim_count audit field remain fed by the ORIGINAL unfiltered pool -- the frozen conflict-score formula is completely untouched.",
+    "tests_added": [
+      "tests/test_conflict_detector.py::TestEvidencePolarityBullBearAssignment -- 7 tests covering all 5 required scenarios: (1) supports A304 appears in bear_structure, (2) opposes A304 excluded, (3) supports the counter-alpha excluded, (4) mixed/mentions excluded, (5) generic bearish language matched to a different alpha never appears under A304 -- plus a dedicated test proving evidence_strength/conflict_score are byte-identical before and after (display-only fix).",
+      "tests/test_v0_1_3_offline_replay_proof.py::test_section_d_real_msft_conflicts_drop_misattributed_display_claims_without_changing_the_score -- REAL historical MSFT conflicts.json: bear_structure claim count for A101__A304 drops 24->16, A304__A601 bull 24->15/bear 24->16, while conflict_score/admitted-conflict-set/main_conflict are IDENTICAL before and after."
+    ],
+    "critical_invariant": "critical_support_opposition_reversal_count == 0 (see Item 2's formal_metrics -- PASS)."
+  },
+
+  "issue_6_detail": {
+    "complaint": "The attached materials do not show the core v0.1.3 feedback-loop functionality.",
+    "result_code": "FEEDBACK_LOOP_SPEC_FOUND_BUT_PHASE_2_NOT_MVP (reported, not invented)",
+    "authoritative_spec_found": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx, 'Patent Foundation and Concept Mapping' table: SIC patent concept 'Non-execution events as computational feedback' -> COMQUTOR embodiment 'Alpha Memory: invalidation conditions, failed/expired structures stored with reason codes to adjust future activation' -- MVP status column says 'Phase 2', not MVP. Every sibling row in the same table (Structure Graph, Alpha Mapper, Activation Score, Conflict Detector) is marked MVP.",
+    "current_implementation": "Only a static, Product-authored, per-Alpha descriptive text registry exists (invalidation_registry.py / alpha_invalidation_conditions_v0.1.yaml) for UI display -- it never persists an actual failed/expired run outcome across runs or feeds it back into a later run's activation score. No cross-run learning loop exists anywhere in the codebase.",
+    "action_taken": "None invented. Implementing the real Phase 2 Alpha Memory system is a substantial, unscoped architectural addition explicitly deferred by the project's own Development Plan -- doing so now would itself violate the standing instruction never to invent a Product decision.",
+    "open_blocker_for_product": "Two readings are possible and only Product/John can resolve which is meant: (a) the patent-level Phase 2 Alpha Memory concept -- a scope-expansion request, not a v0.1.3 bug; or (b) something narrower already achievable in v0.1.3 that was never given to engineering as a spec under 'feedback loop' terminology. See docs/audit_artifacts/section_f_feedback_loop_spec_search_v0.1.3.json for the full file-by-file search record."
+  },
+
+  "conflict_state_separation_detail": {
+    "requirement": "Strict ADMITTED / CANDIDATE / BLOCKED-REJECTED separation; no candidate as admitted; no blocked/rejected as Main Conflict; Main Conflict only from admitted; API/UI/artifact counts agree.",
+    "already_correct_from_prior_work": "conflict_detector.py's admitted_conflicts list (and therefore conflicts/main_conflict) is built ONLY from pairs whose outcome=='admitted' -- structurally impossible for a suppressed/rejected/candidate pair to leak in. The B2 Conflict Evidence Admissibility gate (conflict_admissibility.py) already produces a strict two-value status (admitted/candidate) layered under the three-value outcome (admitted/suppressed/rejected); a B2-denied 'candidate' pair's outcome is always 'suppressed', never 'admitted'. The run-audit API layer (_conflict_summary_section) already exposed explicit per-pair 'outcome'/'admissibility.status'/'is_main' fields and top-level declared/admitted/suppressed/rejected/candidate counts from prior work (B2_CONFLICT_EVIDENCE_ADMISSIBILITY).",
+    "new_this_task": "Two new accounting invariants (_conflict_accounting_invariants): conflict_pairs_conserved (declared == admitted+suppressed+rejected) and candidate_conflicts_are_a_subset_of_suppressed. 3 new tests in tests/test_run_audit_v2.py proving PASS on a consistent fixture, FAIL surfaces honestly on a tampered one, and a B2-denied candidate pair is counted correctly and never becomes main_conflict.",
+    "verified_on_real_data": "Both regenerated real NVDA run_audit.json files show conflict_pairs_conserved=PASS."
+  },
+
+  "high_value_unclassified_recovery_detail": {
+    "requirement": "Review high-value NONE/unclassified claims against existing taxonomy, from existing healthy artifacts only, zero Provider calls.",
+    "delivered": "docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3.json/.md -- rollforward of the exhaustive v0.1.2.1 review (209 candidates individually adjudicated from Step 5A's healthy six-ticker data) since no v0.1.3-session code change touches Alpha Mapper matching (all of Sections B/C/D sit strictly downstream). Results unchanged: 0 strong, 0 borderline, 208 correct_none, 1 duplicate/low-value, 0 insufficient_context. TARGET_NOT_SUPPORTED_BY_HEALTHY_SEMANTIC_DATA (honest, not forced).",
+    "provider_calls": 0
+  },
+
+  "files_changed_this_offline_closure_phase": [
+    "docs/audit_artifacts/evidence_review_summary_v2.json (additive formal_metrics block)",
+    "tests/test_evidence_review_v2.py (+3 tests)",
+    "comqutor_alpha/api/routes_research.py (current_seed_status on entity_exposure_audit; new _seed_status_consistency_invariant; reordered audit_validation computation to run after entity_exposure_audit exists)",
+    "tests/test_run_audit_v2.py (+2 seed_status_consistency tests, plus the earlier +3 conflict-invariant tests from before the STOP instruction)",
+    "tests/test_step10_final_e2e_qa.py (frozen-hash update: conflict_detector.py, alpha_level_classifier.py)",
+    "tests/test_step11_provider_health_rerun.py (same frozen-hash update)",
+    "tests/test_alpha_display_normalization.py (+1 end-to-end A301 display test)",
+    "comqutor_alpha/regression/regression_report_v3.py (NEW module)",
+    "tests/test_regression_report_v3.py (NEW, 10 tests)",
+    "tests/test_v0_1_3_offline_replay_proof.py (NEW, 2 real-data proof tests)",
+    "outputs/runs/2f8ee897-.../run_audit.json (regenerated offline from already-persisted artifacts, additive fields only, zero new Provider/TradingAgents calls)",
+    "outputs/runs/c9abf687-.../run_audit.json (same, superseded run)"
+  ],
+  "files_changed_earlier_in_this_v0_1_3_task_before_the_stop_instruction": [
+    "comqutor_alpha/api/routes_research.py (Section B: _current_seed_status + overlay; Section E: original _conflict_accounting_invariants)",
+    "comqutor_alpha/graph_engine/alpha_level_classifier.py (Section C fix)",
+    "comqutor_alpha/conflict_engine/conflict_detector.py (Section D fix)",
+    "tests/test_entity_alpha_exposure_productization.py, tests/test_b4_activation_level_alignment.py, tests/test_conflict_detector.py, tests/test_msft_a102_a304_taxonomy_adjudication.py, tests/test_evidence_review_v2.py (hash updates + Section C/D tests)",
+    "docs/audit_artifacts/section_f_feedback_loop_spec_search_v0.1.3.json (NEW)",
+    "docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3.json/.md (NEW)",
+    "docs/audit_artifacts/section_i_nvda_smoke_test_v0.1.3.json (NEW -- the one authorized real smoke test + reproducibility check + selected_run_id decision)"
+  ],
+
+  "tests": {
+    "full_suite_run": "tests/ -q, full repository",
+    "passed": 3965,
+    "failed": 21,
+    "errors": 3,
+    "skipped": 47,
+    "subtests_passed": 69,
+    "new_failures_attributable_to_this_task": 0,
+    "all_21_failures_and_3_errors_confirmed_pre_existing": {
+      "test_evidence_review_v2_directional_eligibility.py (3 errors + 3 fails)": "Same root cause as test_evidence_review_v2.py's 13 pre-existing failures below -- references fields (directional_eligibility, raw_h5_metrics-family) removed from evidence_review_summary_v2.json by an EARLIER task's deliberate schema-stripping, under explicit instruction not to fix these tests.",
+      "test_evidence_review_sample.py (1 fail)": "Same family (activation_evidence_count references a field the stripped schema no longer has).",
+      "test_evidence_review_v2.py (13 fails: case1-6,9,9b,10-14)": "Same pre-existing schema-stripping family. (case17, the frozen-hash guard, now passes -- fixed this task.)",
+      "test_j3_semantic_benchmark_j2_v0_2.py (1 fail)": "Stale frozen HEAD reference, predates this task.",
+      "test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch (1 fail)": "comqutor_alpha/replay/semantic_binding.py and source_bundle.py already carried unstaged, pre-existing modifications (confirmed via git status) before this task began -- unrelated to Sections B-E.",
+      "test_w5_demo_seed.py (2 fails)": "scripts/w5_demo_fixtures.py and deterministic_echo_llm.py already carried pre-existing unstaged modifications before this task began -- unrelated."
+    }
+  },
+
+  "does_any_fix_change_research_result_semantics": {
+    "yes_for_sections_c_and_d": "alpha_level_classifier.py's Case A/B decision logic (Section C) and conflict_detector.py's bull_structure/bear_structure display filtering (Section D) DO change what is displayed for a real run whose data hits either condition -- exactly the intended, John-requested fixes. Both are narrowly scoped: Section C never touches B4's numeric thresholds/formula; Section D never touches evidence_strength/conflict_score/admissibility/main_conflict selection.",
+    "no_for_this_closure_phases_own_additions": "Items 1/2/9's own work (regression_report_v3.py, evidence_review_summary_v2.json's formal_metrics, the offline replay test file) is purely additive reporting/schema/testing -- zero semantic change. Item 3's current_seed_status/seed_status_consistency addition is purely additive (new fields only, no existing field's value or meaning changed)."
+  },
+
+  "must_existing_healthy_nvda_be_superseded": {
+    "answer": "NO -- the research run itself does not need to be re-executed.",
+    "reasoning": "Both Section C (Alpha Level Alignment) and Section D (Evidence Polarity) fixes were already live in the codebase BEFORE the NVDA smoke test (run 2f8ee897) was executed -- that run's persisted conflicts.json/alpha_activations.json already reflect the fixed code. Only that run's run_audit.json was stale relative to this closure phase's Item 3 addition (current_seed_status/seed_status_consistency did not exist yet when the run finalized) -- this has now been regenerated in place, offline, at zero cost (no re-run of the expensive research pipeline, no new Provider/TradingAgents call), and now shows current_seed_status=approved_gating, seed_status_consistency=PASS."
+  },
+
+  "remaining_product_authority_blockers": [
+    "Issue 6 (feedback loop): needs an explicit Product/John decision on which of the two readings (Phase 2 Alpha Memory scope-expansion vs. a narrower unspecified v0.1.3 concept) was actually meant, before any implementation can proceed."
+  ],
+
+  "next_step": "STOP HERE per explicit instruction. Awaiting explicit re-authorization before any fresh six-ticker run (Section J) or any further Provider/TradingAgents call."
+}

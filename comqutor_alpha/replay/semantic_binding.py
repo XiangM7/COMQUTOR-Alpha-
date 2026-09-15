@@ -68,6 +68,12 @@ _TASK_BINDING_VERSIONS = {
     # Reading it live means this entry can never again silently drift from
     # the real production prompt the way the old literal did.
     "alpha_classifier": _live_identity("alpha_classifier", "alpha_taxonomy_v1"),
+    # Step 5A (v0.1.2.1) execution-capacity repair: batched sibling of
+    # alpha_classifier, now the production default (see
+    # alpha_mapper.map_structured_records(use_batched_classifier=True)) --
+    # given its own binding support (_bind_alpha_batch) rather than being
+    # reported as EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED.
+    "alpha_classifier_batch": _live_identity("alpha_classifier_batch", "alpha_taxonomy_v1"),
     "structure_extractor": _live_identity("structure_extractor", None),
     # Added (Exact Semantic Replay B1 Binding Support task): B1 Evidence
     # Stance's own LLM upgrade task, registered in the runtime task registry
@@ -386,6 +392,136 @@ def _bind_alpha(
     )
 
 
+def _bind_alpha_batch(
+    record: dict[str, Any],
+    *,
+    audit: dict[str, Any],
+    structured_by_claim_id: dict[str, list[dict[str, Any]]],
+    alpha_matches_by_claim_id: dict[str, list[dict[str, Any]]],
+    taxonomy: dict[str, Any],
+    decision_owners: dict[str, list[str]],
+) -> None:
+    """Step 5A (v0.1.2.1) execution-capacity repair: batched sibling of
+    ``_bind_alpha``, one call binding to MANY alpha_matches decisions
+    (matched by claim_id), mirroring ``_bind_evidence_stance``'s existing
+    one-call-to-many-decisions pattern rather than inventing a new one.
+    Every requested claim_id must independently bind (own request-side
+    claim fields verified against the SAME structured record ``_bind_alpha``
+    checks, and its own decision verified against its own alpha_matches
+    row) for the call itself to register as bound -- a single malformed or
+    mismatched claim_id makes the WHOLE call unbound (missing/ambiguous/
+    mismatched, never silently dropped), exactly as
+    ``_bind_evidence_stance`` already requires for its own multi-item
+    calls. This mirrors production's own row-level salvage split: a
+    genuinely malformed batch response already made the affected claims
+    UNAVAILABLE in alpha_matches.json at run time (see
+    ``alpha_mapper._classify_alpha_batch_with_llm``) -- Exact Replay's job
+    here is only to verify THAT persisted result matches the recorded
+    call, never to re-judge it."""
+    call_id = str(record.get("call_id") or "")
+    request = record.get("input_payload")
+    output = record.get("validated_output")
+    if not isinstance(request, dict) or not isinstance(output, dict):
+        _append_unique(audit, "artifact_decision_mismatches", call_id)
+        return
+    requested_claims = _as_dict_list(request.get("claims"))
+    returned_decisions = _as_dict_list(output.get("decisions"))
+    if not requested_claims:
+        _append_unique(audit, "artifact_decision_mismatches", call_id)
+        return
+
+    expected_taxonomy = [
+        {"alpha_id": alpha.alpha_id, "alpha_name": alpha.name_en, "definition": alpha.core_thesis}
+        for alpha in sorted(taxonomy.values(), key=lambda item: item.alpha_id)
+    ]
+    known_alpha_ids = {entry["alpha_id"] for entry in expected_taxonomy}
+    if _as_dict_list(request.get("alpha_taxonomy")) != expected_taxonomy:
+        _append_unique(audit, "artifact_decision_mismatches", call_id)
+        return
+
+    requested_by_claim_id: dict[str, dict[str, Any]] = {}
+    for item in requested_claims:
+        claim_id = str(item.get("claim_id") or "")
+        if not claim_id or claim_id in requested_by_claim_id:
+            _append_unique(audit, "artifact_decision_mismatches", call_id)
+            return
+        requested_by_claim_id[claim_id] = item
+
+    returned_by_claim_id: dict[str, dict[str, Any]] = {}
+    for item in returned_decisions:
+        claim_id = str(item.get("claim_id") or "")
+        if claim_id not in requested_by_claim_id or claim_id in returned_by_claim_id:
+            continue  # extra/duplicate unrequested result -- never admitted, mirrors _bind_evidence_stance's own rule
+        returned_by_claim_id[claim_id] = item
+
+    decision_keys: list[str] = []
+    for claim_id, requested_claim in requested_by_claim_id.items():
+        item_label = f"{call_id}:{claim_id}"
+        structured_candidates = structured_by_claim_id.get(claim_id, [])
+        match_candidates = alpha_matches_by_claim_id.get(claim_id, [])
+        if not match_candidates or not structured_candidates:
+            _append_unique(audit, "missing_bindings", item_label)
+            continue
+        if len(match_candidates) != 1 or len(structured_candidates) != 1:
+            _append_unique(audit, "ambiguous_bindings", item_label)
+            continue
+        artifact_match = match_candidates[0]
+
+        # Request-side integrity: the batched request's own per-claim
+        # fields must be the SAME claim/evidence/factors/direction the
+        # artifact row itself was matched against -- the batch envelope
+        # trades _bind_alpha's content-based lookup for a direct claim_id
+        # key, so this re-derives the equivalent content check explicitly
+        # rather than dropping it.
+        if (
+            artifact_match.get("claim") != requested_claim.get("claim")
+            or artifact_match.get("evidence") != requested_claim.get("evidence")
+            or artifact_match.get("factors") != requested_claim.get("factors")
+            or artifact_match.get("direction") != requested_claim.get("direction")
+        ):
+            _append_unique(audit, "artifact_decision_mismatches", item_label)
+            continue
+
+        classifier = artifact_match.get("classifier")
+        returned = returned_by_claim_id.get(claim_id)
+        item_matches = False
+        if returned is not None and isinstance(classifier, dict) and classifier.get("used") is True:
+            decision = str(returned.get("decision") or "")
+            selected = returned.get("selected_alpha_id")
+            if decision == "select" and selected in known_alpha_ids:
+                item_matches = (
+                    artifact_match.get("matched_alpha") == selected
+                    and artifact_match.get("match_status") == "matched"
+                    and classifier.get("status") == "llm_selected"
+                    and artifact_match.get("alpha_match_method") == "llm"
+                    and artifact_match.get("alpha_match_fallback_reason") is None
+                )
+            elif decision == "none":
+                item_matches = (
+                    selected in (None, "")
+                    and artifact_match.get("matched_alpha") is None
+                    and artifact_match.get("match_status") == "no_match"
+                    and classifier.get("status") == "llm_none"
+                    and artifact_match.get("alpha_match_method") == "llm"
+                    and artifact_match.get("alpha_match_fallback_reason") is None
+                )
+        if not item_matches:
+            _append_unique(audit, "artifact_decision_mismatches", item_label)
+            continue
+        decision_keys.append(f"alpha:{claim_id}")
+
+    if len(decision_keys) == len(requested_by_claim_id):
+        _register_binding(
+            audit=audit,
+            call_id=call_id,
+            task="alpha_classifier_batch",
+            decision_keys=decision_keys,
+            decision_owners=decision_owners,
+        )
+    elif not any(call_id in str(value) for value in audit["missing_bindings"]):
+        _append_unique(audit, "orphan_records", call_id)
+
+
 def _bind_evidence_stance(
     record: dict[str, Any],
     *,
@@ -680,6 +816,15 @@ def build_semantic_binding_audit(
                 audit=audit,
                 structured_by_claim_id=structured_by_claim_id,
                 alpha_matches=alpha_matches,
+                taxonomy=taxonomy,
+                decision_owners=decision_owners,
+            )
+        elif task == "alpha_classifier_batch":
+            _bind_alpha_batch(
+                record,
+                audit=audit,
+                structured_by_claim_id=structured_by_claim_id,
+                alpha_matches_by_claim_id=alpha_matches_by_claim_id,
                 taxonomy=taxonomy,
                 decision_owners=decision_owners,
             )

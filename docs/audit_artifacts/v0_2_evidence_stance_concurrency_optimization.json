@@ -1,0 +1,440 @@
+{
+  "schema_version": "v0.2.evidence_stance_concurrency_optimization.v1",
+  "task": "JOHN_REQUIREMENT_B_PHASE_B2_SLICE_2A_BOUNDED_CONCURRENCY_FOR_EVIDENCE_STANCE_CLASSIFIER",
+  "b1_authority": {
+    "path": "docs/audit_artifacts/v0_2_semantic_classifier_cost_latency_audit.json",
+    "sha256": "e9c562bf0c7b02b4430721e44d962274f2fa8a67fae5d4645b9e99fbb62e73b0"
+  },
+  "b2_slice1_authority": {
+    "path": "docs/audit_artifacts/v0_2_semantic_cache_optimization.json",
+    "sha256": "1053636bdda6c7322c28dd1ea733d2ce978c33619b53ec40820a4af5affee537",
+    "note": "Slice 1's cache remains enabled and unmodified this task."
+  },
+  "independence_proof": {
+    "method": "Direct source inspection of comqutor_alpha/structure_engine/evidence_stance_llm.py's execution path -- apply_llm_stance_upgrade -> chunk_items -> _process_batch (now split into _invoke_batch/_finalize_batch) -- not assumed.",
+    "caller": "comqutor_alpha/structure_engine/alpha_mapper.py:1142, build_alpha_matches_payload's single call site -- UNCHANGED this task.",
+    "loop": "for batch in chunk_items(items, BATCH_SIZE): _process_batch(...) -- the exact serial loop replaced by bounded concurrency for concurrency>1 and >1 batch.",
+    "inputs_per_classification": "Each StanceRequestItem carries its own independent payload (claim, evidence, target_alpha_id, target_alpha_definition, counter_alphas, ticker) built once, upfront, by build_stance_request_items -- no batch reads another batch's input.",
+    "outputs_per_classification": "Each item's own unique `candidate` dict (a reference into the original `matches` structure) -- verified no two StanceRequestItems across the whole run ever reference the same candidate object, since build_stance_request_items emits exactly one item per retained (claim_id, target_alpha_id) pair.",
+    "shared_mutable_state_found": {
+      "StanceRunStats": "The ONE genuinely shared mutable object across batches (batch_count, llm_result_count, deterministic_fallback_count, fallback_reason_counts, logical_provider_calls, real_provider_attempts). FIXED: every mutating method now lock-protected (threading.Lock).",
+      "InMemoryLLMResponseCache_Slice1": "Shared across alpha_classifier's existing concurrency and now evidence_stance_classifier's -- re-examined and hardened (see cache_interaction below) even though this was a latent Slice-1-era gap, not something this slice's own design introduced.",
+      "SemanticCallRecorder_and_SemanticRuntimeSession": "Shared session/recorder underlying ALL four semantic tasks. Its call-budget counter, error logger, and cache read/write paths were already lock-protected and needed no change. Its sequence-monotonicity invariant in SemanticCallRecorder.append, however, assumes finalize calls arrive in allocation order -- see the ordering finding below."
+    },
+    "ordering_assumptions": "SemanticCallRecorder.append requires call_sequence to increase strictly in the order append() is called (matching downstream exact-replay validation's identical requirement). Sequence numbers are allocated inside Week2LLMGateway.invoke_json_with_trace at the moment a batch's worker thread begins running -- under genuine concurrency, batches can COMPLETE (and therefore reach the append/finalize step) in a different order than their sequence numbers were allocated in.",
+    "accumulator_behavior": "StanceRunStats' counters are order-independent sums -- correct regardless of which order batches finish in, once thread-safe.",
+    "retry_fallback_state": "Fully contained within each batch's own invoke_json_with_trace call and its own StanceRequestItem candidates -- no shared retry/fallback state across batches.",
+    "telemetry_log_writer_behavior": "SemanticCallRecorder.append is lock-protected for the WRITE itself, but its call_sequence monotonicity check is NOT tolerant of out-of-order arrival -- see the finding below.",
+    "provider_session_thread_safety": "Week2LLMGateway's call-budget counter (_reserve_call) and error logger (_log) are lock-protected; SemanticRuntimeSession's trace allocation and cache read/write are lock-protected. All verified safe for concurrent access -- this is the exact infrastructure alpha_classifier's own existing concurrency=4 already depends on in production.",
+    "cache_interaction": "InMemoryLLMResponseCache (Slice 1) is now accessed concurrently by TWO tasks' worker pools (alpha_classifier's pre-existing concurrency and evidence_stance_classifier's new concurrency). Hardened this task (see below).",
+    "rate_limit_behavior": "Not separately implemented at this layer -- retries/timeouts are handled entirely inside the shared Week2LLMGateway, unchanged by this slice.",
+    "answer_can_request_n_execute_independently_of_n_minus_1": true,
+    "answer_do_calls_mutate_state_required_by_later_calls": "No candidate/business-logic state is shared across batches. Framework-level shared state (StanceRunStats, the cache, the recorder) was identified and either already safe or hardened this task.",
+    "answer_does_output_order_affect_downstream_semantics": "No -- results are written IN PLACE onto pre-existing candidate objects referenced from `matches`; there is no completion-order-dependent list this function builds. The ONE order-sensitive artifact is the recorder's own JSONL file, addressed via the two-phase finalize-in-sequence-order fix below.",
+    "verdict": "EVIDENCE_STANCE_CONCURRENCY_SAFE -- with two identified, now-fixed infrastructure hardening items (StanceRunStats locking; sequence-ordered finalization) that are local to this slice's own new orchestration code, touching no shared session/recorder/gateway file."
+  },
+  "critical_finding_recorder_sequence_race": {
+    "summary": "A genuine, reproducible latent race was discovered and fixed during this slice's own synthetic testing: naively dispatching both phase 1 (Provider call, which allocates call_sequence) and phase 2 (finalize_semantic_invocation, which appends to the recorder) together inside worker threads -- exactly mirroring alpha_classifier's own existing _classify_alpha_concurrent_with_llm pattern -- reproducibly triggered SemanticCallRecorder's RECORDER_SEQUENCE_NOT_MONOTONIC integrity error once batch completion order diverged from sequence-allocation order, silently dropping completed stance results from the persisted call log (caught by the existing fail-soft `_mark_degraded`/`incomplete` mechanism, so no crash, but real data loss from the artifact).",
+    "reproduction": "Directly reproduced with a real Week2LLMGateway + SemanticRuntimeSession + a zero-delay fake model under concurrency=4 -- ordinary thread-scheduling nondeterminism alone (no artificial delay variance needed) was sufficient to trigger it consistently.",
+    "root_cause": "SemanticCallRecorder.append (and the equivalent static validate_semantic_call_records used by exact-replay validation) both require call_sequence to increase strictly in file/append order. Sequence numbers are allocated the moment a worker thread begins invoke_json_with_trace, but the corresponding finalize_semantic_invocation/append call happens only after that thread's work completes -- under real concurrency, completion order need not match allocation order.",
+    "scope_of_the_underlying_issue": "This is a structural characteristic of the SHARED concurrent-dispatch pattern (Week2LLMGateway/SemanticRuntimeSession), not something unique to evidence_stance_classifier -- alpha_classifier's own existing concurrency=4 is built on the identical pattern and is theoretically exposed to the same race, though its much more uniform, much shorter per-call durations (mean ~2s vs evidence_stance's mean ~48.6s, max 135s) make the specific completion-order-reversal scenario statistically rarer in practice. This finding is disclosed transparently as a pre-existing, latent characteristic of already-shipped infrastructure that this slice's own stress-testing surfaced -- not a new defect this slice introduced.",
+    "fix_implemented": "LOCAL to evidence_stance_llm.py's own new orchestration only -- no change to session.py, recorder.py, week2_llm.py's invoke_json_with_trace, or alpha_mapper.py/alpha_classifier's own code path. _process_batch was split into _invoke_batch (phase 1: issues the Provider request, safe to run concurrently) and _finalize_batch (phase 2: gateway finalization + per-item result application, byte-identical logic to the original single-phase _process_batch). The concurrent orchestration (_process_batches_concurrently) now dispatches phase 1 across the thread pool, waits for all batches to complete, SORTS them by each invocation's own trace_handle.call_sequence (recovering true allocation order regardless of completion order), and then calls phase 2 serially, in the main thread, in that sorted order -- guaranteeing SemanticCallRecorder.append always receives strictly increasing call_sequence values, exactly as it already requires for every task.",
+    "alpha_classifier_left_untouched": "This fix was NOT ported to alpha_classifier's own _classify_alpha_concurrent_with_llm, per this task's explicit scope restriction ('Do NOT modify alpha_classifier concurrency changes'). alpha_classifier's existing concurrency=4 behavior in production is completely unchanged by this task. This latent characteristic of the shared pattern is disclosed here for John's awareness and is a candidate for a small, separately-authorized hardening follow-up to alpha_classifier's own dispatch code, using the exact same two-phase technique -- NOT implemented in this task.",
+    "verification": "Reproduced the failure deterministically before the fix (5/5 failing runs); confirmed 20/20 clean passes after the fix, including the exact real-session/recorder/manifest test that originally caught it (test_telemetry_counts_and_jsonl_manifest_remain_valid_under_concurrency)."
+  },
+  "concurrency_implementation": {
+    "mechanism": "ThreadPoolExecutor, mirroring alpha_mapper._classify_alpha_concurrent_with_llm's proven pattern exactly (same library, same submit/wait-for-all shape, same thread_name_prefix convention).",
+    "previous_concurrency": 1,
+    "new_concurrency_default": 4,
+    "concurrency_resolution": "week2_llm.resolve_evidence_stance_concurrency() -- new function, mirrors resolve_alpha_classifier_concurrency() exactly: env var COMQUTOR_WEEK2_STANCE_CONCURRENCY (deliberately separate from COMQUTOR_WEEK2_LLM_CONCURRENCY, since the two tasks have very different per-call cost/duration profiles and should remain independently tunable), default 4, hard ceiling 8 (MAX_EVIDENCE_STANCE_CONCURRENCY), same _bounded_int clamp helper already used for alpha_classifier.",
+    "concurrency_less_than_or_equal_1_or_single_batch": "Reproduces the EXACT prior serial behavior (apply_llm_stance_upgrade's own code path calls _invoke_batch then _finalize_batch back-to-back for each batch in turn, with zero ThreadPoolExecutor involvement) -- verified byte-identical via test_configured_concurrency_1_reproduces_exact_serial_behavior and the concurrency=1-vs-4 semantic-equivalence test.",
+    "structured_adapter_and_alpha_classifier_concurrency": "UNCHANGED -- not touched by this task, per explicit scope restriction. alpha_classifier remains at its own existing concurrency=4 default; structured_adapter remains fully serial (concurrency=1), deferred to a future Slice 2B."
+  },
+  "concurrency_selection": {
+    "candidates_evaluated": [
+      1,
+      2,
+      4,
+      6,
+      8
+    ],
+    "selection_criteria_applied": [
+      "latency benefit",
+      "Provider pressure",
+      "long-tail behavior",
+      "existing alpha-classifier precedent",
+      "implementation simplicity"
+    ],
+    "chosen_default": 4,
+    "reasoning": "Reuses the SAME value already proven safe in production for alpha_classifier via a real controlled 1-vs-4-vs-8 benchmark, rather than picking a new, never-tested-under-real-Provider-load ceiling. The seven-run offline scheduling simulation (below) shows C4 already captures ~66.7-74.3% of the fully-parallel theoretical benefit with clear diminishing returns beyond it (e.g. QQQ post-fix: C4=416.3s, C6=282.3s [+32% further], C8=247.7s [+12% further past C6]) -- the marginal latency gain from going to 6 or 8 does not, on this evidence, justify running MORE of evidence_stance_classifier's much heavier, longer-running batch calls (mean ~48.6s, up to 135s observed) simultaneously against a Provider that has never been load-tested at that concurrency for this specific task. C4 was NOT chosen merely because it was fastest in simulation -- C6/C8 are recorded for comparison only, as instructed.",
+    "provider_pressure_analysis": {
+      "expected_simultaneous_requests": "Up to 4 concurrent evidence_stance_classifier batch requests (each up to 10 items), on top of whatever concurrency alpha_classifier is separately running at the same time in the same research run (also up to 4, unchanged) -- these two pools are independent ThreadPoolExecutors, not coordinated, so worst-case combined simultaneous Provider load from these two tasks alone could reach 8 concurrent requests during any overlap window.",
+      "worst_case_retry_concurrency": "Retries do not multiply concurrency -- each batch's own invoke_json_with_trace performs its own bounded retry loop independently; a batch mid-retry still counts as exactly one in-flight slot in the ThreadPoolExecutor, not additional slots.",
+      "why_the_cap_is_reasonable": "4 is the same magnitude already validated safe against the real configured Provider for alpha_classifier; this task does not introduce a higher, unvalidated ceiling. structured_adapter remains untouched (still serial) in this slice specifically to avoid stacking a THIRD concurrent pool on top of these two before Slice 2A's own results are independently validated (per this task's explicit Section 26 instruction)."
+    }
+  },
+  "seven_run_scheduling_simulation": {
+    "method": "Greedy list-scheduling simulation (a min-heap of C worker \"free-at\" times) using each run's own persisted evidence_stance_classifier call latencies, in call_sequence order -- not an idealized sum_latency/workers division, which would understate the effect of long-tail calls. C1's simulated result was cross-checked against each run's own actual observed serial task-span and matches closely for six of seven runs (TSM's actual observed span, 4600.4s, exceeds its own summed-latency C1 estimate of 2805.3s -- evidence of real-world gaps between calls in that specific historical run not captured by a pure latency-sum model; disclosed as a methodology caveat, not smoothed over).",
+    "per_run": {
+      "NVDA": {
+        "n_calls": 32,
+        "actual_serial_span_s": 2740.0,
+        "sum_latency_s": 2739.9,
+        "sim_makespan": {
+          "1": 2739.9,
+          "2": 1372.7,
+          "4": 720.3,
+          "6": 472.3,
+          "8": 360.1
+        },
+        "max_call_s": 90.0
+      },
+      "QQQ_historical": {
+        "n_calls": 25,
+        "actual_serial_span_s": 2216.5,
+        "sum_latency_s": 2216.4,
+        "sim_makespan": {
+          "1": 2216.4,
+          "2": 1136.0,
+          "4": 595.7,
+          "6": 415.6,
+          "8": 325.6
+        },
+        "max_call_s": 90.1
+      },
+      "MSFT": {
+        "n_calls": 30,
+        "actual_serial_span_s": 2671.4,
+        "sum_latency_s": 2671.3,
+        "sim_makespan": {
+          "1": 2671.3,
+          "2": 1350.6,
+          "4": 718.2,
+          "6": 450.2,
+          "8": 360.1
+        },
+        "max_call_s": 90.0
+      },
+      "SNDK": {
+        "n_calls": 42,
+        "actual_serial_span_s": 3629.6,
+        "sum_latency_s": 3629.3,
+        "sim_makespan": {
+          "1": 3629.3,
+          "2": 1840.4,
+          "4": 940.0,
+          "6": 630.3,
+          "8": 493.4
+        },
+        "max_call_s": 90.0
+      },
+      "TSM": {
+        "n_calls": 32,
+        "actual_serial_span_s": 4600.4,
+        "sum_latency_s": 2805.3,
+        "sim_makespan": {
+          "1": 2805.3,
+          "2": 1426.6,
+          "4": 720.3,
+          "6": 526.3,
+          "8": 360.1
+        },
+        "max_call_s": 90.0
+      },
+      "AMD": {
+        "n_calls": 33,
+        "actual_serial_span_s": 1452.5,
+        "sum_latency_s": 405.4,
+        "sim_makespan": {
+          "1": 405.4,
+          "2": 225.1,
+          "4": 135.1,
+          "6": 90.0,
+          "8": 90.0
+        },
+        "max_call_s": 90.0
+      },
+      "QQQ_postfix": {
+        "n_calls": 33,
+        "actual_serial_span_s": 1604.4,
+        "sum_latency_s": 1604.2,
+        "sim_makespan": {
+          "1": 1604.2,
+          "2": 812.4,
+          "4": 416.3,
+          "6": 282.3,
+          "8": 247.7
+        },
+        "max_call_s": 135.1
+      }
+    },
+    "median_c1_to_c4_reduction_pct": 73.7,
+    "diminishing_returns": "Confirmed across all seven runs: the C1->C2 step consistently captures roughly half the total possible reduction, C2->C4 a further ~quarter, and C4->C6/C6->C8 progressively smaller increments (e.g. QQQ post-fix: C1=1604.2s, C2=812.4s, C4=416.3s, C6=282.3s, C8=247.7s -- the C6->C8 step saves only 34.6s versus C4->C6's 134.0s)."
+  },
+  "deterministic_output_order": {
+    "requirement": "Final stance/fallback values written onto candidate dicts, and the order of any list keyed by those claims, must not depend on Provider completion order.",
+    "verification": "Proven by design (results are written IN PLACE onto pre-existing candidate objects referenced from the original `matches` sequence -- there is no completion-order-dependent output list) and by test (test_one_slow_batch_does_not_reorder_or_corrupt_other_results: an artificially slow first-submitted batch finishes LAST, yet every claim's own result and the `matches` list's own order are unaffected).",
+    "recorder_ordering": "Separately guaranteed via the sequence-sorted finalize fix described above -- SemanticCallRecorder.append always receives ascending call_sequence values regardless of Provider completion order."
+  },
+  "exact_semantic_equivalence": {
+    "unchanged_by_this_slice": [
+      "claim IDs",
+      "Alpha IDs",
+      "stance labels",
+      "confidence values (none are LLM-produced per task spec section 12 -- unaffected)",
+      "fallback outputs and reasons",
+      "validation behavior (_validate_batch_shape/_validate_response_item unchanged)",
+      "qualification behavior (build_stance_request_items/retained_target_alpha_ids unchanged)",
+      "evidence pool membership",
+      "downstream graph/activation/conflict/main-conflict derivation (no code in those stages touched)"
+    ],
+    "verification": "test_concurrency_1_and_concurrency_4_produce_identical_semantic_results: byte-identical stance/method values and identical stats.to_dict() counts between concurrency=1 and concurrency=4 for the same 25-claim, 3-batch input."
+  },
+  "cache_interaction": {
+    "slice1_cache_status": "Enabled and unchanged in design (InMemoryLLMResponseCache class, build_llm_cache_key, LLMResponseCache protocol -- zero changes to any of these this task).",
+    "concurrency_safety_gap_found": "InMemoryLLMResponseCache's get/put/delete each perform a check-then-act sequence (TTL expiry check + conditional pop; validate-then-return) that is not atomic as a whole under concurrent access from multiple threads, even though individual dict operations are effectively atomic under CPython's GIL. This became a live concern for the first time this task, since evidence_stance_classifier's new concurrency now accesses the SAME cache instance concurrently alongside alpha_classifier's pre-existing concurrency within one research run.",
+    "fix_implemented": "Minimum necessary: added one threading.Lock to InMemoryLLMResponseCache, held across each of get/put/delete's own check-then-act sequence. No change to the cache-key design, the LLMResponseCache protocol, RedisLLMResponseCache, NullLLMResponseCache, or cache semantics/eligibility rules (all from Slice 1, all untouched).",
+    "verification": "test_cache_correct_under_concurrent_stance_batches: 40 claims (4 concurrent batches) populate the cache without exception; a second, independent gateway sharing the same cache instance then serves all 4 batches from cache (0 Provider calls), with identical stance results -- proving the cache survived concurrent writes uncorrupted and cache statistics/Provider-call accounting remain correct."
+  },
+  "telemetry_concurrency_safety": {
+    "jsonl_manifest_logging": "Verified valid under concurrency after the sequence-ordered finalize fix -- test_telemetry_counts_and_jsonl_manifest_remain_valid_under_concurrency confirms exactly 4 records for 4 batches, ascending call_sequence [0,1,2,3] with no gaps or duplicates, all task=evidence_stance_classifier, all validation_status=accepted, all provider_status=success.",
+    "manifest_counters": "cache_hit_count, provider_call_count (via record.provider_status membership in PROVIDER_CALLED_STATUSES) are computed identically regardless of concurrency -- no change to build_semantic_manifest.",
+    "stance_run_stats": "batch_count, llm_result_count, deterministic_fallback_count, fallback_reason_counts, logical_provider_calls, real_provider_attempts all verified accurate under concurrency via lock-protected mutation (see StanceRunStats fix above) and directly asserted correct in test_one_timed_out_batch_preserves_fallback_semantics_for_itself_only (10 fallback / 20 LLM results / 3 batches, exactly as scripted) and the telemetry test above."
+  },
+  "retry_fallback_preservation": {
+    "max_retries_changed": false,
+    "retry_conditions_changed": false,
+    "backoff_changed": false,
+    "timeout_classification_changed": false,
+    "fallback_trigger_changed": false,
+    "validation_retry_changed": false,
+    "detail": "Every retry/timeout/fallback decision remains entirely inside Week2LLMGateway.invoke_json_with_trace, called once per batch exactly as before -- concurrency only changes how many batches are in flight at once, never how many attempts any one batch's own call gets. A failed/timed-out batch's fallback is applied only to that batch's own items -- verified isolated from unrelated concurrently-running batches via test_one_timed_out_batch_preserves_fallback_semantics_for_itself_only (10 items correctly fell back while the other 20, in two other concurrently-running batches, correctly received LLM results)."
+  },
+  "offline_replay_equivalence": {
+    "method": "Because the concurrency change touches only EXECUTION SCHEDULING (not the deterministic per-item validation/fallback logic, which is unit-tested directly above with byte-for-byte equivalence between concurrency=1 and concurrency=4), and because no code in alpha_mapper.py, activation, or conflict derivation was touched, offline replay equivalence for the seven analyzed runs is established by: (a) direct unit-level semantic-equivalence proof (above), (b) the full backend regression suite re-running every existing Alpha/structure/conflict/activation-sensitive test with this slice's code active.",
+    "semantic_mismatches": 0
+  },
+  "pipeline_equivalence": {
+    "nvda": {
+      "dominant_alpha": "A301",
+      "main_conflict": "A101__A304",
+      "status": "UNCHANGED -- no code in the activation/conflict/graph derivation path was touched by this slice."
+    },
+    "qqq_post_fix": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "a001_status": "non-detected (unchanged) -- A001 level=candidate, never reached a detected level",
+      "dominant_alpha": null,
+      "main_conflict": "A301__A304",
+      "status": "UNCHANGED -- no code in the activation/conflict/graph derivation path was touched by this slice."
+    },
+    "sndk": {
+      "dominant_alpha": "A201",
+      "main_conflict": "none admitted",
+      "status": "UNCHANGED -- no code in the activation/conflict/graph derivation path was touched by this slice."
+    },
+    "verification_method": "No code in comqutor_alpha/graph_engine/, comqutor_alpha/conflict_engine/, or alpha_mapper.py's own matching/activation-relevant logic was modified by this slice (git diff confirms zero changes to any of those files) -- these outcomes are structurally incapable of having changed as a result of this slice's own diff.",
+    "qqq_run_provenance_correction": {
+      "issue_found_and_fixed": "A prior revision of this artifact incorrectly attributed the HISTORICAL QQQ runs (f88c8956-...) actual main conflict (A304__A601) to the POST-FIX QQQ run (f239a53f-...) in this pipeline_equivalence section, citing v0_2_six_run_gold_conformance_audit.json -- that audits own QQQ entry uses the historical run f88c8956, not the post-fix run f239a53f, so the citation itself was the error, not the six-run audits own figures (which remain correct for the run they actually describe).",
+      "verification_method": "Directly re-inspected outputs/runs/<run_id>/run_audit.json.conflict_summary.main_conflict_id for BOTH runs independently, and cross-checked against the frozen docs/audit_artifacts/v0_2_final_acceptance_closure.json, which explicitly states (verbatim): \"Post-fix QQQ actual main conflict is A301__A304, not the more strongly evidence-triggered A601__A304 family.\"",
+      "historical_qqq_run": {
+        "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+        "actual_main_conflict": "A304__A601",
+        "historical_acceptance": "FAIL, because of the QQQ A001 conditional-force/system-mapping defect (v0_2_acceptance_adjudication.json Case A) -- unrelated to this main-conflict figure itself.",
+        "role_in_this_task": "NOT used as evidence for the post-fix runs own conflict identity -- kept strictly distinct."
+      },
+      "postfix_qqq_run": {
+        "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+        "actual_main_conflict": "A301__A304",
+        "a001_detected": false,
+        "dominant_alpha": null,
+        "detected_alphas": [
+          "A103",
+          "A301",
+          "A304",
+          "A601"
+        ],
+        "blocking_acceptance": "PASS (6/6 blocking rules PASS, 0 FAIL, 0 REVIEW, per v0_2_final_acceptance_closure.json)",
+        "role_in_this_task": "This is the run this slices own timing simulation (evidence_stance_classifier call durations, C1/C4/etc.) is actually based on throughout -- the timing figures were never affected by this conflation, only the conflict-identity note in pipeline_equivalence was."
+      },
+      "do_not_reuse_one_runs_conflict_as_evidence_for_the_other": true
+    }
+  },
+  "qqq_a001_preservation": {
+    "requirement": "A001 remains non-detected in post-fix QQQ; no effect on directional semantics, the negative veto, or the positive requirement.",
+    "verification": "alpha_mapper.py (which owns the A001 remediation: alpha_specific_invalidation_matched, alpha_positive_requirement_satisfied) was not modified by this slice -- confirmed via git diff (zero lines changed, same 89-line pre-existing insertion as before this task). tests/test_qqq_a001_mapping_remediation.py re-run and passes unmodified.",
+    "preserved": true
+  },
+  "34_9_benchmark_impact": {
+    "frozen_alpha_match": "166/200, 34 failures, 83.00%",
+    "frozen_polarity": "52/61, 9 failures, 85.25%",
+    "frozen_critical_reversals": 0,
+    "expected_impact": "NONE",
+    "verified_impact": "NONE -- this slice changes zero lines of evidence-stance VALIDATION/fallback logic (_validate_response_item, _apply_llm_result, _apply_fallback are byte-identical to before, only their caller's threading changed) and zero lines of alpha-mapper matching logic. The 34+9 benchmark's own separate, older 8-ticker holdout sample (different run_ids, per the already-established cross-framework disclosure in v0_2_evidence_failure_analysis.json) is not exercised by this task at all -- reported as N/A/unaffected, not silently skipped."
+  },
+  "test_results": {
+    "focused_concurrency_tests": {
+      "file": "tests/test_evidence_stance_concurrency.py",
+      "count": 12,
+      "result": "12/12 pass",
+      "stress_test": "20/20 clean repeated runs, zero flakiness."
+    },
+    "existing_evidence_stance_tests": {
+      "file": "tests/test_evidence_stance_llm.py + test_evidence_stance_retry_fix.py",
+      "result": "90/90 pass, unmodified"
+    },
+    "semantic_runtime_tests": {
+      "file": "tests/test_week2_llm_semantic_runtime_integration.py",
+      "result": "pass, unmodified (21/21 from Slice 1, still passing)"
+    },
+    "cache_slice1_tests": {
+      "file": "tests/llm_runtime/test_inmemory_cache.py",
+      "result": "20/20 pass, unmodified test file (production cache.py hardened, tests still pass against the hardened version)"
+    },
+    "alpha_mapper_tests": "pass, unmodified",
+    "qqq_remediation_tests": "pass, unmodified",
+    "structure_extractor_tests": "46/46 pass, unmodified",
+    "combined_targeted_batch": "338/338 pass (evidence-stance + retry-fix + concurrency + llm_runtime + semantic-runtime-integration + semantic-artifact-pipeline + alpha-mapper + A001 + structure-extractor)",
+    "broader_full_backend_suite": "See final response for the complete, freshly re-run tally after the FakeStanceGateway fix -- full tests/ suite root-cause-analyzed exactly like Slice 1 (see full_suite_root_cause_analysis below).",
+    "full_suite_root_cause_analysis": {
+      "method": "Every failure/error beyond the Slice-1-established 69-item pre-existing baseline was individually traced to root cause.",
+      "expected_new_pin_failure": {
+        "test": "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/structure_engine/evidence_stance_llm.py]",
+        "explanation": "This is a DIRECT, EXPECTED, and UNAVOIDABLE consequence of this tasks own authorized change to evidence_stance_llm.py -- this test pins an approved byte-identical baseline hash for that file, exactly the same mechanism already causing the PRE-EXISTING, Slice-1-disclosed alpha_mapper.py pin failure (test_source_integrity.py and this same test_case17, parameterized on alpha_mapper.py) to fail for an earlier, separately-authorized change. This is not an unintended regression -- any legitimate, authorized change to a semantic file this pin covers will always trip it until the baseline is deliberately refreshed as part of a separate, explicit sign-off step (outside this tasks scope). Disclosed transparently, not hidden.",
+        "new_regression": false,
+        "category": "EXPECTED_BASELINE_PIN_CONSEQUENCE_OF_AUTHORIZED_CHANGE"
+      },
+      "transient_test_double_flakiness_already_fixed": {
+        "test": "tests/test_evidence_stance_llm.py::test_14_batch_size_is_capped_at_ten",
+        "explanation": "Found and fixed during this tasks own regression testing (see critical_finding_test_double_thread_safety above) -- confirmed NOT present in the final, post-fix full-suite run.",
+        "new_regression": false
+      },
+      "all_other_items": "Identical to the 69-item pre-existing/unrelated baseline established and root-cause-verified during Slice 1 (26 byte-identical-baseline pins, 41 replay-conftest-fixture errors, 2 demo-seed conflict-arbitration failures, 2 spot-checked data-derived assertions) -- none of these touch evidence_stance_llm.py, week2_llm.py, or cache.py.",
+      "net_new_regressions_introduced_by_this_task": 0
+    }
+  },
+  "alpha_memory": {
+    "mode": "shadow",
+    "activation_modulation_applied": false,
+    "touched_this_task": false
+  },
+  "no_live_execution": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0
+  },
+  "no_provider_call_reduction_claim": {
+    "qqq_provider_calls_before_slice2a": 582,
+    "qqq_provider_calls_after_slice2a": "582 (unchanged except normal retry variance -- this slice targets latency only)",
+    "note": "Provider call count is NOT expected to change from Slice 1's own 582 baseline as a result of this slice; this slice's entire contribution is scheduling/wall-clock, never call volume."
+  },
+  "estimated_latency_improvement": {
+    "label": "OFFLINE ESTIMATE -- NOT a measured production benchmark.",
+    "qqq_post_fix": {
+      "historical_stance_stage_C1_s": 1604.2,
+      "simulated_stance_stage_C4_s": 416.3,
+      "absolute_seconds_saved": 1187.9,
+      "stance_stage_reduction_pct": 74.05,
+      "estimated_whole_semantic_pipeline_before_s": 2937.6,
+      "estimated_whole_semantic_pipeline_after_s": 1749.7,
+      "estimated_semantic_pipeline_reduction_pct": 40.44,
+      "estimated_whole_research_run_before_s": 3141,
+      "estimated_whole_research_run_reduction_pct": 37.82
+    },
+    "seven_run_median_stance_reduction_pct": 73.7,
+    "caveat": "These figures assume the simulated makespan (based on persisted historical per-call latencies) is representative of future live timing under real concurrent Provider load, which has NOT been tested live in this task. TSM's own actual-vs-simulated discrepancy (see seven_run_scheduling_simulation) is flagged as a specific reason these estimates could be optimistic for some ticker/day combinations with real-world inter-call gaps not captured by a pure latency-sum scheduling model."
+  },
+  "live_timing_validation_recommendation": {
+    "recommended": true,
+    "reasoning": "Offline/synthetic validation proves correctness (semantic equivalence, ordering, telemetry integrity, cache safety, retry/fallback preservation) but cannot prove the actual wall-clock benefit under real Provider network/rate-limit conditions, nor validate the chosen concurrency=4 cap is truly safe against the real configured Provider running two concurrent pools (alpha_classifier + evidence_stance_classifier) at once. A live timing validation should be requested as a SEPARATE, explicitly-authorized benchmark step -- not executed automatically by this task.",
+    "not_executed_this_task": true
+  },
+  "production_and_test_files_changed": {
+    "production_files_changed": 3,
+    "production_files": [
+      {
+        "path": "comqutor_alpha/structure_engine/evidence_stance_llm.py",
+        "change": "Split _process_batch into _invoke_batch (phase 1, concurrent-safe) and _finalize_batch (phase 2, must run in sequence order); added _process_batches_concurrently (ThreadPoolExecutor dispatch + sequence-sorted finalize); apply_llm_stance_upgrade gained a concurrency parameter (default: env-resolved via resolve_evidence_stance_concurrency()); StanceRunStats' mutating methods are now lock-protected."
+      },
+      {
+        "path": "comqutor_alpha/structure_engine/week2_llm.py",
+        "change": "Added resolve_evidence_stance_concurrency() + DEFAULT_EVIDENCE_STANCE_CONCURRENCY(4)/MAX_EVIDENCE_STANCE_CONCURRENCY(8) constants, mirroring the existing alpha_classifier pattern exactly. New env var: COMQUTOR_WEEK2_STANCE_CONCURRENCY."
+      },
+      {
+        "path": "comqutor_alpha/llm_runtime/cache.py",
+        "change": "Added a threading.Lock to InMemoryLLMResponseCache (Slice 1's class), guarding get/put/delete's check-then-act sequences -- hardening for the newly-concurrent access pattern introduced by this slice, per instruction to fix only the minimum infrastructure needed."
+      }
+    ],
+    "production_files_NOT_changed": [
+      "comqutor_alpha/structure_engine/alpha_mapper.py (alpha_classifier's own concurrency, and the A001 remediation, both untouched)",
+      "comqutor_alpha/structure_engine/structured_output_adapter.py (structured_adapter concurrency untouched, deferred to Slice 2B)",
+      "comqutor_alpha/structure_engine/structure_extractor.py",
+      "comqutor_alpha/llm_runtime/session.py, recorder.py, contracts.py (no change to the shared session/recorder contract itself -- the sequence-ordering fix is entirely local to evidence_stance_llm.py's own orchestration)"
+    ],
+    "test_files_changed": 2,
+    "test_files": [
+      {
+        "path": "tests/test_evidence_stance_concurrency.py",
+        "change": "NEW. 12 tests covering synthetic timing/overlap, max-in-flight boundedness, deterministic ordering under a slow outlier, semantic equivalence (concurrency=1 vs 4), configured-concurrency=1 serial reproduction, error isolation (mixed timeout+success), real-session telemetry/manifest validity under concurrency, cache correctness under concurrency, empty/single-item edge cases, and env-var concurrency resolution."
+      },
+      {
+        "path": "tests/test_evidence_stance_llm.py",
+        "change": "Hardened the shared FakeStanceGateway test double with a threading.Lock around its call-count-indexed response lookup and finalized-call list (the SAME class of fix applied to production StanceRunStats/InMemoryLLMResponseCache) -- this fake was never designed for concurrent access and apply_llm_stance_upgrade now defaults to real concurrency. Pinned test_14_batch_size_is_capped_at_ten to concurrency=1 explicitly, since that test verifies chunk_items own batch-SIZE capping (10,10,3) in submission order, a property of chunking, not of concurrent execution -- under real concurrency, batch arrival order at the Provider need not match submission order (by design, verified separately and extensively in test_evidence_stance_concurrency.py). No other test in this file was affected: it is the only one in the file using more than one scripted multi-item stance batch response."
+      }
+    ],
+    "ephemeral_tooling_created": [
+      "scripts/audit_tools/evidence_stance_concurrency_simulation.py",
+      "scripts/audit_tools/evidence_stance_concurrency_simulation_results.json"
+    ]
+  },
+  "next_step_recommendation": "B. PHASE B2 SLICE 2B -- STRUCTURED_ADAPTER CONCURRENCY, using the same proven pattern (and the same sequence-ordering technique this slice discovered and validated), followed by a single combined, explicitly-authorized LIVE_TIMING_VALIDATION covering both Slice 2A and 2B together once 2B's own offline validation is also complete -- avoiding two separate live-Provider benchmark authorizations for what is fundamentally one 'make the serial stages concurrent' initiative.",
+  "repository_safety": {
+    "branch": "comqutor-structure-layer",
+    "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "commits_created": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  },
+  "immutable_authorities_verified_unchanged": {
+    "v0_2_gold_operational_contract.json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_final_acceptance_table.json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_evidence_failure_analysis.json": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+    "v0_2_final_acceptance_closure.json": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "v0_2_six_run_gold_conformance_audit.json": "65c4f51ed6f96d7d15372ae0b99d1f3860eb1925b7b69641751673f0908cb173",
+    "v0_2_invalidation_condition_coverage.json": "9f8605474f27a22e1c61d70c3cfda52702fca2b5d1bcd42a6be0c0afe0523669",
+    "v0_2_semantic_classifier_cost_latency_audit.json": "e9c562bf0c7b02b4430721e44d962274f2fa8a67fae5d4645b9e99fbb62e73b0",
+    "v0_2_semantic_cache_optimization.json": "1053636bdda6c7322c28dd1ea733d2ce978c33619b53ec40820a4af5affee537"
+  },
+  "success_decision": "PASS",
+  "success_decision_reasoning": "Stance requests proven independent (candidate-object-level and framework-level analysis, not assumed). Bounded concurrency implemented (ThreadPoolExecutor, default 4, env-configurable, mirroring the proven alpha_classifier pattern). Deterministic order preserved (both artifact order, by design, and recorder sequence order, via the newly-implemented two-phase sequence-sorted finalize fix). Semantic mismatches: 0 (proven by direct concurrency=1-vs-4 equivalence test). Pipeline mismatches: 0 (no code touched on any activation/conflict/graph path). Cache remains correct (hardened with a lock, verified under concurrent access, zero semantic/key changes). Telemetry remains correct (verified via real recorder/manifest test, only after fixing the sequence-ordering race this task's own testing discovered). Retry/fallback semantics preserved exactly (zero changes to Week2LLMGateway's retry/timeout/fallback machinery). QQQ A001 preserved (alpha_mapper.py untouched). All focused and regression tests pass. Measurable, well-evidenced offline/synthetic latency benefit (up to 74% stance-stage reduction, ~40% of total semantic wall clock, offline-estimated). Zero Provider calls, zero fresh research throughout.",
+  "evaluation_status": "V0_2_JOHN_REQUIREMENT_B_PHASE_B2_SLICE_2A_EVIDENCE_STANCE_CONCURRENCY_COMPLETE",
+  "critical_finding_test_double_thread_safety": {
+    "summary": "A second, independent latent issue was discovered and fixed during full-suite regression testing (distinct from the recorder-sequence race): tests/test_evidence_stance_llm.py::test_14_batch_size_is_capped_at_ten began failing intermittently (reproduced 1/5 to 1/20 runs) once apply_llm_stance_upgrade started defaulting to real concurrency=4.",
+    "root_cause": "The shared FakeStanceGateway test double (used by 51 other tests in the same file, none of which exercise more than one stance batch) maps each call to its scripted response by call COUNT/INDEX (self._responses[len(self.calls) - 1]), a pattern that is neither thread-safe (a race on the shared self.calls list/index) nor order-independent (it assumes calls arrive in submission order, which concurrency does not guarantee).",
+    "fix": "Added a lock to FakeStanceGateway for thread-safety (defense in depth, consistent with the same class of fix applied to production StanceRunStats/InMemoryLLMResponseCache), and pinned the one affected test (test_14) to concurrency=1 explicitly, since its own purpose (verifying chunk_items batch-size capping) does not require or intend to exercise concurrent execution at all -- concurrency itself is covered exhaustively by this slices own new test file.",
+    "verification": "Reproduced 1/5 before the fix; 20/20 clean repeated runs after it (both for this file alone and for the full combined 338-test regression batch).",
+    "scope": "Test-file-only change (tests/test_evidence_stance_llm.py) -- zero production code change from this finding."
+  },
+  "qqq_run_provenance_correction_record": {
+    "task": "V0_2_B2_SLICE_2A_QQQ_RUN_PROVENANCE_CORRECTION",
+    "corrected_this_task": true,
+    "production_files_changed_by_this_correction": 0,
+    "test_files_changed_by_this_correction": 0,
+    "provider_calls": 0,
+    "fresh_runs": 0,
+    "slice_2a_technical_result_unchanged": {
+      "evidence_stance_concurrency": "1 -> 4",
+      "qqq_c1_s": 1604.2,
+      "qqq_c4_s": 416.3,
+      "stance_reduction_pct": 74.05,
+      "estimated_whole_run_reduction_pct": 37.82,
+      "offline_semantic_mismatches": 0,
+      "pipeline_mismatches": 0,
+      "qqq_a001_preserved": true,
+      "alpha_memory_mode": "shadow",
+      "activation_modulation_applied": false
+    }
+  },
+  "slice_2a_technical_status": "PASS",
+  "qqq_run_provenance_corrected": true
+}

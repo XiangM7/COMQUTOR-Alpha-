@@ -5,6 +5,7 @@ import type {
   EntityExposureLifecycleStatus,
   LocalStructureSupportComponent,
 } from "../api/types";
+import { formatActivationLevelForDisplay } from "../utils/activationLevelDisplay";
 
 // John's B3 gated seed lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES):
 // the frontend never recomputes or infers this status -- it only ever
@@ -85,6 +86,17 @@ interface AlphaCardProps {
    * "Activation v1 (legacy)" -- never presented as v2. */
   activation?: AlphaActivation | null;
   isDominant?: boolean;
+  /** This Alpha's taxonomy-defined invalidation conditions (GET
+   * /api/alpha-library, fetched once via useAlphaLibrary and mapped by
+   * alpha_id -- never a per-card fetch). `undefined` means the Alpha
+   * Library hasn't loaded yet (or this alpha_id wasn't found in it) --
+   * render nothing rather than a false "none defined" claim. An empty
+   * array means the taxonomy itself defines zero conditions for this
+   * Alpha -- render the honest fallback, never hide the section or invent
+   * content. Deliberately NOT the same thing as the separately-approved
+   * B5 Conflict Radar invalidation registry (ConflictEvidenceSections'
+   * "approved"/"not_defined" entries) -- never labelled "approved" here. */
+  invalidationConditions?: string[];
 }
 
 /** Alpha activation summary card. Status is conveyed with text + an icon +
@@ -102,6 +114,7 @@ export function AlphaCard({
   evidenceDetail,
   activation,
   isDominant,
+  invalidationConditions,
 }: AlphaCardProps) {
   // QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): the single
   // display-facing level, read directly from the backend -- never
@@ -176,17 +189,13 @@ export function AlphaCard({
             </div>
             <div className="alpha-card-row">
               <dt>Qualification ceiling</dt>
-              <dd>
-                {activation.eligible_cap != null
-                  ? `${activation.eligible_cap.toFixed(0)} (${activation.cap_reason_codes.join(", ")})`
-                  : "None"}
-              </dd>
+              <dd>{activation.eligible_cap != null ? activation.eligible_cap.toFixed(0) : "None"}</dd>
             </div>
             <div className="alpha-card-row">
               <dt>Score was capped</dt>
               <dd>
                 {activation.cap_was_binding
-                  ? `Yes — final score: ${activation.activation_score.toFixed(1)} (${activation.binding_cap_reason_codes.join(", ")})`
+                  ? `Yes — final score: ${activation.activation_score.toFixed(1)}`
                   : "No"}
               </dd>
             </div>
@@ -194,21 +203,23 @@ export function AlphaCard({
         ) : null}
         <div className="alpha-card-row">
           <dt>Activation level</dt>
-          <dd className={`activation-level-label activation-level-${displayLevel}`}>{displayLevel}</dd>
+          <dd className={`activation-level-label activation-level-${displayLevel}`}>
+            {formatActivationLevelForDisplay(displayLevel)}
+          </dd>
         </div>
         {/* QA Closure v0.1.2 Item 4: capped_active is a display-only
             refinement of qualified_level=="active" -- never implies the
             same qualification as a genuinely uncapped Active Alpha, and
             never hides the underlying score (still shown above). Cap
             reason comes straight from the existing B4 blocked_reason_codes,
-            never a frontend-invented text. */}
+            never a frontend-invented text. Product Demo Hardening Phase
+            2D: the raw reason code itself has moved to Technical details
+            below -- this row keeps only the translated reason. */}
         {isCappedActive && activation?.blocked_reason_codes && activation.blocked_reason_codes.length > 0 ? (
           <div className="alpha-card-row alpha-card-row-warning alpha-card-row-capped">
             <dt>Cap reason{activation.blocked_reason_codes.length > 1 ? "s" : ""}</dt>
             <dd>
-              {activation.blocked_reason_codes
-                .map((code) => `${BLOCKED_REASON_LABELS[code] ?? code} (${code})`)
-                .join("; ")}
+              {activation.blocked_reason_codes.map((code) => BLOCKED_REASON_LABELS[code] ?? code).join("; ")}
             </dd>
           </div>
         ) : null}
@@ -222,8 +233,8 @@ export function AlphaCard({
               <div className="alpha-card-row">
                 <dt>Target level</dt>
                 <dd>
-                  {activation.target_level} — what the evidence alone supports, before
-                  qualification
+                  {formatActivationLevelForDisplay(activation.target_level)} — what the evidence
+                  alone supports, before qualification
                 </dd>
               </div>
             ) : null}
@@ -231,8 +242,10 @@ export function AlphaCard({
               <div className="alpha-card-row alpha-card-row-warning alpha-card-row-blocked">
                 <dt>Blocked</dt>
                 <dd>
-                  Held at {activation.qualified_level}, blocked from{" "}
-                  {(activation.blocked_from ?? []).join(", ") || "a higher level"}
+                  Held at {formatActivationLevelForDisplay(activation.qualified_level)}, blocked
+                  from{" "}
+                  {(activation.blocked_from ?? []).map((level) => formatActivationLevelForDisplay(level)).join(", ") ||
+                    "a higher level"}
                   {activation.blocked_reason_codes && activation.blocked_reason_codes.length > 0 ? (
                     <>
                       {" — "}
@@ -457,13 +470,94 @@ export function AlphaCard({
                 {activation.regime_gate_passed === true
                   ? "Qualified"
                   : activation.regime_gate_failures.length > 0
-                    ? `Not qualified (${activation.regime_gate_failures.join(", ")})`
+                    ? "Not qualified"
                     : "Not in regime band"}
               </dd>
             </div>
           </>
         ) : null}
       </dl>
+      {/* Product Demo Hardening Phase 2D: one consolidated, context-local
+          Technical details disclosure preserving every raw internal token
+          this card's default view now translates or omits -- the exact
+          original engineering language and values, never deleted, never
+          approximated, only relocated. Only ever renders a field the
+          backend actually provided (never fabricated). */}
+      {activation ? (
+        <details className="alpha-card-technical-details">
+          <summary>Technical details</summary>
+          <dl className="alpha-card-technical-details-body">
+            <div>
+              <dt>Raw activation level</dt>
+              <dd>{displayLevel}</dd>
+            </div>
+            {activation.eligible_cap != null && activation.cap_reason_codes.length > 0 ? (
+              <div>
+                <dt>Qualification ceiling reason codes</dt>
+                <dd>{activation.cap_reason_codes.join(", ")}</dd>
+              </div>
+            ) : null}
+            {isCappedActive && activation.blocked_reason_codes && activation.blocked_reason_codes.length > 0 ? (
+              <div>
+                <dt>Cap reason codes (raw)</dt>
+                <dd>{activation.blocked_reason_codes.join(", ")}</dd>
+              </div>
+            ) : null}
+            {activation.cap_was_binding && activation.binding_cap_reason_codes.length > 0 ? (
+              <div>
+                <dt>Score-capped reason codes</dt>
+                <dd>{activation.binding_cap_reason_codes.join(", ")}</dd>
+              </div>
+            ) : null}
+            {activation.target_level != null ? (
+              <div>
+                <dt>Target level (raw)</dt>
+                <dd>{activation.target_level}</dd>
+              </div>
+            ) : null}
+            {activation.qualified_level != null ? (
+              <div>
+                <dt>Qualified level (raw)</dt>
+                <dd>{activation.qualified_level}</dd>
+              </div>
+            ) : null}
+            {activation.regime_gate_failures.length > 0 ? (
+              <div>
+                <dt>Regime gate failure codes</dt>
+                <dd>{activation.regime_gate_failures.join(", ")}</dd>
+              </div>
+            ) : null}
+          </dl>
+        </details>
+      ) : null}
+      {/* John Follow-Up Requirement A (Invalidation-Condition Coverage
+          Completion): sourced from this Alpha's own taxonomy definition
+          (alpha_taxonomy_v1.yaml via GET /api/alpha-library), never from
+          the current run's LLM output -- the note below says so
+          explicitly. Rendered for every Alpha once the Alpha Library has
+          loaded, not just A101 (that was the historical gap). Deliberately
+          labelled "Invalidation conditions", never "approved" or
+          "John-approved", since this taxonomy list carries no separate
+          approval provenance -- see the prop's own doc comment. */}
+      {invalidationConditions !== undefined ? (
+        <section className="alpha-card-invalidation">
+          <h4>Invalidation conditions</h4>
+          <p className="alpha-card-invalidation-source-note">
+            From this Alpha's definition, not this run's analysis.
+          </p>
+          {invalidationConditions.length > 0 ? (
+            <ul className="alpha-card-invalidation-list">
+              {invalidationConditions.map((condition, index) => (
+                <li key={`${alphaId}-invalidation-${index}`}>{condition}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="alpha-card-invalidation-empty">
+              No validated invalidation condition is currently defined for this Alpha.
+            </p>
+          )}
+        </section>
+      ) : null}
       {evidenceDetail && evidenceDetail.length > 0 ? (
         <details className="alpha-card-evidence">
           <summary>Evidence ({evidenceDetail.length})</summary>

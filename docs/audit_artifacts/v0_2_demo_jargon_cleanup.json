@@ -1,0 +1,325 @@
+{
+  "schema_version": "v0.2.demo_jargon_cleanup.v1",
+  "phase": "PRODUCT_DEMO_HARDENING_PHASE_2D",
+  "objective": "Translate/hide internal engineering vocabulary from the normal stakeholder view (default view = product language), while preserving every raw value verbatim under an explicit Technical Details disclosure (technical details = original internal language). No semantics altered.",
+  "authority_verification": {
+    "gold_closure_sha256_expected": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "phase1_audit_sha256_expected": "f6905337d4697a85fb30b9419ec165b90b629d42c1927e3297eccb54f6ad9c1c",
+    "phase2a_json_sha256_expected": "0aa62ca9d022f17e2b05f884c335202c8bbaee8848f3e4247d31a2d628332918",
+    "phase2b_json_sha256_expected": "961fe4c70bb1db431b0106a76dc7aa2c0d67fee2e7e9cf5d653d112ddf019384",
+    "phase2c_json_sha256_expected": "b4aa27eeb13d4404b3be65a738caf96cfe02135f5ffc38eed298d4d578a004af",
+    "phase2c_md_sha256_expected": "9a7e010aefddaa7fed322d08dd1eddc4eaa5efe5781fa341fcdba1a7d88458e2",
+    "all_verified_unchanged": true
+  },
+  "jargon_inventory_before": {
+    "method": "grep across frontend/src (excluding *.test.ts(x) and pure type/adapter files) for every term listed in the task plus a broader sweep of the whole frontend, before any edit.",
+    "count_of_distinct_terms_inspected": 17,
+    "confirmed_user_visible_leaks_found": [
+      {
+        "term": "raw activation level (regime_level/candidate/capped_active/etc.)",
+        "location": "AlphaCard.tsx main 'Activation level' row, ConflictCard.tsx activationLevelText(), StructureGraphPage.tsx Blocked-alphas badge",
+        "classification": "TRANSLATE"
+      },
+      {
+        "term": "raw reason codes in parentheses (e.g. 'NO_LOCAL_STRUCTURE_SUPPORT')",
+        "location": "AlphaCard.tsx Qualification ceiling / Score was capped / Cap reason rows; StructureGraphPage.tsx Blocked-alphas Reason line",
+        "classification": "HIDE_DEFAULT_SHOW_TECHNICAL"
+      },
+      {
+        "term": "raw level tokens embedded in prose ('Held at active, blocked from dominant')",
+        "location": "AlphaCard.tsx Target level / Blocked rows",
+        "classification": "TRANSLATE"
+      },
+      {
+        "term": "raw regime_gate_failures codes",
+        "location": "AlphaCard.tsx Regime qualification row",
+        "classification": "HIDE_DEFAULT_SHOW_TECHNICAL"
+      },
+      {
+        "term": "B2 / Conflict Evidence Admissibility",
+        "location": "CandidateConflictCard.tsx default copy and badge context",
+        "classification": "HIDE_DEFAULT_SHOW_TECHNICAL"
+      },
+      {
+        "term": "raw admissibility scores/counts/reason codes",
+        "location": "CandidateConflictCard.tsx always-visible <dl>",
+        "classification": "HIDE_DEFAULT_SHOW_TECHNICAL"
+      },
+      {
+        "term": "'No B2 evidence gaps identified.'",
+        "location": "ConflictEvidenceSections.tsx Missing Evidence empty state",
+        "classification": "TRANSLATE"
+      },
+      {
+        "term": "SHADOW badge",
+        "location": "ResearchRunPage.tsx Alpha Memory panel heading",
+        "classification": "HIDE_DEFAULT_SHOW_TECHNICAL"
+      },
+      {
+        "term": "'Activation modulation: On/Off' (activation_modulation_applied)",
+        "location": "ResearchRunPage.tsx Alpha Memory panel",
+        "classification": "TRANSLATE (to plain product statement) + raw value HIDE_DEFAULT_SHOW_TECHNICAL"
+      },
+      {
+        "term": "raw reason codes in StructureGraphPage Blocked-alphas 'Reason:' line",
+        "location": "StructureGraphPage.tsx (found only via real-run verification, see below)",
+        "classification": "HIDE_DEFAULT_SHOW_TECHNICAL"
+      }
+    ],
+    "already_compliant_before_this_phase": [
+      "phi_id (already gated behind an existing 'Technical detail' <details> in ResearchRunPage.tsx)",
+      "diagnostic_reason_codes (already gated behind 'Full diagnostic detail' <details> in AlphaCard.tsx)",
+      "local_edge_exclusion_reasons (already gated behind 'Why edges did not qualify' <details> in AlphaCard.tsx)",
+      "Phase-2B StructuralSnapshot.tsx (already clean per its own design -- confirmed, not touched)"
+    ],
+    "term_classification_terms_that_remain_KEEP": [
+      "Alpha",
+      "Active",
+      "Dominant",
+      "Structure",
+      "Main Conflict",
+      "Evidence",
+      "Counter-evidence",
+      "Uncertainty",
+      "Risk",
+      "Invalidation",
+      "Research status",
+      "human-readable Alpha names",
+      "Alpha ID alongside a human-readable name (e.g. 'A301 -- Revenue Expansion')"
+    ]
+  },
+  "translation_decisions": {
+    "activation_level_mapping": {
+      "dominant": "Dominant",
+      "regime_level": "Dominant",
+      "active": "Active",
+      "capped_active": "Active",
+      "candidate": "Emerging",
+      "watch": "Watchlist",
+      "inactive": "Inactive",
+      "unknown_future_value": "conservatively humanized (underscore-to-space, title-cased) -- never crashes, never silently mapped to a known state"
+    },
+    "conflict_language_mapping": {
+      "admitted_conflict_badge": "Main conflict / Admitted conflict (unchanged -- already plain)",
+      "candidate_conflict_badge": "Potential conflict (was 'Candidate conflict')",
+      "candidate_conflict_default_copy": "Evidence is not yet strong enough for inclusion as the main structural conflict. (was: 'did not clear the B2 Conflict Evidence Admissibility gate')",
+      "rejected_before_evaluation_copy": "This declared pair did not have enough evidence to be evaluated as a potential conflict. (was: 'rejected before B2 evaluation (...)')",
+      "missing_evidence_empty_state": "No evidence gaps identified. (was: 'No B2 evidence gaps identified.')"
+    },
+    "alpha_memory_mapping": {
+      "default_copy_modulation_false": "Historical memory is shown for context and does not alter the current activation result.",
+      "default_copy_modulation_true_defensive_branch": "Historical memory modulation is currently applied to this run's activation. (narrowest accurate wording; currently unreachable since the type contract constrains activation_modulation_applied to the literal false, but implemented defensively per task section 21/24)",
+      "shadow_badge": "removed from default heading; raw mode value preserved verbatim under Technical details"
+    },
+    "no_new_semantic_states_introduced": true,
+    "no_values_written_back_to_api_model_objects": true,
+    "structure_graph_page_scope_decision": "StructureGraphPage's five section headings (Active/Capped active/Dominant/Regime-level/Candidate alphas) and its overview <dl> stat labels were deliberately left unchanged, per the task's own Section 18 instruction that this page 'must remain useful to technical users' and must not be 'oversimplified into only cards.' The literal raw underscored token 'regime_level' never appears in this page's rendered text either way (only the already-humanized hyphenated 'Regime-level' compound does); 'candidate' appears capitalized as 'Candidate' in a section title. Both are pre-existing, non-raw-token phrasing. This is a considered scope boundary, not an oversight -- documented here rather than left silent."
+  },
+  "files_changed": {
+    "added": [
+      {
+        "path": "frontend/src/utils/activationLevelDisplay.ts",
+        "purpose": "Single shared, pure, frontend-only formatter (formatActivationLevelForDisplay) centralizing the activation-level translation table -- used by AlphaCard.tsx, ConflictCard.tsx, and StructureGraphPage.tsx so every place a level is rendered as text shows the same product word for the same underlying state. Never mutates a stored/API value."
+      },
+      {
+        "path": "frontend/src/utils/activationLevelDisplay.test.ts",
+        "purpose": "12 tests: every known mapping, no raw snake_case token returned for a known level, unknown-value safety (no crash, no misrepresentation as a known state), null/undefined/empty handling, purity."
+      }
+    ],
+    "modified": [
+      {
+        "path": "frontend/src/components/AlphaCard.tsx",
+        "change": "Main Activation level row translated; Qualification ceiling/Score was capped/Cap reason rows stripped of inline raw codes; Target level/Blocked prose translated; Regime qualification row stripped of inline raw codes; one new consolidated 'Technical details' <details> added preserving raw activation level, qualification-ceiling reason codes, score-capped reason codes, cap reason codes (raw), target/qualified level (raw), and regime-gate failure codes -- only ever rendering a field the backend actually provided."
+      },
+      {
+        "path": "frontend/src/components/ConflictCard.tsx",
+        "change": "activationLevelText() now formats the level through the shared helper before composing the bull/bear side's Activation line; the already-translated cap-reason text is unchanged."
+      },
+      {
+        "path": "frontend/src/components/CandidateConflictCard.tsx",
+        "change": "Badge text and default copy changed to plain 'Potential conflict' language; the full raw admissibility diagnostic (scores, evidence counts, B2 reason codes) and the rejected-before-evaluation raw reason codes are now inside a 'Technical details' <details>, collapsed by default."
+      },
+      {
+        "path": "frontend/src/components/ConflictEvidenceSections.tsx",
+        "change": "'No B2 evidence gaps identified.' -> 'No evidence gaps identified.' (one line)."
+      },
+      {
+        "path": "frontend/src/pages/StructureGraphPage.tsx",
+        "change": "Blocked-alphas list: level badge now translated; 'Blocked from' levels translated; 'Reason' now shows the translated label (reusing the same canonical BLOCKED_REASON_LABELS vocabulary already used by AlphaCard/ConflictCard, added locally per this project's established small-local-copy convention); the raw reason code(s) moved into a new per-item 'Technical details' <details>. This specific fix was added only after the real-run verification pass (below) found NO_LOCAL_STRUCTURE_SUPPORT was still VISIBLE_DEFAULT here."
+      },
+      {
+        "path": "frontend/src/pages/ResearchRunPage.tsx",
+        "change": "Alpha Memory panel: removed the always-visible 'SHADOW' badge from the heading; replaced the raw 'Activation modulation: On/Off' line with a plain, accurate default statement (branching safely on the real value, never fabricating); added a 'Technical details' <details> preserving the raw mode and activation_modulation_applied values verbatim."
+      }
+    ],
+    "backend_files_changed": 0,
+    "backend_api_schema_changed": false,
+    "alpha_taxonomy_changed": false,
+    "mapper_changed": false,
+    "evidence_stance_changed": false,
+    "activation_threshold_changed": false,
+    "conflict_admissibility_changed": false,
+    "alpha_memory_behavior_changed": false
+  },
+  "shared_formatter": {
+    "added": true,
+    "path": "frontend/src/utils/activationLevelDisplay.ts",
+    "export": "formatActivationLevelForDisplay(rawLevel)",
+    "consumers": [
+      "AlphaCard.tsx",
+      "ConflictCard.tsx",
+      "StructureGraphPage.tsx"
+    ],
+    "duplication_avoided": "No per-component 'if (level === \"regime_level\") ...' branches were added anywhere; every level-display call site imports the one shared helper."
+  },
+  "technical_details_mechanism": {
+    "pattern": "Native <details>/<summary>, keyboard-accessible by default (no custom JS focus trap needed), default collapsed, labeled 'Technical details' everywhere new (existing pre-Phase-2D disclosures kept their own established labels: 'Full diagnostic detail', 'Why edges did not qualify', 'Technical detail' for phi_id).",
+    "scope": "Context-local in every case: one per AlphaCard, one per CandidateConflictCard, one per StructureGraphPage Blocked-alphas list item, one in the Alpha Memory panel. No page-level or global JSON inspector was created.",
+    "never_dumps_arbitrary_raw_json": true,
+    "only_renders_fields_actually_present": true
+  },
+  "default_view_string_audit_after": {
+    "method": "Real-run, read-only Playwright verification against the already-running comqutor-api server (Postgres-backed) for all three candidate demo runs, across ResearchRunPage, StructureGraphPage, and ConflictRadarPage (6 page/ticker combinations total). No POST /api/research, no POST /api/replay-all, no Provider/TradingAgents calls.",
+    "results": {
+      "regime_level": "NOT_PRESENT (ResearchRunPage, ConflictRadarPage) / TECHNICAL_ONLY (StructureGraphPage, inside AlphaCard's own Technical details)",
+      "candidate": "TECHNICAL_ONLY everywhere observed (never VISIBLE_DEFAULT)",
+      "B2": "NOT_PRESENT (ResearchRunPage, StructureGraphPage) / TECHNICAL_ONLY (ConflictRadarPage, inside CandidateConflictCard's Technical details)",
+      "Conflict Evidence Admissibility": "NOT_PRESENT everywhere observed",
+      "SHADOW": "TECHNICAL_ONLY everywhere observed (inside Alpha Memory's Technical details, lowercase raw 'mode' value)",
+      "phi_id": "NOT_PRESENT (already gated pre-Phase-2D; not directly rendered as the field name anywhere, only as a label inside an already-collapsed detail)",
+      "activation_modulation_applied": "NOT_PRESENT everywhere observed (translated to a plain-English dt label in Technical details, never the raw field name)",
+      "NO_LOCAL_STRUCTURE_SUPPORT": "NOT_PRESENT (ResearchRunPage, ConflictRadarPage) / TECHNICAL_ONLY (StructureGraphPage -- fixed during this phase after the audit initially found it VISIBLE_DEFAULT)",
+      "LINEAGE_UNRESOLVED": "TECHNICAL_ONLY (StructureGraphPage, inside AlphaCard's local_edge_exclusion_reasons detail, when present) / NOT_PRESENT elsewhere"
+    },
+    "target_met": "Every term is TECHNICAL_ONLY or NOT_PRESENT on every page/ticker combination checked -- zero VISIBLE_DEFAULT occurrences remain.",
+    "translated_terms_confirmed_rendering": [
+      "Active",
+      "Dominant",
+      "Emerging",
+      "Potential conflict"
+    ]
+  },
+  "real_run_verification": {
+    "method": "Vite dev server started against the real, already-running comqutor-api (VITE_COMQUTOR_API_BASE_URL=http://127.0.0.1:8000), visited with a throwaway Playwright script (deleted after use) for all three candidate run_ids across all three normal stakeholder-reachable pages. Zero Provider calls, zero TradingAgents calls, zero fresh ticker runs, zero POST /api/research, zero POST /api/replay-all.",
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "structural_snapshot_present": true,
+      "jargon_audit": "PASS (see default_view_string_audit_after)"
+    },
+    "QQQ": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "structural_snapshot_present": true,
+      "no_dominant_copy_rendered": "No single structure currently dominates.",
+      "jargon_audit": "PASS"
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "structural_snapshot_present": true,
+      "no_conflict_copy_rendered": "No high-confidence structural conflict is currently admitted.",
+      "jargon_audit": "PASS"
+    },
+    "dev_server_and_scripts_cleaned_up": true,
+    "real_api_server_untouched": true
+  },
+  "regression_checks": {
+    "phase_2b_structural_snapshot": {
+      "confirmed_clean": true,
+      "raw_regime_level_present": false,
+      "raw_candidate_present": false,
+      "raw_B2_present": false,
+      "raw_phi_id_present": false,
+      "raw_SHADOW_present": false,
+      "test_result": "StructuralSnapshot.test.tsx 14/14 passed (re-run explicitly this phase)"
+    },
+    "phase_2c_disclaimer_and_operator_separation": {
+      "disclaimer_still_present_once_globally": true,
+      "exact_text_confirmed": "Research analysis only \u2014 not financial advice.",
+      "replayallpanel_absent_from_research": true,
+      "replayallpanel_available_at_operator": true,
+      "test_result": "AppShell.test.tsx 6/6, ResearchPage.test.tsx 4/4, OperatorPage.test.tsx 7/7 passed (re-run explicitly this phase)"
+    }
+  },
+  "test_results": {
+    "focused_phase_2d_tests": {
+      "files": [
+        "activationLevelDisplay.test.ts",
+        "AlphaCard.test.tsx (updated+1 new)",
+        "ConflictCard.test.tsx (updated+1 new)",
+        "CandidateConflictCard.test.tsx (updated+2 new)",
+        "ConflictEvidenceSections.test.tsx (updated)",
+        "ConflictRadarPage.test.tsx (updated)",
+        "StructureGraphPage.test.tsx (updated)",
+        "ResearchRunPage.test.tsx (updated Alpha Memory tests +5 new)"
+      ],
+      "passed": "all"
+    },
+    "full_frontend_unit_suite": {
+      "command": "npx vitest run",
+      "test_files": 25,
+      "tests_passed": 290,
+      "tests_failed": 0,
+      "new_regressions": 0
+    },
+    "product_language_test": {
+      "passed": 1,
+      "failed": 0
+    },
+    "typescript_typecheck": {
+      "command": "npx tsc -b",
+      "result": "0 errors"
+    },
+    "production_build": {
+      "command": "npm run build",
+      "result": "success -- 66 modules transformed, 512-547ms across reruns"
+    },
+    "e2e_playwright": {
+      "attempted": true,
+      "command": "npx playwright test e2e/w5-demo.spec.ts",
+      "result": "BLOCKED -- same pre-existing, unrelated Python packaging issue documented in Phase 2B and Phase 2C (scripts/seed_w5_demo.py: ModuleNotFoundError: No module named 'scripts')",
+      "not_fixed": "Explicitly out of scope; not touched, per this phase's own instruction not to repair unrelated Python packaging.",
+      "mitigation": "A separate, throwaway Playwright script (not the blocked w5-demo harness) was used to drive real-run verification directly against the already-running comqutor-api server, bypassing the blocked seed script entirely -- see real_run_verification above."
+    }
+  },
+  "zero_provider_proof": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "post_research_calls": 0,
+    "post_replay_all_calls_against_real_data": 0,
+    "basis": "All changes are presentation-only (label text, disclosure placement, one shared pure formatter). The real-run verification used only GET-driven page loads against already-persisted data through the already-running server; no research or replay endpoint was ever POSTed to."
+  },
+  "final_validation": {
+    "gold_closure_unchanged": true,
+    "phase1_audit_unchanged": true,
+    "phase2a_artifact_unchanged": true,
+    "phase2b_artifact_unchanged": true,
+    "phase2c_artifact_unchanged": true,
+    "research_page_replayallpanel_absent": true,
+    "replay_functionality_still_exists": true,
+    "research_only_positioning_visible": true,
+    "backend_files_changed": 0,
+    "semantic_files_changed": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0
+  },
+  "success_criteria_met": {
+    "stakeholder_default_views_no_longer_require_internal_vocabulary": true,
+    "important_technical_information_not_destroyed": true,
+    "raw_values_available_in_intentional_advanced_path": true,
+    "phase_2b_summary_remains_clean": true,
+    "phase_2c_disclaimer_operator_separation_intact": true,
+    "no_backend_changes": true,
+    "no_semantic_changes": true,
+    "tests_build_pass": true,
+    "no_new_regressions": true,
+    "overall_result": "PASS"
+  },
+  "next_recommended_phase": "PRODUCT DEMO HARDENING -- PHASE 3: Demo rehearsal / final readiness validation, testing the actual presentation sequence with NVDA primary, QQQ secondary, SNDK edge case, identifying only remaining demo blockers. Do NOT start semantic or latency optimization next. Not implemented in this phase.",
+  "gitignore_collision_finding": {
+    "discovered": true,
+    "description": "The new shared formatter was initially placed at frontend/src/lib/activationLevelDisplay.ts. git status showed nothing for that path -- the repo-root .gitignore has a generic 'lib/' rule (line 18, evidently intended for a Python venv's lib/ directory) that, having no leading slash, also matches frontend/src/lib/ at any depth, silently excluding it from version control.",
+    "resolution": "Renamed the directory to frontend/src/utils/ (confirmed clear of any .gitignore pattern) rather than modifying the shared root .gitignore -- a smaller, fully frontend-scoped fix that avoids touching shared repository configuration.",
+    "verified_after_fix": "git status now correctly shows frontend/src/utils/ as an untracked addition; all imports updated; full test suite (290/290), typecheck, and production build all re-confirmed passing after the move."
+  }
+}

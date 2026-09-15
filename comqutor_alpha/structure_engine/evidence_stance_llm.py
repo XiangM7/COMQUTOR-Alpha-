@@ -36,7 +36,9 @@ Reuses, never duplicates:
 
 from __future__ import annotations
 
+import threading
 from collections.abc import Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
@@ -46,6 +48,7 @@ from comqutor_alpha.structure_engine.evidence_stance import (
     VALID_EVIDENCE_STANCES,
     canonical_conflict_partners,
 )
+from comqutor_alpha.structure_engine.week2_llm import resolve_evidence_stance_concurrency
 
 LLM_CLASSIFIER_VERSION = "evidence_stance.llm.v1"
 LLM_TASK_NAME = "evidence_stance_classifier"
@@ -274,9 +277,21 @@ class StanceRunStats:
     """Plain accumulator for the counts this Sprint's report/audit needs.
     Never itself a source of truth for any candidate's stance -- purely a
     tally of what ``apply_llm_stance_upgrade`` already wrote onto the
-    candidate dicts."""
+    candidate dicts.
+
+    John Requirement B, Phase B2 Slice 2A: this is the ONE piece of state
+    ``apply_llm_stance_upgrade`` mutates that is genuinely SHARED across
+    batches (unlike each item's own ``candidate`` dict, which belongs to
+    exactly one batch). Under bounded concurrency, multiple worker threads
+    can call ``record_llm``/``record_fallback``/increment the counters
+    below at the same time -- a plain ``+=``/dict-increment is not
+    guaranteed atomic across threads, so every mutating method is
+    lock-protected. This is the minimum synchronization needed to keep
+    these counts accurate; it adds no behavior change for the existing
+    concurrency=1 (serial) case."""
 
     def __init__(self) -> None:
+        self._lock = threading.Lock()
         self.llm_gateway_used = False
         self.requested_count = 0
         self.llm_result_count = 0
@@ -288,12 +303,23 @@ class StanceRunStats:
         self.invalid_llm_output_admitted = 0
 
     def record_llm(self) -> None:
-        self.llm_result_count += 1
+        with self._lock:
+            self.llm_result_count += 1
 
     def record_fallback(self, reason: str) -> None:
-        self.deterministic_fallback_count += 1
-        if reason in self.fallback_reason_counts:
-            self.fallback_reason_counts[reason] += 1
+        with self._lock:
+            self.deterministic_fallback_count += 1
+            if reason in self.fallback_reason_counts:
+                self.fallback_reason_counts[reason] += 1
+
+    def record_batch_started(self) -> None:
+        with self._lock:
+            self.batch_count += 1
+
+    def record_provider_attempt(self, real_attempts: int) -> None:
+        with self._lock:
+            self.logical_provider_calls += 1
+            self.real_provider_attempts += max(0, int(real_attempts))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -309,19 +335,51 @@ class StanceRunStats:
         }
 
 
-def _process_batch(
+def _invoke_batch(
+    batch: list[StanceRequestItem],
+    llm_gateway: Any,
+) -> tuple[Any | None, Exception | None]:
+    """Phase 1 (John Requirement B, Phase B2 Slice 2A): issue the Provider
+    request only -- the part safe to run concurrently across batches. Never
+    raises; an exception is captured and returned so phase 2 can apply the
+    exact same fail-soft fallback the original single-phase implementation
+    used, regardless of which phase raised it."""
+    try:
+        payload = {"items": [item.payload for item in batch]}
+        invocation = llm_gateway.invoke_json_with_trace(LLM_TASK_NAME, payload, _validate_batch_shape)
+        return invocation, None
+    except Exception as exc:
+        return None, exc
+
+
+def _finalize_batch(
     batch: list[StanceRequestItem],
     taxonomy: Mapping[str, AlphaDefinition],
     llm_gateway: Any,
     stats: StanceRunStats,
+    invocation: Any | None,
+    invoke_error: Exception | None,
 ) -> None:
-    stats.batch_count += 1
+    """Phase 2: gateway finalization (recorder/cache bookkeeping) and
+    per-item result application. John Requirement B, Phase B2 Slice 2A:
+    this phase must be called in ascending call_sequence order across
+    batches (never in raw completion order) -- SemanticCallRecorder.append
+    requires call_sequence to increase strictly for each run, and phase 1's
+    concurrent execution means batches can finish, and therefore reach
+    phase 2, in a different order than their sequence numbers were
+    allocated in. The concurrent orchestration below sorts by each
+    invocation's own trace_handle.call_sequence before calling this
+    function, restoring the exact ordering the recorder (and downstream
+    exact-replay validation, which enforces the identical invariant)
+    already requires -- serial callers (concurrency<=1) call this
+    immediately after phase 1 for each batch in turn, which is already in
+    order by construction."""
+    stats.record_batch_started()
     requested_by_key = {(item.claim_id, item.target_alpha_id): item for item in batch}
     try:
-        payload = {"items": [item.payload for item in batch]}
-        invocation = llm_gateway.invoke_json_with_trace(LLM_TASK_NAME, payload, _validate_batch_shape)
-        stats.logical_provider_calls += 1
-        stats.real_provider_attempts += max(0, int(getattr(invocation, "provider_attempt_count", 0) or 0))
+        if invoke_error is not None:
+            raise invoke_error
+        stats.record_provider_attempt(int(getattr(invocation, "provider_attempt_count", 0) or 0))
 
         if not invocation.validation_accepted:
             reason = _reason_from_invocation(invocation)
@@ -375,11 +433,105 @@ def _process_batch(
             stats.record_fallback(FALLBACK_PROVIDER_ERROR)
 
 
+def _process_batch(
+    batch: list[StanceRequestItem],
+    taxonomy: Mapping[str, AlphaDefinition],
+    llm_gateway: Any,
+    stats: StanceRunStats,
+) -> None:
+    """Serial (concurrency<=1) path: phase 1 then phase 2 for one batch,
+    back to back -- byte-for-byte the original single-phase behavior, since
+    a single batch's own phase 2 always immediately follows its own phase
+    1 with no other batch's work interleaved."""
+    invocation, invoke_error = _invoke_batch(batch, llm_gateway)
+    _finalize_batch(batch, taxonomy, llm_gateway, stats, invocation, invoke_error)
+
+
+def _process_batches_concurrently(
+    batches: list[list[StanceRequestItem]],
+    taxonomy: Mapping[str, AlphaDefinition],
+    llm_gateway: Any,
+    stats: StanceRunStats,
+    concurrency: int,
+) -> None:
+    """John Requirement B, Phase B2 Slice 2A: bounded concurrency for
+    independent stance batches, mirroring alpha_mapper's own
+    ``_classify_alpha_concurrent_with_llm`` pattern exactly.
+
+    Safety, verified against the actual code (not assumed):
+    - Batches are independent: each batch reads only the immutable
+      ``taxonomy`` and writes onto its own items' ``candidate`` dicts,
+      which are never shared with any other batch (``build_stance_request_
+      items`` emits exactly one ``StanceRequestItem`` per retained
+      (claim_id, target_alpha_id) pair, so no two batches ever reference
+      the same candidate object).
+    - No output-order dependency: results are written IN PLACE onto the
+      pre-existing candidate dicts referenced from ``matches`` -- there is
+      no list this function appends to or reorders, so the completion
+      order of batches can never change the final artifact's order.
+    - The only shared mutable state is ``stats`` -- already made
+      thread-safe above (every mutating method is lock-protected).
+    - Week2LLMGateway's call-budget counter and error logger, and
+      SemanticRuntimeSession's cache/trace bookkeeping, are already
+      lock-protected (the same infrastructure alpha_classifier's own
+      concurrency=4 already relies on in production) -- concurrent workers
+      cannot overshoot the shared call budget, corrupt the shared error
+      log, or corrupt the semantic-call recorder.
+    - No cross-batch cancellation: every submitted batch runs to
+      completion (success or its own fail-soft fallback) independently --
+      one batch's failure never discards or alters another batch's
+      already-applied result.
+    - Retry budget is not multiplied by concurrency: each batch's own
+      ``invoke_json_with_trace`` call performs its own bounded retry loop
+      exactly as it does when called serially; concurrency changes only
+      how many batches are in flight at once, never how many attempts any
+      one batch gets.
+    - Deterministic recorder ordering: phase 1 (``_invoke_batch``, which
+      allocates each batch's ``call_sequence`` and performs the actual
+      Provider request) runs concurrently and can COMPLETE in a different
+      order than sequence numbers were allocated in. Phase 2
+      (``_finalize_batch``, which calls the gateway's
+      ``finalize_semantic_invocation`` and therefore
+      ``SemanticCallRecorder.append``) is run here in the MAIN thread only,
+      strictly in ascending ``trace_handle.call_sequence`` order -- exactly
+      the invariant ``SemanticCallRecorder.append`` (and downstream
+      exact-replay validation) already requires for every task, not a new
+      rule introduced by this slice. This was verified necessary by direct
+      testing: dispatching phase 1 AND phase 2 together inside worker
+      threads (naively mirroring alpha_classifier's own concurrent
+      pattern) reproducibly triggered ``RECORDER_SEQUENCE_NOT_MONOTONIC``
+      once batch completion order diverged from allocation order -- a
+      latent race in the shared concurrent-dispatch pattern that this
+      slice's own testing surfaced and fixes locally, without touching
+      ``session.py``, ``recorder.py``, or alpha_classifier's own code path.
+    """
+    with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="comqutor-evidence-stance") as executor:
+        futures = [executor.submit(_invoke_batch, batch, llm_gateway) for batch in batches]
+        completed = [future.result() for future in futures]  # (invocation, invoke_error) per batch, submission order
+
+    def _sequence_key(pair: tuple[Any | None, Exception | None]) -> float:
+        invocation, _ = pair
+        trace = getattr(invocation, "trace_handle", None)
+        sequence = getattr(trace, "call_sequence", None)
+        # A batch with no trace (llm_gateway had no attached semantic_runtime,
+        # or trace allocation itself failed) never reaches the recorder, so
+        # its relative position cannot violate the sequence invariant --
+        # ordered last is an arbitrary-but-safe placement, never a
+        # correctness issue.
+        return sequence if isinstance(sequence, int) else float("inf")
+
+    for (batch, (invocation, invoke_error)) in sorted(
+        zip(batches, completed), key=lambda pair: _sequence_key(pair[1])
+    ):
+        _finalize_batch(batch, taxonomy, llm_gateway, stats, invocation, invoke_error)
+
+
 def apply_llm_stance_upgrade(
     matches: Sequence[Mapping[str, Any]],
     taxonomy: Mapping[str, AlphaDefinition],
     *,
     llm_gateway: Any = None,
+    concurrency: int | None = None,
 ) -> StanceRunStats:
     """Section 5/15: ``result = try_llm_stance(...); if valid(result): return
     result; else: return existing_deterministic_stance(...)`` -- applied per
@@ -387,15 +539,30 @@ def apply_llm_stance_upgrade(
     ``BATCH_SIZE``. When ``llm_gateway`` is ``None`` (the default -- every
     existing caller, and Architecture Replay, which never passes one), this
     is a guaranteed zero-cost no-op: ``matches`` is left exactly as
-    ``map_structured_records`` already produced it."""
+    ``map_structured_records`` already produced it.
+
+    ``concurrency`` (John Requirement B, Phase B2 Slice 2A): number of
+    batches to process at once. ``None`` (the default) resolves to
+    ``week2_llm.resolve_evidence_stance_concurrency()`` -- the same
+    env-var-overridable, centrally-defined resolution pattern already used
+    for ``alpha_classifier``. ``concurrency <= 1`` (or a single batch)
+    reproduces the exact prior serial behavior with zero functional
+    change -- only ``concurrency > 1`` with more than one batch dispatches
+    through the bounded ThreadPoolExecutor path."""
     stats = StanceRunStats()
     if llm_gateway is None:
         return stats
     stats.llm_gateway_used = True
     items = build_stance_request_items(matches, taxonomy)
     stats.requested_count = len(items)
-    for batch in chunk_items(items, BATCH_SIZE):
-        _process_batch(batch, taxonomy, llm_gateway, stats)
+    batches = chunk_items(items, BATCH_SIZE)
+    if concurrency is None:
+        concurrency = resolve_evidence_stance_concurrency()
+    if concurrency <= 1 or len(batches) <= 1:
+        for batch in batches:
+            _process_batch(batch, taxonomy, llm_gateway, stats)
+    else:
+        _process_batches_concurrently(batches, taxonomy, llm_gateway, stats, concurrency)
     return stats
 
 

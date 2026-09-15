@@ -1,0 +1,207 @@
+{
+  "schema_version": "v0.2.qqq_postfix_fresh_run_manifest.v1",
+  "task": "V0.2_POSTFIX_VALIDATION_STEP_7B_1_ONE_FRESH_QQQ_RUN",
+  "purpose": "post-Step-7A/7A.2 QQQ validation run authority establishment -- does NOT decide Gold PASS/FAIL",
+  "authorities_verified_before_run": {
+    "gold_contract_json": {
+      "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+      "expected_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "actual_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "match": true
+    },
+    "evidence_trigger_matrix_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+      "expected_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "actual_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+      "match": true
+    },
+    "final_acceptance_json": {
+      "path": "docs/audit_artifacts/v0_2_final_acceptance_table.json",
+      "expected_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "actual_sha256": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+      "match": true
+    },
+    "acceptance_adjudication_json": {
+      "path": "docs/audit_artifacts/v0_2_acceptance_adjudication.json",
+      "expected_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "actual_sha256": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+      "match": true
+    },
+    "evidence_failure_analysis_json": {
+      "path": "docs/audit_artifacts/v0_2_evidence_failure_analysis.json",
+      "expected_sha256": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+      "actual_sha256": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+      "match": true
+    },
+    "step7a_remediation_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_mapping_remediation.json",
+      "expected_sha256": "ab3e4558167bcd5186678e53c7b9cbbd7621d9d5e910c1294e977e9ffba819d0",
+      "actual_sha256": "ab3e4558167bcd5186678e53c7b9cbbd7621d9d5e910c1294e977e9ffba819d0",
+      "match": true
+    },
+    "step7a1_residual_audit_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_residual_mapping_audit.json",
+      "expected_sha256": "f8d6b59e1b717db32bb00e6ac2f68ff81ea5803925fe3993fd3689439337015c",
+      "actual_sha256": "f8d6b59e1b717db32bb00e6ac2f68ff81ea5803925fe3993fd3689439337015c",
+      "match": true
+    },
+    "step7a2_remediation_json": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_positive_requirement_remediation.json",
+      "expected_sha256": "9c5efb6238e832dc5b9fbdcebb64342dcc1e7b31567725dd1e42d917eef87bf5",
+      "actual_sha256": "9c5efb6238e832dc5b9fbdcebb64342dcc1e7b31567725dd1e42d917eef87bf5",
+      "match": true
+    },
+    "step7a2_remediation_md": {
+      "path": "docs/audit_artifacts/v0_2_qqq_a001_positive_requirement_remediation.md",
+      "expected_sha256": "b9aeb14dcb3d90288de5b2ff0b8f192866d8a461e6b1b12994efb3960a4d5a25",
+      "actual_sha256": "b9aeb14dcb3d90288de5b2ff0b8f192866d8a461e6b1b12994efb3960a4d5a25",
+      "match": true
+    }
+  },
+  "ticker": "QQQ",
+  "historical_run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+  "historical_run_note": "That run and its frozen evidence trigger (A001 ABSENT, etc.) belong ONLY to the pre-remediation corpus and are NOT reused as authority for this new run. Not modified in this task.",
+  "new_run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+  "repository": {
+    "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "branch": "comqutor-structure-layer",
+    "working_tree_summary": "255 pre-existing locally-modified/added files (all from prior authorized session work, none touched by this task); git diff --stat shows exactly the same 4 files already modified before this task began (claim_semantics.py, alpha_mapper.py, factor_normalizer.py, relation_grammar.py) -- zero net change from this task."
+  },
+  "user_authorization": {
+    "live_execution_gate_confirmed_by_user": true,
+    "gate_names": [
+      "COMQUTOR_REAL_TRADINGAGENTS_ENABLED",
+      "COMQUTOR_WEEK2_LLM_ENABLED",
+      "COMQUTOR_REAL_FORCE_REFRESH_ENABLED"
+    ],
+    "note": "An existing, already-running comqutor-api server process (PID 27595, left over from an earlier unrelated session, log file /private/tmp/comqutor_live_start_msft_a304.log) was found already configured with real_execution=configured and live_semantic_pipeline=ready. That existing server was reused as-is (per this task's own safety instructions: never kill/restart another server) -- no new server was started and no env vars were set by this task's own process for a fresh server launch."
+  },
+  "production_semantics": {
+    "claim_semantics_sha256": "f0d9d891c1ee459f149677da19639434f3b236901b455e180e841b354688299b",
+    "alpha_mapper_sha256": "36d36ffebac280578e540372e33eb657622b39d2530927510f28cb1cadcaed29",
+    "test_file_sha256": "74c055d1379215684fd68aac3910369e93808d070fc145c126a1f780cbd97c07",
+    "includes_step7a_invalidation_veto": true,
+    "includes_step7a2_positive_requirement_gate": true,
+    "positive_easing_only_final_acceptance": true
+  },
+  "known_validation_environment_issue": {
+    "id": "TEST_INFRASTRUCTURE_ARTIFACT_39_REPLAY_FIXTURE_ERRORS",
+    "description": "Step-7A.2 broader backend suite: 4168 passed / 27 failed / 42 errors / 3 skipped / 47 deselected. 39 of the 42 errors trace to one shared test fixture (tests/replay/conftest.py:221) whose synthetic mock always canned-selects the alphabetically-first taxonomy Alpha (A001) for unrelated NVDA/AI-demand claim text; the new Step-7A.2 positive-requirement gate correctly rejects that synthetic selection, dropping a downstream mocked call count from 4 to 3 and tripping a hardcoded assertion. Classified as TEST_INFRASTRUCTURE_ARTIFACT, not a proven production regression. Not repaired in Step 7B.1 per explicit instruction. This context does not authorize ignoring any production failure discovered in this fresh QQQ run."
+  },
+  "execution": {
+    "runner_discovery": "scripts/run_regression.py was inspected and ruled out -- its own --help/docstring states it 'Never calls a Provider or TradingAgents... Never runs LLM-driven analysis' (zero-Provider Architecture Replay only). The actual live-run mechanism is scripts/start_live_comqutor.sh (starts the API server with COMQUTOR_REAL_TRADINGAGENTS_ENABLED/COMQUTOR_WEEK2_LLM_ENABLED/COMQUTOR_REAL_FORCE_REFRESH_ENABLED) followed by POST /api/research {ticker, force_refresh:true} -- the exact same mechanism documented in docs/audit_artifacts/v0_1_3_msft_a304_fresh_validation.md line 74 for the historical authoritative runs.",
+    "exact_command": "curl -s -X POST http://127.0.0.1:8000/api/research -H \"Content-Type: application/json\" -d '{\"ticker\":\"QQQ\",\"force_refresh\":true}'",
+    "server_already_running_reused": true,
+    "fresh_refresh_verified": true,
+    "cache_disposition_returned": "force_refreshed",
+    "attempt_count": 1,
+    "infrastructure_retries": 0,
+    "retry_log": [],
+    "polling_endpoint": "GET /api/research/f239a53f-4ebe-455c-bb76-5f5485903901/status",
+    "polling_note": "First poll attempt used the bare GET /api/research/{run_id} endpoint (a persisted-record lookup, not the lifecycle status endpoint) and returned RUN_NOT_FOUND while the run was still genuinely in progress -- a client-side polling error, not a run failure or a retry; corrected by switching to the /status suffix, which immediately confirmed status=running. No second run was ever submitted."
+  },
+  "new_run_authority": {
+    "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+    "ticker": "QQQ",
+    "analysis_date": "2026-09-11",
+    "created_at": "2026-09-11T17:07:25.960769+00:00",
+    "started_at": "2026-09-11T17:07:26.763880+00:00",
+    "completed_at": "2026-09-11T17:59:47.245706+00:00",
+    "elapsed_seconds": 3140,
+    "selected_analysts": [
+      "market",
+      "sentiment",
+      "news",
+      "fundamentals"
+    ],
+    "agents": [
+      "market_agent",
+      "sentiment_agent",
+      "news_agent",
+      "fundamental_agent",
+      "bull_researcher",
+      "bear_researcher",
+      "research_manager",
+      "trader",
+      "aggressive_risk_analyst",
+      "conservative_risk_analyst",
+      "neutral_risk_analyst",
+      "portfolio_manager"
+    ],
+    "llm_provider": "deepseek",
+    "quick_model": "deepseek-v4-flash",
+    "deep_model": "deepseek-v4-flash",
+    "overall_run_completion_status": "completed"
+  },
+  "artifacts": {
+    "path": "outputs/runs/f239a53f-4ebe-455c-bb76-5f5485903901/",
+    "required_artifact_count": 9,
+    "present_required_artifact_count": 9,
+    "missing_required_artifacts": [],
+    "completeness": "pass",
+    "ticker_consistency": "pass",
+    "ticker_consistency_inconsistencies": [],
+    "run_id_consistency": true,
+    "json_parse_validity": "all present JSON artifacts parsed successfully (verified individually)",
+    "data_sanity_status": "ok",
+    "graph_node_count": 10,
+    "graph_edge_count": 11,
+    "note": "Graph/structural file existence and basic counts only -- semantic correctness of edges/conflicts/activations NOT adjudicated in this task."
+  },
+  "provider_health": {
+    "provider": "yfinance",
+    "llm_provider": "deepseek",
+    "semantic_provider_call_count": 617,
+    "semantic_accepted_count": 584,
+    "semantic_rejected_count": 5,
+    "semantic_fallback_count": 11,
+    "semantic_cache_hit_count": 0,
+    "semantic_record_count": 595,
+    "semantic_tasks_breakdown": {
+      "alpha_classifier": 550,
+      "evidence_stance_classifier": 33,
+      "structure_extractor": 4,
+      "structured_adapter": 8
+    },
+    "semantic_critical_error_events_total": 34,
+    "semantic_critical_error_reasons": {
+      "WEEK2_LLM_TIMEOUT": 25,
+      "WEEK2_LLM_VALIDATION_FAILED": 9
+    },
+    "semantic_critical_error_by_task": {
+      "claim_batch_enrichment": 10,
+      "alpha_classifier": 2,
+      "evidence_stance_classifier": 16,
+      "structure_extractor": 6
+    },
+    "recorder_only_failures": 0,
+    "recorder_only_failures_note": "No recorder/audit-trace-only failures identified separately from semantic-critical Provider errors above; all 34 logged error_logs/week2_llm_errors.jsonl entries are WEEK2_LLM_TIMEOUT/WEEK2_LLM_VALIDATION_FAILED events from the Week2 semantic Provider layer itself (timeouts/malformed-output retries), not recorder-append failures.",
+    "non_semantic_data_vendor_degradation": {
+      "reddit_rss_429_backoff": "observed (r/stocks, r/investing) -- non-fatal, automatic retry/backoff, does not affect semantic pipeline",
+      "fred_macro_vendor_not_configured": "observed (FRED_API_KEY unset) -- optional macro data vendor, automatic fallback to next vendor per tradingagents/dataflows/interface.py, non-fatal"
+    }
+  },
+  "semantic_adjudication": {
+    "performed": false,
+    "old_trigger_reused": false,
+    "detected_alpha_correctness_adjudicated": false,
+    "main_conflict_correctness_adjudicated": false,
+    "gold_pass_fail_calculated": false
+  },
+  "semantic_stdout_exposure": true,
+  "semantic_stdout_exposure_note": "Not a stdout print during execution (this run was triggered via the HTTP API, not a CLI runner) -- basic artifact-integrity checking of the persisted, non-required summary.json (checking it parses and has expected schema keys) incidentally exposed two high-level semantic fields (dominant_alpha_ids, main_conflict_id). Recorded here for full transparency; neither value is repeated in this manifest or the companion markdown, and neither was used for any judgment in this task.",
+  "semantic_stdout_used_for_adjudication": false,
+  "old_ledger": {
+    "path": "docs/audit_artifacts/v0_1_3_final_fresh_six_ticker_ledger.json",
+    "sha256": "fafa6c9796348b4a045637ede7edf76ca8b5ba9b35106e6bbc0625923b21bd3f",
+    "modified": false,
+    "new_run_promoted_into_ledger": false
+  },
+  "run_usable_for_postfix_validation": true,
+  "run_usable_reason": "QQQ ticker identity correct (confirmed in metadata.json, run_audit.json ticker_consistency=pass, and every present artifact's own run_id/ticker fields), run completed (status=completed, 100%, no error_code), all 9/9 required canonical artifacts present and valid, evidence corpus available (structured_agent_outputs.json 1.5MB, evidence_facts.json, evidence_stance_audit.json all present and parse), no fatal corruption (data_sanity status=ok, 0 critical/warning counts), Provider health shows a normally-functioning run (617 calls, 584 accepted, only 34 timeout/validation-retry events across the whole run, well within normal variance) -- sufficient persisted output exists for Step 7B.2 (evidence-trigger adjudication) and Step 7B.3 (comparison).",
+  "gold_pass_fail_calculated": false,
+  "historical_acceptance_rewritten": false,
+  "production_files_changed_during_step7b1": 0,
+  "test_files_changed_during_step7b1": 0,
+  "next_step": "STEP 7B.2 -- new-run QQQ evidence-trigger adjudication, independent of Alpha activation/conflict output, using only upstream-of-activation persisted evidence (structured_agent_outputs.json, raw_agent_outputs.json, evidence_facts.json, etc.), exactly as Step 3 originally did for the historical six-ticker corpus."
+}

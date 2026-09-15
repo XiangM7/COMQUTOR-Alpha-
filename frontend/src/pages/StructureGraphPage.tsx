@@ -8,36 +8,54 @@ import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
 import { EmptyState } from "../components/EmptyState";
 import { AlphaCard } from "../components/AlphaCard";
+import { useAlphaLibrary } from "../hooks/useAlphaLibrary";
+import { formatActivationLevelForDisplay } from "../utils/activationLevelDisplay";
 import { StructureGraphView } from "../graph/StructureGraphView";
 import type { SelectableGraphNode } from "../graph/graphTypes";
 
-// John's five-way, mutually-exclusive UI partition (task
-// B4_ACTIVATION_LEVEL_ALIGNMENT, Decision 2). Priority order matters:
-// is_blocked always wins first (an alpha that reached e.g. "active" only
-// because it was blocked from "dominant" is shown as Blocked, not Active),
-// then regime_level, then dominant, then active; everything else
-// (candidate, or -- Decision 3 -- a historical inactive/watch payload) is
-// Candidate. Backend qualified counts (run_audit's
-// active_alpha_count/dominant_alpha_count/etc.) are computed independently
-// and are not required to match this display-only partition's bucket
-// sizes -- see comment on ADMISSIBLE_STATUSES/qualified counts.
-type AlphaLevelBucket = "active" | "dominant" | "regime_level" | "candidate" | "blocked";
+// John's Alpha-level UI partition (John Item 8, Alpha-Level Display
+// Normalization). Display level and blocked status are two orthogonal
+// dimensions: the primary bucket below is derived ONLY from the
+// authoritative display level (activation_level, falling back to
+// qualified_level/status for a historical payload) and is never
+// overridden by is_blocked. A blocked Alpha keeps its own display level
+// (e.g. a capped_active Alpha blocked from "dominant" stays in "Capped
+// active alphas") and is additionally, independently surfaced in the
+// orthogonal Blocked view below (see `blockedAlphas`) -- it may
+// legitimately appear in both places at once.
+export type AlphaLevelBucket = "active" | "capped_active" | "dominant" | "regime_level" | "candidate";
 
-const ALPHA_LEVEL_BUCKETS: { key: AlphaLevelBucket; title: string }[] = [
+// Mirrors AlphaCard's/ConflictCard's own BLOCKED_REASON_LABELS verbatim --
+// the same John-approved canonical reason vocabulary, kept as a small local
+// copy per this project's established convention (see ConflictCard.tsx)
+// rather than a shared import.
+const BLOCKED_REASON_LABELS: Record<string, string> = {
+  NO_LOCAL_STRUCTURE_SUPPORT: "No supporting Structure Graph edges",
+  INSUFFICIENT_EVIDENCE: "Insufficient independent evidence",
+  LOW_ENTITY_EXPOSURE: "Entity Exposure below required threshold",
+  NO_TICKER_SPECIFIC_EVIDENCE: "No ticker-specific evidence",
+};
+
+export const ALPHA_LEVEL_BUCKETS: { key: AlphaLevelBucket; title: string }[] = [
   { key: "active", title: "Active alphas" },
+  { key: "capped_active", title: "Capped active alphas" },
   { key: "dominant", title: "Dominant alphas" },
   { key: "regime_level", title: "Regime-level alphas" },
   { key: "candidate", title: "Candidate alphas" },
-  { key: "blocked", title: "Blocked alphas" },
 ];
 
-function bucketForAlpha(alpha: AlphaActivation): AlphaLevelBucket {
-  if (alpha.is_blocked === true) return "blocked";
-  // qualified_level is always identical to `status` once B4 has run;
-  // falling back to `status` here is what makes a historical payload
-  // (predating qualified_level entirely) partition safely instead of
-  // every alpha silently landing in "candidate".
-  const level = alpha.qualified_level ?? alpha.status;
+/** Exported (Product Demo Hardening Phase 2B) so StructuralSnapshot can
+ * reuse this exact, already-production bucketing logic for the main
+ * Research page's compact Active Structures list -- never a second,
+ * independently-invented definition of "meaningfully active." */
+export function bucketForAlpha(alpha: AlphaActivation): AlphaLevelBucket {
+  // activation_level is the backend's own presentation-only display field
+  // (alpha_level_classifier.CAPPED_ACTIVE et al.) -- read directly, never
+  // recomputed here from score/is_blocked/blocked_from. qualified_level,
+  // then `status`, are the fallback for a historical payload that
+  // predates activation_level entirely.
+  const level = alpha.activation_level ?? alpha.qualified_level ?? alpha.status;
+  if (level === "capped_active") return "capped_active";
   if (level === "regime_level") return "regime_level";
   if (level === "dominant") return "dominant";
   if (level === "active") return "active";
@@ -113,6 +131,25 @@ export function StructureGraphPage() {
   const { runId } = useParams<{ runId: string }>();
   const { graph, conflicts, error, isLoading, runMismatch, reload } = useGraphAndConflicts(runId);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  // John Follow-Up Requirement A (Invalidation-Condition Coverage
+  // Completion): one Alpha Library fetch, shared across every AlphaCard on
+  // this page (see useAlphaLibrary's own module-level cache) -- never a
+  // per-Alpha request.
+  const { library: alphaLibrary } = useAlphaLibrary();
+
+  // alpha_id -> this Alpha's taxonomy invalidation_conditions. undefined
+  // (map miss) while the library hasn't loaded yet, or if a given alpha_id
+  // is genuinely absent from the taxonomy -- AlphaCard renders nothing for
+  // undefined and an honest fallback for a present-but-empty array.
+  const invalidationConditionsByAlpha = useMemo(() => {
+    const index = new Map<string, string[]>();
+    if (alphaLibrary) {
+      for (const entry of alphaLibrary.alphas) {
+        index.set(entry.alpha_id, entry.invalidation_conditions);
+      }
+    }
+    return index;
+  }, [alphaLibrary]);
 
   const conflictAlphaIds = useMemo(() => {
     if (!conflicts || !("conflicts" in conflicts)) return new Set<string>();
@@ -149,24 +186,37 @@ export function StructureGraphPage() {
     return new Set(graph.dominant_alphas.map((alpha) => alpha.alpha_id));
   }, [graph]);
 
-  // The five-way partition itself (see bucketForAlpha above) -- built once
-  // from the full, authoritative per-alpha activation list (never the
-  // narrower dominant_alphas/active_alphas/etc. summary collections, which
-  // are allowed to overlap with each other and are not a valid source for
-  // a mutually-exclusive partition).
+  // The primary, display-level partition (see bucketForAlpha above) --
+  // built once from the full, authoritative per-alpha activation list
+  // (never the narrower dominant_alphas/active_alphas/etc. summary
+  // collections, which are allowed to overlap with each other and are not
+  // a valid source for a mutually-exclusive partition). is_blocked plays
+  // no part in this partition -- see `blockedAlphas` for the orthogonal
+  // blocked view.
   const alphasByBucket = useMemo(() => {
     const buckets: Record<AlphaLevelBucket, AlphaActivation[]> = {
       active: [],
+      capped_active: [],
       dominant: [],
       regime_level: [],
       candidate: [],
-      blocked: [],
     };
     if (!graph || !("activation" in graph)) return buckets;
     for (const alpha of graph.activation.alphas) {
       buckets[bucketForAlpha(alpha)].push(alpha);
     }
     return buckets;
+  }, [graph]);
+
+  // The orthogonal Blocked view (John Item 8): derived independently from
+  // is_blocked === true, never from the display-level bucket above. An
+  // Alpha that is both e.g. capped_active AND blocked appears in both its
+  // level section above and here -- that overlap is intentional, not a
+  // bug (blocked is a status layered on top of a level, not a sixth
+  // level).
+  const blockedAlphas = useMemo(() => {
+    if (!graph || !("activation" in graph)) return [];
+    return graph.activation.alphas.filter((alpha) => alpha.is_blocked === true);
   }, [graph]);
 
   // True when every scored alpha in this run predates task
@@ -274,6 +324,10 @@ export function StructureGraphPage() {
             <dd>{alphasByBucket.active.length}</dd>
           </div>
           <div>
+            <dt>Capped active alphas</dt>
+            <dd>{alphasByBucket.capped_active.length}</dd>
+          </div>
+          <div>
             <dt>Regime-level alphas</dt>
             <dd>{alphasByBucket.regime_level.length}</dd>
           </div>
@@ -282,8 +336,12 @@ export function StructureGraphPage() {
             <dd>{alphasByBucket.candidate.length}</dd>
           </div>
           <div>
+            {/* Independently derived from is_blocked -- NOT the primary
+                display-level bucket above. A capped_active Alpha that is
+                also blocked increments both this count and the
+                "Capped active alphas" count above. */}
             <dt>Blocked alphas</dt>
-            <dd>{alphasByBucket.blocked.length}</dd>
+            <dd>{blockedAlphas.length}</dd>
           </div>
           <div>
             <dt>Nodes</dt>
@@ -340,6 +398,7 @@ export function StructureGraphPage() {
                   evidenceDetail={selectedNodeActivation.evidence_detail}
                   activation={selectedNodeActivation}
                   isDominant={selectedNode.isDominant}
+                  invalidationConditions={invalidationConditionsByAlpha.get(selectedNodeActivation.alpha_id)}
                 />
               ) : (
                 <EmptyState
@@ -388,11 +447,12 @@ export function StructureGraphPage() {
         )}
       </section>
 
-      {/* John's five-way, mutually-exclusive Alpha partition (task
-          B4_ACTIVATION_LEVEL_ALIGNMENT, Decision 2) -- one section per
-          bucket, each alpha appearing in exactly one via bucketForAlpha
-          above. Each alpha here is the full activation entry already, so
-          no separate lookup against graph.activation.alphas is needed. */}
+      {/* John's Alpha-level partition (John Item 8) -- one section per
+          display level, each alpha appearing in exactly one via
+          bucketForAlpha above, derived only from its authoritative
+          display level (never from is_blocked). Each alpha here is the
+          full activation entry already, so no separate lookup against
+          graph.activation.alphas is needed. */}
       {ALPHA_LEVEL_BUCKETS.map(({ key, title }) => {
         const alphas = alphasByBucket[key];
         return (
@@ -416,6 +476,7 @@ export function StructureGraphPage() {
                     evidenceDetail={alpha.evidence_detail}
                     activation={alpha}
                     isDominant={key === "dominant"}
+                    invalidationConditions={invalidationConditionsByAlpha.get(alpha.alpha_id)}
                   />
                 ))}
               </div>
@@ -423,6 +484,57 @@ export function StructureGraphPage() {
           </section>
         );
       })}
+
+      {/* John Item 8: the orthogonal Blocked view. Independently derived
+          from is_blocked === true -- NOT a sixth display level, and never
+          a substitute for an Alpha's own level section above. A blocked
+          Alpha may legitimately appear both there and here; this section
+          uses a compact list (not a full duplicate AlphaCard grid) so the
+          intentional overlap with the level sections above doesn't read
+          as a second, competing copy of the same card. */}
+      <section className="panel alpha-level-panel alpha-blocked-panel">
+        <h2>Blocked alphas</h2>
+        {blockedAlphas.length === 0 ? (
+          <EmptyState title="No blocked alphas for this run" />
+        ) : (
+          <ul className="alpha-blocked-list">
+            {blockedAlphas.map((alpha) => {
+              const displayLevel = bucketForAlpha(alpha);
+              return (
+                <li key={alpha.alpha_id} className="alpha-blocked-item">
+                  <p className="alpha-blocked-item-header">
+                    <strong>{alpha.alpha_id}</strong> — {alpha.alpha_name}{" "}
+                    <span className={`activation-level-badge activation-level-${displayLevel}`}>
+                      {formatActivationLevelForDisplay(displayLevel)}
+                    </span>
+                  </p>
+                  <p className="alpha-blocked-item-meta">
+                    Blocked from:{" "}
+                    {(alpha.blocked_from ?? []).map((level) => formatActivationLevelForDisplay(level)).join(", ") ||
+                      "—"}
+                    {" · "}
+                    Reason:{" "}
+                    {(alpha.blocked_reason_codes ?? []).length > 0
+                      ? (alpha.blocked_reason_codes ?? [])
+                          .map((code) => BLOCKED_REASON_LABELS[code] ?? code)
+                          .join(", ")
+                      : "—"}
+                  </p>
+                  {/* Product Demo Hardening Phase 2D: the raw reason code(s)
+                      are preserved verbatim here rather than leading the
+                      default view. */}
+                  {(alpha.blocked_reason_codes ?? []).length > 0 ? (
+                    <details className="alpha-blocked-item-technical-detail">
+                      <summary>Technical details</summary>
+                      <p>Raw reason codes: {(alpha.blocked_reason_codes ?? []).join(", ")}</p>
+                    </details>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

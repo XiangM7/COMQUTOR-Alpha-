@@ -22,6 +22,9 @@ export function AppShell({ children }: AppShellProps) {
       <main id="main-content" className="app-main">
         {children}
       </main>
+      <footer className="app-footer">
+        <p className="app-disclaimer">Research analysis only — not financial advice.</p>
+      </footer>
     </div>
   );
 }

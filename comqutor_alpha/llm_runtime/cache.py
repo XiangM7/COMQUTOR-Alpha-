@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 from collections.abc import Mapping
+from time import monotonic as _monotonic
 from typing import Any, Protocol, runtime_checkable
 
 from comqutor_alpha.llm_runtime.canonical_json import canonical_json_text, sha256_canonical_json
@@ -109,6 +111,90 @@ class NullLLMResponseCache:
 
     def delete(self, cache_key: str) -> None:
         del cache_key
+
+    def healthcheck(self) -> bool:
+        return True
+
+
+class InMemoryLLMResponseCache:
+    """Run-local, process-lifetime exact-response cache.
+
+    B2 Slice 1 (John Requirement B): the measured optimization opportunity
+    (docs/audit_artifacts/v0_2_semantic_classifier_cost_latency_audit.json)
+    is concentrated in WITHIN-run exact-duplicate requests, with negligible
+    cross-run exact-duplicate benefit -- so this adapter deliberately holds
+    its entries in a plain in-process dict with no persistence, no TTL
+    enforcement beyond a simple wall-clock expiry check, and no cross-process
+    sharing. A fresh instance, scoped to one research run, naturally cannot
+    leak a stale result across runs (e.g. a historical pre-fix QQQ decision
+    can never reach a later post-fix QQQ run through this cache, because
+    each run constructs its own instance). Uses the exact same
+    ``validate_cache_entry``/``LLMCacheEntry`` contract as
+    ``RedisLLMResponseCache`` -- no new cache-entry shape, no new key
+    construction, only a different storage backend for the existing,
+    already-safe design in this module.
+
+    John Requirement B, Phase B2 Slice 2A: this cache is now read/written
+    by concurrent workers from more than one semantic task (``alpha_
+    classifier``'s existing concurrency and, as of this slice, ``evidence_
+    stance_classifier``'s). A plain dict's individual get/set/pop are each
+    atomic under CPython's GIL, but this class's own check-then-act
+    sequences (TTL expiry check followed by a conditional pop; a read
+    followed by validation) are NOT atomic as a whole -- so every public
+    method is wrapped in one internal lock. This is the minimum
+    synchronization needed for correctness under concurrent access; it
+    changes no cache semantics, no key construction, and no behavior for a
+    single-threaded caller.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._values: dict[str, dict[str, Any]] = {}
+        self._expires_at_monotonic: dict[str, float] = {}
+
+    def get(self, cache_key: str) -> dict[str, Any] | None:
+        with self._lock:
+            expiry = self._expires_at_monotonic.get(cache_key)
+            if expiry is not None and expiry <= _monotonic():
+                self._values.pop(cache_key, None)
+                self._expires_at_monotonic.pop(cache_key, None)
+                return None
+            entry = self._values.get(cache_key)
+            if entry is None:
+                return None
+        result = validate_cache_entry(entry, expected_cache_key=cache_key)
+        if not result.valid:
+            raise CacheCorruptionError(
+                result.reason_codes[0],
+                f"Cache entry failed validation: {','.join(result.reason_codes)}",
+            )
+        return dict(entry)
+
+    def put(
+        self,
+        cache_key: str,
+        entry: Mapping[str, Any] | LLMCacheEntry,
+        ttl_seconds: int | None = None,
+    ) -> None:
+        if ttl_seconds is not None and (
+            not isinstance(ttl_seconds, int) or isinstance(ttl_seconds, bool) or ttl_seconds <= 0
+        ):
+            raise ValueError("LLM_CACHE_TTL_INVALID")
+        result = validate_cache_entry(entry, expected_cache_key=cache_key)
+        if not result.valid:
+            raise ContractValidationError(result, "Cache entry validation failed")
+        value = entry.to_dict() if isinstance(entry, LLMCacheEntry) else dict(entry)
+        with self._lock:
+            self._values[cache_key] = value
+            if ttl_seconds is None:
+                self._expires_at_monotonic.pop(cache_key, None)
+            else:
+                self._expires_at_monotonic[cache_key] = _monotonic() + float(ttl_seconds)
+
+    def delete(self, cache_key: str) -> None:
+        with self._lock:
+            self._values.pop(cache_key, None)
+            self._expires_at_monotonic.pop(cache_key, None)
 
     def healthcheck(self) -> bool:
         return True

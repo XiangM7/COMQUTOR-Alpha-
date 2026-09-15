@@ -1,0 +1,2724 @@
+{
+  "release": "v0.1.2.1",
+  "task": "FINAL Fresh Six-Ticker Production E2E (Step 10)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-08-28T20:41:09.039232+00:00",
+  "run_ids": {
+    "NVDA": "948be419-b542-4096-a536-ff567ef459c2",
+    "QQQ": "defeb528-673e-44f7-8d94-c0abdfef03d4",
+    "MSFT": "c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+    "SNDK": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+    "TSM": "5be841d5-0924-4943-8d37-ccd4168228cb",
+    "AMD": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+  },
+  "run_order": [
+    "NVDA",
+    "QQQ",
+    "MSFT",
+    "SNDK",
+    "TSM",
+    "AMD"
+  ],
+  "ticker_concurrency": 1,
+  "claim_level_concurrency": 4,
+  "whole_ticker_retries": [
+    {
+      "ticker": "QQQ",
+      "failed_run_id": "a2e491aa-da5d-4fae-a18f-b47de3be4fc6",
+      "error_code": null,
+      "message": null,
+      "retry_reason": "DeepSeek Provider account returned 402 Payment Required (credit exhausted mid-sequence during the first NVDA run); user topped up account credit externally; re-run performed after an independent live preflight call confirmed the 402 no longer occurred.",
+      "successful_replacement_run_id": "defeb528-673e-44f7-8d94-c0abdfef03d4"
+    },
+    {
+      "ticker": "MSFT",
+      "failed_run_id": "2c8039af-3dc7-4bf6-afa9-1a4451340d17",
+      "error_code": null,
+      "message": null,
+      "retry_reason": "DeepSeek Provider account returned 402 Payment Required (credit exhausted mid-sequence during the first NVDA run); user topped up account credit externally; re-run performed after an independent live preflight call confirmed the 402 no longer occurred.",
+      "successful_replacement_run_id": "c715460c-5fa3-43d8-9949-97fb6b33e8ec"
+    },
+    {
+      "ticker": "SNDK",
+      "failed_run_id": "6325e1f4-1e7f-41f0-92fc-7039e00ce35c",
+      "error_code": null,
+      "message": null,
+      "retry_reason": "DeepSeek Provider account returned 402 Payment Required (credit exhausted mid-sequence during the first NVDA run); user topped up account credit externally; re-run performed after an independent live preflight call confirmed the 402 no longer occurred.",
+      "successful_replacement_run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8"
+    },
+    {
+      "ticker": "TSM",
+      "failed_run_id": "3c549934-3025-4366-b2e3-d3db24c21092",
+      "error_code": null,
+      "message": null,
+      "retry_reason": "DeepSeek Provider account returned 402 Payment Required (credit exhausted mid-sequence during the first NVDA run); user topped up account credit externally; re-run performed after an independent live preflight call confirmed the 402 no longer occurred.",
+      "successful_replacement_run_id": "5be841d5-0924-4943-8d37-ccd4168228cb"
+    },
+    {
+      "ticker": "AMD",
+      "failed_run_id": "b882ebad-3b83-43f9-b161-a4711438bc2a",
+      "error_code": null,
+      "message": null,
+      "retry_reason": "DeepSeek Provider account returned 402 Payment Required (credit exhausted mid-sequence during the first NVDA run); user topped up account credit externally; re-run performed after an independent live preflight call confirmed the 402 no longer occurred.",
+      "successful_replacement_run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+    }
+  ],
+  "artifact_completeness": {
+    "required_per_ticker": 9,
+    "total_required": 54,
+    "total_present": 54,
+    "per_ticker": {
+      "NVDA": {
+        "present": 9,
+        "required": 9,
+        "missing": []
+      },
+      "QQQ": {
+        "present": 9,
+        "required": 9,
+        "missing": []
+      },
+      "MSFT": {
+        "present": 9,
+        "required": 9,
+        "missing": []
+      },
+      "SNDK": {
+        "present": 9,
+        "required": 9,
+        "missing": []
+      },
+      "TSM": {
+        "present": 9,
+        "required": 9,
+        "missing": []
+      },
+      "AMD": {
+        "present": 9,
+        "required": 9,
+        "missing": []
+      }
+    }
+  },
+  "semantic_runtime_health": {
+    "definition": "classified_coverage = (MATCHED + NONE) / eligible_claim_count. The >=95% figure is an INTERNAL_ENGINEERING_RUNTIME_BENCHMARK (Step 5A) -- never a John release gate, regression acceptance, or semantic-accuracy claim.",
+    "internal_engineering_runtime_benchmark_threshold": 0.95,
+    "per_ticker_coverage": {
+      "NVDA": 0.45985401459854014,
+      "QQQ": 0.9834254143646409,
+      "MSFT": 0.03918722786647315,
+      "SNDK": 0.9844124700239808,
+      "TSM": 0.0,
+      "AMD": 0.9739336492890995
+    },
+    "per_ticker_status": {
+      "NVDA": "FAIL",
+      "QQQ": "PASS",
+      "MSFT": "FAIL",
+      "SNDK": "PASS",
+      "TSM": "FAIL",
+      "AMD": "PASS"
+    },
+    "tickers_meeting_internal_benchmark": 3,
+    "tickers_total": 6,
+    "overall_coverage": 0.5864853378665533,
+    "aggregate": {
+      "eligible": 4706,
+      "matched": 1140,
+      "none": 1620,
+      "unavailable": 1946,
+      "provider_attempts": 5532,
+      "provider_successes": 1852,
+      "timeouts": 390,
+      "transport_or_provider_errors": 3912,
+      "rate_limits": 0,
+      "validation_failures": 18,
+      "budget_exhaustions": 0
+    },
+    "per_ticker_detail": {
+      "NVDA": {
+        "run_dir": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/runs/948be419-b542-4096-a536-ff567ef459c2",
+        "eligible_claim_count": 822,
+        "classified_claim_count": 378,
+        "matched_count": 192,
+        "none_count": 186,
+        "unavailable_count": 444,
+        "unavailable_rate": 0.5401459854014599,
+        "unavailable_reason_counts": {
+          "provider_timeout": 9,
+          "provider_error": 435
+        },
+        "classified_coverage": 0.45985401459854014,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 1003,
+        "provider_successes": 245,
+        "timeouts": 41,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 926,
+        "validation_failures": 4,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "FAIL",
+        "semantic_execution_health_status_reason": "EXCESSIVE_ALPHA_MAPPER_UNAVAILABLE"
+      },
+      "QQQ": {
+        "run_dir": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/runs/defeb528-673e-44f7-8d94-c0abdfef03d4",
+        "eligible_claim_count": 724,
+        "classified_claim_count": 712,
+        "matched_count": 298,
+        "none_count": 414,
+        "unavailable_count": 12,
+        "unavailable_rate": 0.016574585635359115,
+        "unavailable_reason_counts": {
+          "provider_timeout": 12
+        },
+        "classified_coverage": 0.9834254143646409,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 560,
+        "provider_successes": 482,
+        "timeouts": 121,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 0,
+        "validation_failures": 3,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "MSFT": {
+        "run_dir": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/runs/c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+        "eligible_claim_count": 689,
+        "classified_claim_count": 27,
+        "matched_count": 2,
+        "none_count": 25,
+        "unavailable_count": 662,
+        "unavailable_rate": 0.9608127721335269,
+        "unavailable_reason_counts": {
+          "provider_timeout": 3,
+          "provider_error": 659
+        },
+        "classified_coverage": 0.03918722786647315,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 1356,
+        "provider_successes": 22,
+        "timeouts": 28,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 1314,
+        "validation_failures": 2,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "FAIL",
+        "semantic_execution_health_status_reason": "EXCESSIVE_ALPHA_MAPPER_UNAVAILABLE"
+      },
+      "SNDK": {
+        "run_dir": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/runs/519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+        "eligible_claim_count": 834,
+        "classified_claim_count": 821,
+        "matched_count": 320,
+        "none_count": 501,
+        "unavailable_count": 13,
+        "unavailable_rate": 0.015587529976019185,
+        "unavailable_reason_counts": {
+          "provider_timeout": 13
+        },
+        "classified_coverage": 0.9844124700239808,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 637,
+        "provider_successes": 559,
+        "timeouts": 114,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 0,
+        "validation_failures": 2,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      },
+      "TSM": {
+        "run_dir": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/runs/5be841d5-0924-4943-8d37-ccd4168228cb",
+        "eligible_claim_count": 793,
+        "classified_claim_count": 0,
+        "matched_count": 0,
+        "none_count": 0,
+        "unavailable_count": 793,
+        "unavailable_rate": 1.0,
+        "unavailable_reason_counts": {
+          "provider_error": 793
+        },
+        "classified_coverage": 0.0,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 1311,
+        "provider_successes": 1,
+        "timeouts": 8,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 1593,
+        "validation_failures": 6,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "FAIL",
+        "semantic_execution_health_status_reason": "EXCESSIVE_ALPHA_MAPPER_UNAVAILABLE"
+      },
+      "AMD": {
+        "run_dir": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/runs/4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+        "eligible_claim_count": 844,
+        "classified_claim_count": 822,
+        "matched_count": 328,
+        "none_count": 494,
+        "unavailable_count": 22,
+        "unavailable_rate": 0.026066350710900472,
+        "unavailable_reason_counts": {
+          "provider_timeout": 8,
+          "provider_error": 14
+        },
+        "classified_coverage": 0.9739336492890995,
+        "classified_coverage_target": 0.95,
+        "provider_attempts": 665,
+        "provider_successes": 543,
+        "timeouts": 78,
+        "rate_limits": 0,
+        "transport_or_provider_errors": 79,
+        "validation_failures": 1,
+        "budget_exhaustions": 0,
+        "retries": "EXACT_COUNT_UNAVAILABLE_FROM_PERSISTED_ARTIFACTS",
+        "disabled_caused_unavailable": 0,
+        "semantic_execution_health_status": "PASS",
+        "semantic_execution_health_status_reason": "COVERAGE_AT_OR_ABOVE_TARGET"
+      }
+    },
+    "honest_finding": "3 of 6 tickers (NVDA 45.99%, MSFT 3.92%, TSM 0.00%) FAILED the internal 95% runtime-health benchmark due to severe DeepSeek 'provider_error' storms (435, 659, and 793 provider_error events respectively) during Week2 semantic classification -- NOT a code or semantic-prompt defect (production semantic code was frozen throughout this task; see semantic_changes_made). 3 of 6 tickers (QQQ 98.34%, SNDK 98.44%, AMD 97.39%) met the benchmark cleanly. A real-world wall-clock gap of ~14 hours was observed between the QQQ and MSFT runs in this same process (started_at/ended_at vs. the much shorter monotonic elapsed_seconds), consistent with the host machine suspending/resuming during MSFT's execution window -- a plausible (not certain) contributing factor to that specific ticker's provider-error storm, noted honestly rather than asserted as proven. This is reported, not repaired, per task section 28: no tuning, no retry for semantic-quality reasons, no silent re-run."
+  },
+  "john_historical_alpha_callouts": {
+    "expected": {
+      "QQQ": [
+        "A001",
+        "A003"
+      ],
+      "MSFT": [
+        "A101",
+        "A102",
+        "A304"
+      ],
+      "SNDK": [
+        "A201",
+        "A301",
+        "A304"
+      ],
+      "TSM": [
+        "A103",
+        "A304"
+      ],
+      "AMD": [
+        "A101",
+        "A201"
+      ]
+    },
+    "classification": {
+      "QQQ:A001": "DETECTED",
+      "QQQ:A003": "DETECTED",
+      "MSFT:A101": "NOT_DETECTED_SOURCE_PRESENT",
+      "MSFT:A102": "NOT_DETECTED_SOURCE_PRESENT",
+      "MSFT:A304": "NOT_DETECTED_SOURCE_PRESENT",
+      "SNDK:A201": "DETECTED",
+      "SNDK:A301": "DETECTED",
+      "SNDK:A304": "DETECTED",
+      "TSM:A103": "NOT_DETECTED_SOURCE_PRESENT",
+      "TSM:A304": "NOT_DETECTED_SOURCE_PRESENT",
+      "AMD:A101": "DETECTED",
+      "AMD:A201": "DETECTED"
+    },
+    "detected_count": 7,
+    "total_count": 12,
+    "step5b_comparison": "Step 5B (healthy, isolated semantic validation) found 12/12 DETECTED. This fresh live E2E run found 7/12 DETECTED -- the 5 misses are on MSFT (A101/A102/A304) and TSM (A103/A304), the exact two tickers that failed semantic runtime health above (3.92% and 0.00% coverage). All 5 are classified NOT_DETECTED_SOURCE_PRESENT/PROVIDER_FAILURE, not a semantic recall regression -- the Step 5B 12/12 finding does not reproduce here because this specific run's runtime health degraded on those two tickers, not because Alpha Mapper semantics changed (they did not)."
+  },
+  "step6_evidence_qualification_live_validation": {
+    "verified_live_not_offline_only": true,
+    "evidence_source": "structure_graph.json['activation']['alphas'][*]['evidence_qualification'] -- read directly from the real live production pipeline output, not an offline replay.",
+    "primary_research_evidence_count": 2079,
+    "secondary_decision_debate_evidence_count": 2627,
+    "unknown_role_evidence_count": 0,
+    "raw_unique_evidence_fact_count_sum": 576,
+    "qualified_activation_eligible_evidence_fact_count_sum": 378,
+    "secondary_excluded_from_activation": 213,
+    "secondary_qualified_causal_evidence": 33,
+    "duplicate_secondary_restatements_prevented_from_inflating_support": 11,
+    "qualification_reason_counts_aggregate": {
+      "PRIMARY_QUALIFIED": 359,
+      "SECONDARY_NOT_TICKER_SPECIFIC": 195,
+      "SECONDARY_DUPLICATE_OF_PRIMARY": 11,
+      "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 33,
+      "SECONDARY_CAUSALITY_UNPROVEN": 7
+    },
+    "per_ticker": {
+      "NVDA": {
+        "primary_count": 335,
+        "secondary_count": 487,
+        "unknown_count": 0,
+        "agent_counts": {
+          "market_agent": 88,
+          "sentiment_agent": 68,
+          "news_agent": 68,
+          "fundamental_agent": 111,
+          "bull_researcher": 81,
+          "bear_researcher": 148,
+          "research_manager": 29,
+          "trader": 7,
+          "aggressive_risk_analyst": 67,
+          "conservative_risk_analyst": 63,
+          "neutral_risk_analyst": 73,
+          "portfolio_manager": 19
+        }
+      },
+      "QQQ": {
+        "primary_count": 301,
+        "secondary_count": 423,
+        "unknown_count": 0,
+        "agent_counts": {
+          "market_agent": 82,
+          "sentiment_agent": 79,
+          "news_agent": 62,
+          "fundamental_agent": 78,
+          "bull_researcher": 101,
+          "bear_researcher": 128,
+          "research_manager": 13,
+          "trader": 6,
+          "aggressive_risk_analyst": 56,
+          "conservative_risk_analyst": 69,
+          "neutral_risk_analyst": 37,
+          "portfolio_manager": 13
+        }
+      },
+      "MSFT": {
+        "primary_count": 338,
+        "secondary_count": 351,
+        "unknown_count": 0,
+        "agent_counts": {
+          "market_agent": 97,
+          "sentiment_agent": 82,
+          "news_agent": 53,
+          "fundamental_agent": 106,
+          "bull_researcher": 59,
+          "bear_researcher": 75,
+          "research_manager": 23,
+          "trader": 7,
+          "aggressive_risk_analyst": 43,
+          "conservative_risk_analyst": 52,
+          "neutral_risk_analyst": 74,
+          "portfolio_manager": 18
+        }
+      },
+      "SNDK": {
+        "primary_count": 381,
+        "secondary_count": 453,
+        "unknown_count": 0,
+        "agent_counts": {
+          "market_agent": 116,
+          "sentiment_agent": 80,
+          "news_agent": 53,
+          "fundamental_agent": 132,
+          "bull_researcher": 107,
+          "bear_researcher": 132,
+          "research_manager": 22,
+          "trader": 5,
+          "aggressive_risk_analyst": 60,
+          "conservative_risk_analyst": 56,
+          "neutral_risk_analyst": 48,
+          "portfolio_manager": 23
+        }
+      },
+      "TSM": {
+        "primary_count": 356,
+        "secondary_count": 437,
+        "unknown_count": 0,
+        "agent_counts": {
+          "market_agent": 100,
+          "sentiment_agent": 70,
+          "news_agent": 84,
+          "fundamental_agent": 102,
+          "bull_researcher": 83,
+          "bear_researcher": 130,
+          "research_manager": 12,
+          "trader": 6,
+          "aggressive_risk_analyst": 60,
+          "conservative_risk_analyst": 56,
+          "neutral_risk_analyst": 72,
+          "portfolio_manager": 18
+        }
+      },
+      "AMD": {
+        "primary_count": 368,
+        "secondary_count": 476,
+        "unknown_count": 0,
+        "agent_counts": {
+          "market_agent": 94,
+          "sentiment_agent": 81,
+          "news_agent": 62,
+          "fundamental_agent": 131,
+          "bull_researcher": 99,
+          "bear_researcher": 97,
+          "research_manager": 49,
+          "trader": 6,
+          "aggressive_risk_analyst": 51,
+          "conservative_risk_analyst": 73,
+          "neutral_risk_analyst": 77,
+          "portfolio_manager": 24
+        }
+      }
+    }
+  },
+  "activation_b4_display_normalization_live_observation": {
+    "combinations_observed": 60,
+    "thresholds_unchanged": {
+      "active": 50.0,
+      "dominant": 70.0,
+      "regime_level": 86.0
+    },
+    "display_distribution": {
+      "candidate": 44,
+      "active": 10,
+      "capped_active": 1,
+      "dominant": 5,
+      "regime_level": 0
+    },
+    "blocked_count": 2,
+    "ambiguous_count": 0,
+    "candidate_active_status": "CANDIDATE_ACTIVE_REQUIRES_PRODUCT_DEFINITION",
+    "per_ticker_alpha_records": {
+      "NVDA": [
+        {
+          "alpha_id": "A001",
+          "activation_score": 19.9117,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 1,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 1,
+            "qualified_unique_evidence_fact_count": 1,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A003",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A101",
+          "activation_score": 78.5561,
+          "target_level": "dominant",
+          "qualified_level": "dominant",
+          "display_level": "dominant",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 8,
+          "ticker_specific_evidence_count": 3,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 8,
+            "qualified_unique_evidence_fact_count": 8,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 8
+            }
+          }
+        },
+        {
+          "alpha_id": "A102",
+          "activation_score": 25.0333,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 2,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 2,
+            "qualified_unique_evidence_fact_count": 2,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 2
+            }
+          }
+        },
+        {
+          "alpha_id": "A103",
+          "activation_score": 63.834,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 8,
+          "ticker_specific_evidence_count": 3,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 8,
+            "qualified_unique_evidence_fact_count": 8,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 8
+            }
+          }
+        },
+        {
+          "alpha_id": "A201",
+          "activation_score": 34.6551,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 8,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 8,
+            "qualified_unique_evidence_fact_count": 8,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 8
+            }
+          }
+        },
+        {
+          "alpha_id": "A301",
+          "activation_score": 69.7897,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 21,
+          "ticker_specific_evidence_count": 6,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 25,
+            "qualified_unique_evidence_fact_count": 21,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 27,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 4
+            }
+          }
+        },
+        {
+          "alpha_id": "A304",
+          "activation_score": 56.7165,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 12,
+          "ticker_specific_evidence_count": 2,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 13,
+            "qualified_unique_evidence_fact_count": 12,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 14,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A501",
+          "activation_score": 38.9107,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 5,
+          "ticker_specific_evidence_count": 1,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 5,
+            "qualified_unique_evidence_fact_count": 5,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 5
+            }
+          }
+        },
+        {
+          "alpha_id": "A601",
+          "activation_score": 53.6187,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 17,
+          "ticker_specific_evidence_count": 2,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 18,
+            "qualified_unique_evidence_fact_count": 17,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 17,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 1
+            }
+          }
+        }
+      ],
+      "QQQ": [
+        {
+          "alpha_id": "A001",
+          "activation_score": 38.0727,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 9,
+          "ticker_specific_evidence_count": 2,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 14,
+            "qualified_unique_evidence_fact_count": 9,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 8,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 5,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A003",
+          "activation_score": 37.9617,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 1,
+          "ticker_specific_evidence_count": 1,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 2,
+            "qualified_unique_evidence_fact_count": 1,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A101",
+          "activation_score": 88.0214,
+          "target_level": "regime_level",
+          "qualified_level": "dominant",
+          "display_level": "dominant",
+          "is_blocked": true,
+          "blocked_from": [
+            "regime_level"
+          ],
+          "blocked_reason_codes": [
+            "LOW_ENTITY_EXPOSURE"
+          ],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 13,
+          "ticker_specific_evidence_count": 3,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 22,
+            "qualified_unique_evidence_fact_count": 13,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 12,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 9,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+            }
+          }
+        },
+        {
+          "alpha_id": "A102",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A103",
+          "activation_score": 46.7872,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 6,
+          "ticker_specific_evidence_count": 2,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 17,
+            "qualified_unique_evidence_fact_count": 6,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 7,
+              "SECONDARY_CAUSALITY_UNPROVEN": 1,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 10
+            }
+          }
+        },
+        {
+          "alpha_id": "A201",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A301",
+          "activation_score": 30.1386,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 8,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 21,
+            "qualified_unique_evidence_fact_count": 8,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 8,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 13
+            }
+          }
+        },
+        {
+          "alpha_id": "A304",
+          "activation_score": 66.2977,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 17,
+          "ticker_specific_evidence_count": 5,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 34,
+            "qualified_unique_evidence_fact_count": 17,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 15,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 17,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+            }
+          }
+        },
+        {
+          "alpha_id": "A501",
+          "activation_score": 41.682,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 5,
+          "ticker_specific_evidence_count": 1,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 9,
+            "qualified_unique_evidence_fact_count": 5,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 5,
+              "SECONDARY_CAUSALITY_UNPROVEN": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 5
+            }
+          }
+        },
+        {
+          "alpha_id": "A601",
+          "activation_score": 70.0,
+          "target_level": "dominant",
+          "qualified_level": "active",
+          "display_level": "capped_active",
+          "is_blocked": true,
+          "blocked_from": [
+            "dominant"
+          ],
+          "blocked_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 22,
+          "ticker_specific_evidence_count": 9,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 35,
+            "qualified_unique_evidence_fact_count": 22,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 22,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 13,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+            }
+          }
+        }
+      ],
+      "MSFT": [
+        {
+          "alpha_id": "A001",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A003",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A101",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A102",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A103",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A201",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A301",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A304",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A501",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A601",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        }
+      ],
+      "SNDK": [
+        {
+          "alpha_id": "A001",
+          "activation_score": 22.7694,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "NO_TICKER_SPECIFIC_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 1,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 2,
+            "qualified_unique_evidence_fact_count": 1,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A003",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 1,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {
+              "SECONDARY_NOT_TICKER_SPECIFIC": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A101",
+          "activation_score": 36.4584,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 3,
+          "ticker_specific_evidence_count": 1,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 7,
+            "qualified_unique_evidence_fact_count": 3,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 3,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 4
+            }
+          }
+        },
+        {
+          "alpha_id": "A102",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A103",
+          "activation_score": 47.553,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 4,
+          "ticker_specific_evidence_count": 2,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 5,
+            "qualified_unique_evidence_fact_count": 4,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 4,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A201",
+          "activation_score": 72.5335,
+          "target_level": "dominant",
+          "qualified_level": "dominant",
+          "display_level": "dominant",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 44,
+          "ticker_specific_evidence_count": 10,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 61,
+            "qualified_unique_evidence_fact_count": 44,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 45,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 18
+            }
+          }
+        },
+        {
+          "alpha_id": "A301",
+          "activation_score": 53.2606,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 12,
+          "ticker_specific_evidence_count": 2,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 16,
+            "qualified_unique_evidence_fact_count": 12,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 11,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 4,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A304",
+          "activation_score": 71.0751,
+          "target_level": "dominant",
+          "qualified_level": "dominant",
+          "display_level": "dominant",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 18,
+          "ticker_specific_evidence_count": 3,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 30,
+            "qualified_unique_evidence_fact_count": 18,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 18,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 2,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 12
+            }
+          }
+        },
+        {
+          "alpha_id": "A501",
+          "activation_score": 34.4467,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 3,
+          "ticker_specific_evidence_count": 1,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 5,
+            "qualified_unique_evidence_fact_count": 3,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 3,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 2
+            }
+          }
+        },
+        {
+          "alpha_id": "A601",
+          "activation_score": 54.5051,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 21,
+          "ticker_specific_evidence_count": 3,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 29,
+            "qualified_unique_evidence_fact_count": 21,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 20,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 8,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+            }
+          }
+        }
+      ],
+      "TSM": [
+        {
+          "alpha_id": "A001",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A003",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A101",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A102",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A103",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A201",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A301",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A304",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A501",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        },
+        {
+          "alpha_id": "A601",
+          "activation_score": 0.0,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "unique_evidence_count": 0,
+          "ticker_specific_evidence_count": 0,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          }
+        }
+      ],
+      "AMD": [
+        {
+          "alpha_id": "A001",
+          "activation_score": 22.7155,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 3,
+          "ticker_specific_evidence_count": 2,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 6,
+            "qualified_unique_evidence_fact_count": 3,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 3,
+              "SECONDARY_CAUSALITY_UNPROVEN": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 2
+            }
+          }
+        },
+        {
+          "alpha_id": "A003",
+          "activation_score": 24.6667,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_UNIQUE_EVIDENCE",
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 1,
+          "ticker_specific_evidence_count": 1,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 1,
+            "qualified_unique_evidence_fact_count": 1,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A101",
+          "activation_score": 79.7427,
+          "target_level": "dominant",
+          "qualified_level": "dominant",
+          "display_level": "dominant",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 20,
+          "ticker_specific_evidence_count": 12,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 27,
+            "qualified_unique_evidence_fact_count": 20,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 13,
+              "SECONDARY_CAUSALITY_UNPROVEN": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 6,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 7
+            }
+          }
+        },
+        {
+          "alpha_id": "A102",
+          "activation_score": 39.8917,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 4,
+          "ticker_specific_evidence_count": 3,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 4,
+            "qualified_unique_evidence_fact_count": 4,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 5,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A103",
+          "activation_score": 64.8344,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 12,
+          "ticker_specific_evidence_count": 7,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 15,
+            "qualified_unique_evidence_fact_count": 12,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 10,
+              "SECONDARY_CAUSALITY_UNPROVEN": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 2,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 2
+            }
+          }
+        },
+        {
+          "alpha_id": "A201",
+          "activation_score": 44.5365,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 11,
+          "ticker_specific_evidence_count": 6,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 14,
+            "qualified_unique_evidence_fact_count": 11,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 10,
+              "SECONDARY_CAUSALITY_UNPROVEN": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 2,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 1
+            }
+          }
+        },
+        {
+          "alpha_id": "A301",
+          "activation_score": 68.5091,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 22,
+          "ticker_specific_evidence_count": 10,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 32,
+            "qualified_unique_evidence_fact_count": 22,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 15,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 10,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 7
+            }
+          }
+        },
+        {
+          "alpha_id": "A304",
+          "activation_score": 56.6268,
+          "target_level": "active",
+          "qualified_level": "active",
+          "display_level": "active",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [],
+          "unique_evidence_count": 13,
+          "ticker_specific_evidence_count": 8,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 37,
+            "qualified_unique_evidence_fact_count": 13,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 9,
+              "SECONDARY_CAUSALITY_UNPROVEN": 1,
+              "SECONDARY_DUPLICATE_OF_PRIMARY": 1,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 24,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 4
+            }
+          }
+        },
+        {
+          "alpha_id": "A501",
+          "activation_score": 33.1062,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "INSUFFICIENT_AGENT_INDEPENDENCE",
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 2,
+          "ticker_specific_evidence_count": 1,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 6,
+            "qualified_unique_evidence_fact_count": 2,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 2,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 4
+            }
+          }
+        },
+        {
+          "alpha_id": "A601",
+          "activation_score": 48.623,
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "display_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "cap_reason_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_count": 21,
+          "ticker_specific_evidence_count": 9,
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 36,
+            "qualified_unique_evidence_fact_count": 21,
+            "qualification_reason_counts": {
+              "PRIMARY_QUALIFIED": 18,
+              "SECONDARY_NOT_TICKER_SPECIFIC": 15,
+              "SECONDARY_QUALIFIED_CAUSAL_EVIDENCE": 3
+            }
+          }
+        }
+      ]
+    }
+  },
+  "conflict_b2_final_observation": {
+    "main_conflicts": {
+      "NVDA": "A101__A304",
+      "QQQ": "A101__A304",
+      "MSFT": null,
+      "SNDK": "A304__A601",
+      "TSM": null,
+      "AMD": "A101__A304"
+    },
+    "per_ticker": {
+      "NVDA": {
+        "main_conflict_id": "A101__A304",
+        "admitted_conflict_count": 3,
+        "candidate_conflict_count": 2,
+        "candidate_evaluations": [
+          {
+            "alpha_a": "A001",
+            "alpha_b": "A501",
+            "outcome": "suppressed",
+            "bull_score": 19.9117,
+            "bear_score": 38.9107,
+            "bull_supporting_evidence_count": 0,
+            "bear_supporting_evidence_count": 5,
+            "bull_ticker_specific_support_count": 0,
+            "bear_ticker_specific_support_count": 1,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT",
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ]
+          },
+          {
+            "alpha_a": "A003",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A101",
+            "alpha_b": "A304",
+            "outcome": "admitted",
+            "bull_score": 78.5561,
+            "bear_score": 56.7165,
+            "bull_supporting_evidence_count": 7,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 3,
+            "bear_ticker_specific_support_count": 2,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A301",
+            "alpha_b": "A304",
+            "outcome": "admitted",
+            "bull_score": 69.7897,
+            "bear_score": 56.7165,
+            "bull_supporting_evidence_count": 10,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 2,
+            "bear_ticker_specific_support_count": 2,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A304",
+            "alpha_b": "A601",
+            "outcome": "admitted",
+            "bull_score": 53.6187,
+            "bear_score": 56.7165,
+            "bull_supporting_evidence_count": 10,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 1,
+            "bear_ticker_specific_support_count": 2,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A501",
+            "alpha_b": "A601",
+            "outcome": "suppressed",
+            "bull_score": 53.6187,
+            "bear_score": 38.9107,
+            "bull_supporting_evidence_count": 10,
+            "bear_supporting_evidence_count": 5,
+            "bull_ticker_specific_support_count": 1,
+            "bear_ticker_specific_support_count": 1,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ]
+          }
+        ]
+      },
+      "QQQ": {
+        "main_conflict_id": "A101__A304",
+        "admitted_conflict_count": 2,
+        "candidate_conflict_count": 4,
+        "candidate_evaluations": [
+          {
+            "alpha_a": "A001",
+            "alpha_b": "A501",
+            "outcome": "suppressed",
+            "bull_score": 38.0727,
+            "bear_score": 41.682,
+            "bull_supporting_evidence_count": 3,
+            "bear_supporting_evidence_count": 4,
+            "bull_ticker_specific_support_count": 1,
+            "bear_ticker_specific_support_count": 1,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ]
+          },
+          {
+            "alpha_a": "A003",
+            "alpha_b": "A501",
+            "outcome": "suppressed",
+            "bull_score": 37.9617,
+            "bear_score": 41.682,
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 4,
+            "bull_ticker_specific_support_count": 1,
+            "bear_ticker_specific_support_count": 1,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ]
+          },
+          {
+            "alpha_a": "A101",
+            "alpha_b": "A304",
+            "outcome": "admitted",
+            "bull_score": 88.0214,
+            "bear_score": 66.2977,
+            "bull_supporting_evidence_count": 14,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 3,
+            "bear_ticker_specific_support_count": 2,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A301",
+            "alpha_b": "A304",
+            "outcome": "suppressed",
+            "bull_score": 30.1386,
+            "bear_score": 66.2977,
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 0,
+            "bear_ticker_specific_support_count": 2,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ]
+          },
+          {
+            "alpha_a": "A304",
+            "alpha_b": "A601",
+            "outcome": "admitted",
+            "bull_score": 70.0,
+            "bear_score": 66.2977,
+            "bull_supporting_evidence_count": 13,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 7,
+            "bear_ticker_specific_support_count": 2,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A501",
+            "alpha_b": "A601",
+            "outcome": "suppressed",
+            "bull_score": 70.0,
+            "bear_score": 41.682,
+            "bull_supporting_evidence_count": 13,
+            "bear_supporting_evidence_count": 4,
+            "bull_ticker_specific_support_count": 7,
+            "bear_ticker_specific_support_count": 1,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ]
+          }
+        ]
+      },
+      "MSFT": {
+        "main_conflict_id": null,
+        "admitted_conflict_count": 0,
+        "candidate_conflict_count": 0,
+        "candidate_evaluations": [
+          {
+            "alpha_a": "A001",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A003",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A101",
+            "alpha_b": "A304",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A301",
+            "alpha_b": "A304",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A304",
+            "alpha_b": "A601",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A501",
+            "alpha_b": "A601",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          }
+        ]
+      },
+      "SNDK": {
+        "main_conflict_id": "A304__A601",
+        "admitted_conflict_count": 1,
+        "candidate_conflict_count": 3,
+        "candidate_evaluations": [
+          {
+            "alpha_a": "A001",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A003",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A101",
+            "alpha_b": "A304",
+            "outcome": "suppressed",
+            "bull_score": 36.4584,
+            "bear_score": 71.0751,
+            "bull_supporting_evidence_count": 2,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 1,
+            "bear_ticker_specific_support_count": 3,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ]
+          },
+          {
+            "alpha_a": "A301",
+            "alpha_b": "A304",
+            "outcome": "suppressed",
+            "bull_score": 53.2606,
+            "bear_score": 71.0751,
+            "bull_supporting_evidence_count": 7,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 0,
+            "bear_ticker_specific_support_count": 3,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ]
+          },
+          {
+            "alpha_a": "A304",
+            "alpha_b": "A601",
+            "outcome": "admitted",
+            "bull_score": 54.5051,
+            "bear_score": 71.0751,
+            "bull_supporting_evidence_count": 10,
+            "bear_supporting_evidence_count": 10,
+            "bull_ticker_specific_support_count": 2,
+            "bear_ticker_specific_support_count": 3,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A501",
+            "alpha_b": "A601",
+            "outcome": "suppressed",
+            "bull_score": 54.5051,
+            "bear_score": 34.4467,
+            "bull_supporting_evidence_count": 10,
+            "bear_supporting_evidence_count": 3,
+            "bull_ticker_specific_support_count": 2,
+            "bear_ticker_specific_support_count": 1,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ]
+          }
+        ]
+      },
+      "TSM": {
+        "main_conflict_id": null,
+        "admitted_conflict_count": 0,
+        "candidate_conflict_count": 0,
+        "candidate_evaluations": [
+          {
+            "alpha_a": "A001",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A003",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A101",
+            "alpha_b": "A304",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A301",
+            "alpha_b": "A304",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A304",
+            "alpha_b": "A601",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A501",
+            "alpha_b": "A601",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "MISSING_LEFT_EVIDENCE",
+              "MISSING_RIGHT_EVIDENCE",
+              "ZERO_EVIDENCE_STRENGTH",
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          }
+        ]
+      },
+      "AMD": {
+        "main_conflict_id": "A101__A304",
+        "admitted_conflict_count": 2,
+        "candidate_conflict_count": 2,
+        "candidate_evaluations": [
+          {
+            "alpha_a": "A001",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A003",
+            "alpha_b": "A501",
+            "outcome": "rejected",
+            "bull_score": null,
+            "bear_score": null,
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_ticker_specific_support_count": null,
+            "bear_ticker_specific_support_count": null,
+            "admissibility_status": null,
+            "reason_codes": [
+              "DIRECTION_ROLE_UNRESOLVED"
+            ]
+          },
+          {
+            "alpha_a": "A101",
+            "alpha_b": "A304",
+            "outcome": "admitted",
+            "bull_score": 79.7427,
+            "bear_score": 56.6268,
+            "bull_supporting_evidence_count": 18,
+            "bear_supporting_evidence_count": 7,
+            "bull_ticker_specific_support_count": 11,
+            "bear_ticker_specific_support_count": 3,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A301",
+            "alpha_b": "A304",
+            "outcome": "admitted",
+            "bull_score": 68.5091,
+            "bear_score": 56.6268,
+            "bull_supporting_evidence_count": 18,
+            "bear_supporting_evidence_count": 7,
+            "bull_ticker_specific_support_count": 7,
+            "bear_ticker_specific_support_count": 3,
+            "admissibility_status": "admitted",
+            "reason_codes": []
+          },
+          {
+            "alpha_a": "A304",
+            "alpha_b": "A601",
+            "outcome": "suppressed",
+            "bull_score": 48.623,
+            "bear_score": 56.6268,
+            "bull_supporting_evidence_count": 9,
+            "bear_supporting_evidence_count": 7,
+            "bull_ticker_specific_support_count": 2,
+            "bear_ticker_specific_support_count": 3,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ]
+          },
+          {
+            "alpha_a": "A501",
+            "alpha_b": "A601",
+            "outcome": "suppressed",
+            "bull_score": 48.623,
+            "bear_score": 33.1062,
+            "bull_supporting_evidence_count": 9,
+            "bear_supporting_evidence_count": 2,
+            "bull_ticker_specific_support_count": 2,
+            "bear_ticker_specific_support_count": 1,
+            "admissibility_status": "candidate",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "negative_constraints": {
+    "checked": [
+      {
+        "ticker": "MSFT",
+        "pair": "A102__A304",
+        "note": "checked"
+      },
+      {
+        "ticker": "SNDK",
+        "pair": "A201__A304",
+        "note": "checked"
+      },
+      {
+        "ticker": "TSM",
+        "pair": "A201__A304",
+        "note": "checked"
+      },
+      {
+        "ticker": "AMD",
+        "pair": "A201__A304",
+        "note": "checked"
+      }
+    ],
+    "results": [
+      {
+        "pair": "A102__A304",
+        "status": "PASS"
+      },
+      {
+        "pair": "A201__A304",
+        "status": "PASS"
+      },
+      {
+        "pair": "A201__A304",
+        "status": "PASS"
+      },
+      {
+        "pair": "A201__A304",
+        "status": "PASS"
+      }
+    ],
+    "violation_count": 0,
+    "status": "PASS"
+  },
+  "call_accounting": {
+    "tradingagents": {
+      "ticker_attempts": 11,
+      "ticker_completions": 6,
+      "whole_ticker_retries": 5,
+      "note": "6 attempts in the pre-credit-topup batch (1 success: NVDA; 5 failed instantly with INTERNAL_ERROR/402 Payment Required) + 5 attempts in the post-credit-topup batch (5/5 succeeded, zero additional retries needed)."
+    },
+    "week2_semantic_provider": {
+      "attempts_source": "llm_semantic_manifest.json:provider_call_count (exact, persisted)",
+      "total_attempts": 5532,
+      "total_successful_classifications": 1852,
+      "total_timeouts": 390,
+      "total_transport_or_provider_errors": 3912,
+      "total_rate_limits": 0,
+      "total_validation_failures": 18,
+      "total_budget_exhaustions": 0,
+      "per_ticker": {
+        "NVDA": {
+          "provider_call_count": 1003,
+          "accepted_count": 245,
+          "fallback_count": 379,
+          "rejected_count": 2,
+          "tasks": {
+            "alpha_classifier": 588,
+            "evidence_stance_classifier": 20,
+            "structure_extractor": 8,
+            "structured_adapter": 8
+          },
+          "cache_hit_count": 0
+        },
+        "QQQ": {
+          "provider_call_count": 560,
+          "accepted_count": 482,
+          "fallback_count": 40,
+          "rejected_count": 4,
+          "tasks": {
+            "alpha_classifier": 478,
+            "evidence_stance_classifier": 30,
+            "structure_extractor": 6,
+            "structured_adapter": 8
+          },
+          "cache_hit_count": 0
+        },
+        "MSFT": {
+          "provider_call_count": 1356,
+          "accepted_count": 22,
+          "fallback_count": 670,
+          "rejected_count": 8,
+          "tasks": {
+            "alpha_classifier": 675,
+            "evidence_stance_classifier": 1,
+            "structure_extractor": 9,
+            "structured_adapter": 7
+          },
+          "cache_hit_count": 0
+        },
+        "SNDK": {
+          "provider_call_count": 637,
+          "accepted_count": 559,
+          "fallback_count": 40,
+          "rejected_count": 4,
+          "tasks": {
+            "alpha_classifier": 554,
+            "evidence_stance_classifier": 33,
+            "structure_extractor": 4,
+            "structured_adapter": 8
+          },
+          "cache_hit_count": 0
+        },
+        "TSM": {
+          "provider_call_count": 1311,
+          "accepted_count": 1,
+          "fallback_count": 655,
+          "rejected_count": 4,
+          "tasks": {
+            "alpha_classifier": 644,
+            "structure_extractor": 4,
+            "structured_adapter": 8
+          },
+          "cache_hit_count": 0
+        },
+        "AMD": {
+          "provider_call_count": 665,
+          "accepted_count": 543,
+          "fallback_count": 61,
+          "rejected_count": 1,
+          "tasks": {
+            "alpha_classifier": 555,
+            "evidence_stance_classifier": 33,
+            "structure_extractor": 8,
+            "structured_adapter": 8
+          },
+          "cache_hit_count": 0
+        }
+      }
+    },
+    "other_provider_calls_b1_etc": "Included in the same llm_semantic_manifest.json task breakdown per ticker (evidence_stance_classifier task) -- see per_ticker above; not separately metered."
+  },
+  "performance": {
+    "per_ticker": {
+      "NVDA": {
+        "started_at": "2026-08-27T23:36:15.909768+00:00",
+        "ended_at": "2026-08-27T23:59:02.878857+00:00",
+        "elapsed_seconds_monotonic": 1367.0,
+        "run_id": "948be419-b542-4096-a536-ff567ef459c2"
+      },
+      "QQQ": {
+        "started_at": "2026-08-28T00:41:58.057503+00:00",
+        "ended_at": "2026-08-28T03:18:23.805220+00:00",
+        "elapsed_seconds_monotonic": 2719.0,
+        "run_id": "defeb528-673e-44f7-8d94-c0abdfef03d4"
+      },
+      "MSFT": {
+        "started_at": "2026-08-28T03:18:23.807539+00:00",
+        "ended_at": "2026-08-28T17:34:15.395568+00:00",
+        "elapsed_seconds_monotonic": 679.8,
+        "run_id": "c715460c-5fa3-43d8-9949-97fb6b33e8ec"
+      },
+      "SNDK": {
+        "started_at": "2026-08-28T17:34:15.399190+00:00",
+        "ended_at": "2026-08-28T18:20:34.431946+00:00",
+        "elapsed_seconds_monotonic": 2779.1,
+        "run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8"
+      },
+      "TSM": {
+        "started_at": "2026-08-28T18:20:34.436917+00:00",
+        "ended_at": "2026-08-28T18:28:54.340393+00:00",
+        "elapsed_seconds_monotonic": 499.9,
+        "run_id": "5be841d5-0924-4943-8d37-ccd4168228cb"
+      },
+      "AMD": {
+        "started_at": "2026-08-28T18:28:54.344929+00:00",
+        "ended_at": "2026-08-28T19:09:10.429051+00:00",
+        "elapsed_seconds_monotonic": 2144.9,
+        "run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+      }
+    },
+    "total_wall_clock_seconds_monotonic": 10189.7,
+    "total_wall_clock_human": "2.83 hours (monotonic/active-execution time; real calendar time spanned longer due to a mid-sequence pause for the DeepSeek credit top-up and an observed ~14-hour host-machine suspend/resume gap between the QQQ and MSFT runs)"
+  },
+  "production_semantic_code_changed": false,
+  "alpha_mapper_changed": false,
+  "taxonomy_changed": false,
+  "b1_changed": false,
+  "b2_changed": false,
+  "b4_changed": false,
+  "step6_evidence_qualification_changed": false,
+  "step7_display_normalization_changed": false,
+  "conflict_ontology_changed": false,
+  "regression_labels_changed": false,
+  "commit": false,
+  "push": false,
+  "full_suite_final_confirmation": {
+    "result": "3873 passed / 6 failed / 47 skipped / 69 subtests passed in 667.71s (0:11:07)",
+    "baseline_comparison": "Step 9 baseline was 3827 passed / 6 failed / 47 skipped. Step 10 adds exactly +46 passed (tests/test_step10_final_e2e_qa.py); the same 6 failures recur unchanged.",
+    "note": "Zero failures attributable to Step 10."
+  }
+}

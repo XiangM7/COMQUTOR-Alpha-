@@ -1,0 +1,40 @@
+{
+  "schema_version": "v0.1.3_qa_closure.section_f.v1",
+  "task": "COMQUTOR Alpha v0.1.3 QA Closure, Section F: v0.1.3 feedback loop",
+  "instruction": "Locate the authoritative spec for 'feedback loop' before implementing or reporting anything. If found, implement/verify exactly that and expose proof. If NOT found, STOP this subsection only and report FEEDBACK_LOOP_SPEC_NOT_FOUND with exact files searched -- never invent a Product definition.",
+  "result_code": "FEEDBACK_LOOP_SPEC_FOUND_BUT_PHASE_2_NOT_MVP",
+  "files_and_locations_searched": [
+    "docs/adr/*.md (all 10 ADRs)",
+    "docs/specs/*.md, docs/specs/*.csv, docs/specs/*.json",
+    "docs/specs/product_decisions_and_unknowns.md (no match)",
+    "docs/specs/development_plan_v1.0_reference_index.md (no match)",
+    "docs/specs/development_plan_v1.0_manifest.json (no match)",
+    "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx (MATCH -- see below)",
+    "docs/audits/**, docs/audit_artifacts/** (grep for feedback/closed_loop/learning_loop/self-correct/human-in-the-loop; only unrelated investment-content matches, e.g. 'closed loop incestuous economy' commentary about a company's business model, not a product feature)",
+    "comqutor_alpha/**/*.py, comqutor_alpha/**/*.yaml (grep for feedback_loop; only an unrelated docstring phrase 'self-reinforcing feedback loop' inside exposure_rubric_contract_v1.yaml describing a market dynamic, not a system feature)",
+    "tests/**/*.py (no feedback-loop-specific test file or fixture found)",
+    "CHANGELOG.md (no relevant match; single hit is an unrelated upstream line)",
+    "No file anywhere in the repo is named or dated v0.1.3 -- this QA Closure task is the first v0.1.3 artifact set being created"
+  ],
+  "authoritative_spec_found": {
+    "document": "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx",
+    "section": "\"2. Patent Foundation and Concept Mapping\" -- SIC provisional patent -> COMQUTOR Alpha embodiment mapping table",
+    "table_row": {
+      "sic_patent_concept": "Non-execution events as computational feedback",
+      "comqutor_alpha_embodiment": "Alpha Memory: invalidation conditions, failed/expired structures stored with reason codes to adjust future activation",
+      "mvp_status_column": "Phase 2"
+    },
+    "surrounding_context": "The same table marks Structured job model, Structure Graph, Alpha Mapper, Activation Score, and Conflict Detector all as 'MVP' (some 'MVP (simplified formula)' / 'MVP (graph); full φ-token lifecycle deferred'). The 'Non-execution events as computational feedback' / Alpha Memory row is the ONLY row in this table marked plain 'Phase 2', alongside 'Stabilization condition + readout engine' (also Phase 2). The document's own MVP scope guard elsewhere states the full φ-token runtime is explicitly out of MVP scope.",
+    "meaning": "The one and only place 'feedback loop' functionality is formally specified in this codebase is as a cross-run Alpha Memory: the system would need to persist failed/expired/non-executed Alpha structures with reason codes, across runs, and use that stored history to adjust a LATER run's activation score for the same or a related structure. This is explicitly a Phase 2 deliverable, not part of the current MVP."
+  },
+  "current_implementation_status": {
+    "what_exists": "comqutor_alpha/conflict_engine/invalidation_registry.py + comqutor_alpha/config/alpha_invalidation_conditions_v0.1.yaml -- a STATIC, Product-authored, per-Alpha descriptive text registry ('what would invalidate this Alpha's thesis?'), surfaced read-only in the Conflict Radar Evidence UI (B5, conflict_evidence_ui.py). Built under task B5_CONFLICT_RADAR_EVIDENCE_UI, sections 8-10.",
+    "what_is_missing": "No mechanism anywhere in the codebase persists an ACTUAL failed/expired/non-executed structure's outcome across runs, and no mechanism reads such persisted history back into a later run's activation_scorer_v2 computation. The invalidation registry never varies by run outcome -- it is fixed, versioned Product content, not computed telemetry. Grepped comqutor_alpha/, tests/, docs/ for alpha_memory/invalidation_condition/failed_structure/expired_structure/closed_loop/learning_loop -- every hit traces to this same static registry or to unrelated investment-commentary text.",
+    "conclusion": "The cross-run computational feedback loop described in the Development Plan does not exist in the current codebase. This is expected and correct per the Plan's own phasing -- it was never scheduled for MVP/v0.1.x."
+  },
+  "action_taken_this_task": "Per Section F's explicit instruction not to invent a Product definition: no new 'feedback loop' mechanism was implemented. Implementing the real Phase-2 Alpha Memory system (cross-run persistence of failed/expired structures + feedback into activation scoring) is a substantial, unscoped architectural addition well beyond a QA closure task, and would itself violate this session's standing instruction to never invent Product decisions or add speculative functionality.",
+  "product_authority_blocker": {
+    "summary": "John's complaint #6 ('the attached materials do not show the core v0.1.3 feedback-loop functionality') cannot be resolved within this QA closure task without a Product decision.",
+    "open_question_for_product": "Two readings are possible and only Product/John can resolve which is meant: (a) John is referring to the patent-level Alpha Memory / non-execution-feedback concept, which the project's own Development Plan defers to Phase 2 -- in which case the complaint is a scope-expansion request, not a v0.1.3 bug, and needs an explicit decision to pull it into MVP with a real design; or (b) John means something narrower already achievable in v0.1.3 (e.g., a review/QA feedback loop between evidence review findings and the next research run, or a simpler within-run signal) that is not documented anywhere under 'feedback loop' terminology and was never given to engineering as a spec. Recommend surfacing this exact ambiguity to John directly rather than guessing."
+  }
+}

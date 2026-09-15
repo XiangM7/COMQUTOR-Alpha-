@@ -1,0 +1,466 @@
+{
+  "schema_version": "v0_1_3_msft_a304_negation_extraction_fix.v1",
+  "scope": "DESIGN + BOUNDED IMPLEMENTATION -- general extraction capability, offline validated",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "official_alpha_hit": "61.0317%",
+  "executive_summary": {
+    "design_gate": "PASS",
+    "implementation": true,
+    "canonical_positive_claim": "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:82",
+    "canonical_positive_claim_text": "Any slowdown in Azure growth could trigger multiple compression.",
+    "first_broken_stage": "A. Missing factor alias -- the source-side concept ('slowdown in Azure growth') never matched any FACTOR_ALIASES entry, so _extract_factors() produced only 1 factor ('Valuation Risk'); both _extract_edges() and _llm_edges() early-return on len(factors) < 2, so no relation extraction was ever attempted.",
+    "source_factor_canonicalization": "Existing canonical factor 'Revenue Growth' (no new factor invented) -- extended via a small, generic, ticker-independent regex pattern set (FACTOR_ALIAS_PATTERNS) for adverse-direction phrasing (slowdown/deceleration/deterioration/slower/weaker + growth), additive to the existing literal FACTOR_ALIASES.",
+    "negation_handling": "NO new negation logic added -- reused, unmodified, existing assertion_status_for()/analyze_claim_semantics()/NEGATED_RELATION_PATTERN machinery plus the existing downstream 'assertion_status != negated' qualification gate in activation_scorer_v2.py. Verified sufficient against all 7+ required negative-control cases.",
+    "positive_claim_extracts": true,
+    "not_a_slowdown_scenario_false_edge": false,
+    "msft_a304_before": {
+      "score": 38.3642,
+      "level": "candidate"
+    },
+    "msft_a304_offline_after": {
+      "score": 43.3642,
+      "level": "candidate",
+      "unavailable": false
+    },
+    "other_alpha_level_changes": "NONE -- confirmed via full offline replay across all 10 MSFT alphas (only A304's score changed) and across NVDA/QQQ/SNDK/TSM/AMD (zero edge-count or alpha-score/status changes in any of the other five tickers)",
+    "false_positive_edges": 0,
+    "new_regressions": 0,
+    "gold_unchanged": true,
+    "provider_calls": 0,
+    "ticker_runs": 0
+  },
+  "architecture_trace": {
+    "pipeline": "claim text -> _extract_factors() [factor_normalizer.extract_known_factors_from_text + literal record.factors] -> _extract_edges()/_llm_edges() [len(factors)<2 early-return gate] -> relation_grammar.extract_relation_candidates() [clause segmentation, mention-span finding, causal-verb pattern matching, direction guard via plausible_causal_direction/CAUSAL_RANK] -> assertion_status_for() [negation/conditional classification] -> _edge() dict -> graph_builder.py (local-edge lineage/qualification) -> activation_scorer_v2.py (local_structure_support component, qualifying_local_edge_count, assertion_status != negated gate)",
+    "factor_alias_authority": "comqutor_alpha.structure_engine.factor_normalizer.FACTOR_ALIASES (literal substrings) -- now supplemented (additively) by the new FACTOR_ALIAS_PATTERNS (regex-based, generic phrase forms)",
+    "factor_normalizer_functions_touched": [
+      "extract_known_factors_from_text",
+      "factor_mention_start",
+      "factor_mention_span"
+    ],
+    "causal_relation_authority": "comqutor_alpha.structure_engine.relation_grammar -- CAUSAL_RANK/plausible_causal_direction (direction admissibility), FORWARD_CAUSAL_VERBS/FORWARD_TRANSITIVE_CAUSAL_PATTERN ('trigger' already present, unmodified), GROWTH_FACTORS/RISK_FACTORS sets (Revenue Growth/Valuation Risk already members, unmodified)",
+    "negation_handling_preexisting": "NEGATED_RELATION_PATTERN (relation_grammar.py) scoped to the clause-local 'bridge' text; analyze_claim_semantics().negated (claim_semantics.py) computed over the full claim text as an additional OR-condition in assertion_status_for()",
+    "clause_segmentation_preexisting": "relation_grammar._split_clauses() -- splits on ,.;: and but/however/although/while/whereas/yet -- already provides clause-local negation scoping for the bridge-based check",
+    "edge_dedupe": "extract_structures_from_records() dedupes on (source, target, edge_type, source_record_id) tuple key -- unmodified",
+    "direction_determination": "_resolve_forward()/_resolve_reverse() (nearest-left/nearest-right mention resolution) plus plausible_causal_direction()'s CAUSAL_RANK comparison -- unmodified; Revenue Growth (rank 3) -> Valuation Risk (rank 3) is an admissible equal-rank pair under the existing rule",
+    "confidence_condition_representation": "assertion_status in {asserted, conditional, negated, mixed, unknown}; relation_confidence()/relation_reason() derive confidence/reason text from (edge_type, assertion_status) -- unmodified"
+  },
+  "design_gate_evaluation": {
+    "claim_82_first_break_proven": true,
+    "existing_ontology_represents_both_factors": true,
+    "existing_relation_represents_causal_relation": true,
+    "proposed_rule_general_not_msft_specific": true,
+    "negative_control_scope_deterministic": true,
+    "corpus_blast_radius_bounded": true,
+    "no_gold_specific_condition_required": true,
+    "no_threshold_change_required": true,
+    "no_provider_call_required": true,
+    "regression_risk": "LOW",
+    "result": "PASS -- all nine criteria met, implementation authorized"
+  },
+  "positive_causal_semantics_analysis": {
+    "trigger_verb_already_supported": true,
+    "revenue_growth_valuation_risk_rank_pair_already_admissible": "True (equal rank 3<=3, per plausible_causal_direction's documented equal-rank admissibility rule)",
+    "examples_from_task_section_7": {
+      "Any slowdown in Azure growth could trigger multiple compression.": "EDGE EMITTED (Revenue Growth -> Valuation Risk, causal, conditional) -- the canonical positive case",
+      "Slower Azure growth may pressure valuation multiples.": "Source factor recognized (new pattern); NO edge -- target phrase 'valuation multiples' is not an existing Valuation Risk alias (target side intentionally left untouched, out of this task's scope)",
+      "Decelerating revenue growth could compress the multiple.": "Source factor recognized (literal 'revenue growth' alias, unchanged); target-side coverage depends on 'the multiple' phrasing, not tested as a required case",
+      "Weaker growth can lead to valuation compression.": "Bare 'weaker growth' (no qualifying noun before 'growth') is NOT matched -- deliberately excluded per Section 11's anti-overreach guidance; only 'weaker <0-3 words> growth' with an explicit growth-noun-phrase form is matched, and this exact wording IS covered by that same pattern (it has zero intervening words, which the pattern allows)",
+      "Growth deterioration may cause multiple contraction.": "Source factor recognized (new pattern); NO edge -- 'multiple contraction' is not an existing Valuation Risk alias"
+    },
+    "conclusion": "Not all wording maps identically, exactly as instructed -- only forms mapping to the EXISTING canonical 'Revenue Growth'/'Valuation Risk' ontology produce edges; wording requiring a target-side alias not yet present is honestly reported as producing no edge, not forced."
+  },
+  "negation_audit": {
+    "A_positive_causal": {
+      "text": "Slowdown in Azure growth could trigger multiple compression.",
+      "result": "EDGE (causal, conditional)"
+    },
+    "B_negated_premise": {
+      "text": "This is not a slowdown scenario. / Azure growth is not slowing.",
+      "result": "NO EDGE -- zero factors recognized (patterns deliberately exclude bare negation-adjacent forms like 'growth is slowing')"
+    },
+    "C_negated_consequence": {
+      "text": "Slower growth would not cause multiple compression.",
+      "result": "EDGE CREATED but assertion_status='negated' -- excluded from qualifying local structure support by the existing, unmodified activation_scorer_v2.py gate (assertion_status != negated)"
+    },
+    "D_negated_causality": {
+      "text": "There is no reason to expect slower Azure growth to compress valuation.",
+      "result": "Any resulting causal edge is 'negated' (verified by test) -- never asserted"
+    },
+    "E_risk_only": {
+      "text": "There is a risk of slower Azure growth.",
+      "result": "NO EDGE -- only 1 factor recognized (Revenue Growth), no target factor present, len(factors)<2 gate"
+    },
+    "F_descriptive_only": {
+      "text": "Azure growth slowed this quarter. / Investors discussed a possible slowdown.",
+      "result": "NO EDGE -- zero factors recognized for the discussed-slowdown form"
+    },
+    "G_counterfactual_denial": {
+      "text": "Contrary to fears, Azure is not experiencing a slowdown. / Growth is strong, not slowing.",
+      "result": "NO EDGE -- zero factors recognized"
+    }
+  },
+  "minimal_negation_model": {
+    "built_new_negation_logic": false,
+    "reasoning": "The demonstrated first-break stage (Section 5) was factor recognition, not negation. Once factor recognition was fixed, empirical testing against all 7+ negative-control categories showed the EXISTING negation/assertion_status/qualification chain already correctly suppresses false-positive edges. Building new negation machinery on top would have been unauthorized scope creep beyond the smallest deterministic mechanism necessary (task section 9)."
+  },
+  "clause_boundary_safety": {
+    "preexisting_mechanism_reused": "relation_grammar._split_clauses() (splits on ,.;: and but/however/although/while/whereas/yet), already used to scope the 'bridge' text for negation detection per relation candidate",
+    "mixed_clause_test_result": "PASS -- 'Azure is not slowing, but valuation could compress if demand weakens.' produces ZERO factors and ZERO edges, because neither clause contains a phrase matching any RECOGNIZED factor pattern under the existing, unmodified ontology (bare 'demand' without an AI/GPU/Inference qualifier is not a factor) -- no fabricated edge in either direction",
+    "note": "A pre-existing, out-of-scope architectural nuance was observed during tracing: assertion_status_for()'s OR-fallback to analyze_claim_semantics(full_claim_text).negated is computed over the WHOLE claim, not clause-scoped, unlike the bridge-based NEGATED_RELATION_PATTERN check. This could, in principle, over-suppress (mark 'negated') a genuinely-asserted relation in an unrelated clause of a mixed sentence -- a CONSERVATIVE-direction risk (never a false-positive-creation risk), and not exercised by any required test case in this task. Reported for completeness; not modified, per this task's narrow scope."
+  },
+  "word_form_normalization_audit": {
+    "included": [
+      "slowdown in <0-3 words> growth",
+      "growth slowdown",
+      "decelerating <0-3 words> growth",
+      "growth deceleration",
+      "growth deterioration",
+      "slower <0-3 words> growth",
+      "weaker <0-3 words> growth"
+    ],
+    "deliberately_excluded": {
+      "bare_slow_weak_tokens": "Excluded per explicit task guidance -- verified by test_bare_slow_or_weak_tokens_not_treated_as_growth_factor ('The market feels slow and weak today.' recognizes no factor)",
+      "growth_is_slowing_form": "Excluded -- would fire on its own negation ('growth is NOT slowing') with zero required-test benefit; already-existing literal 'revenue growth' alias and the included patterns cover every required positive case without it"
+    }
+  },
+  "corpus_blast_radius_scan": {
+    "methodology": "Scanned all persisted claims (structured_agent_outputs.json records + evidence text) across all six authoritative runs (NVDA, QQQ, MSFT, SNDK, TSM, AMD) for the required keyword set (slowdown, slowing, slower, deceleration, decelerating, compression, compress, contraction, valuation multiple), then compared factor/edge extraction before vs. after the proposed patterns.",
+    "total_keyword_matching_claims_scanned": 89,
+    "claims_gaining_a_new_factor_recognition": 2,
+    "classification": {
+      "MSFT_claim_82": "TRUE_POSITIVE_EXPECTED_EDGE -- the canonical target case",
+      "NVDA_bear_researcher_claim_77": "RISK_ONLY_NO_ASSERTED_EDGE -- 'a simple growth deceleration' listed alongside two unrelated risks ('macro shock', 'competitive threat') with no target/compression factor in the same claim; gains only a harmless factor tag, produces no edge"
+    },
+    "claims_producing_a_new_causal_edge": 1,
+    "unexpected_false_positives": 0,
+    "negated_false_positive_risk_claims_found": 0,
+    "ambiguous_claims_found": 0,
+    "conclusion": "Blast radius is bounded to exactly 1 new edge across the entire six-run, six-ticker corpus -- the canonical target claim itself."
+  },
+  "required_positive_tests": {
+    "1_canonical": {
+      "text": "Any slowdown in Azure growth could trigger multiple compression.",
+      "result": "PASS -- Revenue Growth -> Valuation Risk, causal, conditional"
+    },
+    "2_decelerating_revenue_growth": {
+      "text": "Decelerating revenue growth may pressure valuation multiples.",
+      "result": "NO EDGE (honest boundary) -- source factor recognized, target 'valuation multiples' not an existing Valuation Risk alias; not loosened to force a pass"
+    },
+    "3_weaker_revenue_growth": {
+      "text": "Weaker revenue growth could lead to multiple contraction.",
+      "result": "NO EDGE (honest boundary) -- source factor recognized, target 'multiple contraction' not an existing Valuation Risk alias; not loosened to force a pass"
+    }
+  },
+  "required_negative_tests": {
+    "1_not_a_slowdown_scenario": "PASS -- zero factors, zero edges",
+    "2_azure_growth_not_slowing": "PASS -- zero factors, zero edges",
+    "3_slower_growth_would_not_cause": "PASS -- edge created but assertion_status=negated (never a positive causal edge)",
+    "4_risk_of_slower_azure_growth": "PASS -- 1 factor only, zero edges",
+    "5_msft_high_valuation_multiple": "PASS -- Valuation Risk recognized, Revenue Growth absent, zero edges",
+    "6_investors_discussed_possible_slowdown": "PASS -- zero factors, zero edges",
+    "7_growth_is_strong_not_slowing": "PASS -- zero factors, zero edges",
+    "mixed_clause_azure_not_slowing_but_valuation_could_compress": "PASS -- zero factors, zero edges (no fabricated structure in either clause)"
+  },
+  "edge_direction_verification": {
+    "required_direction": "Revenue Growth -> Valuation Risk (growth slowdown -> multiple compression)",
+    "actual_direction_produced": "MSFT Revenue Growth -> Valuation Risk",
+    "reversed_direction_test": "Explicit test (test_canonical_positive_claim_correct_edge_direction) confirms source label is never 'Valuation Risk' for this claim",
+    "result": "PASS"
+  },
+  "no_stance_evidence_rule_change": {
+    "b1_stance_touched": false,
+    "ticker_specificity_touched": false,
+    "primary_secondary_touched": false,
+    "fact_dedupe_touched": false,
+    "evidence_scores_touched": false,
+    "confirmation": "claim:82 independently passed canonical evidence qualification (PRIMARY_QUALIFIED, eligible=true, factor_score=1.0) before and after this change, unmodified by this fix -- only structure/edge extraction was touched"
+  },
+  "no_automatic_a304_association_hack": {
+    "alpha_ids_set_directly_by_extractor": false,
+    "verified_by_test": "test_no_alpha_id_hardcoding_in_edge_output -- confirms no edge dict emitted by this code path ever contains an 'alpha_ids' key; Alpha association is entirely the existing, unmodified graph_builder.py/alpha lineage authority's responsibility"
+  },
+  "msft_a304_offline_replay": {
+    "methodology": "Pure-function replay: comqutor_alpha.structure_engine.structure_extractor.extract_structures_from_records() called directly on MSFT's persisted structured_agent_outputs.json records (with persisted canonical_relations, no llm_gateway -- deterministic-only, matching an apples-to-apples offline comparison), then comqutor_alpha.graph_engine.pipeline.build_and_score_structure_graph() called on the result plus the persisted, UNMODIFIED alpha_matches.json. 'Before' computed by temporarily disabling FACTOR_ALIAS_PATTERNS (simulating pre-fix code); 'after' uses the current, fixed code. No Provider calls; no run artifact mutated (derived counterfactual only, held in memory).",
+    "a304_before": {
+      "activation_score": 38.3642,
+      "status": "candidate",
+      "cap_reason_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "eligible_cap": 70.0,
+      "local_structure_support_raw": 0.0,
+      "qualifying_local_edge_count": 0
+    },
+    "a304_after": {
+      "activation_score": 43.3642,
+      "status": "candidate",
+      "cap_reason_codes": [],
+      "eligible_cap": null,
+      "local_structure_support_raw": 25.0,
+      "qualifying_local_edge_count": 1,
+      "local_edge_ids": [
+        "msft_revenue_growth->valuation_risk:causal"
+      ],
+      "local_claim_ids": [
+        "43472ace-454f-4c69-892c-adca91c25be7:fundamental_agent:fundamentals_report:claim:82"
+      ]
+    },
+    "score_delta": 5.0,
+    "score_delta_explanation": "Entirely attributable to local_structure_support's contribution rising from 0.0 to 5.0 (raw 25.0 x weight 0.2) -- every other component (evidence_quality, agent_independence, ticker_specificity, recency, direction_consistency) is byte-identical before/after.",
+    "a304_became_detected_offline": false,
+    "note": "A304 remains 'candidate' (below the active/dominant/regime_level threshold) after the fix -- NOT forced across any threshold. This is reported as the actual, unmanufactured result, per task section 25's explicit instruction."
+  },
+  "all_alpha_blast_radius_msft": {
+    "A001": {
+      "before": [
+        46.9719,
+        "candidate"
+      ],
+      "after": [
+        46.9719,
+        "candidate"
+      ],
+      "changed": false
+    },
+    "A003": {
+      "before": [
+        0.0,
+        "candidate"
+      ],
+      "after": [
+        0.0,
+        "candidate"
+      ],
+      "changed": false
+    },
+    "A101": {
+      "before": [
+        53.1974,
+        "active"
+      ],
+      "after": [
+        53.1974,
+        "active"
+      ],
+      "changed": false
+    },
+    "A102": {
+      "before": [
+        29.9674,
+        "candidate"
+      ],
+      "after": [
+        29.9674,
+        "candidate"
+      ],
+      "changed": false
+    },
+    "A103": {
+      "before": [
+        84.634,
+        "dominant"
+      ],
+      "after": [
+        84.634,
+        "dominant"
+      ],
+      "changed": false
+    },
+    "A201": {
+      "before": [
+        0.0,
+        "candidate"
+      ],
+      "after": [
+        0.0,
+        "candidate"
+      ],
+      "changed": false
+    },
+    "A301": {
+      "before": [
+        60.8146,
+        "active"
+      ],
+      "after": [
+        60.8146,
+        "active"
+      ],
+      "changed": false
+    },
+    "A304": {
+      "before": [
+        38.3642,
+        "candidate"
+      ],
+      "after": [
+        43.3642,
+        "candidate"
+      ],
+      "changed": true
+    },
+    "A501": {
+      "before": [
+        37.0094,
+        "candidate"
+      ],
+      "after": [
+        37.0094,
+        "candidate"
+      ],
+      "changed": false
+    },
+    "A601": {
+      "before": [
+        27.7558,
+        "candidate"
+      ],
+      "after": [
+        27.7558,
+        "candidate"
+      ],
+      "changed": false
+    },
+    "conclusion": "Only A304 changed. Every other MSFT alpha is byte-identical before/after -- fully explained by the single new edge attributable solely to claim:82."
+  },
+  "all_six_ticker_blast_radius": {
+    "methodology": "Same before/after full-pipeline replay applied independently to NVDA, QQQ, SNDK, TSM, AMD (MSFT reported separately above).",
+    "NVDA": {
+      "edge_count_before": 15,
+      "edge_count_after": 15,
+      "alpha_changes": "NONE"
+    },
+    "QQQ": {
+      "edge_count_before": 14,
+      "edge_count_after": 14,
+      "alpha_changes": "NONE"
+    },
+    "SNDK": {
+      "edge_count_before": 26,
+      "edge_count_after": 26,
+      "alpha_changes": "NONE"
+    },
+    "TSM": {
+      "edge_count_before": 20,
+      "edge_count_after": 20,
+      "alpha_changes": "NONE"
+    },
+    "AMD": {
+      "edge_count_before": 13,
+      "edge_count_after": 13,
+      "alpha_changes": "NONE"
+    },
+    "classification": "EXPECTED_CONSERVATIVE_CHANGE for NVDA (1 claim gains a harmless factor tag, zero edge/score consequence); no classification needed for QQQ/SNDK/TSM/AMD (zero factor or edge changes detected at all)",
+    "unexpected_false_positives": 0
+  },
+  "sndk_tsm_negative_controls": {
+    "sndk_a103": "UNCHANGED (confirmed via full replay -- SNDK's alpha set shows zero score/status changes of any kind)",
+    "sndk_a301": "UNCHANGED (same)",
+    "tsm_a301": "UNCHANGED (TSM's alpha set shows zero score/status changes of any kind)",
+    "no_generic_local_support_relaxation": "Confirmed -- the fix adds exactly one new, narrowly-scoped factor-recognition pathway (Revenue Growth adverse phrasing); no local-structure-support qualification RULE was loosened anywhere"
+  },
+  "provider_reliability_baseline_unchanged": {
+    "week2_llm_py_touched": false,
+    "provider_health_touched": false,
+    "recorder_health_touched": false,
+    "multi_run_evaluator_touched": false,
+    "evidence_stance_retry_policy": "2 retries / 3 max attempts -- unchanged, reconfirmed by full regression pass",
+    "new_tests_require_real_provider_calls": false
+  },
+  "targeted_tests": {
+    "file": "tests/test_msft_a304_negation_aware_extraction.py",
+    "categories_covered": [
+      "canonical positive claim",
+      "factor normalization (generic segment phrasing)",
+      "anti-overreach (bare slow/weak)",
+      "correct edge direction",
+      "negated premise",
+      "negated relation/consequence",
+      "risk-only language",
+      "descriptive language",
+      "mixed clause",
+      "unrelated valuation mention",
+      "existing edge regressions (AI CapEx->GPU Demand)",
+      "existing literal alias regressions",
+      "ticker-independent behavior",
+      "no Alpha-ID hardcoding",
+      "honest target-side boundary (2 tests)"
+    ],
+    "result": "21 passed, 0 failed"
+  },
+  "test_results": {
+    "new_targeted_extraction_tests": "21 passed, 0 failed",
+    "existing_structure_extraction_suites": "115 passed, 0 failed (test_structure_correctness_sprint.py, test_relation_grammar.py, test_structure_extractor.py, test_factor_normalizer.py)",
+    "p0_p1": "26 passed, 0 failed",
+    "provider_health": "32 passed, 0 failed",
+    "multi_run_reproducibility": "28 passed, 0 failed",
+    "recorder_health_diagnostics": "16 passed, 2 skipped (environment-dependent: ephemeral launcher log not present in this shell -- unrelated to this change)",
+    "evidence_stance_retry_fix": "18 passed, 0 failed",
+    "sha_guard_check": "NEITHER factor_normalizer.py NOR relation_grammar.py is protected by any frozen SHA guard (searched all 4 known guard files: test_step10_final_e2e_qa.py, test_step11_provider_health_rerun.py, test_evidence_review_v2.py, test_source_integrity.py) -- no hash update required",
+    "full_backend_suite_before_fix_baseline": "21 failed, 4139 passed, 3 errors, 47 skipped",
+    "full_backend_suite_after_fix": "21 failed, 4158 passed, 3 errors, 49 skipped",
+    "delta_explanation": "+21 new targeted tests, -2 passed/+2 skipped from an unrelated, already-observed environment condition (ephemeral launcher log absence) -- net +19 passed matches exactly (4139 - 2 + 21 = 4158)",
+    "failed_and_error_test_names_identical_to_baseline": true,
+    "new_regressions": 0
+  },
+  "deferred_work": [
+    "NVDA A102",
+    "MSFT A102 research coverage",
+    "AMD A102",
+    "NVDA A201",
+    "AMD A201",
+    "QQQ A101",
+    "SNDK A103",
+    "SNDK A301",
+    "TSM structure changes",
+    "Provider retry beyond the current evidence_stance change",
+    "Gold >=75% itself",
+    "multi-run live benchmark",
+    "Valuation Risk target-side alias extension (e.g. 'valuation multiples', 'multiple contraction')"
+  ],
+  "implementation_verdict": {
+    "verdict": "A304_FIX_IMPLEMENTED_AND_VALIDATED_OFFLINE",
+    "reasoning": "Implementation is complete, all targeted/regression/full-suite tests pass with zero new regressions, the blast radius is precisely bounded (1 new edge across the entire six-run corpus), zero false-positive edges were found across 89 scanned claims, and the offline replay confirms the extraction fix works exactly as designed (claim:82 now extracts a correctly-directed causal edge) with A304's score rising by exactly the local-structure-support contribution this one edge adds. This verdict is NOT based on A304 crossing the Gold Hit threshold -- it remains 'candidate' -- consistent with task section 25's explicit instruction not to require a Gold hit."
+  },
+  "live_validation_readiness": {
+    "MSFT_FRESH_VALIDATION_READY": "YES",
+    "reasoning": "Targeted tests green (21/21), bounded blast radius (1 edge, 0 false positives across 89 scanned claims), no false-positive negation cases in 8 required negative-control categories, NEW_REGRESSIONS=0 on the full backend suite. A future, separately-authorized fresh MSFT run could now validate this fix against live Provider output.",
+    "not_executed_in_this_task": true
+  },
+  "final_validation": {
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+    "official_alpha_hit_unchanged": "61.0317%",
+    "frozen_ledger_unchanged": true,
+    "p0_p1_intact": true,
+    "provider_health_intact": true,
+    "measurement_foundation_intact": true,
+    "recorder_health_intact": true,
+    "evidence_stance_retry_fix_intact": true,
+    "no_threshold_changes": true,
+    "no_taxonomy_changes": true,
+    "no_b1_b2_b4_changes": true,
+    "no_provider_changes": true,
+    "no_alpha_specific_hardcode": true,
+    "negation_negative_controls_pass": true,
+    "new_regressions": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0,
+    "production_files_changed": 2,
+    "production_files_changed_list": [
+      "comqutor_alpha/structure_engine/factor_normalizer.py",
+      "comqutor_alpha/structure_engine/relation_grammar.py"
+    ],
+    "test_files_changed": 1,
+    "test_files_changed_list": [
+      "tests/test_msft_a304_negation_aware_extraction.py (new)"
+    ]
+  }
+}

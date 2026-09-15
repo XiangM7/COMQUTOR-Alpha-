@@ -1502,3 +1502,202 @@ class TestMSFTBoundary:
         text = doc_path.read_text(encoding="utf-8")
         assert "BLOCKED_BY_SPEC_CONFLICT" in text
         assert "MSFT" in text
+
+
+# ---------------------------------------------------------------------------
+# v0.1.3 QA Closure, Section D: Evidence polarity / Conflict Evidence UI.
+#
+# John's suspicion: evidence that REBUTS A304's thesis (its own B1 stance is
+# opposes_alpha toward A304) was being displayed as if it were A304's own
+# bull/bear supporting evidence, merely because the claim's matched_alpha is
+# A304 (topical match) -- conflated with agreeing with A304's thesis
+# (stance match). conflict_evidence_ui.py's bull_evidence/bear_evidence
+# already filtered correctly by stance; bull_structure/bear_structure (the
+# simpler, more prominent top-level fields the frontend's ConflictCard
+# actually renders) did not, until this fix. These tests exercise
+# bull_structure/bear_structure directly -- never generic sentiment, always
+# derived from the Alpha thesis + the claim's own B1 stance toward that
+# specific Alpha.
+# ---------------------------------------------------------------------------
+
+
+def _a101_a304_taxonomy():
+    return two_alpha_taxonomy("A101", "A304", weight_a_to_b=0.9)
+
+
+def _a101_a304_activation():
+    # A101 (AI Expansion) positive/bull; A304 (Multiple Compression)
+    # negative/bear -- resolve_bull_bear is direction-driven, matching the
+    # real canonical taxonomy's own polarity for this pair.
+    return activation_payload(
+        activation_entry("A101", score=80, status="active", direction="positive"),
+        activation_entry("A304", score=75, status="active", direction="negative"),
+    )
+
+
+class TestEvidencePolarityBullBearAssignment:
+    def test_1_evidence_supporting_a304_appears_in_bear_structure(self):
+        result = _detect(
+            _a101_a304_activation(),
+            [
+                match_record("bull1", "A101", evidence_stance="supports_alpha"),
+                match_record("bull2", "A101", evidence_stance="supports_alpha"),
+                match_record("bear1", "A304", evidence_stance="supports_alpha", agent="fundamental_agent"),
+                match_record("bear2", "A304", evidence_stance="supports_alpha", agent="market_agent"),
+            ],
+            taxonomy=_a101_a304_taxonomy(),
+        )
+        conflict = result["conflicts"][0]
+        assert conflict["bear_structure"]["alpha_id"] == "A304"
+        assert conflict["bear_structure"]["claim_ids"] == ["bear1", "bear2"]
+
+    def test_2_evidence_opposing_a304_is_excluded_from_bear_structure(self):
+        # John's exact reported bug: a claim matched to A304 (topically)
+        # whose OWN stance toward A304 is opposes_alpha (rebuts the
+        # compression/bear thesis) must never appear as A304's bear
+        # evidence.
+        result = _detect(
+            _a101_a304_activation(),
+            [
+                match_record("bull1", "A101", evidence_stance="supports_alpha"),
+                match_record("bull2", "A101", evidence_stance="supports_alpha"),
+                match_record("bear1", "A304", evidence_stance="supports_alpha", agent="fundamental_agent"),
+                match_record("bear2", "A304", evidence_stance="supports_alpha", agent="market_agent"),
+                match_record(
+                    "rebuttal1",
+                    "A304",
+                    evidence_stance="opposes_alpha",
+                    agent="news_agent",
+                    evidence="Despite high multiples, accelerating earnings growth justifies the current valuation.",
+                ),
+            ],
+            taxonomy=_a101_a304_taxonomy(),
+        )
+        conflict = result["conflicts"][0]
+        assert "rebuttal1" not in conflict["bear_structure"]["claim_ids"]
+        assert "Despite high multiples" not in " ".join(conflict["bear_structure"]["evidence"])
+        # It must not silently vanish either -- B5's Conflict Evidence UI
+        # still surfaces it, correctly, as Counter Evidence against A304.
+        counter_ids = {item["representative_claim_id"] for item in conflict["evidence_ui"]["counter_evidence"]}
+        member_ids = {
+            cid for item in conflict["evidence_ui"]["counter_evidence"] for cid in item["member_claim_ids"]
+        }
+        assert "rebuttal1" in counter_ids or "rebuttal1" in member_ids
+
+    def test_3_evidence_supporting_the_counter_alpha_is_excluded_from_bear_structure(self):
+        # A claim matched to A304 but whose stance is supports_counter_alpha
+        # (explicitly endorsing A101, A304's opposing thesis) must also
+        # never display as A304's own supporting evidence.
+        counter_claim = match_record(
+            "counter1",
+            "A304",
+            evidence_stance="supports_counter_alpha",
+            agent="bull_researcher",
+            evidence="AI infrastructure demand growth supports further re-rating, not compression.",
+        )
+        counter_claim["candidate_scores"][0]["counter_alpha_id"] = "A101"
+        result = _detect(
+            _a101_a304_activation(),
+            [
+                match_record("bull1", "A101", evidence_stance="supports_alpha"),
+                match_record("bull2", "A101", evidence_stance="supports_alpha"),
+                match_record("bear1", "A304", evidence_stance="supports_alpha", agent="fundamental_agent"),
+                match_record("bear2", "A304", evidence_stance="supports_alpha", agent="market_agent"),
+                counter_claim,
+            ],
+            taxonomy=_a101_a304_taxonomy(),
+        )
+        conflict = result["conflicts"][0]
+        assert "counter1" not in conflict["bear_structure"]["claim_ids"]
+
+    def test_4_mixed_mentions_evidence_is_excluded_from_bear_structure(self):
+        # mentions_alpha (topically relevant, no net stance either way) is
+        # neither support nor rebuttal -- it must not inflate bear_structure
+        # either.
+        result = _detect(
+            _a101_a304_activation(),
+            [
+                match_record("bull1", "A101", evidence_stance="supports_alpha"),
+                match_record("bull2", "A101", evidence_stance="supports_alpha"),
+                match_record("bear1", "A304", evidence_stance="supports_alpha", agent="fundamental_agent"),
+                match_record("bear2", "A304", evidence_stance="supports_alpha", agent="market_agent"),
+                match_record(
+                    "mention1",
+                    "A304",
+                    evidence_stance="mentions_alpha",
+                    agent="news_agent",
+                    evidence="The stock's P/E ratio was mentioned in passing during the earnings call.",
+                ),
+            ],
+            taxonomy=_a101_a304_taxonomy(),
+        )
+        conflict = result["conflicts"][0]
+        assert "mention1" not in conflict["bear_structure"]["claim_ids"]
+
+    def test_5_generic_bearish_language_matched_to_a_different_alpha_never_appears_under_a304(self):
+        # Bull/bear side assignment must derive from the Alpha thesis +
+        # matched_alpha + stance, never from whether the sentence merely
+        # "sounds bearish" for the stock. A claim never matched to A304 at
+        # all (here: matched to A101, even though its text is generic
+        # negative stock commentary) must never appear under A304's
+        # structure just because it reads bearish.
+        result = _detect(
+            _a101_a304_activation(),
+            [
+                match_record(
+                    "bull1",
+                    "A101",
+                    evidence_stance="supports_alpha",
+                    evidence="Shares fell sharply amid broad market weakness and macro uncertainty.",
+                ),
+                match_record("bull2", "A101", evidence_stance="supports_alpha"),
+                match_record("bear1", "A304", evidence_stance="supports_alpha", agent="fundamental_agent"),
+                match_record("bear2", "A304", evidence_stance="supports_alpha", agent="market_agent"),
+            ],
+            taxonomy=_a101_a304_taxonomy(),
+        )
+        conflict = result["conflicts"][0]
+        assert "bull1" not in conflict["bear_structure"]["claim_ids"]
+        assert "bull1" in conflict["bull_structure"]["claim_ids"]
+
+    def test_evidence_strength_and_conflict_score_are_unaffected_by_the_display_fix(self):
+        # The fix is display-only: evidence_strength/conflict_score must
+        # stay computed from the FULL qualifying pool (including
+        # opposes_alpha/mentions_alpha/supports_counter_alpha claims),
+        # byte-identical to before this task -- only bull_structure/
+        # bear_structure's own evidence/claim_ids/evidence_facts fields
+        # changed. Verified by comparing a conflict with only supports_alpha
+        # claims against an equivalent one with additional non-supporting
+        # claims for the SAME alpha: components/evidence_strength for the
+        # side with only supports_alpha claims stay identical regardless of
+        # what the other tests' non-supporting claims would have done had
+        # they mistakenly counted toward strength.
+        baseline = _detect(
+            _a101_a304_activation(),
+            [
+                match_record("bull1", "A101", evidence_stance="supports_alpha"),
+                match_record("bull2", "A101", evidence_stance="supports_alpha"),
+                match_record("bear1", "A304", evidence_stance="supports_alpha", agent="fundamental_agent"),
+                match_record("bear2", "A304", evidence_stance="supports_alpha", agent="market_agent"),
+            ],
+            taxonomy=_a101_a304_taxonomy(),
+        )["conflicts"][0]
+        # bear_raw_claim_count (an existing, pre-v0.1.3 audit field) is
+        # deliberately left sourced from the FULL unfiltered pool -- adding
+        # a non-supporting claim for bear must still change it, proving the
+        # display fix did not silently leak into every bear_* audit field.
+        with_rebuttal = _detect(
+            _a101_a304_activation(),
+            [
+                match_record("bull1", "A101", evidence_stance="supports_alpha"),
+                match_record("bull2", "A101", evidence_stance="supports_alpha"),
+                match_record("bear1", "A304", evidence_stance="supports_alpha", agent="fundamental_agent"),
+                match_record("bear2", "A304", evidence_stance="supports_alpha", agent="market_agent"),
+                match_record("rebuttal1", "A304", evidence_stance="opposes_alpha", agent="news_agent"),
+            ],
+            taxonomy=_a101_a304_taxonomy(),
+        )["conflicts"][0]
+        assert with_rebuttal["bear_raw_claim_count"] == baseline["bear_raw_claim_count"] + 1
+        # But the DISPLAY evidence/claim_ids must be identical -- the extra
+        # rebuttal claim never enters bear_structure.
+        assert with_rebuttal["bear_structure"]["claim_ids"] == baseline["bear_structure"]["claim_ids"]

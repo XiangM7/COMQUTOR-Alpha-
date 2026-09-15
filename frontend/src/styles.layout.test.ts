@@ -62,6 +62,23 @@ describe("Alpha card grid layout (styles.css)", () => {
   });
 });
 
+describe("Analyst findings card layout (styles.css)", () => {
+  // Product Demo Hardening Phase 3B (F1): a claim_id like
+  // "<run_id>:<agent>:<source>:claim:<n>" is a long, colon-delimited,
+  // space-free string that never finds a natural break opportunity under
+  // default word-break rules, and at a narrow viewport (confirmed at
+  // 768px) pushed the whole page into horizontal overflow. Scoped to the
+  // finding-card family only -- never the global `code` element -- so
+  // unrelated short `code` text (Alpha IDs, ticker symbols) is unaffected.
+  it("finding cards allow a long claim_id to wrap instead of overflowing the page", () => {
+    expect(ruleBody(".analyst-output-card")).toMatch(/overflow-wrap:\s*anywhere/);
+  });
+
+  it("unclassified finding cards already had -- and still have -- the same protection", () => {
+    expect(ruleBody(".unclassified-finding-card")).toMatch(/overflow-wrap:\s*anywhere/);
+  });
+});
+
 describe("Conflict card evidence UI layout (styles.css)", () => {
   it("Bull|Bear and Counter|Missing rows are two columns on desktop", () => {
     const body = ruleBody(".evidence-ui-row");

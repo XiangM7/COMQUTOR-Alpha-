@@ -42,7 +42,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from comqutor_alpha.structure_engine.claim_semantics import analyze_claim_semantics
-from comqutor_alpha.structure_engine.factor_normalizer import FACTOR_ALIASES, normalize_text
+from comqutor_alpha.structure_engine.factor_normalizer import (
+    FACTOR_ALIASES,
+    _factor_alias_pattern_spans,
+    normalize_text,
+)
 
 # Bump whenever a rule family, guard, or pattern in this module changes in a
 # way that could alter which claims produce a relation candidate -- consumed
@@ -202,7 +206,7 @@ class _Mention:
 
 def _factor_spans(factor: str, text: str) -> list[tuple[int, int]]:
     aliases = (factor, *FACTOR_ALIASES.get(factor, ()))
-    spans = []
+    spans = list(_factor_alias_pattern_spans(factor, text))
     for alias in aliases:
         alias_norm = normalize_text(alias)
         if not alias_norm:

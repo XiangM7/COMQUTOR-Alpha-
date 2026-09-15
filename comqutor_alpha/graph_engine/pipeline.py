@@ -27,6 +27,7 @@ from comqutor_alpha.graph_engine.graph_schema import (
     GRAPH_BUILDER_VERSION,
     GRAPH_SCHEMA_VERSION_V2,
 )
+from comqutor_alpha.graph_engine.issuer_aliases import company_names_for_ticker
 
 
 def _match_relation_details(record: Mapping[str, Any], alpha_id: str) -> dict[str, Any]:
@@ -184,6 +185,14 @@ def score_and_assemble_structure_graph(
         alpha_matches_payload,
         graph_edges=graph.get("edges") or (),
         ticker=graph.get("ticker"),
+        # P1 Evidence Correctness Fix: canonical issuer-name/alias lookup
+        # (graph_engine/issuer_aliases.py) -- previously always omitted,
+        # which silently defaulted to () and made ticker-specificity match
+        # only the bare ticker symbol, never the issuer's real name (see
+        # docs/audit_artifacts/v0_1_3_a102_cross_company_integrity_audit.md).
+        # Returns () for any ticker not in the registry (including QQQ),
+        # a safe no-op that preserves current behavior exactly for those.
+        company_names=company_names_for_ticker(graph.get("ticker")),
         structured_records=structured_records,
         taxonomy=taxonomy,
         run_timestamp=run_timestamp,

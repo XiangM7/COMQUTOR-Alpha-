@@ -1,0 +1,229 @@
+{
+  "schema_version": "v0_1_3_evidence_stance_retry_fix.v1",
+  "scope": "IMPLEMENTATION -- Option C from the prior reliability audit",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "official_alpha_hit": "61.0317%",
+  "executive_summary": {
+    "fix_implemented": true,
+    "target": "evidence_stance_classifier only",
+    "old_retry_budget": 1,
+    "new_retry_budget": 2,
+    "old_max_attempts": 2,
+    "new_max_attempts": 3,
+    "alpha_classifier_changed": false,
+    "structure_extractor_changed": false,
+    "timeout_changed": false,
+    "fallback_changed": false,
+    "alpha_semantics_changed": false,
+    "provider_behavior_changed": "YES -- one task-specific extra retry only",
+    "targeted_tests": "18/18 PASS",
+    "new_regressions": 0,
+    "provider_calls": 0,
+    "ticker_runs": 0,
+    "gold_unchanged": true
+  },
+  "current_retry_semantics_verified": {
+    "loop": "for attempt in range(1, effective_max_retries + 2)",
+    "meaning": "effective_max_retries=1 -> attempts 1,2 (initial attempt + 1 retry = 2 total); effective_max_retries=2 -> attempts 1,2,3 (initial attempt + 2 retries = 3 total)",
+    "off_by_one_check": "Confirmed correct via 18 passing tests, including an explicit third-attempt-success fixture (model.calls==3, provider_attempt_count==3, retry_count==2) and an explicit alpha_classifier negative control (model.calls==2, unaffected)."
+  },
+  "global_ceiling_confirmation": {
+    "MAX_SERVER_RETRIES": 2,
+    "unchanged": true,
+    "evidence_stance_classifier_new_value_relationship_to_ceiling": "EQUALS the ceiling exactly (2), does not exceed it",
+    "code_matches_prior_audit_assumption": true
+  },
+  "implementation": {
+    "production_files_changed": [
+      "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "production_files_changed_count": 1,
+    "mechanism": "New module-level constant EVIDENCE_STANCE_CLASSIFIER_MAX_RETRIES = min(2, MAX_SERVER_RETRIES) and a new function _resolve_task_max_retries(task, default_max_retries) called once, immediately before the existing retry loop in invoke_json_with_trace(). Only this one call site was changed -- the loop body, exception handling, logging, and every other method (including _invoke_json_legacy and invoke_prebuilt_json_prompt) are byte-identical to before.",
+    "component_specific": true,
+    "global_default_changed": false,
+    "resolver_semantics": "task=='evidence_stance_classifier' AND default_max_retries>0 -> max(default_max_retries, 2); otherwise -> default_max_retries unchanged. An explicit default_max_retries==0 is respected as an intentional 'no retries at all' signal and is never raised, even for evidence_stance_classifier.",
+    "design_iteration_note": "An initial unconditional-floor implementation (always return 2 for evidence_stance_classifier regardless of the caller's configured max_retries) was found, via the full backend suite, to break an existing narrow unit test (tests/llm_runtime/test_evidence_stance_classifier_registration.py::test_d_malformed_response_fails_closed_not_a_registry_error) that explicitly constructs a Gateway with max_retries=0 to isolate single-attempt validation-failure behavior. The resolver was corrected to respect an explicit zero, which fixes that regression while leaving the approved production behavior (1->2 at the .env-configured default of 1) unchanged."
+  },
+  "no_timeout_change": {
+    "timeout_seconds_touched": false,
+    "confirmed_by": "no diff to DEFAULT_TIMEOUT_SECONDS, call_with_timeout, or any timeout-related constant"
+  },
+  "no_backoff_change": {
+    "backoff_added": false,
+    "confirmed_by": "no time.sleep/asyncio.sleep added anywhere"
+  },
+  "no_concurrency_change": {
+    "concurrency_touched": false,
+    "confirmed_by": "alpha_mapper.py (the only file with a ThreadPoolExecutor for semantic-critical tasks) was not modified"
+  },
+  "no_model_or_prompt_change": {
+    "model_touched": false,
+    "prompts_touched": false,
+    "confirmed_by": "_TASK_INSTRUCTIONS, _provider_prompt_prefix, and model construction/factory code all untouched"
+  },
+  "no_semantic_fallback_change": {
+    "fallback_value_unchanged": true,
+    "confirmed_by": "test_evidence_stance_exhaustion_produces_exactly_one_semantic_call_record: fallback_used remains True, exactly one persisted record per logical call, identical shape to pre-fix behavior -- only the number of attempts leading up to that fallback changed."
+  },
+  "retryable_error_contract_preserved": {
+    "timeout_retryable": true,
+    "transport_error_retryable": true,
+    "rate_limit_retryable": "unchanged (not exercised as terminal in fixtures, but code path untouched)",
+    "parse_schema_validation_retryable": true,
+    "non_retryable_path_unaffected": "WEEK2_LLM_INPUT_TOO_LARGE (the one pre-loop rejection) is confirmed unaffected -- test_evidence_stance_oversized_payload_unaffected_by_retry_increase shows model.calls==0, provider_attempt_count==0, regardless of the new retry budget.",
+    "no_new_retryable_error_types_introduced": true
+  },
+  "required_tests": {
+    "1_third_attempt_success": "PASS -- test_evidence_stance_third_attempt_success: model.calls=3, retry_count=2, provider_attempt_count=3, validated_output=42, exactly 2 logged failures",
+    "2_full_exhaustion": "PASS -- test_evidence_stance_full_exhaustion_uses_exactly_three_attempts: model.calls=3, validation_accepted=False, exactly 3 logged failures, exactly ONE final orphan record (not 3) confirmed separately via test_evidence_stance_exhaustion_produces_exactly_one_semantic_call_record",
+    "3_transport_retry": "PASS -- test_evidence_stance_transport_error_retries_and_recovers_on_third_attempt: ConnectionError x2 then success, model.calls=3, both failures logged as WEEK2_LLM_TRANSPORT_ERROR",
+    "4_non_retryable_error": "PASS -- test_evidence_stance_oversized_payload_unaffected_by_retry_increase: pre-loop rejection unaffected by retry budget",
+    "5_alpha_classifier_unchanged": "PASS -- test_alpha_classifier_retry_policy_unchanged: model.calls=2 (unaffected by evidence_stance-specific bump), plus test_tsm_a301_historical_fixture_unaffected reconfirms the historical A301 lineage's 2-attempt exhaustion behavior",
+    "6_structure_extractor_unchanged": "PASS -- test_structure_extractor_retry_policy_unchanged: model.calls=2, unaffected",
+    "7_failure_event_counting": "PASS -- exact attempt-number-tagged log lines verified in tests 1-3 above",
+    "8_final_orphan_no_double_count": "PASS -- test_evidence_stance_exhaustion_produces_exactly_one_semantic_call_record: exactly 1 persisted llm_semantic_calls.jsonl record for 3 internal attempts",
+    "9_fallback_value_unchanged": "PASS -- same test, fallback_used=True, same shape as before",
+    "10_tsm_a301_reliability_fixture": "PASS -- test_tsm_a301_historical_fixture_unaffected",
+    "11_provider_health_metrics_consistency": "PASS -- test_evidence_stance_provider_health_metrics_internally_consistent (timeout,timeout,success -> provider_failure_events=2, final_orphans=0, claims_orphaned=0, impacted_alphas=0) and test_provider_health_diagnostics_still_correctly_flags_orphan_after_full_exhaustion (timeout x3 -> provider_failure_events=3, final_orphans=1)",
+    "additional_tests": [
+      "test_resolver_respects_explicit_zero_retries_even_for_evidence_stance",
+      "test_evidence_stance_single_attempt_when_gateway_configured_with_zero_retries",
+      "5 resolver unit tests (evidence_stance=2, alpha_classifier/structure_extractor/other tasks unchanged, constant<=ceiling)"
+    ],
+    "total": "18/18 PASS"
+  },
+  "provider_health_metrics_added": {
+    "added_in_this_task": false,
+    "reasoning": "The prior audit's recommended additions (retry_recovery_count/rate, terminal_error_type, attempts_to_success, orphan_rate_by_component, evidence_stance alpha-attribution) were evaluated against section 18's bounded-only authorization. Adding them properly requires deciding a stable schema/aggregation shape for provider_health_diagnostics.py's public output, which is a small-but-real design decision beyond a strictly mechanical retry-count change -- deferred per section 19's explicit instruction not to solve the non-trivial alpha-attribution gap in this task, and to keep this task narrowly scoped to the approved Option C change only."
+  },
+  "evidence_stance_alpha_attribution": {
+    "solved_in_this_task": false,
+    "reasoning": "Non-trivial per prior audit finding; deferred per task section 19."
+  },
+  "historical_offline_counterfactual": {
+    "methodology": "Checked whether any of the 6 authoritative runs' evidence_stance_classifier final orphans (183 total) have a RECORDED 3rd-attempt outcome to replay.",
+    "finding": "NONE -- max_retries=1 (2 total attempts) was the applied policy for all 7 historical runs (6 authoritative + TSM new validation); no attempt=3 was ever logged for evidence_stance_classifier in any of them.",
+    "classification": "FUTURE_BENEFIT_UNKNOWN for all 183 historical evidence_stance_classifier final orphans -- explicitly NOT classified OBSERVED_RECOVERABLE, since that would require an actually-recorded 3rd-attempt outcome, which does not exist. This audit does not invent one.",
+    "per_run_candidate_counts": {
+      "NVDA": 30,
+      "QQQ": 25,
+      "MSFT": 28,
+      "SNDK": 37,
+      "TSM_OLD": 30,
+      "AMD": 33,
+      "TSM_NEW": 32
+    }
+  },
+  "expected_impact": {
+    "historical_exact_final_orphan_reduction": "UNKNOWN -- not directly observable from historical data (see historical_offline_counterfactual)",
+    "future_expected_direction": "DOWN",
+    "raw_failure_events_expected_direction": "MAY INCREASE (previously-exhausted calls now get one more attempt, each attempt that also fails adds one more raw event) -- this is NOT a regression by itself; primary metrics are final_orphans, orphan_rate_by_component, claims_orphaned_by_provider_failure, impacted_alpha_ids",
+    "latency_expected_direction": "MAY INCREASE for evidence_stance_classifier calls that would otherwise have already failed twice (i.e. only the already-slow tail, not the common case)",
+    "provider_cost_expected_direction": "MAY INCREASE MODESTLY (up to 1 extra call for currently-orphaned evidence_stance_classifier calls only)",
+    "semantic_behavior": "UNCHANGED"
+  },
+  "latency_cost_bound": {
+    "old_max_attempts_per_evidence_stance_call": 2,
+    "new_max_attempts_per_evidence_stance_call": 3,
+    "old_max_wall_clock_seconds_per_call": "2 x 45s = 90s (shared timeout, unchanged)",
+    "new_max_wall_clock_seconds_per_call": "3 x 45s = 135s (shared timeout, unchanged; only attempt count increased)",
+    "incremental_latency_risk": "LOW",
+    "incremental_provider_cost_risk": "LOW",
+    "reasoning": "The increase applies only to calls that would already have failed twice under the old policy (183 across the 6 authoritative runs, i.e. a small fraction of the ~2400 total call budget per run) -- not to the common, already-successful case."
+  },
+  "deferred_items": [
+    "Global timeout changes",
+    "alpha_classifier retry changes",
+    "structure_extractor retry changes",
+    "AMD transport hardening (Option F)",
+    "Concurrency changes",
+    "Evidence-stance Alpha-attribution mechanism (non-trivial, per prior audit)",
+    "MSFT A304 extraction work",
+    "A102 research coverage",
+    "A201 recovery",
+    "New benchmark runs",
+    "Provider Health metric additions (retry_recovery_rate, terminal_error_type, attempts_to_success, orphan_rate_by_component)"
+  ],
+  "future_live_validation_plan_not_executed": {
+    "recommended_ticker": "TSM",
+    "focus_metrics": [
+      "evidence_stance_classifier final orphan count",
+      "evidence_stance_classifier orphan rate",
+      "overall provider_final_orphans_total",
+      "impacted_alpha_ids",
+      "A301 remains non-Provider-impacted (negative control)",
+      "Gold Alpha stability",
+      "Provider cost/latency"
+    ],
+    "success_not_defined_as": "raw failures decreasing",
+    "executed_in_this_task": false
+  },
+  "success_criteria_met": {
+    "evidence_stance_gets_exactly_one_additional_allowed_retry": true,
+    "no_other_task_retry_policy_changed": true,
+    "fallback_unchanged": true,
+    "semantics_unchanged": true,
+    "targeted_tests_pass": "18/18",
+    "p0_p1_pass": "26/26",
+    "provider_health_tests_pass": "32/32",
+    "measurement_tests_pass": "28+18=46/46",
+    "sha_guards_pass": true,
+    "full_backend_new_regressions": 0,
+    "gold_unchanged": true,
+    "no_provider_or_ticker_calls": true
+  },
+  "test_results": {
+    "new_retry_targeted_tests": "18 passed, 0 failed",
+    "p0_p1": "26 passed, 0 failed",
+    "provider_health": "32 passed, 0 failed",
+    "multi_run_reproducibility": "28 passed, 0 failed",
+    "recorder_health_diagnostics": "18 passed, 0 failed",
+    "sha_guard_test_source_integrity": "4 passed, 0 failed (hash updated for week2_llm.py, others unchanged)",
+    "full_backend_suite_before_fix": "23 failed, 4135 passed, 3 errors, 47 skipped (2 NEW regressions found and fixed)",
+    "full_backend_suite_after_fix": "21 failed, 4139 passed, 3 errors, 47 skipped",
+    "baseline": "21 failed, 4121 passed, 3 errors, 47 skipped",
+    "delta_passed": 18,
+    "new_regressions": 0,
+    "regressions_found_and_fixed_during_implementation": [
+      "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline -- fixed by updating the frozen week2_llm.py SHA256 guard to the new, intentionally-changed hash",
+      "tests/llm_runtime/test_evidence_stance_classifier_registration.py::test_d_malformed_response_fails_closed_not_a_registry_error -- fixed by correcting the resolver to respect an explicit max_retries=0"
+    ]
+  },
+  "final_validation": {
+    "production_files_changed": 1,
+    "production_files_changed_list": [
+      "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "test_files_changed": 2,
+    "test_files_changed_list": [
+      "tests/structured_output_shadow/test_source_integrity.py (frozen SHA guard update, required)",
+      "tests/test_evidence_stance_retry_fix.py (new)"
+    ],
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "frozen_ledger_unchanged": true,
+    "official_alpha_hit_unchanged": "61.0317%",
+    "p0_p1_intact": true,
+    "provider_health_intact": true,
+    "measurement_foundation_intact": true,
+    "recorder_diagnostics_intact": true,
+    "old_tsm_ledger_unchanged": true,
+    "new_tsm_not_promoted": true,
+    "timeout_changed": false,
+    "provider_model_changed": false,
+    "prompts_changed": false,
+    "semantic_fallback_changed": false,
+    "thresholds_changed": false,
+    "new_regressions": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0,
+    "tsm_live_validation_executed": false
+  }
+}

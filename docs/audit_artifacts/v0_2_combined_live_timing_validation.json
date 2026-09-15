@@ -1,0 +1,216 @@
+{
+  "schema_version": "v0.2.combined_live_timing_validation.v1",
+  "task": "JOHN_REQUIREMENT_B_FINAL_STEP_COMBINED_LIVE_TIMING_VALIDATION",
+  "status": "FAIL_INCONCLUSIVE_UPSTREAM_FAILURE_NOT_ATTRIBUTABLE_TO_OPTIMIZATION",
+  "repository_safety": {
+    "branch": "comqutor-structure-layer",
+    "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "commits_created": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0,
+    "production_files_changed_this_task": 0,
+    "test_files_changed_this_task": 0,
+    "note": "This task is measurement-only. No source file was edited. Worktree diff footprint is byte-identical to before this task (verified via git diff --stat on the same 5 files re-checked at the end of this task)."
+  },
+  "current_accepted_implementation_snapshot": {
+    "slice1_cache": {
+      "status": "PASS",
+      "scope": "run-local InMemoryLLMResponseCache"
+    },
+    "slice2a_evidence_stance_concurrency": {
+      "status": "PASS",
+      "concurrency": "1 -> 4",
+      "artifact_sha256": "3efb788832c65d836dfe6f2984a002cbbc65db68da1170892725088e02edfb88",
+      "qqq_offline_estimate": {
+        "c1_s": 1604.2,
+        "c4_s": 416.3,
+        "savings_s": 1187.9,
+        "reduction_pct": 74.05
+      }
+    },
+    "slice2b_structured_adapter_concurrency": {
+      "status": "PASS",
+      "concurrency": "1 -> 4",
+      "artifact_sha256": "3e6c01ea101620e9904f283a74f7036094f75d14fa7f0108ffc8ced4bc804b05",
+      "md_sha256": "a5cc32abe542f91db2fe581093e620362846104e8c4e92889ba3d4e941dcb037",
+      "qqq_offline_estimate": {
+        "c1_s": 595.3,
+        "c4_s": 167.0,
+        "savings_s": 428.3,
+        "reduction_pct": 71.95
+      }
+    },
+    "combined_offline_model": {
+      "historical_qqq_total_wall_clock_s": 3141,
+      "historical_semantic_wall_clock_s": 2937.6,
+      "cache_estimated_savings_s": 15,
+      "stance_estimated_savings_s": 1187.9,
+      "adapter_estimated_savings_s": 428.3,
+      "combined_estimated_semantic_wall_clock_s": 1306.4,
+      "combined_estimated_total_wall_clock_s": 1509.8,
+      "combined_estimated_total_run_reduction_pct": 51.93,
+      "label": "These are OFFLINE estimates only. This task measures actual live behavior."
+    }
+  },
+  "environment_effective_configuration": {
+    "cache_enabled": true,
+    "cache_scope": "run-local",
+    "alpha_classifier_concurrency": 4,
+    "evidence_stance_classifier_concurrency": 4,
+    "structured_adapter_concurrency": 4,
+    "structure_extractor_concurrency": "unchanged (no concurrency mechanism exists in structure_extractor.py -- confirmed via source grep, zero matches for 'concurrency' or 'ThreadPoolExecutor')",
+    "alpha_memory_mode": "SHADOW",
+    "activation_modulation_applied": false,
+    "env_var_overrides_checked": {
+      "COMQUTOR_WEEK2_LLM_CONCURRENCY": "unset (default 4 used)",
+      "COMQUTOR_WEEK2_STANCE_CONCURRENCY": "unset (default 4 used)",
+      "COMQUTOR_WEEK2_ADAPTER_CONCURRENCY": "unset (default 4 used)"
+    },
+    "server_restart_required_and_performed": {
+      "reason": "The only running comqutor-api process (PID 27595, port 8000) had been running continuously since 2026-09-10, predating all of Slice 1/2A/2B's code (written in this session, 2026-09-14). Serving the live validation from that stale process would have measured zero optimization effect. Killing PID 27595 was denied by the environment's own auto-mode safety classifier (interfering with a running workload), so a SEPARATE, freshly-started comqutor-api instance (PID 99906) was launched on port 8001 instead, leaving the pre-existing port-8000 process completely untouched.",
+      "preflight_used": "The same same-process readiness check scripts/start_live_comqutor.sh itself uses (server_execution.is_real_tradingagents_enabled / is_week2_llm_enabled / build_live_semantic_readiness), reproduced manually to target port 8001. Preflight passed: REAL=1, WEEK2=1, PROVIDER=1.",
+      "effective_env_on_new_instance": {
+        "COMQUTOR_REAL_TRADINGAGENTS_ENABLED": "true",
+        "COMQUTOR_WEEK2_LLM_ENABLED": "true",
+        "COMQUTOR_REAL_FORCE_REFRESH_ENABLED": "true",
+        "COMQUTOR_API_HOST": "127.0.0.1",
+        "COMQUTOR_API_PORT": "8001"
+      }
+    }
+  },
+  "frozen_authorities_verified_before_and_after": {
+    "v0_2_gold_operational_contract.json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_final_acceptance_table.json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_final_acceptance_closure.json": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "v0_2_six_run_gold_conformance_audit.json": "65c4f51ed6f96d7d15372ae0b99d1f3860eb1925b7b69641751673f0908cb173",
+    "v0_2_invalidation_condition_coverage.json": "9f8605474f27a22e1c61d70c3cfda52702fca2b5d1bcd42a6be0c0afe0523669",
+    "v0_2_semantic_classifier_cost_latency_audit.json": "e9c562bf0c7b02b4430721e44d962274f2fa8a67fae5d4645b9e99fbb62e73b0",
+    "v0_2_semantic_cache_optimization.json": "1053636bdda6c7322c28dd1ea733d2ce978c33619b53ec40820a4af5affee537",
+    "v0_2_evidence_stance_concurrency_optimization.json": "3efb788832c65d836dfe6f2984a002cbbc65db68da1170892725088e02edfb88",
+    "v0_2_structured_adapter_concurrency_optimization.json": "3e6c01ea101620e9904f283a74f7036094f75d14fa7f0108ffc8ced4bc804b05",
+    "all_unchanged": true
+  },
+  "exact_live_request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8001/api/research",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "ticker": "QQQ",
+      "force_refresh": true
+    },
+    "request_timestamp_utc": "2026-09-14T18:31:52Z",
+    "response_timestamp_utc": "2026-09-14T18:31:53Z",
+    "http_status": 202,
+    "response_body": {
+      "run_id": "ac11831d-7a31-4e6f-9ae8-a37bffddd4c0",
+      "ticker": "QQQ",
+      "status": "queued",
+      "run_status": "queued",
+      "stage": "accepted",
+      "cache_disposition": "force_refreshed"
+    },
+    "fresh_ticker_runs_made": 1,
+    "additional_benchmark_runs_made": 0
+  },
+  "fresh_qqq_run_outcome": {
+    "run_id": "ac11831d-7a31-4e6f-9ae8-a37bffddd4c0",
+    "analysis_date": "2026-09-14",
+    "created_at": "2026-09-14T18:31:53.633613+00:00",
+    "started_at": "2026-09-14T18:31:54.431062+00:00",
+    "completed_at": "2026-09-14T18:46:58.088740+00:00",
+    "elapsed_seconds": 903,
+    "final_status": "failed",
+    "error_code": "INTERNAL_ERROR",
+    "exception_type_observed": "ValueError",
+    "progress_at_failure": {
+      "progress_percent": 8,
+      "current_stage": "initializing",
+      "completed_units": 0,
+      "total_units": 15
+    },
+    "output_run_directory_created": false,
+    "run_persisted_bundle_retrievable": false,
+    "note": "GET /api/research/{run_id} returns RUN_NOT_FOUND despite the job-status record showing 'failed' -- consistent with failure occurring before any run directory/bundle was ever created on disk."
+  },
+  "root_cause_analysis": {
+    "method": "Server stdout/stderr log inspection (comqutor_alpha/api/routes_research.py's own except-block logs only the exception TYPE, not a traceback -- exc_info was not requested at that call site), progress-stage-sequence source tracing (comqutor_alpha/research_lifecycle.py:853 calls progress_reporter.record_stage('initializing') exactly once, immediately before invoking the full run_research_request pipeline; progress never advanced past this single stage marker for the entire 903s), and live outbound-connection inspection (lsof on the actual worker process, a multiprocessing.spawn child (PID 110) of the server, showed two CLOSE_WAIT connections to Yahoo Finance hosts (e1/e2.ycpi.vip.sja.yahoo.com) plus one ESTABLISHED HTTPS connection, confirming genuine network activity, not a frozen/deadlocked thread).",
+    "conclusion": "The failure occurred entirely within the pre-semantic-pipeline 'initializing' stage -- i.e. inside TradingAgents' own market-data acquisition/analyst-debate layer, BEFORE any of structured_adapter, alpha_classifier, or evidence_stance_classifier (the three components Slice 1/2A/2B modified) ever executed. 0 semantic Provider calls, 0 cache lookups, and 0 concurrency-managed work of any kind occurred in this run.",
+    "most_likely_specific_cause": "tradingagents/dataflows/market_data_validator.py defines exactly this failure shape for a same-day request: raise ValueError(f'No OHLCV data available for {symbol}.') / raise ValueError(f'No OHLCV rows on or before {curr_date} for {symbol}.'). Combined with the observed Yahoo Finance CLOSE_WAIT connections and the ~900s delay (consistent with retry/backoff before giving up), the most probable explanation is that same-day (2026-09-14, a Monday/normal trading day) OHLCV data for QQQ was not yet available from the market-data provider at the time of this request (mid-session, before the trading day's bar was finalized). This is stated as the most probable cause, not a confirmed one -- the exact ValueError message was not captured because the failure handler does not log exc_info, and this task is explicitly forbidden from making a second live call to reproduce/confirm it.",
+    "attributable_to_slice_1_2a_or_2b": false,
+    "reasoning": "This is a pre-existing, upstream TradingAgents/market-data-acquisition condition, structurally incapable of being caused by any of the three optimization slices: it occurred before the 'initializing' stage ever transitioned to any semantic-pipeline stage, and none of the three slices' code paths (comqutor_alpha/llm_runtime/cache.py, comqutor_alpha/structure_engine/evidence_stance_llm.py, comqutor_alpha/structure_engine/structured_output_adapter.py, comqutor_alpha/structure_engine/week2_llm.py) were ever reached or imported into an active call stack for this run.",
+    "classification": "PRE_EXISTING_UNRELATED_INFRASTRUCTURE_FAILURE"
+  },
+  "concurrency_effect_verification": {
+    "evidence_stance_max_in_flight_observed": null,
+    "structured_adapter_max_in_flight_observed": null,
+    "result": "NOT OBSERVABLE -- the run never reached evidence_stance_classifier or structured_adapter. No llm_semantic_calls.jsonl was ever created for this run (no run directory exists)."
+  },
+  "cache_effect_verification": {
+    "cache_lookups": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "hit_rate": null,
+    "provider_calls_avoided": 0,
+    "result": "NOT OBSERVABLE -- the run never reached the semantic pipeline stage where InMemoryLLMResponseCache is instantiated/used."
+  },
+  "retries_rate_limits": {
+    "http_429_responses": 0,
+    "rate_limit_warnings_observed": 0,
+    "connection_errors_observed": "2 CLOSE_WAIT sockets to Yahoo Finance hosts (ambiguous signal: consistent with either a normal completed short-lived request or a retried/abandoned one; not conclusively a rate-limit event)",
+    "retry_storm_observed": false,
+    "fallback_increase_observed": "not applicable -- no semantic stage reached",
+    "comparison_to_historical_qqq_postfix": "Not meaningfully comparable -- the historical run reached and completed the full pipeline; this run failed before TradingAgents' own output was produced."
+  },
+  "recorder_telemetry_integrity": {
+    "llm_semantic_calls_jsonl_created": false,
+    "call_sequence_valid": "not applicable, file never created",
+    "manifest_created": false,
+    "artifact_completeness": "0/9 -- no run directory was ever created",
+    "concurrent_write_corruption_observed": false
+  },
+  "fresh_v0_2_gold_evaluation": {
+    "applicable": false,
+    "reason": "No claims, no Alpha mapping, no conflict detection occurred -- the run failed before TradingAgents produced any raw_agent_outputs for the semantic pipeline to consume."
+  },
+  "a001_gate_validation": {
+    "applicable": false,
+    "reason": "No fresh evidence was ever produced to evaluate the A001 gate against."
+  },
+  "conflict_diagnostic": {
+    "applicable": false,
+    "fresh_actual_main_conflict": null,
+    "reason": "No structure/conflict detection occurred."
+  },
+  "artifact_completeness": {
+    "expected": "9/9 (or current run-directory equivalent)",
+    "observed": "0/9 -- run directory was never created"
+  },
+  "performance_decision": {
+    "total_wall_clock_reduction_pct": null,
+    "classification": "FAIL",
+    "classification_basis": "Per Section 18's literal thresholds, a run that never produces a completed, comparable timing measurement cannot be scored STRONG_PASS/PASS/MARGINAL_PASS ('no meaningful speed improvement' -- true by default, since no comparable measurement exists). This FAIL reflects an INCONCLUSIVE measurement caused by an upstream, pre-existing TradingAgents/market-data condition -- it is explicitly NOT evidence of a reliability regression, concurrency defect, or telemetry corruption introduced by Slice 1, 2A, or 2B. None of the three slices' code was ever exercised in this run."
+  },
+  "john_requirement_b_closure_decision": {
+    "status": "NOT CLOSED",
+    "reasoning": "Per Section 19's closure rule, closure requires that 'Slice 2A live concurrency is observed' and 'Slice 2B live concurrency is observed' and 'live runtime materially improves' -- none of these could be evaluated because the single authorized live QQQ run failed before reaching the semantic pipeline. This is not a rejection of the three slices' offline evidence (which remains PASS per their own artifacts) -- it is a statement that live confirmation has not yet been obtained.",
+    "per_section_19_fail_branch": "Root cause identified above (most probable: upstream same-day market-data availability in TradingAgents' market_data_validator.py, unrelated to any of the three slices). No code change is proposed in this task, per its measurement-only scope.",
+    "recommended_next_step": "Retry ONE live QQQ combined-timing validation (same scope, same single-run authorization) at a time of day when same-day OHLCV data is confirmed available (e.g. after US market close), or on a subsequent trading day, OR investigate/resolve the TradingAgents market-data-availability condition first as a separate, unrelated task. Do not begin another optimization slice -- Slice 1/2A/2B's offline evidence remains valid and unaffected by this inconclusive live attempt."
+  },
+  "no_code_changes_during_benchmark": {
+    "production_files_changed": 0,
+    "test_files_changed": 0,
+    "tuning_performed": false
+  },
+  "provider_and_execution_authorization": {
+    "provider_calls_authorized": true,
+    "provider_calls_used": "at least 1 (TradingAgents-layer market-data fetch attempts observed via live network connections); 0 confirmed Week2 semantic Provider calls (never reached)",
+    "tradingagents_calls_authorized": true,
+    "tradingagents_calls_used": true,
+    "fresh_ticker_runs_authorized": 1,
+    "fresh_ticker_runs_used": 1,
+    "second_benchmark_run_attempted": false
+  }
+}

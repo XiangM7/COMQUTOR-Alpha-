@@ -1,0 +1,200 @@
+{
+  "schema_version": "v0_1_3_p0_p1_sha_guard_closure.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "previous_state": {
+    "new_regressions": 3,
+    "reason": "Stale frozen SHA256 expectations after the approved v0.1.3 P0/P1 evidence-correctness production change to comqutor_alpha/graph_engine/activation_scorer_v2.py"
+  },
+  "current_state": {
+    "affected_guards_updated_to_current_approved_hash": true,
+    "affected_guard_tests_pass": true,
+    "p0_p1_targeted_tests_pass": true,
+    "backend_new_regressions": 0
+  },
+  "step3_independent_verification": {
+    "methodology": "Directly re-ran the exact 3 previously-reported failing tests in isolation (not relying solely on the prior report) and inspected each AssertionError's expected/actual SHA256 values.",
+    "command": ".venv/bin/python3 -m pytest \"tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched\" \"tests/test_step10_final_e2e_qa.py::test_production_semantic_files_unchanged_during_step10\" \"tests/test_step11_provider_health_rerun.py::test_production_semantic_files_unchanged_during_step11\" -v",
+    "findings": [
+      {
+        "test_file": "tests/test_evidence_review_v2.py",
+        "test_name": "test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/graph_engine/activation_scorer_v2.py]",
+        "assertion": "actual == _STEP8_FROZEN_HASHES[module_path]",
+        "expected_sha256_old": "3cb44fd86d31365068f2e99c75b084fa544a0af8b012ec58b5201027036bac15",
+        "actual_sha256": "c1b0a479a1d06c94811004c2ea62d95598427ea4541e0f770a5d4633e642911e",
+        "protected_file": "comqutor_alpha/graph_engine/activation_scorer_v2.py",
+        "classification": "STALE_BYTE_HASH_GUARD"
+      },
+      {
+        "test_file": "tests/test_step10_final_e2e_qa.py",
+        "test_name": "test_production_semantic_files_unchanged_during_step10",
+        "assertion": "actual == expected, f'{path} hash changed during Step 10'",
+        "expected_sha256_old": "3cb44fd86d31365068f2e99c75b084fa544a0af8b012ec58b5201027036bac15",
+        "actual_sha256": "c1b0a479a1d06c94811004c2ea62d95598427ea4541e0f770a5d4633e642911e",
+        "protected_file": "comqutor_alpha/graph_engine/activation_scorer_v2.py",
+        "classification": "STALE_BYTE_HASH_GUARD"
+      },
+      {
+        "test_file": "tests/test_step11_provider_health_rerun.py",
+        "test_name": "test_production_semantic_files_unchanged_during_step11",
+        "assertion": "actual == expected, f'{path} hash changed during Step 11'",
+        "expected_sha256_old": "3cb44fd86d31365068f2e99c75b084fa544a0af8b012ec58b5201027036bac15",
+        "actual_sha256": "c1b0a479a1d06c94811004c2ea62d95598427ea4541e0f770a5d4633e642911e",
+        "protected_file": "comqutor_alpha/graph_engine/activation_scorer_v2.py",
+        "classification": "STALE_BYTE_HASH_GUARD"
+      }
+    ],
+    "all_three_confirmed_stale_byte_hash_only": true,
+    "all_three_protect_the_same_single_file": true
+  },
+  "step4_stop_condition_check": {
+    "any_failure_not_pure_stale_hash_guard": false,
+    "result": "PASS -- proceeded. All 3 are the identical mechanism (same file, same old->new hash transition)."
+  },
+  "step5_intentional_change_verification": {
+    "methodology": "Reconstructed the exact pre-P0/P1 byte content of activation_scorer_v2.py by programmatically reversing the three known P0 hunks (import, _foreign_issuer_only_reason function, veto-wiring block) from the current file, then diffed the reconstruction against the current file.",
+    "diff_result": "The ONLY delta between the reconstructed pre-P0 file and the current file is exactly: (1) the CANONICAL_ISSUER_ALIASES import, (2) the FOREIGN_ISSUER_NO_TAXONOMY_SIGNAL constant + _foreign_issuer_only_reason() function, (3) the veto-wiring block inside _qualify_groups_for_activation. No other line differs.",
+    "reconstructed_pre_p0_file_sha256": "3cb44fd86d31365068f2e99c75b084fa544a0af8b012ec58b5201027036bac15",
+    "cross_check": "The reconstructed file's SHA256 exactly equals the OLD frozen hash the guards expected -- independent proof the guards were frozen against precisely this pre-P0 state, and the only thing that changed since is the approved P0 patch.",
+    "confirmed_change_is_part_of_approved_p0_p1_implementation": true,
+    "confirmed_change_is_the_foreign_issuer_only_qualification_veto": true,
+    "targeted_p0_p1_tests_pass": "26/26",
+    "known_amd_contamination_removed": "confirmed via test_i_amd_a201_contamination_regression_fixture and test_g_foreign_issuer_only_claim_is_vetoed",
+    "no_unintended_production_diff_beyond_approved_patch": true
+  },
+  "step6_current_approved_sha256": {
+    "methodology": "Computed directly via shasum -a 256 on the current, live working-tree file -- never hard-coded from the task prompt.",
+    "protected_file": "comqutor_alpha/graph_engine/activation_scorer_v2.py",
+    "canonical_new_hash": "c1b0a479a1d06c94811004c2ea62d95598427ea4541e0f770a5d4633e642911e",
+    "note": "All three stale guards protect the same single file, so one canonical new hash was recorded and applied identically to all three."
+  },
+  "step7_guard_updates": {
+    "files_modified": [
+      "tests/test_evidence_review_v2.py",
+      "tests/test_step10_final_e2e_qa.py",
+      "tests/test_step11_provider_health_rerun.py"
+    ],
+    "change_type": "old approved SHA256 -> new approved SHA256, one dict value each, nothing else",
+    "old_value": "3cb44fd86d31365068f2e99c75b084fa544a0af8b012ec58b5201027036bac15",
+    "new_value": "c1b0a479a1d06c94811004c2ea62d95598427ea4541e0f770a5d4633e642911e",
+    "guard_strictness_preserved": true,
+    "not_done": [
+      "test not removed",
+      "test not skipped",
+      "test not xfailed",
+      "equality not weakened",
+      "hash not wildcarded",
+      "multiple hashes not allowed",
+      "guard not made conditional",
+      "byte hash not replaced with semantic-only checking",
+      "no unrelated expected values changed",
+      "no production code changed"
+    ]
+  },
+  "step8_explanatory_comment": {
+    "existing_style_supports_it": true,
+    "comment_added": "v0.1.3 P0/P1 Evidence Correctness Fix: added the foreign-issuer-only evidence-ownership qualification veto (_foreign_issuer_only_reason) and company_names propagation support. Hash updated deliberately for that authorized change -- see tests/test_p0_p1_evidence_correctness_fix.py.",
+    "matches_established_pattern": "Same style as the existing conflict_detector.py / alpha_level_classifier.py entries in the same dicts (short rationale + pointer to the relevant test file)."
+  },
+  "step9_guard_tests_result": {
+    "command": ".venv/bin/python3 -m pytest \"tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/graph_engine/activation_scorer_v2.py]\" \"tests/test_step10_final_e2e_qa.py::test_production_semantic_files_unchanged_during_step10\" \"tests/test_step11_provider_health_rerun.py::test_production_semantic_files_unchanged_during_step11\" -v",
+    "result": "3 passed, 0 failed"
+  },
+  "step10_p0_p1_targeted_tests_result": {
+    "command": ".venv/bin/python3 -m pytest tests/test_p0_p1_evidence_correctness_fix.py -v",
+    "result": "26 passed, 0 failed"
+  },
+  "step11_full_backend_suite": {
+    "command": ".venv/bin/python3 -m pytest tests/ -q",
+    "result": {
+      "passed": 4043,
+      "failed": 21,
+      "errors": 3,
+      "skipped": 47
+    },
+    "comparison_methodology": "Diffed the exact sorted FAILED/ERROR test-name list of this run against the exact sorted FAILED/ERROR list from the pre-P0/P1 reverted-baseline run performed in the prior closure task (both captured from raw pytest -q output) -- byte-for-byte identical, 24 lines each (21 failed + 3 errors).",
+    "PRE_EXISTING_FAILURES": 21,
+    "PRE_EXISTING_ERRORS": 3,
+    "NEW_REGRESSIONS": 0
+  },
+  "step12_pre_existing_failures_untouched": {
+    "confirmed": true,
+    "note": "None of the 21 pre-existing failures or 3 pre-existing errors were modified, fixed, skipped, or otherwise touched by this task. Only the 3 approved stale hash guards were changed."
+  },
+  "step13_test_only_change_verification": {
+    "production_files_changed_by_this_task": 0,
+    "test_baseline_files_changed_by_this_task": [
+      "tests/test_evidence_review_v2.py",
+      "tests/test_step10_final_e2e_qa.py",
+      "tests/test_step11_provider_health_rerun.py"
+    ],
+    "pipeline_py_unchanged_relative_to_task_start": true,
+    "activation_scorer_v2_py_unchanged_relative_to_task_start": true,
+    "issuer_aliases_py_unchanged_relative_to_task_start": true,
+    "test_p0_p1_evidence_correctness_fix_py_unchanged_relative_to_task_start": true,
+    "verification_method": "Direct diff against the exact byte-identical backups preserved from the prior P0/P1 implementation task (scratchpad copies) -- zero differences found in all four files."
+  },
+  "step14_p0_p1_core_behavior_reverification": {
+    "amd_contaminated_a201_claim_does_not_qualify": true,
+    "remaining_confirmed_c1_contamination": 0,
+    "corporate_company_names_propagation_active": {
+      "NVDA": [
+        "NVIDIA",
+        "NVIDIA Corporation"
+      ],
+      "MSFT": [
+        "Microsoft",
+        "Microsoft Corporation"
+      ],
+      "AMD": [
+        "Advanced Micro Devices",
+        "Advanced Micro Devices, Inc.",
+        "Ryzen",
+        "Instinct",
+        "Epyc"
+      ],
+      "TSM": [
+        "TSMC",
+        "Taiwan Semiconductor Manufacturing",
+        "Taiwan Semiconductor Manufacturing Company",
+        "Taiwan Semiconductor"
+      ],
+      "SNDK": [
+        "SanDisk",
+        "SanDisk Corporation"
+      ],
+      "QQQ": []
+    },
+    "sndk_a102_negative_control_still_passes": true,
+    "qqq_etf_behavior_unchanged": true,
+    "method": "Reconfirmed via existing deterministic tests/artifacts only (test_p0_p1_evidence_correctness_fix.py's 26 tests, direct issuer_aliases.py inspection) -- no ticker runs, no Provider/TradingAgents calls."
+  },
+  "step15_benchmark_hashes_reverified": {
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+    "both_unchanged": true
+  },
+  "final_acceptance": {
+    "p0_p1_closure_status": "CLOSED PASS",
+    "all_conditions_met": {
+      "three_failures_confirmed_pure_stale_sha_guards": true,
+      "no_guard_removed_or_weakened": true,
+      "all_three_updated_guard_tests_pass": true,
+      "p0_p1_targeted_tests_still_pass": true,
+      "full_backend_comparison_shows_new_regressions_0": true,
+      "production_files_unchanged_during_closure_task": true,
+      "gold_hashes_unchanged": true,
+      "no_ticker_provider_ta_runs": true
+    }
+  }
+}

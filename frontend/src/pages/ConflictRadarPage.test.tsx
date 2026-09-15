@@ -480,7 +480,7 @@ describe("ConflictRadarPage", () => {
     const candidateSection = screen.getByText("Candidate and rejected pairs").closest("section");
     expect(candidateSection).not.toBeNull();
     expect(candidateSection!.textContent).toContain("A101 vs A304");
-    expect(candidateSection!.textContent).toContain("Candidate conflict");
+    expect(candidateSection!.textContent).toContain("Potential conflict");
     // The strict invariant: no candidate section content ever claims Main
     // Conflict status, however it is capitalized/worded.
     expect(candidateSection!.textContent).not.toMatch(/main conflict/i);
@@ -557,6 +557,6 @@ describe("ConflictRadarPage", () => {
     // removed just because there is no admitted conflict to show.
     expect(screen.getByText("Candidate and rejected pairs")).toBeInTheDocument();
     expect(screen.getByText("A101 vs A304")).toBeInTheDocument();
-    expect(screen.getByText("Candidate conflict")).toBeInTheDocument();
+    expect(screen.getByText("Potential conflict")).toBeInTheDocument();
   });
 });

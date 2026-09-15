@@ -1,0 +1,340 @@
+{
+  "schema_version": "alpha_memory_feedback_loop_proof.v2",
+  "mode": "shadow",
+  "tickers": {
+    "NVDA": {
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "mode": "shadow",
+      "activation_modulation_applied": false,
+      "identity_model": "atomic_edge_phi",
+      "identity_version": "alpha_memory.phi_edge.v1",
+      "current_phi_count": 9,
+      "recurring_phi_count": 4,
+      "first_seen_phi_count": 5,
+      "prior_observation_total": 9,
+      "num_alphas_in_summary": 6,
+      "recurring_relations": [
+        {
+          "alpha_id": "A103",
+          "source": "ai_capex",
+          "edge_type": "causal",
+          "target": "gpu_demand",
+          "phi_id": "5e6e301580715fb53d7818c4940ee6e5ac55da6f7ad5c7a479b82043c56e04de",
+          "prior_run_ids": [
+            "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d",
+            "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+            "e3eb3909-3744-4a02-9b32-b225cf6ef665"
+          ],
+          "prior_observation_count": 3,
+          "first_seen": "2026-08-11T23:02:05Z",
+          "last_seen_prior": "2026-09-02T17:55:08Z",
+          "current_seen_at": "2026-09-04T00:31:19Z"
+        },
+        {
+          "alpha_id": "A103",
+          "source": "inference_demand",
+          "edge_type": "supportive",
+          "target": "nvda_revenue_growth",
+          "phi_id": "f0e3fc6c1617e5604104c0a485e92a53c71b0968935433179432bce6a00aac52",
+          "prior_run_ids": [
+            "948be419-b542-4096-a536-ff567ef459c2"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-27T23:40:28Z",
+          "last_seen_prior": "2026-08-27T23:40:28Z",
+          "current_seen_at": "2026-09-04T00:31:19Z"
+        },
+        {
+          "alpha_id": "A301",
+          "source": "gpu_demand",
+          "edge_type": "causal",
+          "target": "nvda_revenue_growth",
+          "phi_id": "aa4cdc017acc0196552d3c33e86e4b6a2955c3c66bdab042bc18f18b5d618a2c",
+          "prior_run_ids": [
+            "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d",
+            "a8d47429-a47a-446b-93c4-dd718b8e2ff9"
+          ],
+          "prior_observation_count": 2,
+          "first_seen": "2026-08-28T21:53:44Z",
+          "last_seen_prior": "2026-09-02T17:55:08Z",
+          "current_seen_at": "2026-09-04T00:31:19Z"
+        },
+        {
+          "alpha_id": "A304",
+          "source": "valuation_risk",
+          "edge_type": "conflicting",
+          "target": "nvda_revenue_growth",
+          "phi_id": "4f29404671e4e828f58d675f3d0e750f1a1e7fefc33fcc87d985218624528f4e",
+          "prior_run_ids": [
+            "948be419-b542-4096-a536-ff567ef459c2",
+            "a8d47429-a47a-446b-93c4-dd718b8e2ff9",
+            "e3eb3909-3744-4a02-9b32-b225cf6ef665"
+          ],
+          "prior_observation_count": 3,
+          "first_seen": "2026-08-11T23:02:05Z",
+          "last_seen_prior": "2026-08-28T21:53:44Z",
+          "current_seen_at": "2026-09-04T00:31:19Z"
+        }
+      ]
+    },
+    "QQQ": {
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "mode": "shadow",
+      "activation_modulation_applied": false,
+      "identity_model": "atomic_edge_phi",
+      "identity_version": "alpha_memory.phi_edge.v1",
+      "current_phi_count": 8,
+      "recurring_phi_count": 2,
+      "first_seen_phi_count": 6,
+      "prior_observation_total": 2,
+      "num_alphas_in_summary": 4,
+      "recurring_relations": [
+        {
+          "alpha_id": "A304",
+          "source": "valuation_risk",
+          "edge_type": "conflicting",
+          "target": "qqq_revenue_growth",
+          "phi_id": "23a08d2e4f20634fe0eeaef2eb065a9e6a25278ddc0f0af0726c7a48f4ce14e2",
+          "prior_run_ids": [
+            "a364e0ee-3bb4-4032-88b7-5cd82e379805"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-07-31T21:35:04Z",
+          "last_seen_prior": "2026-07-31T21:35:04Z",
+          "current_seen_at": "2026-09-04T18:22:47Z"
+        },
+        {
+          "alpha_id": "A501",
+          "source": "recession_risk",
+          "edge_type": "conflicting",
+          "target": "qqq_revenue_growth",
+          "phi_id": "d7505be9a04caa9cf6eef65881e1179b46a5932733be645c9335c1f000681f7f",
+          "prior_run_ids": [
+            "a364e0ee-3bb4-4032-88b7-5cd82e379805"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-07-31T21:35:04Z",
+          "last_seen_prior": "2026-07-31T21:35:04Z",
+          "current_seen_at": "2026-09-04T18:22:47Z"
+        }
+      ]
+    },
+    "MSFT": {
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "mode": "shadow",
+      "activation_modulation_applied": false,
+      "identity_model": "atomic_edge_phi",
+      "identity_version": "alpha_memory.phi_edge.v1",
+      "current_phi_count": 7,
+      "recurring_phi_count": 2,
+      "first_seen_phi_count": 5,
+      "prior_observation_total": 2,
+      "num_alphas_in_summary": 3,
+      "recurring_relations": [
+        {
+          "alpha_id": "A001",
+          "source": "rate_cut_cycle",
+          "edge_type": "conflicting",
+          "target": "valuation_risk",
+          "phi_id": "7cf5789e65c8f5535c03789c49de221aecf0fbe53bfddd81d1cb6a92bcb44b3f",
+          "prior_run_ids": [
+            "6cd2566d-e0f1-4306-995f-74f39efb21eb"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-28T22:44:38Z",
+          "last_seen_prior": "2026-08-28T22:44:38Z",
+          "current_seen_at": "2026-09-04T20:20:34Z"
+        },
+        {
+          "alpha_id": "A102",
+          "source": "ai_demand",
+          "edge_type": "supportive",
+          "target": "msft_revenue_growth",
+          "phi_id": "8e953bce87a7e8cfaed041d323e862725ce0d888cc192b09228782fe8c5b9bd3",
+          "prior_run_ids": [
+            "6cd2566d-e0f1-4306-995f-74f39efb21eb"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-28T22:44:38Z",
+          "last_seen_prior": "2026-08-28T22:44:38Z",
+          "current_seen_at": "2026-09-04T20:20:34Z"
+        }
+      ]
+    },
+    "SNDK": {
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "mode": "shadow",
+      "activation_modulation_applied": false,
+      "identity_model": "atomic_edge_phi",
+      "identity_version": "alpha_memory.phi_edge.v1",
+      "current_phi_count": 14,
+      "recurring_phi_count": 3,
+      "first_seen_phi_count": 11,
+      "prior_observation_total": 3,
+      "num_alphas_in_summary": 6,
+      "recurring_relations": [
+        {
+          "alpha_id": "A201",
+          "source": "ai_demand",
+          "edge_type": "causal",
+          "target": "semiconductor_cycle",
+          "phi_id": "b062c42aab87a51edbb0751026162e8ce0c4b9e7bf174a05f7dcf6d7e431da3a",
+          "prior_run_ids": [
+            "519c93f4-7fcd-4879-9ca9-dd65badc0fb8"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-28T17:38:34Z",
+          "last_seen_prior": "2026-08-28T17:38:34Z",
+          "current_seen_at": "2026-09-04T21:53:49Z"
+        },
+        {
+          "alpha_id": "A201",
+          "source": "semiconductor_cycle",
+          "edge_type": "causal",
+          "target": "sndk_revenue_growth",
+          "phi_id": "c9823784fee4cf2ce8569627f6cdf93d066262175ecbe2065ee0dd9bd6932859",
+          "prior_run_ids": [
+            "519c93f4-7fcd-4879-9ca9-dd65badc0fb8"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-28T17:38:34Z",
+          "last_seen_prior": "2026-08-28T17:38:34Z",
+          "current_seen_at": "2026-09-04T21:53:49Z"
+        },
+        {
+          "alpha_id": "A201",
+          "source": "valuation_risk",
+          "edge_type": "conflicting",
+          "target": "sndk_revenue_growth",
+          "phi_id": "a171d79cc4abe6461bb30245aa2166c870d82a272a19189103dd8f067c25f470",
+          "prior_run_ids": [
+            "519c93f4-7fcd-4879-9ca9-dd65badc0fb8"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-28T17:38:34Z",
+          "last_seen_prior": "2026-08-28T17:38:34Z",
+          "current_seen_at": "2026-09-04T21:53:49Z"
+        }
+      ]
+    },
+    "TSM": {
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "mode": "shadow",
+      "activation_modulation_applied": false,
+      "identity_model": "atomic_edge_phi",
+      "identity_version": "alpha_memory.phi_edge.v1",
+      "current_phi_count": 9,
+      "recurring_phi_count": 2,
+      "first_seen_phi_count": 7,
+      "prior_observation_total": 3,
+      "num_alphas_in_summary": 6,
+      "recurring_relations": [
+        {
+          "alpha_id": "A201",
+          "source": "ai_capex",
+          "edge_type": "causal",
+          "target": "semiconductor_cycle",
+          "phi_id": "b5d82b8838c4d4707a87de980bc63783b54e3c2bdc80602f57ff1f6a195abb42",
+          "prior_run_ids": [
+            "1a338ced-118e-44d2-b3f6-2444bfb9d7e6"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-03T17:04:40Z",
+          "last_seen_prior": "2026-08-03T17:04:40Z",
+          "current_seen_at": "2026-09-06T20:07:22Z"
+        },
+        {
+          "alpha_id": "A304",
+          "source": "valuation_risk",
+          "edge_type": "conflicting",
+          "target": "tsm_revenue_growth",
+          "phi_id": "4dce6eb7e81f20ad4a9d96a19e18ebfceb86c6b638314ac9d4007491fad03e57",
+          "prior_run_ids": [
+            "0a44ec41-c181-488d-94b8-00a333e85ddb",
+            "1a338ced-118e-44d2-b3f6-2444bfb9d7e6"
+          ],
+          "prior_observation_count": 2,
+          "first_seen": "2026-08-03T17:04:40Z",
+          "last_seen_prior": "2026-08-28T23:37:10Z",
+          "current_seen_at": "2026-09-06T20:07:22Z"
+        }
+      ]
+    },
+    "AMD": {
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "mode": "shadow",
+      "activation_modulation_applied": false,
+      "identity_model": "atomic_edge_phi",
+      "identity_version": "alpha_memory.phi_edge.v1",
+      "current_phi_count": 10,
+      "recurring_phi_count": 3,
+      "first_seen_phi_count": 7,
+      "prior_observation_total": 3,
+      "num_alphas_in_summary": 6,
+      "recurring_relations": [
+        {
+          "alpha_id": "A101",
+          "source": "ai_capex",
+          "edge_type": "causal",
+          "target": "gpu_demand",
+          "phi_id": "df12c6cc4cc330e0ebbacc1204eb84c9006f5b9a515c688e24dcb8b9ef4d15e4",
+          "prior_run_ids": [
+            "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-28T18:33:48Z",
+          "last_seen_prior": "2026-08-28T18:33:48Z",
+          "current_seen_at": "2026-09-06T23:12:29Z"
+        },
+        {
+          "alpha_id": "A101",
+          "source": "ai_demand",
+          "edge_type": "causal",
+          "target": "amd_revenue_growth",
+          "phi_id": "2bc9800c559c20795683be4f3e24f2ef5075a8f01dbeee29952edd1560f807f8",
+          "prior_run_ids": [
+            "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-08-28T18:33:48Z",
+          "last_seen_prior": "2026-08-28T18:33:48Z",
+          "current_seen_at": "2026-09-06T23:12:29Z"
+        },
+        {
+          "alpha_id": "A304",
+          "source": "ai_demand",
+          "edge_type": "causal",
+          "target": "valuation_risk",
+          "phi_id": "d546f813ac07c72a6408714ac39f7d8369249113b6307ecda47f70e11fa492e3",
+          "prior_run_ids": [
+            "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6"
+          ],
+          "prior_observation_count": 1,
+          "first_seen": "2026-07-31T18:12:36Z",
+          "last_seen_prior": "2026-07-31T18:12:36Z",
+          "current_seen_at": "2026-09-06T23:12:29Z"
+        }
+      ]
+    }
+  },
+  "strongest_recurrence_example": {
+    "ticker": "NVDA",
+    "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "recurring_count": 4
+  },
+  "lifecycle_scope_statement": {
+    "activation_modulation": "NOT IMPLEMENTED -- activation_modulation_applied is hardcoded false in code, not merely false by data coincidence.",
+    "conflict_modulation": "NOT IMPLEMENTED -- Alpha Memory has zero code path into conflict_detector.py.",
+    "invalidation": "NOT IMPLEMENTED -- MODEL 0, confirmed by Step 4A executability audit (0 of 30 taxonomy invalidation conditions executable from current data).",
+    "expiry": "NOT IMPLEMENTED.",
+    "failed_or_non_execution_modulation": "NOT IMPLEMENTED.",
+    "lifecycle_model": "MODEL 0"
+  },
+  "end_to_end_chain_proved": [
+    "1. persisted historical runs (outputs/runs/<run_id>/structure_graph.json + tradingagents_comqutor_vocabulary_snapshot.json) exist on disk from real, previously-completed research runs.",
+    "2. stable atomic edge phi identity (comqutor_alpha/memory/phi_identity.py::compute_phi_edges) computes one phi_id per (ticker, alpha_id, taxonomy_version, taxonomy_sha256, source, edge_type, target) via sha256 of canonical JSON -- no runtime hash(), no timestamps/UUIDs in the identity.",
+    "3. exact cross-run matching (comqutor_alpha/memory/history_reader.py::find_prior_phi_edge_observations) finds prior runs sharing the exact same phi_id for this ticker, filtered by artifact_manifest-based run eligibility -- no fuzzy/embedding/equivalence-table matching anywhere.",
+    "4. recurrence observation (history_reader.py::summarize_phi_edge_history) computes is_recurring = prior_observation_count >= 1, plus first_seen/last_seen_prior/current_seen_at from real timestamps.",
+    "5. run_audit/API visibility: the same alpha_memory section is written into run_audit.json at pipeline-completion time AND surfaced verbatim via GET /api/research/{run_id}'s alpha_memory field (routes_research.py), confirmed byte-identical to the on-disk artifact for all six selected runs."
+  ]
+}

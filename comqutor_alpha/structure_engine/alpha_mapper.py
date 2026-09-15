@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
-from typing import Any
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, TypeVar
 
 from comqutor_alpha.alpha_library.alpha_loader import build_keyword_index, load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
@@ -20,7 +21,9 @@ from comqutor_alpha.structure_engine.claim_quality import (
 from comqutor_alpha.structure_engine.claim_semantics import (
     OPPORTUNITY_ALPHA_IDS,
     RISK_ALPHA_IDS,
+    alpha_positive_requirement_satisfied,
     alpha_relation,
+    alpha_specific_invalidation_matched,
     analyze_claim_semantics,
     semantic_score_for_relation,
 )
@@ -36,7 +39,7 @@ from comqutor_alpha.structure_engine.factor_normalizer import (
     term_in_text,
 )
 from comqutor_alpha.structure_engine.structure_schema import clamp_score, normalize_direction
-from comqutor_alpha.structure_engine.week2_llm import call_with_timeout
+from comqutor_alpha.structure_engine.week2_llm import call_with_timeout, resolve_alpha_classifier_concurrency
 
 SCHEMA_VERSION = "week2.alpha_matches.v2"
 MAPPER_VERSION = "week2.alpha_mapper.v2"
@@ -44,6 +47,22 @@ DEFAULT_MIN_MATCH_SCORE = 0.35
 DEFAULT_AMBIGUITY_DELTA = 0.14
 DEFAULT_SECONDARY_DELTA = 0.25
 DEFAULT_CLASSIFIER_TIMEOUT_SECONDS = 5.0
+# Step 5A execution-capacity repair: bounded batch size for the Pure-LLM
+# alpha_classifier_batch task (comqutor_alpha.structure_engine.week2_llm).
+# Revised down from an initial 40 to 15 after a real controlled-Provider
+# validation against QQQ (874 claims, docs/audit_artifacts/
+# week2_runtime_capacity_repair_v0.1.2.1.md) showed batch=40 only completed
+# within the 45s timeout for 5/22 batches (200/874 = 22.9% coverage,
+# WEEK2_LLM_TIMEOUT on the rest) -- a semantic decision per claim requires
+# real completion-token generation for each item in the batch, so larger
+# batches take proportionally longer wall-clock time to finish, unlike the
+# lighter entities/factors-only claim_batch_enrichment task
+# (LLM_CLAIM_BATCH_SIZE=64) this was originally sized to match. 15 is small
+# enough that even DeepSeek's slower single-claim tail latency (p90 ~3.5s
+# per claim, Step-4 evidence) stays comfortably inside the timeout. Must
+# stay in sync with week2_llm.ALPHA_CLASSIFIER_BATCH_SIZE, which duplicates
+# this value only for its own call-budget formula math.
+ALPHA_CLASSIFIER_BATCH_SIZE = 15
 
 POSITIVE_ALPHA_IDS = OPPORTUNITY_ALPHA_IDS
 
@@ -348,6 +367,31 @@ def _alpha_taxonomy_request_block(taxonomy: Mapping[str, AlphaDefinition]) -> li
 # operational failure (disabled, unavailable, timeout, malformed/invalid
 # output, unknown Alpha ID, provider error) returns outcome="unavailable",
 # never a deterministic Alpha standing in as the semantic answer.
+# Step 5A Section 10/11: the gateway trace path (Week2LLMGateway.
+# invoke_json_with_trace) already distinguishes WHY a call failed
+# (invocation.error_code), but until this repair every non-accepted outcome
+# was collapsed to the single fallback_reason "invalid_output" regardless of
+# cause -- the exact defect that made a 98%-UNAVAILABLE run indistinguishable
+# from a handful of real malformed responses. This maps the gateway's own
+# error taxonomy onto a stable, still-UNAVAILABLE-only fallback_reason
+# vocabulary (never NONE, never a deterministic stand-in -- see
+# _classify_alpha_with_llm's Pure-LLM-authority docstring above).
+_GATEWAY_ERROR_CODE_TO_FALLBACK_REASON: dict[str, str] = {
+    "WEEK2_LLM_TIMEOUT": "provider_timeout",
+    "WEEK2_LLM_CALL_BUDGET_EXHAUSTED": "call_budget_exhausted",
+    "WEEK2_LLM_RATE_LIMIT": "provider_rate_limited",
+    "WEEK2_LLM_TRANSPORT_ERROR": "provider_error",
+    "WEEK2_LLM_PROVIDER_ERROR": "provider_error",
+    "WEEK2_LLM_INVALID_JSON": "invalid_output",
+    "WEEK2_LLM_VALIDATION_FAILED": "invalid_output",
+    "WEEK2_LLM_INPUT_TOO_LARGE": "input_too_large",
+}
+
+
+def _gateway_error_to_fallback_reason(error_code: str | None) -> str:
+    return _GATEWAY_ERROR_CODE_TO_FALLBACK_REASON.get(error_code or "", "invalid_output")
+
+
 def _classify_alpha_with_llm(
     record: Mapping[str, Any],
     taxonomy: Mapping[str, AlphaDefinition],
@@ -417,7 +461,7 @@ def _classify_alpha_with_llm(
                             invocation.error_code or "WEEK2_LLM_ALPHA_CLASSIFIER_FALLBACK"
                         ),
                     )
-                    response = None
+                    return _unavailable(_gateway_error_to_fallback_reason(invocation.error_code))
             if response is None:
                 return _unavailable("invalid_output")
         else:
@@ -446,6 +490,180 @@ def _classify_alpha_with_llm(
 
     return _unavailable("invalid_output")
 
+
+_ChunkItem = TypeVar("_ChunkItem")
+
+
+def _chunk_records(items: list[_ChunkItem], batch_size: int) -> list[list[_ChunkItem]]:
+    return [items[start : start + batch_size] for start in range(0, len(items), batch_size)]
+
+
+def _stable_claim_id(record: Mapping[str, Any], fallback_index: int) -> str:
+    return str(record.get("claim_id") or record.get("agent_output_id") or f"__record_index_{fallback_index}__")
+
+
+def _classify_alpha_batch_with_llm(
+    claim_id_record_pairs: list[tuple[str, Mapping[str, Any]]],
+    taxonomy: Mapping[str, AlphaDefinition],
+    llm_gateway: Any,
+) -> dict[str, dict[str, Any]]:
+    """Batched sibling of ``_classify_alpha_with_llm`` (Step 5A execution-
+    capacity repair): one Provider call classifies up to
+    ``ALPHA_CLASSIFIER_BATCH_SIZE`` claims at once, against the IDENTICAL
+    semantic decision criteria (week2_llm.py's ``alpha_classifier_batch``
+    prompt is copied verbatim from ``alpha_classifier`` v3 -- only the I/O
+    envelope changed, one claim per call -> many claims per call). Returns
+    one outcome dict per claim_id, in the exact shape
+    ``_classify_alpha_with_llm`` returns, so ``map_claim_to_alpha`` can
+    consume either interchangeably via ``llm_outcome_override``.
+
+    Row-level validation salvage (Section 6): a single malformed decision
+    item does not invalidate the whole batch -- only that claim_id is left
+    at its ``unavailable``/``invalid_output`` default while every other,
+    well-formed row in the same batch is still accepted. Only a
+    fundamentally malformed response (not an object, missing the decisions
+    array, wrong length) invalidates the whole batch, because in that case
+    no row can safely be attributed to any specific claim_id. No row may
+    ever inherit another row's answer -- results are built into a fresh,
+    per-claim_id dict, never merged/overwritten across rows.
+    """
+    allowed_ids = set(taxonomy)
+    claim_ids = [claim_id for claim_id, _ in claim_id_record_pairs]
+    id_to_record: dict[str, Mapping[str, Any]] = dict(claim_id_record_pairs)
+    request_claims: list[dict[str, Any]] = [
+        {
+            "claim_id": claim_id,
+            "claim": str(record.get("claim") or ""),
+            "evidence": str(record.get("evidence") or ""),
+            "ticker": str(record.get("ticker") or ""),
+            "factors": _record_factors(record),
+            "direction": normalize_direction(record.get("direction")),
+        }
+        for claim_id, record in claim_id_record_pairs
+    ]
+    request = {"alpha_taxonomy": _alpha_taxonomy_request_block(taxonomy), "claims": request_claims}
+
+    def _row_unavailable(reason: str) -> dict[str, Any]:
+        return {"outcome": "unavailable", "alpha_id": None, "fallback_reason": reason, "diagnostic": _classifier_metadata(True, reason, used=True)}
+
+    def validate_response(payload: Any) -> dict[str, dict[str, Any]]:
+        if not isinstance(payload, Mapping) or set(payload) != {"decisions"}:
+            raise ValueError("batch classifier response has unexpected top-level fields")
+        decisions = payload.get("decisions")
+        if not isinstance(decisions, list) or len(decisions) != len(request_claims):
+            raise ValueError("decisions count must match input claim count exactly")
+
+        results: dict[str, dict[str, Any]] = {cid: _row_unavailable("invalid_output") for cid in claim_ids}
+        seen: set[str] = set()
+        for item in decisions:
+            if not isinstance(item, Mapping) or set(item) != {"claim_id", "decision", "selected_alpha_id"}:
+                continue  # row-level: unidentifiable/malformed row, leave its (or any) claim_id at the default
+            claim_id = item.get("claim_id")
+            if not isinstance(claim_id, str) or claim_id not in id_to_record or claim_id in seen:
+                continue  # row-level: unknown/duplicate claim_id, never overwrite another row's answer
+            seen.add(claim_id)
+            decision = str(item.get("decision") or "").strip().lower()
+            selected_alpha_id = item.get("selected_alpha_id")
+            if decision == "none":
+                if selected_alpha_id in (None, ""):
+                    results[claim_id] = {"outcome": "none", "alpha_id": None, "fallback_reason": None, "diagnostic": _classifier_metadata(True, "llm_none", used=True)}
+                continue  # else: malformed (none + non-null alpha_id) -- leave at unavailable default
+            if decision == "select":
+                selected_alpha_id = str(selected_alpha_id or "").strip()
+                if selected_alpha_id in allowed_ids:
+                    results[claim_id] = {"outcome": "selected", "alpha_id": selected_alpha_id, "fallback_reason": None, "diagnostic": _classifier_metadata(True, "llm_selected", used=True)}
+                else:
+                    results[claim_id] = _row_unavailable("invalid_alpha_id")
+                continue
+            # else: unrecognized decision value -- leave at unavailable default
+        return results
+
+    if not callable(getattr(llm_gateway, "invoke_json_with_trace", None)):
+        # No batching capability on this gateway -- caller must not route
+        # here for such a gateway; fail closed per-claim rather than guess.
+        return {cid: _row_unavailable("unavailable") for cid in claim_ids}
+
+    invocation = llm_gateway.invoke_json_with_trace("alpha_classifier_batch", request, validate_response)
+    if invocation.validation_accepted:
+        llm_gateway.finalize_semantic_invocation(invocation, accepted=True)
+        return invocation.validated_output
+    llm_gateway.finalize_semantic_invocation(
+        invocation,
+        accepted=False,
+        fallback_reason=(invocation.error_code or "WEEK2_LLM_ALPHA_CLASSIFIER_BATCH_FALLBACK"),
+    )
+    reason = _gateway_error_to_fallback_reason(invocation.error_code)
+    return {cid: _row_unavailable(reason) for cid in claim_ids}
+
+
+def _classify_alpha_concurrent_with_llm(
+    claim_id_record_pairs: list[tuple[str, Mapping[str, Any]]],
+    taxonomy: Mapping[str, AlphaDefinition],
+    classifier: Callable[..., Mapping[str, Any]] | None,
+    classifier_enabled: bool,
+    timeout_seconds: float,
+    llm_gateway: Any,
+    concurrency: int,
+) -> dict[str, dict[str, Any]]:
+    """Step 5A Section 4 (multi-claim batching DEFERRED for v0.1.2.1 -- see
+    docs/audit_artifacts/week2_runtime_capacity_repair_v0.1.2.1.md): the
+    proven-reliable semantic unit is restored -- one claim, the FULL
+    canonical taxonomy, one LLM call. Execution capacity instead comes from
+    running independent single-claim calls with bounded concurrency, never
+    from combining claims into one request.
+
+    Safety (Section 5), verified against the existing architecture rather
+    than assumed:
+    - One claim_id maps to exactly one final result: results are collected
+      into a dict keyed by claim_id, never by list position or completion
+      order.
+    - No cross-claim state: each worker calls ``_classify_alpha_with_llm``
+      with its own independent ``record``/request: nothing is shared or
+      mutated across calls.
+    - Week2LLMGateway._reserve_call (the shared call-budget counter) and
+      ._log (the shared error-log writer) are both protected by the
+      gateway's own ``threading.Lock`` (see week2_llm.py), so concurrent
+      workers cannot overshoot the budget, double-count it, or corrupt the
+      shared error log -- verified by reading that code, not assumed.
+    - Retry budget is not multiplied by concurrency: each worker's own
+      ``invoke_json_with_trace`` call performs its OWN bounded retry loop,
+      each attempt independently reserving one unit of the SAME shared,
+      lock-protected counter -- concurrency changes only how many
+      claims are in flight at once, never how many attempts any one claim
+      gets.
+    - No cancellation-on-first-failure: every submitted claim runs to
+      completion (success or its own failure) independently; one claim's
+      timeout/error never discards another claim's already-completed
+      result.
+    """
+    if concurrency <= 1 or len(claim_id_record_pairs) <= 1:
+        return {
+            claim_id: _classify_alpha_with_llm(
+                record, taxonomy, classifier, classifier_enabled, timeout_seconds, llm_gateway
+            )
+            for claim_id, record in claim_id_record_pairs
+        }
+
+    results: dict[str, dict[str, Any]] = {}
+    with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="comqutor-alpha-classifier") as executor:
+        future_to_claim_id = {
+            executor.submit(
+                _classify_alpha_with_llm,
+                record,
+                taxonomy,
+                classifier,
+                classifier_enabled,
+                timeout_seconds,
+                llm_gateway,
+            ): claim_id
+            for claim_id, record in claim_id_record_pairs
+        }
+        for future in as_completed(future_to_claim_id):
+            claim_id = future_to_claim_id[future]
+            results[claim_id] = future.result()
+    return results
+
+
 # Map a structured claim record to the best matching alpha definition, returning a detailed match result.
 def map_claim_to_alpha(
     record: Mapping[str, Any],
@@ -457,7 +675,14 @@ def map_claim_to_alpha(
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
     llm_gateway: Any = None,
+    llm_outcome_override: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """``llm_outcome_override`` (Step 5A): when supplied, this claim's LLM
+    semantic outcome was already computed by a batched call
+    (``_classify_alpha_batch_with_llm``) -- skip the single-claim
+    ``_classify_alpha_with_llm`` call entirely and use the override
+    directly. ``None`` (the default) preserves the exact original
+    single-call-per-claim behavior for every existing caller."""
     taxonomy = taxonomy or load_alpha_taxonomy()
     text = _record_text(record)
     keyword_matches = _indexed_keyword_matches(text, build_keyword_index(taxonomy))
@@ -545,14 +770,17 @@ def map_claim_to_alpha(
     deterministic_top_alpha = matched_alpha
     deterministic_match_status = status
 
-    llm_outcome = _classify_alpha_with_llm(
-        record,
-        taxonomy,
-        classifier,
-        classifier_enabled or llm_gateway is not None,
-        classifier_timeout_seconds,
-        llm_gateway,
-    )
+    if llm_outcome_override is not None:
+        llm_outcome = llm_outcome_override
+    else:
+        llm_outcome = _classify_alpha_with_llm(
+            record,
+            taxonomy,
+            classifier,
+            classifier_enabled or llm_gateway is not None,
+            classifier_timeout_seconds,
+            llm_gateway,
+        )
     if llm_outcome["outcome"] == "selected":
         alpha = taxonomy[llm_outcome["alpha_id"]]
         status = "matched"
@@ -575,6 +803,78 @@ def map_claim_to_alpha(
         reason = f"llm semantic classifier unavailable: {llm_outcome['fallback_reason']}"
         alpha_match_method = "llm_unavailable"
         alpha_match_fallback_reason = llm_outcome["fallback_reason"]
+
+    # v0.2 QQQ A001 mapping remediation (Step 7A): a narrow, taxonomy-native
+    # exception to Pure-LLM Alpha semantic authority above. Root cause (see
+    # docs/audit_artifacts/v0_2_acceptance_adjudication.json Case A):
+    # Activation Scorer v2's evidence_quality/agent_independence components
+    # are direction-blind once a claim carries a given matched_alpha -- they
+    # count claim volume/agent breadth, not net directional support -- so
+    # when the LLM classifier pools evidence that explicitly asserts an
+    # Alpha's own core thesis is FALSE (e.g. "93% probability of NO Fed rate
+    # cuts", "72% probability of a Fed rate hike" for A001's Rate Cut Cycle
+    # thesis) into that Alpha's matched_alpha bucket, that pooled volume
+    # alone can push the Alpha to an official detected level with no
+    # genuine supporting evidence. This check runs AFTER the semantic
+    # classifier (or, when disabled, the deterministic top candidate) has
+    # produced a final matched_alpha, and vetoes it back to no_match only
+    # when that SPECIFIC alpha_id has its own explicit, high-precision
+    # invalidation pattern registered (currently only A001; see
+    # claim_semantics.ALPHA_SPECIFIC_INVALIDATION_PATTERNS) and that pattern
+    # fires for this claim's text. It deliberately never uses the broader,
+    # lower-precision multi-Alpha `_INVALIDATION_PATTERN` (headwind/demand-
+    # weakens/etc.), is keyed only by alpha_id -- never by ticker or
+    # run_id -- and is a no-op for every Alpha without a registered pattern,
+    # so it cannot silently suppress legitimate matches elsewhere. This is a
+    # deliberate, narrow, evidence-driven exception to the "LLM is the ONLY
+    # source of the semantic Alpha result" invariant documented above, not a
+    # reintroduction of deterministic logic as a general fallback authority.
+    if matched_alpha is not None and alpha_specific_invalidation_matched(text, matched_alpha):
+        status = "no_match"
+        matched_alpha = None
+        matched_alpha_name = None
+        reason = (
+            "alpha-specific invalidation evidence explicitly contradicts this Alpha's own "
+            "core thesis; overriding semantic classifier selection to no_match"
+        )
+        alpha_specific_invalidation_override = True
+    else:
+        alpha_specific_invalidation_override = False
+
+    # v0.2 QQQ A001 mapping remediation (Step 7A.2): Alpha-Specific Positive
+    # Requirement gate, complementary to the negative veto immediately
+    # above (never a replacement for it -- both must pass). Root cause (see
+    # docs/audit_artifacts/v0_2_qqq_a001_residual_mapping_audit.json): an
+    # independent row-level audit of the 29 claims that survived the
+    # Step-7A negative veto found ZERO genuine positive A001 evidence among
+    # them (0/29) -- the dominant residual pattern was generic rate-context
+    # commentary (headwinds, repricing, sensitivity framing) that never
+    # asserts the OPPOSITE of A001's thesis (so the negative veto never
+    # fires) but also never asserts the thesis ITSELF. A pure negative
+    # blocklist cannot close this gap without unbounded enumeration, so a
+    # matched Alpha with its own registered positive-requirement classifier
+    # (currently only A001; see claim_semantics.
+    # ALPHA_POSITIVE_REQUIREMENT_CLASSIFIERS) must now also affirmatively
+    # clear that classifier before the match survives. Runs after the
+    # negative veto so it only evaluates a still-live matched_alpha; is a
+    # no-op (always satisfied) for every Alpha without a registered
+    # classifier, so it cannot silently suppress legitimate matches
+    # elsewhere. Same deliberate, narrow, evidence-driven exception to the
+    # "LLM is the ONLY source of the semantic Alpha result" invariant as
+    # the negative veto -- not a reintroduction of deterministic logic as a
+    # general fallback authority.
+    if matched_alpha is not None and not alpha_positive_requirement_satisfied(text, matched_alpha):
+        status = "no_match"
+        matched_alpha = None
+        matched_alpha_name = None
+        reason = (
+            "this Alpha's own positive-requirement semantic gate was not satisfied "
+            "(no affirmative directional evidence for its core thesis); overriding "
+            "semantic classifier selection to no_match"
+        )
+        alpha_positive_requirement_override = True
+    else:
+        alpha_positive_requirement_override = False
 
     # Sprint 2, Track B1: classify Evidence Stance for every candidate now
     # that the FINAL `matched_alpha` is known (needed for the
@@ -640,6 +940,21 @@ def map_claim_to_alpha(
         "secondary_alphas": secondary_alphas,
         "match_status": status,
         "reason": reason,
+        # v0.2 QQQ A001 mapping remediation (Step 7A): additive-only
+        # diagnostic -- True exactly when the deterministic alpha-specific
+        # invalidation veto above fired (overriding a semantic-classifier
+        # "selected" or deterministic-fallback result back to no_match).
+        # False (never fabricated) whenever the veto did not apply,
+        # including for every Alpha without a registered pattern.
+        "alpha_specific_invalidation_override": alpha_specific_invalidation_override,
+        # v0.2 QQQ A001 mapping remediation (Step 7A.2): additive-only
+        # diagnostic -- True exactly when the positive-requirement gate
+        # above fired (overriding a semantic-classifier "selected" or
+        # deterministic-fallback result back to no_match because it failed
+        # to clear that Alpha's own registered positive-requirement
+        # classifier). False (never fabricated) whenever the gate did not
+        # apply, including for every Alpha without a registered classifier.
+        "alpha_positive_requirement_override": alpha_positive_requirement_override,
         # Pure-LLM Alpha semantic authority: which semantic authority
         # produced `matched_alpha` -- always "llm" for a genuine LLM
         # decision, whether it selected an Alpha (match_status="matched") or
@@ -702,17 +1017,79 @@ def map_structured_records(
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
     llm_gateway: Any = None,
+    use_batched_classifier: bool = False,
+    concurrency: int = 1,
 ) -> list[dict[str, Any]]:
+    """``use_batched_classifier`` (Step 5A execution-capacity repair):
+    multi-claim batching (``_classify_alpha_batch_with_llm``, bounded
+    batches of ``ALPHA_CLASSIFIER_BATCH_SIZE``) was evaluated and DEFERRED
+    for v0.1.2.1 -- a real controlled-Provider validation against DeepSeek
+    deepseek-v4-flash showed multi-item structured completions are
+    unreliable regardless of batch size or timeout (see
+    docs/audit_artifacts/week2_runtime_capacity_repair_v0.1.2.1.md). The
+    code path is kept (still offline-tested) for a future release against a
+    provider/model proven reliable for it, but defaults to ``False`` --
+    single-claim semantics are the current production path.
+
+    ``concurrency`` (Step 5A Section 4, default 1): when > 1 and an
+    ``llm_gateway`` exposing ``invoke_json_with_trace`` is supplied,
+    independent single-claim classifications run concurrently via
+    ``_classify_alpha_concurrent_with_llm`` (bounded worker pool -- see its
+    own docstring for the verified concurrency-safety properties this
+    relies on). Legacy gateways/callables that only implement the older
+    ``invoke_json`` seam (every existing unit test's fake gateway, and the
+    raw ``classifier`` callable path) are entirely unaffected -- concurrency
+    only ever applies to the real trace-capable gateway."""
     taxonomy = taxonomy or load_alpha_taxonomy()
-    results = []
-    for record in records:
+    eligible_records: list[Mapping[str, Any]] = [
+        record
+        for record in records
         # Unified Claim Admissibility Sprint: the shared quality gate
         # replaces the old bare "claim == 'unknown'" placeholder check --
         # every quality class (analytical, context_only-as-Alpha-context,
         # non_substantive) is now judged the same way every other consumer
         # judges it, via claim_quality.is_claim_eligible().
-        if not isinstance(record, Mapping) or not is_claim_eligible(record, CONSUMER_MAPPING):
-            continue
+        if isinstance(record, Mapping) and is_claim_eligible(record, CONSUMER_MAPPING)
+    ]
+
+    gateway_supports_trace = llm_gateway is not None and callable(
+        getattr(llm_gateway, "invoke_json_with_trace", None)
+    )
+    batching_active = use_batched_classifier and gateway_supports_trace
+    concurrency_active = (not batching_active) and gateway_supports_trace and int(concurrency) > 1
+
+    llm_outcome_by_claim_id: dict[str, dict[str, Any]] = {}
+    claim_id_record_pairs: list[tuple[str, Mapping[str, Any]]] = []
+    if batching_active:
+        claim_id_record_pairs = [
+            (_stable_claim_id(record, index), record) for index, record in enumerate(eligible_records)
+        ]
+        for batch in _chunk_records(claim_id_record_pairs, ALPHA_CLASSIFIER_BATCH_SIZE):
+            llm_outcome_by_claim_id.update(_classify_alpha_batch_with_llm(batch, taxonomy, llm_gateway))
+    elif concurrency_active:
+        claim_id_record_pairs = [
+            (_stable_claim_id(record, index), record) for index, record in enumerate(eligible_records)
+        ]
+        llm_outcome_by_claim_id = _classify_alpha_concurrent_with_llm(
+            claim_id_record_pairs,
+            taxonomy,
+            classifier,
+            # Matches map_claim_to_alpha's own single-call OR logic: a
+            # supplied llm_gateway always implies "consult the classifier",
+            # regardless of the raw classifier_enabled flag (which exists
+            # for the non-gateway raw-callable path).
+            classifier_enabled or llm_gateway is not None,
+            classifier_timeout_seconds,
+            llm_gateway,
+            int(concurrency),
+        )
+
+    outcome_lookup_active = batching_active or concurrency_active
+    results = []
+    for index, record in enumerate(eligible_records):
+        override = (
+            llm_outcome_by_claim_id.get(_stable_claim_id(record, index)) if outcome_lookup_active else None
+        )
         results.append(
             map_claim_to_alpha(
                 record,
@@ -721,6 +1098,7 @@ def map_structured_records(
                 classifier_enabled=classifier_enabled,
                 classifier_timeout_seconds=classifier_timeout_seconds,
                 llm_gateway=llm_gateway,
+                llm_outcome_override=override,
             )
         )
     return results
@@ -734,11 +1112,18 @@ def build_alpha_matches_payload(
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
     llm_gateway: Any = None,
+    use_batched_classifier: bool = False,
+    concurrency: int | None = None,
 ) -> dict[str, Any]:
     taxonomy = taxonomy or load_alpha_taxonomy()
     records = structured_payload.get("records", [])
     if not isinstance(records, list):
         records = []
+    # Step 5A Section 4/10: resolved here (the production-facing layer),
+    # not hardcoded in map_structured_records, so COMQUTOR_WEEK2_LLM_
+    # CONCURRENCY stays the single source of truth every real caller picks
+    # up automatically -- explicit callers/tests can still override it.
+    resolved_concurrency = concurrency if concurrency is not None else resolve_alpha_classifier_concurrency()
     matches = map_structured_records(
         records,
         taxonomy,
@@ -746,6 +1131,8 @@ def build_alpha_matches_payload(
         classifier_enabled=classifier_enabled,
         classifier_timeout_seconds=classifier_timeout_seconds,
         llm_gateway=llm_gateway,
+        use_batched_classifier=use_batched_classifier,
+        concurrency=resolved_concurrency,
     )
     # B1 LLM upgrade: additive post-pass over the already-computed matches.
     # When llm_gateway is None (every existing caller's default, and
@@ -771,6 +1158,8 @@ def save_alpha_matches(
     classifier_enabled: bool = False,
     classifier_timeout_seconds: float = DEFAULT_CLASSIFIER_TIMEOUT_SECONDS,
     llm_gateway: Any = None,
+    use_batched_classifier: bool = False,
+    concurrency: int | None = None,
 ) -> dict[str, Any]:
     structured_payload = load_json_record(
         run_id,
@@ -783,6 +1172,8 @@ def save_alpha_matches(
         classifier_enabled=classifier_enabled,
         classifier_timeout_seconds=classifier_timeout_seconds,
         llm_gateway=llm_gateway,
+        use_batched_classifier=use_batched_classifier,
+        concurrency=concurrency,
     )
     save_json_record(run_id, "alpha_matches.json", payload, output_root=output_root)
     return payload

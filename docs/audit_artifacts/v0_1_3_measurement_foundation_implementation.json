@@ -1,0 +1,167 @@
+{
+  "schema_version": "v0_1_3_measurement_foundation_implementation.v1",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "branch": "comqutor-structure-layer",
+  "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "official_six_ticker_alpha_hit": "61.0317%",
+  "official_six_ticker_alpha_hit_changed": false,
+  "frozen_ledger_changed": false,
+  "new_tsm_run_promoted": false,
+
+  "executive_summary": {
+    "multi_run_evaluator": "IMPLEMENTED",
+    "recorder_health": "IMPLEMENTED",
+    "tsm_runs_evaluated": 2,
+    "tsm_old_gold_hit": "83.33%",
+    "tsm_new_gold_hit": "66.67%",
+    "tsm_two_run_mean": "75.00%",
+    "variable_gold_alphas": ["A103", "A201", "A301"],
+    "gold_set_jaccard": 0.5,
+    "recorder_failures_in_new_tsm": 247,
+    "canonical_semantic_losses": 0,
+    "recorder_health": "DEGRADED",
+    "provider_metrics_polluted_by_recorder_events": false,
+    "alpha_semantics_changed": false,
+    "new_regressions": 0,
+    "gold_unchanged": true
+  },
+
+  "files_created": {
+    "production_measurement_modules": [
+      "comqutor_alpha/regression/multi_run_reproducibility.py",
+      "comqutor_alpha/regression/recorder_health_diagnostics.py"
+    ],
+    "test_files": [
+      "tests/test_multi_run_reproducibility.py",
+      "tests/test_recorder_health_diagnostics.py"
+    ],
+    "artifact_files": [
+      "docs/audit_artifacts/v0_1_3_multi_run_reproducibility.json",
+      "docs/audit_artifacts/v0_1_3_multi_run_reproducibility.md",
+      "docs/audit_artifacts/v0_1_3_recorder_health_diagnostics.json",
+      "docs/audit_artifacts/v0_1_3_recorder_health_diagnostics.md",
+      "docs/audit_artifacts/v0_1_3_measurement_foundation_implementation.json",
+      "docs/audit_artifacts/v0_1_3_measurement_foundation_implementation.md"
+    ]
+  },
+  "production_files_modified": 0,
+  "test_files_modified_pre_existing": 0,
+  "canonical_pipeline_files_touched": [],
+
+  "official_detection_authority_reuse": {
+    "reused_symbol": "comqutor_alpha.regression.regression_report_v3._DETECTED_LEVELS / _detected_alphas",
+    "reimplemented": false,
+    "verified_by_test": "tests/test_multi_run_reproducibility.py::test_reuses_canonical_detected_levels_constant_not_a_local_copy"
+  },
+
+  "gold_expectation_reuse": {
+    "reused_source": "docs/audit_artifacts/alpha_conflict_gold_benchmark_v1.json",
+    "second_gold_list_created": false
+  },
+
+  "part_a_multi_run_evaluator": {
+    "one_run_supported": true,
+    "two_run_supported": true,
+    "three_plus_run_supported": true,
+    "variable_run_count_weighting_handled": true,
+    "per_run_gold_metric_implemented": true,
+    "per_alpha_detection_frequency_implemented": true,
+    "per_ticker_mean_gold_hit_implemented": true,
+    "global_multi_run_macro_metric_implemented": true,
+    "gold_jaccard_implemented": true,
+    "all_alpha_jaccard_implemented": true,
+    "flip_metrics_implemented": true,
+    "accuracy_and_reproducibility_kept_separate": true,
+    "pass_fail_threshold_enforced": false,
+    "planned_acceptance_target_isolated_non_gating": true
+  },
+
+  "part_b_recorder_health": {
+    "recorder_source_identified": "process-level launcher log (e.g. /tmp/comqutor_live_start.log)",
+    "run_scoped_persisted_artifact_available": false,
+    "recorder_source_durability": "EPHEMERAL_LOG_ONLY",
+    "recorder_py_modified": false,
+    "session_py_modified": false,
+    "second_semantic_logging_system_created": false,
+    "recorder_write_behavior_altered": false,
+    "recorder_failures_made_to_throw": false,
+    "recorder_events_counted_as_provider_failures": false,
+    "recorder_events_counted_as_provider_orphans": false,
+    "recorder_events_create_impacted_alpha_ids": false,
+    "canonical_semantic_losses_architecturally_proven_zero": true
+  },
+
+  "tsm_two_run_fixture_results": {
+    "old_run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+    "new_run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+    "old_gold_hit_rate": 0.8333333333333334,
+    "new_gold_hit_rate": 0.6666666666666666,
+    "two_run_mean_gold_hit_rate": 0.75,
+    "detection_frequency": {
+      "A101": 1.0, "A103": 0.5, "A201": 0.5, "A301": 0.5, "A304": 1.0, "A601": 1.0
+    },
+    "variable_gold_alpha_ids": ["A103", "A201", "A301"],
+    "gold_detected_set_jaccard": 0.5,
+    "all_alpha_detected_set_jaccard": 0.5,
+    "hard_coded_in_production": false,
+    "hard_coded_in_tests_as_regression_fixture": true
+  },
+
+  "new_tsm_recorder_fixture_results": {
+    "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+    "recorder_failure_events": 247,
+    "canonical_semantic_losses": 0,
+    "recorder_health": "RECORDER_DEGRADED",
+    "impacted_alpha_ids_independently_confirmed_unchanged": ["A101"]
+  },
+
+  "tests": {
+    "new_targeted_tests_result": "46 passed, 0 failed",
+    "p0_p1_tests_result": "26 passed, 0 failed",
+    "provider_health_tests_result": "32 passed, 0 failed",
+    "sha_guard_tests_result": "test_step11_provider_health_rerun.py + test_step10_final_e2e_qa.py: 73 passed, 0 failed (test_evidence_review_v2.py's 13 failures are the same accepted pre-existing baseline failures, unrelated to this task and unrelated to any SHA guard on activation_scorer_v2.py)",
+    "full_backend_suite_result": "4121 passed, 21 failed, 3 errors, 47 skipped",
+    "full_backend_suite_baseline": "4075 passed, 21 failed, 3 errors, 47 skipped",
+    "delta_passed": 46,
+    "failed_and_error_test_names_identical_to_baseline": true,
+    "new_regressions": 0
+  },
+
+  "three_run_benchmark_evaluator_ready": "YES",
+  "three_run_benchmark_evaluator_ready_authorizes_a_run": false,
+
+  "future_acceptance_formula": {
+    "per_ticker": "ticker_mean_gold_hit = mean(run-level Gold hit rates for that ticker)",
+    "global": "multi_run_macro_gold_hit = mean(ticker_mean_gold_hit across tickers)",
+    "planned_target": 0.75,
+    "label": "PLANNED_ACCEPTANCE_TARGET",
+    "gate_status": "NOT_ACTIVE_GATE",
+    "enforced_in_this_task": false
+  },
+
+  "final_validation": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "frozen_six_ticker_ledger_unchanged": true,
+    "old_tsm_still_authoritative": true,
+    "new_tsm_still_not_promoted": true,
+    "official_alpha_hit_still_61_0317_percent": true,
+    "p0_p1_still_closed": true,
+    "provider_health_unchanged": true,
+    "recorder_failures_kept_separate_from_provider_failures": true,
+    "no_thresholds_changed": true,
+    "no_taxonomy_changed": true,
+    "no_b1_b2_b4_change": true,
+    "no_alpha_hit_detection_semantics_changed": true,
+    "no_production_alpha_semantic_files_changed": true,
+    "new_regressions": 0,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

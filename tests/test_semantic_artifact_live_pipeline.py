@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 import comqutor_alpha.api.routes_research as routes_research
+from comqutor_alpha.llm_runtime.cache import InMemoryLLMResponseCache, NullLLMResponseCache
 from comqutor_alpha.llm_runtime.manifest import verify_semantic_manifest
 from comqutor_alpha.structure_engine.week2_llm import Week2LLMGateway
 
@@ -38,10 +39,19 @@ class _SemanticModel:
                     }
                 )
             return _Response(json.dumps({"claims": claims}))
-        if "allowed_alpha_ids" in payload:
-            return _Response(
-                json.dumps({"decision": "defer", "selected_alpha_id": None})
-            )
+        if "alpha_taxonomy" in payload:
+            # Post-Alpha-Authority-Migration payload shape: the request
+            # carries the full canonical taxonomy, not the pre-migration
+            # "allowed_alpha_ids" restricted-candidate list, and "defer" is
+            # no longer a recognized decision value (replaced by "none").
+            # A genuine, valid "none" here means BOTH the legacy and the
+            # semantic-runtime-traced execution paths (see Step 5A's
+            # _gateway_error_to_fallback_reason granularity fix in
+            # alpha_mapper.py) reach a real accepted result instead of an
+            # exception -- keeping this test's own before/after comparison
+            # meaningful (sidecars only) rather than comparing two different
+            # flavors of "the model raised an exception".
+            return _Response(json.dumps({"decision": "none", "selected_alpha_id": None}))
         if "allowed_factors" in payload:
             return _Response(json.dumps({"edges": []}))
         raise AssertionError("unexpected task payload")
@@ -281,3 +291,98 @@ def test_cache_miss_integration_adds_only_sidecars_not_business_semantics(
     assert not (legacy_root / run_id / "llm_semantic_calls.jsonl").exists()
     assert (integrated_root / run_id / "llm_semantic_calls.jsonl").is_file()
     assert (integrated_root / run_id / "llm_semantic_manifest.json").is_file()
+
+
+# ---------------------------------------------------------------------------
+# John Requirement B, Phase B2 Slice 1: run_research_request's default
+# week2_llm_cache now resolves to a real, run-local InMemoryLLMResponseCache
+# instead of leaving SemanticRuntimeSession's own NullLLMResponseCache
+# default in effect. These tests exercise that resolution through the full
+# production entrypoint (not a lower-level gateway/session unit test).
+# ---------------------------------------------------------------------------
+
+
+def test_default_cache_is_a_real_run_local_cache_not_null(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """run_research_request's own week2_llm_cache default now resolves to a
+    real InMemoryLLMResponseCache (not SemanticRuntimeSession's own
+    NullLLMResponseCache fallback) when no explicit cache is supplied. The
+    actual duplicate-avoidance mechanics (cache hit avoids the Provider
+    call, output equivalence, task isolation, cross-run isolation) are
+    exercised more directly -- and more reliably, independent of this
+    project's claim-extraction/dedup pipeline shape -- in
+    tests/test_week2_llm_semantic_runtime_integration.py's own dedicated
+    InMemoryLLMResponseCache test group."""
+    _disable_data_sanity(monkeypatch)
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    run_id = "default-cache-run"
+    model = _SemanticModel()
+    gateway = _gateway(tmp_path, run_id, model)
+
+    response = routes_research.run_research_request(
+        _payload(run_id),
+        output_root=tmp_path,
+        week2_llm_gateway=gateway,
+        graph_repository=_MemoryRepository(),
+        # week2_llm_cache intentionally omitted -- exercising the new default.
+    )
+
+    assert response["run_id"] == run_id
+    assert isinstance(gateway.semantic_runtime.cache, InMemoryLLMResponseCache)
+    manifest = _load(tmp_path / run_id / "llm_semantic_manifest.json")
+    assert manifest["cache_hit_count"] == 0  # this fixture has no duplicate claim
+    assert verify_semantic_manifest(tmp_path / run_id / "llm_semantic_manifest.json").valid
+
+
+def test_explicit_null_cache_override_still_disables_caching(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A caller that wants caching off explicitly still can (Section 24
+    item 13: Null cache remains available for explicit disable)."""
+    _disable_data_sanity(monkeypatch)
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    run_id = "explicit-null-cache-run"
+    model = _SemanticModel()
+    gateway = _gateway(tmp_path, run_id, model)
+
+    routes_research.run_research_request(
+        _payload(run_id),
+        output_root=tmp_path,
+        week2_llm_gateway=gateway,
+        graph_repository=_MemoryRepository(),
+        week2_llm_cache=NullLLMResponseCache(),
+    )
+
+    assert isinstance(gateway.semantic_runtime.cache, NullLLMResponseCache)
+    manifest = _load(tmp_path / run_id / "llm_semantic_manifest.json")
+    assert manifest["cache_hit_count"] == 0
+
+
+def test_no_public_api_response_field_leaks_cache_internals(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Section 10: cache lookup/hit/miss accounting stays in the semantic
+    manifest/call-log sidecars -- run_research_request's own return payload
+    (what an API caller ultimately receives) must never carry a raw cache
+    entry, cache key, or cache object."""
+    _disable_data_sanity(monkeypatch)
+    monkeypatch.setenv("COMQUTOR_WEEK2_LLM_ENABLED", "true")
+    run_id = "no-leak-run"
+    model = _SemanticModel()
+    gateway = _gateway(tmp_path, run_id, model)
+
+    response = routes_research.run_research_request(
+        _payload(run_id),
+        output_root=tmp_path,
+        week2_llm_gateway=gateway,
+        graph_repository=_MemoryRepository(),
+    )
+
+    serialized = json.dumps(response, default=str)
+    assert "cache_key" not in serialized
+    assert "InMemoryLLMResponseCache" not in serialized
+    assert "validated_output_sha256" not in serialized

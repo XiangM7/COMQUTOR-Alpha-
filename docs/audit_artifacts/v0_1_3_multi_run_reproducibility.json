@@ -1,0 +1,615 @@
+{
+  "schema_version": "v0_1_3_multi_run_reproducibility.v1",
+  "scope": "MEASUREMENT_ONLY -- diagnostic, not a benchmark replacement",
+  "gold_v1_sha256_unchanged": true,
+  "gold_validity_sha256_unchanged": true,
+  "official_six_ticker_alpha_hit_unchanged": true,
+  "official_six_ticker_alpha_hit": "61.0317%",
+  "tsm_new_run_promoted": false,
+  "tickers": {
+    "TSM": {
+      "gold_alpha_ids": [
+        "A101",
+        "A103",
+        "A201",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "runs": [
+        {
+          "ticker": "TSM",
+          "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+          "gold_alpha_count": 6,
+          "detected_gold_count": 5,
+          "missed_gold_count": 1,
+          "gold_hit_rate": 0.8333333333333334,
+          "detected_gold_alpha_ids": [
+            "A101",
+            "A103",
+            "A201",
+            "A304",
+            "A601"
+          ],
+          "missed_gold_alpha_ids": [
+            "A301"
+          ],
+          "detected_all_alpha_ids": [
+            "A101",
+            "A103",
+            "A201",
+            "A304",
+            "A601"
+          ],
+          "provider_health": "PROVIDER_DEGRADED",
+          "benchmark_review_required": true,
+          "impacted_alpha_ids": [
+            "A301",
+            "A601"
+          ],
+          "recorder_health": null,
+          "recorder_failure_events": null,
+          "per_alpha_gold_states": {
+            "A101": {
+              "score": 52.9006,
+              "level": "active",
+              "direction": "positive",
+              "qualification_ceiling": 70.0,
+              "qualification_codes": [
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 20,
+              "unique_evidence_fact_count": 13,
+              "distinct_supporting_agents": 3,
+              "ticker_specific_evidence_count": 3,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 1,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "LINEAGE_UNRESOLVED",
+                "NO_COMMITTED_ALPHA_MATCH",
+                "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+              ]
+            },
+            "A103": {
+              "score": 68.5499,
+              "level": "active",
+              "direction": "positive",
+              "qualification_ceiling": 70.0,
+              "qualification_codes": [
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 15,
+              "unique_evidence_fact_count": 13,
+              "distinct_supporting_agents": 3,
+              "ticker_specific_evidence_count": 3,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 2,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "LINEAGE_UNRESOLVED",
+                "NO_COMMITTED_ALPHA_MATCH",
+                "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+              ]
+            },
+            "A201": {
+              "score": 64.5041,
+              "level": "active",
+              "direction": "positive",
+              "qualification_ceiling": null,
+              "qualification_codes": [],
+              "raw_supporting_claim_count": 39,
+              "unique_evidence_fact_count": 30,
+              "distinct_supporting_agents": 3,
+              "ticker_specific_evidence_count": 6,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 2,
+              "qualifying_local_edge_count": 2,
+              "local_edge_exclusion_reasons": [
+                "LINEAGE_UNRESOLVED",
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "A301": {
+              "score": 44.7724,
+              "level": "candidate",
+              "direction": "positive",
+              "qualification_ceiling": 70.0,
+              "qualification_codes": [
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 23,
+              "unique_evidence_fact_count": 13,
+              "distinct_supporting_agents": 2,
+              "ticker_specific_evidence_count": 1,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 1,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "LINEAGE_UNRESOLVED",
+                "NO_COMMITTED_ALPHA_MATCH",
+                "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+              ]
+            },
+            "A304": {
+              "score": 57.9945,
+              "level": "active",
+              "direction": "negative",
+              "qualification_ceiling": null,
+              "qualification_codes": [],
+              "raw_supporting_claim_count": 51,
+              "unique_evidence_fact_count": 22,
+              "distinct_supporting_agents": 6,
+              "ticker_specific_evidence_count": 10,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 2,
+              "qualifying_local_edge_count": 1,
+              "local_edge_exclusion_reasons": [
+                "LINEAGE_UNRESOLVED",
+                "NO_COMMITTED_ALPHA_MATCH",
+                "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+              ]
+            },
+            "A601": {
+              "score": 54.1843,
+              "level": "active",
+              "direction": "positive",
+              "qualification_ceiling": 70.0,
+              "qualification_codes": [
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 19,
+              "unique_evidence_fact_count": 13,
+              "distinct_supporting_agents": 3,
+              "ticker_specific_evidence_count": 6,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "LINEAGE_UNRESOLVED",
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            }
+          }
+        },
+        {
+          "ticker": "TSM",
+          "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+          "gold_alpha_count": 6,
+          "detected_gold_count": 4,
+          "missed_gold_count": 2,
+          "gold_hit_rate": 0.6666666666666666,
+          "detected_gold_alpha_ids": [
+            "A101",
+            "A301",
+            "A304",
+            "A601"
+          ],
+          "missed_gold_alpha_ids": [
+            "A103",
+            "A201"
+          ],
+          "detected_all_alpha_ids": [
+            "A101",
+            "A301",
+            "A304",
+            "A601"
+          ],
+          "provider_health": "PROVIDER_DEGRADED",
+          "benchmark_review_required": true,
+          "impacted_alpha_ids": [
+            "A101"
+          ],
+          "recorder_health": "RECORDER_DEGRADED",
+          "recorder_failure_events": 247,
+          "per_alpha_gold_states": {
+            "A101": {
+              "score": 70.0,
+              "level": "active",
+              "direction": "positive",
+              "qualification_ceiling": 70.0,
+              "qualification_codes": [
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 27,
+              "unique_evidence_fact_count": 18,
+              "distinct_supporting_agents": 3,
+              "ticker_specific_evidence_count": 7,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 3,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+              ]
+            },
+            "A103": {
+              "score": 25.7618,
+              "level": "candidate",
+              "direction": "positive",
+              "qualification_ceiling": 60.0,
+              "qualification_codes": [
+                "INSUFFICIENT_UNIQUE_EVIDENCE",
+                "NO_TICKER_SPECIFIC_EVIDENCE",
+                "INSUFFICIENT_AGENT_INDEPENDENCE",
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 2,
+              "unique_evidence_fact_count": 1,
+              "distinct_supporting_agents": 1,
+              "ticker_specific_evidence_count": 0,
+              "high_overlap_warning": true,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "A201": {
+              "score": 44.4406,
+              "level": "candidate",
+              "direction": "positive",
+              "qualification_ceiling": 70.0,
+              "qualification_codes": [
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 30,
+              "unique_evidence_fact_count": 25,
+              "distinct_supporting_agents": 5,
+              "ticker_specific_evidence_count": 9,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            },
+            "A301": {
+              "score": 75.9582,
+              "level": "dominant",
+              "direction": "positive",
+              "qualification_ceiling": null,
+              "qualification_codes": [],
+              "raw_supporting_claim_count": 23,
+              "unique_evidence_fact_count": 14,
+              "distinct_supporting_agents": 4,
+              "ticker_specific_evidence_count": 5,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 2,
+              "qualifying_local_edge_count": 1,
+              "local_edge_exclusion_reasons": [
+                "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+              ]
+            },
+            "A304": {
+              "score": 75.8263,
+              "level": "dominant",
+              "direction": "negative",
+              "qualification_ceiling": null,
+              "qualification_codes": [],
+              "raw_supporting_claim_count": 56,
+              "unique_evidence_fact_count": 18,
+              "distinct_supporting_agents": 6,
+              "ticker_specific_evidence_count": 8,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 4,
+              "qualifying_local_edge_count": 1,
+              "local_edge_exclusion_reasons": [
+                "RELATION_OR_ASSERTION_NOT_QUALIFYING"
+              ]
+            },
+            "A601": {
+              "score": 55.4809,
+              "level": "active",
+              "direction": "positive",
+              "qualification_ceiling": 70.0,
+              "qualification_codes": [
+                "NO_LOCAL_STRUCTURE_SUPPORT"
+              ],
+              "raw_supporting_claim_count": 25,
+              "unique_evidence_fact_count": 16,
+              "distinct_supporting_agents": 3,
+              "ticker_specific_evidence_count": 10,
+              "high_overlap_warning": false,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": []
+            }
+          }
+        }
+      ],
+      "ticker_aggregate": {
+        "ticker": "TSM",
+        "runs_evaluated": 2,
+        "run_ids": [
+          "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+          "0aeea938-97a8-49c8-97e1-409f6dadad30"
+        ],
+        "per_run_gold_hit_rates": [
+          0.8333333333333334,
+          0.6666666666666666
+        ],
+        "mean_gold_hit_rate": 0.75,
+        "min_gold_hit_rate": 0.6666666666666666,
+        "max_gold_hit_rate": 0.8333333333333334,
+        "gold_hit_count_mean": 4.5,
+        "gold_alpha_flip_count": 3,
+        "stable_hit_alpha_ids": [
+          "A101",
+          "A304",
+          "A601"
+        ],
+        "stable_miss_alpha_ids": [],
+        "variable_alpha_ids": [
+          "A103",
+          "A201",
+          "A301"
+        ],
+        "per_alpha_detection_frequency": {
+          "A101": 1.0,
+          "A103": 0.5,
+          "A201": 0.5,
+          "A301": 0.5,
+          "A304": 1.0,
+          "A601": 1.0
+        },
+        "per_alpha": {
+          "A101": {
+            "alpha_id": "A101",
+            "runs_evaluated": 2,
+            "detected_count": 2,
+            "miss_count": 0,
+            "detection_frequency": 1.0,
+            "detection_sequence": [
+              true,
+              true
+            ],
+            "transition_count": 0,
+            "two_run_flip_classification": "STABLE_HIT",
+            "per_run": [
+              {
+                "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+                "level": "active",
+                "score": 52.9006,
+                "detected": true
+              },
+              {
+                "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+                "level": "active",
+                "score": 70.0,
+                "detected": true
+              }
+            ]
+          },
+          "A103": {
+            "alpha_id": "A103",
+            "runs_evaluated": 2,
+            "detected_count": 1,
+            "miss_count": 1,
+            "detection_frequency": 0.5,
+            "detection_sequence": [
+              true,
+              false
+            ],
+            "transition_count": 1,
+            "two_run_flip_classification": "HIT_TO_MISS",
+            "per_run": [
+              {
+                "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+                "level": "active",
+                "score": 68.5499,
+                "detected": true
+              },
+              {
+                "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+                "level": "candidate",
+                "score": 25.7618,
+                "detected": false
+              }
+            ]
+          },
+          "A201": {
+            "alpha_id": "A201",
+            "runs_evaluated": 2,
+            "detected_count": 1,
+            "miss_count": 1,
+            "detection_frequency": 0.5,
+            "detection_sequence": [
+              true,
+              false
+            ],
+            "transition_count": 1,
+            "two_run_flip_classification": "HIT_TO_MISS",
+            "per_run": [
+              {
+                "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+                "level": "active",
+                "score": 64.5041,
+                "detected": true
+              },
+              {
+                "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+                "level": "candidate",
+                "score": 44.4406,
+                "detected": false
+              }
+            ]
+          },
+          "A301": {
+            "alpha_id": "A301",
+            "runs_evaluated": 2,
+            "detected_count": 1,
+            "miss_count": 1,
+            "detection_frequency": 0.5,
+            "detection_sequence": [
+              false,
+              true
+            ],
+            "transition_count": 1,
+            "two_run_flip_classification": "MISS_TO_HIT",
+            "per_run": [
+              {
+                "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+                "level": "candidate",
+                "score": 44.7724,
+                "detected": false
+              },
+              {
+                "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+                "level": "dominant",
+                "score": 75.9582,
+                "detected": true
+              }
+            ]
+          },
+          "A304": {
+            "alpha_id": "A304",
+            "runs_evaluated": 2,
+            "detected_count": 2,
+            "miss_count": 0,
+            "detection_frequency": 1.0,
+            "detection_sequence": [
+              true,
+              true
+            ],
+            "transition_count": 0,
+            "two_run_flip_classification": "STABLE_HIT",
+            "per_run": [
+              {
+                "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+                "level": "active",
+                "score": 57.9945,
+                "detected": true
+              },
+              {
+                "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+                "level": "dominant",
+                "score": 75.8263,
+                "detected": true
+              }
+            ]
+          },
+          "A601": {
+            "alpha_id": "A601",
+            "runs_evaluated": 2,
+            "detected_count": 2,
+            "miss_count": 0,
+            "detection_frequency": 1.0,
+            "detection_sequence": [
+              true,
+              true
+            ],
+            "transition_count": 0,
+            "two_run_flip_classification": "STABLE_HIT",
+            "per_run": [
+              {
+                "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+                "level": "active",
+                "score": 54.1843,
+                "detected": true
+              },
+              {
+                "run_id": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+                "level": "active",
+                "score": 55.4809,
+                "detected": true
+              }
+            ]
+          }
+        },
+        "gold_detected_set_jaccard": {
+          "pairwise_values": [
+            {
+              "run_a": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+              "run_b": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+              "jaccard": 0.5
+            }
+          ],
+          "mean_pairwise_jaccard": 0.5,
+          "min_pairwise_jaccard": 0.5,
+          "max_pairwise_jaccard": 0.5
+        },
+        "all_alpha_detected_set_jaccard": {
+          "pairwise_values": [
+            {
+              "run_a": "0aeea938-97a8-49c8-97e1-409f6dadad30",
+              "run_b": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+              "jaccard": 0.5
+            }
+          ],
+          "mean_pairwise_jaccard": 0.5,
+          "min_pairwise_jaccard": 0.5,
+          "max_pairwise_jaccard": 0.5
+        },
+        "gold_alpha_detection_frequency_mean": 0.75,
+        "gold_alpha_detection_frequency_min": 0.5,
+        "gold_alpha_detection_frequency_max": 1.0,
+        "variable_gold_alpha_count": 3,
+        "stable_gold_hit_count": 3,
+        "stable_gold_miss_count": 0,
+        "mean_pairwise_gold_jaccard": 0.5,
+        "mean_pairwise_all_alpha_jaccard": 0.5,
+        "runs_total": 2,
+        "runs_provider_degraded": 2,
+        "runs_benchmark_review_required": 2,
+        "quality_flags_by_run": {
+          "dfc7ceb3-3584-4514-bd84-6c371aab3e95": {
+            "provider_health": "PROVIDER_DEGRADED",
+            "benchmark_review_required": true,
+            "impacted_alpha_ids": [
+              "A301",
+              "A601"
+            ],
+            "recorder_health": null,
+            "recorder_failure_events": null
+          },
+          "0aeea938-97a8-49c8-97e1-409f6dadad30": {
+            "provider_health": "PROVIDER_DEGRADED",
+            "benchmark_review_required": true,
+            "impacted_alpha_ids": [
+              "A101"
+            ],
+            "recorder_health": "RECORDER_DEGRADED",
+            "recorder_failure_events": 247
+          }
+        },
+        "run_filtering_policy": "REPORT_ALL_RUNS"
+      },
+      "interpretation_label": "TSM_TWO_RUN_REPRODUCIBILITY_DIAGNOSTIC",
+      "not_an_official_benchmark_result": true
+    }
+  },
+  "global_macro": {
+    "tickers_evaluated": [
+      "TSM"
+    ],
+    "runs_per_ticker": {
+      "TSM": 2
+    },
+    "ticker_mean_gold_hit_rate": {
+      "TSM": 0.75
+    },
+    "multi_run_macro_gold_hit_rate": 0.75,
+    "weighting_policy": "EQUAL_PER_TICKER_REGARDLESS_OF_RUN_COUNT"
+  },
+  "planned_acceptance_diagnostic": {
+    "multi_run_macro_gold_hit_rate": 0.75,
+    "PLANNED_ACCEPTANCE_TARGET": 0.75,
+    "meets_planned_target": true,
+    "gate_status": "NOT_ACTIVE_GATE"
+  },
+  "three_run_benchmark_evaluator_ready": "YES",
+  "three_run_benchmark_evaluator_ready_reasoning": "The evaluator (comqutor_alpha/regression/multi_run_reproducibility.py) is generic over run count -- evaluate_run/evaluate_run_from_disk operate on one run at a time, aggregate_alpha_across_runs/aggregate_ticker_across_runs/pairwise_jaccards all accept N runs (tested for N=1,2,3), and aggregate_global_macro weights tickers equally regardless of per-ticker run count (tested). No code change is required to support 6 tickers x 3 runs -- only additional persisted run_audit.json inputs are needed, none of which this task produces. This does NOT authorize any future run.",
+  "future_acceptance_formula_documented_not_enforced": {
+    "per_ticker": "ticker_mean_gold_hit = mean(run-level Gold hit rates for that ticker)",
+    "global": "multi_run_macro_gold_hit = mean(ticker_mean_gold_hit across tickers)",
+    "planned_target": 0.75,
+    "label": "PLANNED_ACCEPTANCE_TARGET",
+    "gate_status": "NOT_ACTIVE_GATE"
+  },
+  "final_validation": {
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

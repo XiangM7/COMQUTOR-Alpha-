@@ -1,0 +1,98 @@
+{
+  "schema_version": "v0_1_3_final_closure_report.v1",
+  "release": "v0.1.3",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "generated_at": "2026-09-08T00:00:00+00:00",
+  "provider_calls_during_this_closure_task": 0,
+  "tradingagents_calls_during_this_closure_task": 0,
+  "no_ticker_run_during_this_closure_task": true,
+  "commit": false,
+  "push": false,
+  "final_six_selected_run_ids": {
+    "NVDA": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "QQQ": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+    "MSFT": "43472ace-454f-4c69-892c-adca91c25be7",
+    "SNDK": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+    "TSM": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+    "AMD": "949f685a-3945-4fd0-b7b9-362b37c90721"
+  },
+  "excluded_orphaned_run": {
+    "ticker": "TSM",
+    "run_id": "be4916f6-d319-4a1f-aa60-bebdc26d55ca",
+    "reason": "Orphaned by an infrastructure interruption (Docker/Postgres/backend process outage mid-run); reconciled by server startup to status=failed/SERVER_RESTARTED. Consumed real Provider calls without a usable result. Not used in any final metric."
+  },
+  "cumulative_call_accounting_across_all_six_final_fresh_runs": {
+    "note": "This is historical accounting of the already-authorized fresh six-ticker production run set, not calls made during this closure task (which made zero).",
+    "total_provider_semantic_calls": 3666,
+    "total_tradingagents_role_executions": 72
+  },
+  "johns_six_issues": {
+    "issue_1_six_ticker_regression_results": {
+      "status": "CLOSED_WITH_NON_BLOCKING_LIMITATION",
+      "summary": "regression_report_v3.json now populated from all six FINAL_FRESH_SELECTED runs, showing actual detected Alphas/main conflicts (not just expected labels) per ticker. Ticker consistency 6/6, artifact completeness 6/6, graph-edges gate 6/6.",
+      "limitation": "main_conflict_gold_status = NOT_GOLD_EVALUABLE -- zero of the referenced main-conflict expectations across all six tickers carry APPROVED_GOLD authority, so the >=4/6 acceptance gate is not evaluable against a frozen Golden benchmark. This is a benchmark-authority gap, not a pipeline defect: the pipeline produced a plausible, structurally-sound main conflict for 4 of 6 tickers (NVDA/QQQ/TSM/AMD admitted; MSFT/SNDK correctly found zero admitted conflict after evaluating all 6 declared pairs each).",
+      "artifact": "docs/audit_artifacts/regression_report_v3.json"
+    },
+    "issue_2_evidence_review_formal_accuracy_metrics": {
+      "status": "CLOSED_PASS",
+      "summary": "Already John-approved: alpha_match_accuracy=83% (166/200), polarity_accuracy=85.25% (52/61), critical_support_opposition_reversal_count=0. Unchanged and reconfirmed this closure -- this metric is a fixed, already-reviewed sample and does not get recomputed per fresh run.",
+      "artifact": "docs/audit_artifacts/evidence_review_summary_v2.json"
+    },
+    "issue_3_entity_exposure_seed_status_consistency": {
+      "status": "CLOSED_PASS",
+      "summary": "All six final selected runs show a single canonical seed status ('approved_gating') consistently across current_seed_status/seed_approval_status/mode/enforcement_allowed, and the seed_status_consistency accounting invariant (entity_exposure_audit.current_seed_status == _current_seed_status(ticker)) passes on all six. No conflicting status aliases found."
+    },
+    "issue_4_alpha_level_alignment": {
+      "status": "CLOSED_PASS",
+      "summary": "B4 thresholds unchanged (ACTIVE=50.0, DOMINANT=70.0, REGIME_LEVEL=86.0). NO_TICKER_SPECIFIC_EVIDENCE/NO_LOCAL_STRUCTURE_SUPPORT gate code unchanged. A301 shows real, varied levels across the six runs (dominant/active/candidate) with no cap_reasons falsely suppressing or falsely inflating any run -- no A301 display regression found."
+    },
+    "issue_5_evidence_polarity": {
+      "status": "CLOSED_PASS",
+      "summary": "conflict_detector.py's stance-filtered bull_display_qualifying/bear_display_qualifying fix is unchanged in code. Spot-checked NVDA's admitted main conflict (A101 bull side / A304 bear side) -- structurally correct polarity, no inversion. Critical support/opposition reversal count remains 0 (Issue 2's fixed sample)."
+    },
+    "issue_6_feedback_loop_proof": {
+      "status": "CLOSED_PASS",
+      "summary": "Final Alpha Memory feedback-loop proof built from all six FINAL_FRESH_SELECTED runs. End-to-end chain proved: persisted historical runs -> stable atomic edge phi identity -> exact cross-run matching -> recurrence observation -> run_audit/API visibility. NVDA shows the strongest example (4 recurring relations, 9 prior observations). Explicitly remains SHADOW / audit-only: activation_modulation_applied=false (hardcoded), lifecycle=MODEL 0, no invalidation/expiry/failed/non-execution modulation implemented anywhere.",
+      "artifacts": [
+        "docs/audit_artifacts/alpha_memory_feedback_loop_proof_final.json",
+        "docs/audit_artifacts/alpha_memory_feedback_loop_proof_final.md"
+      ]
+    }
+  },
+  "high_value_recovery_recheck": {
+    "status": "NOT_EVALUABLE_AGAINST_TARGET",
+    "summary": "Re-ran the primary mechanical discovery diagnostic (candidate_scores[*].eligible==true despite no_match) against the fresh six-run set: 200 candidates found, every one individually read (not sampled). Result: 0 strong, 1 borderline (SNDK A103 analogy-rejection), 199 correct_none. Confirms, on genuinely fresh data, the same conclusion reached before: the target of >=20 recoverable high-value unclassified claims is not supported by the healthy semantic pipeline's actual output.",
+    "unavailable_pool_check": "Fresh unavailable rate (1.02%, 47/4601) vs historical Step5A baseline (0.80%, 39/4894) -- no demonstrable improvement from the alpha_mapper.py batch-size/concurrency repair; difference is within normal run-to-run provider-load variance.",
+    "artifact": "docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3_final.json"
+  },
+  "conflict_state_separation": {
+    "status": "CLOSED_PASS",
+    "summary": "admitted/candidate(suppressed)/rejected remain structurally distinct across all six runs. conflict_pairs_conserved (declared == admitted+suppressed+rejected) and candidate_conflicts_are_a_subset_of_suppressed accounting invariants both pass on all six."
+  },
+  "data_sanity_six_ticker_summary": {
+    "NVDA": {"status": "disabled", "reason": "historical run completed before COMQUTOR_DATA_SANITY_ENABLED was set"},
+    "QQQ": {"status": "disabled", "reason": "historical run completed before COMQUTOR_DATA_SANITY_ENABLED was set"},
+    "MSFT": {"status": "disabled", "reason": "historical run completed before COMQUTOR_DATA_SANITY_ENABLED was set"},
+    "SNDK": {"status": "ok", "reason": "first fresh run after enablement; 277 OHLCV rows, 0 warnings/critical"},
+    "TSM": {"status": "ok", "reason": "275 OHLCV rows, 0 warnings/critical"},
+    "AMD": {"status": "critical", "reason": "NO_MARKET_DATA_AVAILABLE -- yfinance returned zero OHLCV rows for this one request (transient external-provider miss; TSM succeeded with 275 rows for essentially the same date). Display-only sidecar, not a required artifact, no effect on Alpha/Conflict/artifact_completeness -- confirmed unchanged."},
+    "scope_note": "Data Sanity is OPTIONAL/NON-BLOCKING for the v0.1.3 QA acceptance contract. None of these statuses affect FINAL_FRESH_SELECTED designation for any ticker."
+  },
+  "test_results": {
+    "backend": {"passed": 4017, "failed": 21, "errors": 3, "skipped": 47, "subtests_passed": 69, "duration_seconds": 718.77},
+    "frontend": {"passed": 238, "failed": 0, "total_files": 20},
+    "new_regressions_count": 0,
+    "note": "Backend failures/errors are byte-identical by test name to the pre-existing catalog established earlier this session (evidence_review_v2 schema-stripping family x13, evidence_review_v2_directional_eligibility x3 fails+3 errors, evidence_review_sample x1, frozen-HEAD test_e42 x1, test_w5_demo_seed x2, pre-existing unstaged replay test x1). None are new, none are related to this closure's six selected runs or any code touched this session."
+  },
+  "code_files_changed_during_this_closure_task": [],
+  "artifacts_created_or_updated_this_closure_task": [
+    "docs/audit_artifacts/regression_report_v3.json",
+    "docs/audit_artifacts/alpha_memory_feedback_loop_proof_final.json",
+    "docs/audit_artifacts/alpha_memory_feedback_loop_proof_final.md",
+    "docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3_final.json",
+    "docs/audit_artifacts/v0_1_3_final_closure_report.json",
+    "docs/audit_artifacts/v0_1_3_final_closure_report.md"
+  ],
+  "overall_verdict": "V0.1.3_QA_CLOSED -- Issues 2-6 CLOSED_PASS; Issue 1 CLOSED_WITH_NON_BLOCKING_LIMITATION (main-conflict Gold benchmark authority gap, not a pipeline defect). Zero new regressions. Alpha Memory remains shadow, lifecycle MODEL 0, activation_modulation_applied=false throughout all six runs. HEAD unchanged at 9f22872."
+}

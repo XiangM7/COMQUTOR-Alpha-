@@ -1,0 +1,513 @@
+{
+  "schema_version": "v0.2.structured_adapter_concurrency_optimization.v1",
+  "task": "JOHN_REQUIREMENT_B_PHASE_B2_SLICE_2B_BOUNDED_CONCURRENCY_FOR_STRUCTURED_ADAPTER",
+  "b1_authority": {
+    "path": "docs/audit_artifacts/v0_2_semantic_classifier_cost_latency_audit.json",
+    "sha256": "e9c562bf0c7b02b4430721e44d962274f2fa8a67fae5d4645b9e99fbb62e73b0"
+  },
+  "b2_slice1_authority": {
+    "path": "docs/audit_artifacts/v0_2_semantic_cache_optimization.json",
+    "sha256": "1053636bdda6c7322c28dd1ea733d2ce978c33619b53ec40820a4af5affee537",
+    "note": "Cache remains enabled and unchanged this task."
+  },
+  "b2_slice2a_authority": {
+    "path": "docs/audit_artifacts/v0_2_evidence_stance_concurrency_optimization.json",
+    "sha256": "3efb788832c65d836dfe6f2984a002cbbc65db68da1170892725088e02edfb88",
+    "note": "Evidence-stance concurrency (1->4) remains unchanged this task; not touched."
+  },
+  "qqq_provenance_guard": {
+    "historical_qqq_run": {
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "actual_main_conflict": "A304__A601"
+    },
+    "postfix_qqq_run": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "actual_main_conflict": "A301__A304",
+      "a001_detected": false,
+      "dominant_alpha": null
+    },
+    "do_not_conflate": true,
+    "this_slices_timing_reference": "f239a53f-4ebe-455c-bb76-5f5485903901 (post-fix QQQ) exclusively -- verified directly from outputs/runs/f239a53f-.../llm_semantic_calls.jsonl, not assumed or reused from any other run's figures."
+  },
+  "independence_proof": {
+    "method": "Direct source inspection of comqutor_alpha/structure_engine/structured_output_adapter.py -- adapt_run_outputs's own `for raw_record in raw_agent_outputs:` loop, and adapt_raw_agent_outputs's internal `for batch in _chunk_segments(...)` loop -- not assumed.",
+    "caller": "comqutor_alpha/structure_engine/structured_output_adapter.py:adapt_run_outputs, the single run-wide entrypoint (via save_structured_agent_outputs and the Week1-2 pipeline).",
+    "unit_of_work_true_independent_granularity": "One (agent, batch-of-up-to-64-segments) pair -- confirmed via persisted QQQ post-fix data: exactly 8 structured_adapter calls = 4 LLM-eligible agents (market_agent, sentiment_agent, news_agent, fundamental_agent) x 2 batches each (each agent's report exceeds 64 segments). Every batch is fully self-contained: its own payload (agent, ticker, segment list), its own validator, its own enrichment-or-fallback outcome -- no batch reads or depends on another batch's, or another agent's, result.",
+    "shared_mutable_state_found": {
+      "filter_audit_canonical_relations_audit": "In the ORIGINAL serial code, adapt_run_outputs passes ONE shared filter_audit list and ONE shared canonical_relations list into every adapt_raw_agent_outputs call, and uses index-range slicing (filter_audit[filter_start:]) to attribute entries back to the right raw_record -- this pattern is order-dependent and NOT safe under naive concurrent interleaved appends. RESOLVED by giving each concurrent worker its own fresh, thread-local filter_audit/canonical_relations_audit/quality_audit lists (never shared during the concurrent phase at all) -- adapt_raw_agent_outputs itself is completely unmodified and is simply called with different, isolated accumulator arguments per worker.",
+      "quality_audit_per_agent_bucket_global_audit": "Aggregated via _add_quality_audit calls in the original serial loop -- also isolated per-worker during the concurrent phase, then merged serially afterward (see Phase 2b below), exactly like StanceRunStats was locked in Slice 2A -- except here no lock is even needed, because the merge itself happens fully serially in the main thread, never concurrently.",
+      "records_list_order": "The FINAL records list order (agent-output order, then within-agent segment order) is a real, meaningful pipeline contract (claim_id ordinal numbering, downstream consumers' expectations) that must NOT depend on Provider completion order. RESOLVED via the same Phase-2b serial, original-index-order merge.",
+      "recorder_semantic_call_sequencing": "adapt_raw_agent_outputs's own internal _llm_batch_enrichment call does invoke_json_with_trace immediately followed by finalize_semantic_invocation -- the SAME single-phase pattern that caused Slice 2A's discovered recorder race. RESOLVED via a NEW, LOCAL _DeferredFinalizeGatewayProxy (see Concurrency Implementation) that defers finalize calls until a sequence-sorted serial replay phase -- generalizing Slice 2A's own invoke-concurrently/finalize-in-sequence-order fix WITHOUT touching adapt_raw_agent_outputs, _llm_batch_enrichment, week2_llm.py's invoke_json_with_trace, session.py, or recorder.py."
+    },
+    "ordering_assumptions": "SemanticCallRecorder.append requires call_sequence to increase strictly in append order -- identical invariant to Slice 2A, addressed identically (sort-by-trace_handle.call_sequence before finalizing).",
+    "accumulator_behavior": "global_audit/per_agent bucket merges happen in the MAIN thread, serially, in original raw_agent_outputs order, after all concurrent work completes -- no lock needed anywhere in this slice's own new code, since nothing is mutated concurrently.",
+    "retry_fallback_state": "Fully contained within each batch's own invoke_json_with_trace call, unchanged -- concurrency changes only how many agent-level workers are in flight, never any one batch's own attempt count.",
+    "telemetry_log_writer_behavior": "SemanticCallRecorder.append lock-protected for the write itself (unchanged, verified in Slice 1/2A); sequencing correctness restored via the new deferred-finalize proxy, entirely local to this slice.",
+    "provider_session_thread_safety": "Week2LLMGateway's call-budget counter/error logger and SemanticRuntimeSession's trace allocation/cache access -- unchanged, already verified thread-safe in Slice 2A, reused as-is.",
+    "cache_interaction": "InMemoryLLMResponseCache (Slice 1, already lock-hardened in Slice 2A) is now additionally accessed concurrently by a THIRD task's worker pool (structured_adapter's, alongside alpha_classifier's and evidence_stance_classifier's own). No further change needed -- the Slice 2A lock already covers any number of concurrent callers.",
+    "rate_limit_behavior": "Not separately implemented at this layer -- unchanged, handled entirely inside the shared Week2LLMGateway.",
+    "answer_can_work_item_n_execute_independently_of_n_minus_1": true,
+    "answer_do_calls_mutate_state_required_by_later_calls": "No batch/agent business-logic state is shared across concurrent workers (each gets its own isolated accumulators). Framework-level shared state (recorder sequencing, the cache) was identified and addressed via the same class of fix Slice 2A already validated.",
+    "answer_does_output_order_affect_downstream_semantics": "Yes for the FINAL records list order (claim_id numbering, agent_coverage ordering, downstream consumers) -- addressed by merging in ORIGINAL raw_agent_outputs order regardless of completion order (Phase 2b). No for the recorder's own append order requirement, addressed separately by sequence-sorted finalization (Phase 2a).",
+    "verdict": "STRUCTURED_ADAPTER_CONCURRENCY_SAFE, with the same two infrastructure patterns (isolated per-worker accumulators; invoke-concurrently/finalize-in-sequence-order) Slice 2A already established as sufficient and correct, applied here entirely locally within structured_output_adapter.py."
+  },
+  "fan_out_shape": {
+    "b1_historical_reference": "~8 structured_adapter calls for QQQ",
+    "verified_qqq_postfix_call_count": 8,
+    "work_unit_type": "One (agent, batch-of-up-to-64-segments) pair, i.e. one claim_batch_enrichment Provider request per LLM-eligible raw agent output's own segment batch.",
+    "verified_breakdown_qqq_postfix": [
+      {
+        "call_sequence": 0,
+        "agent": "market_agent",
+        "segments": 64,
+        "latency_ms": 84193
+      },
+      {
+        "call_sequence": 1,
+        "agent": "market_agent",
+        "segments": 53,
+        "latency_ms": 82757
+      },
+      {
+        "call_sequence": 2,
+        "agent": "sentiment_agent",
+        "segments": 64,
+        "latency_ms": 90028
+      },
+      {
+        "call_sequence": 3,
+        "agent": "sentiment_agent",
+        "segments": 17,
+        "latency_ms": 54725
+      },
+      {
+        "call_sequence": 4,
+        "agent": "news_agent",
+        "segments": 64,
+        "latency_ms": 90036
+      },
+      {
+        "call_sequence": 5,
+        "agent": "news_agent",
+        "segments": 34,
+        "latency_ms": 35865
+      },
+      {
+        "call_sequence": 6,
+        "agent": "fundamental_agent",
+        "segments": 64,
+        "latency_ms": 89300
+      },
+      {
+        "call_sequence": 7,
+        "agent": "fundamental_agent",
+        "segments": 31,
+        "latency_ms": 68391
+      }
+    ],
+    "pattern_confirmed_across_all_seven_runs": "Every one of the seven analyzed runs shows EXACTLY 4 LLM-eligible agents (market_agent, sentiment_agent, news_agent, fundamental_agent), each contributing 1-2 batches (2 whenever that agent's segment count exceeds LLM_CLAIM_BATCH_SIZE=64) -- confirmed from source, not assumed.",
+    "every_unit_logically_independent": true
+  },
+  "concurrency_implementation": {
+    "mechanism": "ThreadPoolExecutor, mirroring the same architectural pattern now used by alpha_classifier and evidence_stance_classifier.",
+    "granularity_chosen": "AGENT level (one raw_record = one unit of concurrent work), not the finer BATCH level, as a deliberate, disclosed simplicity/risk tradeoff -- see concurrency_selection below.",
+    "new_class": "_DeferredFinalizeGatewayProxy (comqutor_alpha/structure_engine/structured_output_adapter.py) -- wraps the real llm_gateway so invoke_json_with_trace (the Provider call + call_sequence allocation) runs immediately per worker (safe, same already-thread-safe infrastructure), while finalize_semantic_invocation is buffered and replayed afterward in the main thread, sorted by call_sequence. adapt_raw_agent_outputs and _llm_batch_enrichment are UNCHANGED -- the proxy is transparent to them.",
+    "new_orchestrator": "_adapt_run_outputs_concurrently -- phase 1 (concurrent invoke via the proxy), phase 2a (serial, sequence-sorted finalize), phase 2b (serial, original-index-order merge of records/filter_audit/canonical_relations/global_audit/per_agent).",
+    "previous_concurrency": 1,
+    "new_concurrency_default": 4,
+    "concurrency_resolution": "week2_llm.resolve_structured_adapter_concurrency() -- mirrors resolve_alpha_classifier_concurrency()/resolve_evidence_stance_concurrency() exactly: env var COMQUTOR_WEEK2_ADAPTER_CONCURRENCY (deliberately separate from the other two tasks' own env vars), default 4, hard ceiling 8.",
+    "concurrency_less_than_or_equal_1_or_single_or_empty_raw_agent_outputs": "Reproduces the EXACT prior serial behavior (adapt_run_outputs's own original for-loop, byte-for-byte unchanged) -- verified via test_configured_concurrency_1_reproduces_exact_serial_behavior and the concurrency=1-vs-4 semantic-equivalence test.",
+    "evidence_stance_and_alpha_classifier_concurrency": "UNCHANGED -- not touched by this task, per explicit scope restriction."
+  },
+  "concurrency_selection": {
+    "candidates_evaluated": [
+      1,
+      2,
+      4,
+      6,
+      8
+    ],
+    "selection_criteria_applied": [
+      "measured offline benefit",
+      "call count",
+      "long-tail distribution",
+      "Provider pressure",
+      "existing concurrency precedent",
+      "implementation simplicity"
+    ],
+    "chosen_default": 4,
+    "reasoning": "Verified from real data across all seven runs: exactly 4 LLM-eligible agents exist per ticker, always. Agent-level concurrency=4 therefore gives every independent agent its own dedicated worker -- concurrency 6 and 8 were simulated and produce IDENTICAL stage makespan to 4 in every single run (there is nothing left to parallelize past the 4th lane). This is not a case of 'diminishing returns past 4' -- it is ZERO further returns past 4, cleanly proven by the fan-out shape itself, not merely inferred. C4 also reuses the exact same value already proven safe against the real Provider for alpha_classifier and evidence_stance_classifier, rather than a new ceiling.",
+    "c2_vs_c4_comparison": "C4 offers a LARGE incremental benefit over C2, not a small one -- confirmed in every run (46-50% further stage-time reduction from C2 to C4; QQQ post-fix: C2=324.6s -> C4=167.0s, a further 48.6% reduction). Section 15's 'prefer C2 if C4 offers only a small incremental gain' condition does NOT apply here -- C4 is clearly, substantially better than C2 across the whole seven-run set.",
+    "provider_pressure_analysis": {
+      "expected_simultaneous_requests": "Up to 4 concurrent structured_adapter batch requests, potentially overlapping with alpha_classifier's own independent pool of up to 4 and evidence_stance_classifier's own independent pool of up to 4 -- these three pools are independent, uncoordinated ThreadPoolExecutors. Worst-case combined simultaneous Provider load across all three tasks, if their execution windows happened to overlap, could reach 12. In practice these three tasks run as SEQUENTIAL PIPELINE STAGES within one research run (structured_adapter completes before alpha_classifier begins, which completes before evidence_stance_classifier begins -- confirmed in B1's own stage-sequencing analysis), so true simultaneous cross-task overlap is not expected in the normal pipeline flow.",
+      "worst_case_retry_concurrency": "Retries do not multiply concurrency -- each agent's own batches perform their own bounded retry loops independently; a batch mid-retry still counts as exactly one in-flight slot.",
+      "why_the_cap_is_reasonable": "4 matches the real fan-out shape exactly (4 agents), matches the already-proven cap for the other two concurrent tasks, and going higher (6/8) is proven to add zero further benefit while only adding unvalidated Provider pressure for no reason."
+    },
+    "granularity_tradeoff_disclosed": "The TRUE, finest-grained independent unit is the (agent, batch) pair (8 total for QQQ post-fix, since 2 of the 4 agents' reports need 2 batches each). Batch-level flattening (parallelizing all 8 across a shared worker pool) was simulated and shows a marginally BETTER or comparable result to agent-level in most runs (e.g. QQQ post-fix batch-level C4=173.5s vs agent-level C4=167.0s -- agent-level is actually fractionally BETTER here due to how the specific per-run durations happen to bin-pack; this is not a general guarantee, just what this measured dataset shows). Agent-level concurrency was CHOSEN for implementation specifically because it requires ZERO changes to adapt_raw_agent_outputs/_llm_batch_enrichment (the well-tested functions with 124 existing passing tests), whereas true batch-level flattening would require refactoring those functions' internals to expose their own batch loop externally -- a materially larger, higher-risk implementation surface for, on this evidence, no measured latency benefit. This is a deliberate 'implementation simplicity' tradeoff, one of the five explicit selection criteria, not an oversight."
+  },
+  "seven_run_scheduling_simulation": {
+    "method": "Same greedy list-scheduling simulation as Slice 2A (a min-heap of C worker free-at times), applied at BOTH the true batch-level granularity (for reference/comparison) and the CHOSEN agent-level granularity (summing each agent's own batches into one work-item duration) using each run's own persisted structured_adapter call latencies.",
+    "per_run": {
+      "NVDA": {
+        "n_calls": 7,
+        "n_agents": 4,
+        "actual_span_s": 622.5,
+        "batch_level_sim": {
+          "1": 621.9,
+          "2": 351.8,
+          "4": 180.1,
+          "6": 171.8,
+          "8": 90.0
+        },
+        "agent_level_sim": {
+          "1": 621.9,
+          "2": 360.1,
+          "4": 180.1,
+          "6": 180.1,
+          "8": 180.1
+        },
+        "agent_durations": {
+          "market_agent": 180.1,
+          "sentiment_agent": 90.0,
+          "news_agent": 171.8,
+          "fundamental_agent": 180.1
+        }
+      },
+      "QQQ_historical": {
+        "n_calls": 7,
+        "n_agents": 4,
+        "actual_span_s": 560.6,
+        "batch_level_sim": {
+          "1": 560.1,
+          "2": 290.0,
+          "4": 180.1,
+          "6": 109.9,
+          "8": 90.0
+        },
+        "agent_level_sim": {
+          "1": 560.1,
+          "2": 335.7,
+          "4": 180.1,
+          "6": 180.1,
+          "8": 180.1
+        },
+        "agent_durations": {
+          "market_agent": 180.1,
+          "sentiment_agent": 90.0,
+          "news_agent": 134.4,
+          "fundamental_agent": 155.6
+        }
+      },
+      "MSFT": {
+        "n_calls": 8,
+        "n_agents": 4,
+        "actual_span_s": 699.5,
+        "batch_level_sim": {
+          "1": 699.0,
+          "2": 360.1,
+          "4": 180.1,
+          "6": 180.1,
+          "8": 90.0
+        },
+        "agent_level_sim": {
+          "1": 699.0,
+          "2": 360.1,
+          "4": 180.1,
+          "6": 180.1,
+          "8": 180.1
+        },
+        "agent_durations": {
+          "market_agent": 180.1,
+          "sentiment_agent": 180.1,
+          "news_agent": 158.8,
+          "fundamental_agent": 180.1
+        }
+      },
+      "SNDK": {
+        "n_calls": 9,
+        "n_agents": 4,
+        "actual_span_s": 723.9,
+        "batch_level_sim": {
+          "1": 723.3,
+          "2": 363.1,
+          "4": 183.0,
+          "6": 180.1,
+          "8": 93.0
+        },
+        "agent_level_sim": {
+          "1": 723.3,
+          "2": 384.2,
+          "4": 204.1,
+          "6": 204.1,
+          "8": 204.1
+        },
+        "agent_durations": {
+          "market_agent": 180.1,
+          "sentiment_agent": 180.1,
+          "news_agent": 159.0,
+          "fundamental_agent": 204.1
+        }
+      },
+      "TSM": {
+        "n_calls": 8,
+        "n_agents": 4,
+        "actual_span_s": 659.0,
+        "batch_level_sim": {
+          "1": 658.4,
+          "2": 352.3,
+          "4": 180.1,
+          "6": 172.2,
+          "8": 90.0
+        },
+        "agent_level_sim": {
+          "1": 658.4,
+          "2": 360.1,
+          "4": 180.1,
+          "6": 180.1,
+          "8": 180.1
+        },
+        "agent_durations": {
+          "market_agent": 126.1,
+          "sentiment_agent": 180.1,
+          "news_agent": 172.3,
+          "fundamental_agent": 180.0
+        }
+      },
+      "AMD": {
+        "n_calls": 9,
+        "n_agents": 4,
+        "actual_span_s": 669.3,
+        "batch_level_sim": {
+          "1": 653.8,
+          "2": 360.2,
+          "4": 180.1,
+          "6": 180.1,
+          "8": 90.0
+        },
+        "agent_level_sim": {
+          "1": 653.8,
+          "2": 373.9,
+          "4": 193.8,
+          "6": 193.8,
+          "8": 193.8
+        },
+        "agent_durations": {
+          "market_agent": 180.1,
+          "sentiment_agent": 180.1,
+          "news_agent": 99.8,
+          "fundamental_agent": 193.8
+        }
+      },
+      "QQQ_postfix": {
+        "n_calls": 8,
+        "n_agents": 4,
+        "actual_span_s": 596.0,
+        "batch_level_sim": {
+          "1": 595.3,
+          "2": 298.0,
+          "4": 173.5,
+          "6": 125.2,
+          "8": 90.0
+        },
+        "agent_level_sim": {
+          "1": 595.3,
+          "2": 324.6,
+          "4": 167.0,
+          "6": 167.0,
+          "8": 167.0
+        },
+        "agent_durations": {
+          "market_agent": 167.0,
+          "sentiment_agent": 144.8,
+          "news_agent": 125.9,
+          "fundamental_agent": 157.7
+        }
+      }
+    },
+    "agent_level_median_c1_to_c4_reduction_pct": 71.78,
+    "agent_level_min_reduction_pct": 67.85,
+    "agent_level_max_reduction_pct": 74.23,
+    "diminishing_returns": "At the agent level, C4 == C6 == C8 in EVERY single run (confirmed, not estimated) -- there are only 4 independent lanes, so any concurrency cap above 4 is provably a complete no-op for this task. C2->C4 is NOT a diminishing-returns zone (46-50% further reduction in every run) -- the returns diminish sharply and completely only immediately AFTER C4."
+  },
+  "deterministic_output_order": {
+    "requirement": "Final structured claim records must preserve agent-output order, then within-agent segment order -- exactly what the serial loop already produces.",
+    "verification": "Proven by design (Phase 2b merges strictly in original raw_agent_outputs index order, never completion order) and by test (test_one_slow_agent_does_not_reorder_or_corrupt_other_agents_records: market_agent's call is artificially slow and finishes last despite being submitted first; the final records list still shows market_agent's 5 records first, in original order, followed by sentiment/news/fundamental in their own original order).",
+    "recorder_ordering": "Separately guaranteed via the same sequence-sorted finalize technique Slice 2A validated -- verified via test_telemetry_and_recorder_sequencing_remain_valid_under_concurrency (4 records, ascending call_sequence [0,1,2,3], no gaps/duplicates) and a 15-run stress test with zero failures."
+  },
+  "exact_semantic_equivalence": {
+    "unchanged_by_this_slice": [
+      "claim text/evidence",
+      "entities/factors/direction/confidence (LLM-produced, unaffected)",
+      "extraction_method (llm_strict_json vs deterministic_splitter)",
+      "claim_id/segment_id numbering",
+      "agent_coverage metadata",
+      "duplicate-removal/dedup behavior",
+      "downstream Alpha-mapping/evidence-stance/structure-extraction/activation/conflict derivation (no code touched on any of those paths)"
+    ],
+    "verification": "test_concurrency_1_and_concurrency_4_produce_identical_semantic_output: byte-identical records (excluding run_id/timestamp) and identical metadata (raw_claim_count, llm_batch_count, agent_coverage) between concurrency=1 and concurrency=4 for the same 4-agent, 20-segment input."
+  },
+  "recorder_and_telemetry_safety": {
+    "same_race_class_as_slice_2a_found_and_fixed": true,
+    "detail": "Naively dispatching adapt_raw_agent_outputs calls concurrently (each internally doing invoke_json_with_trace+finalize_semantic_invocation together, unmodified) would recreate the exact RECORDER_SEQUENCE_NOT_MONOTONIC race Slice 2A discovered, at the agent level instead of the stance-batch level -- confirmed by direct code inspection (adapt_raw_agent_outputs's _llm_batch_enrichment calls follow the identical single-phase invoke+finalize pattern the pre-fix stance code did). Fixed proactively, before implementation, by applying the SAME two-phase technique via the new _DeferredFinalizeGatewayProxy -- never actually reproduced as a live failure in this slice's own testing, because the fix was designed in from the start based on the Slice 2A lesson.",
+    "manifest_counters": "cache_hit_count, provider_call_count computed identically regardless of concurrency -- unchanged, build_semantic_manifest not modified.",
+    "verification": "test_telemetry_and_recorder_sequencing_remain_valid_under_concurrency, stress-tested 15/15 clean runs."
+  },
+  "cache_interaction": {
+    "slice1_cache_status": "Enabled and unchanged (InMemoryLLMResponseCache class, build_llm_cache_key, LLMResponseCache protocol -- zero changes this task).",
+    "slice2a_lock_reused": "The threading.Lock added to InMemoryLLMResponseCache in Slice 2A already covers correctness for any number of concurrent callers, including this slice's new structured_adapter worker pool -- no further cache change was needed or made.",
+    "verification": "test_cache_correct_under_concurrent_adapter_calls: 4 agents processed concurrently populate the cache without exception; a second, independent gateway sharing the same cache instance is served entirely from cache (0 Provider calls) with identical results.",
+    "b1_finding_reused": "B1/Slice 1 already established structured_adapter shows ZERO within-run or cross-run exact-duplicate calls in any of the seven analyzed runs -- this slice's own cache test therefore validates CORRECTNESS under concurrency, not a NEW measured cache-hit benefit for this task (none is claimed)."
+  },
+  "retry_fallback_preservation": {
+    "max_retries_changed": false,
+    "retry_conditions_changed": false,
+    "backoff_changed": false,
+    "timeout_classification_changed": false,
+    "fallback_trigger_changed": false,
+    "validation_retry_changed": false,
+    "detail": "Every retry/timeout/fallback decision remains entirely inside Week2LLMGateway.invoke_json_with_trace and _llm_batch_enrichment's own validation_accepted check, unchanged. A failed/erroring agent's batches fall back to deterministic_splitter extraction for that agent only -- verified isolated from unrelated concurrently-running agents via test_one_failed_agent_call_preserves_fallback_semantics_for_itself_only (sentiment_agent's induced failure falls back correctly while market_agent/news_agent/fundamental_agent, running concurrently, correctly receive LLM enrichment)."
+  },
+  "offline_replay_equivalence": {
+    "method": "Direct unit-level semantic-equivalence proof (concurrency=1 vs concurrency=4, byte-identical) plus the full backend regression suite re-running every existing structured-output-adapter/Alpha/structure/conflict/activation-sensitive test with this slice's code active.",
+    "semantic_mismatches": 0
+  },
+  "pipeline_equivalence": {
+    "nvda": {
+      "dominant_alpha": "A301",
+      "main_conflict": "A101__A304",
+      "status": "UNCHANGED -- no code in alpha_mapper.py, evidence_stance_llm.py, graph_engine/, or conflict_engine/ was touched by this slice."
+    },
+    "qqq_post_fix": {
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "a001_status": "non-detected (unchanged) -- level=candidate",
+      "dominant_alpha": null,
+      "main_conflict": "A301__A304",
+      "status": "UNCHANGED, matches task baseline exactly."
+    },
+    "sndk": {
+      "dominant_alpha": "A201",
+      "main_conflict": "none admitted",
+      "status": "UNCHANGED."
+    },
+    "verification_method": "git diff confirms zero changes to alpha_mapper.py, evidence_stance_llm.py, comqutor_alpha/graph_engine/, or comqutor_alpha/conflict_engine/ -- these outcomes are structurally incapable of having changed as a result of this slice's own diff (structured_output_adapter.py and week2_llm.py only)."
+  },
+  "a001_preservation": {
+    "requirement": "Post-fix QQQ A001 remains non-detected; no effect on directional semantics, negative veto, or positive requirement.",
+    "verification": "alpha_mapper.py and claim_semantics.py (which own the A001 remediation) were not modified by this slice -- confirmed via git diff (identical byte counts to before this task: alpha_mapper.py +89 lines, unchanged). Directly confirmed structured_output_adapter.py contains zero references to alpha_mapper, alpha_specific_invalidation_matched, or alpha_positive_requirement_satisfied (test_structured_adapter_concurrency_touches_no_alpha_mapping_code). tests/test_qqq_a001_mapping_remediation.py re-run and passes unmodified.",
+    "preserved": true
+  },
+  "34_9_benchmark_impact": {
+    "frozen_alpha_match": "166/200, 34 failures, 83.00%",
+    "frozen_polarity": "52/61, 9 failures, 85.25%",
+    "frozen_critical_reversals": 0,
+    "expected_impact": "NONE",
+    "verified_impact": "NONE -- this slice changes zero lines of Alpha-mapping, evidence-stance, or structure-extraction semantic logic; it only reschedules WHEN structured_adapter's own already-existing, already-validated enrichment/fallback decisions are computed and recorded. The 34+9 benchmark's own separate, older holdout sample is not exercised by this task."
+  },
+  "test_results": {
+    "focused_concurrency_tests": {
+      "file": "tests/test_structured_adapter_concurrency.py",
+      "count": 13,
+      "result": "13/13 pass",
+      "stress_test": "25/25 clean repeated runs after fixing one test-only timestamp-comparison bug (not a production issue -- see below)."
+    },
+    "test_only_issue_found_and_fixed": "During stress-testing, test_concurrency_1_and_concurrency_4_produce_identical_semantic_output failed intermittently (2/20 runs) because its own normalize() helper stripped run_id but not the record's timestamp field (a real, expected wall-clock-dependent value, unrelated to concurrency correctness). Fixed by also excluding timestamp from the comparison -- a test-only fix, zero production impact, mirroring the same category of 'test double needed updating for a legitimate reason' finding as Slice 2A's FakeStanceGateway fix.",
+    "existing_structured_adapter_tests": {
+      "file": "tests/test_structured_output_adapter.py + test_canonical_relation_prompt_injection.py + test_week2_llm_markdown_fence_parsing.py + test_phase1b1_boundaries.py",
+      "result": "124/124 pass, unmodified"
+    },
+    "semantic_runtime_tests": "pass, unmodified",
+    "cache_tests": "20/20 pass, unmodified",
+    "evidence_stance_concurrency_tests": "12/12 pass, unmodified (Slice 2A untouched)",
+    "alpha_mapper_tests": "pass, unmodified",
+    "qqq_remediation_tests": "pass, unmodified",
+    "structure_extractor_tests": "46/46 pass, unmodified",
+    "combined_targeted_batch": "457/457 pass (structured-adapter x4 files + concurrency + evidence-stance x2 + llm_runtime + semantic-runtime-integration + semantic-artifact-pipeline + alpha-mapper + A001 + structure-extractor)",
+    "broader_full_backend_suite": "See final response for the complete tally."
+  },
+  "alpha_memory": {
+    "mode": "shadow",
+    "activation_modulation_applied": false,
+    "touched_this_task": false
+  },
+  "no_live_execution": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0
+  },
+  "combined_offline_latency_model": {
+    "label": "OFFLINE ESTIMATE -- NOT a measured production benchmark. Reference: QQQ post-fix (f239a53f-...).",
+    "baseline_total_run_wall_clock_s": 3141,
+    "baseline_semantic_wall_clock_s": 2937.6,
+    "cache_only_estimated_seconds_saved": 15,
+    "stance_concurrency_estimated_seconds_saved": 1187.9,
+    "adapter_concurrency_estimated_seconds_saved": 428.3,
+    "adapter_concurrency_estimate_detail": {
+      "c1_s": 595.3,
+      "c4_s": 167.0,
+      "reduction_pct": 71.95
+    },
+    "double_counting_check": "None of the three savings sources overlap: cache savings apply within alpha_classifier's own stage span; stance-concurrency savings apply within evidence_stance_classifier's own stage span; adapter-concurrency savings apply within structured_adapter's own stage span. B1 established these four semantic stages (structured_adapter, alpha_classifier, evidence_stance_classifier, structure_extractor) run SEQUENTIALLY relative to each other within one run (near-zero gap between stage spans) -- so per-stage savings sum directly into total semantic wall-clock savings without double-counting.",
+    "combined_estimated_semantic_wall_clock_after_s": 1306.4,
+    "combined_estimated_total_wall_clock_after_s": 1509.8,
+    "combined_estimated_total_run_reduction_pct": 51.93,
+    "caveat": "All figures are OFFLINE, simulation-based estimates using persisted historical per-call durations under an idealized bounded-worker scheduler -- not a measured live benchmark. Real Provider network conditions, rate-limiting, and any interaction effects between three concurrently-configured (though sequentially-executing) worker pools have not been tested live."
+  },
+  "production_and_test_files_changed": {
+    "production_files_changed": 2,
+    "production_files": [
+      {
+        "path": "comqutor_alpha/structure_engine/structured_output_adapter.py",
+        "change": "Added _DeferredFinalizeGatewayProxy, _sequence_key_for_buffered_finalization, _run_one_raw_agent_output, and _adapt_run_outputs_concurrently (all new). adapt_run_outputs gained a concurrency parameter (default: env-resolved via resolve_structured_adapter_concurrency()) and now branches to the new concurrent path when eligible; the pre-existing serial loop is preserved byte-for-byte as the concurrency<=1 (or single/empty raw_agent_outputs) fallback. adapt_raw_agent_outputs and _llm_batch_enrichment: UNCHANGED."
+      },
+      {
+        "path": "comqutor_alpha/structure_engine/week2_llm.py",
+        "change": "Added resolve_structured_adapter_concurrency() + DEFAULT_STRUCTURED_ADAPTER_CONCURRENCY(4)/MAX_STRUCTURED_ADAPTER_CONCURRENCY(8) constants, mirroring the existing pattern exactly. New env var: COMQUTOR_WEEK2_ADAPTER_CONCURRENCY."
+      }
+    ],
+    "production_files_NOT_changed": [
+      "comqutor_alpha/structure_engine/alpha_mapper.py (unchanged, verified byte-identical diff to before this task)",
+      "comqutor_alpha/structure_engine/evidence_stance_llm.py (Slice 2A's own concurrency, untouched)",
+      "comqutor_alpha/llm_runtime/cache.py (Slice 2A's lock reused as-is, untouched)",
+      "comqutor_alpha/llm_runtime/session.py, recorder.py, contracts.py (no change to the shared session/recorder contract -- the sequence-ordering fix is entirely local to structured_output_adapter.py's own new proxy/orchestrator)",
+      "comqutor_alpha/structure_engine/structure_extractor.py (untouched, not in scope)"
+    ],
+    "test_files_changed": 1,
+    "test_files": [
+      {
+        "path": "tests/test_structured_adapter_concurrency.py",
+        "change": "NEW. 13 tests covering synthetic timing/overlap, max-in-flight boundedness, deterministic ordering under a slow outlier, semantic equivalence (concurrency=1 vs 4), configured-concurrency=1 serial reproduction, error isolation (one agent fails, others succeed), real-session telemetry/manifest validity + recorder sequencing under concurrency, cache correctness under concurrency, empty/single-agent edge cases, env-var concurrency resolution, and a structural proof that this module never references alpha_mapper.py's A001-remediation functions."
+      }
+    ],
+    "ephemeral_tooling_created": [
+      "scripts/audit_tools/structured_adapter_concurrency_simulation.py",
+      "scripts/audit_tools/structured_adapter_concurrency_simulation_results.json"
+    ]
+  },
+  "baseline_pin_failure_analysis": {
+    "method": "Every new non-passing test beyond the Slice-1/2A-established 70-item pre-existing/expected baseline (69 pre-existing + 1 expected evidence_stance_llm.py pin) was individually traced to root cause -- reported in the final response with the complete, freshly re-run full-suite tally.",
+    "expected_category_for_any_new_pin": "SOURCE_BASELINE_PIN_EXPECTED_CHANGE for any test pinning an approved byte-identical hash for structured_output_adapter.py or week2_llm.py specifically (both intentionally, authorizedly modified by this slice) -- the SAME mechanism already disclosed for alpha_mapper.py (Slice 1) and evidence_stance_llm.py (Slice 2A). Not silently rewritten -- reported explicitly, category and all, per instruction."
+  },
+  "next_step_recommendation": "COMBINED LIVE TIMING VALIDATION for Slice 1 (cache) + Slice 2A (evidence_stance concurrency) + Slice 2B (structured_adapter concurrency) together, as one single, explicitly-authorized live Provider benchmark. Per instruction, DO NOT begin another optimization slice before this measurement. This live benchmark should determine whether John Requirement B can be closed.",
+  "repository_safety": {
+    "branch": "comqutor-structure-layer",
+    "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "commits_created": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  },
+  "immutable_authorities_verified_unchanged": {
+    "v0_2_gold_operational_contract.json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_final_acceptance_table.json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_evidence_failure_analysis.json": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+    "v0_2_final_acceptance_closure.json": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "v0_2_six_run_gold_conformance_audit.json": "65c4f51ed6f96d7d15372ae0b99d1f3860eb1925b7b69641751673f0908cb173",
+    "v0_2_invalidation_condition_coverage.json": "9f8605474f27a22e1c61d70c3cfda52702fca2b5d1bcd42a6be0c0afe0523669",
+    "v0_2_semantic_classifier_cost_latency_audit.json": "e9c562bf0c7b02b4430721e44d962274f2fa8a67fae5d4645b9e99fbb62e73b0",
+    "v0_2_semantic_cache_optimization.json": "1053636bdda6c7322c28dd1ea733d2ce978c33619b53ec40820a4af5affee537",
+    "v0_2_evidence_stance_concurrency_optimization.json": "3efb788832c65d836dfe6f2984a002cbbc65db68da1170892725088e02edfb88"
+  },
+  "success_decision": "PASS",
+  "success_decision_reasoning": "Structured-adapter work units (agent, batch pairs) proven independent from source. Bounded concurrency implemented at the agent level (4, matching the real fan-out shape exactly, verified zero further benefit past 4). Deterministic ordering preserved both for the output records list (original-index-order merge) and the recorder (sequence-sorted deferred finalize, proactively applying the Slice 2A lesson). Semantic mismatches: 0 (proven by direct concurrency=1-vs-4 equivalence test). Pipeline mismatches: 0 (zero code touched on any Alpha-mapping/stance/activation/conflict path). Cache remains correct (Slice 2A's lock reused, verified under a third concurrent caller). Telemetry remains correct (verified via real recorder/manifest test, 15/15 stress-clean). Retry/fallback semantics preserved exactly. A001 preserved (alpha_mapper.py untouched, verified byte-identical). QQQ provenance correct and explicitly pinned, historical and post-fix runs never conflated. All focused (13/13) and regression (457/457 combined targeted batch) tests pass. Measurable, well-evidenced offline latency benefit (72% adapter-stage reduction; combined with Slices 1+2A, ~52% estimated whole-run reduction). Zero Provider calls, zero fresh research throughout.",
+  "evaluation_status": "V0_2_JOHN_REQUIREMENT_B_PHASE_B2_SLICE_2B_STRUCTURED_ADAPTER_CONCURRENCY_COMPLETE"
+}

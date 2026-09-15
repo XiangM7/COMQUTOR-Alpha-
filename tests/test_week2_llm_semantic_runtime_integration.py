@@ -19,6 +19,7 @@ from comqutor_alpha.structure_engine.week2_llm import (
     DEFAULT_TIMEOUT_SECONDS,
     Week2LLMGateway,
 )
+from comqutor_alpha.llm_runtime.cache import InMemoryLLMResponseCache, NullLLMResponseCache
 from tests.llm_runtime.fakes import InMemoryFakeCache
 
 
@@ -455,3 +456,140 @@ def test_recorder_failure_does_not_change_caller_result_or_repeat_provider(
     assert model.calls == 1
     assert session.incomplete is True
     assert "SEMANTIC_RECORDER_APPEND_FAILED" in session.degraded_reason_codes
+
+
+# ---------------------------------------------------------------------------
+# John Requirement B, Phase B2 Slice 1: real InMemoryLLMResponseCache wired
+# into SemanticRuntimeSession. These tests exercise the PRODUCTION cache
+# backend (not the test-only InMemoryFakeCache above) through the exact same
+# Week2LLMGateway/SemanticRuntimeSession machinery every real research run
+# uses -- proving the production class behaves identically to the fake this
+# file's existing tests already validated the *session-level* cache-hit
+# semantics against.
+# ---------------------------------------------------------------------------
+
+
+def test_real_inmemory_cache_avoids_second_provider_call_for_identical_claim(
+    tmp_path: Path,
+) -> None:
+    """Cache hit avoids the Provider call (Section 24 item 1); repeated
+    exact request returns an identical structured result (item 9)."""
+    model = _SequenceModel([json.dumps(_enrichment())])
+    cache = InMemoryLLMResponseCache()
+    gateway, session = _runtime_gateway(tmp_path, model, cache=cache)
+
+    first = adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=gateway)
+    second = adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=gateway)
+
+    assert first == second
+    assert model.calls == 1
+    assert gateway.call_count == 1
+    records = session.recorder.read_all()
+    assert records[1]["cache"]["hit"] is True
+    assert records[1]["provider_status"] == "not_called"
+
+
+def test_real_inmemory_cache_miss_invokes_provider_for_a_different_claim(tmp_path: Path) -> None:
+    """Cache miss invokes the Provider (Section 24 item 2); a semantic
+    input difference prevents a collision (item 6)."""
+    model = _SequenceModel([json.dumps(_enrichment("AI demand drives GPU demand.")), json.dumps(_enrichment("A different claim entirely."))])
+    cache = InMemoryLLMResponseCache()
+    gateway, session = _runtime_gateway(tmp_path, model, cache=cache)
+
+    adapt_raw_agent_outputs(_raw_record("AI demand drives GPU demand."), "run-semantic", "NVDA", llm_gateway=gateway)
+    adapt_raw_agent_outputs(_raw_record("A different claim entirely."), "run-semantic", "NVDA", llm_gateway=gateway)
+
+    assert model.calls == 2
+    records = session.recorder.read_all()
+    assert [r["cache"]["hit"] for r in records] == [False, False]
+
+
+def test_real_inmemory_cache_never_caches_a_rejected_or_fallback_result(tmp_path: Path) -> None:
+    """Invalid/rejected/fallback results are not cached (Section 24 item 4)."""
+    model = _SequenceModel(["not valid json", json.dumps(_enrichment())])
+    cache = InMemoryLLMResponseCache()
+    gateway, session = _runtime_gateway(tmp_path, model, cache=cache, max_retries=0)
+
+    adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=gateway)
+    adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=gateway)
+
+    # The first call failed validation and used the deterministic fallback;
+    # nothing was cached, so the second identical request must re-invoke
+    # the Provider rather than reuse a bad/absent entry.
+    assert model.calls == 2
+
+
+def test_real_inmemory_cache_task_isolation_end_to_end(tmp_path: Path) -> None:
+    """A response cached for alpha_classifier must never satisfy a request
+    for a different task (Section 19), exercised through the real
+    map_claim_to_alpha (alpha_classifier) and extract_structures_from_records
+    (structure_extractor) call paths sharing one cache instance."""
+    cache = InMemoryLLMResponseCache()
+    alpha_model = _SequenceModel(['{"decision":"none","selected_alpha_id":null}'])
+    alpha_gateway, _ = _runtime_gateway(tmp_path / "alpha", alpha_model, cache=cache)
+    map_claim_to_alpha(
+        _claim_record(),
+        classifier_enabled=True,
+        llm_gateway=alpha_gateway,
+    )
+    assert alpha_model.calls == 1
+
+    structure_model = _SequenceModel([json.dumps(_edge_response())])
+    structure_gateway, _ = _runtime_gateway(tmp_path / "structure", structure_model, cache=cache)
+    extract_structures_from_records(
+        [_claim_record()],
+        llm_gateway=structure_gateway,
+    )
+    # structure_extractor's own request for the SAME underlying claim text
+    # must still hit the Provider -- it is a different task, and therefore
+    # a different cache key, even though it shares the one cache instance.
+    assert structure_model.calls == 1
+
+
+def test_two_run_local_cache_instances_never_share_state(tmp_path: Path) -> None:
+    """Cross-run isolation (Section 17): a fresh InMemoryLLMResponseCache
+    per run, exactly as run_research_request now constructs one per call,
+    means a run cannot observe another run's cached answer -- directly
+    proving the QQQ-historical-cannot-contaminate-QQQ-post-fix property at
+    the cache-instance level, independent of ticker/run_id content."""
+    model_a = _SequenceModel([json.dumps(_enrichment())])
+    model_b = _SequenceModel([json.dumps(_enrichment())])
+    gateway_a, _ = _runtime_gateway(tmp_path / "run-a", model_a, cache=InMemoryLLMResponseCache())
+    gateway_b, _ = _runtime_gateway(tmp_path / "run-b", model_b, cache=InMemoryLLMResponseCache())
+
+    adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=gateway_a)
+    adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=gateway_b)
+
+    # Identical claim, identical everything -- but two separate cache
+    # instances (one per simulated run) -- both must independently call
+    # the Provider exactly once each; neither ever observes the other's hit.
+    assert model_a.calls == 1
+    assert model_b.calls == 1
+
+
+def _without_timestamp(claims):
+    return [{k: v for k, v in claim.items() if k != "timestamp"} for claim in claims]
+
+
+def test_cache_on_and_cache_off_produce_identical_semantic_output(tmp_path: Path) -> None:
+    """Zero-semantic-change test (Section 21/24 item 10): for the same
+    stored Provider result sequence, the only intended difference between
+    cache OFF and cache ON is the number of external Provider calls."""
+    off_model = _SequenceModel([json.dumps(_enrichment()), json.dumps(_enrichment())])
+    off_gateway, _ = _runtime_gateway(tmp_path / "off", off_model, cache=NullLLMResponseCache())
+    off_first = adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=off_gateway)
+    off_second = adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=off_gateway)
+
+    on_model = _SequenceModel([json.dumps(_enrichment())])
+    on_gateway, _ = _runtime_gateway(tmp_path / "on", on_model, cache=InMemoryLLMResponseCache())
+    on_first = adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=on_gateway)
+    on_second = adapt_raw_agent_outputs(_raw_record(), "run-semantic", "NVDA", llm_gateway=on_gateway)
+
+    assert (
+        _without_timestamp(off_first)
+        == _without_timestamp(off_second)
+        == _without_timestamp(on_first)
+        == _without_timestamp(on_second)
+    )
+    assert off_model.calls == 2  # cache OFF: every request reaches the Provider
+    assert on_model.calls == 1  # cache ON: the second, identical request is served from cache

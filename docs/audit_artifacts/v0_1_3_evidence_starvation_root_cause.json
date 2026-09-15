@@ -1,0 +1,708 @@
+{
+  "schema_version": "v0_1_3_evidence_starvation_root_cause.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_unchanged": true,
+  "gold_validity_unchanged": true,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "test_files_changed": [],
+  "commit": false,
+  "push": false,
+  "gold_validity_reconfirmation": [
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A102",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "track": "SYSTEM_RECOVERY_PRIORITY"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A201",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "track": "SYSTEM_RECOVERY_PRIORITY"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A101",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "track": "SYSTEM_RECOVERY_PRIORITY"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A102",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "track": "SYSTEM_RECOVERY_PRIORITY"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha_id": "A102",
+      "gold_class": "REVIEW_CANDIDATE",
+      "confidence": "LOW",
+      "thematic_association_risk": true,
+      "track": "BENCHMARK_REVIEW_ONLY"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A102",
+      "gold_class": "STRONG_GOLD",
+      "confidence": "HIGH",
+      "thematic_association_risk": false,
+      "track": "SYSTEM_RECOVERY_PRIORITY"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A201",
+      "gold_class": "SUPPORTED_GOLD",
+      "confidence": "MEDIUM",
+      "thematic_association_risk": true,
+      "track": "SYSTEM_RECOVERY_PRIORITY"
+    }
+  ],
+  "system_recovery_priority_count": 6,
+  "benchmark_review_only_count": 1,
+  "per_case": [
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "pipeline_trace": {
+        "external_fact_expected": "PRESENT (external) -- Jensen Huang: 'the product is tokens, the workload is inference'; 10x YoY inference-token growth (Gold Validity Audit)",
+        "research_agent_raw_source": "PARTIAL -- NVDA's raw research corpus contains ZERO mentions of the word 'token' anywhere, and 8 'inference' mentions, ALL framed as a COMPETITIVE THREAT (custom ASICs from Google/Amazon/Microsoft eroding NVDA's inference-market dominance), never as a bullish 'inference is exploding and NVDA captures it' narrative",
+        "extracted_claim_fact": "PRESENT (8 claims mention inference, matched_alpha=A102 for several)",
+        "alpha_mapper_candidate_scores": "PRESENT -- 614 candidate-scoring attempts for A102 across the run",
+        "matched_alpha": "PRESENT for several (bear_researcher x3, research_manager, fundamental_agent)",
+        "b1_stance": "REJECTED -- all A102 candidates show eligible=false; the competitive-threat framing does not assert supportive/bullish inference-demand growth for NVDA",
+        "ticker_specific_determination": "NOT_RECORDED (moot -- rejected upstream at eligibility)",
+        "source_role_classification": "NOT_RECORDED (moot)",
+        "fact_group_dedupe": "NOT_RECORDED (moot -- zero facts ever reached grouping)",
+        "canonical_evidence_qualification": "ABSENT -- qualified_unique_evidence_fact_count=0",
+        "final_activation_score": 0.0
+      },
+      "first_meaningful_break": "AT B1 STANCE / SOURCE CONTENT -- NVDA's research agents discussed 'inference' extensively (8 claims) but exclusively through a competitive-risk lens (custom ASICs threatening NVDA), never through the real-world bullish 'inference explosion benefits NVDA' narrative found externally. The break is not a classifier defect (the deterministic eligibility/stance rules correctly rejected genuinely non-supportive competitive-risk content) -- it is that the SPECIFIC real-world bullish narrative never entered this run's research corpus at all.",
+      "primary_subtype": "B1",
+      "secondary_subtype": null,
+      "external_fact_match": "NOT_FOUND_IN_RUN_CORPUS (as a supportive/bullish assertion) -- a related but inverted/competitive-risk framing of 'inference' IS present",
+      "quantity_vs_quality_funnel": {
+        "raw_relevant_claims": 8,
+        "mapped_to_A102": 6,
+        "supports_alpha_stance": 0,
+        "ticker_specific": 0,
+        "unique_qualifying": 0,
+        "final_qualifying": 0
+      },
+      "primary_secondary_attrition": "N/A -- rejection occurred at stance/eligibility, before Primary/Secondary role qualification was ever reached",
+      "ticker_specificity_attrition": "N/A -- moot, rejected upstream",
+      "unique_evidence_agent_independence": "N/A -- zero facts reached this stage",
+      "high_value_unclassified_cross_check": "No candidate found in the existing recovery audit for NVDA A102 specifically -- consistent with this trace's own finding that the competitive-threat claims were correctly excluded, not hidden/missed",
+      "counterfactual": {
+        "one_fact": "UNKNOWN precise (all components at 0; a single strong bullish inference-specific fact would plausibly move evidence_quality/agent_independence/ticker_specificity from 0, but exact magnitude is not reconstructable without re-running the scorer)",
+        "two_facts": "UNKNOWN precise",
+        "minimum_facts_to_cross_50": "UNKNOWN (non-linear; qualitatively, given ALL SIX components are currently 0, meaningfully more than one fact is very likely required)"
+      },
+      "judgment": "RESEARCH_COVERAGE_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE",
+      "next_investigation_category": "research acquisition"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha_id": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "pipeline_trace": {
+        "external_fact_expected": "PRESENT (external) -- NVDA's own explosive DC/revenue growth is real, but Gold Validity Audit itself notes this is better captured by A101/A103 than an independent 'supercycle'",
+        "research_agent_raw_source": "PRESENT -- NVDA's real growth story (DC revenue $89B) is extensively discussed, but almost entirely mapped to A101/A103, not A201",
+        "extracted_claim_fact": "PRESENT -- 2 claims qualify for A201, but both are about inventory/working-capital RISK ('$25.8B inventory build... exposes NVIDIA to writedowns if demand softens'), not supercycle growth",
+        "alpha_mapper_candidate_scores": "PRESENT",
+        "matched_alpha": "A201 for these 2 specific claims (fundamental_agent, PRIMARY_RESEARCH)",
+        "b1_stance": "supports_alpha (qualifying)",
+        "ticker_specific_determination": "REJECTED (NO_TICKER_SPECIFIC_EVIDENCE) -- see Section 12 detail below",
+        "source_role_classification": "PRIMARY_RESEARCH, PRIMARY_QUALIFIED",
+        "fact_group_dedupe": "PRESENT, 2 distinct groups, 1 distinct agent (fundamental_agent) for both",
+        "canonical_evidence_qualification": "QUALIFIED (2 facts) but weak and non-ticker-specific",
+        "final_activation_score": 18.5807
+      },
+      "first_meaningful_break": "AT ALPHA MAPPING -- the claims that genuinely represent NVDA's real 'supercycle'-type evidence (DC revenue acceleration) were mapped to A101/A103 instead; only tangential inventory-risk content ended up attributed to A201, which is thematically adjacent but not the actual Gold-supporting fact.",
+      "primary_subtype": "B3",
+      "secondary_subtype": "B4",
+      "external_fact_match": "FOUND_EXTRACTED_NOT_QUALIFIED_FOR_A201 -- the real supporting fact exists and was extracted and qualified, but for A101/A103, not A201",
+      "quantity_vs_quality_funnel": {
+        "raw_relevant_claims": "not separately counted (overlaps with A101/A103 pool)",
+        "mapped_to_A201": 2,
+        "supports_alpha_stance": 2,
+        "ticker_specific": 0,
+        "unique_qualifying": 2,
+        "final_qualifying": 2
+      },
+      "primary_secondary_attrition": "None -- both qualifying claims are Primary; no Secondary exclusion involved",
+      "ticker_specificity_attrition": {
+        "note": "Both A201 claims discuss NVDA's own inventory/receivables in dollar terms specific to the company ('$25.8B inventory build and $40.7B receivables') -- these ARE substantively NVDA-specific in content, yet ticker_specific_evidence_count=0",
+        "classification": "QUESTIONABLE",
+        "example": "'Supply chain / inventory risk: The $25.8B inventory build and $40.7B receivables expose NVIDIA to potential writedowns...' -- this names NVIDIA's own specific balance-sheet figures but the literal string 'NVIDIA' does not appear until later in a way the strict token-boundary check may or may not catch depending on exact phrasing; requires the same company_names=() root-cause check as documented for MSFT/AMD below."
+      },
+      "unique_evidence_agent_independence": {
+        "unique_fact_groups": 2,
+        "distinct_agents": 1,
+        "note": "Both from fundamental_agent -- genuine single-source concentration, not duplication"
+      },
+      "high_value_unclassified_cross_check": "No candidate found in the existing recovery audit for NVDA A201",
+      "counterfactual": {
+        "one_fact": "UNKNOWN precise (ticker_specificity raw currently 0; if the existing 2 facts were recognized as ticker-specific, ticker_specificity component could rise toward 100, contributing an estimated +10, moving score toward ~28.6 -- still well short of 50)",
+        "two_facts": "UNKNOWN precise, but the local_structure_support component (currently 0, worth up to +20) and additional independent Primary evidence would both need improvement simultaneously to plausibly cross 50",
+        "minimum_facts_to_cross_50": "UNKNOWN (non-linear); qualitatively more than 2 given the current 31.4pp gap"
+      },
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE",
+      "next_investigation_category": "Alpha mapping"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha_id": "A101",
+      "alpha_name": "AI Expansion",
+      "pipeline_trace": {
+        "external_fact_expected": "PRESENT (external, INDIRECT) -- Mag7 ~50% of QQQ weight, 'unusually sensitive to the AI capex cycle' (Gold Validity Audit; itself flagged thematic-association-risk given QQQ has no first-party AI operations)",
+        "research_agent_raw_source": "PRESENT -- multiple claims discuss AI capex driving QQQ's constituent holdings ('accelerating AI capex cycle', 'semiconductor complex rallying', 'GPU financing deal expands addressable market for QQQ's core holdings')",
+        "extracted_claim_fact": "PRESENT -- 4 raw claims",
+        "alpha_mapper_candidate_scores": "PRESENT",
+        "matched_alpha": "A101 for all 4",
+        "b1_stance": "supports_alpha for the 1 qualifying claim; the other 3 also stance-qualify but fail downstream",
+        "ticker_specific_determination": "REJECTED for 3 of 4 (SECONDARY_NOT_TICKER_SPECIFIC) -- these name individual constituents (Intel, AMD, Marvell) rather than 'QQQ' literally",
+        "source_role_classification": "All 4 are SECONDARY_DECISION_OR_DEBATE (bull_researcher, conservative_risk_analyst, portfolio_manager) -- no PRIMARY_RESEARCH claim exists for this Alpha in this run",
+        "fact_group_dedupe": "4 distinct singleton groups",
+        "canonical_evidence_qualification": "Only 1 of 4 survives (SECONDARY_QUALIFIED_CAUSAL_EVIDENCE)",
+        "final_activation_score": 32.2068
+      },
+      "first_meaningful_break": "AT TICKER-SPECIFIC DETERMINATION, compounded by an architectural gap: an ETF's real AI exposure is, by construction, always going to be phrased in terms of its constituent companies (Intel, AMD, Marvell, 'QQQ's core holdings') rather than the ticker 'QQQ' itself -- and the current _is_ticker_specific() check has no concept of ETF-constituent equivalence.",
+      "primary_subtype": "B4",
+      "secondary_subtype": "B5",
+      "external_fact_match": "FOUND_EXTRACTED_NOT_QUALIFIED -- the real, substantively on-topic facts exist and were extracted, matched, and stance-qualified, but 3 of 4 fail the ticker-specificity bar",
+      "quantity_vs_quality_funnel": {
+        "raw_relevant_claims": 4,
+        "mapped_to_A101": 4,
+        "supports_alpha_stance": 4,
+        "ticker_specific": 1,
+        "unique_qualifying": 1,
+        "final_qualifying": 1
+      },
+      "primary_secondary_attrition": {
+        "note": "All 4 relevant claims are Secondary-sourced (debate/risk-analyst commentary) -- NO Primary-Research-agent claim exists discussing AI exposure for QQQ in this run at all",
+        "classification": "CORRECT_SECONDARY_EXCLUSION for the 3 rejected (they are genuinely Secondary AND fail the additional ticker-specific bar Secondary evidence requires) -- but the ABSENCE of any Primary-sourced claim on this topic is itself notable and separately diagnosed as a research-coverage question"
+      },
+      "ticker_specificity_attrition": {
+        "rejected_examples": [
+          "'You point to Intel +4%, AMD +3%, and Marvell +6% as proof that the market is rewarding tangible, AI-driven earnings' -- names individual constituent tickers, never 'QQQ'",
+          "'a semiconductor complex that's rallying into rate headwinds' -- describes the sector QQQ is exposed to, never names QQQ"
+        ],
+        "classification": "QUESTIONABLE -- these ARE the real, substantive mechanism by which QQQ's price is driven (its constituents), and a reasonable ETF-aware evidentiary standard might recognize named-constituent evidence as ticker-relevant for an index product. Under the CURRENT, unmodified ticker-specificity contract (designed for single operating companies), the rejection is technically consistent, but the underlying architecture was not designed with ETF semantics in mind -- this is a genuine product-design question, not a clear rule violation."
+      },
+      "unique_evidence_agent_independence": {
+        "unique_fact_groups": 4,
+        "distinct_agents": "up to 3 possible, but only 1 survives after ticker-specific filtering",
+        "note": "Not a duplication problem -- genuine distinct claims from distinct agents, lost to the ticker-specificity gate, not to dedupe"
+      },
+      "high_value_unclassified_cross_check": "1 relevant candidate found in the existing recovery audit (news_agent claim re: 'AI capital-expenditure narrative... mega-cap technology complex'), independently judged CORRECT_NONE (compound background-context sentence, generic complex-wide narrative). No hidden recoverable evidence found.",
+      "counterfactual": {
+        "one_fact": "UNKNOWN precise",
+        "two_facts": "UNKNOWN precise",
+        "minimum_facts_to_cross_50": "UNKNOWN (non-linear); the 17.8pp gap combined with a completely-zero local_structure_support component suggests more than 1-2 facts alone would not suffice without also addressing structure"
+      },
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE",
+      "next_investigation_category": "ticker specificity (ETF/index-product semantics specifically)"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "pipeline_trace": {
+        "external_fact_expected": "PRESENT (external) -- Azure '10 billion tokens per minute, 52x YoY' (Gold Validity Audit)",
+        "research_agent_raw_source": "PRESENT -- 'AI Monetization (Copilot & AI Services): Microsoft's AI products... are driving inference demand and enterprise adoption' (fundamental_agent, Primary)",
+        "extracted_claim_fact": "PRESENT, high quality -- factor_score=1.0, matched_keywords=['inference'], matched_factors=['Inference Demand']",
+        "alpha_mapper_candidate_scores": "PRESENT -- eligible=true, evidence_stance=supports_alpha via GENUINE LLM CLASSIFICATION (not deterministic fallback), stance_method='llm'",
+        "matched_alpha": "A102 -- correct, clean, high-confidence match",
+        "b1_stance": "supports_alpha (LLM-classified, high confidence, no fallback)",
+        "ticker_specific_determination": "REJECTED (NO_TICKER_SPECIFIC_EVIDENCE) -- DESPITE the claim literally containing the word 'Microsoft'",
+        "source_role_classification": "PRIMARY_RESEARCH, PRIMARY_QUALIFIED. A near-duplicate Secondary claim (bull_researcher, restating the same fact) was correctly excluded as SECONDARY_DUPLICATE_OF_PRIMARY.",
+        "fact_group_dedupe": "Correct -- 1 unique fact-group after removing the Secondary restatement",
+        "canonical_evidence_qualification": "QUALIFIED (1 fact) but flagged non-ticker-specific and insufficiently independent/unique",
+        "final_activation_score": 34.9674
+      },
+      "first_meaningful_break": "AT TICKER-SPECIFIC DETERMINATION -- and this is CODE-VERIFIED, not inferred: independently re-tested comqutor_alpha/graph_engine/activation_scorer_v2.py::_token_boundary_match('Microsoft', <this exact claim text>) returns True. The production call site (comqutor_alpha/graph_engine/pipeline.py, score_alpha_activations_v2) NEVER passes a company_names argument at all, so it defaults to company_names=() (confirmed identical to the documented default used in comqutor_alpha/api/unclassified_findings.py and comqutor_alpha/conflict_engine/conflict_admissibility.py). _is_ticker_specific() therefore can ONLY ever match the bare ticker string ('MSFT') -- never the real company name ('Microsoft') that TradingAgents' own research prose actually uses. This is a concrete, code-and-data-verified mechanism, not speculation.",
+      "primary_subtype": "B4",
+      "secondary_subtype": "B6",
+      "external_fact_match": "FOUND_RAW_AND_EXTRACTED_AND_QUALIFIED -- everything in the pipeline worked correctly up to and including B1 stance classification; only the ticker-specificity check (fed by an always-empty company_names parameter) rejected it despite the claim literally naming 'Microsoft'.",
+      "quantity_vs_quality_funnel": {
+        "raw_relevant_claims": 2,
+        "mapped_to_A102": 2,
+        "supports_alpha_stance": 1,
+        "ticker_specific": 0,
+        "unique_qualifying": 1,
+        "final_qualifying": 1
+      },
+      "primary_secondary_attrition": {
+        "note": "The ONE Secondary claim (bull_researcher restating the same Copilot/inference fact) was CORRECTLY excluded as SECONDARY_DUPLICATE_OF_PRIMARY -- this is the dedupe rule working exactly as designed, not an attrition problem.",
+        "classification": "CORRECT_SECONDARY_EXCLUSION"
+      },
+      "ticker_specificity_attrition": {
+        "rejected_example": "'AI Monetization (Copilot & AI Services): Microsoft's AI products (Microsoft 365 Copilot, GitHub Copilot, Azure AI services) are driving inference demand and enterprise adoption, supporting the re-acceleration in revenue growth.'",
+        "classification": "LIKELY_WRONG",
+        "proof": "Directly tested: _token_boundary_match('Microsoft', <claim text>) == True in isolation. The rejection stems entirely from company_names=() never being populated in production, not from the claim's actual content. This is the single most concrete, reproducible ticker-specificity finding in this entire audit."
+      },
+      "unique_evidence_agent_independence": {
+        "unique_fact_groups": 1,
+        "distinct_agents": 1,
+        "note": "Genuinely thin -- only ONE independent Primary source discussed this specific fact in the entire run; not a duplication artifact, a real single-source-concentration limitation"
+      },
+      "high_value_unclassified_cross_check": "1 relevant candidate found in the existing recovery audit (bear_researcher quoting-then-countering the same Copilot/inference claim), independently judged CORRECT_NONE (a rhetorical rebuttal, not an independent assertion). No hidden additional recoverable evidence found beyond the 1 already-qualified fact.",
+      "counterfactual": {
+        "ticker_specificity_fix_only": "EXACTLY RECONSTRUCTABLE: if ticker_specific_evidence_count rose from 0/1 to 1/1, ticker_specificity component raw would rise from 0 to 100 (contribution 0 -> +10.0). New score = 34.9674 + 10.0 = 44.9674 -- still SHORT of 50 by ~5.03pp. Ticker-specificity fix ALONE is NOT sufficient.",
+        "one_additional_fact": "UNKNOWN precise (would also need to raise evidence_quality/agent_independence, both currently low due to single-source concentration)",
+        "two_additional_facts": "UNKNOWN precise",
+        "minimum_facts_to_cross_50": "UNKNOWN precise, but qualitatively: fixing ticker-specificity closes about 2/3 of the current gap; the remainder requires either 1 more independent qualifying fact or an unrelated component improvement"
+      },
+      "judgment": "DESIGN_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE",
+      "next_investigation_category": "ticker specificity (company_names population)"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "pipeline_trace": {
+        "external_fact_expected": "PRESENT (external) -- MI350/MI450 explicitly engineered/benchmarked FOR INFERENCE (FP4 precision) vs. training (FP8) (Gold Validity Audit)",
+        "research_agent_raw_source": "PRESENT -- 7 raw claims specifically discuss AMD's MI300/MI350/MI400 Instinct series GPUs (sentiment_agent x4, fundamental_agent, bull_researcher, research_manager)",
+        "extracted_claim_fact": "PRESENT -- e.g. fundamental_agent: 'Data Center / AI Accelerators (MI-series GPUs): The massive revenue acceleration and margin expansion strongly suggest AMD's Instinct MI300/MI400 series AI accelerators are ramping rapidly, competing with NVIDIA in the AI training/inference market.'",
+        "alpha_mapper_candidate_scores": "PRESENT -- this exact claim WAS evaluated as an A102 candidate",
+        "matched_alpha": "A101 (not A102) for this claim -- the claim bundles 'training/inference' together as one compound market, without isolating an inference-SPECIFIC change assertion",
+        "b1_stance": "A102 candidate: eligible=false, rejection_reason='AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate', evidence_stance='mentions_alpha'",
+        "ticker_specific_determination": "NOT_RECORDED for this claim (moot, rejected upstream at the AI hard gate)",
+        "source_role_classification": "NOT_RECORDED (moot)",
+        "fact_group_dedupe": "NOT_RECORDED (moot)",
+        "canonical_evidence_qualification": "The ONE claim that DID qualify for A102 (news_agent: 'the broader trend toward inference workloads and AI agents... supports sustained compute demand across the ecosystem') is GENERIC/industry-wide, not AMD-specific",
+        "final_activation_score": 35.6327
+      },
+      "first_meaningful_break": "AT B1 STANCE / SEMANTIC GATE -- AMD's real, product-specific MI-series evidence (7 claims) genuinely entered the corpus (not a source-acquisition gap), but the AI hard-gate correctly rejected the strongest candidate because it bundles 'training/inference' as one compound market rather than isolating an inference-DISTINCT-FROM-TRAINING assertion (the exact technical distinction -- FP4-for-inference vs. FP8-for-training -- that made this genuinely STRONG_GOLD externally). The ONE claim that did pass is generic industry-wide commentary, not AMD-specific. AMD's own research never captured the precise inference/training precision-format distinction found in real external sources.",
+      "primary_subtype": "B1",
+      "secondary_subtype": "B3",
+      "external_fact_match": "FOUND_RAW_AND_EXTRACTED_NOT_QUALIFIED_FOR_A102 -- AMD's MI-series evidence is real and present, but the specific inference-vs-training technical granularity needed to satisfy A102's own (correctly strict) semantic gate was never captured; what was captured mapped more naturally to A101.",
+      "quantity_vs_quality_funnel": {
+        "raw_relevant_claims": 7,
+        "mapped_to_A102_as_candidate": 7,
+        "supports_alpha_stance_for_A102": 1,
+        "ticker_specific": 0,
+        "unique_qualifying": 1,
+        "final_qualifying": 1
+      },
+      "primary_secondary_attrition": "Not the binding constraint here -- the qualifying claim (news_agent) IS Primary; the 6 MI-series-specific claims were excluded by the AI semantic gate / alpha mapping, not by Primary/Secondary rules",
+      "ticker_specificity_attrition": {
+        "note": "The 1 qualifying claim ('broader trend... across the ecosystem') is correctly judged non-ticker-specific -- it genuinely does not name AMD.",
+        "classification": "CORRECT"
+      },
+      "unique_evidence_agent_independence": {
+        "unique_fact_groups": 1,
+        "distinct_agents": 1,
+        "note": "Not a duplication issue -- the 7 real MI-series claims simply never independently qualified for A102 specifically"
+      },
+      "high_value_unclassified_cross_check": "No candidate found in the existing recovery audit for AMD A102 specifically",
+      "counterfactual": {
+        "one_fact": "UNKNOWN precise",
+        "two_facts": "UNKNOWN precise",
+        "minimum_facts_to_cross_50": "UNKNOWN (non-linear); qualitatively, an AMD-specific, inference-distinct-from-training fact passing the AI hard gate cleanly would materially help given local_structure_support is already partially credited (40/100) and evidence_quality is moderate (22.76)"
+      },
+      "judgment": "RESEARCH_COVERAGE_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE",
+      "next_investigation_category": "research acquisition (prompt/coverage for inference-vs-training technical distinctions specifically)"
+    },
+    {
+      "ticker": "AMD",
+      "alpha_id": "A201",
+      "alpha_name": "Semiconductor Supercycle",
+      "pipeline_trace": {
+        "external_fact_expected": "PRESENT (external) -- AI accelerator TAM >45%/yr to ~$1.4T by 2030 (Gold Validity Audit, itself flagged thematic-association-risk: AMD's own framing is competitive/product-category, not industry-cycle)",
+        "research_agent_raw_source": "PRESENT -- financial-statement line items (margin, PPE, working capital) plus one claim about a DIFFERENT COMPANY entirely",
+        "extracted_claim_fact": "PRESENT -- 5 claims: net margin trend, working capital, 'Memory/storage: Silicon Motion up 186%... SanDisk soaring', net PPE growth, 'Client PC: Recovery... Ryzen processors'",
+        "alpha_mapper_candidate_scores": "PRESENT, all matched_alpha=A201",
+        "matched_alpha": "A201 for all 5 -- including the Silicon Motion/SanDisk claim, which is about ENTIRELY DIFFERENT COMPANIES",
+        "b1_stance": "supports_alpha for all 5 (deterministic keyword/factor matching on generic 'semiconductor'/'capacity'/'manufacturing' vocabulary)",
+        "ticker_specific_determination": "REJECTED for all 5 (NO_TICKER_SPECIFIC_EVIDENCE)",
+        "source_role_classification": "All 5 PRIMARY_RESEARCH (fundamental_agent x4, news_agent x1), all PRIMARY_QUALIFIED",
+        "fact_group_dedupe": "5 distinct groups",
+        "canonical_evidence_qualification": "QUALIFIED (5 facts) but none ticker-specific and none genuinely about an AMD-specific semiconductor cycle",
+        "final_activation_score": 25.7333
+      },
+      "first_meaningful_break": "AT ALPHA MAPPING (for the Silicon Motion/SanDisk claim, a genuine cross-company mapping error) AND AT TICKER-SPECIFIC DETERMINATION (for the remaining 4 -- generic financial-statement line items and a 'Ryzen processors' product-brand mention, none containing the literal string 'AMD', with company_names=() preventing 'Advanced Micro Devices' or 'Ryzen' from ever registering as AMD-specific).",
+      "primary_subtype": "B3",
+      "secondary_subtype": "B4",
+      "external_fact_match": "NOT_FOUND_IN_RUN_CORPUS as a genuine AMD-specific semiconductor-supercycle assertion -- the 5 qualifying claims are either generic financial-statement items, a product-brand reference not text-matched to the ticker, or (in one case) a claim about a completely different company.",
+      "quantity_vs_quality_funnel": {
+        "raw_relevant_claims": 5,
+        "mapped_to_A201": 5,
+        "supports_alpha_stance": 5,
+        "ticker_specific": 0,
+        "unique_qualifying": 5,
+        "final_qualifying": 5
+      },
+      "primary_secondary_attrition": "None -- all 5 are Primary; Primary/Secondary rules are not the binding constraint here",
+      "ticker_specificity_attrition": {
+        "rejected_examples": [
+          "'Client PC: Recovery in the PC market with Ryzen processors.' -- names AMD's own product brand 'Ryzen' but never the literal string 'AMD'",
+          "'Memory/storage: Silicon Motion up 186% in a year on NAND strength; SanDisk soaring on S&P 100 inclusion.' -- this is not merely non-ticker-specific, it is substantively about DIFFERENT COMPANIES entirely and arguably should never have been matched_alpha=A201 for AMD in the first place"
+        ],
+        "classification": "MIXED -- 'Ryzen processors' is QUESTIONABLE (a real product-brand reference, blocked only by company_names=() never registering 'Ryzen'/'Advanced Micro Devices'); the Silicon Motion/SanDisk claim is LIKELY_WRONG at the Alpha-mapping stage, independent of ticker-specificity entirely."
+      },
+      "unique_evidence_agent_independence": {
+        "unique_fact_groups": 5,
+        "distinct_agents": 2,
+        "note": "Not a duplication problem -- genuine distinct claims, but weak in substance (generic financial line items, one cross-company error) rather than genuine AMD-specific supercycle content"
+      },
+      "high_value_unclassified_cross_check": "No candidate found in the existing recovery audit for AMD A201",
+      "counterfactual": {
+        "one_fact": "UNKNOWN precise",
+        "two_facts": "UNKNOWN precise",
+        "minimum_facts_to_cross_50": "UNKNOWN (non-linear); the 24.3pp gap is the second-largest of the six system-recovery cases, driven primarily by evidence_quality raw=4.0 (very low) despite 5 nominally-qualifying facts -- suggesting the facts themselves carry little real evidentiary weight even before the ticker-specificity question"
+      },
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE",
+      "next_investigation_category": "Alpha mapping (cross-company claim attribution) and ticker specificity (company_names population)"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha_id": "A102",
+      "alpha_name": "Inference Explosion",
+      "note": "AUDITED FOR COMPLETENESS ONLY -- NOT a system-recovery target per the Gold Validity Audit's REVIEW_CANDIDATE classification (thematic-association risk: SNDK's real driver is AI-driven STORAGE demand, which more precisely fits A103, not A102's compute/inference-specific mechanism).",
+      "pipeline_trace": {
+        "score": 0.0,
+        "raw_supporting_claim_count": 0,
+        "mapper_candidate_appearance_count": 819,
+        "mapper_candidate_eligible_count": 0
+      },
+      "primary_subtype": "B8 (true evidence vacuum -- consistent with the Gold Validity Audit's own finding that this Alpha may not be a well-fitted expectation for this ticker at all)",
+      "judgment": "GOLD_REVIEW_ONLY",
+      "recoverability": "SHOULD_NOT_TARGET",
+      "next_investigation_category": "no system change / Gold review (already flagged in the Gold Validity Audit)"
+    }
+  ],
+  "b_subtype_counts_all_7": {
+    "B1": 2,
+    "B2": 0,
+    "B3": 2,
+    "B4": 2,
+    "B5": 0,
+    "B6": 0,
+    "B7": 0,
+    "B8": 1,
+    "B9": 0
+  },
+  "b_subtype_cases": {
+    "B1": [
+      "NVDA A102 (primary)",
+      "AMD A102 (secondary alongside B3)"
+    ],
+    "B3": [
+      "NVDA A201 (primary)",
+      "AMD A201 (primary)"
+    ],
+    "B4": [
+      "QQQ A101 (primary)",
+      "MSFT A102 (primary)"
+    ],
+    "B8": [
+      "SNDK A102 (benchmark-review case, audited for completeness only)"
+    ]
+  },
+  "note_on_subtype_counting": "Several cases carry a primary + secondary subtype (e.g. AMD A102 = B1 primary + B3 secondary; QQQ A101 = B4 primary + B5 secondary; AMD A201 = B3 primary + B4 secondary). The counts above reflect PRIMARY subtype only, summing to 7 (6 system-recovery + 1 benchmark-review).",
+  "judgment_counts": {
+    "IMPLEMENTATION_DEFECT": 0,
+    "DESIGN_GAP": 4,
+    "RESEARCH_COVERAGE_GAP": 2,
+    "EXPECTED_CONSERVATIVE_BEHAVIOR": 0,
+    "GOLD_REVIEW_ONLY": 1,
+    "INSUFFICIENT_TRACEABILITY": 0
+  },
+  "recoverability_counts": {
+    "HIGH_CONFIDENCE_RECOVERABLE": 0,
+    "MEDIUM_CONFIDENCE_RECOVERABLE": 3,
+    "LOW_CONFIDENCE_RECOVERABLE": 3,
+    "SHOULD_NOT_TARGET": 1
+  },
+  "medium_confidence_cases": [
+    "NVDA A102",
+    "MSFT A102",
+    "AMD A102"
+  ],
+  "low_confidence_cases": [
+    "NVDA A201",
+    "QQQ A101",
+    "AMD A201"
+  ],
+  "shared_root_causes": [
+    {
+      "mechanism": "company_names=() is hardcoded/defaulted empty at the ONLY production call site of the activation scorer (comqutor_alpha/graph_engine/pipeline.py -> score_alpha_activations_v2), meaning _is_ticker_specific() can NEVER match a company's real name or product brand (only the bare ticker string). TradingAgents' own research prose overwhelmingly refers to companies by name/brand ('Microsoft', 'Ryzen', 'Azure', 'Taiwan Semiconductor') rather than by raw ticker.",
+      "affected_cases": [
+        "MSFT A102 (proven directly: claim literally says 'Microsoft', code-verified match would succeed if company_names were populated)",
+        "AMD A201 ('Ryzen processors' mention)",
+        "contributes to NVDA A201's questionable rejection as well"
+      ],
+      "evidence": "Direct code inspection (comqutor_alpha/graph_engine/pipeline.py lines ~183-190: score_alpha_activations_v2 call omits company_names entirely) + direct regex test proving _token_boundary_match('Microsoft', <real claim text>) == True in isolation + two other modules (unclassified_findings.py, conflict_admissibility.py) explicitly documenting company_names=() as 'the exact values' used.",
+      "confidence": "HIGH -- this is the single most concrete, reproducible, code-and-data-verified finding in this entire audit.",
+      "likely_pipeline_stage": "ticker specificity (comqutor_alpha/graph_engine/activation_scorer_v2.py::_is_ticker_specific, and its caller comqutor_alpha/graph_engine/pipeline.py)"
+    },
+    {
+      "mechanism": "ETF ticker-specificity has no architectural concept distinct from single-operating-company ticker-specificity -- an ETF's real exposure evidence is, by construction, expressed in terms of named constituents (Intel, AMD, Marvell) rather than the ETF's own ticker.",
+      "affected_cases": [
+        "QQQ A101"
+      ],
+      "evidence": "3 of 4 QQQ A101 claims name individual constituent companies and are rejected as non-ticker-specific; no ETF-constituent-equivalence concept exists anywhere in the ticker-specificity code.",
+      "confidence": "HIGH",
+      "likely_pipeline_stage": "ticker specificity (product-design gap specific to ETF/index tickers)"
+    },
+    {
+      "mechanism": "The AI semantic hard-gate (used to distinguish A101/A102/A103) requires an isolated, alpha-specific 'anchor phrase with a locally co-occurring change predicate' -- claims that discuss 'training/inference' as a bundled compound market (rather than isolating inference specifically) default to the broader AI-expansion Alpha (A101) rather than the narrower inference-specific one (A102), even when real, ticker-specific, high-quality evidence exists.",
+      "affected_cases": [
+        "AMD A102",
+        "contributes to NVDA A102's difficulty distinguishing genuine inference-growth content from competitive-threat content"
+      ],
+      "evidence": "AMD fundamentals claim explicitly rejected for A102 with rejection_reason='AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate', matched_alpha=A101 instead.",
+      "confidence": "MEDIUM -- observed directly in one case, plausible contributor in a second, not exhaustively verified across the full six-ticker set.",
+      "likely_pipeline_stage": "Alpha mapping / B1 stance (the AI hard-gate specifically)"
+    }
+  ],
+  "table_A_all_7_cases": [
+    {
+      "ticker": "NVDA",
+      "alpha": "A102",
+      "gold_class": "STRONG_GOLD",
+      "primary_subtype": "B1",
+      "judgment": "RESEARCH_COVERAGE_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha": "A201",
+      "gold_class": "SUPPORTED_GOLD",
+      "primary_subtype": "B3",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha": "A101",
+      "gold_class": "SUPPORTED_GOLD",
+      "primary_subtype": "B4",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha": "A102",
+      "gold_class": "STRONG_GOLD",
+      "primary_subtype": "B4",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha": "A102",
+      "gold_class": "REVIEW_CANDIDATE",
+      "primary_subtype": "B8",
+      "judgment": "GOLD_REVIEW_ONLY",
+      "recoverability": "SHOULD_NOT_TARGET"
+    },
+    {
+      "ticker": "AMD",
+      "alpha": "A102",
+      "gold_class": "STRONG_GOLD",
+      "primary_subtype": "B1",
+      "judgment": "RESEARCH_COVERAGE_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "AMD",
+      "alpha": "A201",
+      "gold_class": "SUPPORTED_GOLD",
+      "primary_subtype": "B3",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE"
+    }
+  ],
+  "table_B_strong_supported_only": [
+    {
+      "ticker": "NVDA",
+      "alpha": "A102",
+      "gold_class": "STRONG_GOLD",
+      "primary_subtype": "B1",
+      "judgment": "RESEARCH_COVERAGE_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha": "A201",
+      "gold_class": "SUPPORTED_GOLD",
+      "primary_subtype": "B3",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha": "A101",
+      "gold_class": "SUPPORTED_GOLD",
+      "primary_subtype": "B4",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha": "A102",
+      "gold_class": "STRONG_GOLD",
+      "primary_subtype": "B4",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "AMD",
+      "alpha": "A102",
+      "gold_class": "STRONG_GOLD",
+      "primary_subtype": "B1",
+      "judgment": "RESEARCH_COVERAGE_GAP",
+      "recoverability": "MEDIUM_CONFIDENCE_RECOVERABLE"
+    },
+    {
+      "ticker": "AMD",
+      "alpha": "A201",
+      "gold_class": "SUPPORTED_GOLD",
+      "primary_subtype": "B3",
+      "judgment": "DESIGN_GAP",
+      "recoverability": "LOW_CONFIDENCE_RECOVERABLE"
+    }
+  ],
+  "path_to_75_official_v1": {
+    "current": 61.0317,
+    "target": 75.0,
+    "minimum_additional_hits": 5,
+    "note": "This audit found ZERO HIGH_CONFIDENCE Evidence-Starvation recoveries -- only 3 MEDIUM (NVDA A102, MSFT A102, AMD A102) and 3 LOW. Combined with the prior Structure-side audit's findings (TSM A301 = high-confidence structure recovery; MSFT A304 = medium-confidence; QQQ A201 = uncertain; SNDK A103 = near-miss but insufficient), no combination of HIGH+MEDIUM confidence recoveries across BOTH tracks reaches 5.",
+    "scenario_1_structure_high_only": {
+      "recovered": [
+        "TSM A301"
+      ],
+      "conversions": 1,
+      "macro_average_percent": 63.8095,
+      "confidence": "HIGH_CONFIDENCE"
+    },
+    "scenario_2_structure_high_plus_medium": {
+      "recovered": [
+        "TSM A301",
+        "MSFT A304"
+      ],
+      "conversions": 2,
+      "macro_average_percent": 66.5873,
+      "confidence": "MEDIUM_CONFIDENCE"
+    },
+    "scenario_3_structure_medium_plus_evidence_medium": {
+      "recovered": [
+        "TSM A301",
+        "MSFT A304",
+        "NVDA A102",
+        "MSFT A102",
+        "AMD A102"
+      ],
+      "conversions": 5,
+      "macro_average_percent": "see calculation below",
+      "confidence": "SPECULATIVE -- combines every currently-identified MEDIUM-or-better recovery across BOTH tracks; none of these are confirmed, several (MSFT A102's ticker-specificity fix alone was shown to be insufficient) require MORE than the single identified fix to actually cross 50"
+    },
+    "honest_conclusion": "Even the maximally optimistic SPECULATIVE combination (all identified Medium+ confidence candidates from both tracks) reaches exactly 5 conversions on paper, but this audit's own counterfactual work (e.g. MSFT A102's ticker-specificity-only fix reaching only 44.97, still short) shows several of these 'Medium confidence' cases would need MORE than the single fix already identified to actually flip. This is NOT a credible, ready-to-execute path to 75% -- it is, at best, a plausible direction requiring real implementation and re-validation, exactly as the prior Structure-side audit already concluded for its own track."
+  },
+  "path_to_75_official_v1_scenario3_macro": 74.9206,
+  "clean_gold_diagnostic_path": {
+    "current_strong_hit_rate": 65.0,
+    "current_strong_supported_hit_rate": 66.35,
+    "recoveries_needed_for_strong_supported_to_reach_75": "Diagnostic calculation: the STRONG+SUPPORTED pool has 30 expectations; 66.35% macro-average hit rate (per-ticker average, not a flat count). Reaching 75% on this diagnostic set would require multiple per-ticker improvements across NVDA/MSFT/SNDK -- approximately 3-4 additional legitimate STRONG/SUPPORTED-class hits, depending on which tickers improve, given the macro-averaging method. This is NOT a replacement for the official v1 metric.",
+    "diagnostic_only_disclaimer": "This calculation is diagnostic only and does not replace or supersede the official Gold v1 acceptance metric (61.0317%, all 37 expectations)."
+  },
+  "priority_ranking": [
+    {
+      "priority": "P1",
+      "case": "MSFT A102",
+      "reason": "STRONG_GOLD, clean HIGH-confidence root-cause (company_names=() code-verified), MEDIUM recovery confidence, no Primary/Secondary or B1/B2/B4 rule change needed"
+    },
+    {
+      "priority": "P1",
+      "case": "NVDA A102",
+      "reason": "STRONG_GOLD, clear research-coverage gap (real bullish inference narrative never captured despite 'inference' being discussed 8 times from a competitive-risk angle), MEDIUM recovery confidence"
+    },
+    {
+      "priority": "P1",
+      "case": "AMD A102",
+      "reason": "STRONG_GOLD, clear research-coverage + semantic-gate interaction (real MI-series evidence exists but doesn't isolate inference-vs-training), MEDIUM recovery confidence"
+    },
+    {
+      "priority": "P2",
+      "case": "NVDA A201",
+      "reason": "SUPPORTED_GOLD, plausible Alpha-mapping design gap (real growth evidence exists but attributed elsewhere), LOW recovery confidence given multiple compounding gaps"
+    },
+    {
+      "priority": "P2",
+      "case": "AMD A201",
+      "reason": "SUPPORTED_GOLD, plausible design gap (mapping error + ticker-specificity), LOW recovery confidence, weakest evidence_quality of the six"
+    },
+    {
+      "priority": "P3",
+      "case": "QQQ A101",
+      "reason": "SUPPORTED_GOLD but with an inherent thematic-association caveat already noted by the Gold Validity Audit; a genuine ETF-ticker-specificity product-design question, LOW recovery confidence, more architecturally involved than a simple bug fix"
+    },
+    {
+      "priority": "P4",
+      "case": "SNDK A102",
+      "reason": "REVIEW_CANDIDATE -- Gold review only, explicitly not a system-fix target"
+    }
+  ],
+  "next_investigation_categories_summary": {
+    "ticker specificity": [
+      "MSFT A102 (populate company_names)",
+      "QQQ A101 (ETF constituent-equivalence design question)",
+      "AMD A201 (product-brand registration)"
+    ],
+    "research acquisition": [
+      "NVDA A102 (bullish inference narrative coverage)",
+      "AMD A102 (inference-vs-training technical distinction coverage)"
+    ],
+    "Alpha mapping": [
+      "NVDA A201 (growth evidence misattributed to A101/A103)",
+      "AMD A201 (cross-company mapping error + generic financial-statement over-inclusion)"
+    ],
+    "no system change / Gold review": [
+      "SNDK A102"
+    ]
+  },
+  "validation_checks": {
+    "all_7_original_cases_accounted_for": true,
+    "gold_validity_class_read_from_frozen_audit": true,
+    "sndk_a102_not_used_as_system_fix_target": true,
+    "every_strong_supported_case_traced_end_to_end": true,
+    "gold_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "selected_run_ids_unchanged": true,
+    "no_code_changes": true,
+    "no_tests_changed": true,
+    "no_provider_calls": true,
+    "no_tradingagents_calls": true,
+    "no_ticker_runs": true,
+    "no_threshold_changes": true,
+    "no_taxonomy_changes": true,
+    "no_gold_changes": true,
+    "b1_through_b9_primary_counts_sum_to_7": true,
+    "judgment_counts_sum_to_7": true,
+    "no_unsupported_recovery_claim": true,
+    "no_score_tuning_toward_75": true
+  }
+}

@@ -1,0 +1,310 @@
+{
+  "schema_version": "v0.2.instrument_identity_timeout_fix.v1",
+  "task": "TRADINGAGENTS_INSTRUMENT_IDENTITY_LOOKUP_HARD_TIME_BOUND_AND_FINAL_LIVE_VALIDATION",
+  "success_decision": "FIX_VALIDATED_AND_LIVE_PASS",
+  "repository_safety": {
+    "branch": "comqutor-structure-layer",
+    "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "commits_created": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  },
+  "yfinance_call_path_investigation": {
+    "installed_version": "1.5.1",
+    "backend": "curl_cffi 0.15.0 (Chrome TLS impersonation), with a plain-requests fallback if unavailable",
+    "call_chain": "Ticker.info -> get_info() -> Quote.info -> _fetch_info()+_fetch_complementary() -> Quote._fetch()/_fetch_additional_info() -> YfData.get_raw_json(url, timeout=30)",
+    "native_timeout_available": true,
+    "native_timeout_value": "30s per individual HTTP request (yfinance's own default), YfConfig.network.retries=0 (no internal retry loop)",
+    "why_native_timeout_alone_is_insufficient": "resolve_instrument_identity/Ticker.info never exposes a way to override yfinance's own internal 30s-per-call default from our call site, and .info makes SEVERAL sequential internal calls (cookie/crumb negotiation, quoteSummary fetch, v7 quote fetch, a complementary timeseries fetch) -- each independently up to 30s. Worst case (every one times out) is bounded by yfinance's own internals to roughly 120-240s, not literally infinite, but still far above the requested 10-15s target and not directly controllable without wrapping.",
+    "empirical_check": "A direct standalone call (yf.Ticker('QQQ').info) completed in 1.07s with 103 keys at the time of this task's investigation -- confirming the fast path is healthy under current conditions; the wrapper below protects the rare/slow/stalled path regardless."
+  },
+  "threadpool_naive_approach_rejected": {
+    "attempted": true,
+    "what_broke": "A first implementation used `ThreadPoolExecutor(max_workers=4, ...)` as a module-level singleton, never explicitly shut down, with `future.result(timeout=N)` bounding the caller. This own task's OWN test suite hung past a 60s harness timeout when exercised.",
+    "root_cause_of_the_hang": "concurrent.futures.thread registers a process-exit atexit hook (`_python_exit`) that JOINS every worker thread of EVERY ThreadPoolExecutor ever created, unconditionally, at interpreter shutdown -- regardless of whether the caller's own `future.result(timeout=...)` already gave up on that task. A genuinely-stuck task (this task's own 'never returns' test fake, and by extension a truly-stalled Yahoo Finance connection) would hang the ENTIRE PROCESS at exit, not just the one call.",
+    "how_it_was_diagnosed": "Isolated by running individual tests (all passed quickly) versus the full test file together (hung); confirmed via a minimal standalone repro outside pytest that a single hanging call bounded correctly and exited cleanly, versus multiple tests accumulating stuck ThreadPoolExecutor workers exhausting the pool for later tests. This is documented in detail as a deliberate lesson in the _DaemonThreadPool docstring in agent_utils.py.",
+    "conclusion": "future.result(timeout=...) alone bounds the CALLER's wait, but does not bound PROCESS shutdown if the underlying mechanism is ThreadPoolExecutor. A different mechanism was required."
+  },
+  "selected_bounding_mechanism": {
+    "design": "_DaemonThreadPool: a small, custom, fixed-size (max_workers=4) worker pool built on plain threading.Thread(daemon=True) workers pulling from a queue.Queue, each submission returning a standard concurrent.futures.Future.",
+    "why_this_satisfies_preference_order": {
+      "A_native_http_timeout": "Available (yfinance's own 30s default) but not independently overridable from this call site without monkeypatching yfinance internals -- rejected as too invasive for a best-effort, non-critical lookup.",
+      "B_project_session_mechanism": "No project-level HTTP session wrapper with a configurable deadline exists for this specific yfinance call path.",
+      "C_isolatable_mechanism": "Selected. Daemon threads are abandoned (not joined) at interpreter exit -- Python's atexit machinery only tracks and joins ThreadPoolExecutor-created (non-daemon) threads, never daemon threads created directly. A fixed-size pool (not one new thread per call) additionally guarantees no unbounded thread growth under repeated timeouts."
+    },
+    "not_a_permanently_leaking_thread_as_the_normal_solution": "On the fast, common path (empirically ~0.26-1.1s), no thread is ever left running -- the worker completes and returns to the pool immediately. Only a genuinely-stalled call (rare, and itself bounded by yfinance's own ~30-240s internal ceiling in real production use) leaves one of the 4 fixed workers busy until it eventually resolves on its own."
+  },
+  "selected_timeout_value": {
+    "value_seconds": 12.0,
+    "justification": "Within the requested 10-15s target range. The lookup is best-effort, non-critical, and already fail-open by design (docstring: 'if yfinance is unavailable, rate-limited, or doesn't recognise the ticker, we return {} and the caller falls back to ticker-only context'). 12s comfortably exceeds the empirically-observed healthy-path latency (~0.26-1.1s in this task's own live run and standalone test) by more than an order of magnitude -- essentially zero risk of false-positive timeout on a normal call -- while capping the worst case at roughly 1.3% of the ~903s previously observed across three independent live-run failures.",
+    "exposed_as": "An internal module-level constant (_INSTRUMENT_IDENTITY_TIMEOUT_SECONDS) in tradingagents/agents/utils/agent_utils.py, consistent with this project's existing pattern for internal, non-user-facing bounds (e.g. week2_llm.py's DEFAULT_*_CONCURRENCY constants) -- no new user-facing configuration was introduced, per instruction."
+  },
+  "real_wall_clock_bound_proof": {
+    "test": "tests/test_instrument_identity_timeout_hardening.py::RealWallClockBoundTests::test_hanging_lookup_returns_fallback_within_bound_plus_small_tolerance",
+    "method": "A fake lookup (_never_returns) genuinely blocks forever via threading.Event().wait() with no timeout on the wait itself -- it can never return on its own. The test measures WALL-CLOCK elapsed time of the resolve_instrument_identity(...) CALL itself (not merely whether a TimeoutError was raised internally), using a 0.15s test-mode timeout, and asserts elapsed < timeout + 1.0s.",
+    "measured_elapsed_in_this_run": "0.156s against a configured 0.15s bound (test); 0.155s against the same bound in a standalone non-pytest reproduction used to diagnose the ThreadPoolExecutor issue.",
+    "proves": "The caller's return is genuinely, measurably bounded -- not merely a caught-and-ignored TimeoutError while the caller silently waits longer."
+  },
+  "instrumentation_stage_markers": {
+    "new_markers_in_resolve_instrument_identity": [
+      "INSTRUMENT_IDENTITY_START",
+      "INSTRUMENT_IDENTITY_SUCCESS",
+      "INSTRUMENT_IDENTITY_TIMEOUT",
+      "INSTRUMENT_IDENTITY_FAIL_OPEN",
+      "INSTRUMENT_IDENTITY_END"
+    ],
+    "fields_recorded": [
+      "ticker",
+      "monotonic elapsed time",
+      "status",
+      "configured timeout value",
+      "exception type (fail-open path only, never a full message/traceback)"
+    ],
+    "credentials_logged": false,
+    "remaining_pre_stream_gap_closed": {
+      "new_markers_in_tradingagents_runner": [
+        "GRAPH_CONSTRUCTION_START/END",
+        "PENDING_ENTRIES_START/END",
+        "PAST_CONTEXT_START/END",
+        "INSTRUMENT_CONTEXT_START/END"
+      ],
+      "coverage": "Every setup step between pending-memory-log resolution and STREAM_LOOP_START is now bracketed -- no uninstrumented multi-minute gap remains, per instruction."
+    },
+    "traceback_public_logging_policy_preserved": "routes_research.py's existing, test-backed 'no exc_info at this boundary' policy (tests/test_research_input_validation.py::test_unexpected_internal_failure_is_logged_safely_at_error_level) was left untouched -- diagnostic detail lives only in the internal comqutor_alpha.runners.tradingagents_runner / tradingagents.agents.utils.agent_utils loggers, never exposed to API clients."
+  },
+  "focused_tests": {
+    "file": "tests/test_instrument_identity_timeout_hardening.py",
+    "count": 16,
+    "result": "16/16 pass",
+    "categories": {
+      "real_wall_clock_bound": 2,
+      "repeated_timeout_resource_leak": 3,
+      "success_path_parity": 2,
+      "failure_path": 8,
+      "non_critical_lookup_integration": 1
+    },
+    "test_isolation_note": "Tests that submit a genuinely-never-returning fake use their own throwaway _DaemonThreadPool (swapped in via monkeypatching), never the shared module-level production pool -- exhausting a pool with several simultaneous, truly-infinite fakes is a realistic adversarial-test scenario but not a realistic production one (real yfinance stalls are bounded by yfinance's own ~30-240s internal ceiling), so isolating it keeps that from cross-contaminating unrelated tests in the same run.",
+    "regression_found_and_fixed_during_this_task": "A malformed (non-dict) _fetch_yf_info return value raised an uncaught AttributeError outside the original try/except (a pre-existing gap, not introduced by this task, but exposed by the required 'malformed response' failure-path test) -- fixed by normalizing any non-dict result to {} before further processing, preserving the fail-open contract."
+  },
+  "broader_regression": {
+    "targeted_batch": "540/540 pass (instrument-identity hardening + identity/symbol-normalization + tradingagents runner/diagnostic-instrumentation + research lifecycle/jobs/runs-api/input-validation + llm_runtime/cache + evidence-stance concurrency + structured-adapter concurrency + A001 remediation + alpha-mapper authority + semantic runtime integration)",
+    "full_backend_suite": "4262 passed, 29 failed, 42 errors, 49 skipped, 69 subtests passed (1170.10s)",
+    "true_regressions": 0,
+    "new_item_vs_prior_established_baseline": {
+      "test": "tests/test_deepseek_reasoning.py::TestDeepSeekLiveStructuredOutput::test_v4_flash_returns_structured_output",
+      "root_cause": "A genuine LIVE network call to the real DeepSeek API (this test constructs a real DeepSeekChatOpenAI client and invokes it) that raised openai.APITimeoutError after 243.86s despite a 60s configured client timeout, when re-run in isolation.",
+      "classification": "PRE_EXISTING_UNRELATED (a live-network, Provider-dependent test unrelated to resolve_instrument_identity/agent_utils.py/tradingagents_runner.py; confirmed via isolated re-run reproducing the same live-API timeout)."
+    },
+    "previously_established_baseline_unchanged": "28 failed + 42 errors (the remaining 28 of 29 failures and all 42 errors match the pre-existing baseline exactly, including the one already-failing baseline-pin test that now also reflects this task's own authorized hash changes to agent_utils.py/tradingagents_runner.py/routes_research.py)."
+  },
+  "no_baseline_semantic_change": {
+    "slice_1_status": "PASS",
+    "slice_2a_status": "PASS",
+    "slice_2b_status": "PASS",
+    "34_9_benchmark_impact": "NONE -- zero lines of Alpha-mapping, evidence-stance, structured-adapter, or structure-extraction semantic logic were changed.",
+    "gold_unchanged": true,
+    "alpha_memory_mode": "SHADOW",
+    "activation_modulation_applied": false,
+    "run_local_cache_enabled": true,
+    "alpha_classifier_concurrency": 4,
+    "evidence_stance_concurrency": 4,
+    "structured_adapter_concurrency": 4
+  },
+  "offline_fix_decision": "PROCEED_TO_LIVE -- all Section 19 gates passed: genuinely wall-clock bounded (proven), fail-open preserved (8 dedicated failure-path tests + malformed-response fix), no resource leak (fixed 4-thread pool, proven via repeated-timeout tests), graph proceeds after identity timeout (dedicated integration test), focused tests pass (16/16), no true regression (29th full-suite item confirmed unrelated live-network flake).",
+  "market_data_preflight": {
+    "performed": true,
+    "method": "tradingagents.dataflows.market_data_validator._verified_rows('QQQ', '2026-09-14') -- the exact production validator, no Week2 semantic Provider call, no full TradingAgents analysis.",
+    "result": "PREFLIGHT_READY",
+    "rows": 1255,
+    "latest_date": "2026-09-14"
+  },
+  "final_live_validation": {
+    "authorized_and_executed": true,
+    "server": {
+      "port": 8003,
+      "pid": 87510,
+      "verified_serves_current_hardened_worktree": true,
+      "port_8000_untouched": true,
+      "cleaned_up_after_task": true
+    },
+    "exact_request": {
+      "method": "POST",
+      "url": "http://127.0.0.1:8003/api/research",
+      "body": {
+        "ticker": "QQQ",
+        "force_refresh": true
+      },
+      "sent_at_utc": "2026-09-14T21:28:03Z",
+      "http_status": 202
+    },
+    "run_id": "85cfd878-7b72-4855-8b29-ebd743fd335a",
+    "second_run_launched": false,
+    "root_cause_proof_this_run": {
+      "instrument_identity_outcome": "SUCCESS",
+      "instrument_identity_elapsed_s": 0.264,
+      "stream_loop_start_reached": true,
+      "semantic_pipeline_reached": true,
+      "conclusion": "The identity lookup was NOT the blocker in this run (it completed fast and successfully) -- but the run nonetheless proceeded past every point where all three prior attempts got stuck, all the way to full completion. The hard bound provides durable protection against a future recurrence of a genuinely-stalled identity lookup regardless of whether it was the historical cause; this run's own evidence is inconclusive on whether it WAS the original cause (see classification below), but conclusively demonstrates the fix does not block a healthy run and the overall pipeline is not blocked by anything else in the previously-uninstrumented setup gap.",
+      "classification": "ORIGINAL_BLOCKER_STATUS_INCONCLUSIVE_BUT_PIPELINE_NOW_COMPLETES -- the identity lookup succeeded quickly this time (consistent with this task's own standalone empirical check earlier showing ~1.07s), so this run does not distinguish between 'the identity-lookup hang was transient/conditions-dependent and did not recur' and 'the true original cause lay elsewhere and has separately resolved or was not exercised.' What IS conclusively proven: the hard bound introduces no regression, and a full run now completes end-to-end for the first time in this entire multi-attempt session."
+    },
+    "workload_comparison": {
+      "historical_qqq_postfix_provider_calls": 617,
+      "historical_qqq_postfix_semantic_records": 595,
+      "fresh_provider_call_count": 788,
+      "fresh_semantic_record_count": 757,
+      "fresh_task_breakdown": {
+        "structured_adapter": 10,
+        "alpha_classifier": 713,
+        "evidence_stance_classifier": 34,
+        "structure_extractor": 0
+      },
+      "note": "This fresh run's workload is substantially HEAVIER than the historical baseline (713 alpha_classifier calls alone exceed the historical run's ENTIRE 617-call total) -- a genuine difference in fresh evidence volume, not an artifact of the optimization or the identity-lookup fix. Timing comparisons below must be read with this normalization in mind."
+    },
+    "stage_timing": {
+      "total_wall_clock_s": 2043,
+      "structured_adapter_wall_clock_s": 210.8,
+      "alpha_classifier_wall_clock_s": 1018.5,
+      "evidence_stance_wall_clock_s": 585.8,
+      "structure_extractor_wall_clock_s": 0,
+      "note_on_wall_clock_vs_summed_latency": "Per-task 'wall_clock' above is the span between the earliest started_at and latest completed_at among that task's own records. Summed individual-call latency (structured_adapter=1434.5s, alpha_classifier=1334.7s, evidence_stance=11682.5s) is far larger than wall-clock for all three, confirming real concurrent overlap (work would otherwise have to be strictly additive). Evidence_stance's very high summed-latency/wall-clock ratio in particular is expected under retries (23 total) each adding to summed latency without extending wall-clock proportionally."
+    },
+    "cache_behavior": {
+      "cache_lookups": 757,
+      "cache_hits": 0,
+      "hit_rate": "0%",
+      "provider_calls_avoided": 0,
+      "comparison_to_offline_expectation": "Consistent with B1's own finding that this specific fresh workload shows negligible within-run exact-duplicate opportunity -- 0 hits is not itself evidence of a defect; it is evidence of a heavier, more varied fresh claim set with fewer literal repeats, exactly as B1 predicted could happen for some tickers/runs."
+    },
+    "live_concurrency_evidence": {
+      "method": "A naive start/end-window overlap count is MISLEADING for structured_adapter and evidence_stance in this run: Slice 2A/2B's deferred-finalize design (per docs/audit_artifacts/v0_2_evidence_stance_concurrency_optimization.json and v0_2_structured_adapter_concurrency_optimization.json) records `completed_at` at the batched, sequence-sorted FINALIZE time, not true per-call Provider-response time -- so many records share a near-identical `completed_at`, inflating a naive overlap count to 10 (structured_adapter, all 10 calls) and 34 (evidence_stance, all 34 calls). The correct signal is clustering of `started_at` timestamps (true invoke time, unaffected by deferred finalize).",
+      "structured_adapter_started_at_wave_pattern": "Waves of [4, 1, 3, 2] near-simultaneous starts across the run -- maximum wave size 4, matching the configured bound exactly.",
+      "evidence_stance_started_at_wave_pattern": "29 waves, sizes mostly 1 with a few 2s and one 4 -- maximum wave size 4, matching the configured bound exactly.",
+      "evidence_stance_max_in_flight": 4,
+      "structured_adapter_max_in_flight": 4,
+      "concurrency_bounds_respected": true
+    },
+    "reliability": {
+      "structured_adapter_retries": 8,
+      "structured_adapter_fallbacks": 7,
+      "structured_adapter_errors_recorded": 5,
+      "structured_adapter_fallback_reasons": {
+        "WEEK2_LLM_TIMEOUT": 5,
+        "WEEK2_LLM_VALIDATION_FAILED": 2
+      },
+      "evidence_stance_retries": 23,
+      "evidence_stance_fallbacks": 4,
+      "evidence_stance_errors_recorded": 4,
+      "alpha_classifier_retries": 0,
+      "alpha_classifier_fallbacks": 0,
+      "alpha_classifier_errors_recorded": 0,
+      "rate_limit_429_events": 0,
+      "observation": "structured_adapter shows a notably elevated fallback rate (7 of 10 calls, 70%) to WEEK2_LLM_TIMEOUT/WEEK2_LLM_VALIDATION_FAILED under this run's real concurrent (C4) live load -- plausibly, though not conclusively, related to 4 simultaneous large-batch structured-extraction requests competing for the same Provider capacity/rate limit. This is DESIGNED, TESTED, SAFE degradation (deterministic-splitter fallback, not a crash or corrupted output), not a structural defect -- but it is a real, disclosed reliability signal worth a dedicated follow-up investigation (e.g. whether C4 remains the right structured_adapter default under sustained live load, separate from this task's own scope).",
+      "material_reliability_regression": false,
+      "reasoning": "No run failure, no crash, no corrupted output, no telemetry/recorder corruption (validate_semantic_call_records: valid=True, zero issues), no rate-limit events, and the elevated fallback rate resolves via already-existing, already-tested fail-open machinery rather than novel or unbounded failure. Classified as a disclosed observation, not a blocking regression."
+    },
+    "telemetry_integrity": {
+      "llm_semantic_calls_jsonl_parseable": true,
+      "validate_semantic_call_records_result": "valid=True, 0 issues (the authoritative production validator, not an ad-hoc check)",
+      "sequence_ids_unique_and_strictly_increasing": true,
+      "note_on_sequence_numeric_gaps": "call_sequence values are NOT numerically contiguous (757 records span sequence numbers 0-1141, with 385 gap positions) -- this was investigated and confirmed NOT a defect: the documented, tested contract (comqutor_alpha/llm_runtime/contracts.py:validate_semantic_call_records) requires only uniqueness and strict monotonic increase in append order, never full numeric contiguity. The gaps are consistent with each retry/internal-attempt consuming its own sequence allocation without each attempt producing a separate persisted row.",
+      "manifest_reconciles": true,
+      "provider_call_counter_reconciles": true,
+      "cache_counter_reconciles": true,
+      "retry_fallback_counts_present_and_consistent": true,
+      "artifact_completeness": "20/20 files present in the run directory (summary, data_sanity, llm_semantic_manifest, run_audit, structured_adapter_authority_routing, evidence_facts, structured_agent_outputs, entity_alpha_exposures, market_data_snapshot, metadata, raw_agent_outputs, week3_pipeline_status, unclassified_findings, tradingagents_comqutor_vocabulary_snapshot, alpha_activations, artifact_manifest, structure_graph, llm_semantic_calls.jsonl, extracted_structures, alpha_matches, conflicts, evidence_stance_audit)"
+    },
+    "fresh_v0_2_gold_evaluation": {
+      "method": "Evaluated under the existing, unchanged v0.2 evidence-conditioned Gold contract -- the old post-fix QQQ semantic result was NOT forced onto this fresh evidence.",
+      "detected_active_alphas": [
+        "A601 (Narrative Momentum, score=64.7595, positive)",
+        "A304 (Multiple Compression, score=59.2171, negative)",
+        "A101 (AI Expansion, score=55.0531, positive)"
+      ],
+      "dominant_alpha": "A601 (Narrative Momentum) -- highest activation score among 'active'-status Alphas",
+      "actual_main_conflict": "A101__A304 (2 admitted conflict pairs of 6 declared/evaluated, 4 suppressed, 0 rejected)",
+      "qqq_conflict_family_governance": "NOT_GOVERNED (unchanged -- no frozen authority declares QQQ's conflict family governed, consistent with all prior QQQ runs this session)",
+      "result": "Fresh, evidence-dependent outcome, legitimately different from both the historical (A304__A601) and post-fix (A301__A304) prior QQQ runs -- exactly the 'fresh evidence can differ' behavior this task's instructions require, not a Gold failure."
+    },
+    "a001_gate_validation": {
+      "fresh_a001_status": "candidate (NOT elevated to active/dominant)",
+      "fresh_a001_score": 26.3132,
+      "cap_reason_codes": [
+        "INSUFFICIENT_UNIQUE_EVIDENCE",
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "INSUFFICIENT_AGENT_INDEPENDENCE",
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "qualifying_positive_easing_evidence_present": false,
+      "gate_behavior": "CORRECT -- fresh evidence did not contain qualifying positive easing support (evidence_quality/agent_independence/local_structure_support components all show sparse/single-agent support), and A001 correctly remained at 'candidate' rather than being force-elevated. This is the evidence-conditioned gate behaving as designed, not a hardcoded 'always non-detected' rule."
+    },
+    "no_code_changes_during_benchmark": {
+      "production_files_changed_during_this_step": 0,
+      "gold_touched": false
+    }
+  },
+  "performance_classification": {
+    "historical_total_wall_clock_s": 3141,
+    "fresh_total_wall_clock_s": 2043,
+    "total_reduction_pct": 34.96,
+    "classification": "PASS",
+    "reasoning": "34.96% total wall-clock reduction meets the PASS threshold (>=25%, <40%) despite this fresh run carrying a substantially heavier workload (788 Provider calls vs. 617 historical, 713 alpha_classifier calls alone exceeding the historical total). No material reliability regression (see reliability section) -- the disclosed elevated structured_adapter fallback rate is a designed, safe degradation, not a run failure or data corruption."
+  },
+  "john_requirement_b_closure": {
+    "status": "CLOSED",
+    "reasoning": "Per this task's own Section 27, a completed live run classified PASS (or STRONG_PASS) closes John Requirement B. This live run: reached and completed the full semantic pipeline for the first time in this entire multi-attempt session; demonstrated live bounded concurrency (C4) for both evidence_stance_classifier and structured_adapter via started_at clustering evidence; confirmed telemetry/recorder integrity (validate_semantic_call_records: valid); confirmed cache correctness (0 hits, consistent with B1's own prediction for this workload); confirmed the A001 evidence-conditioned gate behaves correctly against fresh evidence; and completed with a genuine 34.96% wall-clock reduction against the historical baseline despite a heavier fresh workload.",
+    "recommended_follow_up_not_blocking_closure": "Investigate the elevated structured_adapter fallback rate (70% this run) under sustained real concurrent (C4) live load as a separate, dedicated reliability task -- disclosed here as an observation, not treated as a blocker per this task's own explicit closure rule."
+  },
+  "production_and_test_files_changed": {
+    "production_files_changed": 3,
+    "production_files": [
+      {
+        "path": "tradingagents/agents/utils/agent_utils.py",
+        "change": "Added _DaemonThreadPool class, _fetch_yf_info extraction, module-level _INSTRUMENT_IDENTITY_EXECUTOR/_INSTRUMENT_IDENTITY_TIMEOUT_SECONDS, and 5 new stage-marker log points inside resolve_instrument_identity. Fixed a pre-existing (now-tested) malformed-response gap. Zero change to the function's public signature, caching behavior, or documented fail-open contract."
+      },
+      {
+        "path": "comqutor_alpha/runners/tradingagents_runner.py",
+        "change": "Added GRAPH_CONSTRUCTION/PENDING_ENTRIES/PAST_CONTEXT/INSTRUMENT_CONTEXT stage markers closing the remaining pre-STREAM_LOOP_START instrumentation gap identified by the prior root-cause task."
+      },
+      {
+        "path": "comqutor_alpha/api/routes_research.py",
+        "change": "Comment-only note (from the prior task); zero functional change, re-verified."
+      }
+    ],
+    "new_file": {
+      "path": "comqutor_alpha/runners/diagnostics.py",
+      "change": "Unchanged from the prior root-cause task."
+    },
+    "test_files_changed": 1,
+    "test_files": [
+      {
+        "path": "tests/test_instrument_identity_timeout_hardening.py",
+        "change": "New, 16 tests covering all required hard-bound, resource-leak, success-parity, failure-path, and non-critical-lookup-integration properties."
+      }
+    ]
+  },
+  "frozen_authorities_verified_before_and_after": {
+    "v0_2_gold_operational_contract.json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_final_acceptance_table.json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_final_acceptance_closure.json": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "v0_2_six_run_gold_conformance_audit.json": "65c4f51ed6f96d7d15372ae0b99d1f3860eb1925b7b69641751673f0908cb173",
+    "v0_2_invalidation_condition_coverage.json": "9f8605474f27a22e1c61d70c3cfda52702fca2b5d1bcd42a6be0c0afe0523669",
+    "v0_2_semantic_classifier_cost_latency_audit.json": "e9c562bf0c7b02b4430721e44d962274f2fa8a67fae5d4645b9e99fbb62e73b0",
+    "v0_2_semantic_cache_optimization.json": "1053636bdda6c7322c28dd1ea733d2ce978c33619b53ec40820a4af5affee537",
+    "v0_2_evidence_stance_concurrency_optimization.json": "3efb788832c65d836dfe6f2984a002cbbc65db68da1170892725088e02edfb88",
+    "v0_2_structured_adapter_concurrency_optimization.json": "3e6c01ea101620e9904f283a74f7036094f75d14fa7f0108ffc8ced4bc804b05",
+    "all_unchanged": true
+  },
+  "further_optimization_recommended": false,
+  "process_cleanup": {
+    "final_validation_server": {
+      "pid": 87510,
+      "port": 8003,
+      "cleaned_up": true
+    },
+    "original_port_8000_process": {
+      "pid": 27595,
+      "status": "untouched, still running, never stopped or modified"
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "schema_version": "alpha_memory_edge_identity_ablation.v1",
+  "task": "STEP 1.6 -- Atomic Edge phi Identity Field Ablation Audit (read-only analysis, no implementation)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "production_code_modified": false,
+  "tests_modified": false,
+  "phi_implementation_changed": false,
+
+  "real_run_pairs": [
+    {"ticker": "NVDA", "run_a": "2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d", "run_b": "c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6"},
+    {"ticker": "MSFT", "run_a": "07ddc074-9ab2-4b16-8957-acbf94012144", "run_b": "6cd2566d-e0f1-4306-995f-74f39efb21eb"}
+  ],
+  "note_on_msft_pair_data_quality": "MSFT run_a (07ddc074) has only 1 edge with any alpha_ids attached at all (the other 8 edges all have empty alpha_ids lists) -- an orthogonal, independent data-quality observation about that specific run's Alpha-to-edge linkage coverage, not something introduced by this analysis. This makes MSFT's Model A/B numbers structurally degenerate (near-zero denominators) -- reported honestly rather than hidden; Model C/D (ticker-only, no alpha) remain fully informative for MSFT and are weighted accordingly in the recommendation below.",
+
+  "model_definitions": {
+    "MODEL_A": "ticker + alpha_id + source + edge_type + target (full -- Step 1's field set, applied per-edge instead of per-whole-set)",
+    "MODEL_B": "ticker + alpha_id + source + target (drops edge_type, keeps alpha_id)",
+    "MODEL_C": "ticker + source + edge_type + target (drops alpha_id, keeps edge_type)",
+    "MODEL_D": "ticker + source + target (drops both)"
+  },
+
+  "overlap_by_model": {
+    "NVDA": {
+      "MODEL_A": {"count_a": 15, "count_b": 6, "exact_intersection": 2, "union": 19, "jaccard": 0.105},
+      "MODEL_B": {"count_a": 14, "count_b": 6, "exact_intersection": 4, "union": 16, "jaccard": 0.25},
+      "MODEL_C": {"count_a": 14, "count_b": 10, "exact_intersection": 5, "union": 19, "jaccard": 0.263},
+      "MODEL_D": {"count_a": 13, "count_b": 8, "exact_intersection": 6, "union": 15, "jaccard": 0.4}
+    },
+    "MSFT": {
+      "MODEL_A": {"count_a": 1, "count_b": 12, "exact_intersection": 0, "union": 13, "jaccard": 0.0},
+      "MODEL_B": {"count_a": 1, "count_b": 11, "exact_intersection": 0, "union": 12, "jaccard": 0.0},
+      "MODEL_C": {"count_a": 9, "count_b": 9, "exact_intersection": 2, "union": 16, "jaccard": 0.125},
+      "MODEL_D": {"count_a": 9, "count_b": 8, "exact_intersection": 3, "union": 14, "jaccard": 0.214}
+    }
+  },
+
+  "matches_recovered_by_removing_alpha_id": {
+    "definition": "Model A -> Model C (drops alpha_id only, keeps edge_type)",
+    "NVDA": {"before": 2, "after": 5, "recovered": 3},
+    "MSFT": {"before": 0, "after": 2, "recovered": 2}
+  },
+  "matches_recovered_by_removing_edge_type": {
+    "definition": "Model A -> Model B (drops edge_type only, keeps alpha_id)",
+    "NVDA": {"before": 2, "after": 4, "recovered": 2},
+    "MSFT": {"before": 0, "after": 0, "recovered": 0, "note": "Degenerate given MSFT run_a's near-total absence of alpha_ids -- not informative for this specific comparison."}
+  },
+  "headline_finding": "Removing alpha_id alone recovers MORE matches than removing edge_type alone, in both tickers where the comparison is not degenerate (NVDA: +3 vs +2). Alpha-attribution instability is at least as large a contributor to fragmentation as edge_type disagreement -- consistent with, and now quantifying, Step 1.5's qualitative finding.",
+
+  "collision_analysis_dropping_alpha_id": {
+    "within_run_multi_alpha_edges": {
+      "definition": "The SAME (source, target) pair, within ONE run, already legitimately linked to more than one alpha_id simultaneously -- this is not cross-run instability, it is intentional multi-relevance already present in a single run's own graph.",
+      "NVDA_run_a": {"ai_capex->gpu_demand": ["A101", "A103"], "gpu_demand->nvda_revenue_growth": ["A301", "A103"]},
+      "NVDA_run_b": {"ai_capex->gpu_demand": ["A101", "A103"]},
+      "MSFT_run_a": {},
+      "MSFT_run_b": {
+        "ai_capex->msft_revenue_growth": ["A102", "A103"],
+        "narrative_momentum->valuation_risk": ["A601", "A304"],
+        "rate_cut_cycle->valuation_risk": ["A501", "A001"],
+        "ai_demand->msft_revenue_growth": ["A102", "A101"]
+      },
+      "classification": "CASE_2_GENUINELY_DISTINCT -- dropping alpha_id from identity would silently merge 'this edge as evidence for Alpha X' with 'this edge as evidence for Alpha Y' into one identity, even though these are, by the graph's own already-existing design, meaningfully different associations (a future invalidation/lifecycle event for A101 must not be conflated with a separate one for A103 just because they share an edge)."
+    },
+    "cross_run_shared_edges_alpha_id_comparison": {
+      "definition": "Among edges that DO match exactly under Model C (same source/edge_type/target across both runs), what alpha_ids did each run independently attach?",
+      "NVDA": [
+        {"edge": ["ai_capex", "causal", "gpu_demand"], "run_a_alphas": ["A101", "A103"], "run_b_alphas": ["A101"], "relationship": "SUBSET (run_b is a subset of run_a)", "raw_classification": "CASE_1_LIKELY_ATTRIBUTION_VARIANCE"},
+        {"edge": ["ai_infrastructure", "supportive", "nvda_revenue_growth"], "run_a_alphas": ["A101"], "run_b_alphas": ["A103"], "relationship": "DISJOINT", "raw_classification": "CASE_3_AMBIGUOUS -- fully different alpha assigned to the identical edge in each run; cannot be resolved to case 1 or case 2 without further product-level information about A101 vs A103's actual thesis overlap"},
+        {"edge": ["inference_demand", "supportive", "nvda_revenue_growth"], "run_a_alphas": ["A102"], "run_b_alphas": ["A102"], "relationship": "SAME", "raw_classification": "CLEAN_MATCH"},
+        {"edge": ["rate_cut_cycle", "conflicting", "valuation_risk"], "run_a_alphas": ["A001"], "run_b_alphas": [], "relationship": "SUBSET (run_b attached no alpha at all)", "raw_classification": "CASE_1_LIKELY_ATTRIBUTION_VARIANCE"},
+        {"edge": ["valuation_risk", "conflicting", "nvda_revenue_growth"], "run_a_alphas": [], "run_b_alphas": [], "relationship": "SAME (both empty)", "raw_classification": "CLEAN_MATCH_BUT_UNINFORMATIVE"}
+      ],
+      "MSFT": [
+        {"edge": ["ai_capex", "supportive", "ai_infrastructure"], "run_a_alphas": [], "run_b_alphas": ["A103"], "relationship": "SUBSET (run_a attached no alpha at all)", "raw_classification": "CASE_1_LIKELY_ATTRIBUTION_VARIANCE"},
+        {"edge": ["ai_demand", "supportive", "msft_revenue_growth"], "run_a_alphas": [], "run_b_alphas": ["A101", "A102"], "relationship": "SUBSET", "raw_classification": "CASE_1_LIKELY_ATTRIBUTION_VARIANCE"}
+      ],
+      "summary": "Of 7 cross-run shared-edge alpha comparisons, 5 are SUBSET relationships (one run simply found fewer/no alpha links than the other -- plausibly attribution/coverage variance, case 1), 1 is a clean exact match, and 1 (NVDA ai_infrastructure->nvda_revenue_growth) is a fully DISJOINT, unresolved case reported as-is per instruction not to resolve ambiguity by intuition."
+    }
+  },
+
+  "collision_analysis_dropping_edge_type": {
+    "cross_run_shared_node_pairs_edge_type_comparison": {
+      "definition": "Among node pairs that match exactly under Model D (same source/target across both runs), what edge_type(s) did each run use?",
+      "NVDA": [
+        {"pair": ["ai_capex", "gpu_demand"], "run_a_types": ["causal"], "run_b_types": ["supportive", "causal"], "relationship": "DIFFERENT (run_b also includes causal, so partially overlapping)", "raw_classification": "CASE_1_LIKELY_CLASSIFICATION_VARIANCE -- causal vs supportive on a demand-driven relationship read plausibly as alternate phrasings of a positive-driving relationship"},
+        {"pair": ["ai_capex", "nvda_revenue_growth"], "run_a_types": ["supportive"], "run_b_types": ["causal"], "relationship": "DIFFERENT", "raw_classification": "CASE_1_LIKELY_CLASSIFICATION_VARIANCE"},
+        {"pair": ["ai_infrastructure", "nvda_revenue_growth"], "run_a_types": ["supportive", "causal"], "run_b_types": ["supportive"], "relationship": "DIFFERENT (overlapping)", "raw_classification": "CASE_1_LIKELY_CLASSIFICATION_VARIANCE"},
+        {"pair": ["inference_demand", "nvda_revenue_growth"], "run_a_types": ["supportive"], "run_b_types": ["supportive"], "relationship": "SAME", "raw_classification": "CLEAN_MATCH"},
+        {"pair": ["rate_cut_cycle", "valuation_risk"], "run_a_types": ["conflicting"], "run_b_types": ["causal", "conflicting"], "relationship": "DIFFERENT (overlapping)", "raw_classification": "CASE_1_LIKELY_CLASSIFICATION_VARIANCE"},
+        {"pair": ["valuation_risk", "nvda_revenue_growth"], "run_a_types": ["conflicting"], "run_b_types": ["conflicting"], "relationship": "SAME", "raw_classification": "CLEAN_MATCH"}
+      ],
+      "MSFT": [
+        {"pair": ["ai_capex", "ai_infrastructure"], "run_a_types": ["supportive"], "run_b_types": ["supportive"], "relationship": "SAME", "raw_classification": "CLEAN_MATCH"},
+        {"pair": ["ai_capex", "msft_revenue_growth"], "run_a_types": ["causal"], "run_b_types": ["conflicting"], "relationship": "DIFFERENT, NON-OVERLAPPING", "raw_classification": "CASE_2_FLAGGED -- causal and conflicting are not adjacent/compatible readings of the same relationship (one says X drives Y, the other says X works against Y); this looks more like a genuinely different structural claim than mere extraction-wording variance, though it cannot be fully confirmed without the underlying evidence text"},
+        {"pair": ["ai_demand", "msft_revenue_growth"], "run_a_types": ["supportive"], "run_b_types": ["supportive"], "relationship": "SAME", "raw_classification": "CLEAN_MATCH"}
+      ],
+      "summary": "Of 9 cross-run shared-pair edge_type comparisons, 4 are exact matches, 4 (all NVDA) show overlapping/adjacent type variance plausibly explained by classification wording differences (causal/supportive intermixing), and 1 (MSFT ai_capex->msft_revenue_growth: causal vs conflicting) is flagged as a potentially GENUINE semantic disagreement, not mere noise -- reported as-is, not resolved by intuition."
+    }
+  },
+
+  "structure_identity_vs_observation_attributes": {
+    "proposed_split_evaluated": "DURABLE: ticker+source+target+identity_version+taxonomy_authority. OBSERVATION: edge_type, alpha_ids, run_id, activation/exposure/conflict references.",
+    "does_persisted_data_support_this_split": "PARTIALLY, WITH A MATERIAL CAVEAT ON BOTH FIELDS -- the evidence argues AGAINST fully adopting this proposed split for alpha_id and edge_type specifically.",
+    "is_alpha_assignment_part_of_identity_or_observation": {
+      "answer": "PART OF IDENTITY, not a pure observation attribute -- with cross-run instability tracked SEPARATELY as its own data-quality signal, not resolved by removing the field.",
+      "reasoning": "The within-run multi-alpha collision evidence (collision_analysis_dropping_alpha_id.within_run_multi_alpha_edges) shows the SAME literal edge is already, intentionally, linked to more than one alpha_id within a single run's own graph, by the existing production Alpha Mapper design -- these ARE meaningfully distinct associations ('this edge as A101's evidence' vs 'this edge as A103's evidence'), not accidental duplication. Removing alpha_id from identity would erase this already-real distinction, not merely tolerate noise. The genuinely noisy part is the CROSS-RUN attribution variance (mostly SUBSET relationships, one DISJOINT/ambiguous case) -- that instability is real, but the fix is to track and report it (as this audit does), not to delete the field from identity."
+    },
+    "is_edge_type_part_of_identity_or_observation": {
+      "answer": "PART OF IDENTITY, not a pure observation attribute -- for the same reason: at least one real cross-run case (MSFT ai_capex->msft_revenue_growth, causal vs conflicting) looks like a genuinely different structural claim, not classification noise. Silently dropping edge_type would risk merging 'X drives Y' with 'X works against Y' into a single identity -- a real memory-integrity risk for any future invalidation/lifecycle feature, not a cosmetic loss.",
+      "reasoning": "Most (4 of 9) cross-run edge_type disagreements DO look like plausible classification-wording variance (causal/supportive intermixing on the same demand-driven relationship), which would argue for tolerance -- but the one causal-vs-conflicting case is different in kind, not degree, and this audit's own instruction ('do not resolve ambiguity by intuition') means a MIXED, uncertain population must not be resolved by dropping the field wholesale. Recommendation is to keep the field and, if desired in a future step, introduce an explicit, Product-approved equivalence table for specific tolerated pairs (e.g. causal~supportive) rather than removing the distinction entirely."
+    },
+    "run_id_and_downstream_references": "Correctly excluded from identity already (Step 1's phi_identity.py never hashes run_id) -- confirmed appropriate; these ARE pure per-run observation attributes with no ambiguity found."
+  },
+
+  "development_plan_alignment": {
+    "does_the_plan_require_equating_alpha_classification_with_structure_identity": "The Plan's own worked example (phi-001 = AI demand -> GPU shortage -> NVDA benefits) is presented as a single causal chain with an implicit thesis (a bullish structure benefiting the named ticker) -- it does not explicitly separate 'the causal chain' from 'which Alpha it supports' as two different concepts; the example's own terminal step ('NVDA benefits') already encodes a directional, thesis-relevant conclusion. This is consistent with, not contradictory to, treating alpha_id as part of the durable identity rather than a removable per-run tag: the Plan's own example chain IS already alpha-thesis-specific by construction, not alpha-agnostic.",
+    "conclusion": "The Plan does not require dropping Alpha association from structure identity; if anything, its own worked example supports the opposite -- a phi-token is implicitly tied to a specific thesis/Alpha, not a bare, alpha-agnostic graph fragment."
+  },
+
+  "recommended_exact_model": "EDGE_ID_A_ALPHA_AND_TYPE",
+  "recommendation_reasoning": "Models B/C/D achieve higher raw overlap only by discarding fields whose collision analysis shows real, non-noise semantic content (within-run intentional multi-alpha relevance; at least one cross-run causal-vs-conflicting disagreement that reads as a genuinely different claim). The task's own instruction not to optimize for overlap alone is decisive here: Model A's lower match count (2/19 NVDA, 0/13 MSFT-degenerate) is the accurate, conservative reflection of real extraction variance, not a defect to engineer away by loosening the identity. This is a MINIMAL, additive refinement of Step 1's existing implementation, not a new design -- phi_identity.py's existing per-alpha canonical_representation (ticker, alpha_id, taxonomy_version, taxonomy_sha256, chain_edges) is unchanged in FIELD COMPOSITION; only the GRANULARITY changes, from the whole sorted chain_edges set (Step 1) to one edge at a time (this recommendation, matching Step 1.5's own already-accepted direction).",
+
+  "recommended_hierarchy": {
+    "level_1_atomic_durable_edge_phi": "MODEL_A per edge -- ticker+alpha_id+source+edge_type+target+identity_version+taxonomy_version+taxonomy_sha256, hashed exactly as Step 1's existing _stable_digest already does, applied per-edge.",
+    "level_2_whole_alpha_edge_set_as_aggregate_only": "Step 1's CURRENT implementation (the full per-alpha chain_edges set) is retained UNCHANGED but explicitly demoted to a coarse, non-primary aggregate/display grouping -- never the primary cross-run matching signal.",
+    "motif_level": "DEFERRED, reaffirming Step 1.5's finding -- no new evidence in this ablation changes that conclusion (this step did not re-test motifs; Step 1.5's zero-overlap finding for 2-/3-edge motifs stands)."
+  },
+
+  "product_decisions_required": [
+    "Whether to formally adopt EDGE_ID_A_ALPHA_AND_TYPE (full field set, per-edge granularity) as the primary phi matching unit -- this audit recommends it but does not implement it.",
+    "Whether cross-run alpha-attribution instability (mostly SUBSET, one DISJOINT case found) should become its own explicitly tracked/reported data-quality signal, separate from phi matching itself.",
+    "Whether cross-run edge_type instability (mostly overlapping/adjacent, one non-overlapping causal-vs-conflicting case found) should become its own tracked signal, and whether a Product-approved, explicit (non-fuzzy) edge_type equivalence table should ever be introduced for specific tolerated pairs.",
+    "The single DISJOINT alpha-attribution case (NVDA, ai_infrastructure->nvda_revenue_growth, A101 vs A103) and the single non-overlapping edge_type case (MSFT, ai_capex->msft_revenue_growth, causal vs conflicting) are reported as raw, unresolved findings -- Product/domain review, not engineering intuition, should determine whether either indicates a real Alpha Mapper or canonical-relation-extraction defect worth investigating separately from Alpha Memory.",
+    "All prior open items from Step 1 and the Step 1.5 stability audit remain equally open (ticker-scoping for the other 109 factors, taxonomy-drift migration policy, whether phi ids should be durably persisted, motif-level deferral)."
+  ],
+
+  "files_inspected": [
+    "outputs/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/structure_graph.json",
+    "outputs/runs/c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6/structure_graph.json",
+    "outputs/runs/07ddc074-9ab2-4b16-8957-acbf94012144/structure_graph.json",
+    "outputs/runs/6cd2566d-e0f1-4306-995f-74f39efb21eb/structure_graph.json",
+    "comqutor_alpha/memory/phi_identity.py (read only, unchanged)",
+    "docs/audit_artifacts/alpha_memory_phi_stability_audit.json (prior step, read only)"
+  ]
+}

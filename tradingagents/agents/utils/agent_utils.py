@@ -1,6 +1,11 @@
 import functools
 import logging
+import queue
+import threading
+import time
 from collections.abc import Mapping
+from concurrent.futures import Future
+from concurrent.futures import TimeoutError as _FutureTimeoutError
 from typing import Any
 
 import yfinance as yf
@@ -75,6 +80,89 @@ def _clean_identity_value(value: Any) -> str | None:
     return cleaned
 
 
+class _DaemonThreadPool:
+    """A small, fixed-size worker pool built on daemon threads only.
+
+    ``concurrent.futures.ThreadPoolExecutor`` was tried first and rejected:
+    besides a ``with ThreadPoolExecutor(...) as executor:`` block's
+    ``__exit__`` blocking on ``shutdown(wait=True)`` (bounding the caller is
+    not enough if cleanup then waits for the stuck worker anyway), the
+    ``concurrent.futures.thread`` module itself registers a process-exit
+    ``atexit`` hook that joins *every* worker thread of *every*
+    ``ThreadPoolExecutor`` ever created -- so a lookup that genuinely never
+    returns (a stalled socket, or this module's own "never returns" test
+    fake) would hang the *entire process* at shutdown, not just this one
+    call. This was caught empirically: the test suite for this hardening
+    itself hung past its own timeout using a plain ``ThreadPoolExecutor``.
+
+    Plain ``threading.Thread(daemon=True)`` workers sidestep that: daemon
+    threads are abandoned (not joined) at interpreter exit, so a stuck
+    lookup can never block process shutdown. Using a small FIXED pool
+    (rather than one new daemon thread per call) additionally guarantees no
+    unbounded thread growth under repeated timeouts -- exactly the property
+    ``future.result(timeout=...)`` alone does not provide.
+    """
+
+    def __init__(self, max_workers: int, thread_name_prefix: str) -> None:
+        self._max_workers = max_workers
+        self._queue: queue.Queue = queue.Queue()
+        self._threads: list[threading.Thread] = []
+        self._shutdown = False
+        for i in range(max_workers):
+            worker = threading.Thread(
+                target=self._run, daemon=True, name=f"{thread_name_prefix}-{i}"
+            )
+            worker.start()
+            self._threads.append(worker)
+
+    def _run(self) -> None:
+        while True:
+            fn, args, fut = self._queue.get()
+            if not fut.set_running_or_notify_cancel():
+                continue
+            try:
+                result = fn(*args)
+            except BaseException as exc:  # noqa: BLE001 — relay to the Future
+                fut.set_exception(exc)
+            else:
+                fut.set_result(result)
+
+    def submit(self, fn, *args) -> Future:
+        fut: Future = Future()
+        self._queue.put((fn, args, fut))
+        return fut
+
+
+# Bounded, shared, long-lived pool for the identity lookup below -- created
+# once at import time (starts its fixed daemon-thread workers immediately;
+# they sit idle on an empty queue until the first lookup, no import-time
+# network activity) and never shut down. ``future.result(timeout=...)``
+# bounds the caller's wait independent of whether the submitted task ever
+# completes; the pool's own daemon threads bound *process* shutdown
+# independent of whether a lookup ever completes (see _DaemonThreadPool).
+_INSTRUMENT_IDENTITY_EXECUTOR = _DaemonThreadPool(
+    max_workers=4, thread_name_prefix="instrument-identity-lookup"
+)
+# 10-15s target (John Requirement B follow-up, docs/audit_artifacts/
+# v0_2_instrument_identity_timeout_fix.json): this lookup is best-effort,
+# non-critical, and already fail-open by design, so a short bound costs
+# nothing on the (overwhelmingly common) fast path -- empirically ~1s -- and
+# caps the rare slow/stalled path far below the ~900s previously observed in
+# three independent live runs that never reached the semantic pipeline.
+_INSTRUMENT_IDENTITY_TIMEOUT_SECONDS = 12.0
+
+
+def _fetch_yf_info(ticker: str) -> dict:
+    """The actual (blocking, potentially slow or stalled) Yahoo Finance call.
+
+    Extracted to its own function so tests can substitute a fake (including
+    one that never returns) without touching the bounding/fail-open logic in
+    ``resolve_instrument_identity`` itself. ``ticker`` here is already the
+    normalized/canonical symbol.
+    """
+    return yf.Ticker(ticker).info or {}
+
+
 @functools.lru_cache(maxsize=256)
 def resolve_instrument_identity(ticker: str) -> dict:
     """Resolve deterministic identity metadata (company name, sector, …) for a ticker.
@@ -92,14 +180,63 @@ def resolve_instrument_identity(ticker: str) -> dict:
 
     The symbol is normalized first (e.g. ``XAUUSD`` -> ``GC=F``) so identity
     resolves for the same instrument the price path actually fetches (#983).
+
+    Hard-bounded (John Requirement B follow-up): the actual yfinance call
+    runs in a bounded worker pool with a ``_INSTRUMENT_IDENTITY_TIMEOUT_SECONDS``
+    wall-clock cap, so a stalled Yahoo Finance connection can never block this
+    function -- or the research pipeline calling it -- for more than that
+    bound. A timeout is treated exactly like any other failure: fail open,
+    return ``{}}``.
     """
     from tradingagents.dataflows.symbol_utils import normalize_symbol
 
+    canonical = normalize_symbol(ticker)
+    start = time.monotonic()
+    logger.info(
+        "tradingagents_diagnostic stage=INSTRUMENT_IDENTITY_START ticker=%s "
+        "elapsed=0.0s timeout=%.1fs",
+        ticker, _INSTRUMENT_IDENTITY_TIMEOUT_SECONDS,
+    )
+    future = _INSTRUMENT_IDENTITY_EXECUTOR.submit(_fetch_yf_info, canonical)
     try:
-        info = yf.Ticker(normalize_symbol(ticker)).info or {}
-    except Exception as exc:  # noqa: BLE001 — fail open, never block the run
-        logger.debug("Could not resolve instrument identity for %s: %s", ticker, exc)
+        info = future.result(timeout=_INSTRUMENT_IDENTITY_TIMEOUT_SECONDS) or {}
+        if not isinstance(info, dict):
+            # A malformed (non-dict) response is treated the same as an
+            # empty one -- fail open, never guess/invent identity data.
+            info = {}
+    except _FutureTimeoutError:
+        elapsed = time.monotonic() - start
+        logger.warning(
+            "tradingagents_diagnostic stage=INSTRUMENT_IDENTITY_TIMEOUT ticker=%s "
+            "elapsed=%.3fs timeout=%.1fs",
+            ticker, elapsed, _INSTRUMENT_IDENTITY_TIMEOUT_SECONDS,
+        )
+        logger.info(
+            "tradingagents_diagnostic stage=INSTRUMENT_IDENTITY_END ticker=%s "
+            "elapsed=%.3fs status=timeout",
+            ticker, elapsed,
+        )
         return {}
+    except Exception as exc:  # noqa: BLE001 — fail open, never block the run
+        elapsed = time.monotonic() - start
+        logger.debug("Could not resolve instrument identity for %s: %s", ticker, exc)
+        logger.info(
+            "tradingagents_diagnostic stage=INSTRUMENT_IDENTITY_FAIL_OPEN ticker=%s "
+            "elapsed=%.3fs exc_type=%s",
+            ticker, elapsed, type(exc).__name__,
+        )
+        logger.info(
+            "tradingagents_diagnostic stage=INSTRUMENT_IDENTITY_END ticker=%s "
+            "elapsed=%.3fs status=fail_open",
+            ticker, elapsed,
+        )
+        return {}
+
+    elapsed = time.monotonic() - start
+    logger.info(
+        "tradingagents_diagnostic stage=INSTRUMENT_IDENTITY_SUCCESS ticker=%s elapsed=%.3fs",
+        ticker, elapsed,
+    )
 
     identity: dict[str, str] = {}
     company_name = _clean_identity_value(info.get("longName")) or _clean_identity_value(
@@ -116,6 +253,11 @@ def resolve_instrument_identity(ticker: str) -> dict:
         value = _clean_identity_value(info.get(source_key))
         if value:
             identity[target_key] = value
+    logger.info(
+        "tradingagents_diagnostic stage=INSTRUMENT_IDENTITY_END ticker=%s "
+        "elapsed=%.3fs status=success",
+        ticker, time.monotonic() - start,
+    )
     return identity
 
 

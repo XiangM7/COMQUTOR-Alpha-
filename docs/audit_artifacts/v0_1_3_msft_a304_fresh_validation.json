@@ -1,0 +1,429 @@
+{
+  "schema_version": "v0_1_3_msft_a304_fresh_validation.v1",
+  "scope": "LIVE_VALIDATION -- one authorized fresh MSFT production run",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "official_alpha_hit": "61.0317%",
+  "executive_summary": {
+    "old_msft_run": "43472ace-454f-4c69-892c-adca91c25be7",
+    "new_msft_run": "64568bfb-fe0c-453c-9872-831a8dc339a0",
+    "run_complete": true,
+    "a304_old_persisted": {
+      "score": 43.3642,
+      "level": "candidate"
+    },
+    "a304_offline_post_fix_corrected": {
+      "score": 48.3642,
+      "level": "candidate"
+    },
+    "a304_fresh": {
+      "score": 71.1556,
+      "level": "dominant",
+      "detected": true
+    },
+    "relevant_fresh_causal_edge_from_new_extractor": false,
+    "false_positive_structures": 0,
+    "a304_provider_impacted": false,
+    "validation_result": "CASE_M3_FRESH_RESEARCH_NOT_COMPARABLE (for the specific extraction capability under test) -- A304 itself independently reached 'dominant' this run via a wholly unrelated, pre-existing mechanism (canonical LLM relations), NOT via the new factor_normalizer.py/relation_grammar.py patterns, which produced ZERO new edges in this run",
+    "keep_a304_fix": "YES",
+    "old_msft_gold_hit": "3/6 (50.0%)",
+    "new_msft_gold_hit": "4/6 (66.67%)",
+    "two_run_mean": "58.33%",
+    "official_six_ticker_unchanged": "61.0317%",
+    "code_changed_during_validation": false
+  },
+  "important_correction_to_prior_offline_replay": {
+    "issue_found": "The prior task's (v0_1_3_msft_a304_negation_extraction_fix) offline replay called build_and_score_structure_graph() without supplying run_timestamp/as_of, causing the recency component to fall back to a generic 50.0/5.0-contribution value instead of the true run's actual 100.0/10.0 (age_days=0). This -5.0 artifact applied UNIFORMLY to both the 'before' and 'after' simulations in that task, so it happened to make the previously-reported 'after' value (43.3642) numerically coincide with the TRUE, unmodified persisted 'before' value (also 43.3642) -- a coincidence, not evidence of no effect.",
+    "verification": "Re-running the exact same replay with the correct run_timestamp='2026-09-04'/as_of='2026-09-04' (read from the persisted structure_graph.json's own activation.run_timestamp/as_of fields) produces a 'before' (patterns disabled) score of 43.3642 -- an EXACT match to the true, untouched, unmodified persisted structure_graph.json (confirming the replay methodology is otherwise sound) -- and a corrected 'after' (current production code) score of 48.3642.",
+    "impact_on_prior_conclusion": "The DELTA/directional finding from the prior task (local_structure_support raw 0.0->25.0, contribution +5.0, exactly one new qualifying edge, no other component affected) remains fully correct and unaffected -- the recency artifact was a constant, uniform shift applied equally to both sides of that comparison, so it cancelled out in the delta. Only the prior task's reported ABSOLUTE 'before'/'after' numbers (38.3642/43.3642) were incorrect; the corrected, verified absolute numbers are 43.3642 (true before, matching the persisted ground truth exactly) and 48.3642 (true after).",
+    "impact_on_all_alpha_blast_radius_finding": "Unaffected -- the same uniform recency-fallback artifact applied equally to every alpha in that comparison, so the 'only A304 changed' conclusion (a delta-based comparison) remains valid.",
+    "corrected_values_used_in_this_report": true
+  },
+  "pre_run_snapshot": {
+    "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "gold_v1_sha256": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+    "gold_validity_sha256": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+    "old_msft_run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+    "old_msft_a304_true_persisted": {
+      "score": 43.3642,
+      "level": "candidate",
+      "local_structure_support_raw": 0.0,
+      "qualifying_local_edge_count": 0
+    },
+    "corrected_offline_post_fix_a304": {
+      "score": 48.3642,
+      "level": "candidate",
+      "local_structure_support_raw": 25.0,
+      "qualifying_local_edge_count": 1
+    },
+    "provider_configuration": "comqutor_deepseek_default_v1 (deepseek / deepseek-v4-flash, thinking disabled, 1 debate round, 1 risk round) -- identical to the old authoritative MSFT run",
+    "evidence_stance_retry_configuration": "2 retries after initial attempt / 3 max attempts -- confirmed unchanged in code before the run",
+    "closed_status_prerequisites": {
+      "p0_p1": "CLOSED PASS",
+      "provider_health": "CLOSED PASS",
+      "measurement_foundation": "CLOSED PASS",
+      "recorder_health": "CLOSED PASS",
+      "evidence_stance_retry_fix": "CLOSED PASS",
+      "a304_extraction_fix": "CLOSED PASS (offline)"
+    },
+    "operational_note": "No server process was found running at task start (Docker/Postgres were also stopped). Both were started fresh via `docker compose up -d postgres` and the approved scripts/start_live_comqutor.sh launcher (new PID 27595, started 2026-09-10T11:49:28, well after the fix files' last modification at 11:13:13), guaranteeing the fresh run executed the current, fixed code."
+  },
+  "run_execution": {
+    "ticker": "MSFT",
+    "new_run_id": "64568bfb-fe0c-453c-9872-831a8dc339a0",
+    "cache_disposition": "force_refreshed",
+    "start_timestamp": "2026-09-10T18:49:55.032626Z",
+    "end_timestamp": "2026-09-10T20:27:11.753457Z",
+    "wall_clock_duration_minutes": 97.28,
+    "exit_status": "completed",
+    "config_differences_from_old_run": "NONE found"
+  },
+  "run_validity": {
+    "run_completed": true,
+    "semantic_status": "PASS",
+    "artifact_completeness": "9/9",
+    "graph_edge_count": 10,
+    "graph_node_count": 10,
+    "claims_present": true,
+    "claims_count": 1005,
+    "alpha_outputs_present": true,
+    "structure_artifacts_present": true,
+    "provider_logs_present": true,
+    "provider_health_diagnostics_readable": true,
+    "data_sanity_result": "ok",
+    "classification": "VALID (not CASE_M5)"
+  },
+  "fresh_a304_relevant_research": {
+    "methodology": "Scanned all 1005 fresh MSFT claims for adverse-growth/valuation-compression keywords (slowdown, slowing, slower, deceleration, decelerating, compress, compression, contraction, valuation multiple, valuation pressure, growth deterioration, weaker growth, multiple) -- 97 claims matched.",
+    "dominant_narrative": "This run's actual research narrative is a MACRO/RATE-DRIVEN multiple-compression debate (Fed rate-cut-cycle repricing, rising discount rates, 27.8x trailing multiple vs SPY performance) -- NOT a growth-deceleration-driven narrative like the old run's claim:82.",
+    "growth_slowdown_thread_found": {
+      "text": "\"slowing growth and softer bookings\" (Dynamics 365 narrative) -- appears in claims across news_agent, sentiment_agent, and bear_researcher (e.g. news_agent:claim:19/70/88, sentiment_agent:claim:77/90, bear_researcher:claim:21/113/122)",
+      "matches_new_patterns": false,
+      "reason": "The phrase form is 'slowing growth' (adjective-noun), which was DELIBERATELY excluded from FACTOR_ALIAS_PATTERNS in the prior task (to avoid firing on its own negation, 'growth is NOT slowing', with no required-test benefit at the time) -- the 7 included patterns are 'slowdown in ... growth', 'growth slowdown', 'decelerating ... growth', 'growth deceleration', 'growth deterioration', 'slower ... growth', 'weaker ... growth', none of which match 'slowing growth'."
+    },
+    "explicit_negated_growth_claim_found": {
+      "claim_id": "64568bfb-fe0c-453c-9872-831a8dc339a0:fundamental_agent:fundamentals_report:claim:95",
+      "text": "Revenue growth is accelerating, not decelerating: +17.8% YoY in the most recent quarter, with the largest absolute quarterly revenue in company history ($90.0B).",
+      "assertion_status": "negated",
+      "note": "A genuine live negative-control instance: 'not decelerating' correctly does NOT produce an adverse Revenue Growth structure (this claim is a POSITIVE growth assertion, correctly excluded from any adverse structure regardless of the word 'decelerating' appearing in a negated context)."
+    }
+  },
+  "comparable_positive_structures": {
+    "count_matching_new_patterns": 0,
+    "detail": "Zero claims in the fresh 1005-claim corpus matched any of the 7 FACTOR_ALIAS_PATTERNS regexes -- verified directly by pattern search, not merely by absence of new edges.",
+    "conclusion": "The new extraction capability was not exercised in this run -- neither positively nor negatively. This is a legitimate, expected outcome given the run's actual (rate-driven, not growth-driven) narrative content, not a defect."
+  },
+  "false_positive_structure_scan": {
+    "methodology": "Before/after full-pipeline replay (extract_structures_from_records + build_and_score_structure_graph) on the fresh run's own persisted records, comparing FACTOR_ALIAS_PATTERNS enabled (current production) vs. disabled (pre-fix simulation).",
+    "new_edges_from_patterns": 0,
+    "removed_edges": 0,
+    "alpha_score_or_status_changes_from_patterns": "NONE (all 10 alphas byte-identical before/after)",
+    "unexpected_false_positive_count": 0,
+    "classification_of_the_97_scanned_claims": {
+      "TRUE_POSITIVE": 0,
+      "NEGATED_CORRECTLY_EXCLUDED": "1 explicit instance identified (fundamental_agent:claim:95, 'accelerating, not decelerating') -- correctly produced no adverse structure, though this is via the PRE-EXISTING literal 'revenue growth' alias + assertion_status=negated tagging (already present, not a NEW pattern match)",
+      "DESCRIPTIVE_CORRECTLY_EXCLUDED": "majority of the 97 (market-technical 'compression'/'contraction' language -- ATR, MACD, volatility -- entirely unrelated to Revenue Growth/Valuation Risk factors, never matched by any factor alias)",
+      "RISK_ONLY_CORRECTLY_EXCLUDED": "several 'multiple compression risk' mentions correctly recognized only as Valuation Risk (pre-existing alias), with no adverse Revenue Growth pairing attempted since no matching source phrase exists",
+      "AMBIGUOUS": 0,
+      "UNEXPECTED_FALSE_POSITIVE": 0
+    },
+    "result": "UNEXPECTED_FALSE_POSITIVE = 0 -- clean closure criterion met"
+  },
+  "a304_final_state_fresh": {
+    "score": 71.1556,
+    "level": "dominant",
+    "detected": true,
+    "ticker_specific_evidence_count": 14,
+    "qualifying_evidence_count": 30,
+    "unique_evidence_count": 30,
+    "distinct_supporting_agents": 6,
+    "local_structure_support_raw": "not directly itemized in per_alpha summary; incident_graph_edge_count=3, qualifying_local_edge_count=1 (see structure_graph.json edge detail below)",
+    "local_structure_contribution": "1 qualifying local edge out of 3 incident edges",
+    "entity_exposure": "not separately queried in this task (out of scope; unmodified)",
+    "ceiling": null,
+    "reason_codes": [],
+    "qualifying_local_edge_source": "tradingagents_canonical_relation (ai_capex -> valuation_risk, causal; asserted) -- NOT sourced from the new FACTOR_ALIAS_PATTERNS mechanism",
+    "other_incident_edges": [
+      "valuation_risk -> msft_revenue_growth (conflicting, alpha_ids=[A301,A304]) -- canonical relation, non-qualifying",
+      "rate_cut_cycle -> valuation_risk (supportive, alpha_ids=[A001,A304]) -- canonical relation, non-qualifying for A304's causal local-structure count"
+    ]
+  },
+  "a304_three_way_comparison": {
+    "metric": [
+      "score",
+      "level",
+      "detected",
+      "local_structure_edges",
+      "local_structure_raw_support",
+      "ticker_specific_evidence",
+      "qualifying_evidence"
+    ],
+    "old_persisted": [
+      43.3642,
+      "candidate",
+      false,
+      0,
+      0.0,
+      5,
+      14
+    ],
+    "offline_post_fix_corrected": [
+      48.3642,
+      "candidate",
+      false,
+      1,
+      25.0,
+      5,
+      14
+    ],
+    "fresh_post_fix": [
+      71.1556,
+      "dominant",
+      true,
+      1,
+      "N/A (canonical-relation-sourced, not local_structure_support-formula-based in the same way)",
+      14,
+      30
+    ],
+    "note": "The offline-derived result is explicitly NOT an official run and is not treated as one. Fresh A304's recovery is NOT attributable to the offline-validated extraction fix -- confirmed by the zero-new-edges finding above."
+  },
+  "live_validation_classification": {
+    "case": "CASE_M3_FRESH_RESEARCH_NOT_COMPARABLE",
+    "reasoning": "For the SPECIFIC extraction capability under test (FACTOR_ALIAS_PATTERNS / generic adverse Revenue Growth phrasing): the fresh MSFT corpus does not contain legitimate growth-slowdown-phrased content matching any of the 7 supported forms -- zero pattern matches, zero new edges, confirmed by direct pattern search and by before/after replay. This makes the run INCONCLUSIVE for validating this specific fix live, exactly as CASE_M3 describes ('fresh research does not contain legitimate growth-slowdown -> compression content sufficient to exercise the fix... single run is inconclusive for A304 recovery [via this mechanism]').",
+    "important_disambiguation": "A304 THE ALPHA independently reached 'dominant'/detected status in this run -- but via a completely separate, pre-existing mechanism (tradingagents_canonical_relation edges: ai_capex->valuation_risk, rate_cut_cycle->valuation_risk), driven by this run's genuinely different (rate-and-capex-driven, not growth-driven) research narrative. This Gold-adjacent outcome is NOT evidence for or against the extraction fix and must not be conflated with it, per this task's own explicit instruction not to judge the fix by unrelated Gold outcomes.",
+    "excluded_cases": {
+      "CASE_M1": "NOT SELECTED -- would require A304's recovery to be attributable to the generic extractor produced correct structure from THIS fix; it is not (0 new edges from the fix)",
+      "CASE_M2": "NOT SELECTED -- A304 in fact reached >=50 (via the unrelated pathway), so 'A304 remains <50' does not hold",
+      "CASE_M4": "NOT SELECTED -- A304 was confirmed NOT Provider-impacted (impacted_alpha_ids=[])",
+      "CASE_M5": "NOT SELECTED -- run is fully valid (9/9 artifacts, Data Sanity ok, semantic_status PASS)"
+    }
+  },
+  "provider_health": {
+    "provider_health": "PROVIDER_DEGRADED",
+    "provider_failure_events": 82,
+    "semantic_critical_failure_events": 70,
+    "alpha_classifier_final_orphans": 2,
+    "evidence_stance_final_orphans": 11,
+    "structure_extractor_final_orphans": 6,
+    "provider_final_orphans_total": 19,
+    "impacted_alpha_ids": [],
+    "benchmark_review_required": false,
+    "a304_provider_impacted": false
+  },
+  "evidence_stance_retry_observation": {
+    "note": "Observational only -- A304's lineage is entirely canonical-relation-sourced (unaffected by evidence_stance_classifier), so this data does not factor into the A304 validation verdict.",
+    "attempt_distribution": {
+      "attempt_1": 26,
+      "attempt_2": 18,
+      "attempt_3": 11
+    },
+    "retry_count_distribution": {
+      "0_attempts_retry": 30,
+      "1_retry": 8,
+      "2_retries": 18
+    },
+    "third_attempt_successes": 7,
+    "third_attempt_exhaustions": 11,
+    "final_stance_orphans": 11,
+    "retry_policy_unchanged": "confirmed: 2 retries / 3 max attempts"
+  },
+  "recorder_health": {
+    "recorder_failure_events": 345,
+    "recorder_health": "RECORDER_DEGRADED",
+    "canonical_semantic_losses": 0,
+    "kept_separate_from_provider_semantic_impact": true
+  },
+  "all_gold_alphas_comparison": {
+    "A101": {
+      "old": [
+        55.6974,
+        "active",
+        true
+      ],
+      "new": [
+        37.0165,
+        "candidate",
+        false
+      ],
+      "provider_impacted": false,
+      "drift_class": "RESEARCH_VARIANCE"
+    },
+    "A102": {
+      "old": [
+        34.9674,
+        "candidate",
+        false
+      ],
+      "new": [
+        41.9468,
+        "candidate",
+        false
+      ],
+      "provider_impacted": false,
+      "drift_class": "RESEARCH_VARIANCE"
+    },
+    "A103": {
+      "old": [
+        86.4726,
+        "dominant",
+        true
+      ],
+      "new": [
+        82.6727,
+        "dominant",
+        true
+      ],
+      "provider_impacted": false,
+      "drift_class": "RESEARCH_VARIANCE"
+    },
+    "A301": {
+      "old": [
+        65.1479,
+        "active",
+        true
+      ],
+      "new": [
+        70.0,
+        "active",
+        true
+      ],
+      "provider_impacted": false,
+      "drift_class": "RESEARCH_VARIANCE"
+    },
+    "A304": {
+      "old": [
+        43.3642,
+        "candidate",
+        false
+      ],
+      "new": [
+        71.1556,
+        "dominant",
+        true
+      ],
+      "provider_impacted": false,
+      "drift_class": "RESEARCH_VARIANCE (via unrelated canonical-relation pathway, NOT the extraction fix)"
+    },
+    "A601": {
+      "old": [
+        32.7558,
+        "candidate",
+        false
+      ],
+      "new": [
+        66.5385,
+        "active",
+        true
+      ],
+      "provider_impacted": false,
+      "drift_class": "RESEARCH_VARIANCE"
+    }
+  },
+  "msft_a102_side_observation": {
+    "old": {
+      "score": 34.9674,
+      "level": "candidate",
+      "ticker_specific_evidence_count": 0,
+      "unique_qualifying_evidence": 1,
+      "agent_independence_distinct_agents": 1
+    },
+    "new": {
+      "score": 41.9468,
+      "level": "candidate",
+      "ticker_specific_evidence_count": 2,
+      "unique_qualifying_evidence": 3,
+      "agent_independence_distinct_agents": 2
+    },
+    "detected_old": false,
+    "detected_new": false,
+    "note": "A102 remains candidate in both runs; evidence availability improved modestly (0->2 ticker-specific, 1->3 unique facts) but not decisively. No code change authorized or made for A102 in this task."
+  },
+  "two_run_msft_reproducibility": {
+    "old_run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+    "new_run_id": "64568bfb-fe0c-453c-9872-831a8dc339a0",
+    "old_gold_hit": "3/6 = 50.0%",
+    "new_gold_hit": "4/6 = 66.67%",
+    "two_run_mean_gold_hit": "58.33%",
+    "per_gold_alpha_detection_frequency": {
+      "A101": 0.5,
+      "A102": 0.0,
+      "A103": 1.0,
+      "A301": 1.0,
+      "A304": 0.5,
+      "A601": 0.5
+    },
+    "gold_detected_set_jaccard": 0.4,
+    "all_alpha_detected_set_jaccard": 0.2857,
+    "variable_gold_alpha_ids": [
+      "A101",
+      "A304",
+      "A601"
+    ],
+    "diagnostic_only": true,
+    "not_promoted_to_official_benchmark": true
+  },
+  "main_conflict": {
+    "old_authoritative": "NO_ADMITTED_MAIN_CONFLICT",
+    "fresh": {
+      "main_conflict_id": "A301__A304",
+      "admitted": true,
+      "conflict_score": 11.2814,
+      "conflict_level": "low",
+      "bull_score": 70.0,
+      "bear_score": 71.1556,
+      "bull_supporting_evidence_count": "26 unique facts / 4 agents",
+      "bear_supporting_evidence_count": "21 fact groups / 6 agents"
+    },
+    "admission_changed": true,
+    "trace": "A301 (Revenue Expansion, bull thesis) and A304 (Multiple Compression, bear thesis) both independently reached qualifying-for-conflict strength this run (A301=70.0 active, A304=71.1556 dominant) with sufficient distinct-agent/evidence-group support on both sides to pass B2 admissibility (week4.conflict_admissibility.b2.v1) -- a legitimate, unmodified, unmanufactured conflict admission driven entirely by this run's own research content and the unrelated canonical-relation-driven A304 recovery, not by the extraction fix."
+  },
+  "p0_p1_validation": {
+    "p0": "PASS -- 0 competitor-only (AMD/NVDA/SNDK/TSM/QQQ)-mentioning claims without an MSFT/Microsoft term found in this run's corpus (0 checked, 0 vetoed -- narrow veto simply did not encounter its trigger pattern this run, consistent with its documented rare-firing design)",
+    "p1": "PASS -- 'Microsoft' (40 mentions) and 'MSFT' (121 mentions) present in raw research; alias recognition confirmed active on live data"
+  },
+  "other_alpha_drift": {
+    "A001": "RESEARCH_VARIANCE (51.9719 active -> 45.6985 candidate)",
+    "A003": "unchanged (0.0 candidate both)",
+    "A201": "unchanged (0.0 candidate both)",
+    "A501": "RESEARCH_VARIANCE (42.0094 candidate -> 53.4225 active)",
+    "note": "No PROVIDER_VARIANCE or UNEXPLAINED classification was needed -- Provider Health confirms impacted_alpha_ids=[] for this run, and every observed change traces to ordinary research-content differences between two independent live runs three weeks apart, consistent with the extensive research-variance pattern already documented throughout this whole v0.1.3 effort (NVDA/QQQ/SNDK/TSM)."
+  },
+  "no_patch_after_result": {
+    "factor_normalizer_py_modified_during_validation": false,
+    "relation_grammar_py_modified_during_validation": false,
+    "week2_llm_py_modified_during_validation": false,
+    "activation_scorer_modified_during_validation": false,
+    "tests_modified_during_validation": false,
+    "provider_settings_modified_during_validation": false,
+    "gold_modified_during_validation": false
+  },
+  "next_development_step": {
+    "chosen": "NEXT_A102_RESEARCH",
+    "reasoning": "The extraction fix is sufficiently validated at the design/deterministic-test/corpus-blast-radius level (21 unit tests, 89+97=186 total scanned claims across both live MSFT runs' corpora, zero false positives found in either), and this run surfaced no genuine extraction defect independent of evidence sufficiency -- the fix simply was not exercised because this run's real research narrative happened to be rate/capex-driven rather than growth-deceleration-driven, and the one related phrase found ('slowing growth') uses a deliberately-excluded form for well-documented reasons. No further A304 extractor engineering is justified by this result. A304 itself does not require further attention (it already reached dominant this run via an unrelated, legitimate pathway). MSFT A102 remains the clearer, more concrete open item (candidate in both runs, modest but insufficient evidence growth)."
+  },
+  "keep_a304_fix_recommendation": {
+    "decision": "KEEP_A304_FIX",
+    "reasoning": "Generic extraction behavior is correct (proven via 21 deterministic tests plus this run's clean, zero-false-positive live exposure). No false positives occurred (0 new edges, 0 unexpected structures, confirmed by direct pattern search AND full before/after replay). Regression controls remain valid (all fresh-run negative-control-analogous language -- e.g. the explicit 'accelerating, not decelerating' claim -- was correctly excluded, via pre-existing mechanisms). Fresh behavior is fully consistent with intended, documented semantics: the fix simply had no qualifying input to act on this run, which is an honest, expected, non-buggy outcome, not a failure. A304 did not need to cross 50 for this recommendation, and its unrelated dominant status this run played no role in it."
+  },
+  "final_validation": {
+    "exactly_one_ticker_run": true,
+    "ticker": "MSFT",
+    "second_msft_run": false,
+    "other_ticker_run": false,
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "frozen_ledger_unchanged": true,
+    "official_alpha_hit_unchanged": "61.0317%",
+    "production_code_changed_during_validation": 0,
+    "tests_changed_during_validation": 0,
+    "a304_implementation_unchanged": true,
+    "evidence_stance_retry_unchanged": true,
+    "provider_settings_unchanged": true,
+    "p0_p1_behavior_intact": true,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

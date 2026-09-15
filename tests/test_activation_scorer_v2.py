@@ -129,19 +129,19 @@ def _scenario_a_fixture():
     payload = _payload(
         _record(
             "a:claim:1",
-            "analyst_one",
+            "market_agent",
             "ACME datacenter revenue growth is accelerating on strong demand.",
             alpha_id="A101",
         ),
         _record(
             "a:claim:2",
-            "analyst_two",
+            "fundamental_agent",
             "ACME's order backlog continues to expand this quarter.",
             alpha_id="A101",
         ),
         _record(
             "a:claim:3",
-            "analyst_three",
+            "sentiment_agent",
             "ACME announced new supply agreements boosting output capacity.",
             alpha_id="A101",
         ),
@@ -224,7 +224,7 @@ def _scenario_b_fixture():
     payload = _payload(
         *(
             _record(f"b:claim:{i}", agent, text, alpha_id="A102")
-            for i, agent in enumerate(("agent_a", "agent_b", "agent_c", "agent_d"), start=1)
+            for i, agent in enumerate(("market_agent", "fundamental_agent", "sentiment_agent", "news_agent"), start=1)
         )
     )
     return payload
@@ -278,13 +278,13 @@ def _scenario_c_fixture():
     payload = _payload(
         _record(
             "c:claim:1",
-            "analyst_one",
+            "market_agent",
             "ACME product demand remains resilient this quarter.",
             alpha_id="A103",
         ),
         _record(
             "c:claim:2",
-            "analyst_two",
+            "fundamental_agent",
             "ACME supply chain constraints are easing steadily.",
             alpha_id="A103",
         ),
@@ -340,19 +340,19 @@ def _scenario_d_fixture():
     payload = _payload(
         _record(
             "d:claim:1",
-            "solo_agent",
+            "market_agent",
             "ACME margin expansion continued for the third straight quarter.",
             alpha_id="A201",
         ),
         _record(
             "d:claim:2",
-            "solo_agent",
+            "market_agent",
             "ACME backlog conversion accelerated meaningfully in June.",
             alpha_id="A201",
         ),
         _record(
             "d:claim:3",
-            "solo_agent",
+            "market_agent",
             "ACME pricing power improved across every major product line.",
             alpha_id="A201",
         ),
@@ -402,13 +402,13 @@ def _scenario_e_fixture():
     payload = _payload(
         _record(
             "e:claim:1",
-            "analyst_one",
+            "market_agent",
             "Sector-wide semiconductor demand is broadly increasing amid macro tailwinds.",
             alpha_id="A301",
         ),
         _record(
             "e:claim:2",
-            "analyst_two",
+            "fundamental_agent",
             "Industry-wide capacity utilization keeps climbing this cycle.",
             alpha_id="A301",
         ),
@@ -463,12 +463,12 @@ def test_scenario_e_no_ticker_specific_evidence_is_capped():
 
 def _scenario_f_fixture():
     payload = _payload(
-        _record("f:claim:1", "agent_x", "ACME AI infrastructure demand is expanding rapidly.", alpha_id="A601"),
-        _record("f:claim:1b", "agent_y", "ACME AI infrastructure demand is expanding rapidly.", alpha_id="A601"),
-        _record("f:claim:2", "agent_x", "Enterprise cloud spending continues to accelerate broadly.", alpha_id="A601"),
-        _record("f:claim:2b", "agent_z", "Enterprise cloud spending continues to accelerate broadly.", alpha_id="A601"),
-        _record("f:claim:3", "agent_y", "Datacenter buildout momentum remains firmly intact.", alpha_id="A601"),
-        _record("f:claim:4", "agent_z", "Networking equipment orders keep trending upward industry-wide.", alpha_id="A601"),
+        _record("f:claim:1", "market_agent", "ACME AI infrastructure demand is expanding rapidly.", alpha_id="A601"),
+        _record("f:claim:1b", "fundamental_agent", "ACME AI infrastructure demand is expanding rapidly.", alpha_id="A601"),
+        _record("f:claim:2", "market_agent", "Enterprise cloud spending continues to accelerate broadly.", alpha_id="A601"),
+        _record("f:claim:2b", "sentiment_agent", "Enterprise cloud spending continues to accelerate broadly.", alpha_id="A601"),
+        _record("f:claim:3", "fundamental_agent", "Datacenter buildout momentum remains firmly intact.", alpha_id="A601"),
+        _record("f:claim:4", "sentiment_agent", "Networking equipment orders keep trending upward industry-wide.", alpha_id="A601"),
     )
     edges = [
         _edge("factor_a", "factor_b", ["f:claim:1", "f:claim:1b"]),
@@ -517,10 +517,10 @@ def _cap_binding_single_fixture():
     eligible_cap=70.0; 74.0>70 => binding; activation_score=70.0.
     """
     payload = _payload(
-        _record("h:1", "agent_x", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("h:2", "agent_y", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("h:3", "agent_z", "ACME datacenter buildout momentum intact.", alpha_id="A101"),
-        _record("h:4", "agent_x", "ACME networking orders trending upward broadly.", alpha_id="A101"),
+        _record("h:1", "market_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("h:2", "fundamental_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("h:3", "sentiment_agent", "ACME datacenter buildout momentum intact.", alpha_id="A101"),
+        _record("h:4", "market_agent", "ACME networking orders trending upward broadly.", alpha_id="A101"),
     )
     return payload
 
@@ -549,12 +549,12 @@ def _cap_multiple_different_values_fixture():
     the 70-value one.
     """
     payload = _payload(
-        _record("i:1", "agent_x", "AI infrastructure demand accelerating broadly across the sector.", alpha_id="A101"),
-        _record("i:1b", "agent_y", "AI infrastructure demand accelerating broadly across the sector.", alpha_id="A101"),
-        _record("i:2", "agent_x", "Cloud spend keeps rising this quarter industry-wide.", alpha_id="A101"),
-        _record("i:2b", "agent_z", "Cloud spend keeps rising this quarter industry-wide.", alpha_id="A101"),
-        _record("i:3", "agent_y", "Datacenter buildout momentum remains firmly intact.", alpha_id="A101"),
-        _record("i:4", "agent_z", "Networking equipment orders keep trending upward broadly.", alpha_id="A101"),
+        _record("i:1", "market_agent", "AI infrastructure demand accelerating broadly across the sector.", alpha_id="A101"),
+        _record("i:1b", "fundamental_agent", "AI infrastructure demand accelerating broadly across the sector.", alpha_id="A101"),
+        _record("i:2", "market_agent", "Cloud spend keeps rising this quarter industry-wide.", alpha_id="A101"),
+        _record("i:2b", "sentiment_agent", "Cloud spend keeps rising this quarter industry-wide.", alpha_id="A101"),
+        _record("i:3", "fundamental_agent", "Datacenter buildout momentum remains firmly intact.", alpha_id="A101"),
+        _record("i:4", "sentiment_agent", "Networking equipment orders keep trending upward broadly.", alpha_id="A101"),
     )
     return payload
 
@@ -593,9 +593,9 @@ def _cap_tie_fixture():
     activation_score=60.0; binding_cap_reason_codes has BOTH reasons.
     """
     payload = _payload(
-        _record("j:1", "agent_p", "Sector-wide product demand remains broadly resilient.", alpha_id="A101"),
-        _record("j:2", "agent_q", "Sector-wide product demand remains broadly resilient.", alpha_id="A101"),
-        _record("j:3", "agent_r", "Sector-wide product demand remains broadly resilient.", alpha_id="A101"),
+        _record("j:1", "market_agent", "Sector-wide product demand remains broadly resilient.", alpha_id="A101"),
+        _record("j:2", "fundamental_agent", "Sector-wide product demand remains broadly resilient.", alpha_id="A101"),
+        _record("j:3", "sentiment_agent", "Sector-wide product demand remains broadly resilient.", alpha_id="A101"),
     )
     edges = [
         _edge("factor_1", "factor_2", ["j:1"]),
@@ -634,12 +634,12 @@ def _regime_all_pass_fixture():
     """All seven gates pass: score=95.0, unique=4, agents=3, ticker=2,
     local_edge=2, LSS raw=100, no integrity warnings."""
     payload = _payload(
-        _record("k:g0:0", "agent_x", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("k:g0:1", "agent_y", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("k:g1:0", "agent_x", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("k:g1:1", "agent_z", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("k:g2:0", "agent_y", "Datacenter buildout momentum remains intact worldwide.", alpha_id="A101"),
-        _record("k:g3:0", "agent_z", "Networking orders keep trending upward broadly.", alpha_id="A101"),
+        _record("k:g0:0", "market_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("k:g0:1", "fundamental_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("k:g1:0", "market_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("k:g1:1", "sentiment_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("k:g2:0", "fundamental_agent", "Datacenter buildout momentum remains intact worldwide.", alpha_id="A101"),
+        _record("k:g3:0", "sentiment_agent", "Networking orders keep trending upward broadly.", alpha_id="A101"),
     )
     edges = [
         _edge("factor_1", "factor_2", ["k:g0:0"]),
@@ -688,11 +688,11 @@ def test_regime_gate_2_insufficient_unique_evidence_fails_alone():
     Uncapped = 26.25(EQ,3 groups)+20.0(AI)+20.0(LSS)+6.6667(TS,2/3)+10.0+5.0
              = 87.9167 -- passes gate #1, fails only gate #2."""
     payload = _payload(
-        _record("l:g0:0", "agent_x", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("l:g0:1", "agent_y", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("l:g1:0", "agent_x", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("l:g1:1", "agent_z", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("l:g2:0", "agent_y", "Datacenter buildout momentum remains intact worldwide.", alpha_id="A101"),
+        _record("l:g0:0", "market_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("l:g0:1", "fundamental_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("l:g1:0", "market_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("l:g1:1", "sentiment_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("l:g2:0", "fundamental_agent", "Datacenter buildout momentum remains intact worldwide.", alpha_id="A101"),
     )
     edges = [
         _edge("factor_1", "factor_2", ["l:g0:0"]),
@@ -713,12 +713,12 @@ def test_regime_gate_3_insufficient_supporting_agents_fails_alone():
     Uncapped = 35.0(EQ)+15.3333(AI)+20.0(LSS)+5.0(TS,2/4)+10.0+5.0 = 90.3333
     -- passes gates 1/2/4/5/6/7, fails only gate #3."""
     payload = _payload(
-        _record("m:g0:0", "agent_x", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("m:g0:1", "agent_y", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("m:g1:0", "agent_x", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("m:g1:1", "agent_y", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("m:g2:0", "agent_y", "Datacenter buildout momentum remains intact worldwide.", alpha_id="A101"),
-        _record("m:g3:0", "agent_x", "Networking orders keep trending upward broadly.", alpha_id="A101"),
+        _record("m:g0:0", "market_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("m:g0:1", "fundamental_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("m:g1:0", "market_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("m:g1:1", "fundamental_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("m:g2:0", "fundamental_agent", "Datacenter buildout momentum remains intact worldwide.", alpha_id="A101"),
+        _record("m:g3:0", "market_agent", "Networking orders keep trending upward broadly.", alpha_id="A101"),
     )
     edges = [
         _edge("factor_1", "factor_2", ["m:g0:0"]),
@@ -757,12 +757,12 @@ def test_regime_gate_5_no_local_structure_is_structurally_unreachable_via_the_sc
     seam, not a workaround) since it cannot be exercised end-to-end.
     """
     payload = _payload(
-        _record("n:g0:0", "agent_x", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("n:g0:1", "agent_y", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("n:g1:0", "agent_x", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("n:g1:1", "agent_z", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("n:g2:0", "agent_y", "ACME datacenter buildout momentum remains intact.", alpha_id="A101"),
-        _record("n:g3:0", "agent_z", "ACME networking orders keep trending upward broadly.", alpha_id="A101"),
+        _record("n:g0:0", "market_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("n:g0:1", "fundamental_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("n:g1:0", "market_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("n:g1:1", "sentiment_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("n:g2:0", "fundamental_agent", "ACME datacenter buildout momentum remains intact.", alpha_id="A101"),
+        _record("n:g3:0", "sentiment_agent", "ACME networking orders keep trending upward broadly.", alpha_id="A101"),
     )
     result = _score("A101", payload, graph_edges=())
     assert result["components"]["local_structure_support"]["local_edge_count"] == 0
@@ -810,12 +810,12 @@ def test_regime_gate_6_insufficient_local_structure_strength_fails_alone():
     Uncapped = 35.0(EQ)+20.0(AI)+7.5(LSS,raw37.5*0.2)+10.0(TS,4/4)+10.0+5.0
              = 87.5 -- passes every gate except #6."""
     payload = _payload(
-        _record("o:g0:0", "agent_x", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("o:g0:1", "agent_y", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
-        _record("o:g1:0", "agent_x", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("o:g1:1", "agent_z", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
-        _record("o:g2:0", "agent_y", "ACME datacenter buildout momentum remains intact.", alpha_id="A101"),
-        _record("o:g3:0", "agent_z", "ACME networking orders keep trending upward broadly.", alpha_id="A101"),
+        _record("o:g0:0", "market_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("o:g0:1", "fundamental_agent", "ACME AI infrastructure demand accelerating broadly.", alpha_id="A101"),
+        _record("o:g1:0", "market_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("o:g1:1", "sentiment_agent", "ACME cloud spend keeps rising this quarter.", alpha_id="A101"),
+        _record("o:g2:0", "fundamental_agent", "ACME datacenter buildout momentum remains intact.", alpha_id="A101"),
+        _record("o:g3:0", "sentiment_agent", "ACME networking orders keep trending upward broadly.", alpha_id="A101"),
     )
     edges = [
         _edge("factor_1", "factor_2", ["o:g0:0"], assertion_status="conditional"),
@@ -838,7 +838,7 @@ def test_regime_gate_7_evidence_integrity_warning_fails_alone():
     payload["matches"].append(
         _record(
             "k:bad",
-            "agent_w",
+            "news_agent",
             "ACME something else happened entirely.",
             alpha_id="A101",
             match_score=1.5,
@@ -1043,7 +1043,7 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
     alpha_matches = [
         {
             "claim_id": "c1",
-            "agent": "agent_one",
+            "agent": "market_agent",
             "claim": "ACME AI expansion evidence.",
             "evidence": "ACME AI expansion evidence.",
             "match_status": "matched",
@@ -1058,7 +1058,7 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
         },
         {
             "claim_id": "c1b",
-            "agent": "agent_three",
+            "agent": "sentiment_agent",
             "claim": "ACME datacenter demand is accelerating.",
             "evidence": "ACME datacenter demand is accelerating.",
             "match_status": "matched",
@@ -1073,7 +1073,7 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
         },
         {
             "claim_id": "c2",
-            "agent": "agent_two",
+            "agent": "fundamental_agent",
             "claim": "ACME multiple compression evidence.",
             "evidence": "ACME multiple compression evidence.",
             "match_status": "matched",
@@ -1088,7 +1088,7 @@ def test_mutation_conflict_formula_min_to_max_still_fails_existing_tests():
         },
         {
             "claim_id": "c2b",
-            "agent": "agent_four",
+            "agent": "news_agent",
             "claim": "ACME margin compression was flagged by analysts.",
             "evidence": "ACME margin compression was flagged by analysts.",
             "match_status": "matched",
@@ -1134,7 +1134,7 @@ def test_context_only_claim_contributes_no_activation_evidence():
     alpha with an 'activation' relation -- must not count as Activation
     evidence."""
     record = _record(
-        "c1", "agent_x", "The company reported quarterly revenue of $2.3 billion.", alpha_id="A101"
+        "c1", "market_agent", "The company reported quarterly revenue of $2.3 billion.", alpha_id="A101"
     )
     record["claim_quality"] = "context_only"
     payload = _payload(record)
@@ -1151,7 +1151,7 @@ def test_analytical_claim_with_the_same_relation_does_contribute():
     behaves exactly as it always did -- proving the exclusion above is
     caused by claim_quality, not by some other change."""
     record = _record(
-        "c1", "agent_x", "The company reported quarterly revenue of $2.3 billion.", alpha_id="A101"
+        "c1", "market_agent", "The company reported quarterly revenue of $2.3 billion.", alpha_id="A101"
     )
     record["claim_quality"] = "analytical"
     payload = _payload(record)

@@ -17,6 +17,7 @@
 
 import {
   adaptAgentOutputsResponse,
+  adaptAlphaLibraryResponse,
   adaptCanonicalResearchResponse,
   adaptConflictsResponse,
   adaptHealthResponse,
@@ -32,6 +33,7 @@ import {
 import { ApiError } from "./errors";
 import type {
   AgentOutputsResult,
+  AlphaLibraryResponse,
   CanonicalResearchResult,
   ConflictsResult,
   HealthResponse,
@@ -258,6 +260,15 @@ export async function getResearchHistory(
 export async function replayAllSavedOutputs(options: RequestOptions = {}): Promise<ReplayAllResult> {
   const body = await performRequest("/api/replay-all", { method: "POST", signal: options.signal });
   return adaptOrThrow(adaptReplayAllResult(body));
+}
+
+/** GET /api/alpha-library -- the canonical Alpha taxonomy (name, thesis,
+ * invalidation_conditions, etc.), ticker-independent and static for the
+ * lifetime of the running server. Callers should fetch this once (see
+ * hooks/useAlphaLibrary.ts) and map by alpha_id, never once per Alpha. */
+export async function getAlphaLibrary(options: RequestOptions = {}): Promise<AlphaLibraryResponse> {
+  const body = await performRequest("/api/alpha-library", { signal: options.signal });
+  return adaptOrThrow(adaptAlphaLibraryResponse(body));
 }
 
 export async function getHealth(options: RequestOptions = {}): Promise<HealthResponse> {

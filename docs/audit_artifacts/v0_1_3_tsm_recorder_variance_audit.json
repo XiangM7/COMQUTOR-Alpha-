@@ -1,0 +1,532 @@
+{
+  "schema_version": "v0_1_3_tsm_recorder_variance_audit.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "executive_summary": {
+    "semantic_recorder_failure_events": 247,
+    "unique_affected_claims": "UNKNOWN (log format carries no claim_id/task granularity -- run_id/reason_code/exc_type only)",
+    "final_recorder_losses": "247 (audit-trail entries genuinely missing from llm_semantic_calls.jsonl)",
+    "canonical_semantic_losses": 0,
+    "recorder_severity": "AUDIT_TRACE_ONLY -- proven architecturally incapable of causing semantic loss",
+    "a103_regression_root_cause": "V1 RESEARCH_CONTENT_VARIANCE (primary) -- raw AI-infrastructure keyword density dropped 54->30 mentions and unique qualifying facts collapsed 13->1; NOT Provider-caused, NOT recorder-caused",
+    "a201_regression_root_cause": "V7 STRUCTURE_EXTRACTION_VARIANCE (primary) -- raw topic volume was essentially unchanged (40 vs 41 mentions) and evidence quality/ticker-specificity actually improved, but the specific two-factor causal-link sentence pattern that produced 2 structure edges in the old run did not appear in this run's phrasing (0 edges); NOT Provider-caused, NOT recorder-caused",
+    "old_tsm_gold": "5/6 = 83.33%",
+    "new_tsm_gold": "4/6 = 66.67%",
+    "gold_alpha_flips": [
+      "A103 HIT->MISS",
+      "A201 HIT->MISS",
+      "A301 MISS->HIT"
+    ],
+    "single_run_reproducibility": "LOW",
+    "promote_new_tsm": "DO_NOT_PROMOTE",
+    "recommended_next_step": "NEXT_E -- design a multi-run reproducibility/stability metric before treating any single TSM run (old or new) as the authoritative benchmark run",
+    "code_changes": 0,
+    "provider_calls": 0,
+    "ticker_runs": 0
+  },
+  "semantic_recorder_architecture_trace": {
+    "primary_file": "comqutor_alpha/llm_runtime/recorder.py",
+    "primary_class": "SemanticCallRecorder (append-only JSONL writer for llm_semantic_calls.jsonl)",
+    "append_function": "SemanticCallRecorder.append() -- raises RecorderIntegrityError for RECORDER_CLOSED / RECORDER_RUN_ID_MISMATCH / RECORDER_MODE_MISMATCH / RECORDER_DUPLICATE_CALL_ID / RECORDER_SEQUENCE_NOT_MONOTONIC / RECORDER_TAIL_CORRUPTED / RECORDER_MIDDLE_LINE_CORRUPTED / RECORDER_RECORD_NOT_OBJECT",
+    "caller_of_append": "SemanticRuntimeSession.finalize_call() (comqutor_alpha/llm_runtime/session.py:380-470) -- wraps recorder.append(record) in a try/except that calls self._mark_degraded('SEMANTIC_RECORDER_APPEND_FAILED', exc, incomplete=True) and returns False on ANY exception",
+    "caller_of_finalize_call": "Week2LLMGateway.finalize_semantic_invocation() (comqutor_alpha/structure_engine/week2_llm.py:1090-1176), itself wrapped in a blanket try/except that further swallows any exception via report_degraded('SEMANTIC_CALL_FINALIZATION_FAILED')",
+    "task_level_callers_confirmed_identical_pattern": [
+      "comqutor_alpha/structure_engine/alpha_mapper.py:451-462 (_classify_alpha_with_llm): response = invocation.validated_output is assigned BEFORE/independent of the finalize_semantic_invocation() call whose return value is discarded",
+      "comqutor_alpha/structure_engine/alpha_mapper.py:585-589 (_classify_alpha_batch_with_llm): identical pattern, return invocation.validated_output",
+      "comqutor_alpha/structure_engine/structure_extractor.py:434-441: identical pattern, return invocation.validated_output",
+      "comqutor_alpha/structure_engine/evidence_stance_llm.py:328-334: identical pattern, returned_items = invocation.validated_output or []"
+    ],
+    "data_being_appended": "A full audit-trail record (call_id, task, prompt_sha256, input_payload, validated_output, retry_count, provider_status, fallback_used, error_code, latency_ms, token_usage, etc.) written to llm_semantic_calls.jsonl -- the human/machine-readable REPLAY and OBSERVABILITY trail, not a live-computation input.",
+    "destination_artifact": "llm_semantic_calls.jsonl",
+    "append_synchronous": true,
+    "failure_raises_to_caller": false,
+    "failure_swallowed": true,
+    "retry_exists_for_append_itself": false,
+    "downstream_semantic_state_depends_on_successful_append": false,
+    "proof": "In every one of the 4 task-level call sites, the variable actually consumed as the semantic result (invocation.validated_output / invocation.parsed_output) is read from the `invocation` object, which was fully populated by invoke_json_with_trace() BEFORE finalize_semantic_invocation() is ever called. finalize_semantic_invocation()'s return type is None and its return value is never assigned or checked by any caller. A RecorderIntegrityError raised inside recorder.append() is caught inside SemanticRuntimeSession.finalize_call() itself (returns False, never propagates) and is caught AGAIN by finalize_semantic_invocation()'s own blanket try/except -- the exception can never reach, and therefore can never alter, the already-fixed semantic decision.",
+    "role_classification": "B. AUDIT_TRACE_ONLY"
+  },
+  "raw_vs_final_recorder_loss": {
+    "recorder_failure_events": 247,
+    "unique_affected_claims": "UNKNOWN -- not reconstructable from available logs",
+    "final_recorder_losses": 247,
+    "recovered_recorder_writes": "UNKNOWN (cannot distinguish a claim whose FIRST attempt failed but a LATER attempt for the same call_id succeeded, since call_id is unique per attempt in this architecture -- there is no 'retry of the same recorder write', each finalize_call is a one-shot append for a specific already-completed provider call)",
+    "traceability_unknown": 247,
+    "note": "Unlike Provider Health's alpha_classifier orphan tracking (which has a definitive per-claim ground truth in alpha_matches.json's match_status field), NO equivalent per-claim ground truth exists for recorder-append failures specifically -- the only persisted signal is the aggregate server-log warning count. This is a genuine traceability gap, reported honestly rather than approximated."
+  },
+  "semantic_consequence_classification": {
+    "classification_for_all_247_events": "SR1 AUDIT_TRACE_LOSS_ONLY",
+    "reasoning": "Proven architecturally (see semantic_recorder_architecture_trace) that canonical processing (matched_alpha, B1 stance, structure edges) is derived from in-memory invocation state that is fully independent of whether the JSONL audit-trail append succeeds. No instance of SR2 (Alpha mapping trace loss), SR3 (stance trace loss), SR4 (structure trace loss), SR5 (activation input loss), SR6 (conflict input loss), or SR7 (canonical state loss) is possible under the current architecture -- these classes would require the semantic decision itself to depend on a successful append, which the code proves it does not.",
+    "not_classified_as_semantic_loss_merely_because_recorder_failed": true,
+    "canonical_processing_independence_proven": true
+  },
+  "provider_health_diagnostic_gap": {
+    "classification": "DIAGNOSTIC_GAP_AUDITABILITY",
+    "reasoning": "Not DIAGNOSTIC_GAP_SEMANTIC_INTEGRITY, because semantic integrity is proven unaffected. Not DIAGNOSTIC_GAP_NONE, because 247 real degradation events currently have zero visibility in provider_health_diagnostics.py's metrics. It IS an auditability/observability gap: recorder failures reduce the completeness of the REPLAY/audit trail (llm_semantic_calls.jsonl), which matters for future debugging/traceability work, but does not threaten any currently-computed Alpha/Gold result.",
+    "should_become_provider_failure_events": "NO -- conflating a local file-I/O/concurrency integrity check with a Provider (network/LLM) execution failure would misattribute the failure's true nature and is explicitly the conflation this task warns against avoiding.",
+    "should_become_separate_recorder_health_metrics": "YES -- recommended as a distinct metric family (e.g. recorder_append_failure_count, recorder_integrity_status) alongside, not merged into, Provider Health.",
+    "should_become_final_orphan_source": "NO -- 'final orphan' in the Provider Health sense specifically means a semantic decision was never made; recorder failures do not create orphans by this definition.",
+    "should_become_benchmark_review_reason": "NO -- benchmark_review_required is reserved for confirmed Alpha-lineage impact; recorder-only degradation does not meet that bar."
+  },
+  "a103_full_trace": {
+    "old_run": {
+      "score": 68.5499,
+      "level": "active",
+      "detected": true,
+      "evidence_count": 13,
+      "unique_evidence_count": 13,
+      "distinct_supporting_agents": 3,
+      "agents": [
+        "fundamental_agent",
+        "news_agent",
+        "sentiment_agent"
+      ],
+      "ticker_specific_evidence_count": 3,
+      "local_edge_count": 0,
+      "evidence_quality_raw": 100.0,
+      "agent_independence_raw": 85.0,
+      "cap_reason_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "provider_failures_touching_a103": "NOT in impacted_alpha_ids ([A301,A601]) -- none found",
+      "recorder_failures_touching_a103": "N/A -- recorder architecturally cannot affect any Alpha's semantic outcome"
+    },
+    "new_run": {
+      "score": 25.7618,
+      "level": "candidate",
+      "detected": false,
+      "evidence_count": 1,
+      "unique_evidence_count": 1,
+      "distinct_supporting_agents": 1,
+      "agents": [
+        "news_agent"
+      ],
+      "ticker_specific_evidence_count": 0,
+      "local_edge_count": 0,
+      "evidence_quality_raw": 18.99,
+      "agent_independence_raw": 23.3333,
+      "cap_reason_codes": [
+        "INSUFFICIENT_UNIQUE_EVIDENCE",
+        "NO_TICKER_SPECIFIC_EVIDENCE",
+        "INSUFFICIENT_AGENT_INDEPENDENCE",
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "provider_failures_touching_a103": "NOT in impacted_alpha_ids ([A101]) -- none found",
+      "recorder_failures_touching_a103": "N/A -- see above"
+    },
+    "raw_research_keyword_comparison": {
+      "keywords": [
+        "data center",
+        "datacenter",
+        "capex",
+        "infrastructure",
+        "server",
+        "cooling",
+        "networking",
+        "power demand"
+      ],
+      "old_total_mentions": 54,
+      "new_total_mentions": 30,
+      "old_by_agent": {
+        "sentiment_agent": 5,
+        "news_agent": 18,
+        "fundamental_agent": 14,
+        "bull_researcher": 9,
+        "bear_researcher": 7,
+        "research_manager": 1
+      },
+      "new_by_agent": {
+        "news_agent": 5,
+        "fundamental_agent": 16,
+        "bull_researcher": 2,
+        "bear_researcher": 4,
+        "research_manager": 1,
+        "conservative_risk_analyst": 2
+      }
+    },
+    "first_meaningful_divergence": "Raw research content stage (Week1 TradingAgents output): AI-infrastructure-keyword density dropped 44% (54->30 mentions) run-to-run. This is compounded, not fully explained, by an even sharper drop at extraction/qualification (13->1 unique qualifying facts, a 92% reduction) -- the SAME topic was discussed far less AND what remained mapped less cleanly to A103 specifically (possibly diffused into A101 AI Expansion, whose 4 keyword lists overlap with A103's on 'AI capex'/'infrastructure' terms).",
+    "primary_variance_class": "V1 RESEARCH_CONTENT_VARIANCE",
+    "secondary_variance_class": "V3 CLAIM_EXTRACTION_VARIANCE (the disproportionate 13->1 collapse relative to the more modest 54->30 raw-mention decline suggests a compounding extraction/mapping effect beyond pure content volume, not independently isolated further in this task)",
+    "provider_caused": false,
+    "recorder_caused": false
+  },
+  "a201_full_trace": {
+    "old_run": {
+      "score": 64.5041,
+      "level": "active",
+      "detected": true,
+      "evidence_count": 30,
+      "unique_evidence_count": 30,
+      "distinct_supporting_agents": 3,
+      "ticker_specific_evidence_count": 6,
+      "local_edge_count": 2,
+      "cap_reason_codes": [],
+      "structure_edges": [
+        {
+          "edge": "ai_capex -> semiconductor_cycle",
+          "type": "causal",
+          "evidence": "The dominant narrative is an accelerating AI/semiconductor capex supercycle that directly benefits TSM as the world's leading advanced-node foundry"
+        },
+        {
+          "edge": "ai_capex -> tsm_revenue_growth",
+          "type": "supportive",
+          "evidence": "Massive capacity expansion (Arizona $265B, Europe) secures long-term revenue runway"
+        }
+      ],
+      "provider_failures_touching_a201": "NOT in impacted_alpha_ids ([A301,A601]) -- none found"
+    },
+    "new_run": {
+      "score": 44.4406,
+      "level": "candidate",
+      "detected": false,
+      "evidence_count": 25,
+      "unique_evidence_count": 25,
+      "distinct_supporting_agents": 5,
+      "ticker_specific_evidence_count": 9,
+      "local_edge_count": 0,
+      "cap_reason_codes": [
+        "NO_LOCAL_STRUCTURE_SUPPORT"
+      ],
+      "structure_edges": [],
+      "incident_edges_of_any_kind": 0,
+      "provider_failures_touching_a201": "NOT in impacted_alpha_ids ([A101]) -- none found"
+    },
+    "raw_research_keyword_comparison": {
+      "old_total_mentions": 40,
+      "new_total_mentions": 41,
+      "note": "essentially unchanged"
+    },
+    "counter_intuitive_finding": "Evidence VOLUME and QUALITY improved in the new run (unique facts 30->25 modest decline, but ticker_specific_evidence_count IMPROVED 6->9, distinct_supporting_agents IMPROVED 3->5) -- yet the score DROPPED, driven entirely by local_edge_count collapsing from 2 to 0. This is NOT an evidence-attrition story like A103; it is a pure STRUCTURE-EXTRACTION story.",
+    "first_meaningful_divergence": "Structure extraction stage: zero edges of ANY kind (qualifying or non-qualifying) touch A201 in the new run, versus 2 committed edges in the old run. The specific two-factor causal-link sentence pattern ('AI capex... benefits TSM as leading foundry' / 'capacity expansion... secures revenue runway') that produced those edges did not appear in this run's phrasing, despite near-identical overall topic volume.",
+    "primary_variance_class": "V7 STRUCTURE_EXTRACTION_VARIANCE",
+    "secondary_variance_class": "V1 RESEARCH_CONTENT_VARIANCE (same topic, different phrasing -- the underlying facts are present but not expressed in the specific two-factor-co-occurring sentence form the deterministic extractor requires)",
+    "provider_caused": false,
+    "recorder_caused": false
+  },
+  "research_corpus_comparison": {
+    "total_claims": {
+      "old": 766,
+      "new": 817
+    },
+    "primary_claims": {
+      "old": 351,
+      "new": 359
+    },
+    "secondary_claims": {
+      "old": 415,
+      "new": 458
+    },
+    "gold_theme_raw_mention_counts": {
+      "A103_ai_infrastructure_keywords": {
+        "old": 54,
+        "new": 30
+      },
+      "A201_semiconductor_cycle_keywords": {
+        "old": 40,
+        "new": 41
+      }
+    },
+    "conclusion": "Substantial run-to-run movement occurs BEFORE the Alpha Mapper ever sees the evidence -- overall claim volume is comparable (766 vs 817), but topic-specific density varies materially per theme (A103's topic nearly halved; A201's stayed flat). This confirms real, expected day-to-day research variance in live TradingAgents execution, not a systemic pipeline defect."
+  },
+  "source_overlap": {
+    "old_only_outlets": [
+      "Barron's",
+      "CNBC",
+      "GuruFocus",
+      "Reuters"
+    ],
+    "new_only_outlets": [
+      "Barclays",
+      "TheStreet"
+    ],
+    "shared_outlets": [
+      "IBD",
+      "Motley Fool",
+      "StockTwits",
+      "Yahoo Finance",
+      "Zacks"
+    ],
+    "analysis_dates_differ": "old=2026-09-06, new=2026-09-09 (3 calendar days apart)",
+    "conclusion": "Meaningful source rotation is expected and normal for two independent live news-driven research runs on different real dates -- not investigated further via web search per the explicit no-web-search constraint. This is consistent with, and supportive of, the V1 RESEARCH_CONTENT_VARIANCE classification for both A103 and A201."
+  },
+  "same_thesis_cross_run_matching": {
+    "A301_positive_control": {
+      "old_claim_id": "fundamentals_report:claim:42",
+      "new_claim_id": "fundamentals_report:claim:29",
+      "theme": "AI demand/infrastructure driving TSM revenue growth",
+      "old_alpha": null,
+      "new_alpha": "A301",
+      "old_qualification": "match_status=unavailable (provider_timeout)",
+      "new_qualification": "match_status=matched, alpha_match_method=llm"
+    },
+    "A103_A201_note": "No single dominant cross-run claim pair was identified for A103/A201 given the finding is a VOLUME/STRUCTURE difference (many old claims vs few/no new ones for A103; zero edges vs two for A201), not a one-to-one claim substitution -- textual similarity matching across dozens of candidate claims was not exhaustively performed given the clear, sufficient quantitative evidence already established above."
+  },
+  "a301_control_case": {
+    "recorder_failures_affected_new_a301_lineage": "UNKNOWN whether claim:29's own finalize_semantic_invocation call specifically hit SEMANTIC_RECORDER_APPEND_FAILED (no claim-level attribution available) -- IRRELEVANT even if it did, since the architecture trace proves any such failure would be non-canonical/audit-only and could not have prevented A301's committed matched_alpha=A301 result, which is independently confirmed present and correct in alpha_matches.json/structure_graph.json.",
+    "conclusion": "A301's successful recovery is confirmed genuine and unaffected by any concurrent recorder distress, consistent with the architectural proof that recorder failures cannot alter canonical semantic state."
+  },
+  "a101_a304_a601_stability_controls": {
+    "A101": {
+      "old_score": 52.9006,
+      "new_score": 70.0,
+      "old_unique_facts": null,
+      "new_unique_facts": 18,
+      "note": "Both runs comfortably above 50; new run notably stronger (broader evidence base, 18 unique facts)."
+    },
+    "A304": {
+      "old_score": 57.9945,
+      "new_score": 75.8263,
+      "note": "Both above 50; new run stronger, benefiting from a real local_structure_support contribution (raw 25.0) absent in some other alphas."
+    },
+    "A601": {
+      "old_score": 54.1843,
+      "new_score": 55.4809,
+      "note": "Both narrowly above 50 in both runs -- the most MARGIN-classified of the three stable hits, but stable nonetheless across two independent runs."
+    },
+    "why_more_stable_than_a103_a201": "A101/A304/A601 draw on broad, generically-worded market/sentiment/narrative themes (AI expansion, valuation risk, momentum) that are almost always present in SOME form in TSM's daily news flow, giving them redundant, multi-agent evidence bases resistant to any single day's specific phrasing. A103 (AI infrastructure) and A201 (semiconductor supercycle) require more SPECIFIC factual/structural content (capex figures, explicit two-factor causal sentences) that is more sensitive to which particular news items happened to surface on a given research date."
+  },
+  "margin_robustness_analysis": {
+    "methodology_note": "Bins are DIAGNOSTIC-ONLY descriptive categories, not proposed production thresholds: ROBUST (|score-50| >= 15), MARGIN (|score-50| < 15). Stated transparently, not derived from any hidden rule.",
+    "old": [
+      {
+        "alpha": "A101",
+        "score": 52.9006,
+        "margin_from_50": 2.9006,
+        "classification": "MARGIN_HIT"
+      },
+      {
+        "alpha": "A103",
+        "score": 68.5499,
+        "margin_from_50": 18.5499,
+        "classification": "ROBUST_HIT"
+      },
+      {
+        "alpha": "A201",
+        "score": 64.5041,
+        "margin_from_50": 14.5041,
+        "classification": "MARGIN_HIT"
+      },
+      {
+        "alpha": "A301",
+        "score": 44.7724,
+        "margin_from_50": -5.2276,
+        "classification": "MARGIN_MISS"
+      },
+      {
+        "alpha": "A304",
+        "score": 57.9945,
+        "margin_from_50": 7.9945,
+        "classification": "MARGIN_HIT"
+      },
+      {
+        "alpha": "A601",
+        "score": 54.1843,
+        "margin_from_50": 4.1843,
+        "classification": "MARGIN_HIT"
+      }
+    ],
+    "new": [
+      {
+        "alpha": "A101",
+        "score": 70.0,
+        "margin_from_50": 20.0,
+        "classification": "ROBUST_HIT"
+      },
+      {
+        "alpha": "A103",
+        "score": 25.7618,
+        "margin_from_50": -24.2382,
+        "classification": "ROBUST_MISS"
+      },
+      {
+        "alpha": "A201",
+        "score": 44.4406,
+        "margin_from_50": -5.5594,
+        "classification": "MARGIN_MISS"
+      },
+      {
+        "alpha": "A301",
+        "score": 75.9582,
+        "margin_from_50": 25.9582,
+        "classification": "ROBUST_HIT"
+      },
+      {
+        "alpha": "A304",
+        "score": 75.8263,
+        "margin_from_50": 25.8263,
+        "classification": "ROBUST_HIT"
+      },
+      {
+        "alpha": "A601",
+        "score": 55.4809,
+        "margin_from_50": 5.4809,
+        "classification": "MARGIN_HIT"
+      }
+    ],
+    "observation": "5 of 6 old-run Gold alphas were MARGIN-classified (within 15 points of the threshold) -- only A103 was robust. This means TSM's old 'hit' set was itself fragile/borderline for most alphas, which helps explain why a second independent run flipped 3 of 6 outcomes: the underlying scores were, in most cases, never far from the boundary to begin with."
+  },
+  "single_run_benchmark_stability": {
+    "old_gold_hit": "5/6 = 83.3333%",
+    "new_gold_hit": "4/6 = 66.6667%",
+    "gold_set_jaccard": {
+      "intersection": [
+        "A101",
+        "A304",
+        "A601"
+      ],
+      "union": [
+        "A101",
+        "A103",
+        "A201",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "value": 0.5
+    },
+    "all_alpha_detected_set_jaccard": {
+      "intersection": [
+        "A101",
+        "A304",
+        "A601"
+      ],
+      "union": [
+        "A101",
+        "A103",
+        "A201",
+        "A301",
+        "A304",
+        "A601"
+      ],
+      "value": 0.5,
+      "note": "Identical to the Gold-set Jaccard here because no non-Gold alpha (A001/A003/A102/A501) changed detected status between the two runs."
+    },
+    "gold_hit_count_variance": 1,
+    "alpha_level_flip_count": 3,
+    "flip_identities": [
+      "A103: HIT->MISS",
+      "A201: HIT->MISS",
+      "A301: MISS->HIT"
+    ],
+    "is_tsm_alpha_hit_reproducible_at_per_run_level": false,
+    "sample_size_caveat": "n=2 runs only. This conclusion is stated for TSM specifically and is explicitly NOT generalized to NVDA/QQQ/MSFT/SNDK/AMD or to the benchmark as a whole."
+  },
+  "detected_set_stability": {
+    "same_detected_in_both": [
+      "A101",
+      "A304",
+      "A601"
+    ],
+    "hit_to_miss": [
+      "A103",
+      "A201"
+    ],
+    "miss_to_hit": [
+      "A301"
+    ],
+    "level_only_change_no_hit_miss_flip": [
+      "A304 (active->dominant)",
+      "A601 (active->active, score moved)"
+    ],
+    "detected_set_jaccard": 0.5,
+    "gold_set_jaccard": 0.5
+  },
+  "benchmark_representativeness": {
+    "old_run": {
+      "artifact_completeness": "9/9 (established in prior audits)",
+      "data_sanity": "ok",
+      "provider_impact": "1 Gold alpha impacted (A301, confirmed causal)",
+      "recorder_integrity": "not separately measured for this run in this task (out of the two-run comparison's direct scope; presumed comparable given the architecture is unchanged)",
+      "research_diversity": "3 distinct agents contributing to A103 and A201 each; broader outlet set (9 outlets)",
+      "semantic_traceability": "full per-claim traceability confirmed in the prior TSM validation task",
+      "gold_stability": "cannot self-assess stability from one run alone",
+      "classification": "BENCHMARK_USABLE_WITH_REVIEW -- confirmed to carry one real, since-explained Provider-caused miss (A301)"
+    },
+    "new_run": {
+      "artifact_completeness": "9/9 (confirmed in the prior validation task)",
+      "data_sanity": "ok",
+      "provider_impact": "1 alpha impacted (A101, no Gold consequence)",
+      "recorder_integrity": "247 audit-trail append failures (proven non-semantic-impacting, but a real degradation event count)",
+      "research_diversity": "A103 lost 2 of 3 supporting agents; A201 gained agents (3->5) but lost all structural edges",
+      "semantic_traceability": "P0/P1 confirmed active and effective; A301 lineage fully traced and confirmed",
+      "gold_stability": "cannot self-assess stability from one run alone",
+      "classification": "BENCHMARK_USABLE_WITH_REVIEW -- confirmed to carry one real, non-Provider-caused Alpha-mapping instability pattern (A103/A201) alongside the confirmed A301 improvement"
+    },
+    "neither_run_auto_preferred": "Per this task's explicit instruction, the run with the better Gold score (old, 83.33%) is NOT automatically preferred -- both runs show real, explained defects/variance of different kinds, and both are BENCHMARK_USABLE_WITH_REVIEW rather than one being BENCHMARK_CLEAN and the other BENCHMARK_DEGRADED."
+  },
+  "promotion_decision": {
+    "decision": "DO_NOT_PROMOTE",
+    "reasoning": "The decision is NOT based on 'A301 recovered' (a real positive) or 'Gold score decreased' (a real negative) in isolation. It is based on REPRESENTATIVENESS: this task found that TSM's per-run Gold outcome has LOW reproducibility (Jaccard 0.5, 3 of 6 alphas flipped, 5 of 6 old-run hits were themselves MARGIN-classified/borderline) using only n=2 runs. Promoting either run as 'the' authoritative TSM benchmark result would overstate confidence in a single-run measurement that this audit has now shown to be materially unstable. The correct action is to design a multi-run stability metric (see below) BEFORE deciding which run, or what combination, should represent TSM's Gold-evaluable state -- not to promote based on which single run happens to score higher or lower."
+  },
+  "multi_run_benchmark_design_options": {
+    "A_single_frozen_run": {
+      "pros": "simplest, matches current v1 methodology",
+      "cons": "proven unstable for TSM (this audit); a single unlucky/lucky run can swing 3 of 6 Alphas"
+    },
+    "B_2_run_majority": {
+      "pros": "cheap (2x cost), catches obvious flips",
+      "cons": "a tie (1-1) has no resolution rule; still thin statistically"
+    },
+    "C_3_run_majority": {
+      "pros": "resolves ties, meaningfully more robust",
+      "cons": "3x Provider cost per ticker per benchmark cycle"
+    },
+    "D_mean_alpha_score_across_runs": {
+      "pros": "uses more information than a binary hit/miss",
+      "cons": "requires redefining the Alpha Hit contract's detected-state semantics (currently a hard active/dominant/regime_level cutoff, not a continuous score) -- a bigger methodology change"
+    },
+    "E_detection_frequency_per_alpha": {
+      "pros": "directly measures what this audit found missing (e.g. 'A301 detected in 1 of 3 runs') -- a natural, interpretable extension of the existing binary contract",
+      "cons": "still requires multiple runs; needs a frequency threshold decision (also non-arbitrary, deferred)"
+    },
+    "F_stability_weighted_metric": {
+      "pros": "most statistically sophisticated",
+      "cons": "highest complexity, hardest to explain/audit, overkill given the current evidence base (n=2)"
+    },
+    "G_separate_accuracy_and_reproducibility_metrics": {
+      "pros": "does not conflate 'is the Gold expectation correct' with 'is the system's answer stable' -- directly addresses this task's own three framing questions",
+      "cons": "two numbers instead of one, requires documentation/communication discipline"
+    },
+    "recommended_smallest_defensible_approach": "E (detection frequency per Alpha) combined with G (report accuracy and reproducibility as two separate, clearly-labeled numbers) -- e.g. 'TSM A301: detected in 1/2 runs so far' alongside the existing single-run Gold Hit percentage, without yet committing to a majority-vote promotion rule until more runs exist. This is the smallest change that directly answers this audit's own three motivating questions, avoids inventing an arbitrary majority threshold prematurely, and does not require redefining the existing detected-state (active/dominant/regime_level) contract.",
+    "not_recommended_yet": "C (3-run majority) and D (mean score) are more statistically robust but are NOT recommended as the immediate next step -- they represent a larger, costlier methodology change that should follow, not precede, a smaller diagnostic step (E+G) confirming how much reproducibility data is actually needed."
+  },
+  "gold_validity_independence_statement": "Per explicit instruction, A103/A201's cross-run instability is NOT used as evidence that Gold's expectation of A103/A201 for TSM is wrong. Gold validity remains governed exclusively by the frozen, independently-derived Gold Validity Audit (SHA256 3643ea45...), unmodified by this task. The instability found here is a SYSTEM reproducibility question, not a benchmark-quality question -- these are correctly kept on separate axes, exactly as the QQQ/SNDK audit established for a related distinction.",
+  "semantic_recorder_design_recommendation": {
+    "chosen": "RECORDER_NEXT_B",
+    "label": "Add recorder-health diagnostics only",
+    "reasoning": "RECORDER_NEXT_A (no action) undersells a real, quantifiable, currently-invisible degradation signal (247 events) that has legitimate audit/observability value even though it's proven semantically harmless. RECORDER_NEXT_C (fix persistence reliability) and RECORDER_NEXT_D (P0-level fix) are NOT justified by the evidence -- this task proved conclusively (via direct code trace across all 4 semantic-critical call sites) that recorder failures cannot threaten canonical semantic state, so there is no P0-level integrity risk to fix. RECORDER_NEXT_E (insufficient traceability) is not chosen as the PRIMARY recommendation because the architectural question (does this matter semantically) IS sufficiently answered -- only the fine-grained per-claim attribution is insufficiently traceable, which RECORDER_NEXT_B's proposed metrics would directly remedy going forward."
+  },
+  "next_engineering_direction": {
+    "chosen": "NEXT_E",
+    "label": "Design multi-run benchmark/reproducibility metric",
+    "reasoning": "This audit's central, decision-relevant finding is that TSM's single-run Gold outcome has LOW reproducibility (3 of 6 alphas flipped between two otherwise-valid, artifact-complete runs). Proceeding to MSFT A304 extractor design (NEXT_D) remains valid future work but does not address the more fundamental measurement-validity question this task just surfaced. Fixing recorder reliability (NEXT_A/dependent) is not justified given the proven absence of semantic impact. Running a third TSM replicate (NEXT_C) would help but is explicitly not authorized in this task and should only follow a deliberate design decision about HOW additional runs would be used (which is exactly what NEXT_E produces). Extending Provider Health with recorder metrics (NEXT_B, already recommended above as a parallel, low-cost track) can proceed alongside NEXT_E without conflict.",
+    "not_chosen_because_score_desire": "This choice is explicitly NOT based on which direction would raise Alpha Hit -- neither reproducibility-metric design nor recorder diagnostics has any effect on the current 61.0317% official score."
+  },
+  "final_validation": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "old_tsm_authoritative_ledger_unchanged": true,
+    "new_tsm_not_promoted": true,
+    "official_six_ticker_gold_metric_unchanged": true,
+    "p0_p1_untouched": true,
+    "provider_health_implementation_untouched": true,
+    "no_code_changed": true,
+    "no_tests_changed": true,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

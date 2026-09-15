@@ -1,0 +1,84 @@
+{
+  "schema_version": "high_value_unclassified_recovery_report.v2",
+  "release": "v0.1.3",
+  "task": "v0.1.3 QA Closure -- Task 4: High-value unclassified recovery re-check against the final fresh six-ticker selected run set",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "status": "RECHECKED_AGAINST_FRESH_V0.1.3_SELECTED_RUNS",
+  "generated_at": "2026-09-08T00:00:00+00:00",
+  "supersedes": "high_value_unclassified_recovery_report_v0.1.3.json (rollforward placeholder, now resolved with real fresh data)",
+  "selected_runs_used": {
+    "NVDA": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "QQQ": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+    "MSFT": "43472ace-454f-4c69-892c-adca91c25be7",
+    "SNDK": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+    "TSM": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+    "AMD": "949f685a-3945-4fd0-b7b9-362b37c90721"
+  },
+  "source_semantic_validation": {
+    "source": "outputs/runs/<selected_run_id>/alpha_matches.json for the six FINAL_FRESH_SELECTED runs above",
+    "total_claims": 4601,
+    "matched": 1904,
+    "none": 2697
+  },
+  "candidate_discovery_method": {
+    "description": "Same primary mechanical diagnostic as v0.1.2.1/v0.1.3 rollforward, reapplied to fresh data: candidate_scores[*].eligible == true for at least one Alpha despite the claim's final matched_alpha being null (no_match). This was the majority driver (179 of 209) of the original discovery pool and is the only component of that methodology that is purely mechanical/deterministic rather than requiring a targeted manual keyword search seeded by prior review; it was re-run in full here and every resulting row was individually read (not sampled).",
+    "count_found_in_fresh_data": 200
+  },
+  "results": {
+    "STRONG_RECOVERY_CANDIDATE": 0,
+    "BORDERLINE_RECOVERY_CANDIDATE": 1,
+    "CORRECT_NONE": 199,
+    "DUPLICATE_OR_LOW_VALUE": 0,
+    "INSUFFICIENT_CONTEXT": 0
+  },
+  "borderline_candidate_detail": {
+    "ticker": "SNDK",
+    "claim_id": "e8e0f398-7b26-4462-8135-a1410ea5b335:conservative_risk_analyst:risk_debate_state.conservative_history:claim:12",
+    "eligible_alpha": "A103",
+    "claim_text": "The Aggressive Analyst cites Nvidia as a precedent, but Nvidia had a durable, expanding moat in software and networking effects.",
+    "why_borderline_not_strong": "This is a genuine bear rebuttal explicitly rejecting an NVDA-AI-moat analogy for SNDK, which could be read as bear evidence for an AI-gated Alpha -- but it is comparative/meta-argumentative (about the validity of an analogy), not a first-person assertion about SNDK's own AI exposure, so it does not cleanly meet the same bar as a direct ticker-specific claim. Reported honestly as borderline rather than forced into either CORRECT_NONE (would understate a real judgment call) or STRONG (would overstate a comparative rebuttal as direct evidence).",
+    "recommended_action": "None. Below the bar for actual recovery; noted for completeness, not actioned."
+  },
+  "other_ai_gated_candidates_reviewed": [
+    {
+      "ticker": "QQQ",
+      "eligible_alpha": "A101",
+      "claim_text": "The macro backdrop for QQQ over the past week has been defined by a hawkish repricing of Fed policy expectations following a stronger-than-expected August jobs report, set against a still-robust AI capital-expenditure narrative that continues to drive the mega-cap technology complex.",
+      "verdict": "CORRECT_NONE",
+      "reason": "Compound background-context sentence primarily about Fed policy; the AI-capex mention is generic complex-wide narrative, not ticker-specific ai-gated evidence for QQQ itself."
+    },
+    {
+      "ticker": "MSFT",
+      "eligible_alpha": "A102",
+      "claim_text": "He calls the AI CapEx a \"price of admission\" but also claims it's driving \"Inference Demand\" and \"Revenue Growth.\" If the capex is already driving revenue, why is free cash flow declining?",
+      "verdict": "CORRECT_NONE",
+      "reason": "Bear researcher quoting-then-countering the bull's claim with a skeptical rhetorical question; not itself an assertion that inference demand is driving revenue."
+    }
+  ],
+  "dominant_correct_none_patterns_observed": {
+    "generic_technical_or_sentiment_commentary_tagged_A601": "By far the largest bucket -- standard TA/sentiment-scorecard language (RSI/MACD/momentum readings, sentiment scores, moving-average crosses) picks up keyword overlap with Narrative Momentum (A601) without asserting the actual reflexive-flow/crowded-narrative mechanism A601 requires. Correctly rejected.",
+    "company_balance_sheet_liquidity_tagged_A003": "Recurs across NVDA/MSFT/SNDK/TSM -- 'current ratio'/'liquidity position' claims about the COMPANY's balance sheet, not the macro Rate-Cut/Liquidity-Expansion mechanism A003 represents. Same known false-positive pattern documented in the original v0.1.2.1 review.",
+    "raw_financial_statement_line_items_tagged_A301": "Verbatim quarterly/annual revenue-profit-EPS table rows (MSFT/SNDK/TSM/AMD) -- descriptive data recitation, not an interpretive directional claim about revenue expansion as a mechanism. Correctly excluded as data, not a claim."
+  },
+  "unavailable_pool_composition_check": {
+    "purpose": "Action item carried forward from the v0.1.3 rollforward report: confirm whether the alpha_mapper.py ALPHA_CLASSIFIER_BATCH_SIZE (40->15) + bounded week2_llm.py concurrency repair changed the UNAVAILABLE pool composition.",
+    "historical_step5a_baseline": {"unavailable_count": 39, "total_claims": 4894, "unavailable_rate_percent": 0.797},
+    "fresh_v0_1_3_selected_six_run_result": {"unavailable_count": 47, "total_claims": 4601, "unavailable_rate_percent": 1.022},
+    "finding": "The repair did NOT demonstrably reduce the unavailable rate on this fresh data -- 1.02% vs a 0.80% historical baseline, a small increase, well within the kind of run-to-run provider-load variance already observed across this session's six runs (0.51% AMD to 1.63% SNDK). No claim in the fresh unavailable set was reviewed as a recoverable high-value candidate: 'unavailable' here means an LLM semantic-classification attempt that timed out, not a deterministic no_match -- it is a different pool from the one this recovery audit reviews.",
+    "conclusion": "No evidence that the repair changed which claims land in the reviewable NONE pool. Reported honestly rather than assumed improved."
+  },
+  "target_status": {
+    "requested_target": ">=20 important recoveries (John's original ask)",
+    "observed_result": "0 strong + 1 borderline, on real fresh six-ticker data individually reviewed line-by-line (not rolled forward this time)",
+    "result_code": "TARGET_NOT_SUPPORTED_BY_HEALTHY_SEMANTIC_DATA",
+    "note": "This re-confirms, on genuinely fresh data rather than a carried-forward assumption, the same conclusion v0.1.2.1 and the v0.1.3 rollforward both reached: the healthy semantic pipeline output does not contain >=20 recoverable high-value unclassified claims. This is not a refusal to tune the model -- it is what direct review of every eligible-but-unmatched claim across all six fresh runs actually shows."
+  },
+  "taxonomy_change_required": false,
+  "taxonomy_change_reason": "No candidate reviewed indicates a missing Alpha or a structurally wrong AI-gate condition -- the AI hard gate is working as intended (correctly excluding comparative/meta commentary that merely mentions AI in passing).",
+  "no_production_changes_from_this_task": "Alpha Mapper, taxonomy, B1, B2, B4, evidence qualification, and display normalization remain untouched. No claim ID hardcoded, no keyword fallback added, no ticker rule added, no persisted Alpha mapping rewritten.",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false
+}

@@ -63,7 +63,19 @@ from comqutor_alpha.graph_engine.pipeline import (
     build_structure_graph_stage,
     score_and_assemble_structure_graph,
 )
+from comqutor_alpha.llm_runtime.cache import InMemoryLLMResponseCache
 from comqutor_alpha.llm_runtime.session import SemanticRuntimeSession
+from comqutor_alpha.memory.history_reader import (
+    build_phi_structures,
+    detect_alpha_attribution_variance,
+    detect_edge_type_variance,
+    summarize_alpha_memory,
+)
+from comqutor_alpha.memory.phi_identity import (
+    IDENTITY_MODEL,
+    PHI_EDGE_IDENTITY_VERSION,
+    compute_aggregate_fingerprints,
+)
 from comqutor_alpha.research_lifecycle import (
     RESEARCH_RUN_STATUSES,
     ResearchLifecycleError,
@@ -682,6 +694,16 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         # run_audit.json predates this Sprint, never a fabricated summary.
         "evidence_stance_summary": (
             run_audit_for_gate.get("evidence_stance") if isinstance(run_audit_for_gate, dict) else None
+        ),
+        # Alpha Memory Implementation Step 4B (Feedback Loop Visibility):
+        # read straight off run_audit.json's own "alpha_memory" section
+        # (already computed above via run_audit_for_gate, Step 1-3's own
+        # additive section) -- never a second computation. SHADOW ONLY:
+        # mode/activation_modulation_applied are part of this same section
+        # and always travel with it. None for a historical run whose
+        # run_audit.json predates Step 1, never a fabricated summary.
+        "alpha_memory": (
+            run_audit_for_gate.get("alpha_memory") if isinstance(run_audit_for_gate, dict) else None
         ),
         # Sprint 3 (Unclassified Findings Control), Track A3. Only the Top
         # 20 (by the artifact's own frozen deterministic order) travels on
@@ -1453,6 +1475,146 @@ def _conflict_summary_section(conflict_payload):
     }
 
 
+def _conflict_accounting_invariants(conflict_summary):
+    """v0.1.3 QA Closure, Section E (Strict Conflict States): proves the
+    ADMITTED / CANDIDATE / SUPPRESSED / REJECTED conflict-pair collections
+    exposed by ``_conflict_summary_section`` are complete and correctly
+    layered. Every declared pair carries exactly one ``outcome`` string
+    (admitted/suppressed/rejected), so per-pair overlap is impossible by
+    construction; the first invariant instead catches a bug that would make
+    the three top-level counts stop summing to ``declared_pair_count``. The
+    second proves ``candidate_conflict_count`` (B2-denied pairs) is always a
+    subset of ``suppressed_count`` -- a B2-denied pair's outcome is
+    "suppressed", never "rejected", never "admitted" (conflict_detector.py:
+    ``if admissibility.status != B2_ADMITTED: return _audit_item(...,
+    "suppressed", ...)``)."""
+    declared = conflict_summary.get("declared_pair_count")
+    admitted = conflict_summary.get("admitted_count")
+    suppressed = conflict_summary.get("suppressed_count")
+    rejected = conflict_summary.get("rejected_count")
+    candidate = conflict_summary.get("candidate_conflict_count")
+    if declared is None:
+        return []
+    invariants = [
+        {
+            "name": "conflict_pairs_conserved",
+            "formula": "declared_pair_count == admitted_count + suppressed_count + rejected_count",
+            "expected": declared,
+            "actual": (admitted or 0) + (suppressed or 0) + (rejected or 0),
+        },
+        {
+            "name": "candidate_conflicts_are_a_subset_of_suppressed",
+            "formula": "candidate_conflict_count <= suppressed_count",
+            "expected": True,
+            "actual": (candidate or 0) <= (suppressed or 0),
+        },
+    ]
+    for item in invariants:
+        item["passed"] = item["expected"] == item["actual"]
+    return invariants
+
+
+def _seed_status_consistency_invariant(ticker, entity_exposure_audit):
+    """v0.1.3 QA Closure, Item 3 (seed_status_consistency): proves
+    ``entity_exposure_audit["current_seed_status"]`` (what this run's audit
+    report and, via the identical helper, ``get_entity_alpha_exposures``'s
+    API response both display) is byte-identical to an independent,
+    freshly-resolved call against the live seed file for this run's own
+    ticker -- i.e. there is exactly ONE current-status code path, not two
+    that happen to usually agree. A future refactor that let either call
+    site drift onto a second, independently-derived value would fail this
+    invariant immediately."""
+    if not ticker:
+        return []
+    independent = _current_seed_status(ticker)
+    reported = entity_exposure_audit.get("current_seed_status") if isinstance(entity_exposure_audit, dict) else None
+    return [
+        {
+            "name": "seed_status_consistency",
+            "formula": "entity_exposure_audit.current_seed_status == _current_seed_status(ticker)",
+            "expected": independent,
+            "actual": reported,
+            "passed": independent == reported,
+        }
+    ]
+
+
+def _alpha_memory_section(*, run_id, ticker, graph_payload, vocab_snapshot, output_root):
+    """Alpha Memory Implementation Step 2 (SHADOW ONLY). Additive section,
+    following the exact same convention as activation_summary/
+    conflict_summary/entity_exposure above -- never a new top-level
+    artifact file, never a modification of any existing section.
+
+    ``identity_model`` is always "atomic_edge_phi" (Step 2's adopted
+    primary durable unit, per the real-data stability + ablation audits):
+    ``phi_structures`` is the atomic edge phi identity + its cross-run
+    history, one entry per (alpha_id, source, edge_type, target) -- one
+    Alpha may, and typically does, produce many. ``aggregate_fingerprints``
+    is Step 1's original whole-Alpha edge-SET computation, retained
+    unchanged but explicitly demoted to a secondary, coarse diagnostic --
+    never the primary phi identity, and zero aggregate-fingerprint overlap
+    must never be read as zero atomic-phi overlap. ``instability_signals``
+    are audit-only observational diagnostics (alpha-attribution and
+    edge_type variance across this ticker's already-persisted runs) --
+    never merged, scored, or fed back into anything.
+
+    ``activation_modulation_applied`` is a hardcoded Python literal
+    (``False``), never a computed value -- so no future code path here can
+    accidentally flip it to True without an explicit, reviewed line change.
+    Nothing in this function is imported by, or can influence,
+    activation_scorer_v2.py/alpha_level_classifier.py/
+    conflict_detector.py/conflict_admissibility.py -- this section is
+    assembled strictly AFTER those modules' own output already exists,
+    exactly like conflict_summary/entity_exposure are today."""
+    empty_section = {
+        "mode": "shadow",
+        "activation_modulation_applied": False,
+        "identity_model": IDENTITY_MODEL,
+        "identity_version": PHI_EDGE_IDENTITY_VERSION,
+        "phi_structures": [],
+        "alpha_memory_summary": [],
+        "aggregate_fingerprints": [],
+        "instability_signals": {"alpha_attribution_variance": [], "edge_type_variance": []},
+    }
+    if not isinstance(graph_payload, dict) or not graph_payload:
+        return empty_section
+    vocabulary_snapshot = vocab_snapshot if isinstance(vocab_snapshot, dict) else None
+
+    phi_structures = build_phi_structures(
+        current_run_id=run_id,
+        structure_graph=graph_payload,
+        vocabulary_snapshot=vocabulary_snapshot,
+        output_root=output_root,
+    )
+    aggregate_fingerprints = compute_aggregate_fingerprints(
+        structure_graph=graph_payload, vocabulary_snapshot=vocabulary_snapshot
+    )
+    alpha_memory_summary = summarize_alpha_memory(phi_structures)
+
+    resolved_ticker = str(ticker or graph_payload.get("ticker") or "")
+    instability_signals = {
+        "alpha_attribution_variance": (
+            detect_alpha_attribution_variance(ticker=resolved_ticker, output_root=output_root)
+            if resolved_ticker
+            else []
+        ),
+        "edge_type_variance": (
+            detect_edge_type_variance(ticker=resolved_ticker, output_root=output_root) if resolved_ticker else []
+        ),
+    }
+
+    return {
+        "mode": "shadow",
+        "activation_modulation_applied": False,
+        "identity_model": IDENTITY_MODEL,
+        "identity_version": PHI_EDGE_IDENTITY_VERSION,
+        "phi_structures": phi_structures,
+        "alpha_memory_summary": alpha_memory_summary,
+        "aggregate_fingerprints": aggregate_fingerprints,
+        "instability_signals": instability_signals,
+    }
+
+
 def _audit_validation_section(*, accounting_invariants, configuration_versions, generated_at):
     invariant_pass_count = sum(1 for i in accounting_invariants if i["passed"])
     invariant_fail_count = sum(1 for i in accounting_invariants if not i["passed"])
@@ -2042,12 +2204,7 @@ def build_run_audit_payload(
     graph_lineage = _graph_lineage_section(graph_edges_list)
     activation_summary = _activation_summary_section(v2_alphas)
     conflict_summary = _conflict_summary_section(conflict_payload)
-    generated_at = _utc_timestamp()
-    audit_validation = _audit_validation_section(
-        accounting_invariants=accounting_invariants,
-        configuration_versions=configuration_versions,
-        generated_at=generated_at,
-    )
+    accounting_invariants = accounting_invariants + _conflict_accounting_invariants(conflict_summary)
     raw_exposure_records = exposure_payload.get("records")
     exposure_records = (
         [record for record in raw_exposure_records if isinstance(record, dict)]
@@ -2085,6 +2242,14 @@ def build_run_audit_payload(
         "mode": exposure_mode,
         "seed_version": seed_manifest.get("seed_version"),
         "seed_sha256": seed_manifest.get("seed_sha256"),
+        # v0.1.3 QA Closure, Item 3 (seed_status_consistency): the SAME
+        # live-seed overlay used by get_entity_alpha_exposures's
+        # current_seed_status field, applied here too so run_audit.json
+        # never reports a stale configured_status/effective_status from
+        # this run's own frozen exposure_payload (persisted at run time)
+        # as if it were still current. Resolved fresh from the live seed
+        # file every call, keyed by this run's own ticker -- never cached.
+        "current_seed_status": _current_seed_status(ticker),
         # Backward-compatible fields (task B3_ENTITY_EXPOSURE_GATED_STATES,
         # section 7/9): seed_approval_status/enforcement_allowed are kept
         # for any existing reader, now derived from this run's ticker's own
@@ -2169,6 +2334,22 @@ def build_run_audit_payload(
             else None
         ),
     }
+    accounting_invariants = accounting_invariants + _seed_status_consistency_invariant(
+        ticker, entity_exposure_audit
+    )
+    alpha_memory_section = _alpha_memory_section(
+        run_id=run_id,
+        ticker=ticker,
+        graph_payload=graph_payload,
+        vocab_snapshot=vocab_snapshot,
+        output_root=output_root,
+    )
+    generated_at = _utc_timestamp()
+    audit_validation = _audit_validation_section(
+        accounting_invariants=accounting_invariants,
+        configuration_versions=configuration_versions,
+        generated_at=generated_at,
+    )
 
     # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
     # Track A1: the single, shared Ticker Consistency Audit -- never a
@@ -2450,6 +2631,7 @@ def build_run_audit_payload(
         "conflict_summary": conflict_summary,
         "audit_validation": audit_validation,
         "entity_exposure": entity_exposure_audit,
+        "alpha_memory": alpha_memory_section,
         # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
         # Track A1: John's required top-level fields. graph_nodes/
         # graph_edges/regime_alpha_count are additive aliases of the
@@ -2747,13 +2929,28 @@ def run_research_request(
             semantic_runtime = week2_llm_gateway.semantic_runtime
             if semantic_runtime is None and week2_llm_enabled():
                 try:
+                    # B2 Slice 1 (John Requirement B, semantic cache
+                    # optimization, docs/audit_artifacts/
+                    # v0_2_semantic_cache_optimization.json): a caller that
+                    # supplies no explicit week2_llm_cache gets a real,
+                    # run-local, in-process exact-response cache instead of
+                    # SemanticRuntimeSession's own NullLLMResponseCache
+                    # default -- a fresh instance per call, scoped to this
+                    # one run_id, discarded when this function returns. A
+                    # caller that wants caching off explicitly still can, by
+                    # passing week2_llm_cache=NullLLMResponseCache().
+                    effective_week2_llm_cache = (
+                        week2_llm_cache
+                        if week2_llm_cache is not None
+                        else InMemoryLLMResponseCache()
+                    )
                     semantic_runtime = SemanticRuntimeSession(
                         run_id=run_id,
                         output_directory=run_dir,
                         execution_mode="live",
                         provider=week2_llm_gateway.provider,
                         model=week2_llm_gateway.model_name,
-                        cache=week2_llm_cache,
+                        cache=effective_week2_llm_cache,
                     )
                     week2_llm_gateway.attach_semantic_runtime(semantic_runtime)
                 except Exception as exc:
@@ -2806,6 +3003,16 @@ def run_research_request(
                 error_response["error_code"],
             )
         else:
+            # NOTE (John Requirement B root-cause instrumentation,
+            # docs/audit_artifacts/v0_2_tradingagents_timeout_root_cause.json):
+            # this call deliberately omits exc_info -- see
+            # tests/test_research_input_validation.py::
+            # test_unexpected_internal_failure_is_logged_safely_at_error_level,
+            # a pre-existing, intentional policy that this boundary log line
+            # never carries a traceback. The real traceback for a
+            # TradingAgents-layer failure is now captured closer to its
+            # source instead, in comqutor_alpha.runners.tradingagents_runner's
+            # own STREAM_LOOP_ERROR log line (with exc_info=True there).
             logger.error(
                 "research request failed "
                 "(ticker=%s, run_id=%s, stage=%s, reason_code=%s, exc_type=%s)",
@@ -2856,6 +3063,29 @@ def get_research_response(run_id, output_root="outputs/runs"):
     return load_json_record(run_id, "research_response.json", output_root=output_root)
 
 
+def _current_seed_status(ticker: str | None) -> str | None:
+    """The Entity Exposure seed's CURRENT authoritative per-ticker status
+    (v0.1.3 QA Closure, Section B: John observed inconsistent
+    approved_gating/shadow/draft wording -- root cause was old per-run
+    artifacts persisted before a ticker's approval date, served verbatim
+    forever after). Resolved fresh from the live seed file every call --
+    never cached, never derived from a frozen per-run artifact -- so a
+    historical run's own frozen status and the CURRENT production status
+    are always exposed as two distinct fields, never conflated. Returns
+    None (never raises) if the ticker is missing/blank or the seed file
+    itself cannot be loaded -- this is read-only display enrichment and
+    must never break an otherwise-successful exposure response."""
+    if not ticker:
+        return None
+    try:
+        from comqutor_alpha.exposure.seed_loader import load_exposure_seed, resolve_exposure_mode
+
+        bundle = load_exposure_seed()
+        return resolve_exposure_mode(bundle, str(ticker)).effective_status
+    except Exception:
+        return None
+
+
 def get_entity_alpha_exposures(
     run_id, output_root="outputs/runs", *, graph_repository=None
 ):
@@ -2886,8 +3116,9 @@ def get_entity_alpha_exposures(
     artifact = load_json_record_if_exists(
         safe_run_id, "entity_alpha_exposures.json", output_root=output_root
     )
+    current_seed_status = _current_seed_status(ticker)
     if isinstance(artifact.get("records"), list):
-        return {**artifact, "status": "ready"}
+        return {**artifact, "status": "ready", "current_seed_status": current_seed_status}
     try:
         repository = graph_repository or build_repository_from_env(output_root)
         records = repository.get_entity_alpha_exposures(safe_run_id)
@@ -2900,6 +3131,7 @@ def get_entity_alpha_exposures(
         "status": "ready" if records else "unavailable",
         "records": records,
         "reason_codes": [] if records else ["ENTITY_EXPOSURE_UNAVAILABLE"],
+        "current_seed_status": current_seed_status,
     }
 
 
@@ -3685,6 +3917,8 @@ try:
         "REAL_RUN_DISABLED": 503,
         "REAL_RUN_CONFIG_INVALID": 503,
         "REAL_RUN_CREDENTIAL_MISSING": 503,
+        "LIVE_SEMANTIC_PIPELINE_NOT_READY": 503,
+        "LIVE_SEMANTIC_PROVIDER_NOT_READY": 503,
         "RESEARCH_QUEUE_FULL": 503,
         "JOB_MANAGER_UNAVAILABLE": 503,
         "INVALID_ANALYST_SELECTION": 400,

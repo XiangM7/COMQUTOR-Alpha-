@@ -1,0 +1,139 @@
+{
+  "schema_version": "v0_1_3_final_offline_closure.v1",
+  "task": "STEP 5 -- v0.1.3 Final Offline Closure / Code Freeze Gate (read-only verification, no new implementation)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_ticker_research_executed": false,
+  "commit": false,
+  "push": false,
+
+  "release_gate_verdict": "GO_FOR_FINAL_FRESH_SIX_TICKER",
+  "release_gate_reasoning": "No new semantic blocker was found in this gate. Zero new v0.1.3-attributable regressions across the full offline suite (4017 passed; all 21 failed + 3 errors confirmed, by name, against the same pre-existing catalog established earlier in this session). Required generators for every deliverable are ready (some pending fresh data only, never pending a code change). The feedback loop is genuinely visible end-to-end through the real API path on real persisted data. Memory remains shadow-only (activation_modulation_applied=false verified live). Lifecycle remains MODEL 0 (nothing implemented since Step 4A). The one fresh six-ticker production run is the only remaining substantive QA data step -- no further code change is needed before it.",
+
+  "john_issue_status": {
+    "issue_1_six_ticker_regression_results": {
+      "status": "IMPLEMENTATION_READY / FINAL_FRESH_DATA_PENDING",
+      "evidence": "comqutor_alpha/regression/regression_report_v3.py exists, 10/10 tests pass. build_regression_report_v3_entry() requires an EXPLICIT selected_run_id and takes the caller's own already-loaded run_audit/artifact_manifest for that exact run -- it never auto-selects or guesses a run, structurally preventing accidental staleness/mixing. Ticker consistency (run_audit.json's own field) and artifact completeness (artifact_manifest.json's own field) are both already-computed, reused signals, not re-derived. docs/audit_artifacts/regression_report_v3.json intentionally does not exist yet -- populating it before fresh data would itself be the 'stale mixed runs' violation this task forbids."
+    },
+    "issue_2_evidence_review_formal_metrics": {
+      "status": "CLOSED",
+      "evidence": "docs/audit_artifacts/evidence_review_summary_v2.json's formal_metrics block: alpha_match_accuracy=0.83 (>=0.80 target), polarity_accuracy=0.8525 (>=0.80 target), critical_support_opposition_reversal_count=0 (==0 target). approval block: approved_by=John, approval_status=APPROVED, approved_at=2026-09-01T01:02:54+00:00. tests/test_evidence_review_v2.py::test_formal_metrics_* (3/3 pass) guard against the block ever being silently dropped or desynced from acceptance_results."
+    },
+    "issue_3_entity_exposure_seed_status_consistency": {
+      "status": "CLOSED",
+      "evidence": "Single canonical status source (_current_seed_status(), resolved fresh from the live seed file) is now reused verbatim by BOTH get_entity_alpha_exposures()'s API response AND run_audit.json's entity_exposure_audit block -- verified byte-identical by the seed_status_consistency accounting invariant (tests/test_run_audit_v2.py, 2/2 pass) and by tests/test_entity_alpha_exposure_productization.py (3/3 pass). Since regression_report_v3 never re-derives a second seed-status value and always operates on ONE caller-supplied selected_run_id's own artifacts, selected_run_id and seed status cannot diverge in the final report by construction."
+    },
+    "issue_4_alpha_level_alignment": {
+      "status": "CLOSED",
+      "evidence": "B4 thresholds confirmed unchanged this gate (ACTIVE_THRESHOLD=50.0, DOMINANT_THRESHOLD=70.0, REGIME_LEVEL_THRESHOLD=86.0). 103 tests pass across test_b4_activation_level_alignment.py, test_alpha_display_normalization.py, and test_v0_1_3_offline_replay_proof.py -- the last of which re-proves, on a REAL historical MSFT A301 case, that a score clearing ACTIVE_THRESHOLD with both NO_TICKER_SPECIFIC_EVIDENCE and NO_LOCAL_STRUCTURE_SUPPORT present now correctly gates to qualified_level=candidate, never active. Frozen-hash guards for alpha_level_classifier.py (88 tests across 3 guard files) all pass, confirming no unauthorized drift since the fix."
+    },
+    "issue_5_evidence_polarity": {
+      "status": "CLOSED",
+      "evidence": "tests/test_conflict_detector.py::TestEvidencePolarityBullBearAssignment (6/6 pass) re-confirm the presentation-only fix. B1 (evidence_stance) unaffected: 74/74 tests pass across test_evidence_stance_integration.py/test_evidence_stance_llm.py. B5 (conflict_evidence_ui.py) was never modified (confirmed correct from the start, per this session's original investigation). Conflict scores/admission were proven unaffected by the presentation regrouping via test_evidence_strength_and_conflict_score_are_unaffected_by_the_display_fix and the real-data offline replay proof (identical conflict_score/admitted-set/main_conflict before and after, only display claim counts differ). critical_support_opposition_reversal_count = 0 in the approved evidence_review_summary_v2.json (see Issue 2)."
+    },
+    "issue_6_feedback_loop_visibility": {
+      "status": "CLOSED",
+      "evidence": "Full path re-verified live through the real, unmodified API function (build_research_response) against real persisted NVDA run 2f8ee897: 15 current phi, 6 recurring, 9 first-seen, 13 prior observations -- values freshly recomputed at gate time, not hardcoded, matching Step 3/4B exactly. mode=shadow, activation_modulation_applied=false confirmed live. Lifecycle remains MODEL 0 (no invalidation/expiration/failure/non-execution/reason-code work exists in the codebase as of this gate). Frontend AlphaMemoryPanel + all 21 Step 4B tests re-run clean (74 backend Alpha Memory tests + 238/238 frontend tests)."
+    }
+  },
+
+  "other_closure_items_status": {
+    "high_value_unclassified_recovery": {"status": "COMPLETE (rollforward)", "evidence": "docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3.json exists, 13/13 tests pass. Explicitly flagged as a rollforward from Step 5A data pending re-verification once the fresh six-ticker set exists (tracked action item, not a blocker -- Alpha Mapper matching was never touched by any v0.1.3 code change)."},
+    "admitted_candidate_blocked_conflict_separation": {"status": "STRUCTURALLY CONSERVED", "evidence": "conflict_pairs_conserved and candidate_conflicts_are_a_subset_of_suppressed accounting invariants both pass (tests/test_run_audit_v2.py, 4/4 relevant tests). main_conflict is still only ever built from admitted_conflicts (unchanged, verified by code inspection this gate)."},
+    "selected_run_id_handling": {"status": "DETERMINISTIC", "evidence": "build_regression_report_v3_entry requires selected_run_id as an explicit, non-optional keyword argument with no fallback/auto-selection logic -- verified by reading the function signature this gate."},
+    "artifact_completeness_validation": {"status": "INTACT", "evidence": "artifact_manifest.json's artifact_completeness field is unchanged, already reused by Step 3's own run-eligibility filter and by build_regression_report_v3_entry's artifact_manifest parameter."},
+    "graph_edges_requirement_logic": {"status": "EXISTS", "evidence": "build_regression_report_v3's aggregate section computes graph_edges_gate_pass_count (>=3 per ticker), reusing run_audit.json's graph.admitted_edge_count field -- verified present in tests/test_regression_report_v3.py::test_aggregate_gates_computed_across_a_synthetic_six_ticker_set."},
+    "expected_alpha_hit_rate_calculation": {"status": "EXISTS", "evidence": "build_regression_report_v3_entry computes actual_alpha_hit_rate via authority_contract.apply_alpha_authority, correctly falling back to diagnostic evaluation when (as today, system-wide) zero APPROVED_GOLD expected alphas exist -- never fabricates a gold pass."},
+    "evidence_review_accuracy_calculation": {"status": "EXISTS", "evidence": "evidence_review_summary_v2.json's formal_metrics.alpha_match_accuracy, already computed and approved (see Issue 2)."},
+    "polarity_review_accuracy_calculation": {"status": "EXISTS", "evidence": "formal_metrics.polarity_accuracy, already computed and approved (see Issue 2)."},
+    "critical_reversal_calculation": {"status": "EXISTS", "evidence": "formal_metrics.critical_support_opposition_reversal_count, already computed, approved, and equal to 0 (see Issue 2)."}
+  },
+
+  "alpha_memory_freeze_contract": {
+    "primary_phi": "atomic edge identity -- CONFIRMED unchanged since Step 2/3 (comqutor_alpha/memory/phi_identity.py::PHI_EDGE_IDENTITY_VERSION = 'alpha_memory.phi_edge.v1', not modified this gate).",
+    "identity_fields": "ticker + alpha_id + source + edge_type + target + identity_version + taxonomy_version + taxonomy_sha256 -- CONFIRMED unchanged (compute_phi_edges's canonical_representation dict inspected this gate, byte-identical to Step 2/3).",
+    "one_alpha_many_phi": "CONFIRMED -- compute_phi_edges emits one record per (alpha_id, source, edge_type, target) triple, no aggregation into a single per-alpha identity.",
+    "recurrence_definition": "is_recurring = prior_observation_count >= 1, exact phi_id match only -- CONFIRMED unchanged in summarize_phi_edge_history.",
+    "whole_alpha_identity": "aggregate_fingerprint only, never the primary phi -- CONFIRMED: AGGREGATE_FINGERPRINT_VERSION remains a distinct version string from PHI_EDGE_IDENTITY_VERSION, and routes_research.py's alpha_memory section reports it under aggregate_fingerprints, never as phi_structures.",
+    "absence_semantics": "NO_LIFECYCLE_EVENT -- CONFIRMED: no code path anywhere (grepped this gate) interprets a missing phi as invalidated/expired/failed.",
+    "lifecycle_model": "MODEL_0 -- CONFIRMED: no invalidation/expiration/failure/non-execution/reason-code-lifecycle code exists anywhere in comqutor_alpha/memory/ or elsewhere, verified this gate.",
+    "activation_modulation": "false -- CONFIRMED hardcoded (not computed) in routes_research.py::_alpha_memory_section, re-verified live against real data this gate.",
+    "no_equivalence_table_fuzzy_motif_cross_ticker": "CONFIRMED -- no such code exists anywhere in comqutor_alpha/memory/ (grepped this gate for 'embedding', 'similarity', 'fuzzy', 'motif', 'equivalence' -- zero hits in production code)."
+  },
+
+  "semantic_authority_safety": {
+    "memory_code_not_imported_by_b1_b2_b4_conflict_exposure": "CONFIRMED this gate by direct grep of every relevant production file (activation_scorer_v2.py, activation_scorer.py, alpha_level_classifier.py, conflict_detector.py, conflict_admissibility.py, exposure_engine.py, evidence_stance.py, evidence_stance_llm.py) for 'comqutor_alpha.memory' -- zero hits in all eight files, plus the existing automated architectural guard test re-run clean.",
+    "memory_module_own_imports": "comqutor_alpha/memory/phi_identity.py and history_reader.py import only stdlib (hashlib, json, pathlib, typing, collections) plus resolve_output_root (a pure path-resolution utility) -- structurally incapable of writing to, or calling into, any B1/B2/B4/Conflict/Exposure production function.",
+    "cannot_create_evidence": "CONFIRMED -- comqutor_alpha/memory/ contains no evidence-creation code; it only reads already-persisted structure_graph.json edges.",
+    "cannot_promote_an_alpha": "CONFIRMED -- alpha_level_classifier.py's qualification logic is untouched and has zero awareness of comqutor_alpha/memory/'s existence.",
+    "cannot_bypass_ticker_specific_evidence_or_local_structure_support": "CONFIRMED -- these remain activation_scorer_v2.py's own exclusive computations; Alpha Memory never reads or writes these fields' role in scoring.",
+    "cannot_change_conflict_admission_or_main_conflict": "CONFIRMED -- conflict_detector.py's admitted_conflicts/main_conflict selection is untouched; the alpha_memory section is assembled strictly AFTER conflict_summary in build_run_audit_payload and consumes nothing from it."
+  },
+
+  "offline_regression_result": {
+    "full_suite_command": "pytest tests/ -q",
+    "passed": 4017,
+    "failed": 21,
+    "errors": 3,
+    "skipped": 47,
+    "subtests_passed": 69,
+    "pre_existing_failures": [
+      "tests/test_evidence_review_v2.py (13 cases: case1-6,9,9b,10-14) -- earlier task's deliberate evidence_review_summary_v2.json schema-stripping, explicitly out of scope to fix",
+      "tests/test_evidence_review_v2_directional_eligibility.py (3 errors: test_a/b/c + 3 fails: test_f, test_g x2) -- same schema-stripping family",
+      "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence -- same family",
+      "tests/test_j3_semantic_benchmark_j2_v0_2.py::test_e42_head_unchanged_from_session_frozen_starting_commit -- stale frozen HEAD reference, predates this session's v0.1.3 work",
+      "tests/test_w5_demo_seed.py (2 cases) -- scripts/w5_demo_fixtures.py/deterministic_echo_llm.py already carried pre-existing unstaged modifications before this session's v0.1.3 task began",
+      "tests/test_artifact_export_and_api.py::test_replay_conflict_does_not_get_run_id_mismatch -- comqutor_alpha/replay/semantic_binding.py and source_bundle.py already carried pre-existing unstaged modifications before this session's v0.1.3 task began"
+    ],
+    "new_v0_1_3_attributable_regressions": 0,
+    "targeted_alpha_memory_and_related_sweep": {
+      "files": ["test_alpha_memory_phi_identity.py", "test_alpha_memory_history_reader.py", "test_alpha_memory_api_exposure.py", "test_run_audit_v2.py", "test_b4_activation_level_alignment.py", "test_alpha_display_normalization.py", "test_v0_1_3_offline_replay_proof.py", "test_conflict_detector.py (EvidencePolarity subset)", "test_evidence_stance_integration.py", "test_evidence_stance_llm.py", "test_evidence_review_v2.py (formal_metrics subset)", "test_entity_alpha_exposure_productization.py", "test_high_value_unclassified_recovery.py", "test_regression_report_v3.py", "test_msft_a102_a304_taxonomy_adjudication.py", "test_step10_final_e2e_qa.py", "test_step11_provider_health_rerun.py"],
+      "result": "all pass, re-run individually this gate"
+    },
+    "frontend_suite": {"passed": 238, "failed": 0, "files": 20}
+  },
+
+  "artifact_contract_audit": [
+    {"artifact": "regression_report_v3.json", "generator_authority": "comqutor_alpha.regression.regression_report_v3.build_regression_report_v3_entry / build_regression_report_v3", "target_path": "docs/audit_artifacts/regression_report_v3.json", "status": "generator ready, NOT yet populated (deliberately, pending fresh six-ticker data)"},
+    {"artifact": "evidence_review_summary_v2.json", "generator_authority": "already-persisted, John-approved artifact; formal_metrics block is a direct alias of its own acceptance_results, added this session", "target_path": "docs/audit_artifacts/evidence_review_summary_v2.json", "status": "CLOSED, no further generation needed"},
+    {"artifact": "run_audit.json", "generator_authority": "comqutor_alpha.api.routes_research.build_run_audit_payload / write_run_audit_artifact -- called automatically by the real production pipeline's finalizer for every run", "target_path": "outputs/runs/<run_id>/run_audit.json", "status": "generator ready, automatic, unchanged"},
+    {"artifact": "Alpha Memory feedback-loop proof", "generator_authority": "MANUAL, using comqutor_alpha.memory.history_reader.build_phi_structures/summarize_alpha_memory against a selected run's own persisted structure_graph.json + vocabulary_snapshot -- no dedicated automated script exists yet; reproducible by the same manual read-only process used for docs/audit_artifacts/alpha_memory_feedback_loop_proof.json", "target_path": "docs/audit_artifacts/alpha_memory_feedback_loop_proof.json (existing, for NVDA 2f8ee897) -- a fresh equivalent for the FINAL selected six-ticker set would need the same manual step repeated", "status": "process proven, not yet scripted for six tickers at once"},
+    {"artifact": "ticker consistency result", "generator_authority": "run_audit.json's own ticker_consistency field, via audit_ticker_consistency()", "target_path": "embedded in run_audit.json", "status": "CLOSED, automatic"},
+    {"artifact": "artifact completeness result", "generator_authority": "artifact_manifest.json, via build_and_write_artifact_manifest()", "target_path": "outputs/runs/<run_id>/artifact_manifest.json", "status": "CLOSED, automatic"},
+    {"artifact": "conflict state summaries", "generator_authority": "run_audit.json's conflict_summary section (_conflict_summary_section) + accounting_invariants (conflict_pairs_conserved, candidate_conflicts_are_a_subset_of_suppressed, seed_status_consistency)", "target_path": "embedded in run_audit.json", "status": "CLOSED, automatic"},
+    {"artifact": "high-value recovery result", "generator_authority": "manual audit process (this session), documented in docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3.json", "target_path": "docs/audit_artifacts/high_value_unclassified_recovery_report_v0.1.3.json", "status": "COMPLETE as a rollforward; flagged for re-verification once fresh six-ticker data exists (tracked, not a blocker)"}
+  ],
+
+  "final_fresh_run_plan": {
+    "execution": "SPECIFIED ONLY -- NOT EXECUTED in this step",
+    "order": ["NVDA", "QQQ", "MSFT", "SNDK", "TSM", "AMD"],
+    "concurrency": "SEQUENTIAL -- the existing production runner does not guarantee safe concurrency; this session's own earlier empirical finding (Section I of the original v0.1.3 task) showed sustained concurrent LLM load across multiple task types produced a 61% transient provider_error rate on a single ticker alone, reinforcing sequential execution as the safer choice.",
+    "launcher": "scripts/start_live_comqutor.sh (unchanged, already tested this session) -- forces COMQUTOR_REAL_TRADINGAGENTS_ENABLED=true and COMQUTOR_WEEK2_LLM_ENABLED=true, runs its own preflight (live semantic pipeline / Real TradingAgents / Semantic Provider readiness) before exec'ing comqutor-api. COMQUTOR_REAL_FORCE_REFRESH_ENABLED=true must be set in the operator's own shell before invoking the launcher, for this one deliberate action only -- never as a standing configuration change (established precedent from Step 11 and this session's own Section I).",
+    "per_run_preflight_required": ["live semantic pipeline ready (GET /ready)", "Real TradingAgents configured", "Week2 Semantic Provider configured", "no stale selected_run_id contamination -- verify each POST /api/research response reports cache_disposition=force_refreshed, not reused_completed, before treating a run_id as the fresh selected one for that ticker"],
+    "not_executed_here": true
+  },
+
+  "main_conflict_metric_authority": {
+    "target": "main conflict match >= 4/6",
+    "authority_check_result": "ZERO of the 11 currently-referenced expected main-conflict entries across all six tickers (NVDA, QQQ, MSFT, SNDK, TSM, AMD) in docs/audit_artifacts/regression_label_authority_audit_v0.1.2.1.json carry authority_level == APPROVED_GOLD or valid_as_exact_regression_gold == true. Every entry is DOCUMENTED_EXPECTATION, PROVISIONAL_AI_PREDICTED, or REJECTED_OR_SUPERSEDED.",
+    "verdict": "NOT_FULLY_EVALUABLE_AGAINST_FRESH_DYNAMIC_DATA",
+    "distinction_maintained": "A. A fresh pipeline-health result (does the pipeline admit a plausible, structurally-valid main conflict for each ticker at all) IS evaluable once the fresh six-ticker run exists. B. A frozen-Golden expected-conflict comparison is NOT evaluable today -- there is no approved Golden label to compare against. The final regression_report_v3.json must report per-ticker match_result as NOT_GOLD_EVALUABLE for all six tickers (via build_regression_report_v3_entry's own existing, already-tested logic) rather than inventing an expected conflict or silently treating a diagnostic PROVISIONAL_AI_PREDICTED match as if it were a GOLD pass.",
+    "no_semantics_modified": true
+  },
+
+  "screenshot_readiness": {
+    "primary_target_issue_6": {
+      "page": "ResearchRunPage for run 2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d (NVDA, the currently selected healthy baseline)",
+      "url_pattern": "/runs/2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d/research",
+      "exact_state": "Scroll to the 'Alpha Memory SHADOW' panel; expand A101's 'Recurring structures (N)' detail.",
+      "what_it_shows_together": ["'Alpha Memory' header with 'SHADOW' badge", "'Activation modulation: Off'", "A101's summary line (e.g. '5 current structures, 1 recurring, ...')", "the real relation 'ai_capex --causal--> gpu_demand'", "'Previously observed: 5 prior runs' with real first-seen/last-prior-observation timestamps"],
+      "data_source": "100% real, already-persisted production data -- no demo/fake data used or needed."
+    },
+    "note": "For the OTHER five John issues (1-5), no single screenshot is as self-contained as Issue 6's -- those are better demonstrated via the existing docs/audit_artifacts/*.json/.md evidence artifacts already produced this session (regression_report_v3 schema tests, evidence_review_summary_v2.json's formal_metrics, the seed_status_consistency invariant, the real A301/A304 offline-replay-proof test output) rather than a live page screenshot."
+  },
+
+  "provider_calls": 0,
+  "tradingagents_calls": 0
+}

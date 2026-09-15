@@ -17,6 +17,12 @@ import type {
   AlphaEvidenceDetail,
   AlphaInvalidationCondition,
   AlphaInvalidationEntry,
+  AlphaLibraryEntry,
+  AlphaLibraryResponse,
+  AlphaMemoryAggregateFingerprint,
+  AlphaMemoryPhiStructure,
+  AlphaMemorySection,
+  AlphaMemorySummaryEntry,
   CanonicalAlphaLevel,
   CanonicalBlockedReason,
   ConflictAdmissibility,
@@ -789,6 +795,127 @@ function adaptUnclassifiedFinding(payload: unknown): AdaptResult<UnclassifiedFin
   });
 }
 
+// ---------------------------------------------------------------------------
+// Alpha Memory (Implementation Step 4B) -- lenient by design: a malformed
+// or absent alpha_memory payload degrades to `undefined`/`null`, never
+// fails the whole research response (this is a descriptive, audit-only
+// addition, not a field the rest of the page depends on).
+// ---------------------------------------------------------------------------
+
+function adaptAlphaMemoryPhiStructure(payload: unknown): AdaptResult<AlphaMemoryPhiStructure> {
+  if (!isRecord(payload)) return fail("phi structure is not an object");
+  const { phi_id, ticker, alpha_id, source, edge_type, target } = payload;
+  if (!isString(phi_id) || !isString(ticker) || !isString(alpha_id)) {
+    return fail("missing phi_id/ticker/alpha_id");
+  }
+  if (!isString(source) || !isString(edge_type) || !isString(target)) {
+    return fail("missing source/edge_type/target");
+  }
+  if (!isBoolean(payload.is_recurring) || !isNumber(payload.prior_observation_count)) {
+    return fail("missing is_recurring/prior_observation_count");
+  }
+  return ok({
+    phi_id,
+    ticker,
+    alpha_id,
+    source,
+    edge_type,
+    target,
+    is_recurring: payload.is_recurring,
+    has_prior_observation: isBoolean(payload.has_prior_observation)
+      ? payload.has_prior_observation
+      : payload.is_recurring,
+    prior_observation_count: payload.prior_observation_count,
+    prior_run_ids: isStringArray(payload.prior_run_ids) ? payload.prior_run_ids : [],
+    first_seen: nullableString(payload.first_seen),
+    last_seen_prior: nullableString(payload.last_seen_prior),
+    current_seen_at: nullableString(payload.current_seen_at),
+  });
+}
+
+function adaptAlphaMemorySummaryEntry(payload: unknown): AdaptResult<AlphaMemorySummaryEntry> {
+  if (!isRecord(payload)) return fail("summary entry is not an object");
+  const { alpha_id } = payload;
+  if (!isString(alpha_id)) return fail("missing alpha_id");
+  if (
+    !isNumber(payload.current_phi_count) ||
+    !isNumber(payload.first_seen_phi_count) ||
+    !isNumber(payload.recurring_phi_count) ||
+    !isNumber(payload.prior_observation_total)
+  ) {
+    return fail("missing count fields");
+  }
+  return ok({
+    alpha_id,
+    current_phi_count: payload.current_phi_count,
+    first_seen_phi_count: payload.first_seen_phi_count,
+    recurring_phi_count: payload.recurring_phi_count,
+    recurrence_ratio: nullableNumber(payload.recurrence_ratio),
+    prior_observation_total: payload.prior_observation_total,
+  });
+}
+
+function adaptAlphaMemoryAggregateFingerprint(payload: unknown): AdaptResult<AlphaMemoryAggregateFingerprint> {
+  if (!isRecord(payload)) return fail("aggregate fingerprint is not an object");
+  const { aggregate_fingerprint_id, alpha_id } = payload;
+  if (!isString(aggregate_fingerprint_id) || !isString(alpha_id)) {
+    return fail("missing aggregate_fingerprint_id/alpha_id");
+  }
+  return ok({ aggregate_fingerprint_id, alpha_id });
+}
+
+function adaptAlphaMemorySection(payload: unknown): AlphaMemorySection | null | undefined {
+  if (payload === null) return null;
+  if (!isRecord(payload)) return undefined;
+  if (payload.mode !== "shadow") return undefined;
+  if (payload.activation_modulation_applied !== false) return undefined;
+  if (!isString(payload.identity_model) || !isString(payload.identity_version)) return undefined;
+
+  const phiStructures: AlphaMemoryPhiStructure[] = [];
+  if (Array.isArray(payload.phi_structures)) {
+    for (const raw of payload.phi_structures) {
+      const adapted = adaptAlphaMemoryPhiStructure(raw);
+      if (adapted.ok) phiStructures.push(adapted.value);
+    }
+  }
+  const summary: AlphaMemorySummaryEntry[] = [];
+  if (Array.isArray(payload.alpha_memory_summary)) {
+    for (const raw of payload.alpha_memory_summary) {
+      const adapted = adaptAlphaMemorySummaryEntry(raw);
+      if (adapted.ok) summary.push(adapted.value);
+    }
+  }
+  const aggregateFingerprints: AlphaMemoryAggregateFingerprint[] = [];
+  if (Array.isArray(payload.aggregate_fingerprints)) {
+    for (const raw of payload.aggregate_fingerprints) {
+      const adapted = adaptAlphaMemoryAggregateFingerprint(raw);
+      if (adapted.ok) aggregateFingerprints.push(adapted.value);
+    }
+  }
+  let instabilitySignals: AlphaMemorySection["instability_signals"];
+  if (isRecord(payload.instability_signals)) {
+    instabilitySignals = {
+      alpha_attribution_variance: Array.isArray(payload.instability_signals.alpha_attribution_variance)
+        ? payload.instability_signals.alpha_attribution_variance
+        : [],
+      edge_type_variance: Array.isArray(payload.instability_signals.edge_type_variance)
+        ? payload.instability_signals.edge_type_variance
+        : [],
+    };
+  }
+
+  return {
+    mode: "shadow",
+    activation_modulation_applied: false,
+    identity_model: payload.identity_model,
+    identity_version: payload.identity_version,
+    phi_structures: phiStructures,
+    alpha_memory_summary: summary,
+    aggregate_fingerprints: aggregateFingerprints,
+    instability_signals: instabilitySignals,
+  };
+}
+
 export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<CanonicalResearchResponse> {
   if (!isRecord(payload)) return fail("response is not an object");
   const { run_id, status } = payload;
@@ -893,6 +1020,7 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
     unclassified_findings_reason_counts: unclassifiedFindingsReasonCounts,
     unclassified_findings_status: unclassifiedFindingsStatus,
     unclassified_findings_download_available: unclassifiedFindingsDownloadAvailable,
+    alpha_memory: adaptAlphaMemorySection(payload.alpha_memory),
   });
 }
 
@@ -1389,14 +1517,97 @@ export function adaptHealthResponse(payload: unknown): AdaptResult<HealthRespons
   return ok({ status: "ok" });
 }
 
+// ---------------------------------------------------------------------------
+// GET /api/alpha-library
+// ---------------------------------------------------------------------------
+
+function adaptAlphaLibraryEntry(value: unknown): AlphaLibraryEntry | undefined {
+  if (!isRecord(value)) return undefined;
+  const {
+    alpha_id,
+    name_en,
+    name_cn,
+    layer,
+    status,
+    core_thesis,
+    keywords,
+    trigger_signals,
+    confirmation_signals,
+    beneficiary_assets,
+    risk_assets,
+    conflict_alphas,
+    invalidation_conditions,
+    agent_sources,
+  } = value;
+  if (
+    !isString(alpha_id) ||
+    !isString(name_en) ||
+    !isString(name_cn) ||
+    !isString(layer) ||
+    !isString(status) ||
+    !isString(core_thesis) ||
+    !isStringArray(keywords) ||
+    !isStringArray(trigger_signals) ||
+    !isStringArray(confirmation_signals) ||
+    !isStringArray(beneficiary_assets) ||
+    !isStringArray(risk_assets) ||
+    !isStringArray(invalidation_conditions) ||
+    !isStringArray(agent_sources) ||
+    !Array.isArray(conflict_alphas)
+  ) {
+    return undefined;
+  }
+  const adaptedConflicts: { alpha_id: string; contradiction_weight: number }[] = [];
+  for (const item of conflict_alphas) {
+    if (!isRecord(item) || !isString(item.alpha_id) || !isNumber(item.contradiction_weight)) {
+      return undefined;
+    }
+    adaptedConflicts.push({ alpha_id: item.alpha_id, contradiction_weight: item.contradiction_weight });
+  }
+  return {
+    alpha_id,
+    name_en,
+    name_cn,
+    layer,
+    status,
+    core_thesis,
+    keywords,
+    trigger_signals,
+    confirmation_signals,
+    beneficiary_assets,
+    risk_assets,
+    conflict_alphas: adaptedConflicts,
+    invalidation_conditions,
+    agent_sources,
+  };
+}
+
+export function adaptAlphaLibraryResponse(payload: unknown): AdaptResult<AlphaLibraryResponse> {
+  if (!isRecord(payload)) return fail("response is not an object");
+  const { schema_version, alpha_count, alphas } = payload;
+  if (!isString(schema_version) || !isNumber(alpha_count) || !Array.isArray(alphas)) {
+    return fail("unexpected alpha-library payload shape");
+  }
+  const adaptedAlphas: AlphaLibraryEntry[] = [];
+  for (const item of alphas) {
+    const adapted = adaptAlphaLibraryEntry(item);
+    if (!adapted) return fail("unexpected alpha-library entry shape");
+    adaptedAlphas.push(adapted);
+  }
+  return ok({ schema_version, alpha_count, alphas: adaptedAlphas });
+}
+
 export function adaptReadinessResponse(payload: unknown): AdaptResult<ReadinessResponse> {
   if (!isRecord(payload)) return fail("response is not an object");
-  const { status, database, job_manager, real_execution } = payload;
+  const { status, database, job_manager, real_execution, live_semantic_pipeline } = payload;
   if (
     (status !== "ready" && status !== "not_ready") ||
     (database !== "ready" && database !== "unavailable") ||
     (job_manager !== "ready" && job_manager !== "unavailable") ||
-    (real_execution !== "disabled" && real_execution !== "configured" && real_execution !== "misconfigured")
+    (real_execution !== "disabled" && real_execution !== "configured" && real_execution !== "misconfigured") ||
+    (live_semantic_pipeline !== "not_applicable" &&
+      live_semantic_pipeline !== "ready" &&
+      live_semantic_pipeline !== "not_ready")
   ) {
     return fail("unexpected readiness payload shape");
   }
@@ -1406,5 +1617,7 @@ export function adaptReadinessResponse(payload: unknown): AdaptResult<ReadinessR
     job_manager,
     real_execution,
     real_execution_reason: nullableString(payload.real_execution_reason),
+    live_semantic_pipeline,
+    live_semantic_pipeline_reason: nullableString(payload.live_semantic_pipeline_reason),
   });
 }

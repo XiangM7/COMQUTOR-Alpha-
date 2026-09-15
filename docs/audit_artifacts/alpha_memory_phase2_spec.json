@@ -1,0 +1,294 @@
+{
+  "schema_version": "alpha_memory_phase2_spec.v1",
+  "task": "STEP 1 -- Adaptive Alpha Memory / Feedback Loop Spec Freeze (specification only, no implementation)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "based_on": [
+    "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx (product authority)",
+    "docs/audit_artifacts/alpha_memory_existing_code_audit.json/.md (Step 0 findings)",
+    "current local worktree (uncommitted changes included)"
+  ],
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "commit": false,
+  "push": false,
+  "production_code_modified": false,
+  "tests_modified": false,
+  "phase_1_scope": "SHADOW ONLY. activation_modulation_applied MUST be false for the entire first implementation phase. Historical memory may be read, persisted, matched, audited, and displayed -- it must never change an official activation_score, qualified_level, conflict admission outcome, or Evidence qualification.",
+
+  "authoritative_source_quotes": {
+    "phase2_alpha_memory_roadmap": "Post-MVP Roadmap: 'Phase 2 -- Alpha Memory & ϕ-Tokens: persist structure identities across runs; match recurring causal chains to stable ϕ-IDs; store invalidation/non-execution events with reason codes and use them to modulate future activation (patent: non-execution events as computational feedback; ϕ-modulation update loop).'",
+    "patent_mapping_table_row": "'Non-execution events as computational feedback' -> 'Alpha Memory: invalidation conditions, failed/expired structures stored with reason codes to adjust future activation' -- MVP status: Phase 2.",
+    "structure_memory_row": "'Structure Memory (success/failure structures)' -> 'Alpha Structure Library (taxonomy YAML) + entity_alpha_exposure history' -- MVP status: 'MVP static seed; adaptive Phase 2'. This is the Plan's OWN confirmation that entity_alpha_exposure is the intended seed of Phase 2 adaptivity, and that today's implementation is correctly the static half only.",
+    "phi_token_worked_example": "'P3 -- No market-state memory. Identical bullish conclusions on consecutive days are not recognized as the same logic. Fix: encode recurring causal chains as ϕ-tokens with a stable structure identity (e.g., ϕ-001 = AI demand -> GPU shortage -> NVDA benefits), so the system remembers Alpha Structures, not text.'",
+    "phase3_boundary_note": "Phase 3 ('Stabilization & readout windows: require dominance persistence across an update window before a structural verdict is emitted') is a SEPARATE, later roadmap phase in the same Post-MVP Roadmap section -- explicitly out of scope for this Alpha Memory spec, even though the readout-engine table row also says 'multi-window Phase 2' for its own MVP status. Do not conflate multi-window stabilization with Alpha Memory; they are named as two different phases.",
+    "invalidation_conditions_is_a_static_taxonomy_field": "The Plan's own worked Alpha JSON schema example includes '\"invalidation_conditions\": []' as a static per-Alpha field on the Alpha definition itself (alongside causal_graph, trigger_signals, conflict_alphas) -- confirming Step 0's audit finding that invalidation_conditions is Product-authored taxonomy metadata, not a runtime event log, by the Plan's own design.",
+    "terms_not_found_in_the_plan": "The words 'observed', 'repeated'/'reobserved', and 'absent' do not appear anywhere in the Development Plan. They are convenience vocabulary for organizing this spec, not authoritative product terms -- treated as PRODUCT_DECISION_REQUIRED for naming/semantics throughout this document."
+  },
+
+  "A_minimum_feedback_loop": {
+    "data_flow": [
+      {"step": 1, "stage": "previous persisted runs", "source": "structure_graph.json / alpha_activations.json / entity_alpha_exposures.json / conflicts.json for every run under outputs/runs/<run_id>/ and their DB table mirrors (structure_graphs, alpha_activations, entity_alpha_exposures, alpha_conflicts)", "new_or_existing": "100% EXISTING -- no new write path required for the source data itself."},
+      {"step": 2, "stage": "stable structure identity (phi)", "source": "NEW read-side computation, seeded from structure_extractor.py's existing deterministic node id (see section B)", "new_or_existing": "PARTIALLY EXISTING (node-level) + NEW (chain-level, see B.3)"},
+      {"step": 3, "stage": "cross-run matching", "source": "NEW module: loads N runs for one ticker, groups by phi identity", "new_or_existing": "NEW -- no existing code performs this."},
+      {"step": 4, "stage": "historical observation ledger", "source": "NEW, read-only VIEW over existing persisted data (see section C) -- NOT a new duplicate write path", "new_or_existing": "NEW aggregation logic; reuses existing storage, no new source-of-truth table for the raw facts."},
+      {"step": 5, "stage": "lifecycle/event detection", "source": "NEW module, operating only on the ledger from step 4", "new_or_existing": "NEW -- see section D for which event types are authorized vs undecided."},
+      {"step": 6, "stage": "shadow memory assessment", "source": "NEW module -- assembles steps 2-5's output into one additive block per run, per Alpha", "new_or_existing": "NEW."},
+      {"step": 7, "stage": "run artifact/API/UI", "source": "Additive new section on run_audit.json (see section E), following the SAME convention as activation_summary/conflict_summary/entity_exposure", "new_or_existing": "NEW section, EXISTING convention."}
+    ],
+    "activation_modulation_applied": false,
+    "explicit_guarantee": "Every step above is a READ of already-persisted data, or a NEW read-only/audit-only computation over it. No step in this data flow writes into, or is consulted by, activation_scorer_v2.py, alpha_level_classifier.py, conflict_detector.py, or conflict_admissibility.py during Phase 1. The shadow memory assessment is computed strictly AFTER those modules finish, from their own already-final output, exactly like entity_exposure_audit and conflict_summary are today."
+  },
+
+  "B_phi_stable_identity_model": {
+    "scope_determination_from_authority": {
+      "verdict": "SCOPE-DEPENDENT (node-role-dependent), per the Plan's own worked example -- not resolvable to a single blanket rule of 'ticker scoped' or 'global'.",
+      "reasoning": "The Plan's own example, phi-001 = 'AI demand -> GPU shortage -> NVDA benefits', is a causal CHAIN whose PREMISE steps ('AI demand', 'GPU shortage') are ticker-independent macro conditions, while its CONCLUSION step ('NVDA benefits') is ticker-specific. This directly explains -- and likely justifies, rather than merely tolerates -- the current code's inconsistency (Revenue Growth ticker-scoped, ~109 other factors not): a chain-conclusion factor plausibly SHOULD be ticker-scoped, and a chain-premise factor plausibly should NOT be. The Plan never states this rule explicitly, however -- it is inferred from one worked example, not stated as a governing principle. Which of the 110 canonical factors are 'premise' vs 'conclusion' role is undocumented anywhere.",
+      "node_based_or_causal_chain_based": "BOTH, at different levels: phi identity for a SINGLE factor occurrence needs a node-level identity (already exists, see B.1); phi identity for a RECURRING CAUSAL CHAIN (the Plan's actual worked example) needs a PATH-level identity across 2+ connected nodes -- this does NOT exist today and is materially new logic (see B.3)."
+    },
+    "b1_what_existing_id_logic_can_be_reused": {
+      "component": "comqutor_alpha/structure_engine/structure_extractor.py::_make_node -- node['id'] = _slug(_display_label(canonical_factor, ticker))",
+      "why_reusable": "Deterministic, already persisted in every run's structure_graph.json, already cross-run-stable for whatever scope it currently uses per factor. Requires ZERO change to the Structure Extractor to start being read cross-run -- a v1 phi matcher can be built as a pure new reader.",
+      "limitation": "Gives identity to a single NODE (one factor occurrence), not to a CHAIN (the Plan's actual phi-token unit)."
+    },
+    "b2_what_cannot_safely_be_reused_unchanged": {
+      "item": "The current ticker-scoping rule itself (only 'Revenue Growth' is ticker-scoped)",
+      "why_not": "It was designed for graph deduplication within ONE run/ticker's own structure_graph.json, not for cross-ticker phi-token disambiguation. If reused verbatim for cross-run/cross-ticker matching without a documented per-factor scoping decision, two DIFFERENT tickers' unrelated 'AI Demand' claims would silently collide onto the identical phi id -- which may be exactly correct for a genuinely ticker-independent macro premise, or may be a bug, depending on a Product decision the Plan does not make. This is the single highest-risk unresolved item in this whole spec."
+    },
+    "b3_proposed_identity_fields": {
+      "note": "PROPOSED, not authorized -- every field below needs Product sign-off before implementation; none are invented as final by this document.",
+      "node_level_identity": {
+        "reuse": "structure_extractor.py's existing node['id'] verbatim, unchanged.",
+        "fields": ["canonical_factor", "ticker (only where the existing scoping rule already applies it)"]
+      },
+      "chain_level_identity_proposed_v1": {
+        "status": "NEW, not yet built, PRODUCT_DECISION_REQUIRED before design is finalized",
+        "candidate_fields": [
+          "ordered tuple of node ids along a directed path (source_node_id, edge_type, target_node_id, ...)",
+          "chain_length (number of hops) -- the Plan's own example is a 2-hop chain",
+          "ticker (if the chain's terminal/beneficiary node is ticker-scoped)",
+          "phi_id = a deterministic hash/slug of the above tuple, versioned (see B.4)"
+        ]
+      }
+    },
+    "b4_identity_versioning_requirements": [
+      "A phi identity scheme MUST carry an explicit version string (e.g. phi_identity_version = 'alpha_memory.phi.v1') from day one, stored alongside every persisted phi id -- mirroring the existing convention (SCHEMA_VERSION, MAPPER_VERSION, CONFLICT_FORMULA_VERSION, etc. throughout this codebase).",
+      "A version bump MUST NOT silently reinterpret previously-persisted phi ids -- exactly like this codebase's existing frozen-hash-guard convention for production semantic files, a phi scheme change requires an explicit, reviewed decision, never a silent drift.",
+      "Because the underlying canonical_factor taxonomy itself can change (alpha_taxonomy_v1.yaml is already hash-guarded), a phi id's stability is only as strong as the taxonomy's own stability -- a taxonomy edit that renames/merges a canonical factor would need an explicit phi-id migration policy. Not resolved by the Plan; PRODUCT_DECISION_REQUIRED."
+    ],
+    "b5_collision_risks": [
+      "Cross-ticker collision for ticker-independent factors (see B.2) -- may be intentional (shared macro premise) or a bug, undecided.",
+      "Taxonomy drift collision -- if a future taxonomy edit changes a factor's canonical label/slug, its phi id changes silently unless a migration policy exists (see B.4).",
+      "Chain-boundary ambiguity -- the same two real-world facts could be extracted as a 2-hop chain in one run and a 3-hop chain (with an intermediate node) in another, depending on claim-level extraction variance across independent LLM calls, producing two DIFFERENT phi ids for what a human would call 'the same causal chain'. No existing code addresses this; a similarity/normalization step would need explicit Product-approved rules (thresholds), which the Plan does not provide (see section I -- do not invent phi similarity thresholds)."
+    ],
+    "b6_product_decision_required_items": [
+      "Which of the 110 canonical factors should be ticker-scoped vs ticker-independent for cross-run phi purposes (today only 1 of 110 is scoped, for an unrelated intra-run reason).",
+      "Whether phi identity is defined at node level, chain level, or both simultaneously exposed.",
+      "The chain-boundary/similarity-matching rule when two runs' extracted chains differ slightly in hop count or intermediate structure.",
+      "The taxonomy-drift migration policy for phi ids when alpha_taxonomy_v1.yaml changes."
+    ]
+  },
+
+  "C_historical_observation_model": {
+    "principle": "Reuse existing persisted tables/artifacts as the source of truth for every field below. No new duplicate persistence system for raw facts -- only a new, additive, read-only aggregation layer over what already exists.",
+    "minimum_fields_for_one_observation": [
+      {"field": "run_id", "source_table_or_artifact": "structure_graphs / alpha_activations / entity_alpha_exposures / alpha_conflicts (all already keyed by run_id)", "canonical_authority": "research_runs.run_id (existing)", "currently_persisted": true, "new_field_required": false},
+      {"field": "ticker", "source_table_or_artifact": "same tables, all already carry ticker", "canonical_authority": "research_runs.ticker", "currently_persisted": true, "new_field_required": false},
+      {"field": "analysis_date / run timestamp", "source_table_or_artifact": "research_runs.analysis_date / created_at", "canonical_authority": "research_runs (existing)", "currently_persisted": true, "new_field_required": false},
+      {"field": "structure_node_id (phi node component)", "source_table_or_artifact": "structure_graphs.graph_json -> nodes[].id (via structure_graph.json)", "canonical_authority": "structure_extractor.py::_make_node (existing)", "currently_persisted": true, "new_field_required": false},
+      {"field": "phi_id (chain component)", "source_table_or_artifact": "NONE today", "canonical_authority": "NONE -- would be a NEW derived field, computed by the new matcher, not stored inside structure_graphs itself unless Product approves adding it there (see minimal_delta_plan Phase 1)", "currently_persisted": false, "new_field_required": true},
+      {"field": "alpha_id + qualified_level + activation_score (the Alpha's outcome that run)", "source_table_or_artifact": "alpha_activations table / alpha_activations.json", "canonical_authority": "alpha_level_classifier.py (existing, B4 authority)", "currently_persisted": true, "new_field_required": false},
+      {"field": "exposure historical_mapping + computed exposure score", "source_table_or_artifact": "entity_alpha_exposures table / entity_alpha_exposures.json", "canonical_authority": "exposure_engine.py (existing)", "currently_persisted": true, "new_field_required": false},
+      {"field": "conflict outcome (admitted/suppressed/rejected) + reason_codes for any conflict pair touching this Alpha", "source_table_or_artifact": "alpha_conflicts table / conflicts.json arbitration.candidate_evaluations", "canonical_authority": "conflict_detector.py / conflict_admissibility.py (existing)", "currently_persisted": true, "new_field_required": false},
+      {"field": "an explicit link from this observation back to the specific claim/evidence text that produced it", "source_table_or_artifact": "structure_graphs.graph_json -> nodes[].source_claim_ids / source_records (existing, already present on every node)", "canonical_authority": "structure_extractor.py (existing)", "currently_persisted": true, "new_field_required": false}
+    ],
+    "conclusion": "Every fact needed for a v1 historical observation ledger ALREADY EXISTS in already-persisted, already-queryable form except the phi_id itself (chain-level), which is new derived data, not a new raw fact. No new DB table is required to STORE raw observations; a new table (or a purely computed, non-persisted view) is only needed if Product wants phi_id itself to be durably stored rather than recomputed on read each time (a performance/architecture choice, not a product-semantics one)."
+  },
+
+  "D_lifecycle_events": {
+    "note": "For each candidate event, cites the exact authority found (or its absence) and classifies AUTHORIZED (the CONCEPT is named by the Plan) vs PRODUCT_DECISION_REQUIRED (the concept name, or its operational trigger/threshold, is not resolved by any existing authority).",
+    "events": [
+      {
+        "event": "recurrence / seen-again (a phi id observed in more than one run)",
+        "authority": "AUTHORIZED (concept only)",
+        "citation": "'match recurring causal chains to stable phi-IDs' -- the Plan explicitly requires recognizing recurrence.",
+        "operational_definition_status": "PRODUCT_DECISION_REQUIRED -- exact matching/similarity rule is not specified (see B.5)."
+      },
+      {
+        "event": "invalidated",
+        "authority": "AUTHORIZED (concept only)",
+        "citation": "'Alpha Memory: invalidation conditions, failed/expired structures stored with reason codes' -- the Plan names 'invalidation' as a stored state.",
+        "operational_definition_status": "PRODUCT_DECISION_REQUIRED -- no detection mechanism, threshold, or trigger condition exists anywhere in the Plan or the code (Step 0 audit: invalidation_conditions today is static per-Alpha display text, never evaluated)."
+      },
+      {
+        "event": "expired",
+        "authority": "AUTHORIZED (concept only)",
+        "citation": "'failed/expired structures stored with reason codes'.",
+        "operational_definition_status": "PRODUCT_DECISION_REQUIRED -- no expiration window/duration is defined anywhere. Must NOT be invented (task's own explicit constraint)."
+      },
+      {
+        "event": "failed",
+        "authority": "AUTHORIZED (concept only)",
+        "citation": "same citation as 'expired'.",
+        "operational_definition_status": "PRODUCT_DECISION_REQUIRED -- what makes a structure count as 'failed' (a subsequent conflict loss? a subsequent price move contradicting the thesis? human review disagreement?) is undefined."
+      },
+      {
+        "event": "non-execution",
+        "authority": "AUTHORIZED (concept named, mapping is high-level/patent-derived)",
+        "citation": "'Non-execution events as computational feedback' -- but this term originates in the SIC patent's general agent/action-selection framing (Worked Example 3: 'agent/action selection with local admissibility, arbitration that selects/suppresses/defers candidates, and non-execution feedback'), applied to COMQUTOR only by analogy in the mapping table.",
+        "operational_definition_status": "PRODUCT_DECISION_REQUIRED -- COMQUTOR has no trade-execution concept at all (MVP scope guard explicitly forbids emitting Buy/Sell/Hold), so what 'non-execution' means concretely in COMQUTOR's context (an Alpha suppressed by Conflict Detector? an Alpha that reached dominant but a later run showed it should not have?) is not defined by the Plan and must not be guessed."
+      },
+      {
+        "event": "reason codes (accompanying any of the above)",
+        "authority": "AUTHORIZED (requirement for existence)",
+        "citation": "'stored with reason codes' -- reason codes are explicitly required to accompany invalidation/failed/expired/non-execution events.",
+        "operational_definition_status": "PRODUCT_DECISION_REQUIRED -- the actual reason-code vocabulary/values for these NEW cross-run event types must be newly defined and approved; the EXISTING 4 canonical B4 reason codes (NO_LOCAL_STRUCTURE_SUPPORT, INSUFFICIENT_EVIDENCE, LOW_ENTITY_EXPOSURE, NO_TICKER_SPECIFIC_EVIDENCE) are for a DIFFERENT, within-run qualification purpose and must not be silently repurposed or overloaded for cross-run memory events."
+      },
+      {
+        "event": "observed / repeated / absent (as distinct named lifecycle states)",
+        "authority": "NOT FOUND IN THE PLAN",
+        "citation": "None -- these exact terms do not appear anywhere in docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx.",
+        "operational_definition_status": "PRODUCT_DECISION_REQUIRED in full -- both naming and semantics. A conservative, low-risk minimum ('this phi id was seen in N runs, most recently on date D, currently absent from the latest run') can be derived mechanically from the observation ledger (section C) WITHOUT inventing thresholds, but calling this 'absent' vs some other name, and deciding whether 'absent' should ever be treated as meaningful (vs simply 'not present this run'), is still a Product naming/semantics decision, not an engineering one."
+      }
+    ]
+  },
+
+  "E_shadow_memory_output_shape": {
+    "note": "PROPOSED field names, NOT final/authoritative unless stated otherwise. Placement: an ADDITIVE new top-level section on run_audit.json, following the exact same convention as activation_summary/conflict_summary/entity_exposure -- never a new top-level artifact file, never a modification of any existing section.",
+    "proposed_structure": {
+      "alpha_memory": {
+        "schema_version": "alpha_memory_shadow.v1 (PROPOSED)",
+        "mode": "shadow (the only legal value in Phase 1 -- literal, not a free string)",
+        "phi_identity_version": "alpha_memory.phi.v1 (PROPOSED, see B.4)",
+        "phi_matches": "[{ phi_id, node_ids, matched_run_ids, ticker, scope: node|chain }] -- per-Alpha or per-ticker list of phi identities found and which prior runs they also appeared in",
+        "historical_observations": "[{ phi_id, run_id, analysis_date, alpha_id, qualified_level, activation_score, conflict_outcome, reason_codes }] -- the ledger rows from section C, filtered to phi ids relevant to this run",
+        "lifecycle_events": "[{ event_type, phi_id or alpha_id, authority_status: AUTHORIZED|PRODUCT_DECISION_REQUIRED, reason_codes, detected_at_run_id }] -- only event types actually authorized for a given Phase (see H) would ever be populated; undecided event types stay an empty list with an explicit note, never silently fabricated",
+        "shadow_memory_signal": "a purely descriptive, non-numeric summary (e.g. 'A101 phi-matched to 3 prior NVDA runs, most recent 2026-08-15, no lifecycle events detected') -- explicitly NOT a score, NOT a weight, NOT anything activation_scorer_v2.py could accidentally be wired to consume",
+        "activation_modulation_applied": "false (Phase 1 -- hardcoded constant, not a computed value, so it can never accidentally become true through a code path that forgets to set it)"
+      }
+    },
+    "proof_obligations": [
+      "previous runs were read: historical_observations must cite real prior run_ids that exist on disk/DB, never fabricated.",
+      "structures were matched: phi_matches must show >1 matched_run_ids for at least the demonstration/offline-replay case, using real historical data (mirroring this session's own earlier offline-replay-proof pattern).",
+      "history was interpreted: shadow_memory_signal must be a genuine function of historical_observations, not a static placeholder string.",
+      "no official B4 result was modified: a dedicated test (mirroring test_case14_b2_threshold_constants_unchanged_and_untouched_by_this_module's existing pattern) must assert byte-identical activation_score/qualified_level/conflict outcomes with and without the alpha_memory section present."
+    ]
+  },
+
+  "F_evidence_review_boundary": {
+    "decision": "PRODUCT_DECISION_REQUIRED",
+    "action_this_phase": "None. evidence_review_summary_v2.json remains QA authority only, exactly as today. It is NOT connected to future runs, NOT read by the shadow memory engine, NOT referenced by lifecycle event detection.",
+    "citation_check": "The Development Plan does not anywhere state that human review output should feed future inference -- Evidence Review post-dates and is orthogonal to the Plan's own Alpha Memory roadmap section. No authority requires connecting them."
+  },
+
+  "G_reuse_plan": [
+    {"planned_capability": "Node-level phi component", "existing_component_to_reuse": "structure_extractor.py::_make_node's node id", "avoids_parallel_infra": "Yes -- zero change to the extractor; new code only reads structure_graph.json."},
+    {"planned_capability": "Cross-run history source", "existing_component_to_reuse": "structure_graphs / alpha_activations / entity_alpha_exposures / alpha_conflicts DB tables + their JSON artifact mirrors", "avoids_parallel_infra": "Yes -- no new table for raw facts."},
+    {"planned_capability": "Confidence/authority tiering for any future lifecycle-event classification", "existing_component_to_reuse": "comqutor_alpha.regression.authority_contract's APPROVED_GOLD/DOCUMENTED_EXPECTATION/PROVISIONAL_AI_PREDICTED/REJECTED_OR_SUPERSEDED vocabulary and acceptance_status_for_authority()", "avoids_parallel_infra": "Reuse the PATTERN (a small, closed, versioned vocabulary with an explicit acceptance mapping); a NEW, separate vocabulary/file would still be needed since Alpha Memory events are a different domain than regression labels -- do not literally repurpose authority_contract.py itself."},
+    {"planned_capability": "Artifact/API exposure", "existing_component_to_reuse": "run_audit.json's existing additive-section convention (build_run_audit_payload in routes_research.py)", "avoids_parallel_infra": "Yes -- new alpha_memory section, no new artifact file."},
+    {"planned_capability": "Frozen-drift protection for any new production semantic file this work eventually creates", "existing_component_to_reuse": "This codebase's established FROZEN_HASHES/_STEP8_FROZEN_HASHES convention", "avoids_parallel_infra": "Yes -- follow the same pattern rather than inventing a new one."}
+  ],
+
+  "H_implementation_phases": [
+    {
+      "phase": 1,
+      "name": "Stable identity (phi, node-level reuse + chain-level v1)",
+      "files_likely_changed": ["NEW: comqutor_alpha/memory/phi_identity.py (or similar) -- read-only, pure functions over already-persisted structure_graph.json data"],
+      "db_migration_required": false,
+      "provider_calls_required": false,
+      "tradingagents_calls_required": false,
+      "official_research_semantics_changed": false,
+      "blocked_on": "B.6 Product decisions (ticker-scoping rule, node-vs-chain scope)"
+    },
+    {
+      "phase": 2,
+      "name": "Cross-run history reader",
+      "files_likely_changed": ["NEW: comqutor_alpha/storage/db/repository.py additions (new, additive, read-only query functions only)"],
+      "db_migration_required": false,
+      "provider_calls_required": false,
+      "tradingagents_calls_required": false,
+      "official_research_semantics_changed": false,
+      "blocked_on": "Phase 1"
+    },
+    {
+      "phase": 3,
+      "name": "Historical observation ledger",
+      "files_likely_changed": ["NEW: comqutor_alpha/memory/observation_ledger.py -- aggregates Phase 1+2 output into the section C row shape"],
+      "db_migration_required": false,
+      "provider_calls_required": false,
+      "tradingagents_calls_required": false,
+      "official_research_semantics_changed": false,
+      "blocked_on": "Phase 2"
+    },
+    {
+      "phase": 4,
+      "name": "Lifecycle events",
+      "files_likely_changed": ["NEW: comqutor_alpha/memory/lifecycle_events.py -- ONLY implements event types marked AUTHORIZED with an approved operational definition; every PRODUCT_DECISION_REQUIRED event type stays unimplemented, not stubbed with an invented rule"],
+      "db_migration_required": "MAYBE -- only if Product decides lifecycle events must be durably persisted (rather than recomputed on read each time); a pure-recompute v1 needs no migration",
+      "provider_calls_required": false,
+      "tradingagents_calls_required": false,
+      "official_research_semantics_changed": false,
+      "blocked_on": "Section D Product decisions"
+    },
+    {
+      "phase": 5,
+      "name": "Shadow memory engine",
+      "files_likely_changed": ["NEW: comqutor_alpha/memory/shadow_memory.py -- assembles Phases 1-4 into the section E output shape; activation_modulation_applied hardcoded false"],
+      "db_migration_required": false,
+      "provider_calls_required": false,
+      "tradingagents_calls_required": false,
+      "official_research_semantics_changed": false,
+      "blocked_on": "Phase 4"
+    },
+    {
+      "phase": 6,
+      "name": "Artifact/API/UI",
+      "files_likely_changed": ["comqutor_alpha/api/routes_research.py (new additive alpha_memory section in build_run_audit_payload)", "NEW frontend component(s), if Product wants this visible in-product (separate decision from exposing it in run_audit.json for QA)"],
+      "db_migration_required": false,
+      "provider_calls_required": false,
+      "tradingagents_calls_required": false,
+      "official_research_semantics_changed": false,
+      "blocked_on": "Phase 5"
+    },
+    {
+      "phase": 7,
+      "name": "Offline replay QA",
+      "files_likely_changed": ["NEW test file(s), following this session's own established offline-replay-proof pattern (tests/test_v0_1_3_offline_replay_proof.py) -- recompute Phases 1-6 against already-persisted real historical runs (e.g. the existing Step 11 r2 six-run set) to prove real phi matches and zero B4/conflict semantic drift, with ZERO new Provider/TradingAgents calls"],
+      "db_migration_required": false,
+      "provider_calls_required": false,
+      "tradingagents_calls_required": false,
+      "official_research_semantics_changed": false,
+      "blocked_on": "Phase 6"
+    }
+  ],
+  "target_provider_calls_until_final_fresh_regression": 0,
+  "target_tradingagents_calls_until_final_fresh_regression": 0,
+
+  "I_non_negotiable_constraints_confirmed": {
+    "b1_stance_semantics": "not touched by this spec; no change proposed anywhere in Phases 1-7",
+    "b2_admissibility_thresholds": "not touched",
+    "b4_thresholds": "not touched -- ACTIVE_THRESHOLD/DOMINANT_THRESHOLD/REGIME_LEVEL_THRESHOLD and activation_scorer_v2.py's formula remain frozen through all 7 phases",
+    "alpha_taxonomy": "not touched",
+    "canonical_conflict_pairs": "not touched",
+    "existing_human_reviewed_labels": "not touched (see section F)",
+    "memory_modulation_weights": "explicitly NOT introduced in this phase -- activation_modulation_applied stays hardcoded false through Phase 7",
+    "static_historical_mapping_not_conflated_with_adaptive_memory": "This spec explicitly does NOT claim Phase 2 adaptive memory is complete or partially complete merely because the static entity_alpha_exposure seed (historical_mapping) already exists and already gates B4 -- that is, and remains, the MVP-Lite static half only, per the Plan's own 'MVP static seed; adaptive Phase 2' framing for the Structure Memory row."
+  },
+
+  "product_decisions_required_master_list": [
+    "Per-canonical-factor ticker-scoping rule for phi identity (which of the 110 factors are 'premise' vs 'conclusion' role) -- B.6",
+    "Node-level vs chain-level phi scope, or both -- B.1/B.3",
+    "Chain-boundary/similarity matching rule across independently-extracted runs -- B.5",
+    "Taxonomy-drift phi-id migration policy -- B.4",
+    "Operational definition of 'recurrence' matching threshold -- D",
+    "Operational definition and detection mechanism for 'invalidated' -- D",
+    "Expiration window/duration for 'expired' -- D (must not be invented)",
+    "Operational definition of 'failed' -- D",
+    "Operational definition of 'non-execution' in COMQUTOR's context (no trade-execution concept exists) -- D",
+    "New reason-code vocabulary for cross-run memory events (distinct from the 4 existing B4 reason codes) -- D",
+    "Naming/semantics of 'observed'/'repeated'/'absent' as lifecycle states, and whether 'absent' carries any meaning -- D",
+    "Whether phi ids and lifecycle events should be durably persisted (new column/table) or purely recomputed on read -- C/H Phase 4",
+    "Whether/how Evidence Review human-review data should ever influence future runs (default: no connection in this phase) -- F",
+    "Whether shadow memory should be surfaced in the frontend UI in Phase 6, or QA/API-only for now"
+  ]
+}

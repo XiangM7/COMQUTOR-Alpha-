@@ -1,0 +1,924 @@
+{
+  "schema_version": "v0_1_3_provider_failure_blast_radius.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "executive_summary": {
+    "final_runs_audited": 6,
+    "total_provider_failures_raw_log_lines": 709,
+    "semantic_critical_provider_failures_raw": {
+      "alpha_classifier": 216,
+      "evidence_stance_classifier": 371,
+      "structure_extractor": 34,
+      "claim_batch_enrichment_not_semantic_critical_extraction_qc_only": 88
+    },
+    "alpha_classifier_final_orphaned_claims": 47,
+    "alpha_classifier_strong_deterministic_orphaned_claims": 8,
+    "runs_with_semantic_critical_failures": "6 / 6",
+    "gold_misses_potentially_touched": 1,
+    "gold_misses_likely_or_confirmed_affected": 1,
+    "runs_potentially_not_clean_for_benchmark": [
+      "NVDA",
+      "QQQ",
+      "MSFT",
+      "SNDK",
+      "TSM",
+      "AMD (all six, to varying raw degrees; only TSM shows a confirmed Gold-miss consequence)"
+    ],
+    "current_official_alpha_hit_percent": 61.0317,
+    "clean_estimate_of_algorithmic_recall": "PARTIALLY",
+    "recommended_next_step": "NEXT_PROVIDER_C -- add run-quality/benchmark-eligibility diagnostics; separately, fresh-rerun TSM specifically (the one ticker with a confirmed Gold-miss consequence)",
+    "code_changes": 0,
+    "provider_calls": 0,
+    "ticker_runs": 0
+  },
+  "provider_dependent_stage_map": [
+    {
+      "stage": "Research agents (fundamental/market/sentiment/news + debate/risk/portfolio agents)",
+      "code_path": "tradingagents/agents/**",
+      "input": "prior agent state + tool data",
+      "output": "raw_agent_outputs.json",
+      "failure_logging": "not captured in week2_llm_errors.jsonl (this is the Week1 TradingAgents Provider call, a different logging surface not inspected by this offline task per the no-Provider-calls constraint)",
+      "fallback": "UNKNOWN from this offline vantage -- out of scope (Week1, not Week2)",
+      "downstream_continues": "Yes -- Week2 processes whatever raw_agent_outputs.json contains"
+    },
+    {
+      "stage": "Claim batch enrichment",
+      "task_name": "claim_batch_enrichment",
+      "code_path": "structure_engine/structured_output_adapter.py (LLM enrichment step)",
+      "input": "raw_agent_outputs.json",
+      "output": "structured_agent_outputs.json records",
+      "failure_logging": "error_logs/week2_llm_errors.jsonl",
+      "fallback": "deterministic extraction continues without LLM enrichment fields",
+      "retry": "yes, multiple attempts observed (attempt=1,2,...)",
+      "downstream_continues": true,
+      "can_change": [
+        "claim segmentation/quality tags -- indirect, not matched_alpha/candidate_scores/B1/structure directly"
+      ]
+    },
+    {
+      "stage": "Alpha Mapper Pure-LLM Semantic Authority",
+      "task_name": "alpha_classifier",
+      "code_path": "comqutor_alpha/structure_engine/alpha_mapper.py::_classify_alpha_with_llm",
+      "input": "claim + candidate taxonomy block",
+      "output": "matched_alpha / match_status field on each alpha_matches.json record",
+      "failure_logging": "error_logs/week2_llm_errors.jsonl (task=alpha_classifier)",
+      "fallback": "match_status='unavailable', matched_alpha=None -- by INTENTIONAL, documented design, deterministic_top_alpha is NEVER substituted (Pure-LLM Semantic Authority principle)",
+      "retry": "yes, multiple attempts",
+      "downstream_continues": true,
+      "can_change": [
+        "matched_alpha",
+        "candidate_scores (indirectly, via which entry becomes 'the' match)",
+        "downstream structure edge alpha_ids (graph_builder uses only matched_alpha)",
+        "activation score (via evidence pool membership)"
+      ]
+    },
+    {
+      "stage": "B1 Evidence Stance Classification",
+      "task_name": "evidence_stance_classifier",
+      "code_path": "comqutor_alpha/structure_engine/evidence_stance_llm.py (LLM upgrade path over the deterministic evidence_stance.py baseline)",
+      "input": "claim + candidate alpha + taxonomy",
+      "output": "evidence_stance / stance_method / stance_fallback_reason fields",
+      "failure_logging": "error_logs/week2_llm_errors.jsonl (task=evidence_stance_classifier)",
+      "fallback": "stance_method='deterministic_fallback' -- a DESIGNED, EXISTING deterministic stance classifier baseline is used, not a silent drop",
+      "retry": "yes",
+      "downstream_continues": true,
+      "can_change": [
+        "evidence_stance",
+        "ticker-specific activation evidence eligibility (via stance-derived reason codes)"
+      ]
+    },
+    {
+      "stage": "Structure extraction (canonical relation / LLM edge validation)",
+      "task_name": "structure_extractor",
+      "code_path": "comqutor_alpha/structure_engine/structure_extractor.py (module docstring: 'Week 2 claim-level structure extraction with a deterministic fallback')",
+      "input": "claim text + factors",
+      "output": "extracted_structures.json edges/nodes",
+      "failure_logging": "error_logs/week2_llm_errors.jsonl (task=structure_extractor)",
+      "fallback": "the deterministic _extract_edges()/relation_grammar.py path ALWAYS runs regardless of LLM outcome -- LLM-sourced canonical-relation edges are a separate, additive source, not the only source",
+      "retry": "yes",
+      "downstream_continues": true,
+      "can_change": [
+        "extracted_structures.json edges (LLM-sourced subset only)",
+        "alpha_ids on LLM-sourced edges"
+      ]
+    },
+    {
+      "stage": "Debate / risk / portfolio synthesis agents",
+      "note": "Week1 TradingAgents Provider calls, same category as research agents above -- not separately logged in week2_llm_errors.jsonl",
+      "in_scope": "Only as SOURCE claims consumed by the Week2 stages above; no separate Week2 failure surface for these."
+    }
+  ],
+  "provider_failure_table_by_ticker": [
+    {
+      "ticker": "NVDA",
+      "component": "claim_batch_enrichment",
+      "failure_count": 14,
+      "timeout": 13,
+      "validation_failed": 1,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly (final artifact complete)"
+    },
+    {
+      "ticker": "NVDA",
+      "component": "alpha_classifier",
+      "failure_count": 32,
+      "timeout": 31,
+      "validation_failed": 1,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly -- 5 claims final match_status=unavailable"
+    },
+    {
+      "ticker": "NVDA",
+      "component": "evidence_stance_classifier",
+      "failure_count": 60,
+      "timeout": 60,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic_fallback used where exhausted"
+    },
+    {
+      "ticker": "NVDA",
+      "component": "structure_extractor",
+      "failure_count": 7,
+      "timeout": 0,
+      "validation_failed": 7,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic extraction path unaffected"
+    },
+    {
+      "ticker": "QQQ",
+      "component": "claim_batch_enrichment",
+      "failure_count": 12,
+      "timeout": 11,
+      "validation_failed": 1,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly"
+    },
+    {
+      "ticker": "QQQ",
+      "component": "alpha_classifier",
+      "failure_count": 17,
+      "timeout": 17,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly -- 5 claims final match_status=unavailable"
+    },
+    {
+      "ticker": "QQQ",
+      "component": "evidence_stance_classifier",
+      "failure_count": 50,
+      "timeout": 49,
+      "other": "1 WEEK2_LLM_PROVIDER_ERROR",
+      "retried": true,
+      "recovered": "deterministic_fallback used where exhausted"
+    },
+    {
+      "ticker": "QQQ",
+      "component": "structure_extractor",
+      "failure_count": 4,
+      "timeout": 0,
+      "validation_failed": 4,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic extraction path unaffected"
+    },
+    {
+      "ticker": "MSFT",
+      "component": "claim_batch_enrichment",
+      "failure_count": 16,
+      "timeout": 15,
+      "validation_failed": 1,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly"
+    },
+    {
+      "ticker": "MSFT",
+      "component": "alpha_classifier",
+      "failure_count": 45,
+      "timeout": 43,
+      "other": "1 PROVIDER_ERROR, 1 INVALID_JSON",
+      "retried": true,
+      "recovered": "mostly -- 9 claims final match_status=unavailable"
+    },
+    {
+      "ticker": "MSFT",
+      "component": "evidence_stance_classifier",
+      "failure_count": 58,
+      "timeout": 58,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic_fallback used where exhausted"
+    },
+    {
+      "ticker": "MSFT",
+      "component": "structure_extractor",
+      "failure_count": 7,
+      "timeout": 0,
+      "validation_failed": 7,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic extraction path unaffected"
+    },
+    {
+      "ticker": "SNDK",
+      "component": "claim_batch_enrichment",
+      "failure_count": 16,
+      "timeout": 14,
+      "validation_failed": 2,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly"
+    },
+    {
+      "ticker": "SNDK",
+      "component": "alpha_classifier",
+      "failure_count": 52,
+      "timeout": 52,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly -- 15 claims final match_status=unavailable (highest of all six)"
+    },
+    {
+      "ticker": "SNDK",
+      "component": "evidence_stance_classifier",
+      "failure_count": 76,
+      "timeout": 76,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic_fallback used where exhausted"
+    },
+    {
+      "ticker": "SNDK",
+      "component": "structure_extractor",
+      "failure_count": 0,
+      "timeout": 0,
+      "other": 0,
+      "retried": "n/a",
+      "recovered": "n/a -- no failures logged for this stage in this run"
+    },
+    {
+      "ticker": "TSM",
+      "component": "claim_batch_enrichment",
+      "failure_count": 14,
+      "timeout": 13,
+      "validation_failed": 1,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly"
+    },
+    {
+      "ticker": "TSM",
+      "component": "alpha_classifier",
+      "failure_count": 47,
+      "timeout": 44,
+      "validation_failed": 1,
+      "other": "2 TRANSPORT_ERROR",
+      "retried": true,
+      "recovered": "mostly -- 9 claims final match_status=unavailable, 3 of which had a STRONG deterministic candidate (highest of all six)"
+    },
+    {
+      "ticker": "TSM",
+      "component": "evidence_stance_classifier",
+      "failure_count": 61,
+      "timeout": 61,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic_fallback used where exhausted"
+    },
+    {
+      "ticker": "TSM",
+      "component": "structure_extractor",
+      "failure_count": 6,
+      "timeout": 0,
+      "validation_failed": 6,
+      "other": 0,
+      "retried": true,
+      "recovered": "deterministic extraction path unaffected"
+    },
+    {
+      "ticker": "AMD",
+      "component": "claim_batch_enrichment",
+      "failure_count": 16,
+      "timeout": 14,
+      "validation_failed": 2,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly"
+    },
+    {
+      "ticker": "AMD",
+      "component": "alpha_classifier",
+      "failure_count": 23,
+      "timeout": 23,
+      "other": 0,
+      "retried": true,
+      "recovered": "mostly -- 4 claims final match_status=unavailable"
+    },
+    {
+      "ticker": "AMD",
+      "component": "evidence_stance_classifier",
+      "failure_count": 66,
+      "timeout": 9,
+      "other": "57 TRANSPORT_ERROR (distinct profile from other 5 tickers, which are timeout-dominated)",
+      "retried": true,
+      "recovered": "deterministic_fallback used where exhausted"
+    },
+    {
+      "ticker": "AMD",
+      "component": "structure_extractor",
+      "failure_count": 10,
+      "timeout": 0,
+      "other": "10 TRANSPORT_ERROR",
+      "retried": true,
+      "recovered": "deterministic extraction path unaffected"
+    }
+  ],
+  "provider_failure_totals_by_ticker_raw_log_lines": {
+    "NVDA": 113,
+    "QQQ": 83,
+    "MSFT": 126,
+    "SNDK": 144,
+    "TSM": 128,
+    "AMD": 115
+  },
+  "note_on_raw_vs_final_counts": "Raw log-line counts include EVERY retry attempt of the same underlying batch (attempt=1,2,3...); a batch that failed on attempt 1 and succeeded on attempt 2 still produces one raw failure log line despite the task ultimately succeeding. The DEFINITIVE, final-outcome measure is each claim's own persisted match_status/stance_method field in alpha_matches.json, computed separately below.",
+  "alpha_classifier_special_focus": {
+    "methodology": "alpha_classifier_calls_expected is not independently reconstructable from persisted artifacts (no per-claim call-attempt ledger beyond the aggregate error log and the final match_status field) -- reported as UNKNOWN. alpha_classifier_failures/successes are instead measured via the DEFINITIVE ground truth: each claim's final match_status field in alpha_matches.json (match_status='unavailable' = failure surviving all retries; match_status in {'matched','no_match','ambiguous'} = success, regardless of how many retries were needed).",
+    "per_ticker": [
+      {
+        "ticker": "NVDA",
+        "alpha_classifier_calls_expected": "UNKNOWN (see methodology)",
+        "total_claims": 733,
+        "final_unavailable_orphans": 5,
+        "failure_rate_percent": 0.68,
+        "raw_timeout_log_lines": 31,
+        "strong_deterministic_orphaned": 0
+      },
+      {
+        "ticker": "QQQ",
+        "alpha_classifier_calls_expected": "UNKNOWN",
+        "total_claims": 647,
+        "final_unavailable_orphans": 5,
+        "failure_rate_percent": 0.77,
+        "raw_timeout_log_lines": 17,
+        "strong_deterministic_orphaned": 2
+      },
+      {
+        "ticker": "MSFT",
+        "alpha_classifier_calls_expected": "UNKNOWN",
+        "total_claims": 750,
+        "final_unavailable_orphans": 9,
+        "failure_rate_percent": 1.2,
+        "raw_timeout_log_lines": 43,
+        "strong_deterministic_orphaned": 1
+      },
+      {
+        "ticker": "SNDK",
+        "alpha_classifier_calls_expected": "UNKNOWN",
+        "total_claims": 918,
+        "final_unavailable_orphans": 15,
+        "failure_rate_percent": 1.63,
+        "raw_timeout_log_lines": 52,
+        "strong_deterministic_orphaned": 1
+      },
+      {
+        "ticker": "TSM",
+        "alpha_classifier_calls_expected": "UNKNOWN",
+        "total_claims": 766,
+        "final_unavailable_orphans": 9,
+        "failure_rate_percent": 1.17,
+        "raw_timeout_log_lines": 44,
+        "strong_deterministic_orphaned": 3
+      },
+      {
+        "ticker": "AMD",
+        "alpha_classifier_calls_expected": "UNKNOWN",
+        "total_claims": 787,
+        "final_unavailable_orphans": 4,
+        "failure_rate_percent": 0.51,
+        "raw_timeout_log_lines": 23,
+        "strong_deterministic_orphaned": 1
+      }
+    ],
+    "totals": {
+      "final_unavailable_orphans_all_six": 47,
+      "strong_deterministic_orphaned_all_six": 8
+    },
+    "tsm_47_verification": "CONFIRMED. Directly re-counted from outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95/error_logs/week2_llm_errors.jsonl: exactly 47 entries with task='alpha_classifier' (44 WEEK2_LLM_TIMEOUT, 1 WEEK2_LLM_VALIDATION_FAILED, 2 WEEK2_LLM_TRANSPORT_ERROR). This is the RAW retry-attempt count, distinct from TSM's 9 FINAL per-claim orphans (match_status='unavailable') -- both numbers are independently verified and internally consistent (many raw attempt-1 failures were successfully recovered by a later retry attempt)."
+  },
+  "claim_level_failure_lineage_strong_deterministic_orphans": [
+    {
+      "ticker": "QQQ",
+      "claim_id": "news_agent:news_report:claim:10",
+      "source_agent": "news_agent (Primary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "The macro backdrop for QQQ over the past week has been defined by a hawkish repricing of Fed policy expectations...",
+      "deterministic_candidate_state": "deterministic_top_alpha=A601, score=0.3923, eligible=True, relation=activation",
+      "provider_result": "unavailable (provider_timeout)",
+      "fallback_result": "matched_alpha=None",
+      "matched_alpha_after_failure": null,
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A601"
+      ],
+      "gold_relevance": "A601 is ALREADY a QQQ Gold HIT via other evidence -- NO Gold-miss consequence"
+    },
+    {
+      "ticker": "QQQ",
+      "claim_id": "aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:56",
+      "source_agent": "aggressive_risk_analyst (Secondary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "We are holding because the structural bull case\u2014AI CapEx, semiconductor cycle, low recession risk\u2014is intact.",
+      "deterministic_candidate_state": "deterministic_top_alpha=A501, score=0.8438, eligible=True, relation=risk_relief",
+      "provider_result": "unavailable (provider_timeout)",
+      "matched_alpha_after_failure": null,
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A501 (not a Gold-tracked Alpha for QQQ)"
+      ],
+      "gold_relevance": "NONE -- A501 is outside the Gold benchmark's 6-ticker expected-Alpha sets"
+    },
+    {
+      "ticker": "MSFT",
+      "claim_id": "bear_researcher:investment_debate_state.bear_history:claim:67",
+      "source_agent": "bear_researcher (Secondary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "He calls the AI CapEx a 'price of admission' but also claims it's driving 'Inference Demand' and 'Revenue Growth.' If the capex is already driving revenue, why is free cash flow declining?",
+      "deterministic_candidate_state": "deterministic_top_alpha=A301, score=0.6896, eligible=True, relation=conditional",
+      "provider_result": "unavailable (provider_timeout)",
+      "matched_alpha_after_failure": null,
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A301 (already a MSFT Gold HIT)",
+        "A102 (mentioned in text but not the deterministic top pick; this is a rhetorical rebuttal clause, already accounted for in the prior MSFT A102 evidence-starvation trace as a non-material bear-rebuttal quote)"
+      ],
+      "gold_relevance": "NONE -- A301 already hit; A102 relevance is speculative and secondary/rhetorical, not a new independent fact"
+    },
+    {
+      "ticker": "SNDK",
+      "claim_id": "news_agent:news_report:claim:40",
+      "source_agent": "news_agent (Primary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "Prediction markets show Anthropic (86%) is favored to have the best AI model at end-September, with OpenAI at 13%...",
+      "deterministic_candidate_state": "deterministic_top_alpha=A201, score=0.42, eligible=True, relation=activation",
+      "provider_result": "unavailable (provider_timeout)",
+      "matched_alpha_after_failure": null,
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A201"
+      ],
+      "gold_relevance": "A201 is ALREADY a SNDK Gold HIT (dominant) -- NO Gold-miss consequence"
+    },
+    {
+      "ticker": "TSM",
+      "claim_id": "sentiment_agent:sentiment_report:claim:70",
+      "source_agent": "sentiment_agent (Primary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "The news flow is strongly constructive with institutional validation, retail sentiment on StockTwits is clearly bullish (88/12 among labeled messages)...",
+      "deterministic_candidate_state": "deterministic_top_alpha=A601, score=0.5846, eligible=True, relation=activation",
+      "provider_result": "unavailable (provider_timeout)",
+      "matched_alpha_after_failure": null,
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A601"
+      ],
+      "gold_relevance": "A601 is ALREADY a TSM Gold HIT -- NO Gold-miss consequence"
+    },
+    {
+      "ticker": "TSM",
+      "claim_id": "fundamental_agent:fundamentals_report:claim:37",
+      "source_agent": "fundamental_agent (Primary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "Year: 2021; Revenue (TWD M): 2,263,891; Net Income (TWD M): 992,923; Diluted EPS: 196.00; YoY Revenue Growth: \u2014",
+      "deterministic_candidate_state": "deterministic_top_alpha=A301, score=0.7596, eligible=True, relation=activation",
+      "provider_result": "unavailable (provider_timeout)",
+      "matched_alpha_after_failure": null,
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A301 (a Gold MISS)"
+      ],
+      "gold_relevance": "SECOND confirmed A301-relevant orphan for TSM -- a generic historical financial-statement data row, lower narrative value than claim:42 but still a real, deterministically-eligible A301 candidate"
+    },
+    {
+      "ticker": "TSM",
+      "claim_id": "fundamental_agent:fundamentals_report:claim:42",
+      "source_agent": "fundamental_agent (Primary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "Insight: After a modest downcycle in 2023, TSM has delivered two consecutive years of >30% revenue growth (2024 and 2025), driven by the AI infrastructure buildout.",
+      "deterministic_candidate_state": "deterministic_top_alpha=A301, score=0.7596, eligible=True, relation=activation, matched_keywords=['revenue','revenue growth']",
+      "provider_result": "unavailable (provider_timeout)",
+      "matched_alpha_after_failure": null,
+      "structure_consequence": "the ai_infrastructure->tsm_revenue_growth edge carries alpha_ids=[] (untagged) as a direct consequence",
+      "activation_consequence": "local_structure_support stays at 0.0 for A301",
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A301 (a Gold MISS)"
+      ],
+      "gold_relevance": "The PRIMARY, previously-identified TSM A301 case (see v0_1_3_qqq_sndk_clean_gold_recovery_audit.md's Discrepancy A) -- reconfirmed here with full lineage."
+    },
+    {
+      "ticker": "AMD",
+      "claim_id": "bear_researcher:investment_debate_state.bear_history:claim:31",
+      "source_agent": "bear_researcher (Secondary)",
+      "task": "alpha_classifier",
+      "input_text_excerpt": "SpaceX committed to building 'exclusively on Nvidia.' Nvidia's CFO guided to 70% FY2028 revenue growth, far above the 44% consensus.",
+      "deterministic_candidate_state": "deterministic_top_alpha=A301, score=0.7596, eligible=True, relation=activation",
+      "provider_result": "unavailable (provider_timeout)",
+      "matched_alpha_after_failure": null,
+      "did_claim_become_orphaned": true,
+      "alphas_potentially_affected": [
+        "A301 (already an AMD Gold HIT)"
+      ],
+      "gold_relevance": "NONE -- A301 already hit via other evidence; this claim is also substantively about NVIDIA, not AMD, so it would likely have been correctly excluded downstream regardless (ticker-ownership question, not explored further since moot)"
+    }
+  ],
+  "traceability_note": "All 8 strong-deterministic-orphan cases have FULL claim-level traceability (deterministic candidate_scores + final match_status/fallback_reason are both directly persisted per-claim in alpha_matches.json). No TRACEABILITY_GAP for this specific population. Traceability for the remaining 39 (of 47 total) 'weak or absent deterministic candidate' orphans, and for the 371 raw evidence_stance_classifier / 34 structure_extractor failures, is coarser: individual claim-level attribution for THOSE stages beyond the already-inspected examples was not exhaustively re-traced claim-by-claim for this task (would require re-deriving from stance_method/stance_fallback_reason fields per claim, which IS possible in principle but was not exhaustively enumerated here given the demonstrated near-zero Gold-relevant yield from the much smaller, fully-traced alpha_classifier population).",
+  "failure_impact_classification": {
+    "alpha_classifier_47_final_orphans": "F3 ALPHA_MAPPING_ATTRITION (primary) for all 47. Of these, exactly 1 case (TSM claim:42, secondarily also claim:37) escalates to F7 ACTIVATION_ATTRITION because it demonstrably affects a specific Alpha's (A301) local_structure_support component and, by extension, its activation score. The other 46 have F3 impact with NO further Gold-relevant consequence (matched Alphas already hit, non-Gold Alphas, or Secondary/rhetorical content).",
+    "evidence_stance_classifier_371_raw_failures": "F0 NO_SEMANTIC_IMPACT for the DESIGNED fallback PATH (stance_method='deterministic_fallback' is a real, existing, non-silent baseline classifier, not a drop) -- but F8 TRACEABILITY_UNKNOWN for whether the deterministic fallback's OUTPUT is stance-equivalent to what the LLM would have produced in every individual case (not exhaustively re-verified here).",
+    "structure_extractor_34_raw_failures": "F0 NO_SEMANTIC_IMPACT for the overall structure-extraction CAPABILITY (the deterministic _extract_edges()/relation_grammar.py path always runs regardless, per the module's own documented design) with F5 STRUCTURE_ATTRITION scoped narrowly to the LLM-sourced canonical-relation edge subset specifically, which is not separately quantifiable from these artifacts alone.",
+    "claim_batch_enrichment_88_raw_failures": "F1 PRESENTATION_ONLY / F0 -- affects claim-quality/enrichment metadata, not matched_alpha/candidate_scores/B1/structure directly; not semantic-critical in the sense this audit prioritizes."
+  },
+  "tsm_a301_case_study": {
+    "claim_id": "fundamental_agent:fundamentals_report:claim:42",
+    "claim_text": "Insight: After a modest downcycle in 2023, TSM has delivered two consecutive years of >30% revenue growth (2024 and 2025), driven by the AI infrastructure buildout.",
+    "source": "fundamental_agent",
+    "role": "PRIMARY_RESEARCH",
+    "ticker_specific": true,
+    "deterministic_candidate_scores": {
+      "A301": {
+        "score": 0.7596,
+        "eligible": true,
+        "relation": "activation",
+        "matched_keywords": [
+          "revenue",
+          "revenue growth"
+        ]
+      },
+      "A103": {
+        "eligible": false
+      },
+      "A101": {
+        "score": 0.3423,
+        "eligible": false
+      }
+    },
+    "deterministic_eligible_alphas": [
+      "A301"
+    ],
+    "provider_task": "alpha_classifier (Alpha Mapper Pure-LLM Semantic Authority)",
+    "provider_failure": "WEEK2_LLM_TIMEOUT (exhausted retries)",
+    "exact_error": "match_status='unavailable', alpha_match_fallback_reason='provider_timeout'",
+    "fallback_behavior": "matched_alpha=None -- per documented, intentional design, the deterministic top pick is NEVER substituted for a genuine LLM decision on timeout",
+    "matched_alpha_after_failure": null,
+    "structure_consequence": "the ai_infrastructure->tsm_revenue_growth graph edge carries alpha_ids=[] (untagged for A301)",
+    "activation_consequence": "A301's local_structure_support component remains 0.0 (raw), contributing 0.0 at weight 0.20",
+    "would_claim_42_likely_have_contributed_to_a301_if_alpha_classifier_had_succeeded": "Using ONLY deterministic evidence: the claim is ticker-specific, Primary-sourced, and the deterministic layer scored it a clean, singularly-eligible A301 match (no other Alpha's deterministic candidate was eligible) -- there is no deterministic ambiguity or competing candidate. This is the strongest possible circumstantial case for a LIKELY (not certain) A301 outcome had the LLM call succeeded, but the actual LLM decision remains PROVIDER_OUTPUT_UNKNOWN -- it is not invented here.",
+    "classification": "PROVIDER_FAILURE_CAUSAL",
+    "classification_reasoning": "The claim's ONLY blocker to committing an Alpha at all was the provider timeout -- no other qualification stage (ticker-specificity, Primary/Secondary role, dedupe) ever had a chance to run or reject it, because matched_alpha was never set. This is causal to the ABSENCE of an Alpha commitment specifically; it is NOT proof that A301 was the Provider's would-be answer (that remains PROVIDER_OUTPUT_UNKNOWN), but it IS proof that the current TSM A301 miss is causally entangled with this specific provider failure, not with any downstream algorithmic defect."
+  },
+  "six_run_gold_miss_crosscheck": [
+    {
+      "ticker": "NVDA",
+      "alpha": "A102",
+      "gold_validity_class": "STRONG_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "R1 RESEARCH_COVERAGE_GAP (research never surfaced bullish inference narrative)",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO",
+      "affected_claim_count": 0,
+      "could_failure_explain_miss": "NO",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE"
+    },
+    {
+      "ticker": "NVDA",
+      "alpha": "A201",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "R3 Alpha mapping / design gap",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO (not among the 8 strong-orphan cases; not separately re-traced beyond that population)",
+      "affected_claim_count": "UNKNOWN (not exhaustively re-traced)",
+      "could_failure_explain_miss": "POSSIBLE but not evidenced",
+      "classification": "MISS_PROVIDER_TRACEABILITY_UNKNOWN"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha": "A101",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "R1 RESEARCH_COVERAGE_GAP",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO (the 2 QQQ strong-orphans map to A601/A501, not A101)",
+      "affected_claim_count": 0,
+      "could_failure_explain_miss": "NO",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha": "A201",
+      "gold_validity_class": "REVIEW_CANDIDATE",
+      "current_level": "candidate",
+      "prior_root_cause": "Gold-review only, not a system-fix target",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NOT EVALUATED (excluded target per prior audits)",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE (not pursued, Gold-review status independent of this question)"
+    },
+    {
+      "ticker": "QQQ",
+      "alpha": "A301",
+      "gold_validity_class": "REVIEW_CANDIDATE",
+      "current_level": "candidate",
+      "prior_root_cause": "Gold-review only",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NOT EVALUATED",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE (not pursued)"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha": "A102",
+      "gold_validity_class": "STRONG_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "F. legitimately absent second fact",
+      "semantic_critical_provider_failures_touching_relevant_claims": "YES -- 1 tangential orphan (bear_researcher:claim:67) but it is Secondary/rhetorical, not a genuine independent A102 fact even if surfaced",
+      "affected_claim_count": 1,
+      "could_failure_explain_miss": "NO -- the orphan's deterministic top pick was A301 (already hit), not A102; no plausible A102 consequence",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE"
+    },
+    {
+      "ticker": "MSFT",
+      "alpha": "A304",
+      "gold_validity_class": "SUPPORTED_GOLD or structure-track (see phase2)",
+      "current_level": "candidate",
+      "prior_root_cause": "extraction blind spot -- missing 2nd factor, DESIGN_NOT_READY",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO (claim:82 itself has no recorded provider failure -- match_status='matched' cleanly)",
+      "affected_claim_count": 0,
+      "could_failure_explain_miss": "NO",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha": "A103",
+      "gold_validity_class": "STRONG_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "R13 EXPECTED_CONSERVATIVE_BEHAVIOR (no legitimate omission)",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO (the 1 SNDK strong-orphan maps to A201, already hit, not A103)",
+      "affected_claim_count": 0,
+      "could_failure_explain_miss": "NO",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE"
+    },
+    {
+      "ticker": "SNDK",
+      "alpha": "A301",
+      "gold_validity_class": "STRONG_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "R13 EXPECTED_CONSERVATIVE_BEHAVIOR (conflicting edge correctly excluded)",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO",
+      "affected_claim_count": 0,
+      "could_failure_explain_miss": "NO",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE"
+    },
+    {
+      "ticker": "TSM",
+      "alpha": "A301",
+      "gold_validity_class": "structure-track (high recoverability originally claimed)",
+      "current_level": "candidate",
+      "prior_root_cause": "OLD: S6 locality/role-qualification starvation. NEW: provider-timeout artifact.",
+      "semantic_critical_provider_failures_touching_relevant_claims": "YES",
+      "affected_claim_count": 2,
+      "failure_component": "alpha_classifier",
+      "could_failure_explain_miss": "YES, plausibly causal for the STRONGER of the two candidate paths",
+      "classification": "MISS_PROVIDER_FAILURE_CONFIRMED"
+    },
+    {
+      "ticker": "AMD",
+      "alpha": "A102",
+      "gold_validity_class": "STRONG_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "R1 RESEARCH_COVERAGE_GAP + semantic predicate-vocabulary gap",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO (the 1 AMD strong-orphan maps to A301, already hit, and is substantively about NVIDIA not AMD)",
+      "affected_claim_count": 0,
+      "could_failure_explain_miss": "NO",
+      "classification": "MISS_UNAFFECTED_BY_PROVIDER_FAILURE"
+    },
+    {
+      "ticker": "AMD",
+      "alpha": "A201",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "current_level": "candidate",
+      "prior_root_cause": "R3 Alpha mapping / cross-company mapping error (P0-adjacent)",
+      "semantic_critical_provider_failures_touching_relevant_claims": "NO (not among the 8 strong-orphan cases)",
+      "affected_claim_count": "UNKNOWN (not exhaustively re-traced)",
+      "classification": "MISS_PROVIDER_TRACEABILITY_UNKNOWN"
+    }
+  ],
+  "note_on_crosscheck_completeness": "This crosscheck exhaustively covers the 8 highest-value 'strong deterministic candidate orphaned' cases (the population capable of a confirmed or likely Gold-miss consequence) plus the previously-established root causes for all priority clean-Gold targets. Two misses (NVDA A201, AMD A201) are marked MISS_PROVIDER_TRACEABILITY_UNKNOWN because they were not exhaustively re-traced claim-by-claim against the full evidence_stance_classifier/structure_extractor failure populations in this task -- their prior root-cause diagnoses (Alpha-mapping/design gaps, established in earlier audits) are not contradicted by any evidence found here, but a full re-trace was out of this task's bounded scope given the near-zero yield demonstrated by the much smaller, fully-traced alpha_classifier population.",
+  "priority_clean_gold_miss_crosscheck": {
+    "NVDA_A102": "NO",
+    "MSFT_A102": "NO",
+    "AMD_A102": "NO",
+    "TSM_A301": "YES",
+    "MSFT_A304": "NO",
+    "QQQ_A101": "NO",
+    "SNDK_A103": "NO",
+    "SNDK_A301": "NO",
+    "note": "Only TSM A301 shows material Provider-failure contribution. All 7 other priority targets' prior diagnoses are RECONFIRMED, not contradicted, by this Provider-failure investigation."
+  },
+  "revisit_prior_root_cause_audits": {
+    "evidence_starvation_audit": "UNCHANGED -- NVDA A102, MSFT A102, AMD A102 diagnoses (research-coverage gaps) are not confounded by Provider failure; the one tangential MSFT orphan (bear_researcher:claim:67) does not change the finding.",
+    "structure_starvation_audit": "PARTIALLY_REVISED for TSM A301 specifically (see Discrepancy A, already reconciled in the QQQ/SNDK audit and reconfirmed here with full claim-level lineage and error-log corroboration). All other structure-starvation findings (QQQ A301 review-status, SNDK A103/A301 EXPECTED_CONSERVATIVE) UNCHANGED.",
+    "phase2_audit": "UNCHANGED -- the Phase-2 conclusions (0 implementable targets, 74.127% theoretical ceiling) already correctly incorporated the TSM A301 provider-timeout finding; no further revision needed.",
+    "qqq_sndk_audit": "UNCHANGED -- already correctly diagnosed and reconciled TSM A301's provider-timeout root cause; this task independently re-verified and corroborated it with additional error-log evidence (the 47-failure count, timestamps, and the newly-found second orphan claim:37).",
+    "tsm_a301_explicit_reconciliation": "CONFIRMED: OLD_DIAGNOSIS_PARTIAL_DOWNSTREAM_SYMPTOM classification (from the QQQ/SNDK audit) stands, now with full independent corroboration: 47 raw alpha_classifier retry-log failures (44 timeout, 1 validation, 2 transport), 9 final per-claim orphans, of which 3 had strong deterministic candidates (2 for A301: claim:37 and claim:42), spanning a 142-minute window of persistent Week2 Gateway instability."
+  },
+  "failure_cluster_analysis": {
+    "by_ticker": "All six runs show substantial failure counts (83-144 raw log lines); SNDK highest (144), QQQ lowest (83). No ticker is failure-free.",
+    "by_task": "evidence_stance_classifier consistently has the most raw failures (50-76 per run) across all six tickers -- the single most failure-prone stage by volume, though its designed deterministic-fallback path limits semantic impact per the classification above. alpha_classifier is second-most (17-52).",
+    "by_timestamp_burst": "Failures span each run's ENTIRE processing window (56-142 minutes), not a single tight burst -- a persistent, run-long elevated error rate rather than one localized outage spike.",
+    "by_date": "NVDA/QQQ/MSFT/SNDK were all processed on 2026-09-04 (same session/day); TSM/AMD on 2026-09-06 (2 days later, following the documented infrastructure restart from earlier in this session's history). No causal claim is made connecting the date split to the failure rate -- reported as a factual timing observation only, per the instruction not to speculate without logs.",
+    "by_error_type_and_model": "5 of 6 tickers (NVDA/QQQ/MSFT/SNDK/TSM) are TIMEOUT-dominated. AMD is a distinct outlier: 57 of 66 evidence_stance_classifier failures and all 10 structure_extractor failures are WEEK2_LLM_TRANSPORT_ERROR, not timeout -- a different underlying failure mode for that specific run. All runs use the same configured model (deepseek-v4-flash per metadata.json), so the AMD divergence is a run/session-level anomaly, not a model-identity difference.",
+    "no_speculation_beyond_logs": "This section reports only what timestamps/task/error_code fields directly show; no root infrastructure cause (rate limiting, concurrency, prompt size, etc.) is asserted, since none of that telemetry exists in the persisted logs."
+  },
+  "timeout_vs_semantic_failure_separation": {
+    "A_provider_execution_failure_request_never_returned_usable_output": "The dominant category across all six runs -- WEEK2_LLM_TIMEOUT (588 of 709 raw entries, 82.9%) and WEEK2_LLM_TRANSPORT_ERROR (69 entries, 9.7%) both fall here.",
+    "B_model_semantic_disagreement_provider_returned_output_but_classification_wrong": "NOT observable from these logs -- a successful-but-wrong LLM classification produces NO error-log entry at all (it's a normal, logged-as-successful call). This category is fundamentally invisible to error-log-based auditing and is a separate, much harder problem (addressed by the Gold Validity Audit's external-fact comparison, not by this task).",
+    "C_parser_schema_failure_provider_returned_something_but_pipeline_rejected_it": "WEEK2_LLM_VALIDATION_FAILED (26 entries) and WEEK2_LLM_INVALID_JSON (1 entry, MSFT) -- 27 entries, 3.8%.",
+    "D_retry_fallback_failure_first_call_failed_and_recovery_path_also_failed": "The 47 final per-claim 'unavailable' orphans across all six runs represent this category specifically -- these are cases where EVERY retry attempt failed, exhausting the fallback path entirely.",
+    "explicit_confirmation": "No semantic misclassification (category B) is anywhere labeled a timeout in this analysis -- all timeout attributions above are drawn directly from the persisted error_code/match_status/alpha_match_fallback_reason fields, never inferred from score patterns."
+  },
+  "fallback_audit": {
+    "claim_batch_enrichment": "Deterministic extraction continues without LLM enrichment; not a semantic drop for matched_alpha/B1/structure.",
+    "alpha_classifier": "match_status='unavailable', matched_alpha=None -- fully recorded, traceable per-claim. NOT a silent drop at the CLAIM level, but there is NO aggregate/run-level surfacing of 'N claims lost to provider failure' anywhere in run_audit.json/summary.json -- this is the identified QA blind spot (see Section 16 below).",
+    "evidence_stance_classifier": "stance_method='deterministic_fallback' -- a real, designed, existing deterministic baseline stance classifier is used, not a silent drop.",
+    "structure_extractor": "The deterministic factor-pair/relation-grammar path (_extract_edges) always runs regardless of LLM outcome -- LLM-sourced canonical-relation edges are an ADDITIVE layer, not a replacement, so failure here reduces potential edge recall but never silently deletes existing deterministic edges.",
+    "silent_semantic_attrition_exists": "NO at the per-claim level (every failure is explicitly recorded with a reason code) -- but YES at the AGGREGATE/RUN level (no run-level metric, flag, or QA gate currently surfaces 'this run experienced substantial semantic-critical Provider failure' anywhere a benchmark evaluator would see it)."
+  },
+  "failure_visibility_audit": {
+    "per_run": [
+      {
+        "ticker": "NVDA",
+        "run_completed": true,
+        "artifact_complete": true,
+        "raw_provider_failures": 113,
+        "semantic_critical_failures_raw": 99
+      },
+      {
+        "ticker": "QQQ",
+        "run_completed": true,
+        "artifact_complete": true,
+        "raw_provider_failures": 83,
+        "semantic_critical_failures_raw": 71
+      },
+      {
+        "ticker": "MSFT",
+        "run_completed": true,
+        "artifact_complete": true,
+        "raw_provider_failures": 126,
+        "semantic_critical_failures_raw": 110
+      },
+      {
+        "ticker": "SNDK",
+        "run_completed": true,
+        "artifact_complete": true,
+        "raw_provider_failures": 144,
+        "semantic_critical_failures_raw": 128
+      },
+      {
+        "ticker": "TSM",
+        "run_completed": true,
+        "artifact_complete": true,
+        "raw_provider_failures": 128,
+        "semantic_critical_failures_raw": 114
+      },
+      {
+        "ticker": "AMD",
+        "run_completed": true,
+        "artifact_complete": true,
+        "raw_provider_failures": 115,
+        "semantic_critical_failures_raw": 99
+      }
+    ],
+    "can_a_run_be_marked_pass_despite_material_provider_degradation": "YES",
+    "evidence": "None of run_audit.json/summary.json/metadata.json for any of the six runs contains any Provider-failure-rate, LLM-error-count, or Provider-health field. 'data_sanity_status' exists but covers only numeric/price-range data sanity, not LLM/Provider execution health. All six runs were, and remain, marked artifact-complete (9/9 required artifacts) and used for official Gold benchmark evaluation with zero visibility into their 83-144 raw Provider failures each.",
+    "qa_blind_spot_identified": "There is currently NO run-level or aggregate metric anywhere in the persisted artifact schema that would alert a benchmark evaluator that a 'complete' run experienced substantial semantic-critical Provider failure. This is a genuine, confirmed gap in the current QA/acceptance pipeline."
+  },
+  "proposed_run_quality_metrics_design_only": {
+    "metrics": [
+      {
+        "name": "provider_call_failure_rate",
+        "definition": "raw error-log entries / (raw error-log entries + estimated successful calls, if reconstructable) -- else report raw failure count only, since expected-call denominators are UNKNOWN from persisted artifacts today."
+      },
+      {
+        "name": "alpha_classifier_failure_rate",
+        "definition": "final per-claim match_status='unavailable' count / total claims with any candidate_scores entry (the definitive, already-reconstructable measure used throughout this audit)."
+      },
+      {
+        "name": "semantic_critical_failure_count",
+        "definition": "sum of raw error-log entries for task in {alpha_classifier, evidence_stance_classifier, structure_extractor} (excludes claim_batch_enrichment, classified F1/non-semantic-critical)."
+      },
+      {
+        "name": "semantic_critical_failure_rate",
+        "definition": "semantic_critical_failure_count / total claims in the run."
+      },
+      {
+        "name": "claims_orphaned_by_provider_failure",
+        "definition": "count of claims with match_status='unavailable' AND alpha_match_fallback_reason set to a provider-failure code (already computed per-ticker above: 5,5,9,15,9,4)."
+      },
+      {
+        "name": "alphas_impacted_by_provider_failure",
+        "definition": "count of distinct Alpha IDs for which at least one orphaned claim's deterministic_top_alpha was that Alpha AND that Alpha is currently a Gold miss (the highest-value, most actionable metric -- computed here as 1 across all six runs: TSM A301)."
+      }
+    ],
+    "proposed_run_flags": {
+      "PROVIDER_HEALTHY": "no defensible threshold exists yet from only 6 data points -- NOT proposed with a specific cutoff",
+      "PROVIDER_DEGRADED": "same -- NOT proposed with a specific cutoff",
+      "SEMANTIC_VALIDITY_AT_RISK": "same -- NOT proposed with a specific cutoff",
+      "RUN_NOT_BENCHMARK_ELIGIBLE": "same -- NOT proposed with a specific cutoff"
+    },
+    "threshold_derivation_attempt": "All six runs in this benchmark show broadly similar raw failure-rate profiles (0.51%-1.63% final alpha_classifier orphan rate; 83-144 raw log lines) EXCEPT for the single, clearly-identified TSM A301 Gold-relevant consequence. Six data points is too small a sample to derive a statistically defensible threshold (e.g. a percentile cutoff), and no pre-existing Provider-health convention/test in this codebase defines one (only the byte-hash SHA guards and the Provider-call-count assertions used throughout this session's tasks exist as precedent, neither of which defines a failure-RATE threshold).",
+    "recommendation": "Report these metrics per run WITHOUT gating on any threshold yet. Use `alphas_impacted_by_provider_failure` (the highest-value, most actionable metric) as a manual-review trigger: any run where this count is >=1 warrants the kind of claim-level deterministic-candidate trace performed in this audit before treating that specific Alpha's miss as a confirmed algorithmic defect."
+  },
+  "benchmark_eligibility_question": {
+    "should_a_run_with_significant_semantic_critical_provider_failures_be_used_for_alpha_hit_benchmark_acceptance": "DEPENDS_ON_IMPACT",
+    "reasoning": "This audit found that raw Provider failure VOLUME (83-144 per run, all six runs) does NOT by itself predict Gold-relevant impact -- five of six runs show ZERO confirmed Gold-miss consequence despite comparable or higher raw failure counts than TSM. The one run (TSM) that DOES show a confirmed consequence is not distinguishable from the others by raw volume alone (128 raw failures, squarely mid-pack) -- it is distinguishable only by the SPECIFIC claim-level deterministic-candidate trace performed here. This argues against a blanket volume-based exclusion rule and toward the claims_orphaned_by_provider_failure + alphas_impacted_by_provider_failure metrics proposed above as the actual decision-relevant signal.",
+    "gold_benchmark_validity_not_invalidated": "This question concerns RUN quality, not Gold validity -- the frozen Gold Validity Audit's classifications are untouched and unaffected by this finding."
+  },
+  "fresh_run_priority": {
+    "ranking": [
+      {
+        "rank": 1,
+        "ticker": "TSM",
+        "reasoning": "Only ticker with a CONFIRMED Gold-miss consequence (A301, PROVIDER_FAILURE_CAUSAL classification); otherwise healthy run (artifact-complete, no other diagnosed defect for A301); highest semantic-critical raw failure count among timeout-dominated runs (114) plus the highest strong-deterministic-orphan count (3)."
+      },
+      {
+        "rank": 2,
+        "ticker": "SNDK",
+        "reasoning": "Highest final alpha_classifier orphan count (15) and highest raw semantic-critical failure count (128) of all six -- but ZERO confirmed Gold-relevant consequence found among its orphans (the 1 strong-deterministic orphan maps to an already-hit Alpha, A201). Lower priority than TSM despite higher raw volume, precisely because this audit's own methodology (claim-level trace, not raw volume) found no actionable consequence yet -- worth a lower-priority confirmatory check only."
+      },
+      {
+        "rank": 3,
+        "ticker": "MSFT",
+        "reasoning": "Second-highest alpha_classifier raw failures (45) and moderate final orphan count (9), with one orphan tangentially touching the A102 topic (though Secondary/rhetorical, not independently material) -- low but nonzero incremental value to re-verify given MSFT A102's own already-thin evidence base."
+      },
+      {
+        "rank": 4,
+        "ticker": "AMD",
+        "reasoning": "Distinct TRANSPORT_ERROR-dominated failure profile (different underlying issue than the other five runs) with the lowest final alpha_classifier orphan count (4) -- lower priority, though the divergent failure mode itself is worth separate note."
+      },
+      {
+        "rank": 5,
+        "ticker": "NVDA",
+        "reasoning": "Lowest final alpha_classifier orphan rate (0.68%) and no confirmed or plausible Gold-relevant consequence found."
+      },
+      {
+        "rank": 6,
+        "ticker": "QQQ",
+        "reasoning": "Lowest raw failure volume of all six (83) and no confirmed or plausible Gold-relevant consequence found."
+      }
+    ],
+    "note": "TSM is confirmed, not merely assumed, as the top priority -- consistent with the task's stated expectation, but arrived at independently through the full claim-level trace, not by assumption."
+  },
+  "provider_reliability_recommendation": {
+    "chosen": "NEXT_PROVIDER_C",
+    "secondary": "Fresh rerun of TSM specifically (a narrow application of NEXT_PROVIDER_A, scoped to the one confirmed-affected ticker, not a blanket rerun-everything recommendation)",
+    "reasoning": "NEXT_PROVIDER_B (investigate retry/backoff/timeout implementation) is NOT strongly justified by the evidence: the existing retry mechanism appears reasonably effective (only 0.51%-1.63% of claims per run end up permanently orphaned despite 83-144 raw failures each -- most retries eventually succeed). NEXT_PROVIDER_D (ignore, proceed with MSFT A304) undersells a real, now-quantified, currently-invisible risk class this audit surfaced. NEXT_PROVIDER_C is chosen because this audit's own methodology (claim-level deterministic-candidate tracing) is exactly the kind of diagnostic capability that should be a standing, lightweight, always-on run-quality check rather than a one-off manual investigation -- and because it is the lowest-cost, purely-additive, no-Provider-calls-required next step (unlike a TSM rerun, which does require live Provider calls and separate authorization)."
+  },
+  "alpha_hit_interpretation": {
+    "current_official_percent": 61.0317,
+    "confidence_with_respect_to_provider_execution_quality": "MEDIUM",
+    "is_61_0317_a_clean_estimate_of_algorithmic_recall": "PARTIALLY",
+    "quantitative_explanation": "36 of the 37 Gold expectations (97.3%) show NO evidence of Provider-failure contamination in this audit's claim-level trace -- for those, 61.0317% (more precisely, their contribution to it) IS a clean algorithmic-recall estimate. Exactly 1 of 37 (TSM A301, 2.7%) is confirmed PROVIDER_FAILURE_CAUSAL for its absence of an Alpha commitment on at least one strong deterministic candidate claim. This one contaminated case is enough to measurably shift the metric: excluding it from evaluability (treating TSM's denominator as 5 instead of 6) raises the macro-average to 63.8095% -- a 2.7781 percentage-point difference. This is a real, quantified, but SMALL and BOUNDED contamination -- not large enough to explain any meaningful fraction of the 61.0317%-vs-75% gap (13.9683pp), but real enough that 61.0317% should not be treated as a perfectly clean measurement of algorithmic-only recall."
+  },
+  "provider_clean_gold_diagnostic": {
+    "methodology": "Exclude TSM A301 (the one confirmed PROVIDER_FAILURE_CAUSAL Gold expectation) from evaluability, recomputing TSM's own per-ticker rate over its remaining 5 evaluable expectations, then recomputing the macro-average over all six tickers unchanged otherwise.",
+    "provider_clean_gold_expected_count": 36,
+    "provider_clean_gold_hit_count": 23,
+    "provider_clean_hit_rate_percent": 63.8095,
+    "label": "DIAGNOSTIC_ONLY -- does NOT replace the official v1 Gold metric (61.0317%, all 37 expectations, TSM A301 counted as a miss exactly as computed)."
+  },
+  "final_validation": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "no_gold_v2": true,
+    "production_files_changed": 0,
+    "test_files_changed": 0,
+    "p0_p1_untouched": true,
+    "sha_guards_untouched": true,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

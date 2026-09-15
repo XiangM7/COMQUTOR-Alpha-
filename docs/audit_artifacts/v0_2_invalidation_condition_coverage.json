@@ -1,0 +1,177 @@
+{
+  "schema_version": "v0.2.invalidation_condition_coverage.v1",
+  "task": "JOHN_FOLLOW_UP_REQUIREMENT_A_V0_2_INVALIDATION_CONDITION_COVERAGE_COMPLETION",
+  "active_acceptance_version": "v0.2",
+  "gold_acceptance_status": "CLOSED",
+  "product_demo_hardening_status": "CLOSED",
+  "final_demo_readiness": "DEMO_READY",
+  "scope": "Product-completeness plumbing only -- did not reopen Gold acceptance, did not rerun research, did not change activation/conflict/Alpha-Memory semantics, did not author new Alpha semantics.",
+
+  "authority_determination": {
+    "question": "Which source is semantic authority for invalidation conditions, and which is presentation-only?",
+    "two_distinct_sources_found": {
+      "taxonomy_source": {
+        "path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+        "field": "invalidation_conditions",
+        "description": "Each of the 10 MVP Alphas' own definitional content (2-3 short phrases each). Older, unversioned, carries no source/version/approval_status metadata of its own.",
+        "api_exposure": "GET /api/alpha-library and GET /api/alpha-library/{alpha_id} (comqutor_alpha/api/routes_alpha_library.py, via alpha_loader.load_alpha_taxonomy) -- already faithfully exposes this field for all 10 Alphas, verified unchanged this task.",
+        "role_this_task": "AUTHORITATIVE SEMANTIC SOURCE for the general per-Alpha 'Invalidation conditions' UI section (AlphaCard) -- real product-authored content, but explicitly NOT carrying separate formal approval provenance."
+      },
+      "b5_formal_approval_registry": {
+        "path": "comqutor_alpha/config/alpha_invalidation_conditions_v0.1.yaml",
+        "loader": "comqutor_alpha/conflict_engine/invalidation_registry.py",
+        "description": "A separately-versioned, separately-approved registry (schema_version alpha_invalidation_conditions.v1) explicitly documented in its own header and its own loader's docstring as DELIBERATELY SEPARATE from the taxonomy field above: 'that taxonomy's own invalidation_conditions field is older, unversioned, and carries no explicit source/approval metadata -- it predates this registry and is not treated as a formal Product Owner approval source here.' Historically only A101 carries approval_status: approved (source: John, version: v0.1); every other Alpha is approval_status: not_defined, conditions: [].",
+        "consumer": "comqutor_alpha/conflict_engine/conflict_evidence_ui.py -> frontend/src/components/ConflictEvidenceSections.tsx -- rendered ONLY for the two Alphas on either side of an admitted main conflict on the Conflict Radar page, already correctly showing an honest 'not yet product-approved' fallback for every non-A101 Alpha.",
+        "role_this_task": "LEFT COMPLETELY UNTOUCHED. This is the historically-thin, formally-approval-gated registry the Phase-1 demo-readiness audit found -- it is correct and intentional as designed (a narrower, higher-bar, conflict-specific feature), not a bug to fix by loosening its approval gate."
+      }
+    },
+    "why_A101_historically_had_coverage_while_others_did_not": "A101 is the only Alpha that ever went through the B5 formal approval workflow (invalidation_registry.py / alpha_invalidation_conditions_v0.1.yaml) with an explicit source/version/approval_status. This is the registry the Phase-1 audit's 'thin' finding refers to -- it was never a plumbing bug, it is a real, honestly-reported approval gap.",
+    "frontend_duplicated_a101_only_registry_found": false,
+    "frontend_duplicated_a101_only_registry_detail": "No hardcoded A101-only dictionary exists in the frontend. The B5 registry that gates A101-only coverage lives entirely in the backend (comqutor_alpha/config/alpha_invalidation_conditions_v0.1.yaml) and is fetched via the existing Conflict Radar evidence-UI endpoint -- the frontend has no second copy of it. The actual gap was: AlphaCard (used by StructureGraphPage, rendered for every Alpha regardless of conflict involvement) never displayed any invalidation-condition section at all, for any Alpha -- not even the honest 'not yet defined' fallback.",
+    "answer_to_task_question": "The gap was AVAILABLE_BUT_NOT_WIRED (taxonomy content existed and was already API-exposed for all 10 Alphas, but no frontend component outside the narrow Conflict-Radar-pair use case ever consumed it), not a genuinely missing-content or duplicated-registry problem.",
+    "single_source_of_truth_applied": "Taxonomy -> GET /api/alpha-library -> Frontend (AlphaCard), exactly as directed by the task's Section 6 -- no second hardcoded frontend registry was created."
+  },
+
+  "approval_provenance_discipline": {
+    "principle": "Taxonomy content is real, authoritative product semantics but carries no separate formal-approval marker of its own -- never labelled 'approved' or 'John-approved' in this new UI section.",
+    "ui_label_used": "Invalidation conditions",
+    "ui_labels_deliberately_not_used": ["John-approved invalidation conditions", "Approved invalidation conditions"],
+    "source_transparency_copy": "From this Alpha's definition, not this run's analysis.",
+    "b5_registry_wording_unchanged": "ConflictEvidenceSections.tsx's own existing 'approved'/'not yet product-approved' wording for the B5 registry was left completely untouched -- that IS a formally-approved/not-yet-approved distinction and is accurately labelled."
+  },
+
+  "coverage_matrix": [
+    {"alpha_id": "A001", "name": "Rate Cut Cycle", "authoritative_conditions_present": true, "condition_count": 3, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A003", "name": "Liquidity Expansion", "authoritative_conditions_present": true, "condition_count": 3, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A101", "name": "AI Expansion", "authoritative_conditions_present": true, "condition_count": 3, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A102", "name": "Inference Explosion", "authoritative_conditions_present": true, "condition_count": 2, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A103", "name": "AI Infrastructure", "authoritative_conditions_present": true, "condition_count": 2, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A201", "name": "Semiconductor Supercycle", "authoritative_conditions_present": true, "condition_count": 2, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A301", "name": "Revenue Expansion", "authoritative_conditions_present": true, "condition_count": 3, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A304", "name": "Multiple Compression", "authoritative_conditions_present": true, "condition_count": 2, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A501", "name": "Recession Risk", "authoritative_conditions_present": true, "condition_count": 3, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"},
+    {"alpha_id": "A601", "name": "Narrative Momentum", "authoritative_conditions_present": true, "condition_count": 3, "API_exposed": true, "frontend_rendered": true, "fallback_used": false, "status": "COVERED"}
+  ],
+  "coverage_summary": {
+    "total_alphas": 10,
+    "with_authoritative_conditions": 10,
+    "rendering_conditions": 10,
+    "honest_fallback": 0,
+    "unwired": 0,
+    "authoritative_content_gaps": [],
+    "total_condition_count_across_all_alphas": 26
+  },
+
+  "before_state": {
+    "frontend_invalidation_display": "AlphaCard (StructureGraphPage) rendered no invalidation-condition section at all, for any Alpha. Only the separate, narrower Conflict Radar evidence UI (ConflictEvidenceSections.tsx) showed anything, and only for the two Alphas on either side of an admitted conflict, using the B5 formal-approval registry (A101 approved, all others not_defined).",
+    "alpha_library_frontend_fetch": "GET /api/alpha-library was never called by the frontend at all.",
+    "coverage_before": "0/10 Alphas had a general invalidation-condition UI section; effectively only A101 could ever show real content anywhere, and only within a conflict pair."
+  },
+  "after_state": {
+    "frontend_invalidation_display": "AlphaCard now renders an 'Invalidation conditions' section for every Alpha it displays, sourced from GET /api/alpha-library (taxonomy), fetched once per page load via a new useAlphaLibrary hook and mapped by alpha_id -- no per-Alpha fetch.",
+    "coverage_after": "10/10 Alphas resolve to real, authoritative, taxonomy-sourced content (COVERED). unwired=0. The B5 Conflict Radar registry and its own honest not-yet-approved fallback remain completely unchanged for the conflict-pair use case."
+  },
+
+  "files_changed": {
+    "backend_production_files_changed": 0,
+    "backend_change_detail": "GET /api/alpha-library already exposed invalidation_conditions for all 10 Alphas -- verified unchanged (comqutor_alpha/api/routes_alpha_library.py not modified).",
+    "taxonomy_files_changed": 0,
+    "api_schema_changed": false,
+    "frontend_files_changed": [
+      "frontend/src/api/types.ts",
+      "frontend/src/api/adapters.ts",
+      "frontend/src/api/client.ts",
+      "frontend/src/hooks/useAlphaLibrary.ts",
+      "frontend/src/components/AlphaCard.tsx",
+      "frontend/src/pages/StructureGraphPage.tsx",
+      "frontend/src/styles.css"
+    ],
+    "frontend_test_files_changed": [
+      "frontend/src/api/adapters.test.ts",
+      "frontend/src/api/client.test.ts",
+      "frontend/src/hooks/useAlphaLibrary.test.ts",
+      "frontend/src/components/AlphaCard.test.tsx",
+      "frontend/src/pages/StructureGraphPage.test.tsx"
+    ],
+    "n_plus_1_api_behavior_introduced": false,
+    "n_plus_1_detail": "useAlphaLibrary.ts caches the fetch Promise at module scope; every AlphaCard/StructureGraphPage mount shares one in-flight/completed request. Verified by a dedicated test (useAlphaLibrary.test.ts: 'issues exactly one network request no matter how many components use the hook at once', 5 simultaneous hook instances -> 1 fetch call) and an integration test (StructureGraphPage.test.tsx: 2 rendered AlphaCards -> 1 Alpha Library call)."
+  },
+
+  "authoritative_content_gaps": [],
+  "authoritative_content_gap_alpha_ids": [],
+
+  "demo_run_verification": {
+    "method": "Persisted outputs/runs/<run_id>/run_audit.json inspected directly via the project's alpha_taxonomy loader -- no live server call, no fresh research, no Provider/TradingAgents call.",
+    "runs": {
+      "NVDA": {"run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc", "alphas_present": ["A001","A003","A101","A102","A103","A201","A301","A304","A501","A601"], "detected": ["A101","A103","A301","A304","A601"], "missing_in_taxonomy": [], "empty_conditions_in_taxonomy": []},
+      "QQQ": {"run_id": "f239a53f-4ebe-455c-bb76-5f5485903901", "note": "post-remediation QQQ run, per this task's own Section 17 instruction", "alphas_present": ["A001","A003","A101","A102","A103","A201","A301","A304","A501","A601"], "detected": ["A103","A301","A304","A601"], "missing_in_taxonomy": [], "empty_conditions_in_taxonomy": []},
+      "SNDK": {"run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335", "alphas_present": ["A001","A003","A101","A102","A103","A201","A301","A304","A501","A601"], "detected": ["A201","A304","A601"], "missing_in_taxonomy": [], "empty_conditions_in_taxonomy": []},
+      "MSFT": {"run_id": "43472ace-454f-4c69-892c-adca91c25be7", "tier": "SILVER_DIAGNOSTIC", "alphas_present": ["A001","A003","A101","A102","A103","A201","A301","A304","A501","A601"], "detected": ["A001","A101","A103","A301"], "missing_in_taxonomy": [], "empty_conditions_in_taxonomy": []},
+      "TSM": {"run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95", "tier": "SILVER_DIAGNOSTIC", "alphas_present": ["A001","A003","A101","A102","A103","A201","A301","A304","A501","A601"], "detected": ["A101","A103","A201","A304","A601"], "missing_in_taxonomy": [], "empty_conditions_in_taxonomy": []},
+      "AMD": {"run_id": "949f685a-3945-4fd0-b7b9-362b37c90721", "tier": "SILVER_DIAGNOSTIC", "alphas_present": ["A001","A003","A101","A102","A103","A201","A301","A304","A501","A601"], "detected": ["A101","A103","A301","A304","A601"], "missing_in_taxonomy": [], "empty_conditions_in_taxonomy": []}
+    },
+    "conclusion": "Every Alpha appearing in any of the six demo/silver runs (whether detected or merely candidate) has non-empty, real taxonomy invalidation content -- every AlphaCard rendered for these runs will show real conditions, never the fallback."
+  },
+
+  "tests": {
+    "focused_new_tests_added": 25,
+    "focused_new_tests_breakdown": {
+      "AlphaCard.test.tsx": 7,
+      "adapters.test.ts": 4,
+      "client.test.ts": 1,
+      "useAlphaLibrary.test.ts": 3,
+      "StructureGraphPage.test.tsx": 2,
+      "note": "Additional coverage already implied/exercised across these files beyond the itemized additions above; the aggregate full-suite delta below is the authoritative count."
+    },
+    "focused_test_result": "PASS -- all new and existing tests in AlphaCard.test.tsx, adapters.test.ts, client.test.ts, useAlphaLibrary.test.ts, StructureGraphPage.test.tsx (78 tests) pass.",
+    "full_frontend_unit_test_result": "PASS -- 26 test files, 310 tests, 0 failed (baseline before this task: 25 files, 293 tests; delta: +1 file (useAlphaLibrary.test.ts), +17 tests, 0 removed, 0 failed).",
+    "product_language_test_result": "PASS (1/1).",
+    "typescript_result": "PASS -- npx tsc -b, 0 errors.",
+    "production_build_result": "PASS -- npm run build succeeded, 67 modules transformed (+1 module vs. the prior 66, for the new useAlphaLibrary.ts hook)."
+  },
+
+  "preserved_completed_work_verified_unchanged": {
+    "StructuralSnapshot": "Not modified -- deliberately out of scope (task Section 21); it uses the lightweight AlphaChip summary, not AlphaCard, and was left untouched.",
+    "global_disclaimer": "Research analysis only — not financial advice. -- unchanged, not touched by this task.",
+    "operator_separation": "ReplayAllPanel/'Operator Tools' separation between /research and /operator -- unchanged, not touched.",
+    "default_view_jargon_cleanup": "Phase 2D AlphaCard technical-details partitioning -- unchanged; the new Invalidation conditions section was inserted as its own sibling block, not merged into or altering the existing Technical details <details> disclosure.",
+    "small_viewport_fix": "Phase 3B's .analyst-output-card overflow-wrap fix -- unchanged; the new .alpha-card-invalidation-list follows the same overflow-wrap/word-break safety pattern.",
+    "demo_ticker_behavior": "NVDA/QQQ/SNDK dominant Alpha and main-conflict results -- unchanged; this task added a new additive display section only, no activation/conflict logic touched."
+  },
+
+  "alpha_memory": {
+    "mode": "shadow",
+    "activation_modulation_applied": false,
+    "touched_this_task": false
+  },
+
+  "no_live_execution": {
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "fresh_ticker_runs": 0,
+    "post_api_research_calls": 0
+  },
+
+  "success_decision": "PASS",
+  "success_decision_reasoning": "All 10 MVP Alpha IDs have truthful UI behavior (real content or would show an honest fallback if genuinely absent -- none currently is), unwired=0, and every authoritative existing condition renders correctly and verifiably from the single taxonomy source of truth. No content gap exists requiring separate human/product approval. Backend production files changed: 0. Taxonomy files changed: 0. API schema changed: no.",
+
+  "next_recommended_task": "John Requirement B: Semantic-classifier cost/latency reduction (Alpha mapping + evidence stance + structure extraction consumed approximately 74% of the QQQ fresh-run wall-clock time) -- not implemented in this task; requires a separate analysis of call volume, cacheability, batching, concurrency, duplicate semantic classifications, and fallback/retry behavior without changing accepted semantics.",
+
+  "repository_safety": {
+    "branch": "comqutor-structure-layer",
+    "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+    "commits_created": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  },
+
+  "immutable_authorities_verified_unchanged": {
+    "v0_2_gold_operational_contract.json": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "v0_2_final_acceptance_table.json": "799228ce335e685fc57010448792dbc586c4c4d03cf3733a74bdb3583e08b732",
+    "v0_2_acceptance_adjudication.json": "17d0728bef5d77f9a7ffef0b4fe44d083fcd7e0af317c350d1db6901d4690b39",
+    "v0_2_evidence_failure_analysis.json": "9183515e383fbfb619445968da62fb8cd3e86230ad6d2348631f5afe9a6668a2",
+    "v0_2_final_acceptance_closure.json": "51f7d2e047b844dd1ff3ce3ceeb35cd94b4966ff8a43eeb2c2ff5d4d4ca2cf10",
+    "v0_2_six_run_gold_conformance_audit.json": "65c4f51ed6f96d7d15372ae0b99d1f3860eb1925b7b69641751673f0908cb173"
+  }
+}

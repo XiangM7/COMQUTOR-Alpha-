@@ -1,0 +1,507 @@
+{
+  "schema_version": "v0_1_3_qqq_sndk_clean_gold_recovery_audit.v1",
+  "gold_v1_sha256_before": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_v1_sha256_after": "99b1cd0247637054de360c3b5c0c00c7d8052152f3db1d29045eae1850bd8e9a",
+  "gold_validity_judgment_sha256_before": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "gold_validity_judgment_sha256_after": "3643ea45168c029d7c2a2ceb6d1d61cac3d5de80770d3dccb1f57d005c0c1cdf",
+  "head_before": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "head_after": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "ticker_runs_executed": 0,
+  "production_code_files_changed": [],
+  "test_files_changed": [],
+  "commit": false,
+  "push": false,
+  "destructive_git_operations": 0,
+  "executive_summary": {
+    "qqq_clean_gold_misses": 1,
+    "qqq_clean_misses_list": [
+      "A101"
+    ],
+    "sndk_clean_gold_misses": 2,
+    "sndk_clean_misses_list": [
+      "A103",
+      "A301"
+    ],
+    "clean_misses_high_recoverability": 0,
+    "clean_misses_medium_recoverability": 0,
+    "clean_misses_low_recoverability": 1,
+    "clean_misses_expected_conservative": 2,
+    "clean_misses_product_model_gap": 0,
+    "tsm_a301_reconciled_root_cause": "LLM provider-timeout data artifact (WEEK2_LLM_TIMEOUT, task=alpha_classifier) orphaned a deterministically-strong, ticker-specific, Primary A301 claim (claim:42, deterministic_top_alpha=A301, score=0.7596) -- NOT the S6 locality/role-qualification issue the prior Structure Starvation audit assumed for its 'high-confidence' rating. The prior diagnosis correctly described a REAL but secondary symptom (a different, genuinely non-ticker-specific edge) while missing the deeper, decisive blocker.",
+    "msft_a304_reconciled_root_cause": "Confirmed extraction blind spot (structure_extractor.py requires >=2 factors per claim; claim:82 has only 1). The pattern recurs verbatim across NVDA/TSM(x2)/AMD, so a real fix must be generalizable, not a phrase alias -- and generalizing safely requires regex-capable, negation-aware matching that does not exist today. A bare-word alias was empirically shown to misfire on MSFT's own 'not a slowdown scenario' claim. Old recommendation (recognize causal-language patterns) was directionally correct on causal-verb detection (already sufficient) but incomplete on the harder problem: the missing SECOND factor cannot be found by any current phrase-alias mechanism.",
+    "current_official_alpha_hit_percent": 61.0317,
+    "prior_phase2_projected_max_percent": 74.127,
+    "extended_projected_max_percent": 78.8492,
+    "note_on_extended_projection": "This 78.8492% figure is the STRONG+SUPPORTED-only DIAGNOSTIC metric with all 3 clean QQQ/SNDK recoveries applied (66.35% -> 78.8492%), NOT the official v1 macro-average. The official-metric extended projection (adding QQQ A101 + SNDK A103 + SNDK A301 to the CURRENT official baseline, Phase-2 targets NOT included) is 70.4762% -- see Section 23/33 for full breakdown.",
+    "credible_path_to_75_percent": "NO_CREDIBLE_PATH_TO_75_YET",
+    "recommended_next_engineering_direction": "NEXT_D -- MSFT negation-aware structure extraction design (the only track with a demonstrated, offline-replayable, code-side correctness gap; generalizes across 4 tickers; does not depend on Provider re-research or a non-deterministic retry)",
+    "gold_unchanged": true,
+    "code_changes": 0,
+    "provider_calls": 0,
+    "ticker_runs": 0
+  },
+  "qqq_gold_alpha_table": [
+    {
+      "alpha_id": "A101",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "detected_status": "candidate",
+      "level": "candidate",
+      "hit_miss": "MISS",
+      "system_fix_eligible": true
+    },
+    {
+      "alpha_id": "A103",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "detected_status": "active",
+      "level": "active",
+      "hit_miss": "HIT",
+      "system_fix_eligible": "N/A (already hit)"
+    },
+    {
+      "alpha_id": "A201",
+      "gold_validity_class": "REVIEW_CANDIDATE",
+      "detected_status": "candidate",
+      "level": "candidate",
+      "hit_miss": "MISS",
+      "system_fix_eligible": false
+    },
+    {
+      "alpha_id": "A301",
+      "gold_validity_class": "REVIEW_CANDIDATE",
+      "detected_status": "candidate",
+      "level": "candidate",
+      "hit_miss": "MISS",
+      "system_fix_eligible": false
+    },
+    {
+      "alpha_id": "A304",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "detected_status": "active",
+      "level": "active",
+      "hit_miss": "HIT",
+      "system_fix_eligible": "N/A (already hit)"
+    },
+    {
+      "alpha_id": "A601",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "detected_status": "active",
+      "level": "active",
+      "hit_miss": "HIT",
+      "system_fix_eligible": "N/A (already hit)"
+    }
+  ],
+  "sndk_gold_alpha_table": [
+    {
+      "alpha_id": "A102",
+      "gold_validity_class": "REVIEW_CANDIDATE",
+      "detected_status": "candidate",
+      "level": "candidate",
+      "hit_miss": "MISS",
+      "system_fix_eligible": false
+    },
+    {
+      "alpha_id": "A103",
+      "gold_validity_class": "STRONG_GOLD",
+      "detected_status": "watch",
+      "level": "candidate",
+      "hit_miss": "MISS",
+      "system_fix_eligible": true
+    },
+    {
+      "alpha_id": "A201",
+      "gold_validity_class": "SUPPORTED_GOLD",
+      "detected_status": "dominant",
+      "level": "dominant",
+      "hit_miss": "HIT",
+      "system_fix_eligible": "N/A (already hit)"
+    },
+    {
+      "alpha_id": "A301",
+      "gold_validity_class": "STRONG_GOLD",
+      "detected_status": "watch",
+      "level": "candidate",
+      "hit_miss": "MISS",
+      "system_fix_eligible": true
+    },
+    {
+      "alpha_id": "A601",
+      "gold_validity_class": "STRONG_GOLD",
+      "detected_status": "active",
+      "level": "active",
+      "hit_miss": "HIT",
+      "system_fix_eligible": "N/A (already hit)"
+    }
+  ],
+  "verified_clean_target_set": {
+    "QQQ_CLEAN_MISSES": [
+      "A101"
+    ],
+    "SNDK_CLEAN_MISSES": [
+      "A103",
+      "A301"
+    ],
+    "matches_prior_audit_expectation": true,
+    "note": "The prior audits' implied clean target set (QQQ A101, SNDK A103, SNDK A301) is confirmed exactly correct against the frozen Gold Validity Audit's detailed_alpha_judgments and the current final-run hit/miss table. No discrepancy found in target-set membership itself (unlike TSM A301/MSFT A304's root-cause discrepancies)."
+  },
+  "qqq_a101": {
+    "gold_validity_class": "SUPPORTED_GOLD",
+    "confidence": "MEDIUM",
+    "thematic_association_risk": true,
+    "current_state": {
+      "score": 32.2068,
+      "level": "candidate",
+      "evidence_count": 1,
+      "unique_evidence_count": 1,
+      "distinct_supporting_agents": 1,
+      "ticker_specific_evidence_count": 1,
+      "local_structure_support_raw": 0.0
+    },
+    "full_evidence_funnel": {
+      "external_gold_rationale": "Mag7 ~50% of QQQ's weight; QQQ 'unusually sensitive to the AI capex cycle' per Gold Validity Audit (itself flagged thematic-association-risk, since QQQ has no first-party AI operations).",
+      "raw_research_corpus": "4 raw claims discuss AI-capex/constituent-level demand for QQQ (bull_researcher x2, conservative_risk_analyst, portfolio_manager) -- ZERO from any PRIMARY_RESEARCH agent (fundamental_agent/market_agent/sentiment_agent/news_agent).",
+      "extracted_claims": "All 4 correctly extracted.",
+      "alpha_mapper": "All 4 matched_alpha=A101.",
+      "b1_stance": "All 4 supports_alpha / activation relation.",
+      "ticker_entity_ownership": "Only 1 of 4 is ticker-specific -- the one claim that literally says 'QQQ's core holdings' (an aggregate-index-level framing). The other 3 name individual constituents (Intel, AMD, Marvell) without naming QQQ itself -- correctly non-ticker-specific under the current, unmodified, P0/P1-unchanged ETF-neutral contract.",
+      "primary_secondary": "All 4 claims are SECONDARY_DECISION_OR_DEBATE (bull_researcher x2, conservative_risk_analyst, portfolio_manager) -- zero Primary Research claims exist for QQQ A101 at all.",
+      "source_role_qualification": "1 of 4 qualifies as SECONDARY_QUALIFIED_CAUSAL_EVIDENCE (ticker-specific + activation + asserted); 3 of 4 excluded as SECONDARY_NOT_TICKER_SPECIFIC.",
+      "fact_group_dedupe": "No collapse issue -- 4 distinct singleton groups, correctly not deduped against each other (genuinely different claims).",
+      "unique_evidence_agent_independence": "unique_evidence_count=1, distinct_agents=1 (bull_researcher only) -- thin by construction, since only 1 of 4 candidate facts survives qualification.",
+      "structure_extraction": "Not separately traced -- local_structure_support is already 0 with 0 incident edges tagged A101 for QQQ in this run.",
+      "activation_score": 32.2068,
+      "final_level": "candidate"
+    },
+    "first_broken_stage": "Primary/Secondary role qualification (Section 8's Primary Research relevant claims = 0) -- but the true ROOT cause is upstream: research/query coverage never produced any PRIMARY-sourced, QQQ-aggregate-level AI-exposure content; only Secondary debate participants touched the topic, mostly via individual constituents.",
+    "primary_root_cause_class": "R1 RESEARCH_COVERAGE_GAP",
+    "secondary_class": "R6 SOURCE_ROLE_QUALIFICATION_GAP (downstream consequence, not itself a defect)",
+    "special_audit_answer": {
+      "question": "A. no Primary research about QQQ-level AI exposure / B. ETF constituent facts cannot legally become QQQ direct evidence / C. ticker specificity / D. source-role qualification / E. agent independence / F. Gold expectation too broad / G. combination",
+      "answer": "G. combination, dominated by A. Zero Primary-sourced QQQ-aggregate-level AI-exposure claims exist (A, the dominant driver). B is confirmed CORRECT, INTENDED, unmodified behavior, not a gap -- individual constituent mentions correctly do not become direct QQQ evidence, and this is not something P0/P1 was meant to or should change. C, D, E are downstream consequences of A, not independent defects: the ONE claim that IS ticker-specific correctly qualifies via the EXISTING, unmodified ticker-specificity mechanism (literal 'QQQ' mention) -- proving the mechanism itself is not broken. F is not evaluated here (Gold validity is frozen and independently judged; SUPPORTED_GOLD with MEDIUM confidence and a noted thematic-association-risk already captures the benchmark-quality caveat)."
+    },
+    "etf_ownership_boundary": {
+      "DIRECT_ETF_EVIDENCE": "A claim naming 'QQQ' (or a legitimate index alias) directly -- e.g. the one qualifying claim ('QQQ's core holdings').",
+      "AGGREGATE_INDEX_EVIDENCE": "A claim describing the index's or its Mag7-weighted composition's aggregate exposure -- the CURRENTLY MISSING evidence type; none exists from a Primary source.",
+      "CONSTITUENT_RELATIONAL_EVIDENCE": "A claim naming one or more individual constituents (Intel/AMD/Marvell) without an aggregate-index framing -- present (3 of 4 claims) but correctly excluded as non-ticker-specific under current design.",
+      "SINGLE_CONSTITUENT_BACKGROUND": "A claim about ONE constituent with no index-level framing at all -- also present in the broader corpus, correctly non-ticker-specific.",
+      "NON_ETF_SPECIFIC": "Generic macro/sector commentary with no company or index reference.",
+      "is_a101_recoverable_without_a_new_etf_entity_model": "YES for the evidence type that already qualifies (aggregate-index framing, handled correctly today by the existing, unmodified ticker-specificity check) -- recovering via MORE such Primary-sourced aggregate claims requires NO new ETF entity model. Recovering via CONSTITUENT aggregation (e.g. 'if 3+ named constituents co-occur, treat as index-level proxy evidence') WOULD require a new PRODUCT_MODEL_GAP-class ETF ownership model -- but this is a separate, not-yet-needed design question since the counterfactual below shows even the simpler, no-new-model path cannot reach 50 with a small number of new facts.",
+      "product_model_gap_classification": "NOT REQUIRED for the currently-identified evidence type; WOULD BE REQUIRED only if a constituent-aggregation recovery strategy were pursued instead (not recommended here)."
+    },
+    "counterfactual": {
+      "current": {
+        "score": 32.2068,
+        "qualifying_facts": 1,
+        "primary_independent_facts": 0,
+        "structure_support": 0.0
+      },
+      "plus_1_legitimate_qqq_level_primary_fact": {
+        "assumption": "new Primary fact, ticker-specific (aggregate-index framing), comparable quality to the existing fact (match_score contribution ~0.2903)",
+        "computation": "evidence_quality: unique_contribution_sum 0.2903->0.5806, raw 7.2575->14.515, contribution 2.54->5.08 (+2.54). agent_independence: distinct_agents 1->2, coverage 33.33->66.67, raw 23.33->46.67, contribution 4.6667->9.33 (+4.67). ticker_specificity stays 100/raw (contribution unchanged +0). local_structure/recency/direction unchanged.",
+        "new_score": 39.41,
+        "crosses_50": false
+      },
+      "plus_2_legitimate_independent_qqq_level_primary_facts": {
+        "computation": "evidence_quality: unique_contribution_sum 0.8709, raw 21.77, contribution 7.62 (+5.08). agent_independence: distinct_agents 3, coverage 100, raw 70, contribution 14.0 (+9.33). Others unchanged.",
+        "new_score": 46.62,
+        "crosses_50": false
+      },
+      "conclusion": "Even 2 new legitimate independent Primary facts do NOT cross 50 (46.62), given local_structure_support remains stuck at 0 (no QQQ A101-tagged edge exists at all). A 3rd fact or accompanying structure credit would likely be required. No weights invented -- all figures use the exact documented formula constants."
+    },
+    "recoverability": "LOW_CONFIDENCE_RECOVERABLE",
+    "credibility_of_conversion": "FRESH_RUN_DEPENDENT (requires new Primary-sourced research; Provider-facing, uncertain even with 2+ new facts per the counterfactual above)"
+  },
+  "sndk_a103": {
+    "gold_validity_class": "STRONG_GOLD",
+    "confidence": "HIGH",
+    "thematic_association_risk": false,
+    "reverification_against_p0_p1_baseline": {
+      "stale_persisted_score_pre_p0_p1": 39.0305,
+      "true_current_score_with_p0_p1_applied_offline_replay": 42.3638,
+      "note_on_old_49_03_figure": "The prior Structure Starvation audit's ~49.03 figure was ALWAYS a HYPOTHETICAL projection under a proposed, never-implemented 'Option B' structure-authority-unification design -- not an actual historical score, and not something P0/P1 (which never touched local_structure_support at all) was ever meant to deliver. There is no contradiction: P0/P1 legitimately raised the TRUE current score from 39.0305 to 42.3638 (ticker-specific evidence 1->3) via its own, separate, already-implemented mechanism; the unimplemented Option B hypothetical remains a distinct, separate, still-unbuilt design.",
+      "corrected_shortfall_from_50": 7.6362
+    },
+    "current_state": {
+      "score": 42.3638,
+      "level": "candidate",
+      "evidence_count": 6,
+      "unique_evidence_count": 6,
+      "distinct_supporting_agents": 2,
+      "ticker_specific_evidence_count": 3,
+      "local_structure_support_raw": 0.0
+    },
+    "structure_trace": {
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "exclusion_reason": "RELATION_OR_ASSERTION_NOT_QUALIFYING",
+      "edge_found": "ai_demand -> sndk_revenue_growth (causal, asserted, alpha_ids=['A103','A201'])",
+      "edge_underlying_claims_traced": [
+        {
+          "claim": "aggressive_risk_analyst:claim:11 -- 'The $95 billion AI-server backlog is not a hypothetical.'",
+          "matched_alpha": "A103",
+          "A103_candidate_relation": "mention",
+          "A103_candidate_eligible": false,
+          "finding": "relation='mention', NOT 'activation' -- fails the canonical eligibility gate (QUALIFYING_RELATIONS={activation,conditional,mixed}) regardless of matched_alpha. This is a brief affirming clause, not itself an activation-relation statement -- the real activation-relation content is in a DIFFERENT, already-counted claim from the same theme."
+        },
+        {
+          "claim": "neutral_risk_analyst:claim:55 -- 'The Aggressive Analyst is right about the fundamentals...'",
+          "matched_alpha": "A201",
+          "finding": "matched to A201, not A103 at all -- correctly irrelevant to A103's structure support."
+        }
+      ],
+      "conclusion": "Both underlying claims are correctly, legitimately excluded -- one for a genuine relation='mention' classification (not a bug), one for being matched to a different Alpha entirely. No real omitted qualifying fact/edge exists."
+    },
+    "first_broken_stage": "None -- no broken stage found. The structure-side gap is fully explained by correct, existing behavior.",
+    "primary_root_cause_class": "R13 EXPECTED_CONSERVATIVE_BEHAVIOR",
+    "near_threshold_tuning_check": {
+      "is_0_97_or_current_7_64_shortfall_evidence_of_a_bug": false,
+      "real_omitted_qualifying_fact_or_edge_exists": "NO",
+      "classification": "EXPECTED_CONSERVATIVE_BEHAVIOR",
+      "explicit_non_recommendations": [
+        "no threshold lowering",
+        "no rounding/epsilon",
+        "no arbitrary structure credit",
+        "no counting of capped state",
+        "no relaxation of evidence minimums"
+      ]
+    },
+    "evidence_side_counterfactual": {
+      "plus_1_new_independent_primary_fact_ticker_specific": {
+        "computation": "unique_semantic_groups 6->7, contribution_sum ~1.4892->1.737 (avg-quality assumption), evidence_quality raw 37.23->43.43, contribution 13.03->15.2 (+2.17). agent_independence distinct_agents 2->3, coverage 66.67->100, raw 46.67->70, contribution 9.33->14.0 (+4.67). ticker_specificity total_unique 6->7, ticker_specific 3->4, raw 50->57.14, contribution 5.0->5.71 (+0.71).",
+        "new_score_estimate": "approximately 49.9 (UNKNOWN precise -- depends heavily on the hypothetical new fact's exact match_score/quality, which is not invented here; this is close to but not confirmed to cross 50)",
+        "crosses_50": "UNCERTAIN -- very close under an average-quality assumption, not proven"
+      },
+      "caveat": "This remains a hypothetical requiring a new fact that does not currently exist in this run's corpus -- FRESH_RUN_DEPENDENT, not implementable now, and its closeness to 50 must NOT be used to justify any threshold or scoring adjustment."
+    },
+    "recoverability": "EXPECTED_CONSERVATIVE (structure side, no bug); overall LOW_CONFIDENCE_RECOVERABLE at best via a hypothetical, unconfirmed new evidence fact",
+    "credibility_of_conversion": "FRESH_RUN_DEPENDENT"
+  },
+  "sndk_a301": {
+    "gold_validity_class": "STRONG_GOLD",
+    "confidence": "HIGH",
+    "thematic_association_risk": false,
+    "current_state": {
+      "score": 36.9042,
+      "level": "candidate",
+      "evidence_count": 10,
+      "unique_evidence_count": 10,
+      "distinct_supporting_agents": 2,
+      "ticker_specific_evidence_count": 1,
+      "local_structure_support_raw": 0.0
+    },
+    "structure_trace": {
+      "incident_graph_edge_count": 1,
+      "qualifying_local_edge_count": 0,
+      "exclusion_reason": "RELATION_OR_ASSERTION_NOT_QUALIFYING",
+      "edge_found": "valuation_risk -> sndk_revenue_growth (edge_type='conflicting', asserted, alpha_ids=['A201','A301'])",
+      "critical_finding": "This is an OPPOSING/CONFLICTING-type edge (valuation risk contrasted against revenue growth), not a supportive or causal edge. EDGE_CONTRIBUTIONS has NO entry for edge_type='conflicting' at any assertion_status -- it contributes exactly 0.0 by design, and its 4 underlying claims (aggressive/conservative/neutral risk analysts + portfolio_manager, all discussing valuation stretch) are Secondary/valuation-risk-framed, not genuine A301 revenue-growth support.",
+      "conclusion": "Per Section 13's explicit instruction ('Do NOT count an opposing/conflicting edge as positive local support'), the existing code ALREADY correctly excludes this edge. There is no legitimate omitted structure edge -- doing anything else would be the exact prohibited misclassification (turning risk evidence into growth support)."
+    },
+    "first_broken_stage": "None -- no broken stage found; existing conflicting-edge exclusion behaves exactly as intended.",
+    "primary_root_cause_class": "R13 EXPECTED_CONSERVATIVE_BEHAVIOR",
+    "counterfactual": {
+      "current": {
+        "score": 36.9042
+      },
+      "plus_1_new_independent_primary_fact": {
+        "new_score_estimate": 43.59,
+        "crosses_50": false
+      },
+      "plus_2_new_independent_primary_facts": {
+        "new_score_estimate": 45.47,
+        "crosses_50": false
+      },
+      "conclusion": "No real omitted structure exists. Even 2 new hypothetical independent Primary facts do not cross 50 -- more would be needed, same FRESH_RUN_DEPENDENT category as QQQ A101."
+    },
+    "recoverability": "EXPECTED_CONSERVATIVE (structure side, no bug, correct conflicting-edge exclusion confirmed); overall LOW_CONFIDENCE_RECOVERABLE via hypothetical new evidence only",
+    "credibility_of_conversion": "FRESH_RUN_DEPENDENT"
+  },
+  "gold_validity_separation_statement": "Per Section 15, all classifications above use ONLY the frozen Gold Validity Audit's detailed_alpha_judgments -- no Gold-validity class was retroactively altered based on this task's system-miss findings, and no system hit/miss was used as evidence for or against benchmark quality.",
+  "discrepancy_a_tsm_a301": {
+    "old_diagnosis": "Structure/locality starvation (S6 Locality Qualification) -- edge correctly alpha-tagged but underlying claim independently fails Evidence-Source-Role qualification. Rated HIGH-confidence recovery candidate in the original Structure Starvation audit.",
+    "new_verified_diagnosis": {
+      "artifact_lineage_traced": "research (raw_agent_outputs.json) -> claim generation (structured records) -> Alpha Mapper output (alpha_matches.json) -> structure extraction (extracted_structures.json / structure_graph.json edges) -> Provider execution metadata (error_logs/week2_llm_errors.jsonl) -> persisted fallback behavior (match_status='unavailable') -> activation score.",
+      "was_there_actually_a_provider_timeout": "YES",
+      "exact_component": "Alpha Mapper's Pure-LLM Semantic Authority call ('alpha_classifier' task) within the Week2 LLM Gateway.",
+      "exact_error_status": "match_status='unavailable', alpha_match_fallback_reason='provider_timeout' for claim fundamental_agent:fundamentals_report:claim:42 ('TSM has delivered two consecutive years of >30% revenue growth... driven by the AI infrastructure buildout').",
+      "corroborating_run_evidence": "outputs/runs/dfc7ceb3-3584-4514-bd84-6c371aab3e95/error_logs/week2_llm_errors.jsonl contains 128 total LLM errors for this run, of which 47 are specifically 'alpha_classifier' task failures (mostly WEEK2_LLM_TIMEOUT), with real timestamps (e.g. 2026-09-06T20:08:07Z). This run experienced substantial Week2 LLM Gateway instability, fully consistent with claim:42 being one of many casualties.",
+      "what_output_was_missing": "The claim's final Alpha commitment (matched_alpha) -- despite the DETERMINISTIC layer independently, correctly scoring it a clean, eligible A301 match (deterministic_top_alpha='A301', deterministic_match_status='matched', score=0.7596, matched_keywords=['revenue','revenue growth']).",
+      "was_old_diagnosis_observing_a_downstream_symptom": "Partially. The OLD S6 diagnosis correctly and accurately describes a DIFFERENT, genuinely-existing edge (ai_demand->tsm_revenue_growth via neutral_risk_analyst:claim:28, which really is non-ticker-specific with no company name anywhere in its text) -- that edge's exclusion is legitimate and unrelated to any timeout. But the audit's overall 'high-confidence recovery candidate' RATING for TSM A301 was based on incomplete tracing that never surfaced claim:42's provider-timeout artifact -- the actual higher-value, more decisive blocker."
+    },
+    "discrepancy_classification": "OLD_DIAGNOSIS_PARTIAL_DOWNSTREAM_SYMPTOM",
+    "reasoning": "The old S6 finding is not wrong on its own terms (it correctly diagnosed a real, separate non-ticker-specific edge), but it was incomplete -- it missed the deeper, decisive blocker (a provider-timeout artifact on a DIFFERENT, stronger candidate edge) that this task's re-trace uncovered. 'High-confidence recovery candidate' was an overstatement given what is actually fixable through code alone."
+  },
+  "tsm_a301_future_validation_status": {
+    "provider_timeout_is_root_cause_for_the_stronger_candidate": true,
+    "classification": "FRESH_RUN_VALIDATION_REQUIRED",
+    "explanation": "A healthy future run (no LLM timeout on this specific claim) may naturally recover A301 without any code change at all -- the deterministic layer already correctly identifies this claim as a strong A301 match; only the original run's LLM infrastructure hiccup prevented it from being committed. This is fundamentally different from a code defect: no production change is proposed or warranted.",
+    "remaining_structural_gap_separate_from_timeout": "The OTHER edge (neutral_risk_analyst:claim:28) remains genuinely non-ticker-specific and would stay excluded even in a perfectly healthy rerun -- this is correct, existing behavior, not a gap.",
+    "offline_counterfactual_if_claim_42_had_committed": "local_structure_support raw would rise from 0.0 toward ~50.0 (causal/asserted EDGE_CONTRIBUTIONS=1.00, contribution +10.0 at weight 0.20), projecting an estimated new score of ~54.77 -- crossing 50. This remains a hypothetical contingent on a future successful LLM call, not something achievable via any code change today."
+  },
+  "discrepancy_b_msft_a304": {
+    "old_audit": "claim:82 ('Any slowdown in Azure growth could trigger multiple compression') is PRIMARY_QUALIFIED, eligible=True, factor_score=1.0, an explicit causal statement, absent from extracted_structures.json. Recommendation: recognize existing causal-language patterns (could trigger/may drive/can pressure/etc.) if they map into existing relation semantics safely.",
+    "new_phase2_finding_reconfirmed": "Safe fix requires regex-capable + negation-aware extraction; a bare-word 'slowdown' alias (the only literal-phrase option that catches the real recurring pattern) demonstrably misfires on MSFT's own separate claim: 'The macro picture is one of a resilient economy... not a slowdown scenario.'",
+    "extraction_language_audit": {
+      "could_trigger_may_trigger_can_trigger": "'trigger'/'triggers'/'triggering' ARE already recognized FORWARD_CAUSAL_VERBs in relation_grammar.py -- the causal-verb detection layer is NOT the gap.",
+      "could_cause_may_cause": "Not individually re-tested; 'cause' family verbs follow the same FORWARD_CAUSAL_VERB pattern-matching mechanism and are expected to behave analogously (not the source of the gap).",
+      "could_pressure": "Present in other corpus claims (e.g. TSM's 'would directly pressure the thesis') -- same causal-detection layer, not separately gapped.",
+      "slowdown": "NOT present as any FACTOR_ALIASES entry under any category -- this is the actual missing piece.",
+      "compression": "Present via 'multiple compression' under the Valuation Risk factor -- correctly recognized.",
+      "why_claim_82_was_missed": "structure_extractor.py::_extract_edges() requires len(factors) >= 2 to form ANY edge (a source and a target factor node are both required). claim:82 produces exactly ONE recognized factor (Valuation Risk). No FACTOR_ALIASES phrase matches 'slowdown in Azure growth' as a second, growth-adjacent factor.",
+      "classification": "CONCEPT_NORMALIZATION_GAP (the 'growth slowdown' concept has no canonical factor representation) COMPOUNDED BY TOKENIZATION_GAP (term_in_text is literal-adjacent-phrase-only; 'slowdown in Azure growth' has the two relevant words in NON-adjacent order, which no literal phrase alias can represent)."
+    },
+    "negation_aware_requirement": {
+      "positive_fixture": "'Any slowdown in Azure growth could trigger multiple compression.' -- should extract growth-slowdown --causal--> valuation-risk/compression.",
+      "negative_fixture": "'This is not a slowdown scenario.' -- should NOT tag any growth-slowdown factor, and must not produce any edge.",
+      "additional_corpus_patterns_to_handle": [
+        "no slowdown",
+        "not slowing",
+        "slowdown is unlikely",
+        "could avoid compression",
+        "no multiple compression",
+        "not expected to compress",
+        "risk of slowdown (descriptive, no target concept -- should NOT auto-edge)",
+        "slowdown could trigger compression (the clean positive case)"
+      ],
+      "minimum_safe_language_model_required": "A clause-scoped negation detector (does a negation marker -- not/no/unlikely/avoid -- appear between the sentence start/clause boundary and the growth-slowdown anchor, or between the anchor and the causal verb) COMBINED WITH a non-adjacent-phrase-aware source-concept matcher (regex or token-window search for 'slowdown' co-occurring with a growth/spending/capex noun within N tokens, not requiring exact adjacency) COMBINED WITH continued reliance on the EXISTING, already-sufficient causal-verb detector for the predicate. All three pieces are required together; any one alone is unsafe (verified: adjacency-only literal phrase misses the real examples; a bare keyword without negation-awareness misfires on the found negative example).",
+      "design_only_no_implementation": true
+    },
+    "fix_readiness_classification": "DESIGN_NOT_READY",
+    "reasoning": "A narrow deterministic grammar CANNOT yet reliably distinguish positive causal / negative causal / negated premise / negated consequence / risk-only-descriptive with the tools that exist today (literal-phrase FACTOR_ALIASES matching has no regex or negation capability at all). This is explicitly NOT a simple phrase alias -- Section 21's bar for READY_FOR_BOUNDED_IMPLEMENTATION is not met."
+  },
+  "clean_gold_recoverability_scale": {
+    "QQQ_A101": "LOW_CONFIDENCE_RECOVERABLE",
+    "SNDK_A103": "EXPECTED_CONSERVATIVE",
+    "SNDK_A301": "EXPECTED_CONSERVATIVE"
+  },
+  "mathematical_path_to_75": {
+    "current_official_macro_average_percent": 61.0317,
+    "denominators": {
+      "NVDA": 7,
+      "QQQ": 6,
+      "MSFT": 6,
+      "SNDK": 5,
+      "TSM": 6,
+      "AMD": 7
+    },
+    "current_hit_counts": {
+      "NVDA": 5,
+      "QQQ": 3,
+      "MSFT": 3,
+      "SNDK": 2,
+      "TSM": 5,
+      "AMD": 5
+    },
+    "prior_phase2_projection_verified": {
+      "assumptions": "NVDA 6/7 (+A102), QQQ unchanged 3/6, MSFT 5/6 (+A102,+A304), SNDK unchanged 2/5, TSM 6/6 (+A301), AMD 6/7 (+A102)",
+      "recomputed_value_percent": 74.127,
+      "matches_prior_report": true
+    },
+    "independent_effect_of_each_clean_recovery_on_CURRENT_baseline": {
+      "plus_QQQ_A101_only": {
+        "QQQ_new_rate": "4/6=66.6667%",
+        "new_macro_percent": 63.8095
+      },
+      "plus_SNDK_A103_only": {
+        "SNDK_new_rate": "3/5=60.0%",
+        "new_macro_percent": 64.3651
+      },
+      "plus_SNDK_A301_only": {
+        "SNDK_new_rate": "3/5=60.0%",
+        "new_macro_percent": 64.3651
+      },
+      "plus_SNDK_A103_and_A301_both": {
+        "SNDK_new_rate": "4/5=80.0%",
+        "new_macro_percent": 67.6984
+      },
+      "plus_ALL_THREE_QQQ_A101_SNDK_A103_SNDK_A301": {
+        "QQQ_new_rate": "4/6=66.6667%",
+        "SNDK_new_rate": "4/5=80.0%",
+        "new_macro_percent": 70.4762
+      }
+    },
+    "extended_projection_phase2_plus_all_three_clean": {
+      "assumptions": "NVDA 6/7 (+A102), QQQ 4/6 (+A101), MSFT 5/6 (+A102,+A304), SNDK 4/5 (+A103,+A301), TSM 6/6 (+A301), AMD 6/7 (+A102) -- 8 total conversions",
+      "value_percent": 83.5714,
+      "label": "PROJECTION_ONLY. NOT_ACCEPTANCE_RESULT. Combines every currently-identified candidate conversion across BOTH tasks; none are offline-proven."
+    }
+  },
+  "three_numbers_distinguished": {
+    "A_CURRENT_OFFICIAL": 61.0317,
+    "B_PRIOR_PHASE2_PROJECTION": 74.127,
+    "C_EXTENDED_PROJECTION_PHASE2_PLUS_CLEAN_QQQ_SNDK": 83.5714,
+    "disclaimer": "B and C are PROJECTIONS, not results. Only A is the official, currently-computed, Gold-evaluated retrospective metric."
+  },
+  "minimum_legitimate_path_to_75": {
+    "minimum_conversions_required": 5,
+    "proof_4_conversions_insufficient": "The two 'heaviest' available conversions (SNDK A103 + SNDK A301, worth ~3.333 percentage points of macro-average each) plus the two next-heaviest available (any 2 of QQQ A101/MSFT A304/TSM A301, worth ~2.778pp each) sum to at most 61.0317 + 6.667 + 5.556 = 73.254% -- short of 75% with only 4 conversions, regardless of which specific 4 are chosen from the identified candidate set.",
+    "exact_minimal_5_conversion_combination": [
+      "SNDK A103",
+      "SNDK A301",
+      "QQQ A101",
+      "MSFT A304",
+      "TSM A301"
+    ],
+    "resulting_macro_average_percent": 76.0318,
+    "conversion_classification": {
+      "SNDK_A103": "FRESH_RUN_DEPENDENT (no legitimate current omission found; needs a new independent Primary fact)",
+      "SNDK_A301": "FRESH_RUN_DEPENDENT (no legitimate current omission found; needs a new independent Primary fact)",
+      "QQQ_A101": "FRESH_RUN_DEPENDENT (needs 3+ new independent Primary facts per counterfactual; Provider-facing)",
+      "MSFT_A304": "DESIGN_DEPENDENT (regex-capable, negation-aware extraction does not exist yet; DESIGN_NOT_READY)",
+      "TSM_A301": "FRESH_RUN_DEPENDENT (non-deterministic; contingent on a future LLM call not timing out)"
+    },
+    "is_this_combination_credible_today": false,
+    "final_determination": "NO_CREDIBLE_PATH_TO_75_YET -- even though a mathematically sufficient 5-conversion combination exists (76.03%), every single conversion in it (and in any alternative 5-conversion combination drawn from the currently-identified candidate set) is FRESH_RUN_DEPENDENT or DESIGN_DEPENDENT, with zero OFFLINE_PROVEN conversions available. Per Section 25's explicit instruction, this is reported as NOT credible despite being mathematically possible."
+  },
+  "clean_gold_diagnostic_recheck": {
+    "frozen_strong_plus_supported_hit_rate_percent": 66.35,
+    "methodology_reconfirmed": "Macro-average of per-ticker STRONG+SUPPORTED-only fractions: NVDA 5/7, QQQ 3/4, MSFT 3/5, SNDK 2/4, TSM 3/4, AMD 4/6 -> 66.3492%, matching the frozen figure exactly.",
+    "impact_of_qqq_a101_recovery_only": {
+      "QQQ_new": "4/4=100%",
+      "new_value_percent": 70.5159
+    },
+    "impact_of_sndk_a103_recovery_only": {
+      "SNDK_new": "3/4=75%",
+      "new_value_percent": 70.5159
+    },
+    "impact_of_sndk_a301_recovery_only": {
+      "SNDK_new": "3/4=75%",
+      "new_value_percent": 70.5159
+    },
+    "impact_of_both_sndk_recoveries": {
+      "SNDK_new": "4/4=100%",
+      "new_value_percent": 74.6825
+    },
+    "impact_of_all_three_recoveries": {
+      "QQQ_new": "4/4=100%",
+      "SNDK_new": "4/4=100%",
+      "new_value_percent": 78.8492
+    },
+    "diagnostic_only_disclaimer": "This diagnostic metric is NOT the official v1 acceptance gate. It measures benchmark-quality-stratified system performance only, per the frozen Gold Validity Audit's own established methodology."
+  },
+  "priority_recommendation": {
+    "chosen_direction": "NEXT_D",
+    "label": "MSFT negation-aware structure extraction design",
+    "reasoning": "Weighed against correctness, recoverability, blast radius, Gold strength, and ability to prove improvement (explicitly NOT chosen for score gain alone): NEXT_A (Provider research for the three A102 STRONG_GOLD targets) has the highest Gold-quality targets but is entirely Provider-facing, requires separate authorization, and success is inherently uncertain even with better prompts. NEXT_B (QQQ ETF evidence-model design) has low leverage -- the counterfactual shows even 2 new facts don't cross 50, and QQQ A101 is only MEDIUM-confidence/thematic-risk-flagged Gold. NEXT_C (SNDK structure recovery) is a DEAD END -- this task found NO legitimate structure omission exists for either SNDK A103 or A301; pursuing it further would mean either fabricating credit or relaxing rules, both forbidden. NEXT_E (fresh Provider run for TSM A301) is a single, non-deterministic retry with no generalizable value beyond this one case. NEXT_D is uniquely attractive: it is the ONLY track addressing a demonstrated, CODE-side correctness gap (not a research-acquisition uncertainty), it is fully designable and testable OFFLINE via replay of already-persisted claims (no Provider dependency to validate progress), and the underlying 'slowdown in [X] growth/spending/capex -> trigger -> compression' pattern recurs across 4 of 6 tickers -- meaning a properly-designed fix has value well beyond the single MSFT A304 hit. NEXT_F (no implementation) is not chosen because a concrete, bounded next design step (the negation-aware grammar sketched in Section 20) has already been identified and is ready for scoping.",
+    "not_chosen_for_score_gain_alone": true
+  },
+  "final_validation": {
+    "gold_v1_sha256_unchanged": true,
+    "gold_validity_sha256_unchanged": true,
+    "no_gold_v2": true,
+    "no_code_changed": true,
+    "no_tests_changed": true,
+    "p0_p1_untouched": true,
+    "no_thresholds_changed": true,
+    "no_taxonomy_changed": true,
+    "no_b1_b2_b4_change": true,
+    "no_alpha_hit_semantics_changed": true,
+    "provider_calls": 0,
+    "tradingagents_calls": 0,
+    "ticker_runs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "destructive_git_operations": 0
+  }
+}

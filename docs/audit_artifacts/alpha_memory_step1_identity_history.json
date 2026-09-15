@@ -1,0 +1,108 @@
+{
+  "schema_version": "alpha_memory_step1_identity_history.v1",
+  "task": "Alpha Memory Implementation Step 1 -- Stable phi Identity + Cross-Run History Reader (SHADOW ONLY)",
+  "branch": "comqutor-structure-layer",
+  "head": "9f228723fad5406c72e62beca67ec70ea0fdb004",
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "fresh_ticker_research": false,
+  "commit": false,
+  "push": false,
+  "mode": "shadow",
+  "activation_modulation_applied": false,
+
+  "identity_algorithm": {
+    "identity_version": "alpha_memory.phi.v1",
+    "scope": "TICKER-SCOPED (Product Decision 2) -- ticker is part of the hashed canonical representation; two structures for different tickers never collide.",
+    "matching": "EXACT CANONICAL MATCH ONLY (Product Decision 3) -- no embeddings, no LLM similarity, no fuzzy/heuristic matching. Two structures share a phi_id only when their JSON-canonicalized representation is byte-identical before hashing.",
+    "formula": "phi_id = sha256(json.dumps({identity_version, ticker, alpha_id, taxonomy_version, taxonomy_sha256, chain_edges}, sort_keys=True, separators=(',', ':'), ensure_ascii=True))",
+    "chain_edges_definition": "The deterministically sorted SET of (source_node_id, edge_type, target_node_id) triples among this run's structure_graph.json edges whose edge['alpha_ids'] already includes this alpha_id -- reused verbatim from the existing, already-persisted edge/alpha linkage, never re-derived.",
+    "no_python_runtime_hash": true,
+    "no_timestamps_or_random_uuids": true,
+    "digest_function": "hashlib.sha256 over a JSON-canonicalized (sorted keys, fixed separators, ASCII) representation -- stable across processes and Python versions, unlike Python's own hash().",
+    "taxonomy_authority_source": "Each run's OWN persisted tradingagents_comqutor_vocabulary_snapshot.json (taxonomy_version/taxonomy_sha256) -- never recomputed against whatever the current worktree's taxonomy file happens to be, so a historical run's phi_id stays stable even if the taxonomy has since changed. A taxonomy/version difference between two runs automatically produces different phi_ids (Product Decision 4) -- verified by test."
+  },
+
+  "canonical_chain_boundary_rule": {
+    "rule": "For one (ticker, alpha_id) pair, the canonical chain is the SET of that run's (source, edge_type, target) edge triples already linked to alpha_id via the Structure Graph's own existing edge['alpha_ids'] field -- not a single linear PATH.",
+    "why_not_a_linear_path": "The persisted Structure Graph does not disambiguate one canonical path when an alpha's linked edges branch or span more than one connected component. Selecting 'the' path would require an arbitrary tie-breaking rule this implementation refuses to invent, per the explicit instruction not to invent graph semantics.",
+    "why_this_is_the_narrowest_supported_unit": "Requires no path-search algorithm, no cycle handling, no branch-selection heuristic -- purely a deterministic set-membership filter over already-existing, already-persisted data. For the common case of a single linear chain (the Development Plan's own worked example), a single path's edge set and its edge sequence carry identical information, so this rule IS a genuine chain identity in that case.",
+    "known_limitation_reported_honestly": "Two runs whose linked edges represent the same abstract multi-hop causal idea but decompose into a different literal edge structure (e.g. an extra intermediate node appears in one run's LLM extraction but not the other's) will receive DIFFERENT phi_ids under this rule -- confirmed empirically: the two real NVDA smoke-test runs from this session (2f8ee897 and c9abf687) share ZERO phi_ids despite both being genuine NVDA research runs, because their independently-extracted claim sets produced different literal edges. This is EXACT canonical matching working exactly as specified (Product Decision 3), not a bug -- but it does mean this v1 will under-recognize real-world recurrence whenever independent LLM extraction produces even slightly different literal structure. This limitation is inherent to 'exact match only' and was anticipated in the authorized Phase 2 spec's collision-risk section."
+  },
+
+  "ticker_scope_rule": "Ticker is a first-class field in the hashed canonical representation (Product Decision 2). NVDA's AI_DEMAND->GPU_SHORTAGE chain and AMD's identical-shaped chain never receive the same phi_id -- verified by test_same_chain_different_ticker_produces_different_phi_id.",
+
+  "versioning_rule": {
+    "identity_version": "alpha_memory.phi.v1 -- a bump to this string is required before any change to what gets hashed; a version bump never silently reinterprets a previously-computed phi_id.",
+    "taxonomy_version_and_sha256": "Read per-run from that run's own persisted vocabulary snapshot; included in every hash so a taxonomy change never silently merges historical structures across the boundary."
+  },
+
+  "files_changed": {
+    "new_production_modules": [
+      "comqutor_alpha/memory/__init__.py",
+      "comqutor_alpha/memory/phi_identity.py",
+      "comqutor_alpha/memory/history_reader.py"
+    ],
+    "modified_production_files": [
+      "comqutor_alpha/api/routes_research.py -- new imports (PHI_IDENTITY_VERSION, compute_phi_structures, summarize_phi_history); new _alpha_memory_section() helper; one new call site inside build_run_audit_payload; one new key ('alpha_memory') added to the existing returned dict. No existing section, field, or return value was altered or removed."
+    ],
+    "new_test_files": [
+      "tests/test_alpha_memory_phi_identity.py (12 tests)",
+      "tests/test_alpha_memory_history_reader.py (9 tests)"
+    ],
+    "modified_test_files": [
+      "tests/test_run_audit_v2.py -- 3 new tests appended (alpha_memory section presence/shadow-mode, non-interference with activation_summary/conflict_summary, and a real two-run cross-run match)"
+    ]
+  },
+
+  "db_migration": {
+    "required": false,
+    "reasoning": "Every input (structure_graph.json's edges/alpha_ids, tradingagents_comqutor_vocabulary_snapshot.json's taxonomy fields, metadata.json's ticker/created_at) already exists, already persisted, for every run. The cross-run reader performs a filesystem directory scan under output_root, matching this codebase's own existing pattern of pure-file-based offline/audit code paths (e.g. this session's earlier offline-replay-proof tests). No new column, table, or migration was added or is needed for this SHADOW-only v1.",
+    "performance_note_not_a_migration": "A full per-ticker directory scan on every run_audit.json build is O(number of persisted runs for that ticker) -- acceptable at today's data volume, and explicitly NOT a reason to add a DB index/table now per the instruction to only migrate if implementation PROVES it strictly necessary. If ticker run counts grow much larger, a future step MAY want a DB-backed index -- that is an explicit, separate, future decision, not made here."
+  },
+
+  "tests": {
+    "new_tests_total": 24,
+    "new_tests_passed": 24,
+    "new_tests_failed": 0,
+    "existing_suite_impact": "Zero new failures. tests/test_run_audit_v2.py: 25/25 passed (22 pre-existing + 3 new). Full B1/B2/B4/Conflict/Activation/Evidence-Stance sweep (14 files, 422 tests including all new Alpha Memory tests) also run clean -- only the SAME 13 pre-existing, already-documented evidence_review_v2.json schema-stripping failures remain (unrelated, predate this step).",
+    "proof_points_covered": {
+      "1_same_structure_same_phi_id": "test_same_ticker_alpha_and_chain_across_two_runs_produces_the_same_phi_id",
+      "2_different_ticker_different_phi_id": "test_same_chain_different_ticker_produces_different_phi_id",
+      "3_different_alpha_different_phi_id": "test_same_ticker_different_alpha_produces_different_phi_id",
+      "4_changed_chain_different_phi_id": "test_changed_causal_chain_produces_different_phi_id",
+      "5_current_run_excluded": "test_find_ticker_run_ids_excludes_current_run_and_filters_by_ticker",
+      "6_correct_source_run_ids": "test_find_prior_phi_observations_returns_correct_source_run_ids",
+      "7_taxonomy_version_mismatch_no_silent_match": "test_taxonomy_version_mismatch_produces_different_phi_id (unit) + test_taxonomy_mismatch_across_runs_does_not_silently_match (integration)",
+      "8_9_10_no_activation_alpha_level_conflict_change": "test_memory_package_never_imported_by_activation_or_conflict_modules (architectural) + test_alpha_memory_section_does_not_change_activation_or_conflict_summary (integration, real fixture values byte-compared)",
+      "11_existing_b1_b2_b4_tests_unchanged": "Full sweep re-run: tests/test_b4_activation_level_alignment.py, test_b2_admissibility_integration.py, test_conflict_admissibility.py, test_conflict_detector.py, test_evidence_stance_integration.py, test_activation_scorer_v2.py -- all pass exactly as before this step.",
+      "12_deterministic_repeated_execution": "test_repeated_execution_is_deterministic (phi_identity) + test_repeated_execution_of_the_reader_is_deterministic (history_reader)"
+    }
+  },
+
+  "historical_fixtures_and_runs_used": {
+    "unit_tests": "Fully synthetic fixtures (no real run data required) in tests/test_alpha_memory_phi_identity.py.",
+    "integration_tests": "Synthetic tmp_path-based run directories (tests/test_alpha_memory_history_reader.py, tests/test_run_audit_v2.py's existing _seed_rich_run fixture) -- following this codebase's established test-fixture convention exactly.",
+    "real_data_check_performed_manually_not_as_a_committed_test": "The two real NVDA smoke-test runs from this session (2f8ee897-3257-409e-bbbf-1ca1d9cdaa5d, c9abf687-1fe2-4a48-9039-c8fd7cf2e3a6) were checked for a real cross-run phi match -- found ZERO shared phi_ids, an honest and expected finding given exact-match-only semantics and independent LLM extraction (see canonical_chain_boundary_rule's known_limitation). The wired build_run_audit_payload() call was also run against 2f8ee897 directly (not written into any final report artifact) to confirm the real end-to-end path produces a well-formed alpha_memory section with 6 phi_structures and 0 historical matches, with zero exceptions."
+  },
+
+  "evidence_b4_output_unchanged": {
+    "architectural_guarantee": "comqutor_alpha/memory/*.py is never imported by activation_scorer_v2.py, alpha_level_classifier.py, conflict_detector.py, or conflict_admissibility.py -- verified by an AST-based test (test_memory_package_never_imported_by_activation_or_conflict_modules), mirroring this codebase's existing test_evidence_stance_never_imported_by_activation_or_conflict_modules pattern.",
+    "control_flow_guarantee": "_alpha_memory_section() is called in build_run_audit_payload() strictly AFTER activation_summary, conflict_summary, and entity_exposure_audit are already fully computed from their own existing, unmodified logic -- it consumes nothing they produce and feeds nothing back into them.",
+    "byte_identical_values_confirmed": "test_alpha_memory_section_does_not_change_activation_or_conflict_summary asserts activation_summary.active_count/dominant_count/regime_level_count and conflict_summary.admitted_count/main_conflict_id against the exact same fixture used by this file's own pre-existing test_activation_summary_reuses_v2_alpha_counts_verbatim and test_conflict_summary_includes_every_declared_pair tests -- identical values, both before and after this step's changes."
+  },
+
+  "remaining_product_decisions": [
+    "Ticker-scoping consistency for the OTHER 109 canonical factors (today's node-id scoping inconsistency was inherited, not resolved, by this step -- the phi_id hashes ticker at the (ticker, alpha_id) level regardless, which sidesteps but does not resolve the underlying node-scoping question for any FUTURE feature that wants per-node cross-ticker comparison).",
+    "Whether/how to address the chain-boundary limitation (independent extraction producing different literal edge sets for what a human would call the same causal idea) -- explicitly NOT solved by fuzzy/similarity matching per this step's constraints; remains open for a future, explicitly-authorized step.",
+    "Whether phi_id/historical_matches should ever be durably persisted (vs. recomputed on every run_audit.json build, as implemented here) -- a performance/architecture decision, not attempted in this step.",
+    "All lifecycle-event decisions from the prior Phase 2 spec (invalidation, expiration, failure, non-execution, reason codes) remain entirely unaddressed by this step, as instructed."
+  ],
+
+  "explicitly_not_implemented_per_instruction": [
+    "invalidation detection", "invalidation thresholds", "expired logic", "failed logic",
+    "non-execution logic", "reason-code semantics", "decay", "reinforcement",
+    "memory weights", "activation modifiers", "historical gating",
+    "human-review feedback", "fuzzy phi matching", "cross-ticker phi merging"
+  ]
+}

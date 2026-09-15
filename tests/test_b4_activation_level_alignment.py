@@ -150,10 +150,14 @@ def test_b_no_cap_reasons_means_dominant_fully_qualifies():
     assert result.blocked_reason_codes == ()
 
 
-def test_b_candidate_and_active_never_gain_a_new_evidence_graph_or_exposure_gate():
-    # Case A/B (task section 7): John explicitly -- do not invent a new gate
-    # for candidate/active beyond the score itself, even when every other
-    # qualification signal would fail.
+def test_b_candidate_and_active_never_gain_an_exposure_gate_or_a_partial_evidence_gate():
+    # Case A (candidate: unconditional) and Case B (active: only when a
+    # SINGLE evidence signal is missing, per v0.1.3 Section C below) --
+    # Exposure never gates either level (task section 7/8: Exposure only
+    # ever gates dominant/regime_level), and a lone missing evidence signal
+    # alone (ticker-specific OR local structure, not both) never gates
+    # active either -- see test_c2_* below for the "both absent" case that
+    # v0.1.3 now does gate.
     for score in (10.0, 55.0):
         result = classify_alpha_level(
             activation_score=score,
@@ -169,6 +173,109 @@ def test_b_candidate_and_active_never_gain_a_new_evidence_graph_or_exposure_gate
         )
         assert result.is_blocked is False
         assert result.qualified_level == result.target_level
+
+
+# ---------------------------------------------------------------------------
+# Section C2 -- v0.1.3 QA Closure, Section C: an Alpha reaching the active
+# score band MUST NOT display as ordinary "active" when it lacks BOTH
+# ticker-specific qualifying evidence AND local Structure Graph support
+# (John's exact reported case: an A301 record with neither). This
+# supersedes B4's original Case A/B decision (which never gated
+# candidate/active at all) -- score thresholds (50/70/86) are unchanged;
+# only this one new qualification gate, scoped to exactly these two
+# ALREADY-EXISTING diagnostic conditions, is added.
+# ---------------------------------------------------------------------------
+
+
+def test_c2_active_lacking_both_ticker_specific_evidence_and_local_structure_demotes_to_candidate():
+    # John's exact reported A301 shape: active-band score, zero
+    # ticker-specific evidence, zero local Structure Graph support.
+    result = classify_alpha_level(
+        activation_score=55.0,
+        dominant_cap_reason_codes=["NO_TICKER_SPECIFIC_EVIDENCE", "NO_LOCAL_STRUCTURE_SUPPORT"],
+    )
+    assert result.target_level == ACTIVE
+    assert result.qualified_level == CANDIDATE
+    assert result.is_blocked is True
+    assert result.blocked_from == (ACTIVE,)
+    assert set(result.blocked_reason_codes) == {"NO_TICKER_SPECIFIC_EVIDENCE", "NO_LOCAL_STRUCTURE_SUPPORT"}
+    assert result.activation_level == CANDIDATE
+    assert result.classification_version == CLASSIFICATION_VERSION
+
+
+@pytest.mark.parametrize("cap_reason", ["NO_TICKER_SPECIFIC_EVIDENCE", "NO_LOCAL_STRUCTURE_SUPPORT"])
+def test_c2_active_missing_only_one_of_the_two_required_signals_still_qualifies(cap_reason):
+    # John's wording is "lacks BOTH" -- either evidence type alone present
+    # is still sufficient; this must never over-gate a partially-supported
+    # Alpha.
+    result = classify_alpha_level(activation_score=55.0, dominant_cap_reason_codes=[cap_reason])
+    assert result.target_level == ACTIVE
+    assert result.qualified_level == ACTIVE
+    assert result.is_blocked is False
+    assert result.blocked_from == ()
+
+
+def test_c2_active_with_full_evidence_is_never_gated():
+    result = classify_alpha_level(activation_score=55.0, dominant_cap_reason_codes=[])
+    assert result.qualified_level == ACTIVE
+    assert result.is_blocked is False
+
+
+def test_c2_candidate_target_is_never_touched_by_the_new_gate():
+    # A genuinely sub-threshold Alpha (target_level == candidate already)
+    # has nothing to be demoted from -- the new gate only ever applies when
+    # target_level == active.
+    result = classify_alpha_level(
+        activation_score=30.0,
+        dominant_cap_reason_codes=["NO_TICKER_SPECIFIC_EVIDENCE", "NO_LOCAL_STRUCTURE_SUPPORT"],
+    )
+    assert result.target_level == CANDIDATE
+    assert result.qualified_level == CANDIDATE
+    assert result.is_blocked is False
+    assert result.blocked_from == ()
+
+
+def test_c2_dominant_and_regime_level_targets_are_unaffected_by_the_new_active_gate():
+    # The new gate is scoped to target_level == active only -- a
+    # dominant-band or regime-band Alpha's own existing Case C/D logic is
+    # byte-identical to before.
+    dominant_result = classify_alpha_level(
+        activation_score=75.0,
+        dominant_cap_reason_codes=["NO_TICKER_SPECIFIC_EVIDENCE", "NO_LOCAL_STRUCTURE_SUPPORT"],
+    )
+    assert dominant_result.target_level == DOMINANT
+    assert dominant_result.qualified_level == ACTIVE
+    assert dominant_result.blocked_from == (DOMINANT,)
+
+    regime_result = classify_alpha_level(
+        activation_score=90.0,
+        dominant_cap_reason_codes=["NO_TICKER_SPECIFIC_EVIDENCE", "NO_LOCAL_STRUCTURE_SUPPORT"],
+        regime_gate_passed=False,
+    )
+    assert regime_result.target_level == REGIME_LEVEL
+    assert regime_result.qualified_level == ACTIVE
+    assert regime_result.blocked_from == (DOMINANT, REGIME_LEVEL)
+
+
+def test_c2_exposure_still_never_contributes_to_the_new_active_gate():
+    # The new gate checks only NO_TICKER_SPECIFIC_EVIDENCE/
+    # NO_LOCAL_STRUCTURE_SUPPORT in dominant_cap_reason_codes -- B3 Entity
+    # Exposure (even a blocking approved_gating result) must never, by
+    # itself, contribute to gating active (task scope: John named exactly
+    # two conditions, not Exposure).
+    result = classify_alpha_level(
+        activation_score=55.0,
+        dominant_cap_reason_codes=[],
+        entity_exposure={
+            "effective_status": "approved_gating",
+            "exposure_status": "missing_seed",
+            "would_block_dominant": True,
+            "would_block_regime_level": True,
+            "reason_codes": ["SEED_ENTRY_MISSING"],
+        },
+    )
+    assert result.qualified_level == ACTIVE
+    assert result.is_blocked is False
 
 
 # ---------------------------------------------------------------------------

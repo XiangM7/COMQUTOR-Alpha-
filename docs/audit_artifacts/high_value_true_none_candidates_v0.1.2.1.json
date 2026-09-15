@@ -1,0 +1,52 @@
+{
+  "release": "v0.1.2.1",
+  "task": "Step 5B preliminary high-value TRUE-NONE candidate scan (diagnostic only, no repair)",
+  "generated_at": "2026-08-27T00:00:37.551427+00:00",
+  "scope": "Scanned all six tickers' NONE-status (match_status='no_match') claims for keyword-level compatibility with one of the 10 canonical Alphas, then manually reviewed each against the canonical taxonomy. UNAVAILABLE rows excluded entirely.",
+  "raw_keyword_hits": 23,
+  "strong_candidates": [
+    {
+      "ticker": "AMD",
+      "claim_snippet": "Macro context: Lower Treasury yields, easing selling pressure, positive Asian markets.",
+      "candidate_alpha": "A001",
+      "assessment": "STRONG candidate",
+      "reasoning": "Genuine macro data point (falling Treasury yields) directly on A001's discount-rate mechanism, received NONE. Worth a closer look in a future precision-tuning pass."
+    }
+  ],
+  "weak_borderline_candidates": [
+    {
+      "ticker": "NVDA",
+      "claim_snippet": "Competitors (AMD, custom ASIC providers, and in-house silicon efforts at hyperscalers) are increasing competition in the AI accelerator market, which could pressure NVIDIA's dominance.",
+      "candidate_alpha": "A101",
+      "assessment": "WEAK/borderline",
+      "reasoning": "AI-themed but framed as a competitive RISK to NVDA, not an AI-expansion demand claim -- NONE is plausibly correct."
+    },
+    {
+      "ticker": "AMD",
+      "claim_snippet": "AMD faces intense competition from NVIDIA in AI accelerators and from Intel in CPUs.",
+      "candidate_alpha": "A101",
+      "assessment": "WEAK/borderline",
+      "reasoning": "Same pattern as above -- competitive-risk framing, not demand-expansion."
+    },
+    {
+      "ticker": "AMD",
+      "claim_snippet": "AMD's market share in data center GPUs is still a fraction of Nvidia's.",
+      "candidate_alpha": "A103",
+      "assessment": "WEAK/borderline",
+      "reasoning": "Mentions data center GPUs but is a competitive-share statement, not an infrastructure-buildout demand claim -- NONE is plausibly correct."
+    }
+  ],
+  "rejected_false_positive_pattern": {
+    "pattern": "Company-level balance-sheet liquidity (current ratio, cash position, net-cash) superficially keyword-matches 'liquidity' but is semantically UNRELATED to A003's macro monetary-liquidity-expansion thesis.",
+    "count_rejected": 15,
+    "tickers_affected": [
+      "NVDA",
+      "MSFT",
+      "SNDK",
+      "TSM",
+      "AMD"
+    ],
+    "conclusion": "These NONE results are almost certainly CORRECT, not recall misses -- a useful confirmation of classifier precision on this specific false-positive-prone keyword collision, not a defect."
+  },
+  "note": "This is a preliminary scan for John's requested high_value_unclassified_recovery_report.json, not that report itself. Do not claim >=20 recoverable rows from this scan alone -- the actual recoverable count after full review is very small (1 strong + 3 weak/borderline out of 23 raw keyword hits; the rest were confirmed correct NONE decisions)."
+}

@@ -1,0 +1,583 @@
+{
+  "schema_version": "v0.2.evidence_trigger_matrix.v1",
+  "gold_authority": {
+    "version": "v0.2",
+    "contract_json_path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+    "contract_md_path": "docs/audit_artifacts/v0_2_gold_operational_contract.md",
+    "contract_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "contract_md_sha256": "8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04",
+    "integrity_verified": true
+  },
+  "fresh_run_authority": {
+    "ledger": "docs/audit_artifacts/v0_1_3_final_fresh_six_ticker_ledger.json",
+    "runs": {
+      "NVDA": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "QQQ": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "MSFT": "43472ace-454f-4c69-892c-adca91c25be7",
+      "SNDK": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "TSM": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "AMD": "949f685a-3945-4fd0-b7b9-362b37c90721"
+    },
+    "verified_against_ledger": true
+  },
+  "method": {
+    "system_outputs_inspected": false,
+    "acceptance_computed": false,
+    "evidence_sources_used": [
+      "structured_agent_outputs.json (claim/evidence text, factors tag as secondary corroboration only, entities, agent, assertion_status)"
+    ],
+    "evidence_sources_explicitly_not_used": [
+      "alpha_matches.json (matched_alpha, deterministic_top_alpha)",
+      "structure_graph.json activation block (activation_score, status, dominant/active/candidate)",
+      "alpha_activations.json",
+      "conflicts.json",
+      "evidence_stance_audit.json (B1 target-alpha stance -- avoided out of maximal anti-circularity caution)",
+      "any final acceptance/PASS-FAIL report",
+      "the 61.0317% retrospective benchmark result"
+    ],
+    "direction": "UNDERLYING EVIDENCE -> GOLD EVIDENCE CONDITION -> PRESENT/ABSENT/UNCERTAIN (never the reverse)",
+    "evidence_strength_note": "evidence_strength reflects the strength of the EVIDENCE BASE informing the trigger_state call, whichever direction it points -- e.g. an ABSENT call backed by strong, explicit contrary evidence (such as QQQ-A001's 93% no-cut probability) is reported as evidence_strength=STRONG, not merely 'no evidence found'."
+  },
+  "tickers": {
+    "NVDA": {
+      "tier": "FORMAL_GOLD",
+      "blocking": true,
+      "run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+      "rules": [
+        {
+          "rule_id": "NVDA-A101-AI-GROWTH",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "AI training/compute demand growth",
+          "evidence_condition": "Current NVDA-specific evidence materially describes AI training/compute/GPU accelerator demand growth.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "'AI demand is exceptional' (HPE CEO framing, cited in NVDA sentiment coverage); 'AI demand supercycle narrative' (Broadcom CEO $230B 2028 AI revenue projection cited as reinforcing NVDA's own thesis); the $12.9B Hugging Face acquisition explicitly framed as NVDA expanding across the AI stack.",
+          "trigger_rationale": "Multiple independent agents (sentiment_agent, news_agent) report concrete, dated, NVDA-attributed AI-demand evidence with no contrary signal found.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (sentiment_agent, news_agent)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "NVDA-A301-FUNDAMENTAL-GROWTH",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Company fundamental/revenue growth",
+          "evidence_condition": "Current NVDA-specific evidence supports company revenue growth, raised guidance, or fundamental demand-driven revenue transmission.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "'Revenue, EPS, and FCF are all accelerating, with Q1 FY27 delivering 85% YoY revenue growth and record FCF of $48.6B'; '63.7% net margin' -- concrete, quantified company-specific fundamental data from fundamental_agent (Primary), corroborated by bull_researcher and research_manager summaries of the same underlying data.",
+          "trigger_rationale": "Concrete quantified revenue/margin/FCF figures from a Primary fundamental source -- not inferred from AI-leader identity.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (fundamental_agent, bull_researcher, research_manager)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "NVDA-A304-VALUATION-RISK",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Valuation downside / multiple compression risk",
+          "evidence_condition": "Current NVDA-specific evidence materially supports valuation compression, rich valuation, or multiple downside risk.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "'NVDA at 8% of S&P 500 market cap and \"priced for perfection\" concerns'; 'the market is demanding perfection and punishing any [stumble]' (peer AVGO/HPE cited as cautionary precedent for NVDA's own richly-valued position); 'rising rate-hike odds pressuring high-multiple tech.'",
+          "trigger_rationale": "Direct NVDA-attributed valuation-concentration framing plus closely analogous peer precedent explicitly linked to NVDA's own risk profile.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (sentiment_agent, news_agent)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "concept": "AI-leader growth-vs-valuation conflict",
+          "evidence_condition": "Both a supported growth side (A101 and/or A301) and a supported valuation-risk side (A304) present in the same run.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "Both legs of the composite are independently PRESENT/STRONG (see NVDA-A101-AI-GROWTH, NVDA-A301-FUNDAMENTAL-GROWTH, NVDA-A304-VALUATION-RISK above).",
+          "trigger_rationale": "Growth side triggered by BOTH AI growth (A101) and fundamental growth (A301) independently; valuation-risk side (A304) also independently present. This evidence-side finding does NOT inspect or assert anything about the actual admitted conflict -- that is Step 4.",
+          "source_artifacts": [
+            "structured_agent_outputs.json"
+          ],
+          "sub_conditions": {
+            "growth_side_triggered_by": "BOTH (A101 and A301)",
+            "valuation_side": "A304 PRESENT"
+          },
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "NVDA-SUPPORTING-STRUCTURES",
+          "ticker": "NVDA",
+          "tier": "FORMAL_GOLD",
+          "blocking": false,
+          "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+          "concept": "Supporting AI-adjacent structures (infrastructure, cycle, narrative)",
+          "evidence_condition": "Current NVDA-specific evidence supports AI infrastructure buildout (A103), semiconductor-cycle conditions (A201), and/or narrative/momentum dynamics (A601).",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "MIXED",
+          "evidence_summary": "A103 (AI Infrastructure): PRESENT/MODERATE -- 'AI infrastructure demand environment... exceptional, red-hot, constrained by supply' (peer-sourced, CLEAR_TRANSMISSION to NVDA as supplier); fundamental_agent: 'Any slowdown in AI infrastructure spending would directly pressure revenue' (DIRECT_TICKER). A201 (Semiconductor Supercycle): UNCERTAIN -- evidence found (inventory build $5.3B->$25.8B, low capex intensity, TSMC fab reliance) is company-specific supply-chain/balance-sheet detail, not a clean industry-wide inventory/ASP/order-cycle recovery signal distinct from NVDA's own AI-demand story. A601 (Narrative Momentum): PRESENT/STRONG -- 'the Hugging Face acquisition is the dominant narrative'; 'retail is actively discussing the Hugging Face deal... retail is aligned with upside' (DIRECT_TICKER; unrelated MACD/RSI technical-momentum false-matches excluded).",
+          "trigger_rationale": "Rule-level state is PRESENT because 2 of 3 supporting concepts (A103, A601) are independently present with real evidence; A201 specifically remains UNCERTAIN. This rule is non-mandatory regardless of outcome.",
+          "source_artifacts": [
+            "structured_agent_outputs.json"
+          ],
+          "sub_conditions": {
+            "A103": "PRESENT/MODERATE",
+            "A201": "UNCERTAIN",
+            "A601": "PRESENT/STRONG"
+          },
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        }
+      ]
+    },
+    "QQQ": {
+      "tier": "FORMAL_GOLD",
+      "blocking": true,
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "rules": [
+        {
+          "rule_id": "QQQ-A001-RATE-CUT-CYCLE",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Rate-cut / easing-cycle transmission",
+          "evidence_condition": "Current macro evidence relevant to QQQ's constituent basis supports falling-rate/easing/discount-rate-relief transmission.",
+          "trigger_state": "ABSENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "MACRO_BACKGROUND",
+          "evidence_summary": "'93% probability of NO Fed rate cuts in 2026 (up +4.3pp over the week)'; '72% probability of a Fed rate HIKE in 2026 (up 4pp in a week)'; 'Rising Treasury yields are carving a sharp divide in the market.' The persisted evidence shows the OPPOSITE of an easing cycle -- rate-cut odds falling, hike odds rising.",
+          "trigger_rationale": "This is a well-evidenced ABSENT, not merely a lack of data: affirmative, quantified contrary evidence (rising hike odds, falling cut odds) was found. One conditional/explanatory statement exists ('falling rates would tend to support valuations') but it describes the RELATIONSHIP, not evidence that rates ARE currently falling.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (news_agent, fundamental_agent)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "QQQ-A003-LIQUIDITY-EXPANSION",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Liquidity expansion / risk-appetite transmission",
+          "evidence_condition": "Current macro evidence supports liquidity expansion, liquidity release, or broad risk-appetite transmission.",
+          "trigger_state": "UNCERTAIN",
+          "evidence_strength": "WEAK",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "MACRO_BACKGROUND",
+          "evidence_summary": "The only claims tagged 'Liquidity Expansion' are actually framed around LOW RECESSION RISK supporting risk appetite ('This low recession risk supports the equity risk appetite that benefits QQQ's growth-heavy composition'), not direct liquidity-specific evidence (money supply, reserves, credit conditions easing per A003's own core thesis). One generic mention: 'QQQ is a high-beta play on... liquidity conditions' (no directional data).",
+          "trigger_rationale": "Relevant evidence exists but is indirect -- it evidences low recession risk supporting risk appetite generally, not A003's specific liquidity-expansion mechanism (money supply/reserves/credit conditions). Too ambiguous to call PRESENT or ABSENT reliably.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (news_agent, fundamental_agent, aggressive_risk_analyst)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "QQQ-A304-VALUATION-RISK",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Valuation compression / richly-valued-asset downside",
+          "evidence_condition": "Current QQQ/market-relevant evidence supports valuation compression or richly-valued-asset downside risk.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "CLEAR_TRANSMISSION",
+          "evidence_summary": "'Any disappointment in aggregate earnings growth among mega-cap constituents, or a rise in discount rates, could trigger multiple compression' (fundamental_agent, explicitly ETF-aggregate-framed); 'Valuation Risk / Priced-for-Perfection: Software names... being punished even on beats, signaling multiple compression risk in richly valued growth'; 'rate-driven multiple compression in long-duration software/growth names.'",
+          "trigger_rationale": "Extensive, explicitly ETF-constituent-aggregate-framed valuation-risk evidence from a Primary fundamental source plus repeated news-agent corroboration.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (fundamental_agent, sentiment_agent, news_agent)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "QQQ-A501-RECESSION-RISK",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Recession / earnings-downturn risk",
+          "evidence_condition": "Current macro evidence supports recession risk or an earnings-downturn transmission channel.",
+          "trigger_state": "ABSENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "MACRO_BACKGROUND",
+          "evidence_summary": "'Only 6% probability of US recession by end of 2026' (down 1pp on the week); 'This low recession risk supports the equity risk appetite that benefits QQQ'; 'resilient labor market... AI capex cycle... no signs of slowing.' The persisted evidence affirmatively shows LOW, not elevated, recession risk.",
+          "trigger_rationale": "Well-evidenced ABSENT: the corpus contains explicit, quantified evidence that recession risk is low and receding, which is the opposite of A501's defining condition.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (news_agent, bull_researcher)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "QQQ-A601-NARRATIVE-MOMENTUM",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "ETF/mega-cap/AI-market narrative or momentum",
+          "evidence_condition": "Current ETF/mega-cap/AI-market narrative or momentum evidence supports a reflexive narrative structure.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "CLEAR_TRANSMISSION",
+          "evidence_summary": "'The AI narrative remains the dominant force in QQQ's largest holdings'; 'This is the single dominant macro narrative and directly hits QQQ's high-multiple tech holdings'; 'the fund [is] a high-conviction, high-beta expression of the AI/semiconductor... narrative.' (Unrelated MACD/RSI technical price-momentum matches were excluded as a different concept from narrative/attention momentum.)",
+          "trigger_rationale": "Repeated, explicit narrative-dominance language directly and appropriately framed at the ETF/constituent-aggregate level.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (sentiment_agent, news_agent, fundamental_agent)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "QQQ-ETF-CONTEXT-CONTROL",
+          "ticker": "QQQ",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "NEGATIVE_CONTROL_HIT",
+          "concept": "ETF-identity misclassification guard",
+          "evidence_condition": "Whether STRONG current evidence could defensibly support an ETF-level aggregate fundamental/revenue transmission interpretation for A301.",
+          "trigger_state": "UNCERTAIN",
+          "evidence_strength": "WEAK",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "CLEAR_TRANSMISSION",
+          "evidence_summary": "'The elevated PE ratio reflects expectations of continued revenue growth and earnings expansion among constituents' (Revenue Growth-tagged, ETF-appropriately framed); 'Monitor concentration leaders: track the fundamental health (revenue growth, AI demand, datacenter capex) of the largest constituents.' Only 2 claims found; both are forward-looking/expectational framing rather than concrete realized aggregate revenue data.",
+          "trigger_rationale": "qqq_a301_strong_etf_level_evidence = UNCERTAIN. Genuine, appropriately-ETF-framed evidence exists (not a single-company earnings claim, but constituent-aggregate framing) but is thin and largely expectational rather than concretely STRONG. Not turned into PRESENT to make later acceptance easier, per instruction.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (fundamental_agent)"
+          ],
+          "sub_conditions": {
+            "qqq_a301_strong_etf_level_evidence": "UNCERTAIN"
+          },
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        }
+      ]
+    },
+    "SNDK": {
+      "tier": "FORMAL_GOLD",
+      "blocking": true,
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "rules": [
+        {
+          "rule_id": "SNDK-A201-SEMICONDUCTOR-CYCLE",
+          "ticker": "SNDK",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Semiconductor/storage cycle conditions",
+          "evidence_condition": "Current SNDK-specific evidence supports semiconductor/storage-cycle conditions (inventory, orders, ASP, capex, demand recovery/deterioration).",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "'The institutional news flow... is decisively bullish on SNDK, with a strong AI-memory narrative dominating' (entities=[SNDK,AI]); '$95 billion AI-server backlog fueling memory demand' (factors=[AI Demand, Semiconductor Cycle]); 'NAND pricing cycle... still accelerating'; 'memory shortages are real and will persist for years' (IT-leader sourced).",
+          "trigger_rationale": "Extensive, dated, SNDK-entity-tagged evidence of an active memory/storage pricing and demand cycle -- directly matching A201's own core thesis (inventory/pricing/demand-cycle dynamics), not merely industry membership.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (sentiment_agent, news_agent)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "SNDK-ANTI-OVER-AI-CONTROL",
+          "ticker": "SNDK",
+          "tier": "FORMAL_GOLD",
+          "blocking": true,
+          "hit_type": "NEGATIVE_CONTROL_HIT",
+          "concept": "Anti-over-AI false-positive guard",
+          "evidence_condition": "Whether STRONG SNDK-specific evidence exists for A101 (material AI training/compute-demand expansion) and A102 (material inference-side compute demand) directly relevant to SNDK.",
+          "trigger_state": "ABSENT",
+          "evidence_strength": "MODERATE",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "AMBIGUOUS",
+          "evidence_summary": "sndk_a101_strong_ai_evidence = ABSENT: extensive 'AI demand' language exists ('$95B AI-server backlog fueling MEMORY demand', 'AI model releases... driving STORAGE demand') but it consistently describes AI-driven STORAGE/MEMORY demand -- a distinct, adjacent mechanism from A101's own core thesis (accelerator/GPU/training-compute demand, per taxonomy trigger/confirmation signals). No evidence found of SNDK providing or benefiting from accelerator/training-compute demand itself. sndk_a102_strong_inference_evidence = ABSENT: only 1 matching claim, from bull_researcher (argumentative debate source, not Primary company-specific evidence), thin and conflated with several other claims -- not credible/strong standalone evidence of inference-side compute demand.",
+          "trigger_rationale": "This is exactly the discrimination the negative control is designed to make: SNDK has real, strong AI-ADJACENT (storage-demand) evidence, but that is a DIFFERENT mechanism from A101's accelerator/training thesis or A102's inference thesis. Classified ABSENT for both, not merely 'no evidence' -- real evidence exists but for a distinguishable, non-matching mechanism. Evidence_strength MODERATE reflects that this is a substantive, reasoned discrimination rather than a simple absence of any AI-related content.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (sentiment_agent, news_agent, bull_researcher)"
+          ],
+          "sub_conditions": {
+            "sndk_a101_strong_ai_evidence": "ABSENT",
+            "sndk_a102_strong_inference_evidence": "ABSENT"
+          },
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        }
+      ]
+    },
+    "MSFT": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "blocking": false,
+      "run_id": "43472ace-454f-4c69-892c-adca91c25be7",
+      "rules": [
+        {
+          "rule_id": "MSFT-A101-ENTERPRISE-AI-CONDITIONAL",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "blocking": false,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Enterprise AI / cloud AI expansion (conditional mapping only)",
+          "evidence_condition": "Current MSFT-specific evidence describes AI training/cloud-AI demand growth genuinely attributable to MSFT.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "MODERATE",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "'This is a direct catalyst for Azure AI demand'; 'OpenAI's competitive position directly drives Azure AI consumption'; 'AI capex payoff debate -- institutions debate whether MSFT's massive AI spending will pay off.'",
+          "trigger_rationale": "Genuine Azure-AI-demand evidence exists and is MSFT-attributed, though entangled with the capex-payoff debate framing rather than pure demand-growth language -- MODERATE rather than STRONG.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (news_agent, sentiment_agent)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "blocking": false,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Direct inference-mechanism evidence",
+          "evidence_condition": "Current MSFT-specific evidence explicitly describes inference workloads/compute demand, serving AI applications/models, agent/application inference, or inference-side compute consumption.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "'The massive capex buildout signals Microsoft's commitment to expanding Azure capacity to meet AI training AND INFERENCE demand' (factors=[Inference Demand]); 'Microsoft's AI products (Microsoft 365 Copilot, GitHub Copilot, Azure AI services) are DRIVING INFERENCE DEMAND and enterprise adoption'; 'It is driving Inference Demand through products like Microsoft 365 Copilot and Azure AI services, which in turn is driving Revenue Growth.'",
+          "trigger_rationale": "Multiple claims (fundamental_agent Primary source, bull_researcher, bear_researcher) explicitly name 'inference demand' as the mechanism, directly tied to named MSFT products (Copilot, Azure AI services) -- satisfies the DIRECT trigger's explicit-mechanism requirement.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (fundamental_agent, bull_researcher, bear_researcher)"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "MSFT-A102-INDIRECT-INFERENCE-SUPPORT",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "blocking": false,
+          "hit_type": "ALPHA_HIT",
+          "concept": "Indirect/generic enterprise-AI-adoption evidence",
+          "evidence_condition": "Current MSFT-specific evidence describes only broader enterprise AI adoption/Copilot usage/generic AI demand WITHOUT clearly engaging the inference mechanism.",
+          "trigger_state": "UNCERTAIN",
+          "evidence_strength": "WEAK",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "No claim was found describing MSFT Copilot/enterprise-AI adoption in isolation from the inference-mechanism language already captured by MSFT-A102-DIRECT-INFERENCE-TRIGGER -- the corpus's Copilot-related content consistently and explicitly invokes 'inference demand' rather than remaining generic.",
+          "trigger_rationale": "Cannot cleanly disentangle a distinct 'generic adoption only, no inference language' evidence pool from the direct-trigger claims already found -- the two categories are not cleanly separable in this corpus. Reported as UNCERTAIN rather than forcing a PRESENT or ABSENT that the evidence does not clearly support, per instruction not to collapse the two trigger classes into one judgment.",
+          "source_artifacts": [
+            "structured_agent_outputs.json"
+          ],
+          "sub_conditions": null,
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        },
+        {
+          "rule_id": "MSFT-CAPEX-BURDEN-CONDITIONAL",
+          "ticker": "MSFT",
+          "tier": "SILVER_DIAGNOSTIC",
+          "blocking": false,
+          "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+          "concept": "AI capex burden (not automatically a valuation-risk Alpha)",
+          "evidence_condition": "Current MSFT-specific evidence connects AI/cloud capex burden to a downstream financial-pressure channel.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "capex_present = PRESENT: extensive capex discussion ('AI capex payoff debate', 'massive AI spending', 'capex has more than doubled'). capex_downside_linkage_present = PRESENT: 'free cash flow has begun to decline ($67.0B vs $71.6B prior year) due to the capex acceleration' (fundamental_agent, Primary, concrete FCF figures); 'If AI demand does not materialize at the pace expected, this could pressure margins and free cash flow'; bear_researcher: 'The AI CapEx is crushing free cash flow.'",
+          "trigger_rationale": "Both sub-conditions independently confirmed present with concrete, quantified, Primary-sourced evidence -- capex is explicitly and concretely linked to a real FCF decline, not asserted from capex volume alone.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (fundamental_agent, bull_researcher, bear_researcher)"
+          ],
+          "sub_conditions": {
+            "capex_present": "PRESENT",
+            "capex_downside_linkage_present": "PRESENT"
+          },
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        }
+      ]
+    },
+    "TSM": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "blocking": false,
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "rules": [
+        {
+          "rule_id": "TSM-AI-TO-FOUNDRY-TRANSMISSION",
+          "ticker": "TSM",
+          "tier": "SILVER_DIAGNOSTIC",
+          "blocking": false,
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "concept": "AI/infrastructure demand -> semiconductor/foundry demand -> TSM-specific company impact",
+          "evidence_condition": "Current evidence supports at least one leg of the confirmed canonical transmission chain (A101->A201->A301), with A103 as optional supporting context only.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "A101 (upstream AI demand): PRESENT/STRONG -- '$1.3 Trillion in Projected Data Center Spending in 2027'; 'TSM's fate is tightly coupled to the AI CapEx cycle.' A201 (foundry/semiconductor-cycle): PRESENT/STRONG -- 'TSM is framed as the foundry \"everything else depends on\"'; 'benefiting regardless of which chip designer wins'; institutional accumulation cited. A301 (company revenue): PRESENT/STRONG -- 'two consecutive years of >30% revenue growth (2024 and 2025), driven by the AI infrastructure buildout'; 'revenue growth acceleration... to a 36% YoY pace in Q2 2026... directly tied to AI chip demand' (concrete, quantified, fundamental_agent Primary source). A103 (optional supporting): PRESENT -- '$1.3T data center spending', 'TSM sits at the center of the AI infrastructure buildout' (contextual only, not load-bearing).",
+          "trigger_rationale": "All three core legs of the confirmed canonical chain (A101, A201, A301) are independently PRESENT with strong, concrete, TSM-specific evidence -- this is the most fully-evidenced composite trigger of the six tickers. A103 present only as optional supporting context, consistent with its OPTIONAL_SUPPORTING_ALPHA status (never treated as proof of a structural A103->A201 edge).",
+          "source_artifacts": [
+            "structured_agent_outputs.json (sentiment_agent, news_agent, fundamental_agent)"
+          ],
+          "sub_conditions": {
+            "A101": "PRESENT/STRONG",
+            "A201": "PRESENT/STRONG",
+            "A301": "PRESENT/STRONG",
+            "A103_optional_supporting": "PRESENT (contextual only)"
+          },
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        }
+      ]
+    },
+    "AMD": {
+      "tier": "SILVER_DIAGNOSTIC",
+      "blocking": false,
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "rules": [
+        {
+          "rule_id": "AMD-AI-GROWTH-VS-VALUATION",
+          "ticker": "AMD",
+          "tier": "SILVER_DIAGNOSTIC",
+          "blocking": false,
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "concept": "AI semiconductor competitor growth-vs-valuation conflict",
+          "evidence_condition": "Current AMD-specific evidence supports AI/semiconductor growth (A101 and/or A301) AND valuation-risk evidence (A304) coexisting.",
+          "trigger_state": "PRESENT",
+          "evidence_strength": "STRONG",
+          "supporting_fact_groups": [],
+          "supporting_claim_ids": [],
+          "contrary_fact_groups": [],
+          "contrary_claim_ids": [],
+          "ticker_specific": "DIRECT_TICKER",
+          "evidence_summary": "Growth side: PRESENT/STRONG -- 'strong demand for AMD's AI accelerators and server CPUs' (Instinct MI300/MI350/MI400 series named); '50% YoY revenue growth in the latest quarter with continued sequential acceleration' (fundamental_agent, Primary). Valuation-risk side: PRESENT/STRONG -- 'multiple compression could pressure AMD despite strong fundamentals'; 'At 122x trailing earnings, the stock is priced for perfection' (factors=[Valuation Risk]).",
+          "trigger_rationale": "Both composite legs independently present with concrete, TSM-... err AMD-specific quantified evidence (50% revenue growth; 122x trailing earnings). A201 (industry-wide semiconductor cycle) evidence is thinner/mixed (AMD noted as a 'relative laggard' vs NVDA in some claims) but is only an optional element of this rule's acceptable_alphas -- the primary growth trigger (A101+A301) is independently sufficient.",
+          "source_artifacts": [
+            "structured_agent_outputs.json (news_agent, fundamental_agent, bull_researcher, bear_researcher)"
+          ],
+          "sub_conditions": {
+            "growth_side_triggered_by": "A101 and A301",
+            "valuation_side": "A304 PRESENT"
+          },
+          "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+        }
+      ]
+    }
+  },
+  "special_negative_control_summary": {
+    "QQQ_A301_strong_ETF_level_evidence": "UNCERTAIN",
+    "SNDK_A101_strong_AI_evidence": "ABSENT",
+    "SNDK_A102_strong_inference_evidence": "ABSENT"
+  },
+  "special_composite_trigger_summary": {
+    "NVDA_Growth_vs_Valuation": "PRESENT",
+    "TSM_AI_to_Foundry_Transmission": "PRESENT",
+    "AMD_AI_Growth_vs_Valuation": "PRESENT"
+  },
+  "anti_leakage": {
+    "actual_detected_alphas_inspected": false,
+    "alpha_activations_inspected": false,
+    "actual_main_conflicts_inspected": false,
+    "acceptance_pass_fail_computed": false,
+    "release_status_computed": false,
+    "anti_leakage_violation": false,
+    "violation_detail": null,
+    "statement": "Only structured_agent_outputs.json (per-ticker, all six authoritative runs) was read as evidence source in this task, plus the frozen Gold v0.2 contract/manifest and the fresh-run ledger for authority verification. No alpha_activations.json, no structure_graph.json activation block, no alpha_matches.json matched_alpha field, no conflicts.json, and no final acceptance/PASS-FAIL artifact was opened."
+  },
+  "summary": {
+    "total_rules_evaluated": 19,
+    "present_rules": 13,
+    "absent_rules": 3,
+    "uncertain_rules": 3,
+    "formal_gold_trigger_counts": {
+      "PRESENT": 8,
+      "ABSENT": 3,
+      "UNCERTAIN": 2
+    },
+    "silver_trigger_counts": {
+      "PRESENT": 5,
+      "ABSENT": 0,
+      "UNCERTAIN": 1
+    },
+    "acceptance_result": "NOT_COMPUTED"
+  },
+  "evaluation_status": "EVIDENCE_ONLY_NOT_YET_COMPARED"
+}

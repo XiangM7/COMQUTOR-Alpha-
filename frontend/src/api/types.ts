@@ -301,6 +301,61 @@ export interface UnclassifiedFinding {
   display_rank: number;
 }
 
+// ---------------------------------------------------------------------------
+// Alpha Memory (Implementation Steps 1-4B) -- SHADOW ONLY. Historical
+// recurrence is descriptive/audit-only and never changes Activation,
+// Conflict, or Evidence qualification. `activation_modulation_applied` is
+// always `false` today -- render it as the authoritative "modulation off"
+// indicator, never assume/derive it from anything else.
+// ---------------------------------------------------------------------------
+
+export interface AlphaMemoryPhiStructure {
+  phi_id: string;
+  ticker: string;
+  alpha_id: string;
+  source: string;
+  edge_type: string;
+  target: string;
+  is_recurring: boolean;
+  has_prior_observation: boolean;
+  prior_observation_count: number;
+  prior_run_ids: string[];
+  /** Real metadata timestamps only -- null when genuinely unavailable,
+   * never fabricated. */
+  first_seen: string | null;
+  last_seen_prior: string | null;
+  current_seen_at?: string | null;
+}
+
+export interface AlphaMemorySummaryEntry {
+  alpha_id: string;
+  current_phi_count: number;
+  first_seen_phi_count: number;
+  recurring_phi_count: number;
+  /** null when current_phi_count is 0 -- never divide-by-zero-as-0. */
+  recurrence_ratio: number | null;
+  prior_observation_total: number;
+}
+
+export interface AlphaMemoryAggregateFingerprint {
+  aggregate_fingerprint_id: string;
+  alpha_id: string;
+}
+
+export interface AlphaMemorySection {
+  mode: "shadow";
+  activation_modulation_applied: false;
+  identity_model: string;
+  identity_version: string;
+  phi_structures: AlphaMemoryPhiStructure[];
+  alpha_memory_summary: AlphaMemorySummaryEntry[];
+  aggregate_fingerprints: AlphaMemoryAggregateFingerprint[];
+  instability_signals?: {
+    alpha_attribution_variance: unknown[];
+    edge_type_variance: unknown[];
+  };
+}
+
 export interface CanonicalResearchResponse {
   run_id: string;
   ticker: string | null;
@@ -331,6 +386,10 @@ export interface CanonicalResearchResponse {
   unclassified_findings_reason_counts?: Record<string, number>;
   unclassified_findings_status?: "ready" | "unavailable";
   unclassified_findings_download_available?: boolean;
+  /** Alpha Memory Implementation Step 4B. Absent/undefined on a raw
+   * payload predating Step 1; null for a historical run whose run_audit.json
+   * predates it. Never fabricated -- see AlphaMemorySection's own docstring. */
+  alpha_memory?: AlphaMemorySection | null;
 }
 
 export type CanonicalResearchResult = CanonicalResearchResponse | SafeErrorEnvelope;
@@ -976,6 +1035,13 @@ export interface HealthResponse {
 
 export type RealExecutionState = "disabled" | "configured" | "misconfigured";
 
+/** Live-research readiness guard (operational safety fix): "not_applicable"
+ * when real TradingAgents execution itself is disabled -- this never blocks
+ * offline/read-only readiness. Only "not_ready" (real execution enabled but
+ * Week2's LLM classifier or its own semantic Provider isn't) should ever
+ * disable the Start research button. */
+export type LiveSemanticPipelineState = "not_applicable" | "ready" | "not_ready";
+
 export interface ReadinessResponse {
   status: "ready" | "not_ready";
   database: "ready" | "unavailable";
@@ -985,6 +1051,11 @@ export interface ReadinessResponse {
    * "profile_invalid") -- never a config value or env var content. Null
    * unless real_execution is misconfigured. */
   real_execution_reason?: string | null;
+  live_semantic_pipeline: LiveSemanticPipelineState;
+  /** Safe reason label ("week2_llm_disabled" | "week2_provider_not_ready")
+   * -- never a config value or env var content. Null unless
+   * live_semantic_pipeline is "not_ready". */
+  live_semantic_pipeline_reason?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -1014,4 +1085,40 @@ export interface ReplayAllResult {
   results: ReplayAllRunResult[];
   provider_calls: number;
   tradingagents_calls: number;
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/alpha-library
+// ---------------------------------------------------------------------------
+
+/** One Alpha's canonical taxonomy definition (comqutor_alpha/alpha_library/
+ * alpha_taxonomy_v1.yaml, via GET /api/alpha-library). `invalidation_conditions`
+ * here is the Alpha's own definitional content -- it is NOT the same thing as
+ * the separately-versioned, separately-approved B5 invalidation registry
+ * (AlphaInvalidationEntry above, approval_status "approved"/"not_defined").
+ * This taxonomy list predates that approval workflow and carries no
+ * source/version/approval_status of its own -- never label it "approved" or
+ * "John-approved" in the UI, and never present it as output from the current
+ * research run. */
+export interface AlphaLibraryEntry {
+  alpha_id: string;
+  name_en: string;
+  name_cn: string;
+  layer: string;
+  status: string;
+  core_thesis: string;
+  keywords: string[];
+  trigger_signals: string[];
+  confirmation_signals: string[];
+  beneficiary_assets: string[];
+  risk_assets: string[];
+  conflict_alphas: { alpha_id: string; contradiction_weight: number }[];
+  invalidation_conditions: string[];
+  agent_sources: string[];
+}
+
+export interface AlphaLibraryResponse {
+  schema_version: string;
+  alpha_count: number;
+  alphas: AlphaLibraryEntry[];
 }

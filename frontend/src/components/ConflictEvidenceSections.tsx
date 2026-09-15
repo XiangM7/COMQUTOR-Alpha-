@@ -169,7 +169,7 @@ function MissingEvidenceSection({ items }: { items: ConflictMissingEvidenceItem[
     <section className="evidence-ui-section missing-evidence-section">
       <h4>Missing Evidence</h4>
       {items.length === 0 ? (
-        <p className="evidence-ui-section-empty">No B2 evidence gaps identified.</p>
+        <p className="evidence-ui-section-empty">No evidence gaps identified.</p>
       ) : (
         <ul>
           {items.map((item, index) => (
