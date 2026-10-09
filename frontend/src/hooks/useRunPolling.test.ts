@@ -171,4 +171,28 @@ describe("useRunPolling", () => {
     });
     await waitFor(() => expect(spy.mock.calls.length).toBeGreaterThan(1));
   });
+
+  it("records when each answer arrived, and nothing before the first one", async () => {
+    vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(statusRecord("running"));
+    const before = Date.now();
+
+    const { result } = renderHook(() => useRunPolling("run-1"));
+    expect(result.current.receivedAt).toBeNull();
+
+    await waitFor(() => expect(result.current.receivedAt).not.toBeNull());
+    expect(result.current.receivedAt).toBeGreaterThanOrEqual(before);
+    expect(result.current.receivedAt).toBeLessThanOrEqual(Date.now());
+  });
+
+  it("forgets the old run's answer time when the run changes", async () => {
+    vi.spyOn(client, "getResearchRunStatus")
+      .mockResolvedValueOnce(statusRecord("running", { run_id: "run-1" }))
+      .mockReturnValue(new Promise(() => undefined));
+
+    const { result, rerender } = renderHook(({ runId }) => useRunPolling(runId), { initialProps: { runId: "run-1" } });
+    await waitFor(() => expect(result.current.receivedAt).not.toBeNull());
+
+    rerender({ runId: "run-2" });
+    expect(result.current.receivedAt).toBeNull();
+  });
 });

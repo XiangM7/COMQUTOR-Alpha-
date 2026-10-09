@@ -1,0 +1,249 @@
+{
+  "schema_version": "alpha_dev_reserve_replacement_packet.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "purpose": "Blind adjudication packet for the 15 reserve samples drawn to replace development-set samples excluded under the frozen adjudication rubric (non-null ambiguity_flag). No system output of any kind is present.",
+  "system_predictions_included": false,
+  "note": "No COMQUTOR Alpha prediction, mapper score, system confidence, prior Alpha decision, or Candidate 1/2 output is present anywhere in this document. Fields mirror the development adjudication packet's own schema.",
+  "instructions_reference": "docs/audit_artifacts/v0_2_alpha_human_adjudication_rubric.md",
+  "taxonomy_reference": [
+    {
+      "alpha_id": "A001",
+      "name_en": "Rate Cut Cycle",
+      "core_thesis": "Falling rates lower discount rates and support long-duration growth assets."
+    },
+    {
+      "alpha_id": "A003",
+      "name_en": "Liquidity Expansion",
+      "core_thesis": "Improving liquidity supports risk appetite and equity inflows."
+    },
+    {
+      "alpha_id": "A101",
+      "name_en": "AI Expansion",
+      "core_thesis": "AI training and adoption increase demand for accelerators and AI-related equities."
+    },
+    {
+      "alpha_id": "A102",
+      "name_en": "Inference Explosion",
+      "core_thesis": "Enterprise AI applications and AI agents increase inference compute demand."
+    },
+    {
+      "alpha_id": "A103",
+      "name_en": "AI Infrastructure",
+      "core_thesis": "AI buildout drives datacenter, power, cooling, networking, and server demand."
+    },
+    {
+      "alpha_id": "A201",
+      "name_en": "Semiconductor Supercycle",
+      "core_thesis": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand."
+    },
+    {
+      "alpha_id": "A301",
+      "name_en": "Revenue Expansion",
+      "core_thesis": "Strong demand raises revenue guidance, EPS revisions, and repricing potential."
+    },
+    {
+      "alpha_id": "A304",
+      "name_en": "Multiple Compression",
+      "core_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals."
+    },
+    {
+      "alpha_id": "A501",
+      "name_en": "Recession Risk",
+      "core_thesis": "Widening credit spreads and economic slowdown pressure earnings and risk appetite."
+    },
+    {
+      "alpha_id": "A601",
+      "name_en": "Narrative Momentum",
+      "core_thesis": "Investor attention and crowded narratives drive reflexive flows and momentum."
+    }
+  ],
+  "label_field_instructions": {
+    "expected_label": "One canonical alpha_id from taxonomy_reference above, or the string 'NONE'. Leave null until adjudicated.",
+    "confidence": "'low' | 'medium' | 'high'. Leave null until adjudicated.",
+    "ambiguity_flag": "null, or one of: BOTH_REASONABLE_AMBIGUOUS | INSUFFICIENT_CONTEXT | NOT_A_SUBSTANTIVE_CLAIM | DUPLICATE_OR_NEAR_DUPLICATE",
+    "adjudication_reason": "Short free-text justification, required even for NONE. Leave null until adjudicated."
+  },
+  "sample_count": 15,
+  "samples": [
+    {
+      "replacement_slot": 1,
+      "sample_id": "nh-reserve-001",
+      "ticker": "TSM",
+      "run_id": "dfc7ceb3-3584-4514-bd84-6c371aab3e95",
+      "claim": "It challenges the \"indispensable\" narrative at the margin.",
+      "evidence": "It challenges the \"indispensable\" narrative at the margin.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 2,
+      "sample_id": "nh-reserve-002",
+      "ticker": "NVDA",
+      "run_id": "948be419-b542-4096-a536-ff567ef459c2",
+      "claim": "Metric: Gross Profit; Q1 FY26 (Apr-2026): $61.16B; Q4 FY25 (Jan-2026): $51.09B; Q3 FY25 (Oct-2025): $41.85B; Q2 FY25 (Jul-2025): $33.85B; Q1 FY25 (Apr-2025): $26.67B",
+      "evidence": "Metric: Gross Profit; Q1 FY26 (Apr-2026): $61.16B; Q4 FY25 (Jan-2026): $51.09B; Q3 FY25 (Oct-2025): $41.85B; Q2 FY25 (Jul-2025): $33.85B; Q1 FY25 (Apr-2025): $26.67B",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 3,
+      "sample_id": "nh-reserve-003",
+      "ticker": "TSM",
+      "run_id": "13e0948d-649d-4b54-8bf3-74e2828871a7",
+      "claim": "Metric: Cash & ST Investments; 2026-06-30: 3,518,013; 2026-03-31: 3,452,597; 2025-12-31: 3,128,068; 2025-09-30: 2,804,928; 2025-06-30: 2,681,746",
+      "evidence": "Metric: Cash & ST Investments; 2026-06-30: 3,518,013; 2026-03-31: 3,452,597; 2025-12-31: 3,128,068; 2025-09-30: 2,804,928; 2025-06-30: 2,681,746",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 4,
+      "sample_id": "nh-reserve-004",
+      "ticker": "GOOGL",
+      "run_id": "299bb6af-5217-422e-bd47-1b3b07c57192",
+      "claim": "Factor: Valuation; Bull View: PEG 0.91 = undervalued; Bear View (Evidence): PEG is undefined (flat earnings); 24x forward P/E is a premium to market with no earnings growth",
+      "evidence": "Factor: Valuation; Bull View: PEG 0.91 = undervalued; Bear View (Evidence): PEG is undefined (flat earnings); 24x forward P/E is a premium to market with no earnings growth",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 5,
+      "sample_id": "nh-reserve-005",
+      "ticker": "AMD",
+      "run_id": "_step5a_coverage_amd",
+      "claim": "Metric: Total Assets; 2021: $67.58B; 2022: $67.58B; 2023: $67.885B; 2024: $69.226B; 2025: $76.926B",
+      "evidence": "Metric: Total Assets; 2021: $67.58B; 2022: $67.58B; 2023: $67.885B; 2024: $69.226B; 2025: $76.926B",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 6,
+      "sample_id": "nh-reserve-006",
+      "ticker": "NVDA",
+      "run_id": "0e044e37-862c-43be-871c-31012cd660e7",
+      "claim": "Do not average down aggressively into a closing breach of the 200 SMA; respect the technicals if support fails.",
+      "evidence": "Do not average down aggressively into a closing breach of the 200 SMA; respect the technicals if support fails.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 7,
+      "sample_id": "nh-reserve-007",
+      "ticker": "MSFT",
+      "run_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb",
+      "claim": "And the revenue is already showing up.",
+      "evidence": "And the revenue is already showing up.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 8,
+      "sample_id": "nh-reserve-008",
+      "ticker": "SNDK",
+      "run_id": "52c23371-c374-4064-a91c-20c599ffa79c",
+      "claim": "The bear says \"hawkish macro pressures high-beta tech.\" I say \"SNDK's fundamentals are so strong that they overwhelm macro headwinds.\" When a company grows revenue 372% and generates $11.5 billion in FCF, the macro tape matters less than the company's own execution.",
+      "evidence": "The bear says \"hawkish macro pressures high-beta tech.\" I say \"SNDK's fundamentals are so strong that they overwhelm macro headwinds.\" When a company grows revenue 372% and generates $11.5 billion in FCF, the macro tape matters less than the company's own execution.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 9,
+      "sample_id": "nh-reserve-009",
+      "ticker": "NVDA",
+      "run_id": "948be419-b542-4096-a536-ff567ef459c2",
+      "claim": "The company raised guidance.",
+      "evidence": "The company raised guidance.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 10,
+      "sample_id": "nh-reserve-010",
+      "ticker": "AMD",
+      "run_id": "_step5a_coverage_amd",
+      "claim": "You also mention the \"emerging short-term stabilization\" and the flattening 10 EMA.",
+      "evidence": "You also mention the \"emerging short-term stabilization\" and the flattening 10 EMA.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 11,
+      "sample_id": "nh-reserve-011",
+      "ticker": "QQQ",
+      "run_id": "f239a53f-4ebe-455c-bb76-5f5485903901",
+      "claim": "Key catalysts to monitor: the September FOMC decision (hike vs.",
+      "evidence": "Key catalysts to monitor: the September FOMC decision (hike vs.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 12,
+      "sample_id": "nh-reserve-012",
+      "ticker": "TSM",
+      "run_id": "13e0948d-649d-4b54-8bf3-74e2828871a7",
+      "claim": "The 50-day SMA is declining, yes, but that is a lagging indicator.",
+      "evidence": "The 50-day SMA is declining, yes, but that is a lagging indicator.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 13,
+      "sample_id": "nh-reserve-013",
+      "ticker": "TSM",
+      "run_id": "43660d9d-5993-4d2d-a7d8-9b3a47fd59b8",
+      "claim": "But the palm pilot era was characterized by massive investment in infrastructure with minimal consumer adoption.",
+      "evidence": "But the palm pilot era was characterized by massive investment in infrastructure with minimal consumer adoption.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 14,
+      "sample_id": "nh-reserve-014",
+      "ticker": "QQQ",
+      "run_id": "a4dae9c5-0443-48ac-a313-10151922b923",
+      "claim": "The July 29 low of 32.43 is the level that produced the last durable bounce.",
+      "evidence": "The July 29 low of 32.43 is the level that produced the last durable bounce.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 15,
+      "sample_id": "nh-reserve-015",
+      "ticker": "MSFT",
+      "run_id": "64568bfb-fe0c-453c-9872-831a8dc339a0",
+      "claim": "A forward EPS estimate cut (which would re-rate the \"cheap\" 20.8x forward PE upward at the same price), OR",
+      "evidence": "A forward EPS estimate cut (which would re-rate the \"cheap\" 20.8x forward PE upward at the same price), OR",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    }
+  ]
+}

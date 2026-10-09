@@ -1,0 +1,52 @@
+{
+ "what_this_is": "For each PROBLEM TYPE behind John's original 34 items: was the new flow exercised on it in a REAL run (the fresh AMD run c904d4cc and the executions derived from it), and what is still uncovered. It says what the flow demonstrated. It does NOT say that any of the old 34 items was verified: they stay 未验证 and are never backfilled from newer material.",
+ "historical_run": "d5b60b8a-66b8-44c1-9f55-ee345e58c48d (evidence cutoff 2026-09-21): 46 news sources, 0 with a saved body; the 34 items are unchanged",
+ "new_flow_run": {
+  "run": "c904d4cc-dc09-495c-aec5-b056979948e1",
+  "selected_analysts": [
+   "market",
+   "news",
+   "fundamentals"
+  ],
+  "sources_by_type": {
+   "news": 30,
+   "market": 1,
+   "financial": 4
+  }
+ },
+ "problem_types": [
+  {
+   "type": "C: financial data never saved as a source (nothing to link to)",
+   "old_items": 14,
+   "old_producing_agent": "fundamental_agent",
+   "new_flow_exercised": true,
+   "evidence": "4 financial snapshots saved; 132 claims linked to financial sources, 48 of them verified-eligible; positive sample claim 31 traced end to end (Round 21)",
+   "still_uncovered": "claims whose verification failed technically (63 financial-linked claims are NOT_REVIEWED) are not yet shown verified"
+  },
+  {
+   "type": "C: sentiment data never saved as a source",
+   "old_items": 7,
+   "old_producing_agent": "sentiment_agent",
+   "new_flow_exercised": false,
+   "evidence": "the fresh run selected analysts ['market', 'news', 'fundamentals']: no sentiment analyst ran, so no sentiment source exists to test against",
+   "still_uncovered": "everything: this type has never been exercised by a real run of the new flow"
+  },
+  {
+   "type": "B: news source registered (title/URL) but its body never saved",
+   "old_items": 11,
+   "old_producing_agent": "news_agent",
+   "new_flow_exercised": false,
+   "evidence": "30 news sources saved with title/URL/publish time, 0 with a body; news_agent claims linked: 0. The problem type persists in the new run",
+   "still_uncovered": "a news item WITH a saved summary has never been seen in a real run; why none was saved (provider supplied none / parser did not read the field) cannot be told from existing runs. Round 22 adds raw-response saving and offline tests for with/without-summary shapes; no real fetch was made"
+  },
+  {
+   "type": "D: downstream agent restates upstream data that was never captured",
+   "old_items": 2,
+   "old_producing_agent": "bull_researcher, portfolio_manager",
+   "new_flow_exercised": "partly",
+   "evidence": "102 downstream analytical claims state a number; 79 link to a saved source and 6 are verified-eligible",
+   "still_uncovered": "downstream restatement of NEWS-derived data (no news body exists); and most linked downstream claims ended in technical verification failure or an unresolved status"
+  }
+ ],
+ "total_old_items": 34
+}

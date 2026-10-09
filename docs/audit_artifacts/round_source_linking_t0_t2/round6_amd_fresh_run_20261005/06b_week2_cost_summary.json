@@ -1,0 +1,31 @@
+{
+  "schema_version": "comqutor.llm_usage_stats.v1",
+  "logical_call_count": 555,
+  "actual_request_count": 450,
+  "retry_count_total": 4,
+  "calls_with_usage": 443,
+  "calls_missing_usage": 112,
+  "missing_usage_ratio": 0.201802,
+  "total_input_tokens": 897481,
+  "total_output_tokens": 317065,
+  "total_tokens_known": 1214546,
+  "cache_hit_count": 2,
+  "provider_status_counts": {
+    "timeout": 3,
+    "success": 443,
+    "not_called": 2,
+    "budget_exhausted": 107
+  },
+  "total_cost_usd": 0.324857,
+  "cost_basis_notes": {
+    "token_usage_unavailable": 112,
+    "pricing_table:deepseek:deepseek-v4-flash:off_peak_floor_estimate_see_usd_ceiling_for_peak_rate": 443
+  },
+  "per_provider_model": {
+    "deepseek:deepseek-v4-flash": {
+      "logical_call_count": 555,
+      "calls_with_usage": 443,
+      "calls_missing_usage": 112
+    }
+  }
+}

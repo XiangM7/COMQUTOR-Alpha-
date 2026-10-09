@@ -1,6 +1,7 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import * as client from "./api/client";
 import { makeRunRecord } from "./tests/factories";
@@ -15,6 +16,14 @@ function renderAt(path: string) {
 }
 
 describe("App routing", () => {
+  beforeEach(() => {
+    // Every page sits under the navigation bar, which shows server status.
+    vi.spyOn(client, "getReadiness").mockResolvedValue({
+      status: 200,
+      result: { status: "ready", database: "ready", job_manager: "ready", real_execution: "disabled", live_semantic_pipeline: "not_applicable" },
+    });
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -77,7 +86,10 @@ describe("App routing", () => {
 
     renderAt("/runs/run-abc/research");
     await waitFor(() => expect(screen.getByText(/run-abc/i)).toBeInTheDocument());
-    for (const link of screen.getAllByRole("link")) {
+    // The run-sections navigation, not the app's primary navigation (whose
+    // "Research" link points at the landing page).
+    const runNav = screen.getByRole("navigation", { name: "Research run sections" });
+    for (const link of within(runNav).getAllByRole("link")) {
       if (link.textContent === "Research") expect(link).toHaveAttribute("href", "/runs/run-abc/research");
       if (link.textContent === "Structure Graph") expect(link).toHaveAttribute("href", "/runs/run-abc/structure");
       if (link.textContent === "Conflict Radar") expect(link).toHaveAttribute("href", "/runs/run-abc/conflicts");
@@ -102,8 +114,17 @@ describe("App routing", () => {
     );
 
     renderAt("/runs/run-abc/processing");
-    await waitFor(() => expect(screen.getByText(/analyzing nvda/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("heading", { name: /analyzing nvda/i })).toBeInTheDocument());
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "43");
+  });
+
+  it("shows the server status in the navigation bar, on the Research page and elsewhere", async () => {
+    vi.spyOn(client, "getResearchHistory").mockResolvedValue({ status: "ok", items: [], next_cursor: null });
+
+    renderAt("/research");
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Server ready, live research disabled"));
+    // One /ready request serves both the status and the submit guard.
+    expect(client.getReadiness).toHaveBeenCalledTimes(1);
   });
 
   it("renders NotFoundPage for an unknown path", async () => {
@@ -146,25 +167,22 @@ describe("Recent runs routing", () => {
     );
   }
 
+  async function openRecentRun(status: (typeof cases)[number][0]) {
+    fireEvent.click(screen.getByRole("button", { name: /recent runs/i }));
+    return screen.findByRole("link", { name: new RegExp(status.toUpperCase()) });
+  }
+
   it.each(cases)("routes a %s run by mouse to %s", async (status, destination) => {
     renderRecentRun(status);
-    const row = (await screen.findByText(status.toUpperCase())).closest("tr");
-    expect(row).not.toBeNull();
-    fireEvent.click(row!);
+    fireEvent.click(await openRecentRun(status));
     expect(await screen.findByText(`${destination} destination`)).toBeInTheDocument();
   });
 
   it.each(cases)("routes a %s run by Enter to %s", async (status, destination) => {
+    const user = userEvent.setup();
     renderRecentRun(status);
-    const row = (await screen.findByText(status.toUpperCase())).closest("tr");
-    fireEvent.keyDown(row!, { key: "Enter" });
-    expect(await screen.findByText(`${destination} destination`)).toBeInTheDocument();
-  });
-
-  it.each(cases)("routes a %s run by Space to %s", async (status, destination) => {
-    renderRecentRun(status);
-    const row = (await screen.findByText(status.toUpperCase())).closest("tr");
-    fireEvent.keyDown(row!, { key: " " });
+    (await openRecentRun(status)).focus();
+    await user.keyboard("{Enter}");
     expect(await screen.findByText(`${destination} destination`)).toBeInTheDocument();
   });
 });

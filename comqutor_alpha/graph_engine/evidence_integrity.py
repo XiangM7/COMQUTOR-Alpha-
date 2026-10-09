@@ -54,6 +54,7 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     REGIME_GATE_MIN_TICKER_SPECIFIC,
     REGIME_GATE_MIN_UNIQUE_EVIDENCE,
 )
+from comqutor_alpha.graph_engine.claim_data_grounding import grounded_points
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     ALPHA_ACTIVATION_EVIDENCE_V1,
     EvidenceFactCandidate,
@@ -127,6 +128,14 @@ class _Candidate:
     # pass) -- kept as its own field since ``claim_text`` above is used
     # for display/output, not only for grouping.
     signature_text: str
+    # T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-26):
+    # this claim's own VALIDATED source_provenance link, if any -- see
+    # EvidenceFactCandidate's own docstring for why only a validated
+    # (never candidate/unvalidated) id is ever used as a merge signal.
+    linked_source_id: str | None = None
+    # T1 closure (claim_data_points.v1): see EvidenceFactCandidate. Empty unless the run opted in.
+    data_stated: tuple[str, ...] = ()
+    data_inputs: tuple[str, ...] = ()
 
 
 def _duplicate_group_index(
@@ -213,6 +222,13 @@ def _build_candidates(
                 event_signature=_event_signature(combined_text),
                 token_set=_token_set(claim_text),
                 signature_text=combined_text,
+                linked_source_id=(
+                    record.get("linked_source_id")
+                    if record.get("source_link_status") == "VALID" and record.get("linked_source_id")
+                    else None
+                ),
+                data_stated=grounded_points(record, "stated"),
+                data_inputs=grounded_points(record, "inputs"),
             )
         )
     return sorted(candidates, key=lambda c: c.claim_id)
@@ -241,6 +257,9 @@ def _group_candidates(candidates: Sequence[_Candidate], ticker: str) -> list[lis
             semantic_polarity=c.semantic_polarity,
             duplicate_group_id=c.duplicate_group_id,
             relation_triple=c.relation_triple,
+            linked_source_id=c.linked_source_id,
+            data_stated=c.data_stated,
+            data_inputs=c.data_inputs,
         )
         for c in candidates
     ]

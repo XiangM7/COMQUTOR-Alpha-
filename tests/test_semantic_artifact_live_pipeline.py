@@ -284,6 +284,15 @@ def test_cache_miss_integration_adds_only_sidecars_not_business_semantics(
         before = _without_dynamic_metadata(_load(legacy_root / run_id / filename))
         after = _without_dynamic_metadata(_load(integrated_root / run_id / filename))
         assert before == after, filename
+    # T4 round 32: stage_disclosure is DERIVED from the semantic-runtime sidecar ledger itself, so it legitimately differs
+    # between the two sides (no ledger -> "not_recorded"); every other response field must still be identical.
+    legacy_disclosure = legacy_response.pop("stage_disclosure")
+    integrated_disclosure = integrated_response.pop("stage_disclosure")
+    assert legacy_disclosure["source"].startswith("not_recorded") and legacy_disclosure["stages"] == []
+    assert {s["stage"] for s in integrated_disclosure["stages"]} == {
+        "claim_enrichment", "content_support_verification", "alpha_classification", "evidence_stance",
+        "structure_extraction", "structure_graph",
+    }
     assert _without_dynamic_metadata(legacy_response) == _without_dynamic_metadata(
         integrated_response
     )

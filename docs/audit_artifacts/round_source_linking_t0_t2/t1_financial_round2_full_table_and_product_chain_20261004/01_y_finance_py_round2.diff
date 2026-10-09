@@ -1,0 +1,197 @@
+--- /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/round2_pre_fix_snapshot_20261004/y_finance.py	2026-10-04 13:11:57
++++ tradingagents/dataflows/y_finance.py	2026-10-04 13:14:29
+@@ -571,6 +571,51 @@
+     if 355 <= gap_days <= 375:
+         return f"year-over-year, {current_label} vs {prior_label}"
+     return f"{current_label} vs {prior_label} (gap of {gap_days} days)"
++
++
++# Round 2 (2026-10-04): a small, well-known, stable set of yfinance
++# statement line items that are NOT a monetary amount -- not verified
++# against a live call this round (zero network), but these are documented,
++# stable field names, not a per-value guess. Every OTHER line item in a
++# balance sheet / cash flow / income statement is a monetary amount BY
++# DEFINITION of what these three statements are; that is a structural fact
++# about the statement type, not an assumption about any individual field.
++_PER_SHARE_STATEMENT_LINE_ITEMS = frozenset({"Basic EPS", "Diluted EPS"})
++_SHARE_COUNT_STATEMENT_LINE_ITEMS = frozenset(
++    {"Basic Average Shares", "Diluted Average Shares", "Ordinary Shares Number", "Share Issued", "Treasury Shares Number"}
++)
++_RATIO_STATEMENT_LINE_ITEMS = frozenset({"Tax Rate For Calcs"})
++
++
++def _statement_line_item_unit_kind(line_item: str) -> str:
++    """Real unit classification for one statement line item -- never
++    defaults every row to a bare currency amount without checking the small,
++    known set of non-monetary exceptions first (John task-sheet round-2
++    point 1: 'do not treat every statement row as an amount by default')."""
++    if line_item in _PER_SHARE_STATEMENT_LINE_ITEMS:
++        return "per_share_currency"
++    if line_item in _SHARE_COUNT_STATEMENT_LINE_ITEMS:
++        return "share_count"
++    if line_item in _RATIO_STATEMENT_LINE_ITEMS:
++        return "ratio_fraction"
++    return "currency"
++
++
++def _statement_unit_label(unit_kind: str) -> str:
++    """Per-line-item unit label. ``UNKNOWN_CURRENCY`` expresses ONLY that
++    the currency denomination is unknown (no new Provider call was made to
++    fetch it) -- it never stands in for not knowing the metric's TYPE, which
++    is instead determined structurally by ``_statement_line_item_unit_kind``
++    above."""
++    if unit_kind == "currency":
++        return "UNKNOWN_CURRENCY"
++    if unit_kind == "per_share_currency":
++        return "UNKNOWN_CURRENCY_per_share"
++    if unit_kind == "share_count":
++        return "shares"
++    if unit_kind == "ratio_fraction":
++        return "fraction_0_to_1"
++    return "unknown"
+ 
+ 
+ def _statement_source_ids(record_title: str) -> tuple[str, str]:
+@@ -584,7 +629,32 @@
+     return source_id, fragment_id_for(source_id, 0)
+ 
+ 
+-def _statement_summary_sentence(*, statement_type: str, canonical: str, freq: str, line_item: str, row) -> str:
++def _capture_all_line_items(full_table) -> tuple[dict[str, dict[str, object]], dict[str, str]]:
++    """Round 2 (2026-10-04, John task-sheet round-2 point 1): the Agent is
++    given the FULL table (every line item x every period, already
++    date-filtered by the caller) via the plain CSV dump
++    (``get_balance_sheet``/``get_cashflow``/``get_income_statement``'s own
++    ``data.to_csv()``) -- but until now only ONE summary line item's row was
++    ever captured into the source registry. This captures every real row
++    the Agent actually received, using the SAME already-fetched
++    ``full_table`` (zero new Provider request), each line item tagged with
++    its own real unit kind (never defaulted to a bare currency amount
++    without checking the known non-monetary exceptions first)."""
++    all_line_items: dict[str, dict[str, object]] = {}
++    line_item_units: dict[str, str] = {}
++    for line_item_name in full_table.index:
++        row_values: dict[str, object] = {}
++        for col in full_table.columns:
++            period_label = pd.Timestamp(col).strftime("%Y-%m-%d")
++            row_values[period_label] = _json_safe_number(full_table.loc[line_item_name, col])
++        all_line_items[str(line_item_name)] = row_values
++        line_item_units[str(line_item_name)] = _statement_unit_label(_statement_line_item_unit_kind(str(line_item_name)))
++    return all_line_items, line_item_units
++
++
++def _statement_summary_sentence(
++    *, statement_type: str, canonical: str, freq: str, line_item: str, row, full_table=None
++) -> str:
+     """Financial-STATEMENT source chain (2026-09-29, reuses the SAME
+     source_registry/gate/review/API/export machinery every other chain
+     already wired -- no parallel system).
+@@ -621,6 +691,15 @@
+     unchanged value, or a genuinely non-comparable prior value each get
+     their own honest, distinct phrasing -- never a default "remained
+     elevated" guess (the prior bug this round fixes).
++
++    Round 2 (2026-10-04, John task-sheet round-2 point 1): ``full_table``
++    (the SAME already-fetched, already-date-filtered DataFrame the caller's
++    own ``data.to_csv()`` dump gives the Agent in full) is now captured
++    entirely into ``data_snapshot["all_line_items"]``/``["line_item_units"]``
++    -- every row the Agent actually received, not only the one summary
++    ``line_item``. ``full_table=None`` (never happens from the three real
++    callers below, kept only so this function stays independently testable)
++    degrades to the pre-round-2 summary-only capture.
+     """
+     periods_desc = sorted(row.index, key=lambda c: pd.Timestamp(c), reverse=True)
+     latest_period = periods_desc[0]
+@@ -650,9 +729,39 @@
+ 
+     record_title = f"{canonical} {statement_type} {line_item} snapshot {period_label} ({freq})"
+     source_id, fragment_id = _statement_source_ids(record_title)
+-    excerpt = f"{canonical} {statement_type} ({freq}) {line_item}: " + "; ".join(
+-        f"{p}={v}" for p, v in all_periods.items()
+-    )
++    excerpt_parts = [
++        f"{canonical} {statement_type} ({freq}) {line_item}: "
++        + "; ".join(f"{p}={v}" for p, v in all_periods.items())
++    ]
++
++    data_snapshot: dict[str, object] = {
++        "statement_type": statement_type,
++        "line_item": line_item,
++        "value": latest_value,  # kept for backward compatibility: the latest period's own value
++        "freq": freq,
++        "periods": all_periods,  # every period this tool call actually returned, not only the latest
++        "comparison": comparison,  # None when fewer than 2 genuinely comparable periods exist
++    }
++
++    if full_table is not None:
++        all_line_items, line_item_units = _capture_all_line_items(full_table)
++        data_snapshot["all_line_items"] = all_line_items
++        data_snapshot["line_item_units"] = line_item_units
++        # Extend the excerpt to cover every OTHER real row the Agent also
++        # received (not only the summary line_item above) -- so a claim
++        # that restates a non-summary row's own real value can still be
++        # found by match_evidence_to_source_candidates' real, existing
++        # exact-substring mechanism (never a fabricated marker injected into
++        # the plain CSV text itself, which this round does not touch).
++        for other_name, other_periods in all_line_items.items():
++            if other_name == line_item:
++                continue  # already included in excerpt_parts[0] above
++            excerpt_parts.append(
++                f"{canonical} {statement_type} ({freq}) {other_name}: "
++                + "; ".join(f"{p}={v}" for p, v in other_periods.items())
++            )
++
++    excerpt = " | ".join(excerpt_parts)
+     record_source(
+         {
+             "source_type": "financial",
+@@ -666,16 +775,13 @@
+             "observation_date": period_label,
+             # yfinance's statement DataFrames carry no currency metadata;
+             # fetching it would require a new Provider call this function
+-            # does not make -- honestly unknown, never assumed USD.
++            # does not make -- honestly unknown, never assumed USD. This is
++            # the SUMMARY line_item's own unit; see
++            # data_snapshot["line_item_units"] for every other row's real,
++            # individually-classified unit (per-share/share-count/ratio
++            # exceptions are never lumped in as a bare currency amount).
+             "unit": "UNKNOWN_CURRENCY",
+-            "data_snapshot": {
+-                "statement_type": statement_type,
+-                "line_item": line_item,
+-                "value": latest_value,  # kept for backward compatibility: the latest period's own value
+-                "freq": freq,
+-                "periods": all_periods,  # every period this tool call actually returned, not only the latest
+-                "comparison": comparison,  # None when fewer than 2 genuinely comparable periods exist
+-            },
++            "data_snapshot": data_snapshot,
+         }
+     )
+ 
+@@ -735,7 +841,7 @@
+ 
+         line_item, row = _pick_first_present_row(data, _BALANCE_SHEET_LINE_ITEM_CANDIDATES)
+         summary_sentence = (
+-            _statement_summary_sentence(statement_type="balance sheet", canonical=canonical, freq=freq, line_item=line_item, row=row)
++            _statement_summary_sentence(statement_type="balance sheet", canonical=canonical, freq=freq, line_item=line_item, row=row, full_table=data)
+             if line_item is not None
+             else ""
+         )
+@@ -777,7 +883,7 @@
+ 
+         line_item, row = _pick_first_present_row(data, _CASHFLOW_LINE_ITEM_CANDIDATES)
+         summary_sentence = (
+-            _statement_summary_sentence(statement_type="cash flow", canonical=canonical, freq=freq, line_item=line_item, row=row)
++            _statement_summary_sentence(statement_type="cash flow", canonical=canonical, freq=freq, line_item=line_item, row=row, full_table=data)
+             if line_item is not None
+             else ""
+         )
+@@ -819,7 +925,7 @@
+ 
+         line_item, row = _pick_first_present_row(data, _INCOME_STATEMENT_LINE_ITEM_CANDIDATES)
+         summary_sentence = (
+-            _statement_summary_sentence(statement_type="income statement", canonical=canonical, freq=freq, line_item=line_item, row=row)
++            _statement_summary_sentence(statement_type="income statement", canonical=canonical, freq=freq, line_item=line_item, row=row, full_table=data)
+             if line_item is not None
+             else ""
+         )

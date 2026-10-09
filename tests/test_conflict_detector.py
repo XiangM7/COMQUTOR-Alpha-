@@ -67,13 +67,26 @@ def _audit_for_alpha(item, alpha_id):
 
 
 class TestTaxonomyPairEnumeration:
-    def test_six_mandatory_pairs_enumerated_exactly_once(self):
+    def test_six_mandatory_pairs_are_among_the_declared_pairs(self):
+        # PD-017-REVISED (docs/specs/product_decisions_and_unknowns.md):
+        # the real taxonomy now declares 8 canonical pairs -- the original 6
+        # MANDATORY_CONFLICT_WEIGHTS (still exactly 6, unchanged -- "mandatory"
+        # and "canonically declared" are no longer the same set) plus the two
+        # newly-approved conditional_only pairs (A102__A304, A201__A304).
+        # This test only asserts the mandatory 6 remain a subset of whatever
+        # is declared -- it is not, and should not be, an exact-count gate.
         result = _detect(activation_payload(), [])
-        assert result["arbitration"]["declared_pair_count"] == 6
-        assert len(result["arbitration"]["candidate_evaluations"]) == 6
         pairs = {(c["alpha_a"], c["alpha_b"]) for c in result["arbitration"]["candidate_evaluations"]}
-        expected = {tuple(sorted(pair)) for pair in MANDATORY_CONFLICT_WEIGHTS}
-        assert pairs == expected
+        expected_mandatory = {tuple(sorted(pair)) for pair in MANDATORY_CONFLICT_WEIGHTS}
+        assert expected_mandatory.issubset(pairs)
+
+    def test_all_eight_declared_pairs_enumerated_exactly_once(self):
+        result = _detect(activation_payload(), [])
+        assert result["arbitration"]["declared_pair_count"] == 8
+        assert len(result["arbitration"]["candidate_evaluations"]) == 8
+        pairs = {(c["alpha_a"], c["alpha_b"]) for c in result["arbitration"]["candidate_evaluations"]}
+        assert ("A102", "A304") in pairs
+        assert ("A201", "A304") in pairs
 
     def test_bidirectional_declaration_collapses_to_one_candidate(self):
         taxonomy = two_alpha_taxonomy("A101", "A304", weight_a_to_b=0.9)
@@ -82,26 +95,30 @@ class TestTaxonomyPairEnumeration:
         assert len(result["arbitration"]["candidate_evaluations"]) == 1
 
     def test_undeclared_pair_never_computed(self):
+        # A103 remains genuinely undeclared (conflict_alphas == []) -- used
+        # here instead of A102__A304, which is now a real declared pair.
         result = _detect(activation_payload(), [])
         pairs = {(c["alpha_a"], c["alpha_b"]) for c in result["arbitration"]["candidate_evaluations"]}
-        assert canonical_pair_key("A102", "A304") not in pairs
+        assert canonical_pair_key("A103", "A304") not in pairs
 
-    def test_a102_a304_never_appears_as_a_candidate(self):
+    def test_a103_a304_never_appears_as_a_candidate(self):
         # Same intent as the previous test, phrased as its own explicit gate
-        # per the W4.1 task's checklist item #33.
+        # per the W4.1 task's checklist item #33 -- A103 remains genuinely
+        # undeclared (A102__A304 is now a real declared pair, so it no
+        # longer demonstrates "never a candidate").
         result = _detect(
             activation_payload(
-                activation_entry("A102", score=90, status="dominant", direction="positive"),
+                activation_entry("A103", score=90, status="dominant", direction="positive"),
                 activation_entry("A304", score=90, status="dominant", direction="negative"),
             ),
             [
-                match_record("c1", "A102", relation="activation"),
+                match_record("c1", "A103", relation="activation"),
                 match_record("c2", "A304", relation="activation"),
             ],
         )
         serialized = json.dumps(result)
-        assert "A102__A304" not in serialized
-        assert "A304__A102" not in serialized
+        assert "A103__A304" not in serialized
+        assert "A304__A103" not in serialized
 
     def test_weights_are_read_from_the_real_taxonomy_not_hardcoded(self):
         result = _detect(activation_payload(), [])
@@ -1261,7 +1278,9 @@ class TestInputValidation:
 
     def test_official_activation_formula_version_is_accepted(self):
         result = _detect(activation_payload(), [])
-        assert result["arbitration"]["declared_pair_count"] == 6
+        # 8 canonically declared pairs (PD-017-REVISED added A102__A304,
+        # A201__A304 on top of the original 6 mandatory pairs).
+        assert result["arbitration"]["declared_pair_count"] == 8
 
     @pytest.mark.parametrize("payload", [{"alphas": []}, {"formula_version": "", "alphas": []}])
     def test_missing_or_empty_activation_formula_version_is_rejected(self, payload):
@@ -1315,14 +1334,14 @@ class TestInputValidation:
         result = _detect(activation, [])
         assert result["conflicts"] == []
         assert result["main_conflict"] is None
-        assert result["arbitration"]["rejected_count"] == 6
+        assert result["arbitration"]["rejected_count"] == 8
         for item in result["arbitration"]["candidate_evaluations"]:
             assert item["reason_codes"] == ["RUN_ID_MISMATCH"]
 
     def test_embedded_ticker_mismatch_rejects_all_candidates(self):
         activation = {**activation_payload(), "ticker": "SOME_OTHER_TICKER"}
         result = _detect(activation, [])
-        assert result["arbitration"]["rejected_count"] == 6
+        assert result["arbitration"]["rejected_count"] == 8
         for item in result["arbitration"]["candidate_evaluations"]:
             assert item["reason_codes"] == ["TICKER_MISMATCH"]
 
@@ -1343,7 +1362,7 @@ class TestInputValidation:
     def test_match_record_with_mismatching_embedded_run_id_rejects_all(self):
         matches = [{**match_record("cA", "A101"), "run_id": "other_run"}]
         result = _detect(activation_payload(), matches)
-        assert result["arbitration"]["rejected_count"] == 6
+        assert result["arbitration"]["rejected_count"] == 8
 
 
 class TestExplanationLanguageGuard:
@@ -1415,8 +1434,10 @@ class TestNoTickerSpecificProductionCode:
 
 class TestSinglePairHelper:
     def test_pair_not_declared_is_rejected(self):
+        # A103 remains genuinely undeclared (A102__A304 is now a real
+        # declared pair per PD-017-REVISED).
         result = evaluate_conflict_pair(
-            "A102", "A304", activation_payload=activation_payload(), alpha_matches=[]
+            "A103", "A304", activation_payload=activation_payload(), alpha_matches=[]
         )
         assert result["outcome"] == "rejected"
         assert result["reason_codes"] == ["PAIR_NOT_DECLARED"]
@@ -1440,32 +1461,94 @@ class TestSinglePairHelper:
         assert result["outcome"] == "admitted"
         assert result["conflict"]["conflict_id"] == "A101__A304"
 
+    def test_evaluate_conflict_pair_is_never_used_by_any_real_production_path(self):
+        """T1 verified-support eligibility gate follow-up (2026-09-28):
+        this helper is confirmed NOT reachable from any real API route,
+        page, or official-result flow -- detect_alpha_conflicts (via
+        conflict_engine.pipeline.run_week4_conflict_pipeline) is the only
+        production entrypoint. Pins that fact down as an executable
+        assertion (not just a comment) by checking the real module's own
+        source for the one call site this repository is allowed to have."""
+        detector_source = inspect.getsource(conflict_detector)
+        call_sites = detector_source.count("evaluate_conflict_pair(")
+        # Exactly one occurrence: the function's own `def` line. Zero
+        # internal callers -- if a future change makes detect_alpha_
+        # conflicts or any pipeline call this helper, this count changes
+        # and this test must be revisited deliberately, never silently.
+        assert call_sites == 1
+
+    def test_evaluate_conflict_pair_also_supports_the_verified_eligibility_gate(self):
+        """Defensive parity, not currently exercised by any real caller:
+        proves the gate-support parameters this helper accepts (added
+        2026-09-28 specifically so a 'secondary' function is never
+        silently a bypass route) actually work, exactly like detect_alpha_
+        conflicts's own gate support -- an evidence set that would admit
+        under the raw pool is correctly refused once structured_records/
+        sources are supplied and the claims are genuinely unreviewed."""
+        structured_records = [
+            {"claim_id": "cA", "source_link_status": "NOT_PROVIDED"},
+            {"claim_id": "cA2", "source_link_status": "NOT_PROVIDED"},
+            {"claim_id": "cB", "source_link_status": "NOT_PROVIDED"},
+            {"claim_id": "cB2", "source_link_status": "NOT_PROVIDED"},
+        ]
+        result = evaluate_conflict_pair(
+            "A304",
+            "A101",
+            activation_payload=activation_payload(
+                activation_entry("A101", score=90, direction="positive"),
+                activation_entry("A304", score=90, direction="negative"),
+            ),
+            alpha_matches=[
+                match_record("cA", "A101"),
+                match_record("cA2", "A101"),
+                match_record("cB", "A304"),
+                match_record("cB2", "A304"),
+            ],
+            ticker=TICKER,
+            structured_records=structured_records,
+            sources=[],
+        )
+        assert result["outcome"] != "admitted"
+        assert "admissibility_diagnostic_unverified" in result
+        assert result["admissibility_diagnostic_unverified"]["status"] == "admitted"
+
 
 class TestMSFTBoundary:
-    """MSFT's Golden Case (A102 vs A304) is a product-specification conflict
-    documented as BLOCKED_BY_SPEC_CONFLICT in
-    docs/week4_spec_freeze_audit.md -- not a per-run suppressed/deferred
-    candidate. This class only pins down that the boundary holds; it does
-    not implement, fixture, or otherwise attempt the MSFT Golden Case
-    itself."""
+    """MSFT's Golden Case (A102 vs A304) was historically a product-
+    specification conflict documented as BLOCKED_BY_SPEC_CONFLICT in
+    docs/week4_spec_freeze_audit.md (that historical document is preserved
+    unchanged below). **That taxonomy boundary itself has since been
+    reopened and reversed (PD-017-REVISED,
+    docs/specs/product_decisions_and_unknowns.md): A102__A304 is now a real,
+    canonical, conditional_only-governed declared pair.** This class now
+    pins down the OPPOSITE boundary -- that A102__A304 genuinely is
+    declared and evaluable -- while leaving the historical spec-freeze
+    document's own text untouched (it is a dated audit record, not live
+    configuration)."""
 
-    def test_a102_a304_is_not_declared_in_the_real_taxonomy(self):
+    def test_a102_a304_is_now_declared_in_the_real_taxonomy(self):
         taxonomy = load_alpha_taxonomy()
         a102_conflicts = {c.alpha_id for c in taxonomy["A102"].conflict_alphas}
         a304_conflicts = {c.alpha_id for c in taxonomy["A304"].conflict_alphas}
-        assert "A304" not in a102_conflicts
-        assert "A102" not in a304_conflicts
+        assert "A304" in a102_conflicts
+        assert "A102" in a304_conflicts
 
-    def test_real_taxonomy_loader_never_returns_a102_a304_as_a_declared_pair(self):
+    def test_real_taxonomy_loader_now_returns_a102_a304_as_a_declared_pair(self):
         result = _detect(activation_payload(), [])  # uses the real default taxonomy
         pairs = {(c["alpha_a"], c["alpha_b"]) for c in result["arbitration"]["candidate_evaluations"]}
-        assert canonical_pair_key("A102", "A304") not in pairs
-        assert result["arbitration"]["declared_pair_count"] == 6
+        assert canonical_pair_key("A102", "A304") in pairs
+        assert result["arbitration"]["declared_pair_count"] == 8
 
-    def test_detector_never_generates_a102_a304_even_with_strong_evidence_for_both(self):
-        # Even with strong, well-formed evidence for A102 and A304
-        # individually, the pair must never be synthesized -- admissibility
-        # requires taxonomy declaration first, and A102-A304 has none.
+    def test_detector_can_admit_a102_a304_given_strong_evidence_for_both(self):
+        # Being declared makes the pair EVALUABLE, not automatically
+        # admitted -- this uses well-formed, sufficient (per
+        # conflict_admissibility.py's MIN_SUPPORTING_EVIDENCE_PER_SIDE=2,
+        # MIN_TICKER_SPECIFIC_SUPPORT_PER_SIDE=1, ALPHA_SCORE_THRESHOLD=50.0)
+        # evidence on both sides to prove the pair can now genuinely be
+        # admitted when the evidence actually supports it -- never
+        # synthesized without taxonomy declaration, and never forced when
+        # declared but unsupported (see the conditional_only tests in
+        # tests/test_acceptance_rules.py for the unsupported case).
         result = _detect(
             activation_payload(
                 activation_entry("A102", score=95, status="dominant", direction="positive"),
@@ -1473,16 +1556,17 @@ class TestMSFTBoundary:
             ),
             [
                 match_record("c1", "A102", score=1.0, relation="activation"),
+                match_record("c1b", "A102", score=1.0, relation="activation"),
                 match_record("c2", "A304", score=1.0, relation="activation"),
+                match_record("c2b", "A304", score=1.0, relation="activation"),
             ],
         )
         pairs = {(c["alpha_a"], c["alpha_b"]) for c in result["arbitration"]["candidate_evaluations"]}
-        assert canonical_pair_key("A102", "A304") not in pairs
+        assert canonical_pair_key("A102", "A304") in pairs
         conflict_ids = {c["conflict_id"] for c in result["conflicts"]}
-        assert "A102__A304" not in conflict_ids
-        assert "A304__A102" not in conflict_ids
+        assert "A102__A304" in conflict_ids or "A304__A102" in conflict_ids
 
-    def test_single_pair_helper_rejects_a102_a304_as_not_declared(self):
+    def test_single_pair_helper_now_evaluates_a102_a304_instead_of_rejecting_as_undeclared(self):
         result = evaluate_conflict_pair(
             "A102",
             "A304",
@@ -1492,10 +1576,11 @@ class TestMSFTBoundary:
             ),
             alpha_matches=[match_record("c1", "A102"), match_record("c2", "A304")],
         )
-        assert result["outcome"] == "rejected"
-        assert result["reason_codes"] == ["PAIR_NOT_DECLARED"]
+        # Declared now -- rejected (if at all) for an evidentiary reason,
+        # never PAIR_NOT_DECLARED.
+        assert result["reason_codes"] != ["PAIR_NOT_DECLARED"]
 
-    def test_spec_freeze_audit_still_documents_msft_as_blocked(self):
+    def test_spec_freeze_audit_historical_document_preserved_unchanged(self):
         from pathlib import Path
 
         doc_path = Path(__file__).resolve().parents[1] / "docs" / "week4_spec_freeze_audit.md"

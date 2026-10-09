@@ -44,13 +44,27 @@ from __future__ import annotations
 import json
 import logging
 import math
+from collections.abc import Mapping
 from typing import Any
 
+from comqutor_alpha.source_provenance import (
+    SOURCE_LINK_VALID,
+    STATUS_UNAVAILABLE,
+    classify_verified_support_diagnostic,
+    public_source_fields,
+    resolve_external_source_for_claim,
+    resolve_fragment_by_id,
+    resolve_source_by_id,
+)
 from comqutor_alpha.storage.db.repository import (
     GraphPersistenceError,
     build_repository_from_env,
 )
-from comqutor_alpha.storage.file_store import run_dir_for, validate_run_id_for_path
+from comqutor_alpha.storage.file_store import (
+    load_json_record_if_exists,
+    run_dir_for,
+    validate_run_id_for_path,
+)
 from comqutor_alpha.structure_engine.claim_quality import (
     CONSUMER_PRODUCT_FINDINGS,
     is_claim_eligible,
@@ -73,6 +87,15 @@ STRUCTURED_ARTIFACT_FILENAME = "structured_agent_outputs.json"
 # debate_history, investment_plan, final_trade_decision, an adapter raw
 # preview, or any other field not listed here -- is silently dropped, never
 # copied into the response.
+#
+# external_source/external_source_status (John MVP Final Gap Closure --
+# Structured External Source Traceability) are the one deliberate exception
+# to "copied from the raw record via _project_public_record": they are
+# never present on the raw record at all -- _annotate_external_sources
+# computes and attaches them afterward, from a deterministic, read-time
+# join against this run's own source_registry.json. Listed here so the
+# whitelist remains the single source of truth for "every key this endpoint
+# may return", which is what this module's own tests check against.
 PUBLIC_STRUCTURED_OUTPUT_FIELDS = frozenset(
     {
         "claim_id",
@@ -89,6 +112,8 @@ PUBLIC_STRUCTURED_OUTPUT_FIELDS = frozenset(
         "direction",
         "confidence",
         "source_type",
+        "external_source",
+        "external_source_status",
         "output_type",
         "source_refs",
         "claim_index",
@@ -96,6 +121,42 @@ PUBLIC_STRUCTURED_OUTPUT_FIELDS = frozenset(
         "assertion_status",
         "semantic_polarity",
         "extraction_method",
+        # T1 source-linking chain (COMQUTOR Alpha next-round task,
+        # 2026-09-26): unlike external_source/external_source_status (a
+        # read-time title-match join computed below), these four are
+        # computed and PERSISTED at structured-extraction time
+        # (comqutor_alpha.structure_engine.structured_output_adapter's own
+        # _annotate_source_link) via ID-based validation against this run's
+        # source_registry.json -- copied through as-is like any other
+        # adapter-produced field. source_link_status/content_support_status
+        # are two deliberately separate axes (see
+        # comqutor_alpha.source_provenance's own module docstring):
+        # SOURCE_LINK_VALID never implies SUPPORT_SUPPORTS.
+        "source_link_status",
+        "linked_source_id",
+        # source_link_method (2026-09-28): distinguishes an explicit Agent
+        # citation (AGENT_CITED, validated against exactly what this
+        # extraction step's own request offered) from the auxiliary
+        # content-based matcher (CONTENT_MATCH_CANDIDATE) -- never let a
+        # UI/reviewer confuse an explicit reference with a same-text
+        # coincidence.
+        "source_link_method",
+        "content_support_status",
+        "content_support_method",
+        "content_support_review",
+        # linked_source, like external_source above, is never present on
+        # the raw record -- _annotate_validated_source_link resolves it
+        # afterward from linked_source_id against this run's own registry.
+        "linked_source",
+        # verified_support_diagnostic (2026-09-29 gate-bypass closing fix):
+        # like linked_source, never present on the raw record --
+        # _annotate_verified_support_diagnostic computes it afterward via
+        # comqutor_alpha.source_provenance.classify_verified_support_
+        # diagnostic, distinguishing "this claim's source type has no real
+        # linking mechanism yet" from "linking was attempted and failed"
+        # from "linked and simply awaiting review" -- never inferred from a
+        # bare source_link_status alone.
+        "verified_support_diagnostic",
     }
 )
 
@@ -125,6 +186,11 @@ _OPTIONAL_SCALAR_TEXT_FIELDS = (
     "assertion_status",
     "semantic_polarity",
     "extraction_method",
+    "source_link_status",
+    "linked_source_id",
+    "source_link_method",
+    "content_support_status",
+    "content_support_method",
 )
 
 _ERROR_MESSAGES = {
@@ -192,6 +258,53 @@ def _validate_confidence(value: Any) -> float:
     _require(math.isfinite(number))
     _require(0.0 <= number <= 1.0)
     return number
+
+
+_CONTENT_SUPPORT_REVIEW_FIELDS = frozenset(
+    {
+        "schema_version",
+        "status",
+        "method",
+        "reviewer",
+        "rationale",
+        "reviewed_at",
+        "claim_id",
+        "linked_source_id",
+        "content_hash",
+    }
+)
+
+# Historical records persisted before the 2026-09-28 claim/source/content-
+# version binding was added to build_content_support_review/
+# apply_content_support_review (see source_provenance.py) lack these three
+# keys entirely. They must still read back compatibly -- never rejected as
+# corrupted, and never backfilled as if a binding had been verified.
+_CONTENT_SUPPORT_REVIEW_OPTIONAL_FIELDS = frozenset({"claim_id", "linked_source_id", "content_hash"})
+
+
+def _validate_content_support_review(value: Any) -> dict[str, Any] | None:
+    """content_support_review (T1 follow-up, 2026-09-28): a small, fixed-
+    shape audit record (comqutor_alpha.source_provenance.
+    build_content_support_review/apply_content_support_review) -- validated
+    and whitelist-projected exactly like every other field here, never a
+    raw passthrough of whatever the persisted record happens to contain.
+
+    ``claim_id``/``linked_source_id``/``content_hash`` bind a review to the
+    exact claim, source, and content version it was judged against (added
+    2026-09-28). Older persisted records predate this binding and legally
+    omit all three -- they are read back as ``None``, never defaulted to a
+    verified binding."""
+    if value is None:
+        return None
+    _require(isinstance(value, Mapping))
+    _require(set(value) <= _CONTENT_SUPPORT_REVIEW_FIELDS)
+    _require(_CONTENT_SUPPORT_REVIEW_FIELDS - _CONTENT_SUPPORT_REVIEW_OPTIONAL_FIELDS <= set(value))
+    for key in ("schema_version", "status", "method"):
+        _require(isinstance(value.get(key), str) and value[key].strip() != "")
+    for key in ("reviewer", "rationale", "reviewed_at", "claim_id", "linked_source_id", "content_hash"):
+        _require(value.get(key) is None or isinstance(value.get(key), str))
+    projected = {key: value.get(key) for key in _CONTENT_SUPPORT_REVIEW_FIELDS if key in value or key not in _CONTENT_SUPPORT_REVIEW_OPTIONAL_FIELDS}
+    return projected
 
 
 def _validate_claim_index(value: Any) -> int:
@@ -271,6 +384,8 @@ def _project_public_record(record: dict[str, Any], *, run_id: str, ticker: str) 
         projected["source_refs"] = _validate_flat_str_list(record["source_refs"])
     if "claim_index" in record:
         projected["claim_index"] = _validate_claim_index(record["claim_index"])
+    if "content_support_review" in record:
+        projected["content_support_review"] = _validate_content_support_review(record["content_support_review"])
 
     return projected
 
@@ -327,6 +442,148 @@ def _read_structured_payload(run_id: str, output_root: Any) -> dict[str, Any]:
             public_records.append(projected)
 
     return {"ticker": ticker, "schema_version": schema_version, "records": public_records}
+
+
+def _load_source_registry(run_id: str, output_root: Any) -> list[dict[str, Any]]:
+    """Best-effort load of this run's ``source_registry.json`` -- absent
+    entirely for a historical run predating this feature, or a run with no
+    genuine sources captured. Never raises: a missing/corrupted registry
+    degrades to "no sources available" rather than failing the whole
+    agent-outputs response."""
+    try:
+        registry = load_json_record_if_exists(run_id, "source_registry.json", output_root=output_root)
+    except Exception:
+        return []
+    if not isinstance(registry, dict):
+        return []
+    sources = registry.get("sources")
+    return sources if isinstance(sources, list) else []
+
+
+def _annotate_external_sources(
+    records: list[dict[str, Any]], sources: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """John MVP Final Gap Closure -- Structured External Source
+    Traceability: purely additive read-time join. Never mutates, rewrites,
+    or reorders anything already in ``records`` -- only ever appends two new
+    keys (``external_source``, ``external_source_status``) computed by a
+    deterministic substring match (see comqutor_alpha.source_provenance),
+    never by an LLM. Records already in ``records`` keep every one of their
+    existing fields unchanged."""
+    if not sources:
+        for record in records:
+            record["external_source"] = None
+            record["external_source_status"] = STATUS_UNAVAILABLE
+        return records
+    for record in records:
+        match, status = resolve_external_source_for_claim(
+            claim=record.get("claim"), evidence=record.get("evidence"), sources=sources
+        )
+        record["external_source"] = public_source_fields(match) if match else None
+        record["external_source_status"] = status
+    return records
+
+
+def _annotate_validated_source_link(
+    records: list[dict[str, Any]], sources: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """T1 source-linking chain (COMQUTOR Alpha next-round task,
+    2026-09-26): re-resolves the record's own already-persisted,
+    already-validated ``linked_source_id`` (from
+    ``comqutor_alpha.structure_engine.structured_output_adapter``'s
+    extraction-time ``_annotate_source_link`` -- ID-based, never a
+    read-time title match) against THIS run's own registry, and attaches
+    the full public source object as ``linked_source`` -- so a UI can show
+    the real excerpt/title/url a claim's ``source_link_status ==
+    SOURCE_LINK_VALID`` actually points to, distinct from the legacy
+    ``external_source`` title-match join above. Never mutates
+    ``source_link_status``/``linked_source_id`` themselves -- those already
+    came from ``_project_public_record``'s whitelist copy-through; this
+    only adds the resolved object alongside them. A record with no
+    validated link (or a historical record predating this field) gets
+    ``linked_source: None``, never a fabricated value.
+    """
+    for record in records:
+        linked_id = record.get("linked_source_id")
+        if record.get("source_link_status") != SOURCE_LINK_VALID or not linked_id:
+            record["linked_source"] = None
+            continue
+        resolved = resolve_fragment_by_id(linked_id, sources) or resolve_source_by_id(linked_id, sources)
+        record["linked_source"] = public_source_fields(resolved) if resolved else None
+    return records
+
+
+def _load_cited_source_lists(
+    run_id: str, output_root: Any, records: list[dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    """Round 19: supplies the plural citation list (``linked_source_ids``) of
+    the claims whose review binds a source OTHER than the primary
+    ``linked_source_id``.
+
+    ``source_provenance.compute_verified_support_eligibility`` accepts such a
+    review only when its source is one of the claim's cited sources. The
+    structured-output adapter produces that list, but the ``agent_outputs``
+    table has no column for it and the public whitelist above omits it, so a
+    DB-served record reached the read-time diagnostic with the primary link
+    alone and was wrongly reported ``REVIEW_SOURCE_NOT_LINKED_TO_CLAIM`` while
+    the stored result (computed from the full record) is ``ELIGIBLE``.
+
+    This reads the run's own saved ``structured_agent_outputs.json`` -- the
+    file the rows were persisted from -- and only when at least one record
+    needs it. Best-effort and read-only: it never raises, never changes a
+    public field or any stored result, ignores a claim whose primary link
+    disagrees with the artifact's, and a run without the artifact gets
+    ``{}`` (exactly the previous behaviour)."""
+
+    def binds_non_primary_source(record: dict[str, Any]) -> bool:
+        review = record.get("content_support_review")
+        bound = review.get("linked_source_id") if isinstance(review, dict) else None
+        return bool(bound) and bound != record.get("linked_source_id")
+
+    if not any(binds_non_primary_source(record) for record in records):
+        return {}
+    try:
+        payload = load_json_record_if_exists(run_id, STRUCTURED_ARTIFACT_FILENAME, output_root=output_root)
+    except Exception:
+        return {}
+    saved = payload.get("records") if isinstance(payload, dict) else None
+    if not isinstance(saved, list):
+        return {}
+    cited: dict[str, dict[str, Any]] = {}
+    for item in saved:
+        if not isinstance(item, dict):
+            continue
+        claim_id, ids = item.get("claim_id"), item.get("linked_source_ids")
+        if isinstance(claim_id, str) and isinstance(ids, list) and ids and all(isinstance(i, str) and i for i in ids):
+            cited[claim_id] = {"linked_source_id": item.get("linked_source_id"), "linked_source_ids": list(ids)}
+    return cited
+
+
+def _annotate_verified_support_diagnostic(
+    records: list[dict[str, Any]],
+    sources: list[dict[str, Any]],
+    cited_source_lists: dict[str, dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Gate-bypass closing fix (2026-09-29): attaches ``verified_support_
+    diagnostic`` (``{"category": ..., "reason_code": ...}``), explaining
+    WHY this claim does or does not count as verified support at a level
+    suitable for direct display -- distinguishing a source-type coverage
+    gap from a per-claim reference problem from a normal pending-review
+    state. Never mutates source_link_status/content_support_status/
+    content_support_review themselves; purely additive, like linked_source
+    above.
+
+    ``cited_source_lists`` (round 19, see ``_load_cited_source_lists``) feeds
+    the saved ``linked_source_ids`` to the DIAGNOSTIC ONLY: the public record
+    is not given the field, and it is applied only when the artifact's
+    primary link equals this record's."""
+    for record in records:
+        subject = record
+        cited = (cited_source_lists or {}).get(record.get("claim_id"))
+        if cited and not record.get("linked_source_ids") and cited.get("linked_source_id") == record.get("linked_source_id"):
+            subject = {**record, "linked_source_ids": cited["linked_source_ids"]}
+        record["verified_support_diagnostic"] = classify_verified_support_diagnostic(subject, sources)
+    return records
 
 
 def get_agent_outputs_response(
@@ -404,6 +661,12 @@ def get_agent_outputs_response(
                     public_records.append(projected)
         except AgentOutputsReadError:
             return _error_response(safe_run_id, "AGENT_OUTPUTS_CORRUPTED")
+        sources = _load_source_registry(safe_run_id, output_root)
+        public_records = _annotate_external_sources(public_records, sources)
+        public_records = _annotate_validated_source_link(public_records, sources)
+        public_records = _annotate_verified_support_diagnostic(
+            public_records, sources, _load_cited_source_lists(safe_run_id, output_root, public_records)
+        )
         return {
             "run_id": safe_run_id,
             "ticker": ticker,
@@ -432,6 +695,12 @@ def get_agent_outputs_response(
         return _error_response(safe_run_id, "AGENT_OUTPUTS_UNAVAILABLE")
 
     structured_records = parsed["records"]
+    sources = _load_source_registry(safe_run_id, output_root)
+    structured_records = _annotate_external_sources(structured_records, sources)
+    structured_records = _annotate_validated_source_link(structured_records, sources)
+    structured_records = _annotate_verified_support_diagnostic(
+        structured_records, sources, _load_cited_source_lists(safe_run_id, output_root, structured_records)
+    )
     return {
         "run_id": safe_run_id,
         "ticker": parsed["ticker"],

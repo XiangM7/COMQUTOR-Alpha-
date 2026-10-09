@@ -57,12 +57,29 @@ _POSITIONING_PATTERN = re.compile(
 
 _RECESSION_RELIEF_PATTERNS = (
     re.compile(
-        r"\b(?:low|lower|falling|declining|receding|easing|limited|contained)\s+"
+        r"\b(?:low|lower|falling|declining|receding|easing|limited|contained|diminishing)\s+"
         r"(?:u s )?(?:recession|slowdown)\s+(?:risk|probability)\b"
     ),
     re.compile(
         r"\b(?:recession|slowdown)\s+(?:risk|probability)\s+(?:is |remains )?"
-        r"(?:low|lower|falling|declining|receding|easing|limited|contained)\b"
+        r"(?:low|lower|falling|declining|receding|easing|limited|contained|diminishing)\b"
+    ),
+    # 2026-10-02 (NVDA joint-review A501/A304 reverse-evidence fix): the two
+    # patterns above require the easing adjective directly adjacent to
+    # "risk"/"probability" (at most one copula word between them) -- a real
+    # NVDA run showed two common, equally-explicit recession-risk-easing
+    # constructions neither pattern covers: (1) "risk is A [adjective]
+    # concern" (an article plus a noun, not the copula+adjective shape above),
+    # and (2) "risk at N% and falling" (a quantitative aside between the noun
+    # and the easing verb). Both are still grammatically anchored to
+    # "recession/slowdown risk|probability" itself, not a bare keyword window.
+    re.compile(
+        r"\b(?:recession|slowdown)\s+(?:risk|probability)\s+is\s+a\s+"
+        r"(?:diminishing|low|lower|falling|declining|receding|easing|limited|contained)\s+concern\b"
+    ),
+    re.compile(
+        r"\b(?:recession|slowdown)\s+(?:risk|probability)\s+at\s+\d+(?:\.\d+)?%\s+and\s+"
+        r"(?:falling|declining|receding|easing)\b"
     ),
     re.compile(r"\bcredit spreads\s+(?:are )?(?:tightening|narrowing)\b"),
     re.compile(r"\b(?:recession|economic slowdown)\s+(?:is )?unlikely\b"),
@@ -73,6 +90,21 @@ _VALUATION_RELIEF_PATTERNS = (
     re.compile(r"\bmultiple (?:expansion|re rating)\b"),
     re.compile(r"\bmultiples?\s+(?:are )?(?:expanding|recovering|re rating)\b"),
     re.compile(r"\bdiscount rates?\s+(?:are )?(?:falling|declining|easing)\b"),
+    # 2026-10-02 (NVDA joint-review A501/A304 reverse-evidence fix): the four
+    # patterns above all require the text to directly assert that valuation
+    # RISK/multiples/discount rates are moving -- they miss the equally
+    # common, equally explicit "valuation is cheap relative to growth"
+    # framing (a PEG-ratio or growth-vs-multiple argument), which asserts the
+    # same underlying thing (compression risk is not materializing) from the
+    # growth side rather than the multiple/discount-rate side. A real NVDA
+    # run showed three concrete grammatical forms of this: a low PEG ratio
+    # cited as evidence growth outpaces the multiple; an explicit "objectively
+    # cheap/undemanding" valuation assertion; and a bull's own rebuttal that
+    # the bear's "valuation risk" framing does not apply. All three are still
+    # grammatically anchored phrases, not a bare keyword window.
+    re.compile(r"\bpeg\b.{0,20}\b(?:unusually\s+)?low\b"),
+    re.compile(r"\bobjectively (?:cheap|undemanding)\b"),
+    re.compile(r"\bisn.t (?:a|an) valuation argument\b"),
 )
 _RATE_CUT_INVALIDATION_PATTERN = re.compile(
     r"\b(zero (?:fed )?rate cuts?|no (?:fed )?rate cuts?|higher for longer|"
@@ -86,6 +118,92 @@ _RATE_CUT_INVALIDATION_PATTERN = re.compile(
     r"rate hikes?|hike odds|probability of a hike|odds of a hike|hawkish|"
     r"(?:rising yields|yields? (?:rising|rose|are rising|is rising)))\b"
 )
+# 2026-10-01 (AI-review comparison round): the hike/odds alternatives above
+# are bare substring matches with no awareness of a word that REDUCES or
+# REVERSES the hawkish pressure they report -- "rate hike BETS WANE" or
+# "hike odds FADE" describe hawkish pressure DECREASING, the opposite of
+# what the base pattern assumes. Confirmed as a real false positive:
+# execution t3live_20261001T014648Z_1fb9c9d5's prod-run-008 ("...calmer
+# yields as rate hike bets wane...This is a supportive macro backdrop...")
+# matched bare "rate hike" and was classified NEGATIVE_OR_HAWKISH despite
+# the claim's own explicit conclusion being supportive, not hawkish.
+#
+# 2026-10-01, scope-validation follow-up: an initial version of this guard
+# used a bare character-WINDOW around the hike/odds match (any reducing word
+# within N chars either side). That is too loose on two counts, both
+# confirmed by direct test:
+#   1. "Rate hike bets do NOT wane" -- a window scan sees "wane" and
+#      suppresses, ignoring that "do not" immediately negates it (a double
+#      negative must stay hawkish, not be read as reduced).
+#   2. "Rate hike odds rise; stocks fall." -- a window scan sees "fall" and
+#      suppresses, even though "fall" is the predicate of an entirely
+#      different subject ("stocks") in a separate clause after a semicolon,
+#      not of "hike odds" at all.
+# The fix is not a bigger or smaller window (the task explicitly rules that
+# out) but grammatical precision: the reducing word must be the DIRECT
+# predicate of the hike/odds phrase itself (optionally through one
+# connecting noun -- "bets"/"expectations"/"probability" -- and an optional
+# "are"/"is"), never merely nearby. A "not"/"never"/"don't"/"doesn't"/
+# "didn't" immediately before the reducing verb cancels the reduction.
+# Scoped ONLY to the hike/odds alternatives: "no fed rate cuts", "hawkish",
+# "higher for longer", and "rising yields" are untouched and remain
+# unconditional matches (already covered by existing tests in
+# tests/test_qqq_a001_mapping_remediation.py, including the "rate-hike odds
+# PAST 60%" case, which correctly stays hawkish since nothing there reduces
+# it).
+_HIKE_PRESSURE_ALTERNATIVES_PATTERN = re.compile(
+    r"\b(?:rate hikes?|hike odds|probability of a hike|odds of a hike)\b"
+)
+_REDUCING_VERBS_FRAGMENT = (
+    r"wanes?|waning|waned|fades?|fading|faded|falls?|falling|fell|"
+    r"drops?|dropping|dropped|recedes?|receding|receded|eases?|easing|eased|"
+    r"declines?|declining|declined|diminish(?:es|ing|ed)?|subsides?|subsiding|subsided|"
+    r"cooling?|cooled|softening|softened"
+)
+# Direct predicate of the hike/odds phrase: optionally through "bets"/
+# "expectations"/"probability", optionally negated (captured, so the caller
+# can detect and cancel a double negative), optionally through "are"/"is",
+# then the reducing verb itself -- no open-ended wildcard between any of
+# these pieces, so it can never reach into an unrelated clause.
+_HIKE_PRESSURE_TRAILING_REDUCTION_PATTERN = re.compile(
+    r"\b(?:rate hikes?|hike odds|probability of a hike|odds of a hike)\b"
+    r"(?:\s+(?:bets?|expectations?|probabilit(?:y|ies)))?"
+    r"\s+(?P<negated>(?:do|does|did)\s+not\s+|don'?t\s+|doesn'?t\s+|didn'?t\s+|never\s+)?"
+    r"(?:are\s+|is\s+)?"
+    r"(?:" + _REDUCING_VERBS_FRAGMENT + r")\b"
+)
+# Direct adjectival modifier before the hike/odds phrase ("waning rate-hike
+# bets", "fading hike odds") -- same direct-adjacency requirement, no
+# negation handling needed since "not waning rate hikes" is not idiomatic
+# English and is not a case this round's evidence raised.
+_HIKE_PRESSURE_LEADING_REDUCTION_PATTERN = re.compile(
+    r"\b(?:" + _REDUCING_VERBS_FRAGMENT + r")\s+"
+    r"(?:rate hikes?|hike odds|probability of a hike|odds of a hike)\b"
+)
+# Bounds how far back the leading-reduction search looks, purely to limit
+# the slice size -- the pattern itself still requires direct adjacency, so
+# this is not a reintroduction of the loose window the trailing case above
+# replaced.
+_HIKE_LEADING_SEARCH_CHARS = 40
+
+
+def _rate_cut_invalidation_matches(text: str) -> bool:
+    """``_RATE_CUT_INVALIDATION_PATTERN.search(text)``, with the hike/odds
+    alternatives guarded against being the direct target of a reducing word
+    (see above). Checks every match (not just the first) so a neutralized
+    hike/odds mention doesn't hide a separate, genuine hawkish signal
+    elsewhere in the text."""
+    for match in _RATE_CUT_INVALIDATION_PATTERN.finditer(text):
+        if not _HIKE_PRESSURE_ALTERNATIVES_PATTERN.fullmatch(match.group(0)):
+            return True
+        trailing = _HIKE_PRESSURE_TRAILING_REDUCTION_PATTERN.match(text, match.start())
+        if trailing and not trailing.group("negated"):
+            continue
+        leading_slice = text[max(0, match.start() - _HIKE_LEADING_SEARCH_CHARS) : match.end()]
+        if _HIKE_PRESSURE_LEADING_REDUCTION_PATTERN.search(leading_slice):
+            continue
+        return True
+    return False
 _INVALIDATION_PATTERN = re.compile(
     r"\b(demand (?:peaks?|weakens?|slows?|falls?|declines?)|"
     r"capex (?:cuts?|falls?|declines?|is delayed)|"
@@ -194,7 +312,7 @@ def alpha_relation(text: Any, alpha_id: str) -> str:
         return "risk_relief"
     if alpha_id == "A304" and valuation_risk_is_relief(normalized):
         return "risk_relief"
-    if alpha_id == "A001" and _RATE_CUT_INVALIDATION_PATTERN.search(normalized):
+    if alpha_id == "A001" and _rate_cut_invalidation_matches(normalized):
         return "invalidation"
     if alpha_id in OPPORTUNITY_ALPHA_IDS and _INVALIDATION_PATTERN.search(normalized):
         return "invalidation"
@@ -235,7 +353,10 @@ def alpha_specific_invalidation_matched(text: Any, alpha_id: str) -> bool:
     pattern = ALPHA_SPECIFIC_INVALIDATION_PATTERNS.get(alpha_id)
     if pattern is None:
         return False
-    return bool(pattern.search(normalize_text(text)))
+    normalized = normalize_text(text)
+    if pattern is _RATE_CUT_INVALIDATION_PATTERN:
+        return _rate_cut_invalidation_matches(normalized)
+    return bool(pattern.search(normalized))
 
 
 # ---------------------------------------------------------------------------
@@ -307,8 +428,11 @@ _A001_AFFIRMATIVE_EXPECTATION_PATTERNS = (
 # veto, unchanged): adds the Step-7A.1-identified negative phrasings that
 # don't fit the veto's own narrow "core thesis is false" framing as cleanly
 # but are still unambiguous NEGATIVE_OR_HAWKISH signals for this gate.
-_A001_NEGATIVE_OR_HAWKISH_PATTERNS = (
-    _RATE_CUT_INVALIDATION_PATTERN,
+# _RATE_CUT_INVALIDATION_PATTERN itself is checked separately, via the
+# reduction-scope-guarded `_rate_cut_invalidation_matches` (see above) --
+# NOT included directly in this tuple, so a raw `_matches_any` scan can never
+# bypass that guard.
+_A001_NEGATIVE_OR_HAWKISH_SECONDARY_PATTERNS = (
     re.compile(r"\bcuts?\b.{0,30}\b(?:delayed|pushed back|postponed)\b"),
     re.compile(r"\bfewer cuts?\b.{0,15}\bexpected\b"),
     re.compile(r"\bcuts?\b.{0,15}\bless likely\b"),
@@ -353,7 +477,9 @@ def classify_a001_directional_semantics(text: Any) -> str:
     normalized = normalize_text(text)
     if not normalized:
         return "NO_RATE_SEMANTICS"
-    if _matches_any(_A001_NEGATIVE_OR_HAWKISH_PATTERNS, normalized):
+    if _rate_cut_invalidation_matches(normalized) or _matches_any(
+        _A001_NEGATIVE_OR_HAWKISH_SECONDARY_PATTERNS, normalized
+    ):
         return "NEGATIVE_OR_HAWKISH"
     if _matches_any(_A001_MENTION_ONLY_PATTERNS, normalized):
         return "CONDITIONAL_OR_UNCERTAIN"

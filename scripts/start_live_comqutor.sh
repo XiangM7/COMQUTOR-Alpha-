@@ -32,19 +32,71 @@ source "$REPO_ROOT/.venv/bin/activate"
 # --- 3. load .env safely (never let it define the safety-critical vars --
 #        those are always forced explicitly in step 4, below, regardless of
 #        whatever .env contains) ---------------------------------------------
+# 2026-10-02 incident fix: a caller (e.g. the isolated-database launcher,
+# docs/audit_artifacts/round_source_linking_t0_t2/
+# run_nvda_fresh_run_isolated_db.sh) may already have exported
+# COMQUTOR_DATABASE_URL before invoking this script, specifically to
+# override whatever .env's own value is. Sourcing .env below with `set -a`
+# previously clobbered that override silently the moment .env defined its
+# own COMQUTOR_DATABASE_URL -- this is exactly what caused a real NVDA
+# research run to write 2111 rows into the production database instead of
+# the isolated comqutor_alpha_test one (see docs/audit_artifacts/
+# round_source_linking_t0_t2/incident_prod_db_writes_20261002/
+# INCIDENT_REPORT_AND_CLEANUP_PLAN.md for the full incident, and
+# comqutor_alpha.storage.db.engine.enforce_required_database_name for the
+# independent second-layer guard added in the same fix). The caller's own
+# explicit choice, captured here before .env is ever sourced, is restored
+# immediately after -- it always wins over .env. When no caller override
+# exists (the normal case: a developer running this script directly), the
+# captured value is empty and .env's own value flows through exactly as
+# before -- zero behavior change for that case.
+#
+# 2026-10-06 generalization (AMD Fresh Run preflight, round 7): the exact
+# same clobber risk was reproduced for COMQUTOR_WEEK2_LLM_MAX_RETRIES --
+# .env defines it as 1, so a caller exporting 0 (required for this run's
+# "zero retries at both layers" budget constraint) was silently overwritten
+# back to 1 by the unconditional `source .env` below, before this fix. Every
+# var in this list gets the identical capture-before/restore-after
+# treatment; .env is still the only source of truth for any var a caller
+# does NOT already have exported.
+# Plain indexed-array parallel lists, not an associative array -- this
+# script's shebang resolves to the stock macOS /bin/bash (3.2.57), which has
+# no `declare -A` support; a 3.2-incompatible construct here would crash the
+# launcher before it ever reaches the real preflight checks below (caught
+# and fixed during this same round's own zero-cost preflight, before any
+# real Provider spend).
+# 2026-10-08 (T4): COMQUTOR_JOB_TIMEOUT_SECONDS joins the list for the same
+# reason -- .env defines it (7200), and an isolated instance's explicitly
+# chosen job timeout must not be silently reset by the .env source below.
+_CALLER_OVERRIDE_VARS=(COMQUTOR_DATABASE_URL COMQUTOR_WEEK2_LLM_MAX_RETRIES COMQUTOR_JOB_TIMEOUT_SECONDS)
+_CALLER_OVERRIDE_VALUES=()
+for _var in "${_CALLER_OVERRIDE_VARS[@]}"; do
+  _CALLER_OVERRIDE_VALUES+=("${!_var:-}")
+done
 if [[ -f "$REPO_ROOT/.env" ]]; then
   set -a
   # shellcheck disable=SC1091
   source "$REPO_ROOT/.env"
   set +a
 fi
+for _i in "${!_CALLER_OVERRIDE_VARS[@]}"; do
+  _var="${_CALLER_OVERRIDE_VARS[$_i]}"
+  _val="${_CALLER_OVERRIDE_VALUES[$_i]}"
+  if [[ -n "$_val" ]]; then
+    export "$_var=$_val"
+  fi
+done
 
 # --- 4. explicitly export the required live-research environment -----------
 export COMQUTOR_REAL_TRADINGAGENTS_ENABLED=true
 export COMQUTOR_WEEK2_LLM_ENABLED=true
-export COMQUTOR_CORS_ORIGINS="http://127.0.0.1:5175"
+# 2026-10-08 (T4): a separate, isolated live instance (its own port and its
+# own frontend origin) may set COMQUTOR_LIVE_API_PORT /
+# COMQUTOR_LIVE_FRONTEND_ORIGIN; .env never defines either, and unset keeps
+# the permanent 8000 / 5175 pair exactly as before.
+export COMQUTOR_CORS_ORIGINS="${COMQUTOR_LIVE_FRONTEND_ORIGIN:-http://127.0.0.1:5175}"
 export COMQUTOR_API_HOST="127.0.0.1"
-export COMQUTOR_API_PORT="8000"
+export COMQUTOR_API_PORT="${COMQUTOR_LIVE_API_PORT:-8000}"
 
 # --- 5. default force_refresh to false unless the operator's own shell/.env
 #        already set it -- never silently enabled by this launcher ---------
@@ -109,7 +161,7 @@ echo "Real TradingAgents : $(state_label "$REAL_STATE")"
 echo "Week2 Semantic LLM : $(state_label "$WEEK2_STATE")"
 echo "Semantic Provider  : $(state_label_ready "$PROVIDER_STATE")"
 echo "API                : ${COMQUTOR_API_HOST}:${COMQUTOR_API_PORT}"
-echo "Frontend CORS      : 127.0.0.1:5175"
+echo "Frontend CORS      : ${COMQUTOR_CORS_ORIGINS}"
 echo "========================================"
 
 # --- 10. if ANY required condition fails: exit non-zero, do not start ------

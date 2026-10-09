@@ -1,0 +1,493 @@
+==================================================================
+[0a zip sha256] 2026-10-09T18:29:35Z
+cwd: /Users/xiangmao/COMQUTOR-Alpha-
+$ shasum -a 256 /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/T4_delivery_round31_20261009.zip
+6f11b68844598b12e31ba36d0a2e756b133a1e17be76593eefebf1af555ec89b  /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/T4_delivery_round31_20261009.zip
+exit_code: 0
+==================================================================
+[0b zip size and entry count] 2026-10-09T18:29:36Z
+cwd: /Users/xiangmao/COMQUTOR-Alpha-
+$ bash -c ls -l '/Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/T4_delivery_round31_20261009.zip'; unzip -Z1 '/Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/T4_delivery_round31_20261009.zip' | grep -v '/$' | wc -l
+-rw-r--r--@ 1 xiangmao  staff  30827964 Oct  9 11:29 /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/T4_delivery_round31_20261009.zip
+     255
+exit_code: 0
+==================================================================
+[0c unzip into a new empty directory] 2026-10-09T18:29:36Z
+cwd: /Users/xiangmao/COMQUTOR-Alpha-
+$ unzip -q /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/T4_delivery_round31_20261009.zip -d /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL
+exit_code: 0
+==================================================================
+[1-6 verify_package (sha256 per file, references + README commands, statistics, export, secrets incl. .env values, identity)] 2026-10-09T18:29:38Z
+cwd: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery
+$ python3 tools/verify_package.py --env /Users/xiangmao/COMQUTOR-Alpha-/.env --out /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/verify_package_result.json
+1_manifest: PASS
+2_references: PASS
+3_statistics: PASS
+4_export: PASS
+5_secrets: PASS
+6_identity: PASS
+optional_chapters: PASS
+{
+ "package": "T4_delivery",
+ "1_manifest": {
+  "files_listed": 254,
+  "missing": [],
+  "mismatched": [],
+  "unlisted": [],
+  "ok": true
+ },
+ "2_references": {
+  "report_paths_checked": 87,
+  "missing_paths": [],
+  "readme_commands": 11,
+  "readme_problems": [],
+  "ok": true
+ },
+ "3_statistics": {
+  "exit_code": 0,
+  "summary": [
+   "cross-checks: {\"run2.check_pool_ledger_equals_structure_graph\": true, \"run2.check_ledger_rows_equal_claims\": true, \"run2.check_reservations_equal_wire_audit_equal_attempts\": true, \"run2.check_cs_identity\": true, \"run1.check_pool_ledger_equals_structure_graph\": true, \"run1.check_ledger_rows_equal_claims\": true, \"run1.check_reservations_equal_wire_audit_equal_attempts\": true, \"run1.check_cs_identity\": true} | missing values written as 0/NONE/empty: {\"run2.ledger_missing_written_as_zero_or_none\": 0, \"run1.ledger_missing_written_as_zero_or_none\": 0}",
+   "figures: 70, mismatched: 0, not cited: 0"
+  ],
+  "ok": true
+ },
+ "4_export": {
+  "run2_12591384": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_download_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_equals_api": true,
+   "equals_sha_recorded_in_round30": true,
+   "ok": true
+  },
+  "run1_fa642639": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_download_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_equals_api": true,
+   "ok": true
+  },
+  "ok": true
+ },
+ "5_secrets": {
+  "blobs_scanned": 361,
+  "hits": [],
+  "hit_count": 0,
+  "env_value_keys_checked": [
+   "ANTHROPIC_API_KEY",
+   "COMQUTOR_DATABASE_URL:password",
+   "COMQUTOR_TEST_DATABASE_URL:password",
+   "DEEPSEEK_API_KEY",
+   "POSTGRES_PASSWORD"
+  ],
+  "redacted_header_or_field_values_seen": {
+   "placeholder": 5,
+   "REDACTED": 2246
+  },
+  "fixture_or_redacted_matches": {
+   "api_key_sk:sk-testsecret0123456789abcdef": 2,
+   "db_url_with_password:pass": 2,
+   "db_url_with_password:p": 3,
+   "db_url_with_password:***REDACTED***": 3,
+   "db_url_with_password:fake": 24
+  },
+  "ok": true
+ },
+ "6_identity": {
+  "tracked_diff_file_sha256": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+  "untracked_recomputed": "38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad",
+  "run2_12591384": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "run1_fa642639": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "ok": true
+ },
+ "optional_chapters": {
+  "results": [
+   {
+    "video": "video/fresh_run2_12591384/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/frozen_round27/t4_demo_frozen.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/fresh_run1_fa642639/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   }
+  ],
+  "ok": true
+ },
+ "all_ok": true
+}
+exit_code: 0
+==================================================================
+[README command 1 (as written)] 2026-10-09T18:30:24Z
+cwd: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery
+$ python3 tools/verify_package.py
+1_manifest: PASS
+2_references: PASS
+3_statistics: PASS
+4_export: PASS
+5_secrets: PASS
+6_identity: PASS
+optional_chapters: PASS
+{
+ "package": "T4_delivery",
+ "1_manifest": {
+  "files_listed": 254,
+  "missing": [],
+  "mismatched": [],
+  "unlisted": [],
+  "ok": true
+ },
+ "2_references": {
+  "report_paths_checked": 87,
+  "missing_paths": [],
+  "readme_commands": 11,
+  "readme_problems": [],
+  "ok": true
+ },
+ "3_statistics": {
+  "exit_code": 0,
+  "summary": [
+   "cross-checks: {\"run2.check_pool_ledger_equals_structure_graph\": true, \"run2.check_ledger_rows_equal_claims\": true, \"run2.check_reservations_equal_wire_audit_equal_attempts\": true, \"run2.check_cs_identity\": true, \"run1.check_pool_ledger_equals_structure_graph\": true, \"run1.check_ledger_rows_equal_claims\": true, \"run1.check_reservations_equal_wire_audit_equal_attempts\": true, \"run1.check_cs_identity\": true} | missing values written as 0/NONE/empty: {\"run2.ledger_missing_written_as_zero_or_none\": 0, \"run1.ledger_missing_written_as_zero_or_none\": 0}",
+   "figures: 70, mismatched: 0, not cited: 0"
+  ],
+  "ok": true
+ },
+ "4_export": {
+  "run2_12591384": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_download_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_equals_api": true,
+   "equals_sha_recorded_in_round30": true,
+   "ok": true
+  },
+  "run1_fa642639": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_download_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_equals_api": true,
+   "ok": true
+  },
+  "ok": true
+ },
+ "5_secrets": {
+  "blobs_scanned": 361,
+  "hits": [],
+  "hit_count": 0,
+  "env_value_keys_checked": [],
+  "redacted_header_or_field_values_seen": {
+   "placeholder": 5,
+   "REDACTED": 2246
+  },
+  "fixture_or_redacted_matches": {
+   "api_key_sk:sk-testsecret0123456789abcdef": 2,
+   "db_url_with_password:pass": 2,
+   "db_url_with_password:p": 3,
+   "db_url_with_password:***REDACTED***": 3,
+   "db_url_with_password:fake": 24
+  },
+  "ok": true
+ },
+ "6_identity": {
+  "tracked_diff_file_sha256": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+  "untracked_recomputed": "38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad",
+  "run2_12591384": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "run1_fa642639": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "ok": true
+ },
+ "optional_chapters": {
+  "results": [
+   {
+    "video": "video/fresh_run2_12591384/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/frozen_round27/t4_demo_frozen.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/fresh_run1_fa642639/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   }
+  ],
+  "ok": true
+ },
+ "all_ok": true
+}
+exit_code: 0
+==================================================================
+[README command 2 (as written): offline statistics rebuild vs report] 2026-10-09T18:31:14Z
+cwd: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery
+$ python3 tools/rebuild_stats.py
+OK   run2.claims report= 951 rebuilt= 951 
+OK   run2.ledger_rows report= 951 rebuilt= 951 
+OK   run2.alpha_final_match report= 164 rebuilt= 164 
+OK   run2.alpha_final_none report= 787 rebuilt= 787 
+OK   run2.alpha_classification_unavailable report= 0 rebuilt= 0 
+OK   run2.alpha_raw_model_selection report= 187 rebuilt= 187 
+OK   run2.alpha_gate_override report= 23 rebuilt= 23 
+OK   run2.alpha_override_invalidation report= 11 rebuilt= 11 
+OK   run2.alpha_override_positive_requirement report= 12 rebuilt= 12 
+OK   run2.alpha_final_A601 report= 60 rebuilt= 60 
+OK   run2.alpha_final_A304 report= 35 rebuilt= 35 
+OK   run2.alpha_final_A301 report= 25 rebuilt= 25 
+OK   run2.alpha_final_A501 report= 17 rebuilt= 17 
+OK   run2.alpha_final_A201 report= 10 rebuilt= 10 
+OK   run2.alpha_final_A103 report= 8 rebuilt= 8 
+OK   run2.alpha_final_A101 report= 5 rebuilt= 5 
+OK   run2.alpha_final_A001 report= 3 rebuilt= 3 
+OK   run2.alpha_final_A102 report= 1 rebuilt= 1 
+OK   run2.cs_SUPPORTS report= 61 rebuilt= 61 
+OK   run2.cs_CONDITIONAL report= 79 rebuilt= 79 
+OK   run2.cs_PENDING_REVIEW report= 95 rebuilt= 95 
+OK   run2.cs_BACKGROUND report= 9 rebuilt= 9 
+OK   run2.cs_OPPOSES report= 2 rebuilt= 2 
+OK   run2.cs_NOT_APPLICABLE report= 705 rebuilt= 705 
+OK   run2.cs_not_applicable_not_linked report= 615 rebuilt= 615 
+OK   run2.cs_not_applicable_no_source_registry report= 90 rebuilt= 90 
+OK   run2.cs_supports_automated_no_request report= 5 rebuilt= 5 
+OK   run2.cs_sent_supports_material_remainder_conditional report= 53 rebuilt= 53 
+OK   run2.cs_sent_llm_insufficient_pending report= 39 rebuilt= 39 
+OK   run2.cs_not_sent_input_too_large report= 5 rebuilt= 5 
+OK   run2.cs_trio_sum report= 235 rebuilt= 235 
+OK   run2.cs_trio_without_request report= 10 rebuilt= 10 
+OK   run2.cs_sent_other_status report= 11 rebuilt= 11 
+OK   run2.cs_requests_sent report= 236 rebuilt= 236 
+OK   run2.pool_claims_structure_graph report= 3 rebuilt= 3 
+OK   run2.ledger_in_official_pool report= 3 rebuilt= 3 
+OK   run2.active_alphas report= 0 rebuilt= 0 
+OK   run2.dominant_alphas report= 0 rebuilt= 0 
+OK   run2.A301_activation_score report= 22.0056 rebuilt= 22.0056 
+OK   run2.admitted_conflicts report= 0 rebuilt= 0 
+OK   run2.conflict_pairs_evaluated report= 8 rebuilt= 8 
+OK   run2.conflict_pairs_direction_role_unresolved report= 8 rebuilt= 8 
+OK   run2.agent_http_requests report= 19 rebuilt= 19 
+OK   run2.agent_retries report= 0 rebuilt= 0 
+OK   run2.week2_retries report= 0 rebuilt= 0 
+OK   run2.week2_http_requests_wire_audit report= 1204 rebuilt= 1204 
+OK   run2.week2_budget_reservations report= 1204 rebuilt= 1204 
+OK   run2.week2_ledger_attempts report= 1204 rebuilt= 1204 
+OK   run2.week2_not_sent report= 6 rebuilt= 6 
+OK   run2.week2_timeouts report= 7 rebuilt= 7 
+OK   run2.requests_missing_usage report= 7 rebuilt= 7 
+OK   run2.usd_off_peak_floor report= 1.8 rebuilt= 1.8 
+OK   run2.usd_peak_ceiling report= 3.6 rebuilt= 3.6 
+OK   run2.key_conclusions report= 57 rebuilt= 57 
+OK   run2.key_verified_support report= 0 rebuilt= 0 
+OK   run2.key_partial_support report= 10 rebuilt= 10 
+OK   run2.key_scored report= 0 rebuilt= 0 
+OK   run2.supports_rows report= 61 rebuilt= 61 
+OK   run2.supports_model_none report= 56 rebuilt= 56 
+OK   run2.supports_matched report= 5 rebuilt= 5 
+OK   run2.supports_in_pool report= 3 rebuilt= 3 
+OK   run2.supports_non_analytical report= 2 rebuilt= 2 
+OK   run1.claims report= 870 rebuilt= 870 
+OK   run1.alpha_classification_unavailable report= 2 rebuilt= 2 
+OK   run1.week2_http_requests_wire_audit report= 1042 rebuilt= 1042 
+OK   run1.week2_budget_reservations report= 1042 rebuilt= 1042 
+OK   run1.week2_not_sent report= 33 rebuilt= 33 
+OK   run1.requests_missing_usage report= 7 rebuilt= 7 
+OK   run1.usd_off_peak_floor report= 1.28 rebuilt= 1.28 
+OK   run1.usd_peak_ceiling report= 2.55 rebuilt= 2.55 
+cross-checks: {"run2.check_pool_ledger_equals_structure_graph": true, "run2.check_ledger_rows_equal_claims": true, "run2.check_reservations_equal_wire_audit_equal_attempts": true, "run2.check_cs_identity": true, "run1.check_pool_ledger_equals_structure_graph": true, "run1.check_ledger_rows_equal_claims": true, "run1.check_reservations_equal_wire_audit_equal_attempts": true, "run1.check_cs_identity": true} | missing values written as 0/NONE/empty: {"run2.ledger_missing_written_as_zero_or_none": 0, "run1.ledger_missing_written_as_zero_or_none": 0}
+figures: 70, mismatched: 0, not cited: 0
+exit_code: 0
+==================================================================
+[README command 3 (as written): credential pattern scan] 2026-10-09T18:31:16Z
+cwd: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery
+$ python3 tools/scan_credentials.py
+{"target": "T4_delivery", "env_value_keys_checked": [], "blobs_scanned": 361, "redacted_header_or_field_values_seen": {"placeholder": 5, "REDACTED": 2246}, "fixture_or_redacted_matches": {"api_key_sk:sk-testsecret0123456789abcdef": 2, "db_url_with_password:pass": 2, "db_url_with_password:p": 3, "db_url_with_password:***REDACTED***": 3, "db_url_with_password:fake": 24}, "clean": true} hits=0
+exit_code: 0
+==================================================================
+[optional: regenerate the claim ledgers with the production code (repository at the run's code identity)] 2026-10-09T18:31:56Z
+cwd: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery
+$ python3 tools/verify_package.py --regenerate-ledgers --repo /Users/xiangmao/COMQUTOR-Alpha- --out /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/verify_regenerate_result.json
+1_manifest: PASS
+2_references: PASS
+3_statistics: PASS
+4_export: PASS
+5_secrets: PASS
+6_identity: PASS
+optional_chapters: PASS
+optional_regenerate_ledgers: PASS
+{
+ "package": "T4_delivery",
+ "1_manifest": {
+  "files_listed": 254,
+  "missing": [],
+  "mismatched": [],
+  "unlisted": [],
+  "ok": true
+ },
+ "2_references": {
+  "report_paths_checked": 87,
+  "missing_paths": [],
+  "readme_commands": 11,
+  "readme_problems": [],
+  "ok": true
+ },
+ "3_statistics": {
+  "exit_code": 0,
+  "summary": [
+   "cross-checks: {\"run2.check_pool_ledger_equals_structure_graph\": true, \"run2.check_ledger_rows_equal_claims\": true, \"run2.check_reservations_equal_wire_audit_equal_attempts\": true, \"run2.check_cs_identity\": true, \"run1.check_pool_ledger_equals_structure_graph\": true, \"run1.check_ledger_rows_equal_claims\": true, \"run1.check_reservations_equal_wire_audit_equal_attempts\": true, \"run1.check_cs_identity\": true} | missing values written as 0/NONE/empty: {\"run2.ledger_missing_written_as_zero_or_none\": 0, \"run1.ledger_missing_written_as_zero_or_none\": 0}",
+   "figures: 70, mismatched: 0, not cited: 0"
+  ],
+  "ok": true
+ },
+ "4_export": {
+  "run2_12591384": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_download_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_equals_api": true,
+   "equals_sha_recorded_in_round30": true,
+   "ok": true
+  },
+  "run1_fa642639": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_download_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_equals_api": true,
+   "ok": true
+  },
+  "ok": true
+ },
+ "5_secrets": {
+  "blobs_scanned": 361,
+  "hits": [],
+  "hit_count": 0,
+  "env_value_keys_checked": [],
+  "redacted_header_or_field_values_seen": {
+   "placeholder": 5,
+   "REDACTED": 2246
+  },
+  "fixture_or_redacted_matches": {
+   "api_key_sk:sk-testsecret0123456789abcdef": 2,
+   "db_url_with_password:pass": 2,
+   "db_url_with_password:p": 3,
+   "db_url_with_password:***REDACTED***": 3,
+   "db_url_with_password:fake": 24
+  },
+  "ok": true
+ },
+ "6_identity": {
+  "tracked_diff_file_sha256": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+  "untracked_recomputed": "38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad",
+  "run2_12591384": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "run1_fa642639": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "ok": true
+ },
+ "optional_chapters": {
+  "results": [
+   {
+    "video": "video/fresh_run2_12591384/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/frozen_round27/t4_demo_frozen.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/fresh_run1_fa642639/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   }
+  ],
+  "ok": true
+ },
+ "optional_regenerate_ledgers": {
+  "repo_tracked_diff_sha256_now": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+  "repo_code_equals_run_code": true,
+  "run2_12591384": {
+   "exit_code": 0,
+   "files_differing": [],
+   "ok": true
+  },
+  "run1_fa642639": {
+   "exit_code": 0,
+   "files_differing": [],
+   "ok": true
+  },
+  "ok": true
+ },
+ "all_ok": true
+}
+exit_code: 0
+==================================================================
+[no __pycache__ or stray files were created by the checks] 2026-10-09T18:32:50Z
+cwd: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery
+$ bash -c find . -name __pycache__ -o -name '.DS_Store' | wc -l
+       0
+exit_code: 0
+==================================================================
+[6b original runs and protected directories: before/after hashes] 2026-10-09T18:32:50Z
+cwd: /Users/xiangmao/COMQUTOR-Alpha-
+$ python3 docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/T4_delivery/tools/snapshot_state.py --out docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/hash_proof/state_after.json --compare docs/audit_artifacts/round_source_linking_t0_t2/round31_t4_delivery_20261009/hash_proof/state_before.json
+{"read_only_file_count": 1218, "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc", "tracked_diff_sha256": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363", "read_only_unchanged": true, "tracked_diff_changed": false, "untracked_added": [], "untracked_removed": [], "untracked_modified": []}
+exit_code: 0
+==================================================================
+[6c the original run directories equal the package copies byte for byte] 2026-10-09T18:32:52Z
+cwd: /Users/xiangmao/COMQUTOR-Alpha-
+$ bash -c diff -r outputs/t4_runs/12591384-0b26-470d-a99d-a49c00be440b '/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery/runs/12591384-0b26-470d-a99d-a49c00be440b' && diff -r outputs/t4_runs/fa642639-8d93-4f9a-9de1-2c4d789eade8 '/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL/T4_delivery/runs/fa642639-8d93-4f9a-9de1-2c4d789eade8' && echo identical
+identical
+exit_code: 0
+unzipped at: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4_unzip_verify.AbTEiL

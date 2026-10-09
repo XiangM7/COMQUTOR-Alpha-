@@ -46,7 +46,14 @@ class DelayedFakeAdapterModel:
     def _default_response(payload):
         return {
             "claims": [
-                {**segment, "entities": ["X"], "factors": ["F"], "direction": "positive", "confidence": 0.9}
+                {
+                    **segment,
+                    "entities": ["X"],
+                    "factors": ["F"],
+                    "direction": "positive",
+                    "confidence": 0.9,
+                    "cited_source_id": None,
+                }
                 for segment in payload["segments"]
             ]
         }
@@ -353,9 +360,29 @@ def test_structured_adapter_concurrency_touches_no_alpha_mapping_code():
     remediation-specific functions (alpha_specific_invalidation_matched /
     alpha_positive_requirement_satisfied) -- the A001 remediation lives
     entirely outside structured_adapter's own module and code path."""
+    import ast
+    import io
+    import tokenize
+
     import comqutor_alpha.structure_engine.structured_output_adapter as soa
 
-    module_source = Path(soa.__file__).read_text(encoding="utf-8")
+    raw_source = Path(soa.__file__).read_text(encoding="utf-8")
+    # 2026-10-09 (T4 round 32): the property is about CODE references, so '#' comments are stripped before the
+    # substring checks. The original whole-file substring check also matched prose: a Round 9 (2026-10-05) comment
+    # that only compares a post-pass's *shape* to alpha_mapper's ("mirrors alpha_mapper's own ...") failed it although
+    # the module neither imports nor calls alpha_mapper. Everything else the old check covered -- imports, names,
+    # attributes, string literals and docstrings -- is still checked, plus an explicit AST import check below.
+    module_source = tokenize.untokenize(
+        (tok.type, tok.string) for tok in tokenize.generate_tokens(io.StringIO(raw_source).readline) if tok.type != tokenize.COMMENT
+    )
     assert "alpha_mapper" not in module_source
     assert "alpha_specific_invalidation_matched" not in module_source
     assert "alpha_positive_requirement_satisfied" not in module_source
+    imported = set()
+    for node in ast.walk(ast.parse(raw_source)):
+        if isinstance(node, ast.Import):
+            imported.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imported.add(node.module or "")
+            imported.update(f"{node.module}.{alias.name}" for alias in node.names)
+    assert not any("alpha_mapper" in name for name in imported)

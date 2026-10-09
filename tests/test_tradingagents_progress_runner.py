@@ -562,3 +562,56 @@ def test_progress_failures_never_fail_the_run(tmp_path):
         graph_factory=lambda i, c: _FakeGraph(_full_chunks()),
     )
     assert run_dir.name == "claimed-run-9"
+
+
+# ---------------------------------------------------------------------------
+# John MVP Final Gap Closure -- Structured External Source Traceability:
+# relocation must rewrite source_registry.json's run_id too, the same as
+# metadata.json/raw_agent_outputs.json -- regression test for a real bug
+# this task's own live AMD verification run surfaced (the registry kept the
+# writer's pre-relocation temp run_id).
+# ---------------------------------------------------------------------------
+
+
+def test_relocation_rewrites_source_registry_run_id(tmp_path):
+    from tradingagents.dataflows.source_capture import record_source
+
+    graph = _FakeGraph(_full_chunks())
+    original_stream = graph.graph.stream
+
+    def stream_with_capture(init_state, **kwargs):
+        record_source(
+            {
+                "source_type": "news",
+                "name": "Reuters",
+                "title": "A Genuine Captured Headline During This Fake Stream",
+                "url": "https://reuters.com/x",
+            }
+        )
+        yield from original_stream(init_state, **kwargs)
+
+    graph.graph.stream = stream_with_capture
+
+    run_dir = run_streaming_tradingagents_research(
+        _payload(run_id="claimed-source-registry-run"),
+        output_root=str(tmp_path),
+        graph_factory=lambda internal, config: graph,
+    )
+
+    registry_path = run_dir / "source_registry.json"
+    assert registry_path.exists()
+    registry = json.loads(registry_path.read_text())
+    assert registry["run_id"] == "claimed-source-registry-run"
+    assert registry["sources"][0]["name"] == "Reuters"
+
+    # metadata.json/raw_agent_outputs.json remain correctly relocated too --
+    # this fix must not regress the existing behavior.
+    metadata = json.loads((run_dir / "metadata.json").read_text())
+    assert metadata["run_id"] == "claimed-source-registry-run"
+
+
+def test_relocation_without_any_captured_sources_writes_no_registry_and_does_not_crash(tmp_path):
+    run_dir, _graph = _run(tmp_path, _payload(run_id="claimed-no-sources-run"), _full_chunks())
+    assert not (run_dir / "source_registry.json").exists()
+    metadata = json.loads((run_dir / "metadata.json").read_text())
+    assert metadata["run_id"] == "claimed-no-sources-run"

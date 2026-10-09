@@ -195,6 +195,26 @@ def _run_deterministic_downstream(
     structured, alpha_matches, extracted = _replay_computation_views(bundle, replay_id)
     graph_stage = build_structure_graph_stage(alpha_matches, extracted)
     run_timestamp = bundle.metadata.get("analysis_date") or bundle.metadata.get("created_at")
+    # 2026-09-29 (T2/Replay verification, this round): a normal completed
+    # research run now ALWAYS calls score_and_assemble_structure_graph with
+    # sources=<this run's own source_registry.json> and
+    # require_verified_evidence_gate=True (see routes_research.py's own
+    # "2026-09-29 closing fix" comment at its live-pipeline call site) --
+    # Exact Semantic Replay must reproduce that SAME run configuration, not
+    # merely the same semantic decisions, or its own deterministic
+    # downstream recomputation legitimately diverges from the source run's
+    # real official activation/conflict result purely from a missing
+    # parameter, never a genuine semantic difference. Found via this file's
+    # own comparison mechanism (deterministic_downstream_equivalent=False)
+    # while investigating tests/replay/*. bundle.source_registry is
+    # correctly None for a pre-source-linking or no-source-linked-evidence
+    # run, in which case this call degrades exactly like the live pipeline's
+    # own opportunistic contract already does.
+    sources = (
+        bundle.source_registry.get("sources")
+        if isinstance(bundle.source_registry, dict) and isinstance(bundle.source_registry.get("sources"), list)
+        else None
+    )
     graph = score_and_assemble_structure_graph(
         graph_stage,
         alpha_matches,
@@ -202,6 +222,8 @@ def _run_deterministic_downstream(
         run_timestamp=run_timestamp,
         structured_records=structured.get("records") or [],
         exposure_run_id=replay_id,
+        sources=sources,
+        require_verified_evidence_gate=True,
     )
     conflicts = detect_alpha_conflicts(
         run_id=replay_id,

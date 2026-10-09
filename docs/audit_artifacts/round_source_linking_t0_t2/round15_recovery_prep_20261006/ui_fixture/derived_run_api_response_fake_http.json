@@ -1,0 +1,1196 @@
+{
+ "_notice": "FAKE-HTTP derived run built from the frozen c904d4cc inputs by tests/test_classification_recovery_derived_run.py; the classification decisions are test doubles, not a real recovery.",
+ "response": {
+  "run_id": "recovery-20261007T035009Z-1b0a98b9",
+  "ticker": "AMD",
+  "status": "completed",
+  "artifacts": {
+   "metadata": true,
+   "raw_agent_outputs": true,
+   "structured_agent_outputs": true,
+   "final_report": false,
+   "alpha_matches": true,
+   "extracted_structures": true,
+   "structured_output_error_logs": false,
+   "week2_llm_error_logs": false,
+   "week2_pipeline_error_logs": false
+  },
+  "agent_output_count": 11,
+  "structured_output_count": 975,
+  "structure_graph_status": "ready",
+  "dominant_alphas": [],
+  "main_conflict": null,
+  "conflict_status": "ready",
+  "alpha_classification_completion": {
+   "total_claims": 975,
+   "valid_select_count": 3,
+   "valid_none_count": 972,
+   "call_failure_count": 0,
+   "not_executed_count": 0,
+   "not_executed_configuration_count": 0,
+   "not_executed_fault_count": 0,
+   "complete": true
+  },
+  "alpha_classification_status": "complete_active_no_dominant",
+  "summary": "Verified evidence is currently insufficient to reach an official conclusion for this research run -- unreviewed or unlinked claims may still exist as research text or pending-review candidates, but none yet counts as verified support.",
+  "entity_alpha_exposures": [
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A001",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": null,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": null,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "missing_seed",
+    "would_block_dominant": false,
+    "would_block_regime_level": false,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_QUALIFICATION_APPLIED",
+     "EXPOSURE_SEED_MISSING",
+     "SEED_ENTRY_MISSING"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A003",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": null,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": null,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "missing_seed",
+    "would_block_dominant": false,
+    "would_block_regime_level": false,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_QUALIFICATION_APPLIED",
+     "EXPOSURE_SEED_MISSING",
+     "SEED_ENTRY_MISSING"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A101",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": 0.8,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.4,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "computed",
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A102",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": 0.55,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.275,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "computed",
+    "would_block_dominant": true,
+    "would_block_regime_level": true,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_DOMINANT_THRESHOLD",
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A103",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": 0.65,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.325,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "computed",
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A201",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": 0.85,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.425,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "computed",
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A301",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": 0.7,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.35,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "computed",
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A304",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": 0.75,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.375,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "computed",
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A501",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": null,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": null,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "missing_seed",
+    "would_block_dominant": false,
+    "would_block_regime_level": false,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_QUALIFICATION_APPLIED",
+     "EXPOSURE_SEED_MISSING",
+     "SEED_ENTRY_MISSING"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   },
+   {
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "alpha_id": "A601",
+    "seed_version": "v0.1",
+    "seed_effective_date": "2026-08-11",
+    "seed_approval_status": "approved_gating",
+    "owner": "John",
+    "approved_by": "John",
+    "approved_at": "2026-08-11",
+    "configured_status": "approved_gating",
+    "effective_status": "approved_gating",
+    "historical_mapping": 0.75,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.375,
+    "unique_evidence_fact_count": 0,
+    "ticker_specific_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "mode": "enforced",
+    "exposure_status": "computed",
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "override_candidate": false,
+    "qualification_effect_applied": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ],
+    "provenance": {
+     "formula_version": "week4.exposure_score.mvp_v1",
+     "evidence_fact_index_version": "evidence_fact_index.v1",
+     "representative_fact_group_ids": [],
+     "mean_representative_match_score": 0.0,
+     "ticker_specific_fact_ratio": 0.0,
+     "qualifying_local_edge_count": 0
+    }
+   }
+  ],
+  "entity_alpha_exposure_status": "ready",
+  "data_sanity_status": "ok",
+  "data_sanity_warning_count": 0,
+  "data_sanity_critical_count": 0,
+  "data_sanity_warnings": [],
+  "data_sanity_numeric_semantics": {
+   "evaluated_count": 0,
+   "daily_range_eligible_count": 0,
+   "skipped_by_role_count": 0,
+   "semantic_role_counts": {}
+  },
+  "evidence_stance_summary": {
+   "classifier_version": "evidence_stance.deterministic.v1",
+   "effect_mode": "shadow",
+   "stance_effect_applied": false,
+   "claim_alpha_pair_count": 4878,
+   "supports_alpha_count": 508,
+   "opposes_alpha_count": 33,
+   "mentions_alpha_count": 457,
+   "neutral_background_count": 3880,
+   "supports_counter_alpha_count": 0,
+   "manual_review_required_count": 1834,
+   "unknown_count": 0,
+   "llm_stance_count": 0,
+   "deterministic_fallback_count": 0,
+   "fallback_reason_counts": {
+    "duplicate_result": 0,
+    "identity_mismatch": 0,
+    "invalid_counter_alpha": 0,
+    "invalid_stance": 0,
+    "malformed_response": 0,
+    "missing_result": 0,
+    "provider_error": 0,
+    "timeout": 0
+   },
+   "stance_count_invariant_holds": true,
+   "activation_scores_unchanged": true,
+   "activation_levels_unchanged": true,
+   "conflict_outcomes_unchanged": true
+  },
+  "alpha_memory": {
+   "mode": "shadow",
+   "activation_modulation_applied": false,
+   "identity_model": "atomic_edge_phi",
+   "identity_version": "alpha_memory.phi_edge.v1",
+   "phi_structures": [
+    {
+     "phi_id": "5f6e9dfa75c1529aef6a78e32547835b5f160f895cb8366bd8f7de6d586f303e",
+     "identity_version": "alpha_memory.phi_edge.v1",
+     "ticker": "AMD",
+     "alpha_id": "A304",
+     "source": "ai_demand",
+     "edge_type": "causal",
+     "target": "amd_revenue_growth",
+     "taxonomy_version": null,
+     "taxonomy_sha256": null,
+     "run_id": "recovery-20261007T035009Z-1b0a98b9",
+     "current_run_id": "recovery-20261007T035009Z-1b0a98b9",
+     "prior_run_ids": [],
+     "prior_observation_count": 0,
+     "total_observation_count": 1,
+     "has_prior_observation": false,
+     "is_recurring": false,
+     "first_seen": "2026-10-07T03:51:29Z",
+     "last_seen_prior": null,
+     "current_seen_at": "2026-10-07T03:51:29Z"
+    },
+    {
+     "phi_id": "e97890fbad1b210e01d20880a2aea3f32084951118db21f4f0ec57fd7fbfa2fa",
+     "identity_version": "alpha_memory.phi_edge.v1",
+     "ticker": "AMD",
+     "alpha_id": "A304",
+     "source": "ai_infrastructure",
+     "edge_type": "supportive",
+     "target": "amd_revenue_growth",
+     "taxonomy_version": null,
+     "taxonomy_sha256": null,
+     "run_id": "recovery-20261007T035009Z-1b0a98b9",
+     "current_run_id": "recovery-20261007T035009Z-1b0a98b9",
+     "prior_run_ids": [],
+     "prior_observation_count": 0,
+     "total_observation_count": 1,
+     "has_prior_observation": false,
+     "is_recurring": false,
+     "first_seen": "2026-10-07T03:51:29Z",
+     "last_seen_prior": null,
+     "current_seen_at": "2026-10-07T03:51:29Z"
+    }
+   ],
+   "alpha_memory_summary": [
+    {
+     "alpha_id": "A304",
+     "current_phi_count": 2,
+     "first_seen_phi_count": 2,
+     "recurring_phi_count": 0,
+     "historically_matched_phi_count": 0,
+     "unmatched_phi_count": 2,
+     "recurrence_ratio": 0.0,
+     "prior_observation_total": 0
+    }
+   ],
+   "aggregate_fingerprints": [
+    {
+     "aggregate_fingerprint_id": "d70f120bec804488fc03fecdcb35ae6501030e8b06df1091fd9698959801ff03",
+     "identity_version": "alpha_memory.aggregate_fingerprint.v1",
+     "ticker": "AMD",
+     "alpha_id": "A304",
+     "taxonomy_version": null,
+     "taxonomy_sha256": null,
+     "chain_edges": [
+      [
+       "ai_demand",
+       "causal",
+       "amd_revenue_growth"
+      ],
+      [
+       "ai_infrastructure",
+       "supportive",
+       "amd_revenue_growth"
+      ]
+     ],
+     "run_id": "recovery-20261007T035009Z-1b0a98b9"
+    }
+   ],
+   "instability_signals": {
+    "alpha_attribution_variance": [
+     {
+      "ticker": "AMD",
+      "source": "ai_demand",
+      "edge_type": "causal",
+      "target": "amd_revenue_growth",
+      "alpha_attribution_variance_detected": true,
+      "observed_variants": [
+       {
+        "alpha_ids": [],
+        "run_ids": [
+         "c904d4cc-dc09-495c-aec5-b056979948e1"
+        ]
+       },
+       {
+        "alpha_ids": [
+         "A304"
+        ],
+        "run_ids": [
+         "recovery-20261007T035009Z-1b0a98b9"
+        ]
+       }
+      ]
+     },
+     {
+      "ticker": "AMD",
+      "source": "ai_infrastructure",
+      "edge_type": "supportive",
+      "target": "amd_revenue_growth",
+      "alpha_attribution_variance_detected": true,
+      "observed_variants": [
+       {
+        "alpha_ids": [],
+        "run_ids": [
+         "c904d4cc-dc09-495c-aec5-b056979948e1"
+        ]
+       },
+       {
+        "alpha_ids": [
+         "A304"
+        ],
+        "run_ids": [
+         "recovery-20261007T035009Z-1b0a98b9"
+        ]
+       }
+      ]
+     }
+    ],
+    "edge_type_variance": []
+   }
+  },
+  "unclassified_findings_top20": [
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:55",
+    "claim": "If AMD can rally to $654.91 with 96% odds of no cuts priced in, imagine what happens if the October 15 CPI comes in cool \u2014 the bear's own report notes the cooler 3.4% bucket sits at just 4%, meaning any downside surprise to inflation is a massive asymmetric upside catalyst.",
+    "evidence": "If AMD can rally to $654.91 with 96% odds of no cuts priced in, imagine what happens if the October 15 CPI comes in cool \u2014 the bear's own report notes the cooler 3.4% bucket sits at just 4%, meaning any downside surprise to inflation is a massive asymmetric upside catalyst.",
+    "agent": "bull_researcher",
+    "confidence": 0.85,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_7905731258c1",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+    "claim_index": 54,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 1
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:96",
+    "claim": "AMD is a fundamentally inflecting, net-cash-rich, AI-levered semiconductor leader trading at a forward P/E of 41.67 with a PEG of 0.64, in a stacked bullish technical uptrend, riding a chip-led market at all-time highs, with recession odds at 7% and falling, and with capex, inventory, and CIP all signaling preparation for a forward ramp the market hasn't fully priced.",
+    "evidence": "AMD is a fundamentally inflecting, net-cash-rich, AI-levered semiconductor leader trading at a forward P/E of 41.67 with a PEG of 0.64, in a stacked bullish technical uptrend, riding a chip-led market at all-time highs, with recession odds at 7% and falling, and with capex, inventory, and CIP all signaling preparation for a forward ramp the market hasn't fully priced.",
+    "agent": "bull_researcher",
+    "confidence": 0.85,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_f4df106cd126",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+    "claim_index": 95,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 2
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:4",
+    "claim": "So the debate is not \"is AMD a good company.\" It's \"is AMD a good stock at $654.91.\" That framing matters, and it's the bear who correctly forced it.",
+    "evidence": "So the debate is not \"is AMD a good company.\" It's \"is AMD a good stock at $654.91.\" That framing matters, and it's the bear who correctly forced it.",
+    "agent": "research_manager",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_96ecaa7347fb",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan",
+    "claim_index": 3,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 3
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:13",
+    "claim": "And it's an estimate that requires AMD to grow earnings roughly 4x from the current TTM EPS of $3.92 [fragmentid: src7e133fa786f7aaa0:frag:0].",
+    "evidence": "And it's an estimate that requires AMD to grow earnings roughly 4x from the current TTM EPS of $3.92 [fragmentid: src7e133fa786f7aaa0:frag:0].",
+    "agent": "bear_researcher",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "unknown",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_665732a66f97",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+    "claim_index": 12,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 4
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:25",
+    "claim": "The bull makes a clever move: he says rising rates only hurt indebted companies, and AMD has net cash of $8.8B.",
+    "evidence": "The bull makes a clever move: he says rising rates only hurt indebted companies, and AMD has net cash of $8.8B.",
+    "agent": "bear_researcher",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "unknown",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_41d1529d362c",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+    "claim_index": 24,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 5
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:28",
+    "claim": "He says the prediction markets are pricing 96% odds of no Fed rate cuts in 2026 and 76% odds of another hike, the 10-year is at a 24-year high, AMD's beta is 2.454, and therefore long-duration semiconductor multiples compress.",
+    "evidence": "He says the prediction markets are pricing 96% odds of no Fed rate cuts in 2026 and 76% odds of another hike, the 10-year is at a 24-year high, AMD's beta is 2.454, and therefore long-duration semiconductor multiples compress.",
+    "agent": "neutral_risk_analyst",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "unknown",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_cd7dbd94972c",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history",
+    "claim_index": 27,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 6
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:39",
+    "claim": "AMD has negative net debt and generates nearly $9 billion in annual free cash flow.",
+    "evidence": "AMD has negative net debt and generates nearly $9 billion in annual free cash flow.",
+    "agent": "bull_researcher",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "negative",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_4be8fb8dccab",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+    "claim_index": 38,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 7
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:41",
+    "claim": "Reduce existing AMD holdings by 40% (the neutral analyst's middle path between the trader's one-third and the conservative analyst's half), selling into rallies rather than weakness.",
+    "evidence": "Reduce existing AMD holdings by 40% (the neutral analyst's middle path between the trader's one-third and the conservative analyst's half), selling into rallies rather than weakness.",
+    "agent": "portfolio_manager",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "negative",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_5d9ea67b14db",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision",
+    "claim_index": 40,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 8
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:53",
+    "claim": "The report flags 45% implied odds that AI-chip export licensing becomes law this year \u2014 a direct revenue-channel risk to AMD's China exposure.",
+    "evidence": "The report flags 45% implied odds that AI-chip export licensing becomes law this year \u2014 a direct revenue-channel risk to AMD's China exposure.",
+    "agent": "bear_researcher",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "negative",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_998e8b61c0f1",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+    "claim_index": 52,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 9
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:75",
+    "claim": "The near-term path is likely driven by (a) the October 15 CPI print, (b) the chip-complex momentum trade holding, and (c) any AMD-specific catalyst (earnings, MI-series/accelerator announcements, guidance) that I could not retrieve.",
+    "evidence": "The near-term path is likely driven by (a) the October 15 CPI print, (b) the chip-complex momentum trade holding, and (c) any AMD-specific catalyst (earnings, MI-series/accelerator announcements, guidance) that I could not retrieve.",
+    "agent": "news_agent",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_5ce4d1e77f8b",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+    "claim_index": 74,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 10
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:87",
+    "claim": "But AMD's net cash position of $8.8B and $8.84B TTM FCF mean it's funding its own growth.",
+    "evidence": "But AMD's net cash position of $8.8B and $8.84B TTM FCF mean it's funding its own growth.",
+    "agent": "bull_researcher",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "positive",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_433b6c78b95e",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+    "claim_index": 86,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 11
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:89",
+    "claim": "The stock is up 248% off its 52-week low of $188.22 [fragmentid: src7e133fa786f7aaa0:frag:0] on the back of sector momentum and macro narrative, not on any new AMD-specific disclosure.",
+    "evidence": "The stock is up 248% off its 52-week low of $188.22 [fragmentid: src7e133fa786f7aaa0:frag:0] on the back of sector momentum and macro narrative, not on any new AMD-specific disclosure.",
+    "agent": "bear_researcher",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_879f3b7f0631",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+    "claim_index": 88,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 12
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:97",
+    "claim": "Category: Rates; Signal: Sharply higher; Evidence: 10Y & 30Y at highest since 2002; 10Y biggest monthly gain since 2022; mortgage 7.58%; Implication for AMD: Bearish \u2014 compresses AMD's long-duration multiple",
+    "evidence": "Category: Rates; Signal: Sharply higher; Evidence: 10Y & 30Y at highest since 2002; 10Y biggest monthly gain since 2022; mortgage 7.58%; Implication for AMD: Bearish \u2014 compresses AMD's long-duration multiple",
+    "agent": "news_agent",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "negative",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_daed0d530253",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+    "claim_index": 96,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 13
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:98",
+    "claim": "Category: Fed path; Signal: No cuts, hike likely; Evidence: 96% no cuts in 2026; 76% another hike; 2-hike bucket +18pp w/w; Implication for AMD: Bearish \u2014 \"Rate Cut Cycle\" tailwind priced out",
+    "evidence": "Category: Fed path; Signal: No cuts, hike likely; Evidence: 96% no cuts in 2026; 76% another hike; 2-hike bucket +18pp w/w; Implication for AMD: Bearish \u2014 \"Rate Cut Cycle\" tailwind priced out",
+    "agent": "news_agent",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "negative",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_0d88cb94d194",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+    "claim_index": 97,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 14
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:99",
+    "claim": "Category: Recession; Signal: Low and falling; Evidence: 7% US recession by end-2026, \u22121.5pp w/w; Implication for AMD: Bullish \u2014 demand intact, no hard landing",
+    "evidence": "Category: Recession; Signal: Low and falling; Evidence: 7% US recession by end-2026, \u22121.5pp w/w; Implication for AMD: Bullish \u2014 demand intact, no hard landing",
+    "agent": "news_agent",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_b2717046e2c1",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+    "claim_index": 98,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 15
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:100",
+    "claim": "AMD can keep growing earnings and still fall if the market decides 41x forward is too rich in a 5%+ rate world.",
+    "evidence": "AMD can keep growing earnings and still fall if the market decides 41x forward is too rich in a 5%+ rate world.",
+    "agent": "bear_researcher",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "unknown",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_d7778b2f71b1",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+    "claim_index": 99,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 16
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:100",
+    "claim": "Category: Inflation; Signal: Sticky, leaning hot; Evidence: Fed officials warn \"still too high\"; Iran war driving inflation; Sept CPI odds shifting hotter; Implication for AMD: Bearish \u2014 supports hike path; Oct 15 CPI is key risk",
+    "evidence": "Category: Inflation; Signal: Sticky, leaning hot; Evidence: Fed officials warn \"still too high\"; Iran war driving inflation; Sept CPI odds shifting hotter; Implication for AMD: Bearish \u2014 supports hike path; Oct 15 CPI is key risk",
+    "agent": "news_agent",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "negative",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_5ca4ae9b0224",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+    "claim_index": 99,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 17
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:105",
+    "claim": "Category: Policy tail risks; Signal: Live; Evidence: AI-chip export licensing 45%; export-control chip security 28%; shutdown/House 92% combo; Implication for AMD: Tail risk \u2014 discrete AMD revenue/headline exposure",
+    "evidence": "Category: Policy tail risks; Signal: Live; Evidence: AI-chip export licensing 45%; export-control chip security 28%; shutdown/House 92% combo; Implication for AMD: Tail risk \u2014 discrete AMD revenue/headline exposure",
+    "agent": "news_agent",
+    "confidence": 0.75,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "negative",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_2e93a937c62f",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+    "claim_index": 104,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 18
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:2",
+    "claim": "The single most important finding of this research cycle is a data-availability failure on the AMD-specific news channel: every getnews call for AMD (and for AMD.US, NVDA, semiconductors) returned \"No news found.\" I therefore have zero company-specific AMD headlines to work with, and I will not fabricate them.",
+    "evidence": "The single most important finding of this research cycle is a data-availability failure on the AMD-specific news channel: every getnews call for AMD (and for AMD.US, NVDA, semiconductors) returned \"No news found.\" I therefore have zero company-specific AMD headlines to work with, and I will not fabricate them.",
+    "agent": "news_agent",
+    "confidence": 0.7,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_e98708b722b2",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+    "claim_index": 1,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 19
+   },
+   {
+    "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:6",
+    "claim": "So the aggressive case I'm going to make is not \"buy more AMD at 654.91.\" It's this: the trader is right to sell, but for the wrong reason, and the conservative and neutral analysts are both going to try to talk him into either holding everything or buying the dip \u2014 and both of those are the actual mistakes.",
+    "evidence": "So the aggressive case I'm going to make is not \"buy more AMD at 654.91.\" It's this: the trader is right to sell, but for the wrong reason, and the conservative and neutral analysts are both going to try to talk him into either holding everything or buying the dip \u2014 and both of those are the actual mistakes.",
+    "agent": "aggressive_risk_analyst",
+    "confidence": 0.65,
+    "matched_alpha": null,
+    "secondary_alphas": [],
+    "direction": "neutral",
+    "reason": "no_alpha_match",
+    "reason_codes": [
+     "no_alpha_match"
+    ],
+    "diagnostic_reason_codes": [
+     "llm semantic classifier determined no canonical Alpha materially fits"
+    ],
+    "ticker_specific": true,
+    "duplicate_group_id": "dupgroup_7fd1cd0d6bd9",
+    "evidence_fact_group_id": null,
+    "representative_claim_id": null,
+    "source_refs": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+    ],
+    "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+    "claim_index": 5,
+    "run_id": "recovery-20261007T035009Z-1b0a98b9",
+    "ticker": "AMD",
+    "display_rank": 20
+   }
+  ],
+  "unclassified_findings_total_count": 975,
+  "unclassified_findings_reason_counts": {
+   "duplicate_supporting_text": 0,
+   "generic_background": 2,
+   "low_confidence": 0,
+   "no_alpha_match": 972,
+   "no_ticker_specific_evidence": 2
+  },
+  "unclassified_findings_status": "ready",
+  "unclassified_findings_download_available": true,
+  "lineage": {
+   "based_on_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "execution_type": "alpha_classification_recovery",
+   "recovery_lineage_artifact": "recovery_lineage.json"
+  }
+ }
+}

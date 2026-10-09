@@ -1,0 +1,76 @@
+{
+  "schema_version": "t3_offline_score_result.v1",
+  "scored_at": "2026-10-05T17:49:32.210133+00:00",
+  "source_prediction_execution_id": "t3live_20261001T014648Z_1fb9c9d5",
+  "source_predictions_file": "outputs/t3_evaluations/t3live_20261001T014648Z_1fb9c9d5/t3_eval_records.jsonl",
+  "source_predictions_file_sha256": "6dde93698d2f169260d896e9a371646595a7520181854885bf3ccfc95d1b5d55",
+  "review_form_file": "docs/audit_artifacts/round_source_linking_t0_t2/t3_human_review_form_2026-09-30.json",
+  "review_form_file_sha256": "9e6fb2676d51abb5a02d34205b2dc60fac3233bde95449c191025a39a6ca9d1f",
+  "sample_version_mismatches": [],
+  "sample_version_consistent": true,
+  "scoring": {
+    "scoring_status": "SCORED",
+    "steps_covered": {
+      "alpha_classification": "IMPLEMENTED -- reuses comqutor_alpha.structure_engine.alpha_mapper.map_claim_to_alpha with classifier_enabled=True and a real Week2LLMGateway, the exact real production call convention.",
+      "source_support_verification": "NOT_IMPLEMENTED_THIS_ROUND -- a separate real step (comqutor_alpha.source_provenance); finding a claim in alpha_matches.json only proves a model output existed, never that it has verified source support.",
+      "claim_fidelity": "NOT_IMPLEMENTED_THIS_ROUND",
+      "evidence_stance_polarity": "NOT_IMPLEMENTED_THIS_ROUND -- a separate real step (comqutor_alpha.structure_engine.evidence_stance_llm.apply_llm_stance_upgrade).",
+      "downstream_eligibility": "NOT_IMPLEMENTED_THIS_ROUND -- a separate real step (comqutor_alpha.structure_engine.claim_quality)."
+    },
+    "scored_sample_count": 39,
+    "unable_to_judge_count": 1,
+    "total_judged_count": 40,
+    "total_sample_count": 40,
+    "overall_accuracy": 0.564103,
+    "non_none_precision": 0.5,
+    "non_none_recall": 0.68,
+    "outcome_code_counts": {
+      "MATCHED": 34,
+      "NONE": 5
+    },
+    "category_counts": {
+      "A304_boundary": 15,
+      "A101_A103_differentiation": 8,
+      "A102": 4,
+      "A501": 4,
+      "A001": 4,
+      "A003": 4
+    },
+    "confusion_matrix": {
+      "NONE": {
+        "A304": 5,
+        "NONE": 5,
+        "A301": 1,
+        "A103": 1,
+        "A003": 2
+      },
+      "A304": {
+        "A304": 4
+      },
+      "A301": {
+        "A304": 1,
+        "A301": 2
+      },
+      "A001": {
+        "None": 4,
+        "A304": 1,
+        "A001": 1
+      },
+      "A103": {
+        "A103": 3
+      },
+      "A101": {
+        "A101": 2
+      },
+      "A102": {
+        "A103": 1,
+        "A102": 2
+      },
+      "A501": {
+        "A103": 1,
+        "A501": 3
+      }
+    },
+    "note": "confusion_matrix rows are the human label, columns are the system's outcome (an Alpha ID for MATCHED, or the literal outcome_code for NONE/CALL_FAILED/PARSE_FAILED/UNAVAILABLE/ABSTAINED_AMBIGUOUS/SKIPPED_BUDGET_STOP) -- failures and abstentions are never dropped from this matrix or from scored_sample_count. Items where the reviewer explicitly answered UNABLE_TO_JUDGE are counted in unable_to_judge_count and total_judged_count but excluded from scored_sample_count/accuracy/precision/recall/confusion_matrix -- never coerced into a right-or-wrong comparison."
+  }
+}

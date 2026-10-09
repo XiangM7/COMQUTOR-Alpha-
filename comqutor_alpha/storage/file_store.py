@@ -48,6 +48,42 @@ ALLOWED_ARTIFACT_FILENAMES = {
     "evidence_stance_audit.json",
     # Sprint 3 -- Unclassified Findings Control, Track A3.
     "unclassified_findings.json",
+    # John MVP Final Gap Closure -- Structured External Source Traceability:
+    # the per-run registry of genuine, upstream-supplied source metadata
+    # (news article title/publisher/url/date, etc.), captured at the data-
+    # acquisition boundary. Additive only -- never required, never backfilled
+    # onto a historical run.
+    "source_registry.json",
+    # Round 5 (2026-10-04), T2 closing gap: the formal acceptance entry
+    # point's own verdict (comqutor_alpha.regression.acceptance_engine.
+    # run_formal_acceptance, via comqutor_alpha.api.formal_acceptance_
+    # artifact), now genuinely computed at the end of every real run's own
+    # completion flow. Additive only -- never required for "completed"
+    # gating, never backfilled onto a historical run.
+    "formal_acceptance.json",
+    # Round 15 (2026-10-06): alpha-classification recovery. Both exist ONLY in
+    # a derived ``recovery-*`` execution (never in a normal run, never in the
+    # original run it is based on): the original<->derived identity/lineage
+    # record, and the separately-authorized direction-task request manifest.
+    "recovery_lineage.json",
+    "evidence_stance_followup_manifest.json",
+    # Round 17: the direction-evaluation execution (also a derived run, never a normal one).
+    "direction_lineage.json",
+    "evidence_stance_direction_results.json",
+    # Round 18: the evidence-eligibility re-qualification execution.
+    "requalification_lineage.json",
+    "evidence_eligibility_requalification.json",
+    # T1 closure: the claim-level evidence trace (source material -> claim -> Alpha match -> stance -> scoring), and
+    # the lineage record of the offline execution that recomputes a run with the fact-dependency contract.
+    "evidence_trace.json",
+    "dependency_lineage.json",
+    # T1 closeout (Round 22): additive, present-only capture artifacts -- the COMPLETE input window behind a derived value
+    # (technical indicators) and the sanitized raw provider response. Never required, never backfilled.
+    "derived_inputs.json",
+    "provider_response_audit.json",
+    # T4 round 32 (2026-10-09): stage completion / degradation disclosure (comqutor_alpha.api.stage_disclosure), written
+    # at finalization by runs that saved a semantic call ledger. Additive, present-only, never backfilled.
+    "stage_disclosure.json",
 }
 ALLOWED_ARTIFACT_PATHS = {
     *ALLOWED_ARTIFACT_FILENAMES,
@@ -59,6 +95,26 @@ ALLOWED_ARTIFACT_PATHS = {
     # Week2 error-log path because canonical artifact presence is part of the
     # authoritative research API response.
     "structured_adapter_shadow_runtime/error_logs/week2_llm_errors.jsonl",
+    # T1 verified-support eligibility gate, minimal human review entrypoint
+    # (2026-09-28): an APPEND-ONLY, independently-traceable log of every
+    # human content-support review ever submitted for this run -- never
+    # written in place into structured_agent_outputs.json, so the original
+    # run's own persisted input/output is never overwritten by a review.
+    "content_support_reviews.jsonl",
+    # APPEND-ONLY index, on the ORIGINAL run, of every re-evaluation
+    # execution ever triggered for it (each entry names a distinct
+    # execution_id, itself a full sibling run directory) -- lets a caller
+    # discover/list every past execution for a run without scanning the
+    # whole output root.
+    "reevaluation_executions.jsonl",
+    # 2026-10-06 (Phase C controlled single-request verification round):
+    # APPEND-ONLY, opt-in (Week2LLMGateway(enable_request_response_audit=
+    # True) only -- every existing production caller never writes here)
+    # record of the LITERAL wire request/response bytes for a real
+    # Provider call, captured at the httpx transport boundary -- not a
+    # second reconstruction via the model's own _get_request_payload.
+    "error_logs/week2_llm_provider_request_audit.jsonl",
+    "error_logs/week2_llm_provider_response_audit.jsonl",
 }
 
 # Validate and normalize a request run_id.
@@ -185,6 +241,22 @@ def append_jsonl_record(run_id, artifact_path, data, output_root="outputs/runs")
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
     line = json.dumps(data, ensure_ascii=False, default=str) + "\n"
     return atomic_write_text(path, existing + line, encoding="utf-8")
+
+
+# Read every record from an allowlisted run-local JSONL artifact, in append
+# order. Missing file -> []; never raises for the "nothing appended yet"
+# case (e.g. a run with no human review submitted at all).
+def read_jsonl_records(run_id, artifact_path, output_root="outputs/runs"):
+    path = artifact_path_for(run_id, artifact_path, output_root)
+    if not path.exists():
+        return []
+    records = []
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if line:
+                records.append(json.loads(line))
+    return records
 
 # List all valid run_ids in the output root directory, ignoring invalid directories.
 def list_runs(output_root="outputs/runs"):

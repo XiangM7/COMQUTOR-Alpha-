@@ -77,12 +77,28 @@ class SemanticCallRecorder:
         self._fsync = bool(fsync)
         self._lock = threading.Lock()
         self._closed = False
-        self._last_sequence = -1
+        # 2026-10-02 (concurrent-audit-loss incident fix): `persist_sequence`
+        # tracks append/completion order, assigned by THIS recorder itself at
+        # append time -- never supplied by the caller and never derived from
+        # `call_sequence` (which reflects call-START order, assigned by
+        # SemanticRuntimeSession well before a call's real Provider
+        # attempt(s) even begin). Under real concurrent dispatch, calls do
+        # not complete in the same order they started -- a real NVDA run
+        # (034a0a60-430e-41f8-8321-03a11389707a) lost ~240 real, billed
+        # attempts' own audit records because the previous design used
+        # call_sequence (start order) as the append-time monotonicity gate,
+        # which a later-started-but-earlier-completing call would violate.
+        # Initialized from file position (not from any specific field), so a
+        # pre-fix file -- whose records were only ever successfully
+        # appended in true completion order to begin with, just silently
+        # missing the ones that hit the old bug -- reopens correctly without
+        # requiring any backfill.
+        self._last_persist_sequence = -1
         self._call_ids: set[str] = set()
         if self.calls_path.exists():
             records = self._read_all_unlocked()
             if records:
-                self._last_sequence = records[-1]["call_sequence"]
+                self._last_persist_sequence = len(records) - 1
                 self._call_ids = {record["call_id"] for record in records}
 
     def ensure_artifact(self) -> Path:
@@ -120,11 +136,15 @@ class SemanticCallRecorder:
                     "RECORDER_DUPLICATE_CALL_ID",
                     "Duplicate call_id is forbidden",
                 )
-            if value["call_sequence"] <= self._last_sequence:
-                raise RecorderIntegrityError(
-                    "RECORDER_SEQUENCE_NOT_MONOTONIC",
-                    "call_sequence must increase strictly",
-                )
+            # call_sequence (start order, assigned by the caller) is
+            # deliberately NOT used as an append-time ordering gate -- real
+            # concurrent dispatch means a later-started call can legitimately
+            # complete, and need to be persisted, before an earlier-started
+            # one. persist_sequence (assigned here, under this same lock, in
+            # true append order) is monotonic by construction; no record a
+            # caller supplies can ever violate it, so there is nothing to
+            # validate here, only to assign.
+            value["persist_sequence"] = self._last_persist_sequence + 1
 
             line = canonical_json_bytes(value) + b"\n"
             with self.calls_path.open("ab") as handle:
@@ -132,7 +152,7 @@ class SemanticCallRecorder:
                 handle.flush()
                 if self._fsync:
                     os.fsync(handle.fileno())
-            self._last_sequence = value["call_sequence"]
+            self._last_persist_sequence = value["persist_sequence"]
             self._call_ids.add(value["call_id"])
 
     def _read_all_unlocked(self) -> list[dict[str, Any]]:

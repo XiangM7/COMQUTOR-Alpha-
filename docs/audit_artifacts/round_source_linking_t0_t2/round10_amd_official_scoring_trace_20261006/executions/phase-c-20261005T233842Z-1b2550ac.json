@@ -1,0 +1,157 @@
+{
+  "based_on_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+  "execution_id": "phase-c-20261005T233842Z-1b2550ac",
+  "executed_at": "2026-10-05T23:39:16.916787+00:00",
+  "candidate_source_content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+  "analysis_date": "2026-10-05",
+  "evidence_cutoff_at": "2026-10-05T17:36:24",
+  "evidence_cutoff_basis": "MAX_SOURCE_FETCHED_AT",
+  "git_commit": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "git_dirty": true,
+  "claim_count": 1,
+  "max_calls": 1,
+  "max_tokens": 8192,
+  "stats": {
+    "llm_gateway_used": true,
+    "requested_count": 1,
+    "llm_verified_count": 0,
+    "fallback_count": 1,
+    "fallback_reason_counts": {
+      "audit_write_failed": 0,
+      "budget_exhausted": 0,
+      "content_hash_stale": 0,
+      "duplicate_result": 0,
+      "identity_mismatch": 0,
+      "invalid_status": 0,
+      "malformed_response": 0,
+      "missing_result": 0,
+      "provider_error": 0,
+      "quote_or_data_not_found": 1,
+      "source_not_in_candidates": 0,
+      "time_invalid": 0,
+      "timeout": 0
+    },
+    "status_counts": {
+      "BACKGROUND": 0,
+      "CITATION_ONLY": 0,
+      "CONDITIONAL": 0,
+      "INSUFFICIENT": 0,
+      "OPPOSES": 0,
+      "SUPPORTS": 0
+    },
+    "batch_count": 1,
+    "logical_provider_calls": 1,
+    "real_provider_attempts": 1,
+    "attempt_log": [
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:66"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "3307669a-2ee1-4443-ae32-081880c37b86",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 7300,
+            "prompt_tokens": 1923,
+            "total_tokens": 9223,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 7036,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 1789
+            },
+            "prompt_cache_hit_tokens": 1789,
+            "prompt_cache_miss_tokens": 134
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1923,
+          "output_tokens": 7300,
+          "total_tokens": 9223
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      }
+    ]
+  },
+  "records": [
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:66",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:66",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "bear_researcher",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "The stock is 37% above its 200-day average with a beta of 2.45 \u2014 maximum downside convexity.",
+      "evidence": "The stock is 37% above its 200-day average with a beta of 2.45 \u2014 maximum downside convexity.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "negative",
+      "confidence": 0.75,
+      "source_type": "analyst",
+      "output_type": "research_debate",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "claim_index": 65,
+      "source_section": "7. Bottom Line: The Bull Is Right About the Business, Wrong About the Price",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "PENDING_REVIEW",
+      "content_support_method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "PENDING_REVIEW",
+        "method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:66",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": null
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_fb9a07b2f819",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "merged_agents": [
+        "bear_researcher"
+      ],
+      "content_support_llm_fallback_reason": "quote_or_data_not_found"
+    }
+  ]
+}

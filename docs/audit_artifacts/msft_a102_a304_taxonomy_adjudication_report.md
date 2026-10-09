@@ -1,5 +1,14 @@
 # MSFT A102__A304 Canonical Conflict Taxonomy Adjudication
 
+> **SUPERSEDED (2026-09-26, PD-017-REVISED, `docs/specs/product_decisions_and_unknowns.md`).**
+> The `REJECT_PAIR` decision below has been reopened and reversed by explicit
+> user instruction ("COMQUTOR Alpha 下一轮开发任务单", task T2): `A102__A304`
+> is now a canonical, `conditional_only`-governed conflict pair in
+> `comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml`. This report's own
+> analysis was not independently re-litigated as part of that reversal and is
+> preserved below, unchanged, as the historical record of the original
+> decision and its reasoning.
+
 **Branch:** `comqutor-structure-layer` **HEAD (before and after):** `b5837e80a4550fc35165d0013a8ef0f27ccb4c8f` (unchanged)
 **Worktree:** preserved, no destructive git operations **Commit:** none **Push:** none **Subagents used:** 0
 

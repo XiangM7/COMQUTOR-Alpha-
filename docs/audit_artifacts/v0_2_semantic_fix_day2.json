@@ -1,0 +1,469 @@
+{
+  "schema_version": "v0.2.semantic_fix_day2.v1",
+  "scope": "DAY_2_SEMANTIC_FIX_ATTEMPT -- read/verify only; no production code changed",
+  "summary": {
+    "category_A_cases": 8,
+    "category_B_cases": 9,
+    "category_C_cases": 4,
+    "total_cases_examined": 21,
+    "fixes_applied": 0,
+    "cases_resolved": 0,
+    "cases_unresolved": 21
+  },
+  "headline_finding": "For all three of John's priority categories, the current on-disk production code/config does not reproduce the historical system outputs recorded in the row-level failure analysis. This was verified directly for Category B (all 9 cases re-run through classify_evidence_stance() today; none reproduce the recorded historical system_polarity) and corroborated for Category A/C via the pre-existing field_availability_note already present in v0_2_evidence_failure_analysis.json (alpha_matches.json for these run_ids does not reproduce the historical system_matched_alpha_id either) plus a direct keyword-overlap check against the current taxonomy. Because no sample's failure can be causally reproduced against current code, no production code change could be verifiably 'directly justified by the accepted row-level failure analysis' (the task's own permitted-change gate) for any of the 21 cases below -- applying a speculative change anyway would risk an unverified, undocumented behavior change to frozen/sensitive semantic-classification code with no way to confirm it fixes what actually happened. All 21 cases are marked UNRESOLVED with this precise reason, per the task's explicit instruction not to disguise unresolved cases as fixed.",
+  "rows": [
+    {
+      "sample_id": "holdout5-004",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "One inventory write-down like the one that caused AMD's Q2 2025 gross margins to crater to 39.8 percent and operating income to turn negative would not just miss the quarter.",
+      "pre_fix_output": {
+        "system_alpha": "A201"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A304"
+      },
+      "root_cause": "SEMANTIC_CLASSIFICATION",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-056",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "The macro \"headwind\" is a non-factor when a company is demonstrating this level of pricing power and operational leverage.",
+      "pre_fix_output": {
+        "system_alpha": "A301"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A501"
+      },
+      "root_cause": "SEMANTIC_CLASSIFICATION",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-071",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "If you're spending $120B+ per year on infrastructure that may or may not generate commensurate returns, operating cash flow is not the right metric.",
+      "pre_fix_output": {
+        "system_alpha": "A304"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A103"
+      },
+      "root_cause": "TAXONOMY_BOUNDARY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-146",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "Net view: The AI earnings catalyst is powerful and has reignited the trade, but QQQ faces a genuine tug-of-war between AI-driven earnings momentum and a hawkish rate/yield backdrop.",
+      "pre_fix_output": {
+        "system_alpha": "A304"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A101"
+      },
+      "root_cause": "INPUT_AMBIGUITY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-151",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "The company wrote off $1.83 billion of illusory value from its books when pricing deteriorated.",
+      "pre_fix_output": {
+        "system_alpha": "A201"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A304"
+      },
+      "root_cause": "SEMANTIC_CLASSIFICATION",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-154",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "> \u26a1 Key Insight: The forward P/E of 6x against TTM P/E of 43x signals the market anticipates enormous profit acceleration.",
+      "pre_fix_output": {
+        "system_alpha": "A301"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A304"
+      },
+      "root_cause": "INPUT_AMBIGUITY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-158",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "Part of that differential reflects the fact that SNDK had run significantly harder into the peak than MU did, and institutional rebalancing after a parabolic move often amplifies the correction on the way down regardless of relative fundamental merit.",
+      "pre_fix_output": {
+        "system_alpha": "A601"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A304"
+      },
+      "root_cause": "SEMANTIC_CLASSIFICATION",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-174",
+      "category": "A",
+      "category_description": "Growth/cycle vs risk-structure confusion",
+      "original_input": "The Q1 FY2026 78.4% gross margin and $5.95B revenue quarter are cycle-peak outputs, not structural run-rates.",
+      "pre_fix_output": {
+        "system_alpha": "A201"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A304"
+      },
+      "root_cause": "SEMANTIC_CLASSIFICATION",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason. A verified fix would require reproducing the exact historical scoring decision first.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-001",
+      "category": "C",
+      "category_description": "A101/A102/A103 boundary confusion",
+      "original_input": "These analysts are seeing something in the forward order book, in the hyperscaler spending commitments, and in AMD's competitive positioning that justifies dramatically higher price targets.",
+      "pre_fix_output": {
+        "system_alpha": "A101"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A103"
+      },
+      "root_cause": "TAXONOMY_BOUNDARY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (A101/A102/A103 keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-003",
+      "category": "C",
+      "category_description": "A101/A102/A103 boundary confusion",
+      "original_input": "AMD's entire bull case rests on continued hyperscaler AI infrastructure spending.",
+      "pre_fix_output": {
+        "system_alpha": "A101"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A103"
+      },
+      "root_cause": "TAXONOMY_BOUNDARY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (A101/A102/A103 keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-057",
+      "category": "C",
+      "category_description": "A101/A102/A103 boundary confusion",
+      "original_input": "Amazon's Q2 beat showed its AI/chip businesses at a $25 billion run rate, and its cloud growth is \"shooting to the top of the cloud wars.\" Google Cloud is aggressively discounting to win enterprise deals.",
+      "pre_fix_output": {
+        "system_alpha": "A102"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A101"
+      },
+      "root_cause": "TAXONOMY_BOUNDARY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (A101/A102/A103 keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-164",
+      "category": "C",
+      "category_description": "A101/A102/A103 boundary confusion",
+      "original_input": "But here's the critical distinction the bull glosses over: AI data centers primarily drive demand for HBM and DRAM in inference engines, not NAND flash.",
+      "pre_fix_output": {
+        "system_alpha": "A102"
+      },
+      "expected_output": {
+        "reviewer_expected_alpha": "A101"
+      },
+      "root_cause": "TAXONOMY_BOUNDARY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/alpha_mapper.py (candidate scoring/admission) and comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (A101/A102/A103 keyword lists)",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-checked against current on-disk code/config: this claim's text does not keyword-match the system-assigned Alpha under alpha_taxonomy_v1.yaml's current keyword lists (verified directly), and the existing evidence-failure-analysis JSON's own field_availability_note for this sample already recorded that outputs/runs/<holdout_run_id>/alpha_matches.json does NOT reproduce the historical system_matched_alpha_id (it shows deterministic-only no_match / all-zero candidate scores). This proves the current Alpha Mapper code/config does not reproduce this specific historical decision -- the original output was very likely produced by a different pipeline snapshot (possibly LLM semantic matching not replayable offline). A code change to comqutor_alpha/structure_engine/alpha_mapper.py cannot be causally verified against this sample, so none was made; disguising a speculative change as a verified fix for this sample would violate the task's own instruction not to invent a result."
+    },
+    {
+      "sample_id": "holdout5-003",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "AMD's entire bull case rests on continued hyperscaler AI infrastructure spending.",
+      "pre_fix_output": {
+        "system_polarity": "mentions_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "supports_alpha"
+      },
+      "root_cause": "MODALITY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A103' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('CONTEXT_ONLY',)), not the historically-recorded system_polarity ('mentions_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('CONTEXT_ONLY',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-016",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "Microsoft Announcement: Baird's 155% upside target hinges on a \"surprise Microsoft announcement\" \u2014 a potential game-changer.",
+      "pre_fix_output": {
+        "system_polarity": "mentions_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "supports_alpha"
+      },
+      "root_cause": "MODALITY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A301' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('NON_SUBSTANTIVE',)), not the historically-recorded system_polarity ('mentions_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('NON_SUBSTANTIVE',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-017",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "The market is paying a premium for growth, but it's a growth-adjusted fair value.",
+      "pre_fix_output": {
+        "system_polarity": "opposes_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "mentions_alpha"
+      },
+      "root_cause": "CONDITIONAL_LANGUAGE",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A304' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('GENERIC_BACKGROUND',)), not the historically-recorded system_polarity ('opposes_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('GENERIC_BACKGROUND',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-040",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "When retail is clinging to a stale Berkshire headline and the measured investor community has nothing to say, that is a sign of distribution, not accumulation.",
+      "pre_fix_output": {
+        "system_polarity": "opposes_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "mentions_alpha"
+      },
+      "root_cause": "CONDITIONAL_LANGUAGE",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A601' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('NON_SUBSTANTIVE',)), not the historically-recorded system_polarity ('opposes_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('NON_SUBSTANTIVE',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-057",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "Amazon's Q2 beat showed its AI/chip businesses at a $25 billion run rate, and its cloud growth is \"shooting to the top of the cloud wars.\" Google Cloud is aggressively discounting to win enterprise deals.",
+      "pre_fix_output": {
+        "system_polarity": "mentions_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "supports_alpha"
+      },
+      "root_cause": "MODALITY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A101' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('NON_SUBSTANTIVE',)), not the historically-recorded system_polarity ('mentions_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('NON_SUBSTANTIVE',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-070",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "The 92% earnings beat probability sitting on prediction markets is real.",
+      "pre_fix_output": {
+        "system_polarity": "mentions_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "supports_alpha"
+      },
+      "root_cause": "MODALITY",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A301' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('CONTEXT_ONLY',)), not the historically-recorded system_polarity ('mentions_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('CONTEXT_ONLY',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-154",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "> \u26a1 Key Insight: The forward P/E of 6x against TTM P/E of 43x signals the market anticipates enormous profit acceleration.",
+      "pre_fix_output": {
+        "system_polarity": "opposes_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "mentions_alpha"
+      },
+      "root_cause": "CONDITIONAL_LANGUAGE",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A304' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('GENERIC_BACKGROUND',)), not the historically-recorded system_polarity ('opposes_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('GENERIC_BACKGROUND',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-196",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "AI trade caution: Bloomberg's \"AI Isn't a Catch-All Trade\" warns that not all AI trades are equal this earnings season \u2014 a sector-wide caution flag.",
+      "pre_fix_output": {
+        "system_polarity": "opposes_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "mentions_alpha"
+      },
+      "root_cause": "CONDITIONAL_LANGUAGE",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A601' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('CONTEXT_ONLY',)), not the historically-recorded system_polarity ('opposes_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('CONTEXT_ONLY',)",
+        "reproduces_historical_output": false
+      }
+    },
+    {
+      "sample_id": "holdout5-198",
+      "category": "B",
+      "category_description": "Cautious/questioning/skeptical wording incorrectly classified as support or opposition",
+      "original_input": "This mismatch suggests retail may be leaning into the AI thesis more aggressively than institutional framing, which is a mild contrarian flag \u2014 retail could be chasing while institutions hedge.",
+      "pre_fix_output": {
+        "system_polarity": "opposes_alpha"
+      },
+      "expected_output": {
+        "reviewer_expected_polarity": "mentions_alpha"
+      },
+      "root_cause": "CONDITIONAL_LANGUAGE",
+      "responsible_code_path": "comqutor_alpha/structure_engine/evidence_stance.py::classify_evidence_stance",
+      "minimal_proposed_fix": "None proposed -- see change_reason.",
+      "fix_applied": false,
+      "post_fix_output": null,
+      "status": "UNRESOLVED",
+      "change_reason": "Empirically re-ran comqutor_alpha.structure_engine.evidence_stance.classify_evidence_stance with this exact claim/evidence text and target_alpha_id='A601' against the current on-disk taxonomy: it returns evidence_stance='neutral_background' (reason codes: ('NON_SUBSTANTIVE',)), not the historically-recorded system_polarity ('opposes_alpha'). The current deterministic classifier does not reproduce this failure at all -- it does not even fall into the same output category as the historical review compared against. This means the historical system output was very likely produced by a different code path (most likely comqutor_alpha/structure_engine/evidence_stance_llm.py's Provider-backed LLM classification, or an earlier snapshot of this deterministic module), neither of which can be inspected or safely modified today without a Provider call (forbidden under Day 2 scope). No change was made to evidence_stance.py because no causal link to this sample's failure could be verified.",
+      "verification": {
+        "method": "Direct re-execution of classify_evidence_stance() with this exact claim/evidence text and target_alpha_id against current on-disk alpha_taxonomy_v1.yaml",
+        "current_deterministic_output": "neutral_background",
+        "current_reason_codes": "('NON_SUBSTANTIVE',)",
+        "reproduces_historical_output": false
+      }
+    }
+  ]
+}

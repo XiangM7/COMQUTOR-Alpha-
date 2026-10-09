@@ -92,6 +92,14 @@ _SEMANTIC_TASKS = frozenset(
         # exactly like evidence_stance_classifier above (never one of the
         # three MANIFEST_ORIGINAL_TASKS, which stay unchanged).
         "alpha_classifier_batch",
+        # 2026-10-08 (T3 closeout): registered alongside llm_runtime/
+        # contracts.py's SEMANTIC_TASKS, for the same KeyError reason as
+        # evidence_stance_classifier above. Exact Replay has no binding for
+        # this task (replay/semantic_binding.py), so a run carrying its
+        # records reports EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED -- such runs
+        # were never exact-replay ready before either (their semantic record
+        # set was incomplete).
+        "content_support_verification",
     }
 )
 # Must stay exactly equal to llm_runtime/manifest.py's own
@@ -140,6 +148,38 @@ _RECORD_FIELDS = frozenset(
         "fallback_reason",
         "error_code",
         "error_message",
+    }
+)
+# 2026-10-01 (v7 limited real-verification round): this module keeps its own
+# separate copy of the record field schema (see the "duplicated literal, not
+# a shared import" note on _MANIFEST_ORIGINAL_TASKS above -- the same
+# pattern applies here), and _record_contract_errors' exact `set(record) !=
+# _RECORD_FIELDS` check never accounted for ANY of
+# comqutor_alpha.llm_runtime.contracts.py's additive optional fields
+# (execution_policy, profile_id, request_control, provider_response,
+# request_attempts) at all -- a latent bug that never manifested only
+# because no test fixture's fake model ever populated request_control/
+# provider_response (they require a real ChatOpenAI-family model exposing
+# _get_request_payload/response_metadata), and request_attempts did not
+# exist until this round. Confirmed as a real, live bug once
+# request_attempts started being populated unconditionally for every real
+# attempt: a real v7 execution's own saved calls (e.g.
+# t3live_20261001T230846Z_16d44096, which also has real request_control/
+# provider_response) would fail Exact Replay here with
+# SEMANTIC_RECORD_FIELDS_INVALID despite being perfectly valid records.
+# Fixed the same way contracts.py already does it: required fields must all
+# be present; any additional field must be one of this known optional set;
+# anything else still fails closed exactly as before.
+_OPTIONAL_RECORD_FIELDS = frozenset(
+    {
+        "execution_policy", "profile_id", "request_control", "provider_response",
+        "request_attempts", "persist_sequence",
+        # 2026-10-06 (round 14): mirrors llm_runtime/contracts.py's new
+        # optional out-of-band claim identity. Without this entry, replaying
+        # any run recorded after that change failed closed with
+        # SEMANTIC_RECORD_FIELDS_INVALID (the same latent-mirror trap this
+        # comment block already documents for earlier additive fields).
+        "claim_ids",
     }
 )
 _MANIFEST_FIELDS = frozenset(
@@ -195,14 +235,42 @@ _SUPPORTED_ARTIFACT_SCHEMAS = {
     "conflicts.json": "conflicts.export.v1",
     "artifact_manifest.json": "artifact_manifest.export.v1",
 }
-_SUPPORTED_CALL_IDENTITIES = {
-    "structured_adapter": {
-        "prompt_version": "week2.claim_batch_enrichment.v1",
-        "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
-        "input_schema_version": "week2.claim_batch_enrichment.input.v1",
-        "output_schema_version": "week2.claim_batch_enrichment.output.v1",
-        "taxonomy_version": None,
-    },
+# 2026-10-01 (v6/v7 Exact Replay identity compatibility fix): each task now
+# maps to a TUPLE of accepted identities instead of a single dict. Minimal
+# change to the existing shape -- every task that still has exactly one
+# authorized identity is simply that identity wrapped in a 1-tuple, with its
+# own value completely unchanged. This exists because a real prompt version
+# bump (alpha_classifier v6 -> v7, this round) must not retroactively break
+# Exact Replay for bundles saved under the PRIOR version -- v6 and v7 are
+# each independently valid, matched as a whole identity (task + prompt_
+# version + prompt_sha256 + both schema versions + taxonomy_version
+# together), never by mixing fields from two different accepted identities
+# (a record claiming prompt_version=v7 with v6's own prompt_sha256, or any
+# other cross-identity combination, matches neither tuple entry and is
+# rejected exactly like an unknown version -- see _validate_call_versions
+# below, which checks each candidate identity as one atomic unit via a
+# single `all()` per candidate, never per-field across candidates).
+_SUPPORTED_CALL_IDENTITIES: dict[str, tuple[dict[str, Any], ...]] = {
+    # T4 round 34 (D1 fix, 2026-10-09): v1 kept verbatim for bundles recorded under it
+    # (Week2LLMGateway.retired_prompt_identity_sha256("week2.claim_batch_enrichment.v1") reproduces
+    # its prompt_sha256); v2 added as a second, independently valid identity, prompt_sha256 taken
+    # live from Week2LLMGateway.prompt_identity_sha256("claim_batch_enrichment").
+    "structured_adapter": (
+        {
+            "prompt_version": "week2.claim_batch_enrichment.v1",
+            "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+            "input_schema_version": "week2.claim_batch_enrichment.input.v1",
+            "output_schema_version": "week2.claim_batch_enrichment.output.v1",
+            "taxonomy_version": None,
+        },
+        {
+            "prompt_version": "week2.claim_batch_enrichment.v2",
+            "prompt_sha256": "fc01ae0d261f63bf081610a22c99486186d10677d94ddbabb21f2fa602d4f628",
+            "input_schema_version": "week2.claim_batch_enrichment.input.v2",
+            "output_schema_version": "week2.claim_batch_enrichment.output.v2",
+            "taxonomy_version": None,
+        },
+    ),
     # Updated (Pure-LLM Alpha Semantic Authority task) from the pre-migration
     # week2.alpha_classifier.v2 identity to the current, authorized v3
     # identity (decision vocabulary select/defer -> select/none; deterministic
@@ -216,20 +284,63 @@ _SUPPORTED_CALL_IDENTITIES = {
     # This is not a relaxation -- an exact-replay bundle still fails closed
     # on any identity this dict does not list; only the single already-
     # authorized, already-shipped current value changed.
-    "alpha_classifier": {
-        "prompt_version": "week2.alpha_classifier.v3",
-        "prompt_sha256": "04b255de7e2f73872bf6431eea9a908465bde685923d0f0f37687d5dffcc8f83",
-        "input_schema_version": "week2.alpha_classifier.input.v2",
-        "output_schema_version": "week2.alpha_classifier.output.v2",
-        "taxonomy_version": "alpha_taxonomy_v1",
-    },
-    "structure_extractor": {
-        "prompt_version": "week2.structure_extractor.v1",
-        "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
-        "input_schema_version": "week2.structure_extractor.input.v1",
-        "output_schema_version": "week2.structure_extractor.output.v1",
-        "taxonomy_version": None,
-    },
+    # 2026-09-29 (T2/Replay verification, this round): re-pinned again --
+    # same FROZEN_HASHES-style drift pattern as the two prior updates to
+    # this same entry (see the comment above). week2_llm.py's own
+    # _TASK_RUNTIME_METADATA["alpha_classifier"] had already been bumped to
+    # v6/output.v3 (and its prompt text gained substantial disambiguation
+    # guidance -- A101/A103/A601 datacenter/power/cooling framing,
+    # hypothetical/rebuttal framing rules, etc.) across prior sessions on
+    # this branch, but this registry was simply never updated to match --
+    # it still listed the stale v3/output.v2 identity. Found while
+    # investigating why every tests/replay/* test using the shared
+    # eligible_live_source fixture failed closed with
+    # EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH. version labels and
+    # prompt_sha256 both taken live from week2_llm.py's own current state
+    # (_TASK_RUNTIME_METADATA / Week2LLMGateway.prompt_identity_sha256),
+    # never hand-derived -- this is registry maintenance to match already-
+    # shipped, already-authorized prompt content, never a relaxation of
+    # what this bundle-validity gate accepts.
+    #
+    # 2026-10-01 (v6/v7 Exact Replay identity compatibility fix): v6 is kept
+    # here VERBATIM, unchanged, specifically so bundles saved under v6 --
+    # including the real, already-authorized execution
+    # t3live_20261001T014648Z_1fb9c9d5 -- keep passing Exact Replay exactly
+    # as before. v7 (the AI-review-comparison-round prompt edit; see
+    # week2_llm.py's own _TASK_RUNTIME_METADATA["alpha_classifier"] comment
+    # for the full per-clause rationale) is added as a SECOND, independently
+    # valid identity, not a replacement. Both prompt_sha256 values taken
+    # live from Week2LLMGateway.prompt_identity_sha256("alpha_classifier")
+    # at each version's own introduction, never hand-derived. A record must
+    # match one identity's fields as a whole -- week2.alpha_classifier.v7
+    # paired with v6's own prompt_sha256 (or any other cross-identity field
+    # combination) matches neither tuple entry and fails closed exactly like
+    # an unrecognized version, by construction (see _validate_call_versions).
+    "alpha_classifier": (
+        {
+            "prompt_version": "week2.alpha_classifier.v6",
+            "prompt_sha256": "bb2dbdf0f3fc9a43291233494c2f355275b4fe6fddc71cd63fd1377f9ba109d9",
+            "input_schema_version": "week2.alpha_classifier.input.v2",
+            "output_schema_version": "week2.alpha_classifier.output.v3",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+        {
+            "prompt_version": "week2.alpha_classifier.v7",
+            "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+            "input_schema_version": "week2.alpha_classifier.input.v2",
+            "output_schema_version": "week2.alpha_classifier.output.v3",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+    ),
+    "structure_extractor": (
+        {
+            "prompt_version": "week2.structure_extractor.v1",
+            "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+            "input_schema_version": "week2.structure_extractor.input.v1",
+            "output_schema_version": "week2.structure_extractor.output.v1",
+            "taxonomy_version": None,
+        },
+    ),
     # Added (Step 5A v0.1.2.1 execution-capacity repair): batched sibling of
     # "alpha_classifier" -- IDENTICAL semantic decision criteria, only the
     # I/O envelope changed (one claim per call -> many claims per call,
@@ -237,25 +348,50 @@ _SUPPORTED_CALL_IDENTITIES = {
     # so it gets its own registered identity here rather than being merged
     # into "alpha_classifier"'s. prompt_sha256 computed live via
     # Week2LLMGateway.prompt_identity_sha256("alpha_classifier_batch").
-    "alpha_classifier_batch": {
-        "prompt_version": "week2.alpha_classifier_batch.v1",
-        "prompt_sha256": "6885e15f5a5578e6d6050a8cef6af5e3d5c75891ef183da564754d98afb5bf7b",
-        "input_schema_version": "week2.alpha_classifier_batch.input.v1",
-        "output_schema_version": "week2.alpha_classifier_batch.output.v1",
-        "taxonomy_version": "alpha_taxonomy_v1",
-    },
+    # 2026-09-29: re-pinned alongside "alpha_classifier" above for the same
+    # reason -- its own classification rules are copied verbatim from
+    # "alpha_classifier" (per week2_llm.py's own comment), so the same
+    # already-shipped disambiguation-guidance addition changed this prompt
+    # text too; week2_llm.py's own _TASK_RUNTIME_METADATA
+    # ["alpha_classifier_batch"] had already been bumped to v4/output.v2,
+    # this registry simply hadn't been updated to match. Version labels and
+    # prompt_sha256 both taken live from week2_llm.py's own current state.
+    "alpha_classifier_batch": (
+        {
+            "prompt_version": "week2.alpha_classifier_batch.v4",
+            "prompt_sha256": "f217bdbeb5a68f80f1447a1178f97b2a4c314d90f445cf92b356b164c33ebc2e",
+            "input_schema_version": "week2.alpha_classifier_batch.input.v1",
+            "output_schema_version": "week2.alpha_classifier_batch.output.v2",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+    ),
     # Added (post-Alpha-Authority-Migration registry cleanup): B1 Evidence
     # Stance's own LLM upgrade task, registered here for the first time
     # alongside SEMANTIC_TASKS/_SEMANTIC_TASKS above -- current B1 v3
     # identity, unchanged by this task (see week2_llm.py's
     # _TASK_RUNTIME_METADATA["evidence_stance_classifier"]).
-    "evidence_stance_classifier": {
-        "prompt_version": "evidence_stance.llm_classifier.v3",
-        "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
-        "input_schema_version": "evidence_stance.llm_classifier.input.v1",
-        "output_schema_version": "evidence_stance.llm_classifier.output.v1",
-        "taxonomy_version": "alpha_taxonomy_v1",
-    },
+    "evidence_stance_classifier": (
+        {
+            "prompt_version": "evidence_stance.llm_classifier.v3",
+            "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+            "input_schema_version": "evidence_stance.llm_classifier.input.v1",
+            "output_schema_version": "evidence_stance.llm_classifier.output.v1",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+    ),
+    # 2026-10-08 (T3 closeout): content support's current v2.1 identity,
+    # prompt_sha256 read live from Week2LLMGateway.prompt_identity_sha256
+    # ("content_support_verification") -- the value the T3 execution's signed
+    # plan pinned.
+    "content_support_verification": (
+        {
+            "prompt_version": "content_support.llm.v2.1",
+            "prompt_sha256": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+            "input_schema_version": "content_support.llm.input.v2",
+            "output_schema_version": "content_support.llm.output.v2.1",
+            "taxonomy_version": None,
+        },
+    ),
 }
 
 
@@ -310,6 +446,18 @@ class ExactSemanticSourceBundle:
     run_audit: dict[str, Any]
     artifact_manifest: dict[str, Any]
     source_files: tuple[SourceFileSnapshot, ...]
+    # T1 source-linking chain (2026-09-29 T2/Replay verification fix):
+    # OPTIONAL -- a run from before source-linking existed, or one with no
+    # genuinely source-linked claims (every non-news/market/financial/macro
+    # chain), has no source_registry.json at all, and that must degrade to
+    # None here exactly like score_and_assemble_structure_graph's own
+    # opportunistic contract already treats a missing registry (see
+    # routes_research.py's live-pipeline call site) -- never required,
+    # never fabricated. When PRESENT, its own byte content is still covered
+    # by this bundle's whole-directory before/after integrity snapshot
+    # (_snapshot_source_directory), so a tampered registry still fails
+    # closed even though it is not one of REQUIRED_SOURCE_ARTIFACTS.
+    source_registry: dict[str, Any] | None = None
 
     def artifact_path(self, filename: str) -> Path:
         if filename not in REQUIRED_SOURCE_ARTIFACTS:
@@ -411,9 +559,16 @@ def _contains_sensitive_value(value: Any) -> bool:
 
 def _record_contract_errors(record: dict[str, Any]) -> list[str]:
     errors: list[str] = []
-    if set(record) != _RECORD_FIELDS:
+    record_keys = set(record)
+    if (_RECORD_FIELDS - record_keys) or (record_keys - _RECORD_FIELDS - _OPTIONAL_RECORD_FIELDS):
         errors.append("SEMANTIC_RECORD_FIELDS_INVALID")
         return errors
+    claim_ids = record.get("claim_ids")
+    if "claim_ids" in record and claim_ids is not None and (
+        not isinstance(claim_ids, (list, tuple))
+        or not all(isinstance(item, str) and item.strip() for item in claim_ids)
+    ):
+        errors.append("SEMANTIC_CLAIM_IDS_INVALID")
     if record.get("schema_version") != SEMANTIC_CALL_SCHEMA_VERSION:
         errors.append("SEMANTIC_SCHEMA_VERSION_INVALID")
     for key in (
@@ -429,6 +584,10 @@ def _record_contract_errors(record: dict[str, Any]) -> list[str]:
             errors.append(f"SEMANTIC_STRING_REQUIRED:{key}")
     if not _nonnegative_int(record.get("call_sequence")):
         errors.append("SEMANTIC_CALL_SEQUENCE_INVALID")
+    if "persist_sequence" in record and record["persist_sequence"] is not None and not _nonnegative_int(
+        record["persist_sequence"]
+    ):
+        errors.append("SEMANTIC_PERSIST_SEQUENCE_INVALID")
     if record.get("task") not in _SEMANTIC_TASKS:
         errors.append("SEMANTIC_TASK_INVALID")
     if record.get("execution_mode") not in {"live", "shadow", "replay_fixture", "test"}:
@@ -492,10 +651,16 @@ def _record_contract_errors(record: dict[str, Any]) -> list[str]:
     cache = record.get("cache")
     if (
         not isinstance(cache, dict)
-        or set(cache) != {"cache_key", "hit"}
+        # source_call_id (round 14): optional, only on a cache-hit record;
+        # mirrors contracts.validate_semantic_call_record.
+        or not ({"cache_key", "hit"} <= set(cache) <= {"cache_key", "hit", "source_call_id"})
         or not isinstance(cache.get("cache_key"), str)
         or not _CACHE_KEY_PATTERN.fullmatch(cache["cache_key"])
         or not isinstance(cache.get("hit"), bool)
+        or (
+            cache.get("source_call_id") is not None
+            and not (isinstance(cache["source_call_id"], str) and cache["source_call_id"].strip())
+        )
     ):
         errors.append("SEMANTIC_CACHE_INVALID")
     validation = record.get("validation_status")
@@ -552,9 +717,18 @@ def _record_contract_errors(record: dict[str, Any]) -> list[str]:
 
 
 def _call_collection_errors(records: list[dict[str, Any]]) -> list[str]:
+    """2026-10-02 (concurrent-audit-loss incident fix): mirrors contracts.py's
+    own validate_semantic_call_records -- ordering is checked on
+    persist_sequence (recorder-assigned, true append order) wherever a
+    record carries it, never on call_sequence (caller-assigned, call-START
+    order), which real concurrent dispatch can legitimately persist out of
+    order. A record with no persist_sequence (a pre-fix artifact) falls
+    back to the original call_sequence-based check, unchanged, among other
+    such records for the same run."""
     errors: list[str] = []
     seen_ids: set[str] = set()
-    last_sequence: dict[str, int] = {}
+    last_persist_sequence: dict[str, int] = {}
+    last_call_sequence: dict[str, int] = {}
     for record in records:
         errors.extend(_record_contract_errors(record))
         call_id = record.get("call_id")
@@ -563,12 +737,21 @@ def _call_collection_errors(records: list[dict[str, Any]]) -> list[str]:
                 errors.append("SEMANTIC_DUPLICATE_CALL_ID")
             seen_ids.add(call_id)
         run_id = record.get("run_id")
+        if not isinstance(run_id, str):
+            continue
+        persist_sequence = record.get("persist_sequence")
+        if _nonnegative_int(persist_sequence):
+            previous_persist = last_persist_sequence.get(run_id)
+            if previous_persist is not None and persist_sequence <= previous_persist:
+                errors.append("SEMANTIC_PERSIST_SEQUENCE_NOT_MONOTONIC")
+            last_persist_sequence[run_id] = persist_sequence
+            continue
         sequence = record.get("call_sequence")
-        if isinstance(run_id, str) and _nonnegative_int(sequence):
-            previous = last_sequence.get(run_id)
+        if _nonnegative_int(sequence):
+            previous = last_call_sequence.get(run_id)
             if previous is not None and sequence <= previous:
                 errors.append("SEMANTIC_CALL_SEQUENCE_NOT_MONOTONIC")
-            last_sequence[run_id] = sequence
+            last_call_sequence[run_id] = sequence
     return errors
 
 
@@ -801,8 +984,17 @@ def _validate_call_versions(calls: tuple[dict[str, Any], ...]) -> None:
         if record.get("schema_version") != SEMANTIC_CALL_SCHEMA_VERSION:
             raise ExactReplayError(EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH)
         task = record.get("task")
-        expected = _SUPPORTED_CALL_IDENTITIES.get(str(task))
-        if expected is None or any(record.get(key) != value for key, value in expected.items()):
+        candidates = _SUPPORTED_CALL_IDENTITIES.get(str(task))
+        # Each candidate identity is matched as one atomic unit (all its own
+        # fields must agree with the record together) -- never by checking
+        # one field against one candidate and another field against a
+        # different candidate, which would let a record mix, for example,
+        # one version's prompt_version with a different version's own
+        # prompt_sha256 and still pass.
+        if candidates is None or not any(
+            all(record.get(key) == value for key, value in identity.items())
+            for identity in candidates
+        ):
             raise ExactReplayError(
                 EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH,
                 details={"task": task, "call_id": record.get("call_id")},
@@ -974,6 +1166,18 @@ def load_exact_semantic_source_bundle(
     if before != after:
         raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_HASH_MISMATCH)
 
+    # OPTIONAL (see ExactSemanticSourceBundle.source_registry's own
+    # docstring): absent for a pre-source-linking or no-source-linked-
+    # evidence run; present and malformed still fails closed rather than
+    # being silently ignored (the SAME artifact-invalid contract every
+    # other required artifact uses via _load_json above).
+    source_registry_path = source_directory / "source_registry.json"
+    source_registry = (
+        _load_json(source_registry_path, source_directory, "source_registry.json")
+        if source_registry_path.exists()
+        else None
+    )
+
     return ExactSemanticSourceBundle(
         source_directory=source_directory,
         source_run_id=source_run_id,
@@ -991,6 +1195,7 @@ def load_exact_semantic_source_bundle(
         run_audit=payloads["run_audit.json"],
         artifact_manifest=payloads["artifact_manifest.json"],
         source_files=before,
+        source_registry=source_registry,
     )
 
 

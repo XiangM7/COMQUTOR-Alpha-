@@ -52,6 +52,51 @@ def _sample_record(claim_id, *, run_id, ticker="NVDA", agent="news_agent", sourc
     return record
 
 
+def _with_no_external_source(records):
+    """John MVP Final Gap Closure -- Structured External Source
+    Traceability: the reader always annotates every record with these two
+    fields now (UNAVAILABLE when no source_registry.json exists for the
+    run, which is the case for every fixture in this file that doesn't
+    write one) -- expected-output comparisons must account for them
+    explicitly rather than comparing against the bare input fixture.
+
+    ``linked_source`` (T1 source-linking chain, COMQUTOR Alpha next-round
+    task, 2026-09-26): the reader's own _annotate_validated_source_link
+    always attaches this too -- None here since none of these fixture
+    records carry a source_link_status/linked_source_id at all (a
+    historical/synthetic record predating T1).
+
+    ``verified_support_diagnostic`` (gate-bypass closing fix, 2026-09-29,
+    extended for the market-data chain 2026-09-29): the reader's own
+    _annotate_verified_support_diagnostic always attaches this too, keyed
+    by the record's own ``agent`` field -- news_agent and market_agent are
+    both in the currently-covered set (source_provenance.
+    LINKED_AGENT_COVERAGE), so either one's record with no source_link_
+    status at all classifies as REFERENCE_MISSING_OR_INVALID (a covered
+    agent with no resolvable reference); every other agent (fundamental_
+    agent, etc.) is not yet covered and classifies as SOURCE_TYPE_NOT_YET_
+    COVERED instead."""
+    from comqutor_alpha.source_provenance import LINKED_AGENT_COVERAGE
+
+    return [
+        {
+            **record,
+            "external_source": None,
+            "external_source_status": "UNAVAILABLE",
+            "linked_source": None,
+            "verified_support_diagnostic": {
+                "category": (
+                    "REFERENCE_MISSING_OR_INVALID"
+                    if record.get("agent") in LINKED_AGENT_COVERAGE
+                    else "SOURCE_TYPE_NOT_YET_COVERED"
+                ),
+                "detail_code": "SOURCE_LINK_NOT_VALID",
+            },
+        }
+        for record in records
+    ]
+
+
 def _seed_run(
     tmp_path,
     run_id,
@@ -121,7 +166,7 @@ def test_normal_response_is_structured_only(tmp_path):
     assert result["run_id"] == "normal_run"
     assert result["ticker"] == "NVDA"
     assert result["schema_version"] == _SCHEMA_VERSION
-    assert result["structured_agent_outputs"] == records
+    assert result["structured_agent_outputs"] == _with_no_external_source(records)
     assert result["count"] == 2
 
     assert "raw_agent_outputs" not in result
@@ -343,7 +388,7 @@ def test_endpoint_succeeds_even_when_raw_agent_outputs_json_is_corrupted(tmp_pat
 
     result = get_agent_outputs_response("corrupt_raw_run", output_root=tmp_path)
     assert result["status"] == "ok"
-    assert result["structured_agent_outputs"] == records
+    assert result["structured_agent_outputs"] == _with_no_external_source(records)
 
 
 def test_reader_never_opens_raw_agent_outputs_json(tmp_path, monkeypatch):
@@ -913,3 +958,139 @@ def test_every_valid_direction_is_returned_unchanged(tmp_path, direction):
     record = result["structured_agent_outputs"][0]
     assert record["direction"] == direction
     assert set(record).issubset(PUBLIC_STRUCTURED_OUTPUT_FIELDS)
+
+
+# ---------------------------------------------------------------------------
+# John MVP Final Gap Closure -- Structured External Source Traceability:
+# the API-layer read-time join against a run's source_registry.json.
+# ---------------------------------------------------------------------------
+
+
+def _write_source_registry(tmp_path, run_id, sources):
+    import json as _json
+
+    run_dir = tmp_path / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "source_registry.json").write_text(
+        _json.dumps(
+            {
+                "schema_version": "source_registry.v1",
+                "run_id": run_id,
+                "ticker": "NVDA",
+                "source_count": len(sources),
+                "sources": sources,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_claim_matching_a_real_source_title_is_traceable(tmp_path):
+    run_id = "source_match_run"
+    matching_title = "Why Stocks Are Loving the Fed's Rate Hike Today"
+    records = [
+        _sample_record(
+            "c1",
+            run_id=run_id,
+            claim=f"Barron's: \"{matching_title}\" -- equities took it well.",
+            evidence=f"Barron's: \"{matching_title}\" -- equities took it well.",
+        )
+    ]
+    _seed_run(tmp_path, run_id, structured_records=records)
+    _write_source_registry(
+        tmp_path,
+        run_id,
+        [
+            {
+                "source_id": "src_abc123",
+                "source_type": "news",
+                "name": "Barron's",
+                "title": matching_title,
+                "url": "https://barrons.com/x",
+                "published_at": "2026-09-17T10:00:00",
+                "retrieved_at": "2026-09-17T22:00:00Z",
+                "metadata_status": "TRACEABLE",
+            }
+        ],
+    )
+
+    result = get_agent_outputs_response(run_id, output_root=tmp_path)
+    record = result["structured_agent_outputs"][0]
+    assert record["external_source_status"] == "TRACEABLE"
+    assert record["external_source"]["source_id"] == "src_abc123"
+    assert record["external_source"]["name"] == "Barron's"
+    assert record["external_source"]["url"] == "https://barrons.com/x"
+
+
+def test_claim_not_matching_any_source_is_unavailable(tmp_path):
+    run_id = "source_no_match_run"
+    records = [_sample_record("c1", run_id=run_id)]  # generic claim/evidence text
+    _seed_run(tmp_path, run_id, structured_records=records)
+    _write_source_registry(
+        tmp_path,
+        run_id,
+        [
+            {
+                "source_id": "src_unrelated",
+                "source_type": "news",
+                "name": "Reuters",
+                "title": "A Completely Unrelated News Headline About Something Else",
+                "url": "https://reuters.com/y",
+                "metadata_status": "TRACEABLE",
+            }
+        ],
+    )
+
+    result = get_agent_outputs_response(run_id, output_root=tmp_path)
+    record = result["structured_agent_outputs"][0]
+    assert record["external_source_status"] == "UNAVAILABLE"
+    assert record["external_source"] is None
+
+
+def test_historical_run_with_no_source_registry_is_honestly_unavailable(tmp_path):
+    # A run predating this feature (no source_registry.json at all) --
+    # backward compatibility, section 8: must remain fully loadable, and
+    # must never fabricate a source.
+    run_id = "historical_no_registry_run"
+    records = [_sample_record("c1", run_id=run_id)]
+    _seed_run(tmp_path, run_id, structured_records=records)
+    assert not (tmp_path / run_id / "source_registry.json").exists()
+
+    result = get_agent_outputs_response(run_id, output_root=tmp_path)
+    assert result["status"] == "ok"
+    record = result["structured_agent_outputs"][0]
+    assert record["external_source_status"] == "UNAVAILABLE"
+    assert record["external_source"] is None
+
+
+def test_malformed_source_registry_cannot_masquerade_as_valid_and_never_crashes(tmp_path):
+    run_id = "malformed_registry_run"
+    records = [_sample_record("c1", run_id=run_id)]
+    _seed_run(tmp_path, run_id, structured_records=records)
+    run_dir = tmp_path / run_id
+    # Not even a JSON object -- a bare string.
+    (run_dir / "source_registry.json").write_text('"not an object"', encoding="utf-8")
+
+    result = get_agent_outputs_response(run_id, output_root=tmp_path)
+    assert result["status"] == "ok"
+    record = result["structured_agent_outputs"][0]
+    assert record["external_source_status"] == "UNAVAILABLE"
+    assert record["external_source"] is None
+
+
+def test_source_registry_with_sources_not_a_list_degrades_safely(tmp_path):
+    import json as _json
+
+    run_id = "malformed_sources_field_run"
+    records = [_sample_record("c1", run_id=run_id)]
+    _seed_run(tmp_path, run_id, structured_records=records)
+    run_dir = tmp_path / run_id
+    (run_dir / "source_registry.json").write_text(
+        _json.dumps({"schema_version": "source_registry.v1", "run_id": run_id, "sources": "not-a-list"}),
+        encoding="utf-8",
+    )
+
+    result = get_agent_outputs_response(run_id, output_root=tmp_path)
+    assert result["status"] == "ok"
+    record = result["structured_agent_outputs"][0]
+    assert record["external_source_status"] == "UNAVAILABLE"

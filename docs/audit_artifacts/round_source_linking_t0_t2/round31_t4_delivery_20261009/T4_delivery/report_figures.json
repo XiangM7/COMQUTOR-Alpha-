@@ -1,0 +1,357 @@
+{
+ "schema": "t4.round31.report_figures.v1",
+ "report_file": "00_T4交付主报告.md",
+ "how_checked": "tools/rebuild_stats.py recomputes every id from runs/<run_id>/ raw files and ledgers/<run>/ (standard library only) and checks that cited_as appears verbatim in the report",
+ "figures": [
+  {
+   "id": "run2.claims",
+   "value": 951,
+   "cited_as": "951 条 claim 全部分类"
+  },
+  {
+   "id": "run2.ledger_rows",
+   "value": 951,
+   "cited_as": "951 条 claim 全部分类"
+  },
+  {
+   "id": "run2.alpha_final_match",
+   "value": 164,
+   "cited_as": "最终 164 条匹配到 Alpha"
+  },
+  {
+   "id": "run2.alpha_final_none",
+   "value": 787,
+   "cited_as": "787 条没有匹配"
+  },
+  {
+   "id": "run2.alpha_classification_unavailable",
+   "value": 0,
+   "cited_as": "分类调用失败 0 次"
+  },
+  {
+   "id": "run2.alpha_raw_model_selection",
+   "value": 187,
+   "cited_as": "模型原始选择 187 条"
+  },
+  {
+   "id": "run2.alpha_gate_override",
+   "value": 23,
+   "cited_as": "被规则闸门改为不匹配 23 条"
+  },
+  {
+   "id": "run2.alpha_override_invalidation",
+   "value": 11,
+   "cited_as": "Alpha 专属否定条件 11 条"
+  },
+  {
+   "id": "run2.alpha_override_positive_requirement",
+   "value": 12,
+   "cited_as": "正向必要条件 12 条"
+  },
+  {
+   "id": "run2.alpha_final_A601",
+   "value": 60,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A304",
+   "value": 35,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A301",
+   "value": 25,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A501",
+   "value": 17,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A201",
+   "value": 10,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A103",
+   "value": 8,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A101",
+   "value": 5,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A001",
+   "value": 3,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.alpha_final_A102",
+   "value": 1,
+   "cited_as": "A601 60、A304 35、A301 25、A501 17、A201 10、A103 8、A101 5、A001 3、A102 1"
+  },
+  {
+   "id": "run2.cs_SUPPORTS",
+   "value": 61,
+   "cited_as": "| SUPPORTS | 61 |"
+  },
+  {
+   "id": "run2.cs_CONDITIONAL",
+   "value": 79,
+   "cited_as": "| CONDITIONAL | 79 |"
+  },
+  {
+   "id": "run2.cs_PENDING_REVIEW",
+   "value": 95,
+   "cited_as": "| PENDING_REVIEW | 95 |"
+  },
+  {
+   "id": "run2.cs_BACKGROUND",
+   "value": 9,
+   "cited_as": "| BACKGROUND | 9 |"
+  },
+  {
+   "id": "run2.cs_OPPOSES",
+   "value": 2,
+   "cited_as": "| OPPOSES | 2 |"
+  },
+  {
+   "id": "run2.cs_NOT_APPLICABLE",
+   "value": 705,
+   "cited_as": "| NOT_APPLICABLE | 705 |"
+  },
+  {
+   "id": "run2.cs_not_applicable_not_linked",
+   "value": 615,
+   "cited_as": "615 条未链接来源"
+  },
+  {
+   "id": "run2.cs_not_applicable_no_source_registry",
+   "value": 90,
+   "cited_as": "90 条 sentiment claim 没有来源登记"
+  },
+  {
+   "id": "run2.cs_supports_automated_no_request",
+   "value": 5,
+   "cited_as": "5 条由确定性数据核对支持"
+  },
+  {
+   "id": "run2.cs_sent_supports_material_remainder_conditional",
+   "value": 53,
+   "cited_as": "53 条模型判支持但披露了 MATERIAL 级未支持部分"
+  },
+  {
+   "id": "run2.cs_sent_llm_insufficient_pending",
+   "value": 39,
+   "cited_as": "39 条模型判证据不足"
+  },
+  {
+   "id": "run2.cs_not_sent_input_too_large",
+   "value": 5,
+   "cited_as": "5 条输入超限没有发送"
+  },
+  {
+   "id": "run2.cs_trio_sum",
+   "value": 235,
+   "cited_as": "61＋79＋95＝235"
+  },
+  {
+   "id": "run2.cs_trio_without_request",
+   "value": 10,
+   "cited_as": "其中 10 条没有发出请求"
+  },
+  {
+   "id": "run2.cs_sent_other_status",
+   "value": 11,
+   "cited_as": "有 11 个最终是其他状态"
+  },
+  {
+   "id": "run2.cs_requests_sent",
+   "value": 236,
+   "cited_as": "235 − 10 + 11 = 236"
+  },
+  {
+   "id": "run2.pool_claims_structure_graph",
+   "value": 3,
+   "cited_as": "进入正式证据池的 claim：3 条"
+  },
+  {
+   "id": "run2.ledger_in_official_pool",
+   "value": 3,
+   "cited_as": "进入正式证据池的 claim：3 条"
+  },
+  {
+   "id": "run2.active_alphas",
+   "value": 0,
+   "cited_as": "没有 active Alpha"
+  },
+  {
+   "id": "run2.dominant_alphas",
+   "value": 0,
+   "cited_as": "没有 active Alpha"
+  },
+  {
+   "id": "run2.A301_activation_score",
+   "value": 22.0056,
+   "cited_as": "分数 22.0056"
+  },
+  {
+   "id": "run2.admitted_conflicts",
+   "value": 0,
+   "cited_as": "没有主冲突"
+  },
+  {
+   "id": "run2.conflict_pairs_evaluated",
+   "value": 8,
+   "cited_as": "8 个冲突候选对都在准入前被拒"
+  },
+  {
+   "id": "run2.conflict_pairs_direction_role_unresolved",
+   "value": 8,
+   "cited_as": "8 个冲突候选对都在准入前被拒，原因码都含 DIRECTION_ROLE_UNRESOLVED"
+  },
+  {
+   "id": "run2.agent_http_requests",
+   "value": 19,
+   "cited_as": "研究 Agent 19 次 HTTP 请求"
+  },
+  {
+   "id": "run2.agent_retries",
+   "value": 0,
+   "cited_as": "两层均为 0"
+  },
+  {
+   "id": "run2.week2_retries",
+   "value": 0,
+   "cited_as": "两层均为 0"
+  },
+  {
+   "id": "run2.week2_http_requests_wire_audit",
+   "value": 1204,
+   "cited_as": "Week 2 1204 次 HTTP 请求"
+  },
+  {
+   "id": "run2.week2_budget_reservations",
+   "value": 1204,
+   "cited_as": "网关预算占用 1204 次"
+  },
+  {
+   "id": "run2.week2_ledger_attempts",
+   "value": 1204,
+   "cited_as": "账本尝试 1204 次"
+  },
+  {
+   "id": "run2.week2_not_sent",
+   "value": 6,
+   "cited_as": "6 次输入超限"
+  },
+  {
+   "id": "run2.week2_timeouts",
+   "value": 7,
+   "cited_as": "7 次超时"
+  },
+  {
+   "id": "run2.requests_missing_usage",
+   "value": 7,
+   "cited_as": "7 个请求缺 usage"
+  },
+  {
+   "id": "run2.usd_off_peak_floor",
+   "value": 1.8,
+   "cited_as": "$1.80–3.60"
+  },
+  {
+   "id": "run2.usd_peak_ceiling",
+   "value": 3.6,
+   "cited_as": "$1.80–3.60"
+  },
+  {
+   "id": "run2.key_conclusions",
+   "value": 57,
+   "cited_as": "57 条关键结论"
+  },
+  {
+   "id": "run2.key_verified_support",
+   "value": 0,
+   "cited_as": "已验证支持 0 条"
+  },
+  {
+   "id": "run2.key_partial_support",
+   "value": 10,
+   "cited_as": "部分支持 10 条"
+  },
+  {
+   "id": "run2.key_scored",
+   "value": 0,
+   "cited_as": "57 条全部未进入"
+  },
+  {
+   "id": "run2.supports_rows",
+   "value": 61,
+   "cited_as": "61 条 SUPPORTS"
+  },
+  {
+   "id": "run2.supports_model_none",
+   "value": 56,
+   "cited_as": "56 条模型判没有匹配的 Alpha"
+  },
+  {
+   "id": "run2.supports_matched",
+   "value": 5,
+   "cited_as": "5 条匹配到 Alpha"
+  },
+  {
+   "id": "run2.supports_in_pool",
+   "value": 3,
+   "cited_as": "3 条进入正式证据池（A301）"
+  },
+  {
+   "id": "run2.supports_non_analytical",
+   "value": 2,
+   "cited_as": "2 条因非分析性被排除"
+  },
+  {
+   "id": "run1.claims",
+   "value": 870,
+   "cited_as": "| claim 数 | 951 | 870 |"
+  },
+  {
+   "id": "run1.alpha_classification_unavailable",
+   "value": 2,
+   "cited_as": "2 次 Alpha 调用失败"
+  },
+  {
+   "id": "run1.week2_http_requests_wire_audit",
+   "value": 1042,
+   "cited_as": "Week 2 HTTP 1042 次 = 预算占用 1042 次"
+  },
+  {
+   "id": "run1.week2_budget_reservations",
+   "value": 1042,
+   "cited_as": "Week 2 HTTP 1042 次 = 预算占用 1042 次"
+  },
+  {
+   "id": "run1.week2_not_sent",
+   "value": 33,
+   "cited_as": "未发送 33 次"
+  },
+  {
+   "id": "run1.requests_missing_usage",
+   "value": 7,
+   "cited_as": "缺 usage 7 次"
+  },
+  {
+   "id": "run1.usd_off_peak_floor",
+   "value": 1.28,
+   "cited_as": "$1.28–2.55"
+  },
+  {
+   "id": "run1.usd_peak_ceiling",
+   "value": 2.55,
+   "cited_as": "$1.28–2.55"
+  }
+ ]
+}

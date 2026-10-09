@@ -1,0 +1,45 @@
+{
+  "schema_version": "candidate3_final_validation_run_manifest.v1",
+  "validation_type": "ONE_SHOT_INDEPENDENT_FINAL_VALIDATION",
+  "final_gold_path": "docs/audit_artifacts/v0_2_alpha_final_gold_v1.json",
+  "final_gold_sha256": "a3c402ce391cfba1bd49d3d84a352e222e2775118f24b9ebf2a003183e2392de",
+  "final_gold_sample_count": 150,
+  "candidate3_classifier_hash_sha256": "d53b2d7511f4c4a8089db746d09e4c79cb38f22597dac6459920ca3deac1171d",
+  "candidate3_batch_hash_sha256": "a03c8f673ffd387a866bc8dd585c4c96cf5464b80a50cb6e4c3fc5f894f68379",
+  "candidate3_classifier_prompt_version": "week2.alpha_classifier.v6",
+  "head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "branch": "comqutor-structure-layer",
+  "model_provider_identity": {
+    "research_profile_id": "comqutor_anthropic_medium_sonnet46_v1 (ANTHROPIC_PROFILE_ID)",
+    "llm_provider": "anthropic",
+    "quick_think_llm": "claude-sonnet-4-6",
+    "backend_url": null
+  },
+  "model_parameters_used": {
+    "temperature": "production default (unmodified) -- no explicit temperature override, identical to the Day 4G baseline and Candidate 3 development runs",
+    "note": "Never changed for this run relative to prior Day 4G runs, per explicit instruction not to alter settings merely for repeatability."
+  },
+  "retry_policy": {
+    "max_retries": 0,
+    "note": "Identical to scripts/run_day4g_candidate3_baseline_dev.py -- the same harness used for both the Day 4G baseline and Candidate 3 development runs. Existing automatic Provider-client-level retry behavior for transient failures (if any, inside create_llm_client) is unmodified and may still operate."
+  },
+  "timeout_settings": {
+    "timeout_seconds": 60.0,
+    "note": "Identical to the Day 4G harness."
+  },
+  "evaluation_code_script_path": "scripts/run_day4i_candidate3_final_validation.py (new, modeled byte-for-byte on scripts/run_day4g_candidate3_baseline_dev.py's harness logic, only the input join table and output file names differ)",
+  "environment_feature_flag_required": "COMQUTOR_WEEK2_LLM_ENABLED=true, scoped INLINE to the validation command only, never persisted to .env",
+  "sample_count": 150,
+  "planned_evaluation_passes": 1,
+  "tuning_after_result_permitted": false,
+  "prohibited_actions_this_task": [
+    "running baseline against Final Gold",
+    "running Candidate 1 or Candidate 2 against Final Gold",
+    "running Candidate 3 a second time against Final Gold",
+    "pre-testing a subset of Final Gold",
+    "manually probing final samples",
+    "selectively rerunning misclassified samples",
+    "tuning prompts after observing outputs",
+    "changing model/provider settings after seeing results"
+  ]
+}

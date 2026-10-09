@@ -1,0 +1,187 @@
+{
+  "schema_version": "comqutor.formal_acceptance_artifact.v1",
+  "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+  "ticker": "AMD",
+  "label_v1_version": "j2.provisional.v0.1",
+  "label_v2_version": "j2.provisional.v0.2",
+  "formal_status": "pass",
+  "effective_rules": {
+    "schema_version": "acceptance_engine.v1",
+    "taxonomy": {
+      "path": "/Users/xiangmao/COMQUTOR-Alpha-/comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+      "sha256": "18a0dc6b5de7bbae3541272fbd66fa1172e62eed172fd86e97a72e1a40d90972",
+      "declared_alpha_count": 10
+    },
+    "label_v2": {
+      "path": "/Users/xiangmao/COMQUTOR-Alpha-/comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+      "sha256": "6037e2616b06b8089e5322aa69630e553042bf8d7541be484c5d45bc9bef090c",
+      "label_version": "j2.provisional.v0.2",
+      "evaluation_mode": "shadow"
+    },
+    "rule_families": {
+      "must_detect_if_evidence_present": {
+        "config_source": "j2_provisional_regression_labels_v0.2.yaml: required_conflicts",
+        "applicable_target": "declared conflict pair, per ticker",
+        "execution_function": "acceptance_engine.evaluate_must_detect_if_evidence_present",
+        "trigger_condition": "pair is in the ticker's required_conflicts AND B2 arbitration recorded >= 1 stance-confirmed supporting claim on EACH side (bull_supporting_evidence_count and bear_supporting_evidence_count from conflicts.json's own arbitration.candidate_evaluations[].admissibility)",
+        "evidence_requirement": ">= 1 supporting claim per side (weaker than B2's own admission threshold of 2 -- this rule asks 'was evidence present at all', not 'did it clear B2's admission bar')",
+        "verdict_result": [
+          "pass",
+          "fail",
+          "not_applicable",
+          "not_evaluable"
+        ]
+      },
+      "should_detect_if_supported": {
+        "config_source": "j2_provisional_regression_labels_v0.2.yaml: conditional_conflicts",
+        "applicable_target": "declared conflict pair, per ticker",
+        "execution_function": "acceptance_engine.evaluate_should_detect_if_supported",
+        "trigger_condition": "pair is in the ticker's conditional_conflicts AND evidence is present per the same bar as must_detect_if_evidence_present AND stance_source is llm_semantic or mixed (evaluator.stance_source) -- offline runs with deterministic-baseline-only stance cannot reliably judge 'supported' and are marked pending_review instead",
+        "evidence_requirement": "evidence present (>= 1 supporting claim per side) AND LLM-semantic stance resolution actually ran for this replay",
+        "verdict_result": [
+          "pass",
+          "needs_review",
+          "pending_review",
+          "not_applicable",
+          "not_evaluable"
+        ]
+      },
+      "conditional_only": {
+        "config_source": "j2_provisional_regression_labels_v0.2.yaml: conditional_conflicts",
+        "applicable_target": "declared conflict pair, per ticker",
+        "execution_function": "evaluation_contract.apply_v2_contract (conditional_conflict_results)",
+        "trigger_condition": "pair is in the ticker's conditional_conflicts",
+        "evidence_requirement": "none required to trigger; a miss is always informational, never a fail",
+        "verdict_result": [
+          "pass",
+          "informational_mismatch",
+          "not_evaluable"
+        ]
+      },
+      "do_not_force": {
+        "config_source": "conflicts.json: conflicts[] cross-checked against arbitration.candidate_evaluations[].admissibility",
+        "applicable_target": "every admitted conflict, per ticker (a run-wide invariant, not a per-pair rule)",
+        "execution_function": "acceptance_engine.evaluate_do_not_force_invariant",
+        "trigger_condition": "always evaluated when the ticker is evaluable",
+        "evidence_requirement": "every pair in evaluate_ticker's admitted_conflicts must have a matching arbitration.candidate_evaluations entry whose own admissibility.status is 'admitted' -- proves B2's evidence gate was not bypassed, never a second judgment call",
+        "verdict_result": [
+          "invariant_held",
+          "invariant_violated",
+          "not_evaluable"
+        ]
+      },
+      "allowed_main_conflicts": {
+        "config_source": "j2_provisional_regression_labels_v0.2.yaml: allowed_conflicts",
+        "applicable_target": "declared conflict pair, per ticker",
+        "execution_function": "evaluation_contract.apply_v2_contract (allowed_conflict_results)",
+        "trigger_condition": "pair is in the ticker's allowed_conflicts",
+        "evidence_requirement": "none -- legal structures, never mandatory outputs; absence is never a failure",
+        "verdict_result": [
+          "observed_admitted",
+          "observed_candidate",
+          "not_observed",
+          "not_evaluable"
+        ]
+      },
+      "forbidden_dominant_without_strong_evidence": {
+        "config_source": "j2_provisional_regression_labels_v0.1.yaml (v0.1): should_not_be_dominant_without_strong_evidence",
+        "applicable_target": "Alpha, per ticker",
+        "execution_function": "evaluator.dominance_guard_flags",
+        "trigger_condition": "Alpha is listed in the ticker's should_not_be_dominant_without_strong_evidence AND reached dominant/regime_level status",
+        "evidence_requirement": "none to trigger the flag itself -- flags for human review, never auto-fails",
+        "verdict_result": [
+          "review_required",
+          "not_triggered",
+          "not_evaluable"
+        ]
+      }
+    }
+  },
+  "rule_family_results": {
+    "must_detect_if_evidence_present": [],
+    "should_detect_if_supported": [
+      {
+        "pair": "A101__A304",
+        "evidence_present": false,
+        "stance_source": "deterministic_baseline",
+        "admissibility_status": null,
+        "verdict": "not_applicable",
+        "detail": "evidence below the evidence-present bar -- rule does not trigger"
+      },
+      {
+        "pair": "A201__A304",
+        "evidence_present": false,
+        "stance_source": "deterministic_baseline",
+        "admissibility_status": null,
+        "verdict": "not_applicable",
+        "detail": "evidence below the evidence-present bar -- rule does not trigger"
+      }
+    ],
+    "conditional_only": [
+      {
+        "pair": "A101__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      },
+      {
+        "pair": "A201__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      }
+    ],
+    "do_not_force": {
+      "verdict": "invariant_held",
+      "violations": [],
+      "detail": "every conflicts.json-admitted pair has a matching B2-admitted arbitration entry"
+    },
+    "allowed_main_conflicts": [
+      {
+        "pair": "A301__A304",
+        "observed_status": "not_reached"
+      }
+    ],
+    "forbidden_dominant_without_strong_evidence": []
+  },
+  "undeclared_admitted_conflicts": [],
+  "v2_contract_result": {
+    "ticker": "AMD",
+    "evaluation_status": "evaluated",
+    "ticker_status": "pass",
+    "artifact_completeness": "pass",
+    "required_conflict_results": [],
+    "conditional_conflict_results": [
+      {
+        "pair": "A101__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      },
+      {
+        "pair": "A201__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      }
+    ],
+    "allowed_conflict_results": [
+      {
+        "pair": "A301__A304",
+        "observed_status": "not_reached"
+      }
+    ],
+    "product_decision_pending_results": [],
+    "removed_while_undeclared_pairs": [],
+    "structural_expectation_results": {
+      "positive_alphas_detected": [],
+      "positive_alphas_not_detected": [
+        "A101",
+        "A201",
+        "A301"
+      ],
+      "negative_alphas_detected": [],
+      "negative_alphas_not_detected": [
+        "A304"
+      ],
+      "note": "informational only -- a structural Alpha's absence in any one run never fails that run"
+    },
+    "run_bound_expectations": null
+  }
+}

@@ -1,0 +1,62 @@
+{
+ "execution_id": "t4r32-replay-20261009T201948Z-6d2647f0",
+ "based_on_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+ "output_root": "outputs/t4_r32_verify_runs",
+ "database": "comqutor_alpha_t4_r32_verify_test",
+ "tables_before": [],
+ "tables_after_migration": [
+  "agent_outputs",
+  "alpha_activations",
+  "alpha_conflicts",
+  "alpha_matches",
+  "entity_alpha_exposures",
+  "research_run_progress",
+  "research_runs",
+  "schema_migrations",
+  "structure_graphs"
+ ],
+ "status": "completed",
+ "elapsed_seconds": 303.4,
+ "replay": {
+  "saved_requests_in_based_on_run": 1204,
+  "requests_answered_with_saved_response": {
+   "claim_batch_enrichment": 1,
+   "content_support_verification": 236,
+   "alpha_classifier": 941,
+   "evidence_stance_classifier": 17,
+   "structure_extractor": 2
+  },
+  "timeouts_replayed": {
+   "claim_batch_enrichment": 7
+  },
+  "identical_body_reused": {},
+  "unmatched_requests": [],
+  "replies_with_run_id_rebased": {},
+  "distinct_saved_bodies": 1204,
+  "saved_attempts_indexed": 1204,
+  "requests_made": 1204
+ },
+ "response_summary": {
+  "status": "completed",
+  "structure_graph_status": "ready",
+  "conflict_status": "ready",
+  "alpha_classification_status": "complete_active_no_dominant",
+  "alpha_classification_completion": {
+   "total_claims": 951,
+   "valid_select_count": 164,
+   "valid_none_count": 787,
+   "call_failure_count": 0,
+   "not_executed_count": 0,
+   "not_executed_configuration_count": 0,
+   "not_executed_fault_count": 0,
+   "complete": true
+  },
+  "summary": "No dominant Alpha structure or admitted conflict was identified for this research run.",
+  "main_conflict": null
+ },
+ "stage_disclosure_degraded": [
+  "claim_enrichment",
+  "content_support_verification",
+  "structure_extraction"
+ ]
+}

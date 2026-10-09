@@ -1,0 +1,207 @@
+{
+  "schema_version": "candidate3_fresh_e2e_qqq.v1",
+  "run_type": "FRESH_END_TO_END_VALIDATION",
+  "ticker": "QQQ",
+  "run_id": "0d890564-2479-4361-94e8-25c48af3b9a8",
+  "start_timestamp": "2026-09-17T23:17:00Z",
+  "end_timestamp": "2026-09-17T23:45:42Z",
+  "total_wall_clock_seconds": 1721,
+  "total_wall_clock_display": "28m41s",
+  "candidate3_classifier_prompt_version_confirmed_in_run": "week2.alpha_classifier.v6",
+  "final_research_status": "completed",
+  "structure_graph_status": "ready",
+  "graph_coherence": {
+    "score": 100.0,
+    "valid_edges": 16,
+    "alpha_covered_count": 10
+  },
+  "evidence_status": "present",
+  "conflict_radar_status": "present (3 conflicts admitted, 6 candidate pairs arbitrated)",
+  "upstream_categories_invoked": [
+    "TradingAgents research agents (market/sentiment/news/fundamentals analysts, bull/bear researchers, research_manager, trader, aggressive/conservative/neutral risk analysts, portfolio_manager)",
+    "Week2LLMGateway semantic Provider calls (structured_adapter, alpha_classifier, evidence_stance_classifier, structure_extractor)"
+  ],
+  "provider_accounting": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "total_semantic_provider_calls": 812,
+    "semantic_calls_by_task": {
+      "alpha_classifier": 747,
+      "evidence_stance_classifier": 23,
+      "structure_extractor": 8,
+      "structured_adapter": 10
+    },
+    "retries": 24,
+    "timeouts": 0,
+    "error_tagged_records": 7,
+    "fallback_count": 14,
+    "rejected_count": 7,
+    "cache_hit_count": 0
+  },
+  "token_usage": "FIELD_PRESENT_BUT_NULL -- same disclosed limitation as NVDA and the Day 4B precedent.",
+  "cost": "NOT_AVAILABLE",
+  "dominant_alphas": [],
+  "active_alphas": [
+    {
+      "alpha_id": "A003",
+      "alpha_name": "Liquidity Expansion",
+      "direction": "positive",
+      "activation_score": 63.9159,
+      "evidence_count": 7,
+      "distinct_supporting_agents": 3
+    },
+    {
+      "alpha_id": "A304",
+      "alpha_name": "Multiple Compression",
+      "direction": "negative",
+      "activation_score": 62.9705,
+      "evidence_count": 12,
+      "distinct_supporting_agents": 3
+    },
+    {
+      "alpha_id": "A501",
+      "alpha_name": "Recession Risk",
+      "direction": "negative",
+      "activation_score": 54.9367,
+      "evidence_count": 4,
+      "distinct_supporting_agents": 2
+    },
+    {
+      "alpha_id": "A601",
+      "alpha_name": "Narrative Momentum",
+      "direction": "positive",
+      "activation_score": 54.3161,
+      "evidence_count": 33,
+      "distinct_supporting_agents": 5
+    }
+  ],
+  "candidate_alphas_count": 6,
+  "blocked_alphas_count": 0,
+  "no_dominant_alpha_this_run": true,
+  "no_dominant_alpha_legitimate": "YES -- per explicit instruction, a dominant Alpha is never required. Four Alphas cleared the 'active' bar with real, multi-agent evidence; none crossed the higher 'dominant' threshold. This is a legitimate outcome of this run's actual evidence, not a defect.",
+  "main_conflict": {
+    "conflict_id": "A003__A501",
+    "bull_alpha_id": "A003",
+    "bear_alpha_id": "A501",
+    "conflict_level": "low",
+    "conflict_score": 23.9173,
+    "admissibility_status": "admitted",
+    "admissibility_reason_codes": [],
+    "bull_score": 63.9159,
+    "bull_supporting_evidence_count": "see arbitration detail",
+    "bull_ticker_specific_support_count": 5,
+    "bear_score": 54.9367,
+    "bear_ticker_specific_support_count": 1,
+    "on_qqq_allowed_list": true
+  },
+  "other_admitted_conflicts_not_selected_as_main": [
+    {
+      "conflict_id": "A501__A601",
+      "conflict_level": "low",
+      "conflict_score": 17.3102,
+      "on_qqq_allowed_list": false,
+      "note": "Admitted with zero reason codes but not selected as main (lower conflict_score than A003__A501). Not on QQQ's own allowed list (A501 and A601 each individually appear in the list only paired with other Alphas)."
+    },
+    {
+      "conflict_id": "A304__A601",
+      "conflict_level": "low",
+      "conflict_score": 9.6922,
+      "on_qqq_allowed_list": true,
+      "note": "Admitted, on the allowed list, but had the lowest conflict_score of the three admitted pairs so was not selected as main."
+    }
+  ],
+  "conflict_arbitration_full_picture": {
+    "declared_canonical_pair_count": 6,
+    "admitted_count": 3,
+    "suppressed_count": 3,
+    "rejected_count": 0,
+    "all_candidates": [
+      {
+        "pair": "A001__A501",
+        "outcome": "suppressed",
+        "reason_codes": [
+          "BULL_SCORE_BELOW_THRESHOLD",
+          "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+          "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+        ]
+      },
+      {
+        "pair": "A003__A501",
+        "outcome": "admitted",
+        "reason_codes": [],
+        "selected_as_main": true
+      },
+      {
+        "pair": "A101__A304",
+        "outcome": "suppressed",
+        "reason_codes": [
+          "BULL_SCORE_BELOW_THRESHOLD"
+        ]
+      },
+      {
+        "pair": "A301__A304",
+        "outcome": "suppressed",
+        "reason_codes": [
+          "BULL_SCORE_BELOW_THRESHOLD",
+          "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+          "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+        ],
+        "note": "The historically-cited A301__A304 off-list conflict from an earlier frozen run does NOT reproduce in this fresh run -- it was suppressed here, not admitted, on its own evidentiary merits under the identical formula. Nothing was rewritten to force this outcome."
+      },
+      {
+        "pair": "A304__A601",
+        "outcome": "admitted",
+        "reason_codes": []
+      },
+      {
+        "pair": "A501__A601",
+        "outcome": "admitted",
+        "reason_codes": []
+      }
+    ]
+  },
+  "frozen_rule_check": {
+    "applicable_rule_families_loaded": [
+      "must_detect_if_evidence_present",
+      "should_detect_if_supported",
+      "conditional_only",
+      "do_not_force",
+      "allowed_main_conflicts",
+      "forbidden_dominant_without_strong_evidence"
+    ],
+    "qqq_allowed_main_conflicts_baseline": [
+      "A001__A501",
+      "A003__A501",
+      "A304__A601"
+    ],
+    "admitted_main_conflict_on_allowed_list": true,
+    "forbidden_dominant_without_strong_evidence_check": "N/A -- no Alpha reached dominant level this run; nothing to check for forbidden unsupported dominance.",
+    "do_not_force_check": "PASS -- no forcing observed. A301__A304 (the historically-cited off-list pair) did NOT appear this run at all; it was genuinely suppressed on its own evidentiary merits.",
+    "lack_of_dominant_alpha_legitimate": "YES -- explicitly permitted; not treated as a failure.",
+    "evidence_supporting_admitted_main_conflict": "Genuine QQQ/ETF-level evidence for A003 (e.g. 'QQQ inflows totaled nearly $1B on 2026-09-16 (etf.com)' -- fund-flow evidence intrinsic to the ETF itself, not one constituent) and genuine macro evidence for A501 (recession-risk/credit-spread commentary).",
+    "review_required_condition": "NO -- the admitted, highest-scored main conflict is on QQQ's own predeclared allowed list, cleanly admitted with zero reason codes, with real ticker/ETF-level evidence on the bull side."
+  },
+  "qqq_fresh_run_conflict_status": "PASS",
+  "qqq_fresh_run_conflict_status_note": "This is THIS fresh run's own honest rule-check finding. It does not retroactively resolve, override, or reinterpret the standing, carried QQQ Formal Gold REVIEW_REQUIRED status from the earlier frozen-input run that produced the off-list A301__A304 conflict (a different run, different day, different evidence) -- that historical record and its RULE_CHANGE_RECOMMENDATION (not adopted) remain unchanged. This fresh run simply did not reproduce that off-list conflict; it produced a different, on-list one instead, and is reported as such.",
+  "artifact_completeness": {
+    "required_artifacts_present": "9/9 (pass)",
+    "research": "available",
+    "structure_graph": "available",
+    "evidence": "available",
+    "conflict_radar": "available",
+    "source_citation_caveat": "The existence of a claim_id is an internal identifier into this run's own persisted agent-output records, not proof the underlying source was externally verified."
+  },
+  "all_relevant_artifact_paths": [
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/metadata.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/raw_agent_outputs.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/structured_agent_outputs.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/evidence_facts.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/alpha_matches.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/structure_graph.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/alpha_activations.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/conflicts.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/run_audit.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/llm_semantic_manifest.json",
+    "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/llm_semantic_calls.jsonl"
+  ]
+}

@@ -121,14 +121,35 @@ class TestSectionALabels:
         with pytest.raises(LabelValidationError):
             load_j2_labels(path)
 
-    def test_a7_undeclared_conflict_pair_is_reported_never_silently_dropped(self):
-        labels = load_j2_labels()
-        # MSFT's A102__A304 is not in the canonical 6-pair taxonomy.
-        assert "MSFT" in labels["undeclared_conflict_pairs"]
-        assert "A102__A304" in labels["undeclared_conflict_pairs"]["MSFT"]
+    def test_a7_undeclared_conflict_pair_is_reported_never_silently_dropped(self, tmp_path):
+        # PD-017-REVISED (docs/specs/product_decisions_and_unknowns.md):
+        # MSFT's real A102__A304 is now a canonical taxonomy pair, so it no
+        # longer demonstrates "undeclared" against the real live taxonomy --
+        # this uses the existing synthetic-label helper with a pair that
+        # remains genuinely undeclared (A103__A304; A103's conflict_alphas
+        # is still [] in the real taxonomy) to keep proving
+        # undeclared_conflict_pairs' own reporting behavior, independent of
+        # any future taxonomy content change.
+        raw = _minimal_label_yaml(allowed_main_conflicts=["A103__A304"])
+        path = tmp_path / "undeclared_pair_fixture.yaml"
+        path.write_text(raw, encoding="utf-8")
+        labels = load_j2_labels(path)
+        assert "NVDA" in labels["undeclared_conflict_pairs"]
+        assert "A103__A304" in labels["undeclared_conflict_pairs"]["NVDA"]
         # Still present, verbatim, in the loaded ticker block -- never
         # silently deleted because it is undeclared.
-        assert "A102__A304" in ticker_label(labels, "MSFT")["allowed_main_conflicts"]
+        assert "A103__A304" in ticker_label(labels, "NVDA")["allowed_main_conflicts"]
+
+    def test_a7b_a102_a304_is_no_longer_reported_as_undeclared_for_msft(self):
+        # The real, live MSFT v0.1 label file's own allowed_main_conflicts
+        # still lists A102__A304 (v0.1 is an intentionally frozen, never-
+        # superseded historical snapshot -- see PD-017's own "Impact"
+        # section) -- but load_j2_labels() computes undeclared_conflict_pairs
+        # dynamically against the REAL, CURRENT taxonomy, so this pair must
+        # no longer be reported as undeclared now that it is genuinely
+        # canonical.
+        labels = load_j2_labels()
+        assert "A102__A304" not in labels["undeclared_conflict_pairs"].get("MSFT", [])
 
 
 def _minimal_label_yaml(**ticker_overrides) -> str:

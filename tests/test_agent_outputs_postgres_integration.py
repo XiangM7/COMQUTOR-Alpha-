@@ -155,3 +155,79 @@ def test_invalid_replace_preserves_previous_rows(postgres_context):
 
     assert exc_info.value.reason_code == "AGENT_OUTPUTS_PAYLOAD_INVALID"
     assert repo.list_agent_outputs(run_id) == before
+
+
+# ---------------------------------------------------------------------------
+# T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-28):
+# migration 0007's real PostgreSQL verification. postgres_context's own
+# apply_migrations(engine) call already ran apply_column_migrations as part
+# of the real production entrypoint (see comqutor_alpha.storage.db.
+# migrations.apply_migrations) -- these tests verify that against the real,
+# isolated COMQUTOR_TEST_DATABASE_URL, never a production database.
+# ---------------------------------------------------------------------------
+
+
+def test_source_linking_migration_0007_was_applied(postgres_context):
+    engine = postgres_context["engine"]
+    with engine.connect() as conn:
+        version_count = conn.scalar(
+            sa.select(sa.func.count())
+            .select_from(schema_migrations)
+            .where(schema_migrations.c.version == "0007_add_agent_outputs_source_linking_columns")
+        )
+        column_types = dict(
+            conn.execute(
+                sa.text(
+                    "SELECT column_name, data_type FROM information_schema.columns "
+                    "WHERE table_name = 'agent_outputs' "
+                    "AND column_name IN ('source_link_status', 'linked_source_id', "
+                    "'source_link_method', 'content_support_status', "
+                    "'content_support_method', 'content_support_review')"
+                )
+            ).all()
+        )
+    assert version_count == 1
+    assert column_types["content_support_review"] == "jsonb"
+    assert column_types["source_link_status"] == "character varying"
+
+
+def test_source_linking_fields_round_trip_through_real_postgres(postgres_context):
+    repo = postgres_context["repo"]
+    run_id = _run_id(postgres_context, "source_linking")
+    record = _record(run_id, "c1")
+    record.update(
+        source_link_status="VALID",
+        linked_source_id="src_abc123",
+        source_link_method="AGENT_CITED",
+        content_support_status="PENDING_REVIEW",
+        content_support_method="AGENT_CITED_UNVERIFIED_SUPPORT",
+        content_support_review={
+            "schema_version": "content_support_review.v1",
+            "status": "PENDING_REVIEW",
+            "method": "AGENT_CITED_UNVERIFIED_SUPPORT",
+            "reviewer": None,
+            "rationale": None,
+            "reviewed_at": None,
+        },
+    )
+    repo.persist_agent_outputs(run_id=run_id, ticker="NVDA", structured_payload=_payload(run_id, record))
+
+    rows = repo.list_agent_outputs(run_id)
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["source_link_status"] == "VALID"
+    assert row["linked_source_id"] == "src_abc123"
+    assert row["content_support_review"]["method"] == "AGENT_CITED_UNVERIFIED_SUPPORT"
+
+
+def test_pre_migration_style_row_reads_new_columns_as_null_on_real_postgres(postgres_context):
+    # A row with none of the 6 new fields at all -- exactly what every row
+    # written before this migration looks like. Must read back cleanly with
+    # no crash and no fabricated status.
+    repo = postgres_context["repo"]
+    run_id = _run_id(postgres_context, "pre_migration_row")
+    repo.persist_agent_outputs(run_id=run_id, ticker="NVDA", structured_payload=_payload(run_id, _record(run_id, "c1")))
+
+    row = repo.list_agent_outputs(run_id)[0]
+    assert "source_link_status" not in row
+    assert "content_support_review" not in row

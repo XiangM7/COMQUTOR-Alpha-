@@ -1,0 +1,107 @@
+{
+  "schema_version": "v0.2.alpha_provider_prompt_remediation.v1",
+  "scope": "DAY_4B_ALPHA_PROVIDER_PROMPT_REMEDIATION",
+  "provider_facing_path_trace": {
+    "prompt_source_file": "comqutor_alpha/structure_engine/week2_llm.py",
+    "prompt_building_function": "_TASK_INSTRUCTIONS['alpha_classifier'] / _TASK_INSTRUCTIONS['alpha_classifier_batch'] (literal instruction text), combined with _SYSTEM_PREAMBLE and the caller-supplied request payload by Week2LLMGateway.invoke_json / invoke_json_with_trace",
+    "taxonomy_injection_function": "comqutor_alpha/structure_engine/alpha_mapper.py::_alpha_taxonomy_request_block(taxonomy) -- builds the 'alpha_taxonomy' field of the request payload sent alongside the prompt",
+    "model_provider_call_site": "comqutor_alpha/structure_engine/alpha_mapper.py::_classify_alpha_with_llm (single-claim) and _classify_alpha_batch_with_llm (batched) -- both call llm_gateway.invoke_json_with_trace('alpha_classifier'[_batch], request, validate_response)",
+    "response_parser": "the validate_response closure defined inline in _classify_alpha_with_llm / _classify_alpha_batch_with_llm -- enforces the exact {decision, selected_alpha_id} (or batched decisions array) schema, rejects any field set mismatch, any non-canonical alpha_id, or any decision value other than select/none",
+    "none_decision_semantics": "decision=none, selected_alpha_id=null -- a first-class, successful 'no canonical Alpha materially fits' answer (never a failure/fallback); explicitly NOT permitted as a way to avoid choosing between two plausible Alphas (v3+ contract)",
+    "multi_alpha_wrong_alpha_semantics": "exactly one alpha_id per claim is ever returned; the classifier is instructed to compare competing plausible Alphas directly against each other and select the closer mechanistic fit rather than deferring or guessing from surface keyword overlap",
+    "taxonomy_descriptions_injected_pre_change": "alpha_id, alpha_name, definition (core_thesis) only -- one abstract sentence per Alpha",
+    "taxonomy_descriptions_injected_post_change": "alpha_id, alpha_name, definition, trigger_signals, confirmation_signals -- all four already-authored in alpha_taxonomy_v1.yaml, only the first two were previously sent to the model"
+  },
+  "root_cause_analysis_by_category": {
+    "SYSTEM_FALSE_NEGATIVE_LLM_NONE": {
+      "count": 26,
+      "prompt_deficiency_found": "The model was given only each Alpha's one-sentence abstract core_thesis, never its trigger_signals/confirmation_signals -- concrete, already-authored example manifestations. With only an abstract sentence to match against, paraphrased, indirect, or company-specific phrasing (never restating the thesis in the Alpha's own words) plausibly reads as not 'directly and substantively' engaging any Alpha, biasing the model toward decision=none."
+    },
+    "SYSTEM_FALSE_POSITIVE_OVERMATCH": {
+      "count": 10,
+      "prompt_deficiency_found": "The existing v3 prompt already told the model to use none for 'generic or background market commentary,' but gave no explicit guidance on the specific recurring failure pattern observed: a bare, standalone financial figure or ratio (an EPS number, a valuation multiple, an asset-value estimate) with no stated causal mechanism, which the model was nonetheless attributing to a loosely valuation- or growth-adjacent Alpha."
+    },
+    "OTHER_WRONG_ALPHA_SUBSTITUTION": {
+      "count": 10,
+      "prompt_deficiency_found": "Same root deficiency as the false-negative category (abstract-thesis-only comparison starves the model's own existing 'compare mechanisms directly' instruction of the concrete signal it needs to discriminate well between two plausible Alphas)."
+    },
+    "CROSS_FAMILY_GROWTH_VS_RISK_CONFUSION": {
+      "count": 4,
+      "prompt_deficiency_found": "Same root deficiency as above, applied to growth-vs-risk-family neighbor pairs specifically."
+    },
+    "A101_A102_A103_BOUNDARY_CONFUSION": {
+      "count": 2,
+      "prompt_deficiency_found": "Same root deficiency as above. Also noted: these 2 samples predate commit c454245's v3 A101/A103 worked example, so part of this specific pair's confusion is independently explained by prompt age (see v0_2_semantic_reproducibility_audit.json), not solely by the missing trigger/confirmation signal data addressed here."
+    }
+  },
+  "changes_applied": [
+    {
+      "file": "comqutor_alpha/structure_engine/alpha_mapper.py",
+      "symbol": "_alpha_taxonomy_request_block",
+      "change": "Added trigger_signals and confirmation_signals (already-existing AlphaDefinition fields, sourced from alpha_taxonomy_v1.yaml, never fabricated) to each taxonomy entry in the request payload, alongside the existing alpha_id/alpha_name/definition.",
+      "generalization": "Applies automatically to the full taxonomy and to both the single-claim and batched classifier call sites (both consume this same function) -- not ticker-specific, not sample-specific, adds zero new Alpha IDs."
+    },
+    {
+      "file": "comqutor_alpha/structure_engine/week2_llm.py",
+      "symbol": "_TASK_INSTRUCTIONS['alpha_classifier'] and _TASK_INSTRUCTIONS['alpha_classifier_batch']",
+      "change": "Added two symmetric, general instruction sentences (identical in both, preserving the existing 'copied verbatim' invariant between the single and batched variants): (1) treat trigger_signals/confirmation_signals as positive evidence even under paraphrase, without requiring literal keyword overlap with the abstract definition; (2) a bare standalone financial figure/ratio is never sufficient alone -- only select when the evidence connects it to a specific Alpha's own mechanism/trigger/confirmation signal.",
+      "generalization": "Both sentences are taxonomy-wide rules referencing Alpha-structural concepts (trigger_signals, confirmation_signals, 'a specific Alpha's own mechanism'), never a sample ID, holdout-specific phrase, or ticker name."
+    },
+    {
+      "file": "comqutor_alpha/structure_engine/week2_llm.py",
+      "symbol": "_TASK_RUNTIME_METADATA['alpha_classifier'] and ['alpha_classifier_batch']",
+      "change": "Bumped prompt_version (v3->v4, batch v1->v2) and input_schema_version (v2->v3, batch v1->v2) per this codebase's own ADR-005 convention: a versioned identifier must change with the instructions/contract it identifies, so no old cached pre-remediation result is ever silently reused as if it reflected the new prompt. output_schema_version unchanged (response contract itself did not change).",
+      "generalization": "Pure bookkeeping/versioning; no behavioral content."
+    },
+    {
+      "file": "tests/test_week2_llm_semantic_runtime_integration.py",
+      "symbol": "test_legacy_prompt_payload_api_and_defaults_are_byte_compatible, test_invalid_cache_candidate_is_revalidated_then_treated_as_provider_miss",
+      "change": "Both tests hardcoded the pre-remediation literal prompt text / version-identifier strings as fixtures. Updated both to reference the live _TASK_INSTRUCTIONS / _TASK_RUNTIME_METADATA source constants instead of a duplicated, now-stale copy -- preserves each test's full original assertion strength (still checks byte-exact prompt assembly / exact cache-key revalidation behavior) while tracking future deliberate, versioned prompt revisions instead of going stale against them. No assertion was weakened or removed.",
+      "generalization": "N/A -- test maintenance, not a behavioral change."
+    }
+  ],
+  "forbidden_items_avoided": [
+    "No sample-ID examples added",
+    "No holdout-specific phrase copied verbatim",
+    "No ticker-specific hack",
+    "No expected label changed",
+    "No Gold rule changed",
+    "No new Alpha ID added",
+    "No change to the 200-sample denominator",
+    "No deterministic fallback logic added to bypass the Provider"
+  ],
+  "gold_taxonomy_unchanged": true,
+  "improvement_claim_status": "NOT CLAIMED. Per explicit instruction, no improvement is asserted until Provider-backed validation actually runs against the same 200-sample independent holdout. Local tests (see v0_2_alpha_provider_prompt_remediation.md) confirm prompt construction/schema/parser correctness only, never semantic accuracy.",
+  "prompt_hashes": {
+    "alpha_classifier": {
+      "pre_change_sha256": "a2ca2a32be2d5c22301a0905112727d2c43aece60b1d9e680c8092c3d67c25d8",
+      "post_change_sha256": "36bf5a632dee1e3cd8f4b2ac04fa3498db63cf99275d309157365c59c5bf77e9"
+    },
+    "alpha_classifier_batch": {
+      "pre_change_sha256": "0caa5b77b77a97618e92e1b3f254edf8749bae5aa4a21a42ba5d60a539effff0",
+      "post_change_sha256": "291f69db9c495eebc75c52cbf5d9ce9f97401af3ec7a735765f01f43af6d876e"
+    }
+  },
+  "local_non_provider_testing": {
+    "command": "pytest tests/test_alpha_mapper.py tests/test_alpha_mapper_llm_authority.py tests/test_ai_alpha_mapper_discrimination.py tests/test_alpha_mapper_nvda_real_report.py tests/test_week2_semantics.py tests/test_evidence_stance_classifier.py tests/test_claim_quality.py tests/test_structured_output_adapter.py tests/test_week2_llm_markdown_fence_parsing.py tests/test_week2_llm.py tests/test_week2_llm_semantic_runtime_integration.py -q",
+    "result": "384 passed, 1 skipped (Provider smoke test, correctly skipped -- no credentials), 0 failed",
+    "two_task_attributable_failures_found_and_fixed": [
+      "test_legacy_prompt_payload_api_and_defaults_are_byte_compatible -- hardcoded pre-remediation prompt text; updated to reference the live _TASK_INSTRUCTIONS constant",
+      "test_invalid_cache_candidate_is_revalidated_then_treated_as_provider_miss -- hardcoded pre-remediation version-identifier strings; updated to reference the live _TASK_RUNTIME_METADATA constant"
+    ],
+    "proves": "prompt construction, schema, parser compatibility, taxonomy injection, deterministic surrounding logic",
+    "does_not_prove": "semantic accuracy -- these are NOT reported as Alpha validation"
+  },
+  "provider_environment_check": {
+    "method": "presence/absence only, no secret values printed",
+    "COMQUTOR_REAL_TRADINGAGENTS_ENABLED": "ABSENT",
+    "OPENAI_API_KEY": "ABSENT",
+    "ANTHROPIC_API_KEY": "ABSENT",
+    "FINNHUB_API_KEY": "ABSENT",
+    "GOOGLE_API_KEY": "ABSENT",
+    "PROVIDER_API_KEY": "ABSENT",
+    "COMQUTOR_API_KEY": "ABSENT",
+    "result": "PROVIDER_VALIDATION_BLOCKED_BY_ENVIRONMENT"
+  },
+  "provider_backed_validation_status": "NOT EXECUTED -- PROVIDER_VALIDATION_BLOCKED_BY_ENVIRONMENT"
+}

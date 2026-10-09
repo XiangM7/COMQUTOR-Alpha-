@@ -1,0 +1,354 @@
+{
+ "schema_version": "comqutor.alpha_rule_provenance.v1",
+ "contract": {
+  "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+  "sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f"
+ },
+ "freeze_manifest": {
+  "path": "docs/audit_artifacts/v0_2_gold_freeze_manifest.json",
+  "sha256": "081e66b405ac039f9fe64c2689e346c6f91de1448d6405e449e49ce74e8e0540"
+ },
+ "trigger_matrix": {
+  "path": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+  "sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1"
+ },
+ "baseline": {
+  "path": "docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml",
+  "sha256": "b8165911b78aa46fa4993a6b209d47e2b66e152547a618e2587facd97eb79a9c"
+ },
+ "source_messages": {
+  "step1": {
+   "transcript_line": 72541,
+   "recorded_timestamp": "2026-09-10T20:43:46.251Z",
+   "description": "Step 1 -- operationalize John's Gold labels v0.2"
+  },
+  "step2": {
+   "transcript_line": 72630,
+   "recorded_timestamp": "2026-09-10T21:02:57.563Z",
+   "description": "Step 2 -- John's final decisions and the freeze"
+  },
+  "step4": {
+   "transcript_line": 72837,
+   "recorded_timestamp": "2026-09-10T21:52:47.071Z",
+   "description": "Step 4 -- compare frozen Gold + frozen triggers against the six runs"
+  },
+  "cleanup": {
+   "transcript_line": 82435,
+   "recorded_timestamp": "2026-09-15T01:15:19.103Z",
+   "description": "Final John-scoped submission cleanup (rewrites the contract's markdown)"
+  }
+ },
+ "transcript_file": "8d38fcbd-98ee-4ff6-b804-8855e3f6b189.jsonl",
+ "note": "The John decisions are cited from the working session in which they were relayed; they are quoted by section from that transcript, not retyped. The repository preserves their effect (contract JSON, freeze manifest) but not their text.",
+ "rules": [
+  {
+   "rule_id": "NVDA-A101-AI-GROWTH",
+   "ticker": "NVDA",
+   "tier": "FORMAL_GOLD",
+   "blocking": true,
+   "hit_type": "ALPHA_HIT",
+   "rule_type": "must_detect_if_evidence_present",
+   "acceptable_alphas": [
+    "A101"
+   ],
+   "allowed_main_conflicts": [],
+   "evidence_condition_in_contract": "Current NVDA-specific evidence (ticker-specific, qualified, Primary/Secondary-role-aware, deduplicated fact groups) materially describes AI training / AI compute / GPU accelerator demand growth relevant to NVDA's role as an AI accelerator supplier.",
+   "required_behavior_in_contract": "If the evidence condition is present, the system must detect A101 at an official detected level (active, dominant, or regime_level).",
+   "not_triggered_behavior_in_contract": "If no material NVDA-specific AI/GPU demand evidence exists in a given run, A101 is NOT_TRIGGERED -- no forced detection.",
+   "review_notes_in_contract": null,
+   "frozen_trigger": {
+    "bound_run": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "state": "PRESENT",
+    "strength": "STRONG",
+    "rationale": "Multiple independent agents (sentiment_agent, news_agent) report concrete, dated, NVDA-attributed AI-demand evidence with no contrary signal found.",
+    "source_artifacts": [
+     "structured_agent_outputs.json (sentiment_agent, news_agent)"
+    ],
+    "determined_by": "reading structured_agent_outputs.json of the bound run once (not executable for other runs)"
+   },
+   "john_decision_text": [
+    {
+     "message": "Step 2 -- John's final decisions and the freeze",
+     "transcript_line": 72630,
+     "recorded_timestamp": "2026-09-10T21:02:57.563Z",
+     "section": "section 4 (NVDA policy, core mappings)",
+     "quoted_text": "==================================================\n4. IMPORTANT NVDA POLICY\n==================================================\n\nNVDA Gold thesis remains:\n\nAI leader growth-vs-valuation conflict.\n\nCore mappings:\n\nA101:\nmust_detect_if_evidence_present\n\nA301:\nshould_detect_if_supported + conditional_only\n\nA304:\nmust_detect_if_evidence_present\n\nGrowth-vs-Valuation Composite:\n\nallowed canonical pairs:\n\nA101__A304\nA301__A304\n\nonly when both relevant evidence sides are present.\n\nDo not force a conflict if only one side is supported.\n\nA103 / A201 / A601 remain supporting/non-mandatory."
+    },
+    {
+     "message": "Step 2 -- John's final decisions and the freeze",
+     "transcript_line": 72630,
+     "recorded_timestamp": "2026-09-10T21:02:57.563Z",
+     "section": "section 2 (blocking)",
+     "quoted_text": "==================================================\n2. PRESERVE ALL OTHER DRAFT RULES\n==================================================\n\nDo not otherwise broaden or narrow the Step-1 contract.\n\nFormal Gold remains:\n\nNVDA\nQQQ\nSNDK\n\nblocking = true\n\nSilver remains:\n\nMSFT\nTSM\nAMD\n\nblocking = false\n\nHit types remain:\n\nALPHA_HIT\nCOMPOSITE_STRUCTURE_HIT\nNEGATIVE_CONTROL_HIT\nCONDITIONAL_ACCEPTANCE_HIT\n\nNo new production Alpha IDs."
+    },
+    {
+     "message": "Step 1 -- operationalize John's Gold labels v0.2",
+     "transcript_line": 72541,
+     "recorded_timestamp": "2026-09-10T20:43:46.251Z",
+     "section": "section 8.A (AI growth)",
+     "quoted_text": "A. AI growth\n\nPreferred existing Alpha mapping:\n\nA101 — AI Expansion\n\nRule type:\n\nmust_detect_if_evidence_present\n\nCondition conceptually:\n\ncurrent NVDA-specific evidence materially supports AI training /\nAI compute / GPU demand expansion.\n\nDo NOT force A101 when such evidence is absent.\n\n--------------------------------------------------"
+    }
+   ],
+   "conflicts_found_that_would_pause_the_rule": "none (see integrity_notes for the observations that do not conflict with it)",
+   "status": "IN EFFECT"
+  },
+  {
+   "rule_id": "NVDA-A304-VALUATION-RISK",
+   "ticker": "NVDA",
+   "tier": "FORMAL_GOLD",
+   "blocking": true,
+   "hit_type": "ALPHA_HIT",
+   "rule_type": "must_detect_if_evidence_present",
+   "acceptable_alphas": [
+    "A304"
+   ],
+   "allowed_main_conflicts": [],
+   "evidence_condition_in_contract": "Current NVDA-specific evidence materially supports valuation compression, rich valuation, or multiple downside risk.",
+   "required_behavior_in_contract": "If the evidence condition is present, the system must detect A304 at an official detected level.",
+   "not_triggered_behavior_in_contract": "If no material valuation-risk evidence exists, A304 is NOT_TRIGGERED.",
+   "review_notes_in_contract": null,
+   "frozen_trigger": {
+    "bound_run": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "state": "PRESENT",
+    "strength": "STRONG",
+    "rationale": "Direct NVDA-attributed valuation-concentration framing plus closely analogous peer precedent explicitly linked to NVDA's own risk profile.",
+    "source_artifacts": [
+     "structured_agent_outputs.json (sentiment_agent, news_agent)"
+    ],
+    "determined_by": "reading structured_agent_outputs.json of the bound run once (not executable for other runs)"
+   },
+   "john_decision_text": [
+    {
+     "message": "Step 2 -- John's final decisions and the freeze",
+     "transcript_line": 72630,
+     "recorded_timestamp": "2026-09-10T21:02:57.563Z",
+     "section": "section 4 (NVDA policy, core mappings)",
+     "quoted_text": "==================================================\n4. IMPORTANT NVDA POLICY\n==================================================\n\nNVDA Gold thesis remains:\n\nAI leader growth-vs-valuation conflict.\n\nCore mappings:\n\nA101:\nmust_detect_if_evidence_present\n\nA301:\nshould_detect_if_supported + conditional_only\n\nA304:\nmust_detect_if_evidence_present\n\nGrowth-vs-Valuation Composite:\n\nallowed canonical pairs:\n\nA101__A304\nA301__A304\n\nonly when both relevant evidence sides are present.\n\nDo not force a conflict if only one side is supported.\n\nA103 / A201 / A601 remain supporting/non-mandatory."
+    },
+    {
+     "message": "Step 1 -- operationalize John's Gold labels v0.2",
+     "transcript_line": 72541,
+     "recorded_timestamp": "2026-09-10T20:43:46.251Z",
+     "section": "section 8.C (valuation downside)",
+     "quoted_text": "C. Valuation downside\n\nExisting mapping:\n\nA304 — Multiple Compression\n\nRule type:\n\nmust_detect_if_evidence_present\n\nCondition:\n\ncurrent evidence materially supports valuation compression /\nrich valuation / multiple downside risk.\n\n--------------------------------------------------"
+    }
+   ],
+   "conflicts_found_that_would_pause_the_rule": "none (see integrity_notes for the observations that do not conflict with it)",
+   "status": "IN EFFECT"
+  },
+  {
+   "rule_id": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+   "ticker": "MSFT",
+   "tier": "SILVER_DIAGNOSTIC",
+   "blocking": false,
+   "hit_type": "ALPHA_HIT",
+   "rule_type": "must_detect_if_evidence_present",
+   "acceptable_alphas": [
+    "A102"
+   ],
+   "allowed_main_conflicts": [],
+   "evidence_condition_in_contract": "Current MSFT-specific evidence explicitly describes: inference workloads, inference compute demand, serving AI applications/models, agent/application inference, or inference-side compute consumption.",
+   "required_behavior_in_contract": "If the evidence condition is present, the system must detect A102 at an official detected level (active/dominant/regime_level).",
+   "not_triggered_behavior_in_contract": "If evidence does not explicitly engage the inference mechanism, this rule is NOT_TRIGGERED -- see MSFT-A102-INDIRECT-INFERENCE-SUPPORT instead.",
+   "review_notes_in_contract": null,
+   "frozen_trigger": {
+    "bound_run": "43472ace-454f-4c69-892c-adca91c25be7",
+    "state": "PRESENT",
+    "strength": "STRONG",
+    "rationale": "Multiple claims (fundamental_agent Primary source, bull_researcher, bear_researcher) explicitly name 'inference demand' as the mechanism, directly tied to named MSFT products (Copilot, Azure AI services) -- satisfies the DIRECT trigger's explicit-mechanism requirement.",
+    "source_artifacts": [
+     "structured_agent_outputs.json (fundamental_agent, bull_researcher, bear_researcher)"
+    ],
+    "determined_by": "reading structured_agent_outputs.json of the bound run once (not executable for other runs)"
+   },
+   "john_decision_text": [
+    {
+     "message": "Step 2 -- John's final decisions and the freeze",
+     "transcript_line": 72630,
+     "recorded_timestamp": "2026-09-10T21:02:57.563Z",
+     "section": "section 1.G (final decision)",
+     "quoted_text": "G. MSFT A102\n\nFINAL:\n\nsplit evidence strength behavior.\n\nDIRECT_INFERENCE_TRIGGER:\n\nIf current MSFT-specific evidence explicitly describes:\n\n- inference workloads\n- inference compute demand\n- serving AI applications/models\n- agent/application inference\n- inference-side compute consumption\n\nthen:\n\nmust_detect_if_evidence_present\n→ A102\n\nINDIRECT_INFERENCE_SUPPORT:\n\nIf evidence only describes broader:\n\n- enterprise AI adoption\n- Copilot usage\n- AI application adoption\n- generic AI demand\n\nwithout clearly engaging the inference mechanism:\n\nshould_detect_if_supported\n\nDo not force A102 from generic AI adoption alone.\n\nMSFT remains SILVER / NON-BLOCKING.\n\n--------------------------------------------------"
+    },
+    {
+     "message": "Step 2 -- John's final decisions and the freeze",
+     "transcript_line": 72630,
+     "recorded_timestamp": "2026-09-10T21:02:57.563Z",
+     "section": "section 2 (blocking)",
+     "quoted_text": "==================================================\n2. PRESERVE ALL OTHER DRAFT RULES\n==================================================\n\nDo not otherwise broaden or narrow the Step-1 contract.\n\nFormal Gold remains:\n\nNVDA\nQQQ\nSNDK\n\nblocking = true\n\nSilver remains:\n\nMSFT\nTSM\nAMD\n\nblocking = false\n\nHit types remain:\n\nALPHA_HIT\nCOMPOSITE_STRUCTURE_HIT\nNEGATIVE_CONTROL_HIT\nCONDITIONAL_ACCEPTANCE_HIT\n\nNo new production Alpha IDs."
+    },
+    {
+     "message": "Step 1 -- operationalize John's Gold labels v0.2",
+     "transcript_line": 72541,
+     "recorded_timestamp": "2026-09-10T20:43:46.251Z",
+     "section": "section 11.B (the 'must/should' wording that decision G resolved)",
+     "quoted_text": "B. Inference\n\nExisting mapping:\n\nA102 — Inference Explosion\n\nRule:\n\nmust/should_detect_if_evidence_present\n\nCondition:\n\ncurrent MSFT-specific evidence supports inference-side compute demand\nfrom AI applications/agents.\n\n--------------------------------------------------"
+    }
+   ],
+   "conflicts_found_that_would_pause_the_rule": "none (see integrity_notes for the observations that do not conflict with it)",
+   "status": "IN EFFECT"
+  },
+  {
+   "rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+   "ticker": "NVDA",
+   "tier": "FORMAL_GOLD",
+   "blocking": true,
+   "hit_type": "COMPOSITE_STRUCTURE_HIT",
+   "rule_type": "conditional_only",
+   "acceptable_alphas": [
+    "A101",
+    "A301",
+    "A304"
+   ],
+   "allowed_main_conflicts": [
+    "A101__A304",
+    "A301__A304"
+   ],
+   "evidence_condition_in_contract": "Both a supported growth side (A101 and/or A301 reaching a qualified/detected level) and a supported valuation-risk side (A304 reaching a qualified/detected level) are present in the same run.",
+   "required_behavior_in_contract": "When both sides coexist, an admissible growth-vs-valuation conflict (one of the allowed pairs) should be surfaced via the existing, unmodified conflict admissibility (B2) authority -- this rule does not itself define or alter B2's admission logic.",
+   "not_triggered_behavior_in_contract": "If only one side is present (growth without valuation-risk evidence, or vice versa), the system must NOT force a conflict.",
+   "review_notes_in_contract": null,
+   "frozen_trigger": {
+    "bound_run": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+    "state": "PRESENT",
+    "strength": "STRONG",
+    "rationale": "Growth side triggered by BOTH AI growth (A101) and fundamental growth (A301) independently; valuation-risk side (A304) also independently present. This evidence-side finding does NOT inspect or assert anything about the actual admitted conflict -- that is Step 4.",
+    "source_artifacts": [
+     "structured_agent_outputs.json"
+    ],
+    "determined_by": "reading structured_agent_outputs.json of the bound run once (not executable for other runs)"
+   },
+   "john_decision_text": [
+    {
+     "message": "Step 2 -- John's final decisions and the freeze",
+     "transcript_line": 72630,
+     "recorded_timestamp": "2026-09-10T21:02:57.563Z",
+     "section": "section 4 (composite)",
+     "quoted_text": "==================================================\n4. IMPORTANT NVDA POLICY\n==================================================\n\nNVDA Gold thesis remains:\n\nAI leader growth-vs-valuation conflict.\n\nCore mappings:\n\nA101:\nmust_detect_if_evidence_present\n\nA301:\nshould_detect_if_supported + conditional_only\n\nA304:\nmust_detect_if_evidence_present\n\nGrowth-vs-Valuation Composite:\n\nallowed canonical pairs:\n\nA101__A304\nA301__A304\n\nonly when both relevant evidence sides are present.\n\nDo not force a conflict if only one side is supported.\n\nA103 / A201 / A601 remain supporting/non-mandatory."
+    },
+    {
+     "message": "Step 4 -- compare frozen Gold + frozen triggers against the six runs",
+     "transcript_line": 72837,
+     "recorded_timestamp": "2026-09-10T21:52:47.071Z",
+     "section": "section 13 (composite evaluation)",
+     "quoted_text": "==================================================\n13. COMPOSITE STRUCTURE RULE\n==================================================\n\nIf frozen composite trigger = ABSENT:\n\n→ NOT_TRIGGERED\n\nIf frozen composite trigger = UNCERTAIN:\n\n→ REVIEW\n\nIf frozen composite trigger = PRESENT:\n\ninspect:\n\n- relevant actual Alpha states\n- persisted conflict candidates\n- admitted main conflict\n- canonical allowed conflict family\n\nIf an allowed evidence-supported conflict is actually admitted:\n\n→ PASS\n\nIf actual admitted conflict is clearly outside the frozen allowed family:\n\n→ FAIL or REVIEW if admissibility/root-cause analysis is required.\n\nIf no conflict is admitted even though composite trigger = PRESENT:\n\nDO NOT immediately call it a system error.\n\nRecord:\n\nREVIEW\n\nrequires_step5_adjudication = true\n\nunless the existing persisted artifact already proves a deterministic\nviolation of the frozen contract.\n\nStep 5 will specifically adjudicate conflict/gating mismatches."
+    },
+    {
+     "message": "Step 4 -- compare frozen Gold + frozen triggers against the six runs",
+     "transcript_line": 72837,
+     "recorded_timestamp": "2026-09-10T21:52:47.071Z",
+     "section": "section 15 (NVDA frozen trigger states)",
+     "quoted_text": "==================================================\n15. NVDA — FORMAL GOLD\n==================================================\n\nUse frozen trigger states:\n\nA101 AI-growth:\nPRESENT / STRONG\n\nA301 fundamental-growth:\nPRESENT / STRONG\n\nA304 valuation-risk:\nPRESENT / STRONG\n\nA103:\nPRESENT / MODERATE\n\nA201:\nUNCERTAIN\n\nA601:\nPRESENT / STRONG\n\nGrowth-vs-Valuation composite:\nPRESENT\n\nDo NOT reinterpret these states.\n\nNow compare actual system outputs.\n\nCore acceptance questions:\n\n- Was A101 properly detected?\n- Was A301 appropriately detected?\n- Was A304 properly detected?\n- Did the system surface an allowed Growth-vs-Valuation conflict?\n- Did any frozen forbidden-dominance rule fail?\n\nA103/A201/A601 remain subject to their frozen non-mandatory semantics.\n\nDo not turn NVDA A201 UNCERTAIN into a release failure unless the frozen rule\nexplicitly makes it blocking."
+    }
+   ],
+   "conflicts_found_that_would_pause_the_rule": "none (see integrity_notes for the observations that do not conflict with it)",
+   "status": "IN EFFECT"
+  },
+  {
+   "rule_id": "AMD-AI-GROWTH-VS-VALUATION",
+   "ticker": "AMD",
+   "tier": "SILVER_DIAGNOSTIC",
+   "blocking": false,
+   "hit_type": "COMPOSITE_STRUCTURE_HIT",
+   "rule_type": "conditional_only",
+   "acceptable_alphas": [
+    "A101",
+    "A201",
+    "A301",
+    "A304"
+   ],
+   "allowed_main_conflicts": [
+    "A101__A304",
+    "A301__A304"
+   ],
+   "evidence_condition_in_contract": "Current AMD-specific evidence supports AI/semiconductor growth (A101 and/or A301, optionally A201) AND valuation-risk evidence (A304) coexisting in the same run.",
+   "required_behavior_in_contract": "When both a supported growth side and a supported valuation-risk side coexist, an admissible conflict (one of the allowed pairs) should be surfaced via the existing, unmodified conflict admissibility (B2) authority. Do not force either pair.",
+   "not_triggered_behavior_in_contract": "If only one side is present, the system must NOT force a conflict.",
+   "review_notes_in_contract": null,
+   "frozen_trigger": {
+    "bound_run": "949f685a-3945-4fd0-b7b9-362b37c90721",
+    "state": "PRESENT",
+    "strength": "STRONG",
+    "rationale": "Both composite legs independently present with concrete, TSM-... err AMD-specific quantified evidence (50% revenue growth; 122x trailing earnings). A201 (industry-wide semiconductor cycle) evidence is thinner/mixed (AMD noted as a 'relative laggard' vs NVDA in some claims) but is only an optional element of this rule's acceptable_alphas -- the primary growth trigger (A101+A301) is independently sufficient.",
+    "source_artifacts": [
+     "structured_agent_outputs.json (news_agent, fundamental_agent, bull_researcher, bear_researcher)"
+    ],
+    "determined_by": "reading structured_agent_outputs.json of the bound run once (not executable for other runs)"
+   },
+   "john_decision_text": [
+    {
+     "message": "Step 1 -- operationalize John's Gold labels v0.2",
+     "transcript_line": 72541,
+     "recorded_timestamp": "2026-09-10T20:43:46.251Z",
+     "section": "section 13 (AMD composite)",
+     "quoted_text": "==================================================\n13. AMD — SILVER / NON-BLOCKING\n==================================================\n\nJohn thesis:\n\nAI semiconductor competitor / valuation conflict\n\nUse existing Alpha concepts:\n\nA101 — AI Expansion\nA201 — Semiconductor Supercycle\nA301 — Revenue Expansion when supported\nA304 — Multiple Compression\n\nRules remain evidence-conditional.\n\nCreate a composite:\n\nAMD_AI_GROWTH_VS_VALUATION\n\nHit type:\n\nCOMPOSITE_STRUCTURE_HIT\n\nIf current AI/semiconductor growth evidence and valuation-risk evidence\ncoexist, acceptable canonical conflict should be derived from taxonomy.\n\nLikely:\n\nA101__A304\nA301__A304\n\nonly if canonical taxonomy confirms.\n\nDo not force either pair.\n\nSilver / non-blocking."
+    },
+    {
+     "message": "Step 4 -- compare frozen Gold + frozen triggers against the six runs",
+     "transcript_line": 72837,
+     "recorded_timestamp": "2026-09-10T21:52:47.071Z",
+     "section": "section 13 (composite evaluation)",
+     "quoted_text": "==================================================\n13. COMPOSITE STRUCTURE RULE\n==================================================\n\nIf frozen composite trigger = ABSENT:\n\n→ NOT_TRIGGERED\n\nIf frozen composite trigger = UNCERTAIN:\n\n→ REVIEW\n\nIf frozen composite trigger = PRESENT:\n\ninspect:\n\n- relevant actual Alpha states\n- persisted conflict candidates\n- admitted main conflict\n- canonical allowed conflict family\n\nIf an allowed evidence-supported conflict is actually admitted:\n\n→ PASS\n\nIf actual admitted conflict is clearly outside the frozen allowed family:\n\n→ FAIL or REVIEW if admissibility/root-cause analysis is required.\n\nIf no conflict is admitted even though composite trigger = PRESENT:\n\nDO NOT immediately call it a system error.\n\nRecord:\n\nREVIEW\n\nrequires_step5_adjudication = true\n\nunless the existing persisted artifact already proves a deterministic\nviolation of the frozen contract.\n\nStep 5 will specifically adjudicate conflict/gating mismatches."
+    },
+    {
+     "message": "Step 4 -- compare frozen Gold + frozen triggers against the six runs",
+     "transcript_line": 72837,
+     "recorded_timestamp": "2026-09-10T21:52:47.071Z",
+     "section": "section 20 (AMD)",
+     "quoted_text": "==================================================\n20. AMD — SILVER\n==================================================\n\nFrozen:\n\ngrowth:\nPRESENT / STRONG\n\nvaluation:\nPRESENT / STRONG\n\nAI-growth-vs-valuation composite:\nPRESENT\n\nInspect actual system outputs and allowed canonical conflicts.\n\nNon-blocking."
+    }
+   ],
+   "conflicts_found_that_would_pause_the_rule": "none (see integrity_notes for the observations that do not conflict with it)",
+   "status": "IN EFFECT"
+  }
+ ],
+ "integrity_notes": [
+  {
+   "id": "N1",
+   "topic": "the 'APPROVED' flag inside the contract file",
+   "finding": "contract.authority.approval_status = APPROVED with approval_authority = John is the literal block the Step-1 instruction (section 20) asked the file to contain; it is a template field, not evidence of approval.",
+   "handling": "not cited. Each executed rule cites the John decision it implements (john_decision_text)."
+  },
+  {
+   "id": "N2",
+   "topic": "contract JSON integrity",
+   "finding": "sha256 e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f equals frozen_contract_json_sha256 in the freeze manifest (e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f).",
+   "handling": "verified at load time on every run of the entry; a different sha256 is a configuration error."
+  },
+  {
+   "id": "N3",
+   "topic": "contract markdown companion",
+   "finding": "sha256 now efc7a82b33e6f4c5aea5fa9c14d6c62ce97245534ff2b17b568074762d989eca; the freeze manifest recorded 8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04. The file was rewritten on John's instruction of 2026-09-15 (final submission cleanup, section 3: a short John-facing definition of the six semantics), which is why it is 1.9 KB and no longer byte-identical. Its six semantics sentences agree with contract.rule_type_semantics. The rule records live in the JSON only.",
+   "handling": "reported in effective_rules (markdown_companion), not read by the executor, not a conflict with any executed rule. The owner may want the freeze manifest to record the post-cleanup hash."
+  },
+  {
+   "id": "N4",
+   "topic": "trigger matrix integrity and binding",
+   "finding": "sha256 3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1 equals the frozen hash recorded in v0_2_final_acceptance_closure.json (authorities_verified.historical_trigger_matrix_json); it was written against the contract sha256 e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f. Its triggers were determined by reading structured_agent_outputs.json of ONE run per ticker: {'NVDA': '57d7b4c4-dbb9-4134-b962-ee2a873941cc', 'QQQ': 'f88c8956-cb62-48aa-9951-89f8e8a95f83', 'MSFT': '43472ace-454f-4c69-892c-adca91c25be7', 'SNDK': 'e8e0f398-7b26-4462-8135-a1410ea5b335', 'TSM': 'dfc7ceb3-3584-4514-bd84-6c371aab3e95', 'AMD': '949f685a-3945-4fd0-b7b9-362b37c90721'}. It records the run id and the input artifact name but no hash of that input, so the binding is by run id.",
+   "handling": "the trigger is used only when the evaluated run id equals the bound run id; every other run is NOT_EVALUABLE. No approved executable method determines the trigger for another run."
+  },
+  {
+   "id": "N5",
+   "topic": "AMD allowed pairs",
+   "finding": "the contract's AMD composite lists A101__A304 and A301__A304; John's later written baseline (authority hierarchy level 1, which supersedes the contract for acceptance purposes) lists A101__A304, A201__A304 and A301__A304 for AMD.",
+   "handling": "the allowed family is the baseline-controlled set the label already carries, plus the contract's own pairs. No executed rule's verdict on the six pinned runs depends on it (AMD's pinned run is not bound)."
+  },
+  {
+   "id": "N6",
+   "topic": "NVDA composite: contract wording versus matrix method",
+   "finding": "the contract's evidence_condition for the NVDA composite is written in terms of the component Alphas reaching a qualified / detected level; the matrix (and John's Step-4 protocol: 'do not use actual Alpha output to change a trigger') fixes the trigger from evidence, independent of the system's output.",
+   "handling": "the executor uses only the matrix trigger, for the bound run. Whether a level-based trigger is approved for other runs is an OWNER DECISION; none is assumed."
+  },
+  {
+   "id": "N7",
+   "topic": "QQQ run identity",
+   "finding": "the matrix binds QQQ to f88c8956; John's final submission table (2026-09-15) uses the later QQQ run f239a53f. No executed rule belongs to QQQ.",
+   "handling": "no effect now; recorded for the day a QQQ rule is executed."
+  },
+  {
+   "id": "N8",
+   "topic": "label v0.2 structural_expectations versus the Gold must_detect rules",
+   "finding": "the provisional label file says a missing structural Alpha never fails a run; the Gold contract's must_detect rules say a missed Alpha with the evidence present is a FAIL.",
+   "handling": "not a conflict that pauses a rule: the baseline's authority hierarchy ranks John's Gold contract above the repository label files ('implementation sources only'). The two do not collide in the executor (structural_expectations are never executed)."
+  }
+ ]
+}

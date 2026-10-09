@@ -1,0 +1,41 @@
+{
+  "schema_version": "alpha_final_adjudication_blindness_audit.v1",
+  "packet_audited": "docs/audit_artifacts/v0_2_alpha_final_adjudication_packet.json",
+  "sample_count_audited": 150,
+  "checks_performed": [
+    "structural key scan for forbidden system-output field names, restricted to actual data fields (samples[], taxonomy_reference[]) -- excludes documentation-only fields (note/purpose/label_field_instructions/*_reference) which legitimately name excluded categories in prose",
+    "confirmed all 4 label fields (expected_label, confidence, ambiguity_flag, adjudication_reason) are null for all 150 samples",
+    "confirmed no unexpected fields exist on any sample beyond the intended schema",
+    "confirmed zero overlap between this packet's claim_ids and any claim_id appearing in either Candidate 3 development-run output file (v0_2_candidate3_baseline_dev_system_alpha_raw.json, v0_2_candidate3_candidate3_dev_system_alpha_raw.json) -- Candidate 3 output was not joined in, even indirectly",
+    "confirmed all content fields (claim/evidence/ticker/run_id/claim_id/agent/sample_id) are plain strings, not nested system-output objects"
+  ],
+  "forbidden_keys_checked": [
+    "matched_alpha_id",
+    "matched_alpha",
+    "predicted_alpha",
+    "system_label",
+    "system_matched_alpha_id",
+    "system_matched_alpha_name",
+    "mapper_score",
+    "candidate_score",
+    "candidate_scores",
+    "plausible_alphas",
+    "plausible_alpha",
+    "system_confidence",
+    "system_explanation",
+    "provider_result",
+    "match_status",
+    "alpha_match_method",
+    "alpha_match_fallback_reason",
+    "classifier",
+    "deterministic_top_alpha",
+    "deterministic_match_status",
+    "eligible_candidates"
+  ],
+  "structural_forbidden_key_hits_in_data": [],
+  "non_null_label_field_values": [],
+  "content_field_type_violations": [],
+  "candidate3_claim_id_overlap_count": 0,
+  "naive_substring_scan_note": "An initial raw substring scan over the whole file also flagged 'plausible_alphas', 'plausible_alpha', 'reason', and 'score' -- all four were manually verified as false positives: they appear only inside the packet's own descriptive 'note' field text (which names these categories specifically to state they are absent) and inside the legitimate blank field name 'adjudication_reason'. None is an actual leaked data value. This is disclosed for audit transparency rather than silently excluded.",
+  "SYSTEM_OUTPUT_EXPOSURE_TO_ADJUDICATOR": 0
+}

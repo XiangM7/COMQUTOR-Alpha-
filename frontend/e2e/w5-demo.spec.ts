@@ -11,40 +11,41 @@ async function assertNoHorizontalOverflow(page: Page) {
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 }
 
-async function submitDemoTicker(page: Page, ticker: "NVDA" | "QQQ") {
+// The analysis date is always today and the analyst team is always the full
+// four, so the seeded 2026-06-30 runs can no longer be reached by submitting a
+// ticker. They are opened the way a user reopens any earlier run: from the
+// Recent runs menu.
+async function openDemoRun(page: Page, ticker: "NVDA" | "QQQ", runId: string) {
   await page.goto("/research");
   await page.getByLabel("Ticker").fill(ticker);
-  await page.getByLabel("Analysis date").fill("2026-06-30");
-  for (const analyst of ["Market", "Sentiment", "News", "Fundamentals"]) {
-    await expect(page.getByLabel(analyst)).toBeChecked();
-  }
+  // Neither the date nor the analyst team is a user choice on the page.
+  await expect(page.getByLabel("Analysis date")).toHaveCount(0);
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
 
-  const responsePromise = page.waitForResponse(
-    (response) => response.url().endsWith("/api/research") && response.request().method() === "POST"
-  );
-  await page.getByRole("button", { name: "Start research" }).click();
-  const response = await responsePromise;
-  expect(response.status()).toBe(200);
-  const body = (await response.json()) as Record<string, unknown>;
-  expect(body.status).toBe("completed");
-  expect(body.cache_disposition).toBe("reused_completed");
-  return body;
+  await page.getByRole("button", { name: "Recent runs" }).click();
+  await page.getByRole("link", { name: new RegExp(`${ticker}.*Completed`) }).click();
+  await expect(page).toHaveURL(`/runs/${runId}/research`);
 }
 
 test("Research page is backed by the isolated completed cache", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/research$/);
-  await expect(page.getByText("API ready")).toBeVisible();
-  await expect(page.getByText("Real execution disabled")).toBeVisible();
-  await expect(page.getByRole("button", { name: /NVDA.*completed/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /QQQ.*completed/ })).toBeVisible();
+  await expect(page.locator(".server-status")).toContainText("Server ready, live research disabled");
+  // Recent runs stays collapsed until it is opened.
+  const recentRuns = page.getByRole("button", { name: "Recent runs" });
+  await expect(recentRuns).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByRole("link", { name: /NVDA/ })).toHaveCount(0);
+  await recentRuns.click();
+  await expect(recentRuns).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByRole("link", { name: /NVDA.*Completed/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /QQQ.*Completed/ })).toBeVisible();
+  await recentRuns.click();
+  await expect(recentRuns).toHaveAttribute("aria-expanded", "false");
   await expect(page.getByText("404")).toHaveCount(0);
 });
 
-test("NVDA completed reuse exposes research, graph, conflict, and evidence", async ({ page }) => {
-  const submission = await submitDemoTicker(page, "NVDA");
-  expect(submission.run_id).toBe(NVDA_RUN_ID);
-  await expect(page).toHaveURL(`/runs/${NVDA_RUN_ID}/research`);
+test("NVDA completed run exposes research, graph, conflict, and evidence", async ({ page }) => {
+  await openDemoRun(page, "NVDA", NVDA_RUN_ID);
   await expect(page.locator('[role="status"][data-status="completed"]')).toContainText(
     "Completed"
   );
@@ -95,9 +96,7 @@ test("QQQ uses backend arbitration under primary Activation v2", async ({ page }
   // still arbitrated (evaluated and rejected on activation threshold),
   // and the UI must truthfully show the no-conflict state rather than a
   // fabricated conflict.
-  const submission = await submitDemoTicker(page, "QQQ");
-  expect(submission.run_id).toBe(QQQ_RUN_ID);
-  await expect(page).toHaveURL(`/runs/${QQQ_RUN_ID}/research`);
+  await openDemoRun(page, "QQQ", QQQ_RUN_ID);
 
   await page.getByRole("link", { name: "Structure Graph" }).click();
   await expect(page.getByRole("heading", { name: /Structure graph — QQQ/ })).toBeVisible();
@@ -155,8 +154,10 @@ test("a live 202 submission shows real processing progress and forwards to resul
   const runId = "e2e_live_processing_run";
   let statusCalls = 0;
 
+  let submittedBody: unknown = null;
   await page.route("**/api/research", (route) => {
     if (route.request().method() !== "POST") return route.fallback();
+    submittedBody = route.request().postDataJSON();
     return route.fulfill({
       status: 202,
       contentType: "application/json",
@@ -262,17 +263,30 @@ test("a live 202 submission shows real processing progress and forwards to resul
   await page.getByRole("button", { name: "Start research" }).click();
 
   await expect(page).toHaveURL(`/runs/${runId}/processing`);
+  // The page sends exactly the ticker, today's date and the full analyst team.
+  expect(submittedBody).toEqual({
+    ticker: "MSTR",
+    analysis_date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    selected_analysts: ["market", "sentiment", "news", "fundamentals"],
+  });
   await expect(page.getByRole("heading", { name: "Analyzing MSTR" })).toBeVisible();
   const bar = page.getByRole("progressbar");
   await expect(bar).toHaveAttribute("aria-valuenow", "43");
-  await expect(page.getByText("Research profile: COMQUTOR Anthropic Medium v1")).toBeVisible();
-  await expect(page.getByText("Estimating completion time…")).toBeVisible();
-  await expect(page.getByText("Current step: Running the News Analyst.")).toBeVisible();
+  await expect(page.getByText("43%", { exact: true })).toBeVisible();
+  await expect(page.getByText("Estimating time…")).toBeVisible();
+  // The backend's own sentence is the caption under the pipeline picture.
+  await expect(page.getByText("Running the News Analyst.")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Analyst research" })).toContainText("News analysis");
+  // No research profile name on the page.
+  await expect(page.locator("body")).not.toContainText("COMQUTOR Anthropic");
   await assertNoHorizontalOverflow(page);
 
-  // Terminal status arrives via polling -> the page announces completion
-  // and forwards to the results automatically.
-  await expect(page).toHaveURL(`/runs/${runId}/research`, { timeout: 20_000 });
+  // Terminal status arrives via polling -> the page announces completion and
+  // offers the results. It never redirects on its own.
+  await expect(page.getByText("Research complete")).toBeVisible({ timeout: 20_000 });
+  await expect(page).toHaveURL(`/runs/${runId}/processing`);
+  await page.getByRole("link", { name: "View results" }).click();
+  await expect(page).toHaveURL(`/runs/${runId}/research`);
   await expect(page.getByRole("heading", { name: "Research summary" })).toBeVisible();
 });
 

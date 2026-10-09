@@ -1,0 +1,210 @@
+{
+ "scoring_status": "SCORED",
+ "reference_items": 40,
+ "skipped": {},
+ "invalid": [],
+ "reviewers": {
+  "Xiang Mao (PROJECT_OWNER_HUMAN_REVIEWER)": 40
+ },
+ "attested_no_prior_view": {
+  "False": 40
+ },
+ "L2_alpha": {
+  "scoring_status": "SCORED",
+  "steps_covered": {
+   "alpha_classification": "IMPLEMENTED -- reuses comqutor_alpha.structure_engine.alpha_mapper.map_claim_to_alpha with classifier_enabled=True and a real Week2LLMGateway, the exact real production call convention.",
+   "source_support_verification": "NOT_IMPLEMENTED_THIS_ROUND -- a separate real step (comqutor_alpha.source_provenance); finding a claim in alpha_matches.json only proves a model output existed, never that it has verified source support.",
+   "claim_fidelity": "NOT_IMPLEMENTED_THIS_ROUND",
+   "evidence_stance_polarity": "NOT_IMPLEMENTED_THIS_ROUND -- a separate real step (comqutor_alpha.structure_engine.evidence_stance_llm.apply_llm_stance_upgrade).",
+   "downstream_eligibility": "NOT_IMPLEMENTED_THIS_ROUND -- a separate real step (comqutor_alpha.structure_engine.claim_quality)."
+  },
+  "scored_sample_count": 40,
+  "unable_to_judge_count": 0,
+  "total_judged_count": 40,
+  "total_sample_count": 40,
+  "overall_accuracy": 0.65,
+  "non_none_precision": 0.857143,
+  "non_none_recall": 0.580645,
+  "outcome_code_counts": {
+   "NONE": 16,
+   "MATCHED": 21,
+   "SELECTED_BUT_NOT_MATCHED": 3
+  },
+  "category_counts": {
+   "A304_boundary": 16,
+   "A101_A103": 8,
+   "A001": 4,
+   "A003": 4,
+   "A102": 4,
+   "A501": 4
+  },
+  "confusion_matrix": {
+   "A304": {
+    "NONE": 7,
+    "A304": 7,
+    "A001": 1
+   },
+   "NONE": {
+    "NONE": 8,
+    "A101": 1
+   },
+   "A001": {
+    "NONE": 1,
+    "SELECTED_BUT_NOT_MATCHED": 3
+   },
+   "A101": {
+    "A101": 3
+   },
+   "A103": {
+    "A101": 1
+   },
+   "A102": {
+    "A102": 4
+   },
+   "A501": {
+    "A501": 4
+   }
+  },
+  "note": "confusion_matrix rows are the human label, columns are the system's outcome (an Alpha ID for MATCHED, or the literal outcome_code for NONE/CALL_FAILED/PARSE_FAILED/UNAVAILABLE/ABSTAINED_AMBIGUOUS/SKIPPED_BUDGET_STOP) -- failures and abstentions are never dropped from this matrix or from scored_sample_count. Items where the reviewer explicitly answered UNABLE_TO_JUDGE are counted in unable_to_judge_count and total_judged_count but excluded from scored_sample_count/accuracy/precision/recall/confusion_matrix -- never coerced into a right-or-wrong comparison.",
+  "task_failures": 0
+ },
+ "L2_historical_comparison": {
+  "samples_with_historical_answer": 33,
+  "same_raw_selection": 30,
+  "note": "consistency with earlier production answers; not accuracy, not part of the evaluation"
+ },
+ "L1_source_to_claim": {
+  "counts": {
+   "compared": 16,
+   "compared_llm_result": 16,
+   "agree": 10
+  },
+  "agreement_rate": 0.625,
+  "disagreements": [
+   {
+    "sample_id": "t3v3-005",
+    "system": "CONDITIONAL",
+    "system_method": "LLM_RESULT",
+    "reviewer": "SUPPORTS"
+   },
+   {
+    "sample_id": "t3v3-012",
+    "system": "INSUFFICIENT",
+    "system_method": "LLM_RESULT",
+    "reviewer": "CONDITIONAL"
+   },
+   {
+    "sample_id": "t3v3-013",
+    "system": "INSUFFICIENT",
+    "system_method": "LLM_RESULT",
+    "reviewer": "CONDITIONAL"
+   },
+   {
+    "sample_id": "t3v3-014",
+    "system": "BACKGROUND",
+    "system_method": "LLM_RESULT",
+    "reviewer": "SUPPORTS"
+   },
+   {
+    "sample_id": "t3v3-016",
+    "system": "INSUFFICIENT",
+    "system_method": "LLM_RESULT",
+    "reviewer": "CONDITIONAL"
+   },
+   {
+    "sample_id": "t3v3-030",
+    "system": "CONDITIONAL",
+    "system_method": "LLM_RESULT",
+    "reviewer": "SUPPORTS"
+   }
+  ],
+  "not_checked_by_production_vs_reviewer_relation": {
+   "NOT_SUBMITTED | reviewer CONDITIONAL": 18,
+   "TASK_FAILED | reviewer CONDITIONAL": 1,
+   "NOT_SUBMITTED | reviewer SUPPORTS": 2,
+   "NOT_SUBMITTED | reviewer CITATION_ONLY": 1,
+   "NOT_SUBMITTED | reviewer UNABLE_TO_JUDGE": 2
+  },
+  "reviewer_claim_fidelity_by_material_status": {
+   "COMPLETE": {
+    "UNABLE_TO_JUDGE": 18,
+    "FAITHFUL": 8,
+    "MATERIAL_DEVIATION": 1
+   },
+   "NO_FACTUAL_ELEMENT": {
+    "UNABLE_TO_JUDGE": 2
+   },
+   "NO_MATERIAL": {
+    "UNABLE_TO_JUDGE": 3,
+    "MINOR_DEVIATION": 1
+   },
+   "PARTIAL": {
+    "UNABLE_TO_JUDGE": 7
+   }
+  }
+ },
+ "L3_direction": {
+  "counts": {
+   "not_applicable_no_system_alpha": 19,
+   "compared": 18,
+   "agree": 18,
+   "not_applicable_alpha_differs": 3
+  },
+  "agreement_rate": 1.0,
+  "disagreements": []
+ },
+ "L4_claim_eligibility": {
+  "counts": {
+   "not_applicable_no_system_alpha": 19,
+   "compared": 18,
+   "agree": 15,
+   "not_applicable_alpha_differs": 3
+  },
+  "agreement_rate": 0.833333,
+  "disagreements": [
+   {
+    "sample_id": "t3v3-005",
+    "system": "DOES_NOT_QUALIFY",
+    "reviewer": "QUALIFIES",
+    "failing_condition_kind": "semantic_or_review",
+    "selector": {
+     "eligible": false,
+     "excluded_reason": "RELATION_NOT_SUPPORTING"
+    },
+    "verified_support": {
+     "eligible": false,
+     "reason_code": "SUPPORT_STATUS_NOT_RESOLVED"
+    }
+   },
+   {
+    "sample_id": "t3v3-006",
+    "system": "DOES_NOT_QUALIFY",
+    "reviewer": "QUALIFIES",
+    "failing_condition_kind": "semantic_or_review",
+    "selector": {
+     "eligible": false,
+     "excluded_reason": "RELATION_NOT_SUPPORTING"
+    },
+    "verified_support": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE"
+    }
+   },
+   {
+    "sample_id": "t3v3-039",
+    "system": "DOES_NOT_QUALIFY",
+    "reviewer": "QUALIFIES",
+    "failing_condition_kind": "semantic_or_review",
+    "selector": {
+     "eligible": false,
+     "excluded_reason": "RELATION_NOT_SUPPORTING"
+    },
+    "verified_support": {
+     "eligible": false,
+     "reason_code": "SOURCE_LINK_NOT_VALID"
+    }
+   }
+  ]
+ },
+ "note": "Each link has its own denominator; links are never merged into one score. Diagnostic sample (40 items, 4 per A001/A003/A102/A501 cell): not a market-representative sample and not a re-measurement of the 80% target."
+}

@@ -1,0 +1,128 @@
+{
+  "schema_version": "alpha_final_reserve_replacement_packet.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "round": 2,
+  "purpose": "Blind adjudication packet for the 4 reserve samples drawn to replace the round-1 final-reserve replacements that were themselves excluded under the frozen adjudication rubric (non-null ambiguity_flag).",
+  "system_predictions_included": false,
+  "candidate3_output_included": false,
+  "note": "No COMQUTOR Alpha prediction, mapper score, plausible_alphas, system confidence, Provider result, or any Candidate 1/2/3 result is present anywhere in this document.",
+  "instructions_reference": "docs/audit_artifacts/v0_2_alpha_human_adjudication_rubric.md",
+  "policy_reference": "docs/audit_artifacts/v0_2_final_alpha_adjudication_policy.md",
+  "taxonomy_reference": [
+    {
+      "alpha_id": "A001",
+      "name_en": "Rate Cut Cycle",
+      "core_thesis": "Falling rates lower discount rates and support long-duration growth assets."
+    },
+    {
+      "alpha_id": "A003",
+      "name_en": "Liquidity Expansion",
+      "core_thesis": "Improving liquidity supports risk appetite and equity inflows."
+    },
+    {
+      "alpha_id": "A101",
+      "name_en": "AI Expansion",
+      "core_thesis": "AI training and adoption increase demand for accelerators and AI-related equities."
+    },
+    {
+      "alpha_id": "A102",
+      "name_en": "Inference Explosion",
+      "core_thesis": "Enterprise AI applications and AI agents increase inference compute demand."
+    },
+    {
+      "alpha_id": "A103",
+      "name_en": "AI Infrastructure",
+      "core_thesis": "AI buildout drives datacenter, power, cooling, networking, and server demand."
+    },
+    {
+      "alpha_id": "A201",
+      "name_en": "Semiconductor Supercycle",
+      "core_thesis": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand."
+    },
+    {
+      "alpha_id": "A301",
+      "name_en": "Revenue Expansion",
+      "core_thesis": "Strong demand raises revenue guidance, EPS revisions, and repricing potential."
+    },
+    {
+      "alpha_id": "A304",
+      "name_en": "Multiple Compression",
+      "core_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals."
+    },
+    {
+      "alpha_id": "A501",
+      "name_en": "Recession Risk",
+      "core_thesis": "Widening credit spreads and economic slowdown pressure earnings and risk appetite."
+    },
+    {
+      "alpha_id": "A601",
+      "name_en": "Narrative Momentum",
+      "core_thesis": "Investor attention and crowded narratives drive reflexive flows and momentum."
+    }
+  ],
+  "label_field_instructions": {
+    "expected_label": "One canonical alpha_id from taxonomy_reference above, or the string 'NONE'. Leave null until adjudicated.",
+    "confidence": "'low' | 'medium' | 'high'. Leave null until adjudicated.",
+    "ambiguity_flag": "null, or one of: BOTH_REASONABLE_AMBIGUOUS | INSUFFICIENT_CONTEXT | NOT_A_SUBSTANTIVE_CLAIM | DUPLICATE_OR_NEAR_DUPLICATE",
+    "adjudication_reason": "Short free-text justification, required even for NONE. Leave null until adjudicated."
+  },
+  "sample_count": 4,
+  "samples": [
+    {
+      "replacement_slot": 1,
+      "sample_id": "nh-reserve-039",
+      "ticker": "AMD",
+      "run_id": "949f685a-3945-4fd0-b7b9-362b37c90721",
+      "claim_id": "949f685a-3945-4fd0-b7b9-362b37c90721:bull_researcher:investment_debate_state.bull_history:claim:66",
+      "agent": "bull_researcher",
+      "claim": "A strong economy means continued hyperscaler capex, continued enterprise AI adoption, and continued demand for AMD’s data center products.",
+      "evidence": "A strong economy means continued hyperscaler capex, continued enterprise AI adoption, and continued demand for AMD’s data center products.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 2,
+      "sample_id": "nh-reserve-040",
+      "ticker": "TSM",
+      "run_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:research_manager:investment_plan:claim:14",
+      "agent": "research_manager",
+      "claim": "Neither side has a decisive edge.",
+      "evidence": "Neither side has a decisive edge.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 3,
+      "sample_id": "nh-reserve-041",
+      "ticker": "SNDK",
+      "run_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:conservative_risk_analyst:risk_debate_state.conservative_history:claim:36",
+      "agent": "conservative_risk_analyst",
+      "claim": "My aggressive colleague was right to call this the analytical trap it is, but I want to be even more precise about why.",
+      "evidence": "My aggressive colleague was right to call this the analytical trap it is, but I want to be even more precise about why.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 4,
+      "sample_id": "nh-reserve-042",
+      "ticker": "NVDA",
+      "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "claim_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665:portfolio_manager:final_trade_decision:claim:1",
+      "agent": "portfolio_manager",
+      "claim": "Executive Summary: Maintain the current NVDA position at $217.50 without adding or trimming aggressively.",
+      "evidence": "Executive Summary: Maintain the current NVDA position at $217.50 without adding or trimming aggressively.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    }
+  ]
+}

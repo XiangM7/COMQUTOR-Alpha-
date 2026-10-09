@@ -356,6 +356,48 @@ export interface AlphaMemorySection {
   };
 }
 
+/** 2026-10-06 (round 14, section 6): the single, shared judgment of how
+ * complete this run's real Alpha classification is -- computed once by the
+ * backend (alpha_matches.json's own persisted fields combined with
+ * dominant_alphas) and read verbatim here; never re-derived in the browser. */
+export type AlphaClassificationStatus =
+  | "incomplete"
+  | "complete_no_active"
+  | "complete_active_no_dominant"
+  | "complete_has_dominant";
+
+/** T4 round 32: one model-assisted sub-step's completion, read from the run's own semantic ledger. */
+export interface StageDisclosureStage {
+  stage: string;
+  task: string | null;
+  /** "model_complete" | "degraded" | "model_not_used" | "not_run" | "not_recorded" | "built" | "not_built" */
+  status: string;
+  calls?: number | null;
+  http_requests?: number | null;
+  outcomes?: Record<string, number> | null;
+}
+
+/** T4 round 32: which sub-steps were degraded or fell back (additive; absent on older backends). */
+export interface StageDisclosure {
+  schema_version: string;
+  stages: StageDisclosureStage[];
+  degraded_stages: string[];
+  notes: string[];
+}
+
+export interface AlphaClassificationCompletion {
+  total_claims: number;
+  valid_select_count: number;
+  valid_none_count: number;
+  /** A real attempt that produced no usable result (provider error,
+   * timeout, rate limit, invalid/truncated output). */
+  call_failure_count: number;
+  /** No request ever reached the Provider (classifier off, budget spent,
+   * input too large, or the Gateway's own audit was unavailable). */
+  not_executed_count: number;
+  complete: boolean;
+}
+
 export interface CanonicalResearchResponse {
   run_id: string;
   ticker: string | null;
@@ -368,6 +410,13 @@ export interface CanonicalResearchResponse {
   main_conflict: AlphaConflict | null;
   conflict_status: "ready" | "not_ready";
   summary: string;
+  /** Additive; null on a payload from a backend predating this field. When
+   * "incomplete", an empty dominant/active/conflict result must NOT be
+   * presented as "no such structure exists". */
+  alpha_classification_status?: AlphaClassificationStatus | null;
+  alpha_classification_completion?: AlphaClassificationCompletion | null;
+  /** T4 round 32: sub-step completion / fallback disclosure; null when absent. */
+  stage_disclosure?: StageDisclosure | null;
   data_sanity_status: DataSanityStatus;
   data_sanity_warning_count: number;
   data_sanity_critical_count: number;
@@ -749,6 +798,13 @@ export interface ConflictEvidenceUIItem {
   /** Counter Evidence, Case B only (supports_counter_alpha): the alpha
    * this evidence supports instead. */
   supports_counter_alpha_id?: string | null;
+  /** John MVP Final Gap Closure -- Structured External Source
+   * Traceability: computed at read time, same as StructuredAgentOutputRecord's
+   * own external_source (comqutor_alpha.api.routes_research
+   * ._attach_external_sources_to_conflicts) -- never re-judges evidence
+   * admissibility/stance, purely additive. */
+  external_source?: ExternalSource | null;
+  external_source_status?: ExternalSourceStatus;
 }
 
 export interface ConflictMissingEvidenceItem {
@@ -986,6 +1042,54 @@ export type ConflictsResult = ConflictsResponse | SafeErrorEnvelope;
 // GET /api/research/{run_id}/agent-outputs
 // ---------------------------------------------------------------------------
 
+/** John MVP Final Gap Closure -- Structured External Source Traceability.
+ * See comqutor_alpha.source_provenance.public_source_fields: every field
+ * here traces back to a real upstream tool response (news article title/
+ * publisher/url/date, a dataset series id, a filing accession, etc.) --
+ * never LLM-generated. All fields optional/nullable since an upstream item
+ * legitimately may not provide all of them (see metadata_status). */
+export type ExternalSourceStatus = "TRACEABLE" | "PARTIAL" | "UNAVAILABLE";
+
+export interface ExternalSource {
+  source_id: string;
+  source_type: string;
+  name: string | null;
+  title: string | null;
+  url: string | null;
+  published_at: string | null;
+  retrieved_at: string | null;
+  external_record_id: string | null;
+  locator: string | null;
+  provider: string | null;
+  metadata_status: ExternalSourceStatus;
+  /** T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-26):
+   * the genuine, upstream-extracted excerpt this source's content_hash/
+   * fragment_id were computed from -- null when no content was ever
+   * captured for this source (identity-only registration). */
+  excerpt?: string | null;
+  content_hash?: string | null;
+  fragment_id?: string | null;
+}
+
+/** T1 source-linking chain: two DELIBERATELY SEPARATE axes -- see
+ * comqutor_alpha.source_provenance's own module docstring.
+ * SOURCE_LINK_VALID never implies SUPPORT_SUPPORTS. */
+export type SourceLinkStatus =
+  | "VALID"
+  | "UNKNOWN_ID"
+  | "CONTENT_UNAVAILABLE"
+  | "TIME_INVALID"
+  | "NOT_PROVIDED";
+
+export type ContentSupportStatus =
+  | "SUPPORTS"
+  | "OPPOSES"
+  | "BACKGROUND"
+  | "CITATION_ONLY"
+  | "CONDITIONAL"
+  | "PENDING_REVIEW"
+  | "NOT_APPLICABLE";
+
 /** The public-whitelisted subset of one structured agent output record --
  * see agent_output_reader.PUBLIC_STRUCTURED_OUTPUT_FIELDS. Every field here
  * (and only these) may ever appear; raw_output/prompt/final_state/etc. are
@@ -1012,6 +1116,25 @@ export interface StructuredAgentOutputRecord {
   assertion_status?: string;
   semantic_polarity?: string;
   extraction_method?: string;
+  /** Computed at read time by joining against this run's own
+   * source_registry.json (see comqutor_alpha.api.agent_output_reader
+   * ._annotate_external_sources) -- always present on a response from the
+   * current backend; treat as UNAVAILABLE/null if ever absent (an older
+   * cached response shape). */
+  external_source?: ExternalSource | null;
+  external_source_status?: ExternalSourceStatus;
+  /** T1 source-linking chain: computed and PERSISTED at structured-
+   * extraction time via ID-based validation (comqutor_alpha.structure_
+   * engine.structured_output_adapter._annotate_source_link) -- unlike
+   * external_source/external_source_status above (a read-time title-match
+   * join), these come straight from the persisted record. linked_source is
+   * resolved afterward from linked_source_id, same pattern as
+   * external_source. */
+  source_link_status?: SourceLinkStatus;
+  linked_source_id?: string | null;
+  content_support_status?: ContentSupportStatus;
+  content_support_method?: string | null;
+  linked_source?: ExternalSource | null;
 }
 
 export interface AgentOutputsResponse {
@@ -1024,6 +1147,82 @@ export interface AgentOutputsResponse {
 }
 
 export type AgentOutputsResult = AgentOutputsResponse | SafeErrorEnvelope;
+
+// ---------------------------------------------------------------------------
+// Minimal human content-support review entrypoint (T1 verified-support
+// eligibility gate, 2026-09-28) -- POST /api/research/{run_id}/claims/
+// {claim_id}/review, GET .../content-support-reviews, GET .../reevaluations.
+// ---------------------------------------------------------------------------
+
+/** Selectable review verdicts -- PENDING_REVIEW is intentionally excluded:
+ * it is the pre-review default, never a human's own submitted verdict. */
+export type ContentSupportReviewVerdict = Exclude<ContentSupportStatus, "PENDING_REVIEW">;
+
+export interface ContentSupportReviewRecord {
+  schema_version: string;
+  status: ContentSupportStatus;
+  method: string;
+  /** Manually typed by whoever submitted the review -- this app has no
+   * authentication, so this is NEVER an authenticated identity, only a
+   * free-text label the reviewer chose to enter. */
+  reviewer: string;
+  rationale: string;
+  reviewed_at: string;
+  claim_id: string;
+  linked_source_id: string | null;
+  content_hash: string | null;
+  review_id?: string;
+}
+
+export interface ReevaluationSummary {
+  status: "ok";
+  run_id: string;
+  execution_id: string;
+  based_on_run_id: string;
+  review_log_entry_count: number;
+}
+
+export interface ReevaluationFailure {
+  status: "failed";
+  error_code: string;
+  run_id?: string;
+  execution_id?: string;
+}
+
+export interface ContentSupportReviewSubmissionResult {
+  status: "ok";
+  run_id: string;
+  claim_id: string;
+  content_support_status: ContentSupportStatus;
+  content_support_review: ContentSupportReviewRecord;
+  reevaluation: ReevaluationSummary | ReevaluationFailure | null;
+}
+
+export type ContentSupportReviewSubmissionOutcome = ContentSupportReviewSubmissionResult | SafeErrorEnvelope;
+
+export interface ContentSupportReviewLogResponse {
+  status: "ok";
+  run_id: string;
+  reviews: ContentSupportReviewRecord[];
+  count: number;
+}
+
+export type ContentSupportReviewLogResult = ContentSupportReviewLogResponse | SafeErrorEnvelope;
+
+export interface ReevaluationExecutionEntry {
+  execution_id: string;
+  triggered_at: string;
+  review_log_entry_count: number;
+}
+
+export interface ReevaluationExecutionsResponse {
+  status: "ok";
+  run_id: string;
+  executions: ReevaluationExecutionEntry[];
+  count: number;
+}
+
+export type ReevaluationExecutionsResult = ReevaluationExecutionsResponse | SafeErrorEnvelope;
 
 // ---------------------------------------------------------------------------
 // GET /health, GET /ready
@@ -1056,6 +1255,15 @@ export interface ReadinessResponse {
    * -- never a config value or env var content. Null unless
    * live_semantic_pipeline is "not_ready". */
   live_semantic_pipeline_reason?: string | null;
+  /** Database backend and name of this instance (never a DSN or a
+   * credential). Absent on servers that predate the field. */
+  database_backend?: { dialect: string | null; database: string | null } | null;
+  /** Week 2 execution profile this instance would use; null when none is
+   * selected. Absent on servers that predate the field. */
+  week2_execution_profile?: string | null;
+  /** Short code version of this instance: git HEAD, plus a marker and diff
+   * hash prefix when it runs uncommitted changes. */
+  code_version?: string | null;
 }
 
 // ---------------------------------------------------------------------------

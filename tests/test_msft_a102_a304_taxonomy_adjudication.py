@@ -1,14 +1,22 @@
 """MSFT A102__A304 Canonical Conflict Taxonomy Adjudication -- dedicated
 tests (task `MSFT_A102_A304_TAXONOMY_ADJUDICATION`).
 
-DECISION = REJECT_PAIR (PD-017, docs/specs/product_decisions_and_unknowns.md):
-A102__A304 is not added to the canonical conflict taxonomy. Source-authority
-reasoning lives in PD-017 and the final report, not here -- this file only
-locks in the resulting, observable system behavior.
+ORIGINAL DECISION (PD-017, docs/specs/product_decisions_and_unknowns.md) was
+REJECT_PAIR: A102__A304 was not added to the canonical conflict taxonomy.
 
-Section map (matches the task's own checklist):
+**That decision has since been reopened and reversed** (PD-017-REVISED, same
+file, "COMQUTOR Alpha 下一轮开发任务单" task T2): A102__A304 -- and,
+separately, the previously-undeclared A201__A304 (SNDK/TSM/AMD) -- are now
+canonical, `conditional_only`-governed conflict pairs. This file has been
+updated to lock in the NEW, current, observable system behavior
+(`APPROVED_CONDITIONAL`), not the original rejection. PD-017's own reasoning,
+and the fact that this reversal did not independently re-litigate that
+reasoning, are preserved in PD-017-REVISED's own text, not restated here.
+
+Section map (matches the task's own checklist, section B relabeled for the
+current outcome):
     A - Checks required for every outcome (1-10)
-    B - REJECT_PAIR-specific checks (11-15)
+    B - APPROVED_CONDITIONAL-specific checks (11-15)
 """
 
 from __future__ import annotations
@@ -53,7 +61,13 @@ J3_BENCHMARK_PATH = REPO_ROOT / "comqutor_alpha" / "config" / "j3_provisional_se
 # is therefore not a taxonomy-content-decision leak and should not trip this
 # specific adjudication's own invariant check.
 FROZEN_HASHES = {
-    TAXONOMY_PATH: "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    # Re-pinned (PD-017-REVISED, docs/specs/product_decisions_and_unknowns.md):
+    # this decision's own explicit content change -- two reciprocal
+    # conflict_alphas declarations (A102<->A304, A201<->A304) plus an
+    # append-only content_change_log block -- is exactly what this hash is
+    # now expected to reflect, not an unrelated/unauthorized drift.
+    # Re-pinned again 2026-10-07: the T2 content_version field (1.1.0) and its change-log entry were added to the taxonomy file.
+    TAXONOMY_PATH: "c6d523beaee4942c71756a3fddbb8213d4ba2f8653fded088d73031ca80f3bfa",
     # Re-pinned (Post-Alpha-Authority-Migration Cleanup task) to the current,
     # fully-authorized value. alpha_mapper.py genuinely does read taxonomy
     # conflict-pair content (_conflict_ids/_directions_oppose, used for
@@ -157,11 +171,14 @@ class TestSectionAAllOutcomes:
         v2 = load_j2_labels_v2()
         msft = ticker_label_v2(v2, "MSFT")
         assert msft["product_decision_pending"] == []
-        assert "A102__A304" in msft["remove_while_undeclared"]
-        for category in ("required_conflicts", "conditional_conflicts", "allowed_conflicts"):
+        # PD-017-REVISED: A102__A304 is now canonical/conditional, not
+        # removed-while-undeclared.
+        assert msft["remove_while_undeclared"] == []
+        assert "A102__A304" in msft["conditional_conflicts"]
+        for category in ("required_conflicts", "allowed_conflicts"):
             assert "A102__A304" not in msft[category]
 
-    def test_a5_a4_no_longer_reports_the_old_unexplained_pending_entry(self):
+    def test_a5_a4_no_longer_reports_the_pair_as_removed_while_undeclared(self):
         v2 = load_j2_labels_v2()
         label = ticker_label_v2(v2, "MSFT")
         not_evaluable_result = {
@@ -175,7 +192,7 @@ class TestSectionAAllOutcomes:
         }
         result = apply_v2_contract(ticker="MSFT", ticker_v2_label=label, evaluate_ticker_result=not_evaluable_result)
         assert result["product_decision_pending_results"] == []
-        assert result["removed_while_undeclared_pairs"] == ["A102__A304"]
+        assert result["removed_while_undeclared_pairs"] == []
 
     def test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical(self):
         for path, expected_hash in FROZEN_HASHES.items():
@@ -194,22 +211,22 @@ class TestSectionAAllOutcomes:
 
 
 # ---------------------------------------------------------------------------
-# Section B -- REJECT_PAIR-specific
+# Section B -- APPROVED_CONDITIONAL-specific (PD-017-REVISED)
 # ---------------------------------------------------------------------------
 
 
-class TestSectionBRejectPairSpecific:
-    def test_b11_canonical_taxonomy_hash_unchanged(self):
+class TestSectionBApprovedConditionalSpecific:
+    def test_b11_canonical_taxonomy_hash_matches_the_revised_content(self):
         assert _sha256(TAXONOMY_PATH) == FROZEN_HASHES[TAXONOMY_PATH]
 
-    def test_b12_j2_no_longer_treats_the_pair_as_an_executable_expectation(self):
+    def test_b12_j2_now_treats_the_pair_as_a_conditional_executable_expectation(self):
         v2 = load_j2_labels_v2()
         msft = ticker_label_v2(v2, "MSFT")
         assert "A102__A304" not in msft["required_conflicts"]
-        assert "A102__A304" not in msft["conditional_conflicts"]
+        assert "A102__A304" in msft["conditional_conflicts"]
         assert "A102__A304" not in msft["allowed_conflicts"]
 
-    def test_b13_a4_never_reports_the_missing_pair_as_a_ticker_failure(self):
+    def test_b13_a4_never_reports_the_conditional_pair_as_a_ticker_failure(self):
         v2 = load_j2_labels_v2()
         label = ticker_label_v2(v2, "MSFT")
         evaluable_result = {
@@ -225,8 +242,15 @@ class TestSectionBRejectPairSpecific:
         assert result["ticker_status"] == "pass"
         assert result["required_conflict_results"] == []
 
-    def test_b14_validator_still_rejects_a102_a304_as_an_executable_pair(self, tmp_path):
+    def test_b14_validator_still_rejects_a_genuinely_undeclared_pair(self, tmp_path):
+        # A102__A304 is no longer a useful example of an undeclared pair (it
+        # IS now canonical) -- A103__A304 remains genuinely undeclared
+        # (A103's conflict_alphas is still []), so it is used here instead to
+        # keep proving the validator's own protective behavior still works.
         import yaml
+
+        taxonomy = load_alpha_taxonomy()
+        assert taxonomy["A103"].conflict_alphas == [], "test fixture assumption broken: A103__A304 is no longer undeclared"
 
         payload = {
             "schema_version": "regression_labels.v2",
@@ -242,33 +266,43 @@ class TestSectionBRejectPairSpecific:
                     "structural_expectations": {"positive_alphas": [], "negative_alphas": [], "conditional_alphas": []},
                     "run_bound_expectations": None,
                     "required_conflicts": [],
-                    # Attempting to silently re-promote the rejected pair
-                    # into an executable category must still fail closed.
-                    "conditional_conflicts": ["A102__A304"],
+                    # Attempting to promote a genuinely undeclared pair into
+                    # an executable category must still fail closed.
+                    "conditional_conflicts": ["A103__A304"],
                     "product_decision_pending": [],
                     "remove_while_undeclared": [],
                     "allowed_conflicts": [],
                 }
             },
         }
-        path = tmp_path / "attempted_reintroduction.yaml"
+        path = tmp_path / "attempted_undeclared_promotion.yaml"
         path.write_text(yaml.safe_dump(payload), encoding="utf-8")
         with pytest.raises(LabelV2ValidationError) as exc_info:
             load_j2_labels_v2(path)
         assert exc_info.value.reason_code == "LABEL_V2_UNDECLARED_EXECUTABLE_CONFLICT_PAIR"
 
-    def test_b14b_a102_still_has_zero_canonical_conflicts(self):
+    def test_b14b_a102_and_a201_now_have_a304_as_a_canonical_conflict(self):
         taxonomy = load_alpha_taxonomy()
-        assert taxonomy["A102"].conflict_alphas == []
+        assert [(c.alpha_id, c.contradiction_weight) for c in taxonomy["A102"].conflict_alphas] == [("A304", 0.75)]
+        assert [(c.alpha_id, c.contradiction_weight) for c in taxonomy["A201"].conflict_alphas] == [("A304", 0.75)]
         pairs = _canonical_conflict_pairs(taxonomy)
-        assert "A102__A304" not in pairs
-        assert "A304__A102" not in pairs
+        assert "A102__A304" in pairs
+        assert "A201__A304" in pairs
 
-    def test_b15_development_plan_preserved_with_a_formal_superseding_decision(self):
+    def test_b15_development_plan_preserved_pd017_text_still_intact(self):
         assert _sha256(DEVELOPMENT_PLAN_DOCX_PATH) == FROZEN_HASHES[DEVELOPMENT_PLAN_DOCX_PATH]
         pd017 = _pd017_text()
         assert "Development Plan" in pd017
         assert "§4" in pd017 or "section 4" in pd017.lower()
+
+    def test_b16_pd017_revised_entry_exists_and_documents_the_reversal(self):
+        text = PD_REGISTER_PATH.read_text(encoding="utf-8")
+        assert "## PD-017-REVISED" in text
+        match = re.search(r"## PD-017-REVISED.*?(?=\n## PD-|\Z)", text, re.DOTALL)
+        assert match, "PD-017-REVISED section not found"
+        revised_text = match.group(0)
+        assert "APPROVED_CONDITIONAL" in revised_text
+        assert "A201__A304" in revised_text
 
 
 # ---------------------------------------------------------------------------

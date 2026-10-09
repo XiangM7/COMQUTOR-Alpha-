@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from comqutor_alpha.graph_engine.claim_data_grounding import FACT_DEPENDENCY_CONTRACT
 from comqutor_alpha.storage.file_store import (
     atomic_write_text,
     resolve_output_root,
@@ -288,8 +289,18 @@ def save_comqutor_run_outputs(
     output_root=None,
     allow_empty_final_state=False,
     write_final_report=False,
+    captured_sources=None,
 ):
-    """Save COMQUTOR-standard raw outputs for a completed TradingAgents run."""
+    """Save COMQUTOR-standard raw outputs for a completed TradingAgents run.
+
+    ``captured_sources`` (John MVP Final Gap Closure -- Structured External
+    Source Traceability): the raw list collected by
+    ``tradingagents.dataflows.source_capture.source_capture_scope`` during
+    this same run, or ``None``/empty for a caller that never opened that
+    scope (e.g. an offline/injected-``final_state`` test seam, or a run
+    with no real news tool calls) -- in either case, no ``source_registry.json``
+    is even written, which is the same honest "not preserved for this run"
+    signal a historical run predating this feature already produces."""
     final_state = _validate_final_state(final_state, allow_empty_final_state)
     run_id = str(uuid4())
     output_root = resolve_output_root(output_root)
@@ -322,6 +333,14 @@ def save_comqutor_run_outputs(
     }
     if warnings:
         metadata["warnings"] = warnings
+    # T1 closure: a new run opts in to the fact-dependency contract (claim_data_grounding) -- a claim that is a
+    # derived expression of another claim's saved observations counts as the same evidence, and the run exports
+    # its evidence_trace.json. Runs written before this field existed carry no marker and keep legacy grouping.
+    metadata["fact_dependency_contract"] = FACT_DEPENDENCY_CONTRACT
+    # T4 (2026-10-08): database backend, code identity, execution type and effective configuration of this run.
+    from comqutor_alpha.run_environment import EXECUTION_TYPE_FRESH_RUN, run_environment_or_unavailable
+
+    metadata["run_environment"] = run_environment_or_unavailable(EXECUTION_TYPE_FRESH_RUN, output_root)
 
     raw_payload = {
         "schema_version": OUTPUT_VERSION,
@@ -349,6 +368,71 @@ def save_comqutor_run_outputs(
         )
     except Exception:
         pass
+
+    # John MVP Final Gap Closure -- Structured External Source Traceability:
+    # additive, best-effort artifact. Every record here traces back to a
+    # real upstream tool response (see tradingagents.dataflows.*) -- never
+    # LLM-generated. Written only when at least one genuine source was
+    # actually captured; an empty/absent registry is the same honest
+    # UNAVAILABLE signal callers already handle for a historical run.
+    if captured_sources:
+        try:
+            from comqutor_alpha.source_provenance import build_source_registry
+
+            registry = build_source_registry(
+                run_id=run_id,
+                ticker=ticker,
+                retrieved_at=created_at,
+                captured_records=captured_sources,
+            )
+            # Round 18: an undated live financial data snapshot (published_at
+            # deliberately left unknown) gets a versioned, self-validating
+            # "available before the evidence cutoff" record, so the time gate
+            # can tell "captured live before the cutoff" from "no time basis
+            # at all". published_at itself is never touched.
+            from comqutor_alpha.source_provenance import (
+                AVAILABILITY_ANNOTATION_REGISTRY_WRITE,
+                annotate_sources_availability,
+            )
+
+            registry["sources"], _availability_summary = annotate_sources_availability(
+                registry.get("sources"), analysis_date, mode=AVAILABILITY_ANNOTATION_REGISTRY_WRITE
+            )
+            if registry["source_count"] > 0:
+                save_json_record(run_id, "source_registry.json", registry, output_root=output_root)
+        except Exception:
+            pass
+
+    # T1 closeout (Round 22): the two additive, present-only capture artifacts that ride along on the capture container
+    # (tradingagents.dataflows.source_capture.CapturedSources.aux): the COMPLETE input window behind a derived value, and the
+    # sanitized raw provider response. Written only when a call site actually captured one; a run without them (every
+    # historical run) is byte-for-byte what it was, and nothing is ever backfilled. Best-effort like the registry above.
+    capture_aux = getattr(captured_sources, "aux", None)
+    if isinstance(capture_aux, dict) and capture_aux:
+        try:
+            from comqutor_alpha.capture_artifacts import (
+                DERIVED_INPUTS_FILENAME,
+                PROVIDER_RESPONSE_AUDIT_FILENAME,
+                build_derived_inputs_artifact,
+                build_provider_response_artifact,
+            )
+
+            if capture_aux.get("derived_inputs"):
+                save_json_record(
+                    run_id,
+                    DERIVED_INPUTS_FILENAME,
+                    build_derived_inputs_artifact(run_id=run_id, ticker=ticker, entries=capture_aux["derived_inputs"]),
+                    output_root=output_root,
+                )
+            if capture_aux.get("provider_responses"):
+                save_json_record(
+                    run_id,
+                    PROVIDER_RESPONSE_AUDIT_FILENAME,
+                    build_provider_response_artifact(run_id=run_id, ticker=ticker, entries=capture_aux["provider_responses"]),
+                    output_root=output_root,
+                )
+        except Exception:
+            pass
 
     if write_final_report:
         final_report_filename = validate_artifact_filename("final_report.md")

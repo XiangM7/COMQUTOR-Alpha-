@@ -18,6 +18,8 @@ from comqutor_alpha.structure_engine.week2_llm import (
     DEFAULT_MAX_RETRIES,
     DEFAULT_TIMEOUT_SECONDS,
     Week2LLMGateway,
+    _TASK_INSTRUCTIONS,
+    _TASK_RUNTIME_METADATA,
 )
 from comqutor_alpha.llm_runtime.cache import InMemoryLLMResponseCache, NullLLMResponseCache
 from tests.llm_runtime.fakes import InMemoryFakeCache
@@ -117,6 +119,7 @@ def _enrichment(text="AI demand drives GPU demand."):
                 "factors": ["AI Demand", "GPU Demand"],
                 "direction": "positive",
                 "confidence": 0.9,
+                "cited_source_id": None,
             }
         ]
     }
@@ -144,31 +147,13 @@ def test_legacy_prompt_payload_api_and_defaults_are_byte_compatible(tmp_path: Pa
 
     result = gateway.invoke_json("alpha_classifier", payload, lambda value: dict(value))
 
-    instruction = (
-        "Classify the Evidence against the FULL supplied Alpha taxonomy (alpha_taxonomy) -- every "
-        "canonical Alpha is a legitimate candidate, none has been pre-filtered or pre-admitted by "
-        "any other program logic. Select the single Alpha whose core thesis and causal/economic "
-        "mechanism the Evidence most directly and substantively supports or opposes -- never an "
-        "Alpha that merely shares surface words or a topic with the Evidence. Several Alphas can "
-        "share overlapping keywords (for example AI capex, GPU demand, or data center activity can "
-        "each relate to more than one Alpha); when more than one Alpha looks plausible, compare "
-        "them directly against each other and select whichever one's own stated mechanism the "
-        "Evidence engages with more closely and substantively -- never by keyword overlap alone, "
-        "and never by declining to choose merely because the comparison is close. A difficult or "
-        "close classification is still a classification task: decision=none is not a way to avoid "
-        "choosing between two or more plausible Alphas. For example, if both A101 and A103 seem "
-        "plausible, deciding decision=none because 'both are plausible' is WRONG; if A103 is the "
-        "closer, more substantive fit, the required answer is decision=select with "
-        "selected_alpha_id=A103. Use decision=none with selected_alpha_id=null only when no single "
-        "canonical Alpha materially fits the Evidence at all -- when the Evidence does not "
-        "substantively engage any Alpha's thesis, or is generic or background market commentary "
-        "with no specific Alpha-relevant mechanism. Judge only from the claim, the evidence, and "
-        "each Alpha's own definition. Return one JSON object with decision set to select or none "
-        "and selected_alpha_id set to exactly one alpha_id from the supplied alpha_taxonomy when "
-        "decision is select, or null when decision is none. Never invent an Alpha ID that is not "
-        "in the supplied taxonomy, never select more than one Alpha, and never provide a trading "
-        "decision or recommendation."
-    )
+    # Referenced from the live constant rather than hardcoded here: this test
+    # verifies the payload-construction API (shared prefix + instruction +
+    # INPUT_JSON separator + payload) stays byte-compatible across candidate
+    # prompt revisions, not that the instruction text itself is frozen (which
+    # is covered by the versioned prompt/output-schema identifiers and their
+    # own hash-verification artifacts instead).
+    instruction = _TASK_INSTRUCTIONS["alpha_classifier"]
     expected_prompt = (
         "You are a constrained COMQUTOR extraction component. Return strict JSON only, with "
         "no markdown and no hidden reasoning. "
@@ -294,10 +279,10 @@ def test_cache_hit_reexecutes_real_task_validator_without_provider_budget(
     real_validator = structured_output_adapter._validate_llm_batch_enrichment
     validator_calls = 0
 
-    def counting_validator(payload, segments):
+    def counting_validator(payload, segments, **kwargs):
         nonlocal validator_calls
         validator_calls += 1
-        return real_validator(payload, segments)
+        return real_validator(payload, segments, **kwargs)
 
     monkeypatch.setattr(
         structured_output_adapter,
@@ -328,13 +313,14 @@ def test_invalid_cache_candidate_is_revalidated_then_treated_as_provider_miss(
     model = _SequenceModel([json.dumps({"decision": "none", "selected_alpha_id": None})])
     gateway, session = _runtime_gateway(tmp_path, model, cache=cache)
     payload = {"allowed_alpha_ids": ["A101"]}
+    _meta = _TASK_RUNTIME_METADATA["alpha_classifier"]
     seeded = session.start_call(
         task="alpha_classifier",
-        prompt_version="week2.alpha_classifier.v3",
+        prompt_version=_meta["prompt_version"],
         prompt_sha256=gateway.prompt_identity_sha256("alpha_classifier"),
-        input_schema_version="week2.alpha_classifier.input.v2",
-        output_schema_version="week2.alpha_classifier.output.v2",
-        taxonomy_version="alpha_taxonomy_v1",
+        input_schema_version=_meta["input_schema_version"],
+        output_schema_version=_meta["output_schema_version"],
+        taxonomy_version=_meta["taxonomy_version"],
         input_payload=payload,
     )
     trace = seeded.trace_handle

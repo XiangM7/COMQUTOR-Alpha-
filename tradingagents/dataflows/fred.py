@@ -14,7 +14,10 @@ from datetime import datetime, timedelta
 
 import requests
 
+from comqutor_alpha.source_provenance import fragment_id_for, make_source_id
+
 from .errors import VendorNotConfiguredError
+from .source_capture import record_source
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +136,99 @@ def _request(path: str, params: dict) -> dict:
     return response.json()
 
 
+def _macro_source_ids(record_title: str) -> tuple[str, str]:
+    """Deterministic (source_id, fragment_id) for one macro-series fetch --
+    the SAME make_source_id/fragment_id_for functions the news/market/
+    financial chains already use. Takes the EXACT SAME already-composed
+    title string the captured record itself uses (never independently
+    reconstructed from series_id/curr_date here) so the two can never
+    silently drift apart and compute two different ids for what should be
+    the same source -- a mismatch this exact function signature update
+    was needed to fix (see tests/test_t1_macro_source_chain.py's own
+    catching of the original two-different-title-strings bug)."""
+    source_id = make_source_id(
+        source_type="macro",
+        name="FRED",
+        title=record_title,
+        url="",
+    )
+    return source_id, fragment_id_for(source_id, 0)
+
+
+def _macro_summary_sentence(
+    *,
+    series_id: str,
+    title: str,
+    units: str,
+    curr_date: str,
+    last_date: str,
+    last_val: str,
+    delta: float | None,
+    realtime_start: str | None,
+) -> str:
+    """Financial/macro-data source chain (2026-09-29, reuses the SAME
+    source_registry/gate/review/API/export machinery the news/market/
+    financial chains already wired -- no parallel system per data type).
+
+    Disclosure-timing caveat (DELIBERATE, never self-completed -- this
+    round's task sheet explicitly warns against treating an observation
+    PERIOD as its disclosure time): FRED's own per-observation
+    ``realtime_start`` field names the date the CURRENTLY-displayed value's
+    vintage took effect. For an observation never revised since release,
+    this equals its true original publish date; for one that HAS since
+    been revised, it instead reflects the LATEST revision, not the
+    original release -- a real, inherent ambiguity this module does not
+    attempt to resolve by guessing. When the underlying response omits it
+    (this codebase's own existing FRED test fixtures do not include it --
+    see tests/test_fred.py's ``_OBS``), ``published_at`` and
+    ``data_snapshot["realtime_start"]`` are both left ``None`` -- NEVER
+    backfilled from ``last_date`` (the observation PERIOD), which would
+    silently conflate period with disclosure time. This is recorded so a
+    reader of the captured record can see the gap directly, even though
+    the shared, frozen ``validate_source_reference`` does not independently
+    gate on a missing ``published_at`` (a general, pre-existing, cross-
+    source-type characteristic, not modified by this round).
+    """
+    record_title = f"{title} ({series_id}) macro snapshot {curr_date}"
+    source_id, fragment_id = _macro_source_ids(record_title)
+    excerpt = f"{title} ({series_id}) {last_date}={last_val} {units}".strip()
+    record_source(
+        {
+            "source_type": "macro",
+            "name": "FRED",
+            "title": record_title,
+            "url": "",
+            "published_at": realtime_start,
+            "provider": "fred",
+            "excerpt": excerpt,
+            "instrument": series_id,
+            "observation_date": last_date,
+            "unit": units or None,
+            "data_snapshot": {
+                "value": last_val,
+                "realtime_start": realtime_start,
+                "requested_curr_date": curr_date,
+            },
+        }
+    )
+    # A real, data-derived direction word (never invented commentary,
+    # never hardcoded to a fixed direction) -- same lesson as the market/
+    # financial chains: claim_quality.py's own STATE_OR_CHANGE_TERMS
+    # vocabulary ("rose"/"fell"/"remains elevated") is required for this
+    # sentence to classify as ANALYTICAL rather than CONTEXT_ONLY, and the
+    # marker is embedded INLINE, before the sentence's own closing period.
+    if delta is not None and delta > 0:
+        moved = "rose to"
+    elif delta is not None and delta < 0:
+        moved = "fell to"
+    else:
+        moved = "remained elevated at"
+    return (
+        f"Verified macro data: {title} ({series_id}) {moved} {last_val} {units} "
+        f"as of {last_date} [source_id: {source_id}] [fragment_id: {fragment_id}]."
+    )
+
+
 def get_macro_data(
     indicator: str,
     curr_date: str,
@@ -188,11 +284,10 @@ def get_macro_data(
     ).get("observations", [])
 
     # FRED encodes a missing observation as ".".
-    points = [
-        (o["date"], o["value"])
-        for o in observations
-        if o.get("value") not in (".", None, "")
+    usable_observations = [
+        o for o in observations if o.get("value") not in (".", None, "")
     ]
+    points = [(o["date"], o["value"]) for o in usable_observations]
 
     header = (
         f"## FRED: {title} ({series_id})\n"
@@ -210,6 +305,7 @@ def get_macro_data(
 
     first_date, first_val = points[0]
     last_date, last_val = points[-1]
+    delta: float | None = None
     try:
         delta = float(last_val) - float(first_val)
         base = float(first_val)
@@ -234,4 +330,16 @@ def get_macro_data(
         + "\n"
     )
 
-    return header + summary + note + table
+    # Macro-data source chain (2026-09-29): realtime_start is read straight
+    # off the SAME observation object the "Latest" summary above already
+    # uses -- never a separate, re-fetched value -- so it is None whenever
+    # the underlying response genuinely omits it (see
+    # _macro_summary_sentence's own docstring for why that is never
+    # backfilled from last_date).
+    realtime_start = usable_observations[-1].get("realtime_start")
+    summary_sentence = _macro_summary_sentence(
+        series_id=series_id, title=title, units=units, curr_date=curr_date,
+        last_date=last_date, last_val=last_val, delta=delta, realtime_start=realtime_start,
+    )
+
+    return header + summary + note + table + "\n" + summary_sentence + "\n"

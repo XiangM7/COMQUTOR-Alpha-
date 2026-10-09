@@ -1,0 +1,431 @@
+ M comqutor_alpha/adapters/tradingagents_output_writer.py
+ M comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml
+ M comqutor_alpha/api/agent_output_reader.py
+ M comqutor_alpha/api/artifact_export.py
+ M comqutor_alpha/api/main.py
+ M comqutor_alpha/api/routes_research.py
+ M comqutor_alpha/api/routes_system.py
+ M comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml
+ M comqutor_alpha/conflict_engine/conflict_detector.py
+ M comqutor_alpha/conflict_engine/pipeline.py
+ M comqutor_alpha/graph_engine/activation_scorer_v2.py
+ M comqutor_alpha/graph_engine/evidence_fact_index.py
+ M comqutor_alpha/graph_engine/evidence_integrity.py
+ M comqutor_alpha/graph_engine/graph_schema.py
+ M comqutor_alpha/graph_engine/pipeline.py
+ M comqutor_alpha/llm_runtime/contracts.py
+ M comqutor_alpha/llm_runtime/recorder.py
+ M comqutor_alpha/llm_runtime/session.py
+ M comqutor_alpha/regression/labels_v2.py
+ M comqutor_alpha/replay/exact_semantic.py
+ M comqutor_alpha/replay/semantic_binding.py
+ M comqutor_alpha/replay/source_bundle.py
+ M comqutor_alpha/research_lifecycle.py
+ M comqutor_alpha/runners/diagnostics.py
+ M comqutor_alpha/runners/tradingagents_runner.py
+ M comqutor_alpha/storage/db/engine.py
+ M comqutor_alpha/storage/db/migrations.py
+ M comqutor_alpha/storage/db/repository.py
+ M comqutor_alpha/storage/db/schema.py
+ M comqutor_alpha/storage/db/week4_persistence.py
+ M comqutor_alpha/storage/file_store.py
+ M comqutor_alpha/structure_engine/alpha_mapper.py
+ M comqutor_alpha/structure_engine/claim_semantics.py
+ M comqutor_alpha/structure_engine/evidence_stance_llm.py
+ M comqutor_alpha/structure_engine/structured_output_adapter.py
+ M comqutor_alpha/structure_engine/week2_llm.py
+ M docs/audit_artifacts/msft_a102_a304_taxonomy_adjudication_report.md
+ M docs/specs/product_decisions_and_unknowns.md
+ M frontend/README_DEV.md
+ M frontend/e2e/w5-demo.spec.ts
+ M frontend/src/App.test.tsx
+ M frontend/src/App.tsx
+ M frontend/src/api/adapters.test.ts
+ M frontend/src/api/adapters.ts
+ M frontend/src/api/client.ts
+ M frontend/src/api/errors.ts
+ M frontend/src/api/types.ts
+ M frontend/src/components/AlphaCard.tsx
+ M frontend/src/components/AppShell.test.tsx
+ M frontend/src/components/AppShell.tsx
+ M frontend/src/components/CandidateConflictCard.tsx
+ M frontend/src/components/ConflictCard.tsx
+ M frontend/src/components/ConflictEvidenceSections.test.tsx
+ M frontend/src/components/ConflictEvidenceSections.tsx
+ M frontend/src/components/ResearchForm.test.tsx
+ M frontend/src/components/ResearchForm.tsx
+ M frontend/src/components/StructuralSnapshot.test.tsx
+ M frontend/src/components/StructuralSnapshot.tsx
+ M frontend/src/hooks/useRunPolling.test.ts
+ M frontend/src/hooks/useRunPolling.ts
+ M frontend/src/pages/ConflictRadarPage.tsx
+ M frontend/src/pages/ProcessingPage.test.tsx
+ M frontend/src/pages/ProcessingPage.tsx
+ M frontend/src/pages/ResearchPage.test.tsx
+ M frontend/src/pages/ResearchPage.tsx
+ M frontend/src/pages/ResearchRunPage.test.tsx
+ M frontend/src/pages/ResearchRunPage.tsx
+ M frontend/src/pages/StructureGraphPage.tsx
+ M frontend/src/styles.css
+ M frontend/src/styles.layout.test.ts
+ M scripts/start_live_comqutor.sh
+ M tests/conftest.py
+ M tests/llm_runtime/test_evidence_stance_classifier_registration.py
+ M tests/llm_runtime/test_recorder.py
+ M tests/replay/conftest.py
+ M tests/replay/test_semantic_source_bundle_validation.py
+ M tests/structured_output_shadow/conftest.py
+ M tests/structured_output_shadow/test_shadow_semantic_runtime.py
+ M tests/structured_output_shadow/test_source_integrity.py
+ M tests/test_a4_regression_runner.py
+ M tests/test_agent_outputs_api.py
+ M tests/test_agent_outputs_postgres_integration.py
+ M tests/test_artifact_export_and_api.py
+ M tests/test_conflict_detector.py
+ M tests/test_conflict_evidence_fact_integration.py
+ M tests/test_env_overrides.py
+ M tests/test_evidence_review_v2.py
+ M tests/test_evidence_stance_integration.py
+ M tests/test_graph_api.py
+ M tests/test_graph_persistence.py
+ M tests/test_high_value_unclassified_recovery.py
+ M tests/test_j3_semantic_benchmark_j2_v0_2.py
+ M tests/test_live_research_final_closure.py
+ M tests/test_msft_a102_a304_taxonomy_adjudication.py
+ M tests/test_qqq_a001_mapping_remediation.py
+ M tests/test_research_runs_persistence.py
+ M tests/test_step10_final_e2e_qa.py
+ M tests/test_step11_provider_health_rerun.py
+ M tests/test_structure_integrity_evidence_fact_index.py
+ M tests/test_structured_adapter_concurrency.py
+ M tests/test_structured_output_adapter.py
+ M tests/test_temperature_config.py
+ M tests/test_tradingagents_diagnostic_instrumentation.py
+ M tests/test_tradingagents_output_writer.py
+ M tests/test_tradingagents_progress_runner.py
+ M tests/test_v0_1_3_offline_replay_proof.py
+ M tests/test_w5_1b_postgres_integration.py
+ M tests/test_week2_llm.py
+ M tests/test_week2_llm_semantic_runtime_integration.py
+ M tests/test_week3_nvda_sanity.py
+ M tests/test_week3_qqq_sanity.py
+ M tests/test_week4_golden_closure.py
+ M tests/test_week4_nvda_conflict_sanity.py
+ M tests/test_week4_persistence.py
+ M tests/test_week4_pipeline_api.py
+ M tests/test_week4_postgres_persistence.py
+ M tradingagents/agents/analysts/fundamentals_analyst.py
+ M tradingagents/agents/analysts/market_analyst.py
+ M tradingagents/agents/analysts/news_analyst.py
+ M tradingagents/agents/managers/portfolio_manager.py
+ M tradingagents/agents/managers/research_manager.py
+ M tradingagents/agents/researchers/bear_researcher.py
+ M tradingagents/agents/researchers/bull_researcher.py
+ M tradingagents/agents/risk_mgmt/aggressive_debator.py
+ M tradingagents/agents/risk_mgmt/conservative_debator.py
+ M tradingagents/agents/risk_mgmt/neutral_debator.py
+ M tradingagents/agents/trader/trader.py
+ M tradingagents/agents/utils/agent_utils.py
+ M tradingagents/dataflows/fred.py
+ M tradingagents/dataflows/market_data_validator.py
+ M tradingagents/dataflows/stockstats_utils.py
+ M tradingagents/dataflows/y_finance.py
+ M tradingagents/dataflows/yfinance_news.py
+ M tradingagents/default_config.py
+ M tradingagents/graph/trading_graph.py
+ M tradingagents/llm_clients/openai_client.py
+?? comqutor_alpha/api/evidence_trace.py
+?? comqutor_alpha/api/formal_acceptance_artifact.py
+?? comqutor_alpha/api/stage_disclosure.py
+?? comqutor_alpha/capture_artifacts.py
+?? comqutor_alpha/classification_recovery.py
+?? comqutor_alpha/direction_evaluation.py
+?? comqutor_alpha/graph_engine/claim_data_grounding.py
+?? comqutor_alpha/graph_engine/verified_evidence_gate.py
+?? comqutor_alpha/llm/cost_basis.py
+?? comqutor_alpha/llm/run_usage_report.py
+?? comqutor_alpha/llm/usage_stats.py
+?? comqutor_alpha/regression/acceptance_engine.py
+?? comqutor_alpha/regression/formal_acceptance_report.py
+?? comqutor_alpha/regression/frozen_input_conflict_recompute.py
+?? comqutor_alpha/regression/gold_contract_rules.py
+?? comqutor_alpha/regression/open_review_ledger.py
+?? comqutor_alpha/run_environment.py
+?? comqutor_alpha/run_provider_stop.py
+?? comqutor_alpha/runners/request_budget.py
+?? comqutor_alpha/source_provenance.py
+?? comqutor_alpha/structure_engine/content_support_llm.py
+?? comqutor_alpha/structure_engine/derived_fact_verification.py
+?? comqutor_alpha/structure_engine/numeric_tolerance.py
+?? comqutor_alpha/structure_engine/real_evidence_retrieval.py
+?? comqutor_alpha/structure_engine/week2_execution_profile.py
+?? comqutor_alpha/structure_engine/week2_llm_request_audit.py
+?? docs/audit_artifacts/item2_blind_holdout4_provider_audit_day4b_postremediation.json
+?? docs/audit_artifacts/item2_blind_holdout4_provider_audit_day4c_candidate2_dev.json
+?? docs/audit_artifacts/item2_blind_holdout4_system_alpha_day4b_postremediation.json
+?? docs/audit_artifacts/item2_blind_holdout4_system_alpha_day4c_candidate2_dev.json
+?? docs/audit_artifacts/round_source_linking_t0_t2/
+?? docs/audit_artifacts/v0_2_alpha_candidate_history.json
+?? docs/audit_artifacts/v0_2_alpha_candidate_history.md
+?? docs/audit_artifacts/v0_2_alpha_dev_adjudication_packet.json
+?? docs/audit_artifacts/v0_2_alpha_dev_adjudication_packet.md
+?? docs/audit_artifacts/v0_2_alpha_dev_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_dev_external_adjudication_summary.md
+?? docs/audit_artifacts/v0_2_alpha_dev_gold_v1.json
+?? docs/audit_artifacts/v0_2_alpha_dev_gold_v1.md
+?? docs/audit_artifacts/v0_2_alpha_dev_human_labels.json
+?? docs/audit_artifacts/v0_2_alpha_dev_replacement_log.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_external_adjudication_round2.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_external_adjudication_summary.md
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_packet.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_packet.md
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_round2_packet.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_round2_packet.md
+?? docs/audit_artifacts/v0_2_alpha_dev_review_queue.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_blindness_audit.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_blindness_audit.md
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet.md
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet_manifest.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet_manifest.md
+?? docs/audit_artifacts/v0_2_alpha_final_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_freeze_manifest.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_freeze_manifest.md
+?? docs/audit_artifacts/v0_2_alpha_final_gold_labels_working.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_v1.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_v1.md
+?? docs/audit_artifacts/v0_2_alpha_final_holdout_sealed_manifest.json
+?? docs/audit_artifacts/v0_2_alpha_final_replacement_log.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_external_adjudication_round2.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_external_adjudication_round3.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_packet.md
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round2_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round2_packet.md
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round3_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round3_packet.md
+?? docs/audit_artifacts/v0_2_alpha_holdout_provenance.json
+?? docs/audit_artifacts/v0_2_alpha_holdout_provenance.md
+?? docs/audit_artifacts/v0_2_alpha_human_adjudication_rubric.md
+?? docs/audit_artifacts/v0_2_alpha_prompt_candidate2.json
+?? docs/audit_artifacts/v0_2_alpha_prompt_candidate2.md
+?? docs/audit_artifacts/v0_2_alpha_provider_prompt_remediation.json
+?? docs/audit_artifacts/v0_2_alpha_provider_prompt_remediation.md
+?? docs/audit_artifacts/v0_2_alpha_validation_leakage_audit.json
+?? docs/audit_artifacts/v0_2_alpha_validation_leakage_audit.md
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_provider_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_result.json
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_result.md
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_system_alpha_raw.json
+?? docs/audit_artifacts/v0_2_candidate3_candidate3_dev_provider_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_candidate3_dev_system_alpha_raw.json
+?? docs/audit_artifacts/v0_2_candidate3_dev_error_analysis.json
+?? docs/audit_artifacts/v0_2_candidate3_dev_error_analysis.md
+?? docs/audit_artifacts/v0_2_candidate3_dev_result.json
+?? docs/audit_artifacts/v0_2_candidate3_dev_result.md
+?? docs/audit_artifacts/v0_2_candidate3_final_error_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_final_error_audit.md
+?? docs/audit_artifacts/v0_2_candidate3_final_predictions.json
+?? docs/audit_artifacts/v0_2_candidate3_final_provider_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_final_system_alpha_raw.json
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_result.json
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_result.md
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_run_manifest.json
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_run_manifest.md
+?? docs/audit_artifacts/v0_2_candidate3_freeze_manifest.json
+?? docs/audit_artifacts/v0_2_candidate3_freeze_manifest.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_nvda.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_nvda.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_plan.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_plan.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_qqq.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_qqq.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_summary.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_summary.md
+?? docs/audit_artifacts/v0_2_day3_review_resolution.json
+?? docs/audit_artifacts/v0_2_day3_review_resolution.md
+?? docs/audit_artifacts/v0_2_day4_alpha_holdout_failure_analysis.json
+?? docs/audit_artifacts/v0_2_day4_alpha_holdout_failure_analysis.md
+?? docs/audit_artifacts/v0_2_day4_fresh_e2e.json
+?? docs/audit_artifacts/v0_2_day4_fresh_e2e.md
+?? docs/audit_artifacts/v0_2_day4_frozen_regression.json
+?? docs/audit_artifacts/v0_2_day4_frozen_regression.md
+?? docs/audit_artifacts/v0_2_day4_independent_validation.json
+?? docs/audit_artifacts/v0_2_day4_independent_validation.md
+?? docs/audit_artifacts/v0_2_day4_six_ticker_validation.json
+?? docs/audit_artifacts/v0_2_day4_six_ticker_validation.md
+?? docs/audit_artifacts/v0_2_day4_validation_manifest.md
+?? docs/audit_artifacts/v0_2_day4b_provider_validation_result.json
+?? docs/audit_artifacts/v0_2_day4c_candidate1_regression_analysis.json
+?? docs/audit_artifacts/v0_2_day4c_candidate1_regression_analysis.md
+?? docs/audit_artifacts/v0_2_day4f_closure.json
+?? docs/audit_artifacts/v0_2_day4f_closure.md
+?? docs/audit_artifacts/v0_2_day5_freeze_decision.json
+?? docs/audit_artifacts/v0_2_demo_walkthrough_checklist.json
+?? docs/audit_artifacts/v0_2_demo_walkthrough_checklist.md
+?? docs/audit_artifacts/v0_2_demo_walkthrough_script.md
+?? docs/audit_artifacts/v0_2_evidence_error_statistics.json
+?? docs/audit_artifacts/v0_2_evidence_error_statistics.md
+?? docs/audit_artifacts/v0_2_final_alpha_adjudication_policy.json
+?? docs/audit_artifacts/v0_2_final_alpha_adjudication_policy.md
+?? docs/audit_artifacts/v0_2_final_delivery_package.json
+?? docs/audit_artifacts/v0_2_final_delivery_package.md
+?? docs/audit_artifacts/v0_2_final_performance_log.json
+?? docs/audit_artifacts/v0_2_final_performance_log.md
+?? docs/audit_artifacts/v0_2_independent_polarity_gate_audit.json
+?? docs/audit_artifacts/v0_2_independent_polarity_gate_audit.md
+?? docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml
+?? docs/audit_artifacts/v0_2_john_rule_baseline_diff.json
+?? docs/audit_artifacts/v0_2_john_rule_baseline_diff.md
+?? docs/audit_artifacts/v0_2_labeled_alpha_data_inventory.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit.md
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_final.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_final.md
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_postfix.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_postfix.md
+?? docs/audit_artifacts/v0_2_new_alpha_holdout_creation_plan.md
+?? docs/audit_artifacts/v0_2_new_alpha_holdout_split.json
+?? docs/audit_artifacts/v0_2_new_alpha_holdout_split.md
+?? docs/audit_artifacts/v0_2_qqq_conflict_review.json
+?? docs/audit_artifacts/v0_2_qqq_conflict_review.md
+?? docs/audit_artifacts/v0_2_rule_evidence_output_audit.json
+?? docs/audit_artifacts/v0_2_rule_evidence_output_audit.md
+?? docs/audit_artifacts/v0_2_semantic_fix_day2.json
+?? docs/audit_artifacts/v0_2_semantic_fix_day2.md
+?? docs/audit_artifacts/v0_2_semantic_reproducibility_audit.json
+?? docs/audit_artifacts/v0_2_semantic_reproducibility_audit.md
+?? docs/audit_artifacts/v0_2_validation_freeze_plan.md
+?? docs/specs/t2_acceptance_scenario_map.json
+?? frontend/src/api/__fixtures__/
+?? frontend/src/api/derivedRunResponse.test.ts
+?? frontend/src/api/evidenceTrace.test.ts
+?? frontend/src/api/evidenceTrace.ts
+?? frontend/src/components/CandleSvg.tsx
+?? frontend/src/components/ConflictEvidenceBasis.test.tsx
+?? frontend/src/components/ContentSupportReviewPanel.test.tsx
+?? frontend/src/components/ContentSupportReviewPanel.tsx
+?? frontend/src/components/EvidenceTraceDetail.test.tsx
+?? frontend/src/components/EvidenceTraceDetail.tsx
+?? frontend/src/components/ExternalSourceDisplay.test.tsx
+?? frontend/src/components/ExternalSourceDisplay.tsx
+?? frontend/src/components/KeyConclusionsPanel.tsx
+?? frontend/src/components/PipelineScene.tsx
+?? frontend/src/components/PriceHistoryCard.test.tsx
+?? frontend/src/components/PriceHistoryCard.tsx
+?? frontend/src/components/PriceHistorySheet.tsx
+?? frontend/src/components/ProgressSummary.tsx
+?? frontend/src/components/ReadinessProvider.tsx
+?? frontend/src/components/RecentRunsMenu.test.tsx
+?? frontend/src/components/RecentRunsMenu.tsx
+?? frontend/src/components/ServerStatus.tsx
+?? frontend/src/components/StageDisclosurePanel.test.tsx
+?? frontend/src/components/StageDisclosurePanel.tsx
+?? frontend/src/components/StagesPanel.tsx
+?? frontend/src/components/evidenceTrace.css
+?? frontend/src/hooks/useDialogFocus.ts
+?? frontend/src/hooks/useElapsedSince.ts
+?? frontend/src/hooks/usePriceHistory.ts
+?? frontend/src/hooks/useReadiness.ts
+?? frontend/src/hooks/useRunNotification.test.ts
+?? frontend/src/hooks/useRunNotification.ts
+?? frontend/src/utils/alphaLevelBucketing.ts
+?? frontend/src/utils/motion.ts
+?? frontend/src/utils/priceHistory.test.ts
+?? frontend/src/utils/priceHistory.ts
+?? frontend/src/utils/processingStages.test.ts
+?? frontend/src/utils/processingStages.ts
+?? frontend/src/utils/runFormat.test.ts
+?? frontend/src/utils/runFormat.ts
+?? frontend/src/utils/serverStatus.test.ts
+?? frontend/src/utils/serverStatus.ts
+?? frontend/src/utils/transitionHandoff.test.ts
+?? frontend/src/utils/transitionHandoff.ts
+?? scripts/build_open_review_ledger.py
+?? scripts/human_adjudicate_alpha_dev.py
+?? scripts/recompute_conflicts_frozen_inputs.py
+?? scripts/run_day4b_holdout4_system_alpha_postremediation.py
+?? scripts/run_day4c_holdout4_system_alpha_candidate2.py
+?? scripts/run_day4g_candidate3_baseline_dev.py
+?? scripts/run_day4i_candidate3_final_validation.py
+?? scripts/run_formal_acceptance.py
+?? tests/_content_support_v2_fixture_helpers.py
+?? tests/_network_guard.py
+?? tests/fixtures/t1_closeout_legacy_conflict_excerpt.json
+?? tests/fixtures/t1_closure_amd_excerpt.json
+?? tests/replay/test_capture_artifacts_replay_compat.py
+?? tests/structured_output_shadow/test_network_leak_guard.py
+?? tests/test_a304_a501_reverse_evidence_fix.py
+?? tests/test_acceptance_engine.py
+?? tests/test_agent_outputs_cited_source_list_read_time.py
+?? tests/test_agent_outputs_source_linking_db_migration.py
+?? tests/test_alpha_classification_completion.py
+?? tests/test_alpha_classifier_audit_concurrency_fix.py
+?? tests/test_alpha_evidence_consumption_contract.py
+?? tests/test_automated_content_support_verification.py
+?? tests/test_candidate3_alpha_classifier_guardrail.py
+?? tests/test_claim_identity_traceability.py
+?? tests/test_classification_recovery_derived_run.py
+?? tests/test_content_support_llm.py
+?? tests/test_content_support_llm_multi_field_citation.py
+?? tests/test_content_support_llm_phase_c_batch_size_fix.py
+?? tests/test_content_support_llm_production_wiring.py
+?? tests/test_content_support_llm_v2_semantic_contract.py
+?? tests/test_content_support_never_inflates_scoring.py
+?? tests/test_content_support_reevaluation_export_roundtrip.py
+?? tests/test_content_support_reevaluation_postgres_integration.py
+?? tests/test_content_support_review_endpoint.py
+?? tests/test_direction_evaluation.py
+?? tests/test_evidence_gate_qualified_evidence_scenarios.py
+?? tests/test_evidence_requalification.py
+?? tests/test_formal_acceptance_artifact_production_wiring.py
+?? tests/test_formal_acceptance_report.py
+?? tests/test_frozen_input_conflict_recompute.py
+?? tests/test_label_v2_covers_john_frozen_baseline.py
+?? tests/test_live_launcher_database_isolation.py
+?? tests/test_llm_usage_stats.py
+?? tests/test_new_research_evidence_gate_production_wiring.py
+?? tests/test_no_gold_label_import_in_research_path.py
+?? tests/test_numeric_tolerance.py
+?? tests/test_open_review_ledger.py
+?? tests/test_phase_c_script_transport_level_fixed_response.py
+?? tests/test_recovery_downstream_zero_model_calls.py
+?? tests/test_recovery_mid_batch_crash.py
+?? tests/test_recovery_real_path_gating.py
+?? tests/test_recovery_staged_executor.py
+?? tests/test_request_budget.py
+?? tests/test_source_capture.py
+?? tests/test_source_provenance.py
+?? tests/test_t1_closeout_capture_artifacts.py
+?? tests/test_t1_closeout_conflict_basis.py
+?? tests/test_t1_closure_grounding_dependency_trace.py
+?? tests/test_t1_cross_agent_reference_and_derived_calc.py
+?? tests/test_t1_financial_source_chain.py
+?? tests/test_t1_financial_statement_source_chain.py
+?? tests/test_t1_macro_source_chain.py
+?? tests/test_t1_market_data_source_linking.py
+?? tests/test_t1_market_source_fields_postgres_integration.py
+?? tests/test_t1_source_linking_pipeline.py
+?? tests/test_t2_acceptance_engine_qualified_evidence_scenarios.py
+?? tests/test_t2_architecture_replay_never_shown_as_pass_or_no_conflict.py
+?? tests/test_t2_conflict_semantics_real_b2.py
+?? tests/test_t2_gold_contract_alpha_rules.py
+?? tests/test_t2_rule_config_errors.py
+?? tests/test_t2_scenario_map_points_at_real_tests.py
+?? tests/test_t3_closeout_content_support_citation_and_ledger.py
+?? tests/test_t3_closeout_relation_and_opposition_consumption.py
+?? tests/test_t3_diagnostic_evaluation_driver.py
+?? tests/test_t3_joint_sample_driver.py
+?? tests/test_t3_joint_verification_driver.py
+?? tests/test_t4_phase_a_environment_and_metering.py
+?? tests/test_t4_required_postgres_integration.py
+?? tests/test_t4_round28_provider_stop.py
+?? tests/test_t4_round32_not_sent_and_stage_disclosure.py
+?? tests/test_tradingagents_usage_stats_callback.py
+?? tests/test_verified_evidence_gate.py
+?? tests/test_verified_evidence_gate_production_wiring.py
+?? tests/test_week2_execution_profile.py
+?? tests/test_week2_llm_true_concurrent_audit.py
+?? tradingagents/dataflows/source_capture.py

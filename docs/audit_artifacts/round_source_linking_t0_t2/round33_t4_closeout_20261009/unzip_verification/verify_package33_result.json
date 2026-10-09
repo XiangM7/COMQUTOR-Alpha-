@@ -1,0 +1,76 @@
+{
+ "package": "T4_final_r33",
+ "all_ok": true,
+ "checks": {
+  "1 manifest": {
+   "ok": true,
+   "files": 215,
+   "problems": []
+  },
+  "2 round32": {
+   "ok": true,
+   "round32_manifest_files": 176,
+   "byte_identical": 171,
+   "edited": [
+    "01_regressions/回归失败分析.md",
+    "05_stage_disclosure/结构抽取与降级披露.md"
+   ],
+   "superseded_not_copied": [
+    "00_T4最终交付报告.md",
+    "README.md",
+    "report_figures.json"
+   ],
+   "problems": []
+  },
+  "3 figures": {
+   "ok": true,
+   "figures": 88,
+   "from_round32": 61,
+   "from_round33": 27,
+   "failing": []
+  },
+  "4 round33": {
+   "ok": true,
+   "problems": []
+  },
+  "5 references": {
+   "ok": true,
+   "found": 93,
+   "repository_paths": [
+    "comqutor_alpha/api/stage_disclosure.py",
+    "comqutor_alpha/structure_engine/structured_output_adapter.py",
+    "comqutor_alpha/structure_engine/week2_llm.py",
+    "contracts.py",
+    "docs/audit_artifacts/round_source_linking_t0_t2",
+    "docs/specs/week2_semantic_runtime_integration_contract_v1.md",
+    "outputs/t4_r32_demo_runs",
+    "outputs/t4_runs/12591384-0b26-470d-a99d-a49c00be440b",
+    "round14_recovery_closure_20261006/regression_attribution_manifest.md",
+    "round15_recovery_prep_20261006/regression_evidence/full_run.junit.xml",
+    "round23_t2_completion_20261007/test_evidence/full_suite_AFTER.junit.xml",
+    "round26_t3_closeout_20261008/test_evidence/README.md",
+    "round28_t4_launch_protection_20261008/test_evidence/affected_junit.xml",
+    "round30_t4_nvda_fresh_run2_20261009/FRESH_RUN2_REPORT.md",
+    "round31_t4_delivery_20261009/T4_delivery/00_T4交付主报告.md",
+    "round32_t4_closure_20261009/T4_final/00_T4最终交付报告.md",
+    "round32_t4_closure_20261009/T4_final/03_not_sent/未发送记录修复说明.md",
+    "round32_t4_closure_20261009/T4_final/05_stage_disclosure/结构抽取与降级披露.md",
+    "structured_output_adapter.py",
+    "tests/test_structured_output_adapter.py",
+    "tests/test_t1_source_linking_pipeline.py",
+    "tests/test_week2_llm.py"
+   ],
+   "missing": []
+  },
+  "6 credentials": {
+   "ok": true,
+   "blobs_scanned": 532,
+   "hits": [],
+   "fixture_or_redacted": {
+    "db_url_with_password": 42,
+    "redacted_or_fixture_field": 3468,
+    "api_key_sk": 11
+   }
+  }
+ }
+}

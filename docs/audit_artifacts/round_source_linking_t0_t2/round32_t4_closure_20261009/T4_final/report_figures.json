@@ -1,0 +1,321 @@
+{
+ "schema": "t4.round32.report_figures.v1",
+ "report_file": "00_T4最终交付报告.md",
+ "how_checked": "tools/rebuild_stats32.py recomputes every id from the package's own files (test JUnit/logs, PostgreSQL results, the derived execution directory and the two Fresh run directories inside the nested Round 31 ZIP) and checks that cited_as appears verbatim in the report",
+ "figures": [
+  {
+   "id": "tests.new.passed",
+   "value": 46,
+   "cited_as": "| 46 passed | 0 |"
+  },
+  {
+   "id": "tests.new.exit",
+   "value": 0,
+   "cited_as": "| 46 passed | 0 |"
+  },
+  {
+   "id": "tests.new.code_unchanged",
+   "value": "yes",
+   "cited_as": "运行期间代码没有变化"
+  },
+  {
+   "id": "tests.replay.passed",
+   "value": 1,
+   "cited_as": "| 1 passed | 0 |"
+  },
+  {
+   "id": "tests.replay.exit",
+   "value": 0,
+   "cited_as": "| 1 passed | 0 |"
+  },
+  {
+   "id": "tests.pg.passed",
+   "value": 65,
+   "cited_as": "| 65 passed，0 skipped | 0 |"
+  },
+  {
+   "id": "tests.pg.skipped",
+   "value": 0,
+   "cited_as": "| 65 passed，0 skipped | 0 |"
+  },
+  {
+   "id": "tests.pg.failed",
+   "value": 0,
+   "cited_as": "PG 集成测试 65 passed、0 skipped"
+  },
+  {
+   "id": "tests.pg.code_unchanged",
+   "value": "yes",
+   "cited_as": "运行期间代码没有变化"
+  },
+  {
+   "id": "tests.affected.passed",
+   "value": 1313,
+   "cited_as": "| 1313 passed，1 skipped，0 failed | 0 |"
+  },
+  {
+   "id": "tests.affected.skipped",
+   "value": 1,
+   "cited_as": "| 1313 passed，1 skipped，0 failed | 0 |"
+  },
+  {
+   "id": "tests.affected.failed",
+   "value": 0,
+   "cited_as": "| 1313 passed，1 skipped，0 failed | 0 |"
+  },
+  {
+   "id": "tests.affected.exit",
+   "value": 0,
+   "cited_as": "| 1313 passed，1 skipped，0 failed | 0 |"
+  },
+  {
+   "id": "tests.affected.code_unchanged",
+   "value": "yes",
+   "cited_as": "运行期间代码没有变化"
+  },
+  {
+   "id": "tests.frontend.exit_codes",
+   "value": [
+    "0",
+    "0",
+    "0"
+   ],
+   "cited_as": "ESLint 退出码 0；typecheck 退出码 0"
+  },
+  {
+   "id": "tests.frontend.vitest_passed",
+   "value": 102,
+   "cited_as": "vitest 4 个文件 102 passed"
+  },
+  {
+   "id": "regression.A_head_7a9aefa",
+   "value": "2 passed",
+   "cited_as": "| HEAD | 2 passed |"
+  },
+  {
+   "id": "regression.B_fresh_code_1b53b921_before_fix",
+   "value": "2 failed",
+   "cited_as": "| Fresh 代码快照（修复前） | 2 failed |"
+  },
+  {
+   "id": "regression.C_worktree_before_fix",
+   "value": "2 failed",
+   "cited_as": "| 修复前的工作区 | 2 failed |"
+  },
+  {
+   "id": "regression.D_worktree_after_fix",
+   "value": "2 passed",
+   "cited_as": "| 修复后的工作区 | 2 passed |"
+  },
+  {
+   "id": "regression.negative_controls_failed",
+   "value": 3,
+   "cited_as": "3 个对照全部失败"
+  },
+  {
+   "id": "pg.migrations",
+   "value": 7,
+   "cited_as": "7 个迁移、9 张表"
+  },
+  {
+   "id": "pg.tables",
+   "value": 9,
+   "cited_as": "7 个迁移、9 张表"
+  },
+  {
+   "id": "pg.tables_before_derived_execution",
+   "value": 0,
+   "cited_as": "派生执行前 0 张表"
+  },
+  {
+   "id": "pg.research_runs",
+   "value": 1,
+   "cited_as": "research_runs 1"
+  },
+  {
+   "id": "pg.agent_outputs",
+   "value": 951,
+   "cited_as": "agent_outputs 951"
+  },
+  {
+   "id": "pg.restart_snapshots_identical",
+   "value": true,
+   "cited_as": "重启前后快照（历史、详情、状态、图、冲突、agent 输出、关键证据追溯、产物）完全相同"
+  },
+  {
+   "id": "pg.export_manifest_files",
+   "value": 20,
+   "cited_as": "Export 20 个 manifest 文件"
+  },
+  {
+   "id": "pg.export_same_sha_after_restart",
+   "value": true,
+   "cited_as": "重启前后 ZIP 的 sha256 相同"
+  },
+  {
+   "id": "pg.export_stage_disclosure_equals_api",
+   "value": true,
+   "cited_as": "ZIP 含 `stage_disclosure.json`，与 API 相同"
+  },
+  {
+   "id": "replay.requests_made",
+   "value": 1204,
+   "cited_as": "1204 个请求全部匹配，未匹配 0"
+  },
+  {
+   "id": "replay.unmatched",
+   "value": 0,
+   "cited_as": "1204 个请求全部匹配，未匹配 0"
+  },
+  {
+   "id": "replay.timeouts_replayed",
+   "value": 7,
+   "cited_as": "当时超时的 7 个请求在这里也按超时处理"
+  },
+  {
+   "id": "replay.claims",
+   "value": 951,
+   "cited_as": "951 条 claim，文本和来源绑定完全相同"
+  },
+  {
+   "id": "replay.claims_changed",
+   "value": 5,
+   "cited_as": "5 条从未发送的内容核验"
+  },
+  {
+   "id": "replay.claims_changed_only_fallback_reason",
+   "value": true,
+   "cited_as": "5 条从未发送的内容核验"
+  },
+  {
+   "id": "replay.relabel",
+   "value": [
+    [
+     "malformed_response->input_too_large",
+     5
+    ]
+   ],
+   "cited_as": "原因由 `malformed_response` 改为 `input_too_large`"
+  },
+  {
+   "id": "replay.alpha_matches_identical",
+   "value": true,
+   "cited_as": "完全相同（187 / 164）"
+  },
+  {
+   "id": "replay.raw_selected",
+   "value": 187,
+   "cited_as": "完全相同（187 / 164）"
+  },
+  {
+   "id": "replay.final_matched",
+   "value": 164,
+   "cited_as": "完全相同（187 / 164）"
+  },
+  {
+   "id": "replay.activation_identical",
+   "value": true,
+   "cited_as": "激活分数和等级完全相同"
+  },
+  {
+   "id": "replay.graph_metrics_identical",
+   "value": true,
+   "cited_as": "Structure Graph 完全相同"
+  },
+  {
+   "id": "replay.admitted_conflicts",
+   "value": 0,
+   "cited_as": "冲突评估完全相同（准入 0）"
+  },
+  {
+   "id": "replay.conflict_evaluations_identical",
+   "value": true,
+   "cited_as": "冲突评估完全相同（准入 0）"
+  },
+  {
+   "id": "replay.same_request_set",
+   "value": true,
+   "cited_as": "请求集合相同"
+  },
+  {
+   "id": "replay.prompt_identity_identical",
+   "value": true,
+   "cited_as": "5 个任务的 prompt sha256 相同"
+  },
+  {
+   "id": "not_sent.run2.count",
+   "value": 6,
+   "cited_as": "| 第二次 Fresh | 6（内容核验 5、适配器 1） | 5 |"
+  },
+  {
+   "id": "not_sent.run2.mislabelled_malformed",
+   "value": 5,
+   "cited_as": "| 第二次 Fresh | 6（内容核验 5、适配器 1） | 5 |"
+  },
+  {
+   "id": "not_sent.run1.count",
+   "value": 33,
+   "cited_as": "| 第一次 Fresh | 33 | 31 |"
+  },
+  {
+   "id": "not_sent.run1.mislabelled_malformed",
+   "value": 31,
+   "cited_as": "| 第一次 Fresh | 33 | 31 |"
+  },
+  {
+   "id": "not_sent.run2.with_attempts",
+   "value": 0,
+   "cited_as": "在预算占用和 HTTP 之前就本地拒绝"
+  },
+  {
+   "id": "not_sent.run1.with_attempts",
+   "value": 0,
+   "cited_as": "在预算占用和 HTTP 之前就本地拒绝"
+  },
+  {
+   "id": "qqq.formal_status",
+   "value": "needs_review",
+   "cited_as": "结果 `needs_review`"
+  },
+  {
+   "id": "qqq.rules_not_executed",
+   "value": 6,
+   "cited_as": "QQQ 的 6 条合约规则本入口没有执行"
+  },
+  {
+   "id": "qqq.network_attempts",
+   "value": 0,
+   "cited_as": "零网络，run 目录不变"
+  },
+  {
+   "id": "amd.list_hashes_equal_round21",
+   "value": true,
+   "cited_as": "哈希与 Round 21 完整性核对记录相同"
+  },
+  {
+   "id": "sndk.all_agree_no_main_conflict",
+   "value": true,
+   "cited_as": "最终代码 API 和页面一致"
+  },
+  {
+   "id": "demo.scenes",
+   "value": 11,
+   "cited_as": "11 个场景全部完成"
+  },
+  {
+   "id": "demo.scenes_ok",
+   "value": 11,
+   "cited_as": "11 个场景全部完成"
+  },
+  {
+   "id": "demo.non_get_blocked",
+   "value": 0,
+   "cited_as": "拦截的非 GET 请求 0 次"
+  },
+  {
+   "id": "demo.export_sha256",
+   "value": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "cited_as": "页面下载的 Export sha256 `49bd4650…`"
+  }
+ ]
+}

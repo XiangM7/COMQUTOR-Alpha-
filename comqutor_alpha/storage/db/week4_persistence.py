@@ -42,17 +42,25 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     ACTIVATION_V2_FORMULA_VERSION,
 )
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
+from comqutor_alpha.graph_engine.verified_evidence_gate import (
+    ACTIVATION_V2_VERIFIED_FORMULA_VERSION,
+)
 from comqutor_alpha.structure_engine.evidence_stance import (
     OPPOSES_ALPHA,
     SUPPORTS_ALPHA,
     SUPPORTS_COUNTER_ALPHA,
 )
 
-# Activation payloads accepted for persistence: the frozen v1 formula and
-# the versioned Activation v2 formula. The row's formula_version column
-# records whichever version the payload actually declared.
+# Activation payloads accepted for persistence: the frozen v1 formula, the
+# versioned Activation v2 formula, and the verified-gate view of v2 (T1
+# verified-support eligibility gate, escalated 2026-09-28 to "official
+# result" -- the SAME v2 formula, restricted to a HUMAN_REVIEWED-verified
+# evidence pool, so it must be persistable as this run's own official
+# activation row exactly like v1/v2 always have been). The row's
+# formula_version column records whichever version the payload actually
+# declared.
 SUPPORTED_ACTIVATION_FORMULA_VERSIONS = frozenset(
-    {ACTIVATION_FORMULA_VERSION, ACTIVATION_V2_FORMULA_VERSION}
+    {ACTIVATION_FORMULA_VERSION, ACTIVATION_V2_FORMULA_VERSION, ACTIVATION_V2_VERIFIED_FORMULA_VERSION}
 )
 
 WEEK4_ACTIVATION_PAYLOAD_INVALID = "WEEK4_ACTIVATION_PAYLOAD_INVALID"
@@ -100,7 +108,32 @@ _ACTIVATION_FIELDS = (
 # candidate's audit item and, when it exists, its full conflict record --
 # so it survives DB round-trip on both tables' JSON blob columns exactly
 # like every other additive field this whitelist already carries.
-_CANDIDATE_FIELDS = ("alpha_a", "alpha_b", "outcome", "reason_codes", "evidence_audit", "admissibility")
+#
+# "admissibility_diagnostic_unverified"/"evidence_gate_version"/
+# "evidence_gate_applied" (T1 verified-support eligibility gate, escalated
+# 2026-09-28 from "additive diagnostic" to "official result"):
+# "admissibility" itself is now the GATE-FILTERED result whenever a real
+# caller supplied structured_records/sources to detect_alpha_conflicts --
+# "admissibility_diagnostic_unverified" is the SAME shape (built by the
+# real, unmodified evaluate_conflict_admissibility over the raw, unfiltered
+# pool), kept ONLY as an audit/comparison field, never consulted for
+# ADMITTED/conflicts/main_conflict. OPTIONAL and additive (present only
+# when the gate was actually applied; a candidate evaluated without it
+# simply has neither key, never a fabricated one). Pass-through, exactly
+# like "admissibility" itself -- no separate validation function, since it
+# is the identical AdmissibilityResult.to_dict() shape already validated
+# structurally by conflict_admissibility.py's own frozen dataclass.
+_CANDIDATE_FIELDS = (
+    "alpha_a",
+    "alpha_b",
+    "outcome",
+    "reason_codes",
+    "evidence_audit",
+    "admissibility",
+    "admissibility_diagnostic_unverified",
+    "evidence_gate_version",
+    "evidence_gate_applied",
+)
 _CONFLICT_FIELDS = (
     "conflict_id",
     "alpha_a",
@@ -118,6 +151,9 @@ _CONFLICT_FIELDS = (
     "reason_codes",
     "explanation",
     "admissibility",
+    "admissibility_diagnostic_unverified",
+    "evidence_gate_version",
+    "evidence_gate_applied",
 )
 _STRUCTURE_FIELDS = (
     "alpha_id",
@@ -1118,6 +1154,45 @@ def _whitelist_evidence_ui(value: Any, reason_code: str) -> dict[str, Any]:
     }
 
 
+def _whitelist_qualification_reason_counts(value: Any, reason_code: str) -> dict[str, int]:
+    if not isinstance(value, Mapping):
+        _fail(reason_code)
+    result: dict[str, int] = {}
+    for key, count in value.items():
+        if not isinstance(key, str) or not key:
+            _fail(reason_code)
+        result[key] = _integer(count, reason_code)
+    return result
+
+
+def _whitelist_evidence_qualification(value: Any, reason_code: str) -> dict[str, Any]:
+    """Step 6 (Primary vs Secondary Evidence Qualification): audit summary
+    of the role-based qualification filter conflict_detector.py already
+    applied -- additive and optional at the call site (``if
+    "evidence_qualification" in conflict``, mirroring ``evidence_ui``
+    immediately above), never fabricated for a conflict payload predating
+    this field.
+
+    2026-09-30 PostgreSQL round-trip fidelity fix: this field existed in
+    conflict_detector.py's own real output (Step 6) but was never added
+    here -- _whitelist_conflict silently dropped it on every real
+    persistence write, a genuine implementation gap, not a deliberate
+    exclusion (found via tests/test_week4_postgres_persistence.py::
+    test_round_trip_all_outcomes_and_main_reconstruction against a real,
+    isolated PostgreSQL test database)."""
+    if not isinstance(value, Mapping):
+        _fail(reason_code)
+    return {
+        "policy_version": _text(value.get("policy_version"), reason_code),
+        "bull_qualification_reason_counts": _whitelist_qualification_reason_counts(
+            value.get("bull_qualification_reason_counts"), reason_code
+        ),
+        "bear_qualification_reason_counts": _whitelist_qualification_reason_counts(
+            value.get("bear_qualification_reason_counts"), reason_code
+        ),
+    }
+
+
 def _whitelist_conflict(conflict: Mapping[str, Any]) -> dict[str, Any]:
     reason = WEEK4_CONFLICT_PAYLOAD_INVALID
     alpha_a = _text(conflict.get("alpha_a"), reason)
@@ -1196,6 +1271,14 @@ def _whitelist_conflict(conflict: Mapping[str, Any]) -> dict[str, Any]:
     # the identical comment in _whitelist_candidate.
     if "evidence_ui" in conflict:
         whitelisted["evidence_ui"] = _whitelist_evidence_ui(conflict["evidence_ui"], reason)
+    # Step 6 (Primary vs Secondary Evidence Qualification): additive and
+    # optional, same convention as evidence_ui above -- 2026-09-30 fix, see
+    # _whitelist_evidence_qualification's own docstring for why this was
+    # previously silently dropped on every real persistence write.
+    if "evidence_qualification" in conflict:
+        whitelisted["evidence_qualification"] = _whitelist_evidence_qualification(
+            conflict["evidence_qualification"], reason
+        )
     return _json_copy(whitelisted, reason)
 
 

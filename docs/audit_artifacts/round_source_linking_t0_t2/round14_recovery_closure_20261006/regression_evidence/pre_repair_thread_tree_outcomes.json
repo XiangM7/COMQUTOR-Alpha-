@@ -1,0 +1,1058 @@
+{
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_no_production_scope_imports_phase1b1_smoke_modules": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_run_phase1b1_provider_smoke_script_not_imported_by_production": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_default_llm_setting_unaffected_when_env_unset": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_existing_three_task_instructions_text_unchanged": [
+  "FAILED",
+  "AssertionError: assert {'alpha_class...re_extractor'} == {'alpha_class...re_extractor'}"
+ ],
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_replay_pipeline_still_passes_llm_gateway_none_explicitly": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_shadow_provider_module_declares_no_live_route_intent_in_docstring": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_no_pilot_or_evaluation_scaffolding_exists_yet": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_phase1b1_boundaries.py::test_cli_module_reads_approval_env_var_only_at_call_time": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_selection_is_deterministic_across_repeated_calls": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_selection_covers_all_four_target_families": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_selection_prefers_nvda_when_fully_covered": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_max_provider_calls_above_four_fails_before_any_call": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_invalid_research_profile_is_blocked": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_output_dir_outside_allowed_root_is_blocked": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_output_dir_traversal_is_blocked": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_no_authorization_blocks_with_zero_provider_calls": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_execute_flag_without_env_var_still_blocks": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_shadow_provider_smoke_cli.py::test_fully_authorized_run_with_fake_client_writes_complete_bundle": [
+  "FAILED",
+  "assert not True"
+ ],
+ "tests/structured_output_shadow/test_source_integrity.py::test_canonical_development_plan_is_unchanged": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_source_integrity.py::test_current_semantic_components_match_approved_phase1_master_baseline": [
+  "FAILED",
+  "AssertionError: assert {'comqutor_al...922710fec416'} == {'comqutor_al...922710fec416'}"
+ ],
+ "tests/structured_output_shadow/test_source_integrity.py::test_acceptance_fixtures_are_source_classified_and_traceable": [
+  "PASSED",
+  ""
+ ],
+ "tests/structured_output_shadow/test_source_integrity.py::test_phase1a_has_no_files_under_historical_outputs": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_b2_admissibility_integration.py::test_b2_result_is_computed_once_and_identical_across_detector_db_and_export": [
+  "FAILED",
+  "AssertionError: assert {'admissibili..._b': 'B', ...} == {'conflict_id...id': 'A', ...}"
+ ],
+ "tests/test_evidence_review_sample.py::test_46_exactly_50_unique_rows_when_enough_candidates_exist": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_47_no_duplicate_candidate_key": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_48_deterministic_byte_identical_output": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_49_six_ticker_coverage": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_50_quota_calculations_correct": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_51_quota_shortfall_honestly_reported": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_52_reviewer_fields_blank": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_53_review_status_pending": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_54_multiline_evidence_safely_quoted": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_55_csv_formula_injection_protected": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_56_json_companion_preserves_exact_original_text": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_57_csv_sha_matches_manifest": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_58_sample_rows_trace_back_to_real_artifacts": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_59_sample_contains_manual_review_cases": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_sample.py::test_60_sample_includes_conflict_and_activation_evidence": [
+  "FAILED",
+  "AssertionError: assert 0 > 0"
+ ],
+ "tests/test_evidence_review_sample.py::test_source_hashes_recorded_and_match_disk": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case1_v2_summary_uses_exactly_one_200_row_current_review_source": [
+  "FAILED",
+  "KeyError: 'raw_h5_metrics'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case2_legacy_50_row_metrics_cannot_become_current_acceptance_metrics": [
+  "FAILED",
+  "KeyError: 'raw_h5_metrics'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case3_development_rereview_cannot_overwrite_current_acceptance": [
+  "FAILED",
+  "KeyError: 'raw_h5_metrics'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case4_raw_h5_metrics_recompute_deterministically": [
+  "FAILED",
+  "KeyError: 'raw_h5_metrics'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case5_raw_critical_reversal_remains_1": [
+  "FAILED",
+  "KeyError: 'raw_h5_metrics'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case6_adjudication_does_not_mutate_frozen_labels": [
+  "FAILED",
+  "KeyError: 'critical_reversal_adjudication'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case7_system_correct_review_wrong_would_produce_separate_adjudicated_view": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case8_review_label_correct_system_wrong_would_retain_critical_reversal_failure": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case9_ambiguous_adjudication_remains_pending": [
+  "FAILED",
+  "KeyError: 'critical_reversal_adjudication'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case9b_ambiguous_direction_resolves_current_acceptance_to_pass_without_erasing_the_raw_reversal": [
+  "FAILED",
+  "KeyError: 'critical_reversal_result'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case10_alpha_threshold_is_exactly_80_percent": [
+  "FAILED",
+  "KeyError: 'alpha_accuracy_threshold_percent'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case11_polarity_threshold_is_exactly_80_percent": [
+  "FAILED",
+  "KeyError: 'polarity_accuracy_threshold_percent'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case12_critical_reversal_target_is_exactly_0": [
+  "FAILED",
+  "KeyError: 'critical_reversal_target'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case13_john_approved_cannot_become_true_without_explicit_approval_provenance": [
+  "FAILED",
+  "KeyError: 'john_approval_status'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case14_human_review_performed_remains_false_for_independent_model_review": [
+  "FAILED",
+  "KeyError: 'review_source'"
+ ],
+ "tests/test_evidence_review_v2.py::test_case15_legacy_mixed_summary_is_not_current_acceptance_source": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case16_qa_closure_index_points_current_evidence_review_acceptance_to_v2": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml]": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml hash changed"
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/conflict_engine/conflict_detector.py]": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/conflict_engine/conflict_detector.py hash changed"
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/graph_engine/activation_scorer_v2.py]": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/graph_engine/activation_scorer_v2.py hash changed"
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/graph_engine/alpha_display_normalizer.py]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/graph_engine/alpha_level_classifier.py]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/graph_engine/evidence_source_role.py]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/structure_engine/alpha_mapper.py]": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/structure_engine/alpha_mapper.py hash changed"
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/structure_engine/evidence_stance.py]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_case17_production_semantic_modules_remain_untouched[comqutor_alpha/structure_engine/evidence_stance_llm.py]": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/structure_engine/evidence_stance_llm.py hash changed"
+ ],
+ "tests/test_evidence_review_v2.py::test_no_import_of_provider_or_tradingagents_client_modules_in_this_test_file": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_formal_metrics_block_exists_with_exact_named_fields": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_formal_metrics_are_a_pure_alias_of_acceptance_results_never_a_second_source": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2.py::test_formal_metrics_meet_v0_1_3_acceptance_targets": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_a_ambiguous_row_is_preserved_in_audit_provenance": [
+  "ERROR",
+  "failed on setup with \"KeyError: 'directional_eligibility'\""
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_b_ambiguous_row_excluded_from_polarity_acceptance_denominator": [
+  "ERROR",
+  "failed on setup with \"KeyError: 'directional_eligibility'\""
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_c_ambiguous_row_excluded_from_critical_reversal_gate": [
+  "ERROR",
+  "failed on setup with \"KeyError: 'directional_eligibility'\""
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_d_directionally_clear_reversal_would_still_count_as_critical": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_e_no_row_id_specific_exception_in_eligibility_source_code": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_e_eligibility_is_driven_by_outcome_not_by_identity": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_f_john_approved_cannot_become_true_automatically_even_when_all_mechanical_gates_pass": [
+  "FAILED",
+  "KeyError: 'alpha_accuracy_result'"
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_g_legacy_mixed_summary_metrics_are_not_read_as_current_acceptance": [
+  "FAILED",
+  "KeyError: 'raw_h5_metrics'"
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_g_eligibility_contract_is_the_generic_source_used_by_the_build_script": [
+  "FAILED",
+  "AssertionError: assert set() == {'holdout5-005'}"
+ ],
+ "tests/test_evidence_review_v2_directional_eligibility.py::test_no_import_of_provider_or_tradingagents_client_modules_in_this_test_file": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case1_unavailable_rows_cannot_enter_recovery_pool": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case2_only_valid_none_rows_can_enter_recovery_pool": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case3_keyword_hit_alone_cannot_produce_strong_recovery_candidate": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case4_single_best_alpha_requirement_is_enforced": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case5_duplicate_low_value_claims_do_not_count_toward_recovery_target": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case6_borderline_candidates_do_not_count_as_strong_target_satisfaction": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case7_nineteen_strong_plus_borderline_is_not_supported": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case8_twenty_strong_is_supported": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case9_requested_target_remains_exactly_20": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_actual_observed_result_matches_computed_status": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case10_production_semantic_artifacts_are_not_modified": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/structure_engine/alpha_mapper.py hash changed"
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case11_historical_step5b_artifact_remains_historical": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_high_value_unclassified_recovery.py::test_case12_qa_closure_index_points_john7_to_new_authoritative_report": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a1_exactly_fifty_rows": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a2_sample_ids_unique": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a3_row_order_matches_blind_packet_never_resorted": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a4_identity_fields_copied_verbatim_never_regenerated": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a5_claim_text_byte_for_byte_from_blind_packet": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a6_every_reviewed_stance_is_valid_vocabulary": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a6b_invalid_stance_vocabulary_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a7_counter_alpha_rules_hold_on_real_data": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a7b_illegal_counter_alpha_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a7e_unknown_counter_alpha_id_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a7c_missing_counter_alpha_when_stance_requires_it_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a7d_unexpected_counter_alpha_when_stance_does_not_allow_it_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a8_stance_distribution_matches_task_exactly": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a9_confidence_distribution_matches_task_exactly": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a10_wrong_row_count_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a10b_duplicate_sample_id_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a10c_identity_mismatch_vs_blind_packet_fails_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a10d_load_rejects_a_tampered_row_count_file": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionAJ3BenchmarkConstruction::test_a10e_load_rejects_wrong_schema_version": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b11_exact_agreement_counts": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b12_exact_partition_breakdown": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b13_all_seven_reversal_rows_support_b1_llm": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b14_exact_disagreement_ids": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b15_false_support_positive_is_zero": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b16_false_support_negative_exact_ids": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b17_comparison_never_mutates_its_inputs": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b18_tampered_row_is_caught_fail_closed_never_silently_reported": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionBSemanticComparison::test_b18b_wrong_row_count_is_caught_fail_closed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c19_v01_still_loads_and_is_unaffected_by_v02": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c19b_v01_file_byte_identical_to_recorded_hash": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c20_pair_in_multiple_categories_is_rejected": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c21_conditional_conflict_miss_is_informational_never_fails_ticker": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c22_required_conflict_miss_fails_the_ticker": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c22b_required_conflict_present_passes_the_ticker": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c23_product_decision_pending_is_always_unresolved_never_pass_fail": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c24_incomplete_artifact_marks_whole_ticker_not_evaluable": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c24b_incomplete_artifact_never_evaluates_conditional_pairs_as_if_reliable": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c25_undeclared_executable_conflict_pair_rejected": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c25b_remove_while_undeclared_rejects_an_actually_canonical_pair": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c26_msft_a102_a304_was_reopened_and_approved_conditional": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c27_amd_a301_a304_is_allowed_not_auto_required": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c28_a201_a304_now_executable_as_conditional_for_sndk_tsm_amd": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionCJ2V2Schema::test_c28b_no_ticker_currently_has_a_required_conflict": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d29_report_shows_actual_label_and_benchmark_versions": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d30_semantic_benchmark_block_has_all_required_fields": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d31_report_omits_new_keys_entirely_when_not_given": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d32a_cli_without_new_flags_produces_no_new_keys": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d32b_cli_bad_labels_v2_path_exits_with_dedicated_code": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d32c_cli_bad_semantic_benchmark_path_exits_with_dedicated_code": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d33_repeated_comparison_is_deterministic": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d33b_repeated_contract_application_is_deterministic": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d34_generated_at_is_the_only_field_allowed_to_vary": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionDA4Integration::test_d35_source_run_directory_hash_unchanged_after_v02_contract_application": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e36_five_value_stance_vocabulary_unchanged": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e37_b2_admissibility_status_constants_unchanged": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e38_canonical_conflict_pairs_are_exactly_the_eight_declared_pairs": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e39_msft_pending_pair_was_reopened_and_added_to_canonical_taxonomy": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e40_provider_calls_zero_on_real_replay": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e41_tradingagents_calls_zero_on_real_replay": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e42_head_unchanged_from_session_frozen_starting_commit": [
+  "FAILED",
+  "subprocess.CalledProcessError: Command '['git', 'rev-parse', 'HEAD']' returned non-zero exit status 128."
+ ],
+ "tests/test_j3_semantic_benchmark_j2_v0_2.py::TestSectionEInvariants::test_e43_frozen_files_this_segment_must_never_touch_are_clean": [
+  "FAILED",
+  "subprocess.CalledProcessError: Command '['git', 'status', '--porcelain', '--', 'comqutor_alpha/conflict_engine/conflict_schema.py', 'comqutor_alpha/conflict_engine/conflict_admissibility.py']' returned non-zero exit status 128."
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a1_decision_record_exists_and_is_readable": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a2_decision_source_is_accurate": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a3_never_claims_john_or_human_approval": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a4_j2_is_consistent_with_the_final_decision": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a5_a4_no_longer_reports_the_pair_as_removed_while_undeclared": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a6_b1_b2_b3_b4_invariant_modules_are_byte_identical": [
+  "FAILED",
+  "AssertionError: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/pre_thread_tree_full/comqutor_alpha/structure_engine/alpha_mapper.py hash changed"
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a7_and_a8_provider_and_tradingagents_calls_zero": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a9_source_run_byte_identical_before_and_after": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionAAllOutcomes::test_a10_j3_benchmark_byte_identical": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionBApprovedConditionalSpecific::test_b11_canonical_taxonomy_hash_matches_the_revised_content": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionBApprovedConditionalSpecific::test_b12_j2_now_treats_the_pair_as_a_conditional_executable_expectation": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionBApprovedConditionalSpecific::test_b13_a4_never_reports_the_conditional_pair_as_a_ticker_failure": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionBApprovedConditionalSpecific::test_b14_validator_still_rejects_a_genuinely_undeclared_pair": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionBApprovedConditionalSpecific::test_b14b_a102_and_a201_now_have_a304_as_a_canonical_conflict": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionBApprovedConditionalSpecific::test_b15_development_plan_preserved_pd017_text_still_intact": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_msft_a102_a304_taxonomy_adjudication.py::TestSectionBApprovedConditionalSpecific::test_b16_pd017_revised_entry_exists_and_documents_the_reversal": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_ids_are_new_not_reused_from_prior_steps[AMD]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_ids_are_new_not_reused_from_prior_steps[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_ids_are_new_not_reused_from_prior_steps[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_ids_are_new_not_reused_from_prior_steps[QQQ]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_ids_are_new_not_reused_from_prior_steps[SNDK]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_ids_are_new_not_reused_from_prior_steps[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_directory_exists_on_disk[AMD]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_directory_exists_on_disk[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_directory_exists_on_disk[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_directory_exists_on_disk[QQQ]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_directory_exists_on_disk[SNDK]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_directory_exists_on_disk[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_nine_core_artifacts_present_per_ticker[AMD]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_nine_core_artifacts_present_per_ticker[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_nine_core_artifacts_present_per_ticker[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_nine_core_artifacts_present_per_ticker[QQQ]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_nine_core_artifacts_present_per_ticker[SNDK]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_nine_core_artifacts_present_per_ticker[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_artifact_completeness_is_exactly_54_of_54": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_semantic_runtime_health_is_reported_honestly_not_inflated": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_at_least_one_ticker_genuinely_failed_the_internal_benchmark": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_unavailable_never_silently_converted_to_none": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_john_callout_misses_are_exactly_the_two_degraded_tickers": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step6_evidence_qualification_present_in_live_structure_graph[AMD]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step6_evidence_qualification_present_in_live_structure_graph[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step6_evidence_qualification_present_in_live_structure_graph[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step6_evidence_qualification_present_in_live_structure_graph[QQQ]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step6_evidence_qualification_present_in_live_structure_graph[SNDK]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step6_evidence_qualification_present_in_live_structure_graph[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step7_display_normalization_present_in_live_structure_graph[AMD]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step7_display_normalization_present_in_live_structure_graph[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step7_display_normalization_present_in_live_structure_graph[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step7_display_normalization_present_in_live_structure_graph[QQQ]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step7_display_normalization_present_in_live_structure_graph[SNDK]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_step7_display_normalization_present_in_live_structure_graph[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_negative_constraints_all_pass": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_no_null_main_conflict_is_ever_flagged_as_a_negative_constraint_violation": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_formal_alpha_gate_remains_pending_not_faked_pass_or_fail": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_formal_main_conflict_gate_remains_pending_not_faked_pass_or_fail": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_diagnostic_numbers_never_relabeled_as_formal_acceptance": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_gold_authority_state_unchanged_zero_approved_gold": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_run_id_consistency_across_qa_index_a4_and_item6": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_qa_closure_index_does_not_silently_promote_degraded_runs_as_valid_baseline": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_production_semantic_files_unchanged_during_step10": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/structure_engine/alpha_mapper.py hash changed during Step 10"
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_e2e_report_declares_no_production_semantic_changes": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step10_final_e2e_qa.py::test_whole_ticker_retries_are_documented_with_full_audit_trail": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_preflight_and_health_probe_passed": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_rerun_run_id_differs_from_step10_degraded_run_id[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_rerun_run_id_differs_from_step10_degraded_run_id[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_rerun_run_id_differs_from_step10_degraded_run_id[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_dedup_hit_was_detected_and_corrected_for_msft_and_tsm": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_nvda_did_not_need_force_refresh": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_rerun_directory_exists_and_is_complete[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_rerun_directory_exists_and_is_complete[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_rerun_directory_exists_and_is_complete[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_replacement_rule_all_four_conditions_met[NVDA]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_replacement_rule_all_four_conditions_met[MSFT]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_replacement_rule_all_four_conditions_met[TSM]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_final_baseline_status_is_repaired": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_no_retry_reason_cites_semantic_dissatisfaction": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_qqq_sndk_amd_retained_unchanged_from_step10": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_step10_artifact_not_overwritten": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_composite_semantic_runtime_health_is_6_of_6": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_artifact_completeness_54_of_54": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_john_callouts_12_of_12_on_composite": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_main_conflicts_non_null_on_composite": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_negative_constraints_pass_on_composite": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_formal_gates_remain_pending_despite_strong_diagnostic": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_step8_and_step9_conclusions_unchanged": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_run_id_consistency_across_qa_index_a4_and_item6": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_history_preserved_not_deleted": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_production_semantic_files_unchanged_during_step11": [
+  "FAILED",
+  "AssertionError: comqutor_alpha/structure_engine/alpha_mapper.py hash changed during Step 11"
+ ],
+ "tests/test_step11_provider_health_rerun.py::test_r2_report_declares_no_production_semantic_changes": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_adapter_calls_overlap_concurrently_and_bounded_concurrency_is_respected": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_max_in_flight_never_exceeds_configured_limit": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_concurrency_1_and_concurrency_4_produce_identical_semantic_output": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_configured_concurrency_1_reproduces_exact_serial_behavior": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_one_slow_agent_does_not_reorder_or_corrupt_other_agents_records": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_one_failed_agent_call_preserves_fallback_semantics_for_itself_only": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_telemetry_and_recorder_sequencing_remain_valid_under_concurrency": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_cache_correct_under_concurrent_adapter_calls": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_empty_agent_outputs_works_under_concurrency_config": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_single_agent_output_uses_serial_path_even_with_concurrency_configured": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_default_concurrency_resolves_from_env_var": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_adapt_run_outputs_uses_env_resolved_concurrency_by_default": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_structured_adapter_concurrency.py::test_structured_adapter_concurrency_touches_no_alpha_mapping_code": [
+  "FAILED",
+  "assert 'alpha_mapper' not in '\"\"\"Adapt Tr...   _main()\\n'"
+ ],
+ "tests/test_v0_1_3_offline_replay_proof.py::test_section_c_a301_real_msft_run_was_incorrectly_active_before_the_fix_now_gates_to_candidate": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_v0_1_3_offline_replay_proof.py::test_section_d_real_msft_conflicts_drop_misattributed_display_claims_without_changing_the_score": [
+  "FAILED",
+  "AssertionError: assert {'A101__A304'... 'A304__A601'} == {'A101__A304', 'A304__A601'}"
+ ],
+ "tests/test_w5_demo_seed.py::test_default_targets_are_isolated_under_demo_root": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[outputs/runs-sqlite:///.demo/w5/comqutor_demo.db-environment0]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[.demo/w5/outputs/runs-sqlite:///normal-development.db-environment1]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[.demo/w5/outputs/runs-postgresql://localhost/comqutor-environment2]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[.demo/w5/outputs/runs-sqlite:///.demo/w5/comqutor_demo.db-environment3]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider": [
+  "FAILED",
+  "scripts.seed_w5_demo.DemoSeedError: NVDA_MAIN_CONFLICT_NOT_ARBITRATED"
+ ],
+ "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded": [
+  "FAILED",
+  "scripts.seed_w5_demo.DemoSeedError: NVDA_MAIN_CONFLICT_NOT_ARBITRATED"
+ ]
+}

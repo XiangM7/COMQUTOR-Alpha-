@@ -1,0 +1,34 @@
+{
+  "schema_version": "alpha_dev_reserve_external_adjudication_round2.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "round": 2,
+  "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+  "system_predictions_seen": false,
+  "sample_count": 3,
+  "labels": [
+    {
+      "replacement_slot": 1,
+      "sample_id": "nh-reserve-016",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The statement recommends tranche-based position sizing because of generic valuation and competitive risks, but it does not state the rich/high-multiple downside mechanism required by A304 or any other canonical Alpha thesis."
+    },
+    {
+      "replacement_slot": 2,
+      "sample_id": "nh-reserve-017",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A break below a price level toward the lower band and 200 SMA is a technical price-path observation, not a canonical Alpha mechanism."
+    },
+    {
+      "replacement_slot": 3,
+      "sample_id": "nh-reserve-018",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A near-term swing low followed by a rally is a technical price-action observation and does not substantively engage any canonical Alpha thesis."
+    }
+  ]
+}

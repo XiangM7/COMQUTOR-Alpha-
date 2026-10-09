@@ -15,7 +15,10 @@ import logging
 
 import pytest
 
-from comqutor_alpha.runners.diagnostics import TradingAgentsDiagnosticCallback
+from comqutor_alpha.runners.diagnostics import (
+    TradingAgentsDiagnosticCallback,
+    TradingAgentsUsageStatsCallback,
+)
 from comqutor_alpha.runners.tradingagents_runner import (
     run_streaming_tradingagents_research,
 )
@@ -280,8 +283,12 @@ def test_diagnostic_callback_is_attached_to_stream_config(tmp_path):
     )
     stream_kwargs = graph.graph.stream_calls[0]["kwargs"]
     callbacks = stream_kwargs["config"]["callbacks"]
-    assert len(callbacks) == 1
+    # T4 request-level statistics offline prep (this round) added a second,
+    # additive callback alongside the pre-existing diagnostic one -- same
+    # real call boundary, neither one replacing the other.
+    assert len(callbacks) == 2
     assert isinstance(callbacks[0], TradingAgentsDiagnosticCallback)
+    assert isinstance(callbacks[1], TradingAgentsUsageStatsCallback)
 
 
 def test_diagnostic_callback_standalone_chain_and_retry_events_log_cleanly(caplog):

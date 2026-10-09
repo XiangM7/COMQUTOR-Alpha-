@@ -1,0 +1,160 @@
+{
+  "schema_version": "alpha_dev_review_queue.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "purpose": "Samples excluded from the accepted development scoring population per the frozen adjudication rubric (non-null ambiguity_flag). Derived solely from the imported external adjudication's own fields.",
+  "status": "RESOLVED_ALL_FLAGGED_SAMPLES_REPLACED",
+  "queue_count": 15,
+  "queue": [
+    {
+      "sample_id": "nh-dev-033",
+      "ticker": "SNDK",
+      "claim_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8:news_agent:news_report:claim:28",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "BOTH_REASONABLE_AMBIGUOUS",
+      "adjudication_reason": "The same claim independently presents valuation risk and an eventual semiconductor-cycle turn as supply catches up; A304 and A201 are both materially engaged with no clean textual basis to choose one.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-034",
+      "ticker": "MSFT",
+      "claim_id": "07ddc074-9ab2-4b16-8957-acbf94012144:neutral_risk_analyst:risk_debate_state.neutral_history:claim:35",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The phrase 'this' has no referent in the provided claim/evidence, so the underlying mechanism being flagged cannot be identified.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-036",
+      "ticker": "MU",
+      "claim_id": "0ba23540-0623-4d05-a670-098fbbfec1d1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:43",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The statement says the stop is not arbitrary but omits the reason or mechanism that would make it non-arbitrary.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-041",
+      "ticker": "MU",
+      "claim_id": "0ba23540-0623-4d05-a670-098fbbfec1d1:bull_researcher:investment_debate_state.bull_history:claim:53",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The claim refers to 'this' being like 2022 without specifying the thesis or mechanism being compared.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-048",
+      "ticker": "SNDK",
+      "claim_id": "183b04dd-aae3-4b33-bbb0-3c9bc3bc942f:bear_researcher:investment_debate_state.bear_history:claim:37",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The sentence is fragmentary/truncated and does not provide the context needed to identify a canonical mechanism.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-049",
+      "ticker": "SNDK",
+      "claim_id": "52c23371-c374-4064-a91c-20c599ffa79c:bear_researcher:investment_debate_state.bear_history:claim:115",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The claim refers to an unspecified 'one data point'; Tepper's reputation does not reveal the underlying Alpha mechanism.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-051",
+      "ticker": "GOOGL",
+      "claim_id": "299bb6af-5217-422e-bd47-1b3b07c57192:news_agent:news_report:claim:69",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "BOTH_REASONABLE_AMBIGUOUS",
+      "adjudication_reason": "A hike in AI capex can directly support both AI Expansion (cloud AI capex) and AI Infrastructure (buildout spending); the text does not specify accelerator demand versus infrastructure demand.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-052",
+      "ticker": "QQQ",
+      "claim_id": "defeb528-673e-44f7-8d94-c0abdfef03d4:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:53",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "BOTH_REASONABLE_AMBIGUOUS",
+      "adjudication_reason": "The claim simultaneously asserts broadening AI adoption and accelerating earnings; A101 and A301 are both materially engaged and the text gives no basis to prefer one.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-055",
+      "ticker": "SNDK",
+      "claim_id": "e8e0f398-7b26-4462-8135-a1410ea5b335:news_agent:news_report:claim:3",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "NOT_A_SUBSTANTIVE_CLAIM",
+      "adjudication_reason": "The text is metadata (date, sector, exchange), not a substantive mechanism claim.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-058",
+      "ticker": "MU",
+      "claim_id": "0ba23540-0623-4d05-a670-098fbbfec1d1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:62",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The pronoun 'That' has no referent, so the substantive claim cannot be reconstructed from the provided text.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-065",
+      "ticker": "MU",
+      "claim_id": "0ba23540-0623-4d05-a670-098fbbfec1d1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:3",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "NOT_A_SUBSTANTIVE_CLAIM",
+      "adjudication_reason": "The statement is only an intention to challenge another framing and contains no substantive mechanism assertion.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-080",
+      "ticker": "AMD",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:conservative_risk_analyst:risk_debate_state.conservative_history:claim:29",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "NOT_A_SUBSTANTIVE_CLAIM",
+      "adjudication_reason": "This is a setup sentence promising a calculation, not the calculation or a substantive Alpha mechanism.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-084",
+      "ticker": "MSFT",
+      "claim_id": "64568bfb-fe0c-453c-9872-831a8dc339a0:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:27",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The short phrase 'You get paid either way' lacks the referent/mechanism needed for Alpha adjudication.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-091",
+      "ticker": "GOOGL",
+      "claim_id": "299bb6af-5217-422e-bd47-1b3b07c57192:news_agent:news_report:claim:25",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The antecedent of 'This' is absent, so the mechanism pressuring Google Cloud cannot be identified from the provided text.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    },
+    {
+      "sample_id": "nh-dev-098",
+      "ticker": "AMD",
+      "claim_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:22",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "INSUFFICIENT_CONTEXT",
+      "adjudication_reason": "The pronoun 'It' has no referent and the statement provides no mechanism that can be adjudicated.",
+      "resolution_state": "RESOLVED_VIA_RESERVE_REPLACEMENT"
+    }
+  ],
+  "resolution_note": "All 15 first-pass excluded development samples were resolved through deterministic reserve replacement (12 accepted in round 1; the 3 round-1 exclusions were themselves replaced and accepted in round 2). This queue is preserved as audit history and was not deleted or altered beyond recording the resolution state."
+}

@@ -1,0 +1,60 @@
+1
+00:00:00,000 --> 00:00:06,000
+【实例页面】 01_instance：Research 页（verify 实例，真实执行关闭）：状态行显示数据库和代码身份
+run_id — · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+2
+00:00:06,000 --> 00:00:53,000
+【冻结/历史】 02_history_reopen：Recent runs（PostgreSQL）→ 重开 AMD 重评 run（页面加载约 45 秒）
+run_id dependency-20261008T213330Z-d6f60d8d · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+3
+00:00:53,000 --> 00:00:59,000
+【冻结/历史】 03_research_summary：研究摘要：partial，分类不完整（975 次中 1 次失败），结论没有被夸大。这是真实历史 partial，不是注入的
+run_id dependency-20261008T213330Z-d6f60d8d · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+4
+00:00:59,000 --> 00:01:08,000
+【冻结/历史】 04_key_conclusion_source：关键结论 → 四项独立检查 → 已保存来源片段（市场快照 RSI 72.95）
+run_id dependency-20261008T213330Z-d6f60d8d · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+5
+00:01:08,000 --> 00:01:15,000
+【冻结/历史】 05_structure_graph：Structure Graph：因子节点、分数、节点详情
+run_id dependency-20261008T213330Z-d6f60d8d · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+6
+00:01:15,000 --> 00:01:27,000
+【冻结/历史】 06_calculation_basis：A301 Revenue Expansion → Evidence → View basis：已保存来源、匹配数值、计算状态
+run_id dependency-20261008T213330Z-d6f60d8d · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+7
+00:01:27,000 --> 00:01:37,000
+【冻结/历史】 07_conflict_radar：Conflict Radar：没有准入的主冲突；候选 / 被拒冲突对及原因
+run_id dependency-20261008T213330Z-d6f60d8d · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+8
+00:01:37,000 --> 00:01:44,000
+【冻结/历史】 08_sndk_no_main_conflict：SNDK 历史 run（冻结）：没有主冲突，已验证证据不足
+run_id dependency-20261008T213350Z-89497ab9 · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+9
+00:01:44,000 --> 00:02:00,000
+【冻结/历史】 09_nvda_frozen_recompute：NVDA 冻结输入重算：证据不足
+run_id t4-frozen-nvda-034a0a60-20261008 · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+10
+00:02:00,000 --> 00:02:05,000
+【模拟·测试注入】 10_simulated_empty_input：【模拟】有意提交一份空 agent 输出 → 0 条 claim、证据不足（状态记为 completed，见 Round 27 发现）
+run_id t4-simulated-failure-20261008 · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+11
+00:02:05,000 --> 00:02:13,000
+【模拟·测试注入】 11_simulated_failure：【模拟】失败：运行中有意重启实例 → failed，SERVER_SHUTDOWN，没有续跑
+run_id t4-simulated-interrupted-20261008 · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+
+12
+00:02:13,000 --> 00:02:39,560
+【冻结/历史】 12_export：Export research：页面下载的 ZIP（17 个条目，sha256 2836e0ca…，与 API 导出相同）
+run_id dependency-20261008T213330Z-d6f60d8d · 代码 7a9aefa + uncommitted, tracked diff b5e91198..., untracked a61cb62c...
+

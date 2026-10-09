@@ -1,0 +1,610 @@
+--- /dev/null
++++ after/tests/test_t3_closeout_content_support_citation_and_ledger.py
+@@ -0,0 +1,261 @@
++"""2026-10-08 (T3 closeout): content-support citation validation and its
++semantic-ledger record.
++
++Execution t3joint-20261008T170322Z-bd99811e rejected six real replies as
++quote_or_data_not_found. Five of them cite parts that the cited candidate's
++own excerpt prints verbatim (``_segmented_literal_citation_valid``); one
++(t3v3-002) quotes text the excerpt does not contain and stays rejected.
++
++The first group of tests replays the SAVED real replies (read from the
++execution's wire audit, never retyped) against the production-built request
++items through the unmodified ``_process_batch``. The second group uses small
++constructed fixtures -- labeled as such -- for the cases no real reply
++exercised (fragments, wrong bindings, invented parts). The last group checks
++the semantic-ledger record through the production gateway builder with only
++the HTTP transport replaced. Zero network.
++"""
++
++from __future__ import annotations
++
++import importlib.util
++import json
++import sys
++from functools import lru_cache
++from pathlib import Path
++from types import SimpleNamespace
++
++import httpx
++import pytest
++
++from comqutor_alpha.llm_runtime.session import SemanticRuntimeSession
++from comqutor_alpha.structure_engine import content_support_llm as cs
++from tests._content_support_v2_fixture_helpers import v2_response
++
++REPO = Path(__file__).resolve().parents[1]
++DRIVER = REPO / "docs/audit_artifacts/round_source_linking_t0_t2/t3_joint_sample_driver.py"
++MANIFEST = REPO / "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/B1_samples_v4/joint_sample_v4_manifest.json"
++EXECUTION_ID = "t3joint-20261008T170322Z-bd99811e"
++EXECUTION_DIR = REPO / "outputs/t3_joint_evaluations" / EXECUTION_ID
++CS_LOGS = EXECUTION_DIR / "content_support_verification" / EXECUTION_ID / "error_logs"
++
++
++@lru_cache(maxsize=1)
++def _driver():
++    spec = importlib.util.spec_from_file_location("t3_joint_driver_closeout_tests", DRIVER)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    sys.modules[spec.name] = module
++    spec.loader.exec_module(module)
++    return module
++
++
++def _t3_items_and_replies():
++    driver = _driver()
++    samples = driver.load_samples(MANIFEST)
++    for s in samples:
++        driver.strip_saved_llm_content_verdict(s["record"])
++    items = {i.claim_id: i for run_items in driver.content_support_request_items(samples).values() for i in run_items}
++    requests = [json.loads(line) for line in (CS_LOGS / "week2_llm_provider_request_audit.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
++    responses = {r["attempt_id"]: r for r in (json.loads(line) for line in (CS_LOGS / "week2_llm_provider_response_audit.jsonl").read_text(encoding="utf-8").splitlines() if line.strip())}
++    replies, bodies = {}, {}
++    for req in requests:
++        body = responses[req["attempt_id"]]["body"]
++        bodies[req["claim_ids"][0]] = body
++        replies[req["claim_ids"][0]] = json.loads(json.loads(body)["choices"][0]["message"]["content"])["items"][0]
++    sample_of = {s["record"]["claim_id"]: s["sample_id"] for s in samples}
++    claim_of = {sid: cid for cid, sid in sample_of.items()}
++    sources_of = {s["sample_id"]: s["sources"] for s in samples}
++    return items, replies, bodies, sample_of, claim_of, sources_of
++
++
++class _ReplayGateway:
++    """The unmodified _process_batch with a canned invocation wrapping a saved reply (no network)."""
++
++    model_name = "deepseek-v4-flash"
++    provider = "deepseek"
++
++    def __init__(self, returned_items):
++        self._returned_items = returned_items
++        self.finalized = []
++
++    def invoke_json_with_trace(self, task, payload, validator):
++        return SimpleNamespace(provider_attempt_count=1, provider_status="success", error_code=None, cache_hit=False,
++                               validation_accepted=True, request_control=None, provider_response_metadata=None, token_usage=None,
++                               attempt_history=(), validated_output=validator({"items": self._returned_items}))
++
++    def finalize_semantic_invocation(self, invocation, accepted, fallback_reason=None):
++        self.finalized.append((accepted, fallback_reason))
++
++
++def _run(item, reply):
++    gateway = _ReplayGateway([reply])
++    results = {}
++    cs._process_batch([item], gateway, cs.ContentSupportRunStats(), results)
++    return results[item.claim_id], gateway
++
++
++# ---------------------------------------------------------------------------------------------------------------------
++# real saved replies
++# ---------------------------------------------------------------------------------------------------------------------
++
++EXPECTED_AFTER_FIX = {
++    "t3v3-002": ("quote_or_data_not_found", None),  # "Diluted EPS 2026-06-30=1.38" is not in the excerpt ("Diluted EPS: 2026-06-30=1.38")
++    "t3v3-005": (None, "CONDITIONAL"),
++    "t3v3-015": (None, "CONDITIONAL"),
++    "t3v3-019": (None, "CONDITIONAL"),
++    "t3v3-029": (None, "SUPPORTS"),
++    "t3v3-031": (None, "SUPPORTS"),
++}
++
++
++@pytest.mark.parametrize("sample_id", sorted(EXPECTED_AFTER_FIX))
++def test_six_rejected_real_replies_replayed_through_the_production_batch_processor(sample_id):
++    items, replies, _, _, claim_of, _ = _t3_items_and_replies()
++    claim_id = claim_of[sample_id]
++    record, gateway = _run(items[claim_id], replies[claim_id])
++    expected_reason, expected_status = EXPECTED_AFTER_FIX[sample_id]
++    assert record["content_support_llm_fallback_reason"] == expected_reason
++    if expected_status is None:
++        assert record.get("content_support_llm_detail") is None
++        assert gateway.finalized == [(False, "quote_or_data_not_found")]
++    else:
++        assert record["content_support_status"] == expected_status
++        assert record["content_support_llm_detail"]["supporting_quote_or_data"] == replies[claim_id]["supporting_quote_or_data"]
++        assert gateway.finalized == [(True, None)]
++
++
++def test_the_eleven_replies_the_execution_accepted_get_the_same_verdict():
++    items, replies, _, sample_of, _, _ = _t3_items_and_replies()
++    predictions = {json.loads(line)["sample_id"]: json.loads(line) for line in (EXECUTION_DIR / "joint_predictions.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()}
++    checked = 0
++    for claim_id, item in items.items():
++        sid = sample_of[claim_id]
++        if predictions[sid]["L1"]["status"] != "LLM_RESULT":
++            continue
++        record, _ = _run(item, replies[claim_id])
++        assert record["content_support_llm_fallback_reason"] is None, sid
++        assert record["content_support_status"] == predictions[sid]["L1"]["content_support_status"], sid
++        checked += 1
++    assert checked == 11
++
++
++# ---------------------------------------------------------------------------------------------------------------------
++# constructed fixtures (not real replies): the reality rule still holds per part
++# ---------------------------------------------------------------------------------------------------------------------
++
++CANDIDATE = {
++    "source_id": "src_fixture",
++    "excerpt": "AMD fundamentals Forward PE=41.668015 PEG Ratio=0.64 Forward EPS=15.72189 PE Ratio (TTM)=167.11734 Beta=2.454",
++    "data_snapshot": {"forward_pe": 41.668015, "peg_ratio": 0.64, "forward_eps": 15.72189, "trailing_pe": 167.11734, "beta": 2.454},
++}
++
++
++def _reason(used_location: str, quote: str):
++    requested = cs.ContentSupportRequestItem(claim_id="c1", payload={"claim_id": "c1", "proposition": "x", "allowed_candidates": [CANDIDATE]},
++                                             record={"claim_id": "c1"}, candidates_by_id={CANDIDATE["source_id"]: CANDIDATE})
++    returned = v2_response(claim_id="c1", status="SUPPORTS", used_source_id="src_fixture", used_location=used_location,
++                           supporting_quote_or_data=quote)
++    return cs._validate_response_item(requested, returned)[1]
++
++
++def test_fixture_verbatim_parts_bound_to_matching_paths_are_accepted():
++    assert _reason("data_snapshot.forward_pe; data_snapshot.forward_eps; data_snapshot.trailing_pe",
++                   "Forward PE=41.668015; Forward EPS=15.72189; PE Ratio (TTM)=167.11734") is None
++
++
++def test_fixture_verbatim_parts_with_a_free_text_location_are_accepted():
++    assert _reason("excerpt containing the PEG and EPS figures", "PEG Ratio=0.64; Forward EPS=15.72189") is None
++
++
++def test_fixture_reformatted_part_not_in_the_excerpt_is_rejected():
++    assert _reason("excerpt", "Forward PE 41.668015; Forward EPS=15.72189") == cs.FALLBACK_QUOTE_OR_DATA_NOT_FOUND
++
++
++def test_fixture_fragment_of_a_longer_number_is_rejected():
++    # "Forward PE=41.66" is a substring of "Forward PE=41.668015" but not a whole token
++    assert _reason("excerpt", "Forward PE=41.66; Forward EPS=15.72189") == cs.FALLBACK_QUOTE_OR_DATA_NOT_FOUND
++
++
++def test_fixture_label_split_from_its_value_is_rejected():
++    assert _reason("excerpt", "Forward PE; =41.668015") == cs.FALLBACK_QUOTE_OR_DATA_NOT_FOUND
++
++
++def test_fixture_invented_part_is_rejected():
++    assert _reason("excerpt", "Forward PE=41.668015; Dividend Yield=9.99") == cs.FALLBACK_QUOTE_OR_DATA_NOT_FOUND
++
++
++def test_fixture_real_excerpt_pair_cited_against_the_wrong_path_is_rejected():
++    assert _reason("data_snapshot.trailing_pe; data_snapshot.forward_eps",
++                   "Forward PE=41.668015; Forward EPS=15.72189") == cs.FALLBACK_QUOTE_OR_DATA_NOT_FOUND
++
++
++def test_fixture_path_count_different_from_part_count_is_rejected():
++    assert _reason("data_snapshot.forward_pe; data_snapshot.forward_eps; data_snapshot.trailing_pe",
++                   "Forward PE=41.668015; Forward EPS=15.72189") == cs.FALLBACK_QUOTE_OR_DATA_NOT_FOUND
++
++
++def test_fixture_unknown_path_is_rejected():
++    assert _reason("data_snapshot.forward_pe; data_snapshot.not_a_field",
++                   "Forward PE=41.668015; Forward EPS=15.72189") == cs.FALLBACK_QUOTE_OR_DATA_NOT_FOUND
++
++
++# ---------------------------------------------------------------------------------------------------------------------
++# semantic ledger: production gateway builder, real session, saved responses as the only fake (the HTTP transport)
++# ---------------------------------------------------------------------------------------------------------------------
++
++
++@pytest.fixture
++def profile_env(monkeypatch):
++    for name, value in {
++        "COMQUTOR_WEEK2_LLM_ENABLED": "1",
++        "COMQUTOR_WEEK2_LLM_PROVIDER": "deepseek",
++        "COMQUTOR_WEEK2_LLM_MODEL": "deepseek-v4-flash",
++        "COMQUTOR_WEEK2_LLM_BASE_URL": "https://api.deepseek.com",
++        "COMQUTOR_WEEK2_LLM_PROFILE": "t3_verified_20261008",
++        "DEEPSEEK_API_KEY": "test-not-a-key",
++    }.items():
++        monkeypatch.setenv(name, value)
++
++
++def test_content_support_calls_are_recorded_in_the_semantic_ledger_with_item_outcome(tmp_path, profile_env):
++    from comqutor_alpha.structure_engine.week2_llm import (
++        Week2LLMGateway,
++        build_server_week2_llm_gateway,
++    )
++
++    items, _, bodies, _, claim_of, _ = _t3_items_and_replies()
++    wanted = {"t3v3-029": claim_of["t3v3-029"], "t3v3-002": claim_of["t3v3-002"]}
++
++    def handler(request: httpx.Request) -> httpx.Response:
++        content = json.loads(request.content)["messages"][0]["content"]
++        claim_id = json.loads(content[content.index('{"items"'):])["items"][0]["claim_id"]
++        return httpx.Response(200, content=bodies[claim_id].encode("utf-8"), headers={"content-type": "application/json"})
++
++    run_id = "closeout-ledger-test"
++    (tmp_path / run_id).mkdir()
++    gateway = build_server_week2_llm_gateway(run_id, tmp_path, execution_id=run_id, _base_transport_for_testing=httpx.MockTransport(handler))
++    assert gateway is not None
++    session = SemanticRuntimeSession(run_id=run_id, output_directory=tmp_path / run_id, execution_mode="test", provider="deepseek",
++                                     model="deepseek-v4-flash")
++    gateway.attach_semantic_runtime(session)
++    results = {}
++    for claim_id in wanted.values():
++        cs._process_batch([items[claim_id]], gateway, cs.ContentSupportRunStats(), results)
++
++    assert not session.incomplete and "SEMANTIC_RUNTIME_CALL_START_FAILED" not in session.degraded_reason_codes
++    ledger = [json.loads(line) for line in (tmp_path / run_id / "llm_semantic_calls.jsonl").read_text(encoding="utf-8").splitlines()]
++    assert len(ledger) == 2
++    by_claim = {r["claim_ids"][0]: r for r in ledger}
++    for record in ledger:
++        assert record["task"] == "content_support_verification"
++        assert record["prompt_version"] == "content_support.llm.v2.1"
++        assert record["prompt_sha256"] == Week2LLMGateway.prompt_identity_sha256("content_support_verification")
++        assert record["provider"] == "deepseek" and record["model"] == "deepseek-v4-flash"
++        assert record["token_usage"] and record["token_usage"].get("input_tokens") and record["token_usage"].get("output_tokens")
++        assert record["request_attempts"] and record["request_attempts"][0].get("attempt_id")
++        assert record["retry_count"] == 0
++    accepted = by_claim[wanted["t3v3-029"]]
++    rejected = by_claim[wanted["t3v3-002"]]
++    assert accepted["validation_status"] == "accepted" and accepted["fallback_reason"] is None
++    assert rejected["validation_status"] == "rejected" and rejected["fallback_reason"] == "quote_or_data_not_found"
++    assert results[wanted["t3v3-002"]]["content_support_llm_fallback_reason"] == "quote_or_data_not_found"
+--- /dev/null
++++ after/tests/test_week2_execution_profile.py
+@@ -0,0 +1,194 @@
++"""2026-10-08 (T3 closeout): the selectable Week 2 execution profile
++``t3_verified_20261008`` (week2_execution_profile.py).
++
++Built through the production ``build_server_week2_llm_gateway`` and the real
++tradingagents client construction; only the lowest HTTP layer is a fake
++(``_base_transport_for_testing``), so what reaches it is exactly what a real
++run would put on the wire. These tests show wiring and failure handling, not
++model behavior. Zero network.
++"""
++
++from __future__ import annotations
++
++import json
++
++import httpx
++import pytest
++
++from comqutor_alpha.structure_engine import week2_llm
++from comqutor_alpha.structure_engine.week2_execution_profile import (
++    PROFILE_ENV_VAR,
++    T3_VERIFIED_20261008,
++)
++from comqutor_alpha.structure_engine.week2_llm import build_server_week2_llm_gateway
++
++PROFILE_TASKS = ("content_support_verification", "alpha_classifier", "evidence_stance_classifier")
++
++
++@pytest.fixture
++def base_env(monkeypatch):
++    """The deployed .env's conflicting values, to show which ones a profile replaces."""
++    for name, value in {
++        "COMQUTOR_WEEK2_LLM_ENABLED": "1",
++        "COMQUTOR_WEEK2_LLM_PROVIDER": "deepseek",
++        "COMQUTOR_WEEK2_LLM_MODEL": "deepseek-v4-flash",
++        "COMQUTOR_WEEK2_LLM_BASE_URL": "https://api.deepseek.com",
++        "COMQUTOR_WEEK2_LLM_TIMEOUT_SECONDS": "45",
++        "COMQUTOR_WEEK2_LLM_MAX_RETRIES": "1",
++        "COMQUTOR_WEEK2_LLM_CONCURRENCY": "8",
++        "COMQUTOR_WEEK2_STANCE_CONCURRENCY": "8",
++        "DEEPSEEK_API_KEY": "test-not-a-key",
++    }.items():
++        monkeypatch.setenv(name, value)
++    for name in (PROFILE_ENV_VAR, "COMQUTOR_WEEK2_LLM_ENABLE_REQUEST_AUDIT", "COMQUTOR_WEEK2_CONTENT_SUPPORT_BATCH_SIZE",
++                 "COMQUTOR_WEEK2_ALPHA_CLASSIFIER_MAX_TOKENS", "COMQUTOR_WEEK2_CONTENT_SUPPORT_MAX_TOKENS"):
++        monkeypatch.delenv(name, raising=False)
++
++
++def _completion(content: str) -> httpx.Response:
++    return httpx.Response(200, json={"id": "fixed", "object": "chat.completion", "created": 0, "model": "deepseek-flash",
++                                     "choices": [{"index": 0, "message": {"role": "assistant", "content": content}, "finish_reason": "stop"}],
++                                     "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}})
++
++
++def _requests(tmp_path, run_id):
++    path = tmp_path / run_id / "error_logs" / "week2_llm_provider_request_audit.jsonl"
++    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()] if path.exists() else []
++
++
++def test_without_a_profile_the_environment_behavior_is_unchanged(tmp_path, base_env):
++    gateway = build_server_week2_llm_gateway("no-profile", tmp_path)
++    assert gateway is not None
++    assert gateway.execution_profile is None
++    assert gateway.max_retries == 1
++    assert all(gateway.task_timeout_seconds_for(task) == 45.0 for task in PROFILE_TASKS)
++    assert gateway._audit_enabled is False
++    assert week2_llm.resolve_alpha_classifier_concurrency() == 8
++    assert week2_llm.resolve_evidence_stance_concurrency() == 8
++
++
++def test_profile_replaces_timeouts_retries_audit_and_concurrency(tmp_path, base_env, monkeypatch):
++    monkeypatch.setenv(PROFILE_ENV_VAR, "t3_verified_20261008")
++    gateway = build_server_week2_llm_gateway("with-profile", tmp_path)
++    assert gateway is not None
++    assert gateway.execution_profile == "t3_verified_20261008"
++    assert gateway.max_retries == 0
++    assert gateway.task_timeout_seconds_for("content_support_verification") == 120.0
++    assert gateway.task_timeout_seconds_for("alpha_classifier") == 45.0
++    assert gateway.task_timeout_seconds_for("evidence_stance_classifier") == 120.0
++    assert gateway.task_timeout_seconds_for("structure_extractor") == 45.0  # not a profile task: the shared env timeout
++    assert gateway._audit_enabled is True
++    assert week2_llm.resolve_alpha_classifier_concurrency() == 4
++    assert week2_llm.resolve_evidence_stance_concurrency() == 4
++    assert week2_llm._resolve_task_max_retries("evidence_stance_classifier", gateway.max_retries) == 0
++
++
++def test_profile_requests_carry_each_task_timeout_on_the_wire_and_no_extra_control_fields(tmp_path, base_env, monkeypatch):
++    monkeypatch.setenv(PROFILE_ENV_VAR, "t3_verified_20261008")
++    app_timeouts = {}
++    real_call_with_timeout = week2_llm.call_with_timeout
++
++    def recording_call_with_timeout(function, timeout_seconds):
++        app_timeouts.setdefault("calls", []).append(timeout_seconds)
++        return real_call_with_timeout(function, timeout_seconds)
++
++    monkeypatch.setattr(week2_llm, "call_with_timeout", recording_call_with_timeout)
++    hits = []
++
++    def handler(request: httpx.Request) -> httpx.Response:
++        hits.append(request)
++        return _completion("{}")
++
++    run_id = "profile-wire"
++    gateway = build_server_week2_llm_gateway(run_id, tmp_path, execution_id=run_id, _base_transport_for_testing=httpx.MockTransport(handler))
++    assert gateway is not None
++    observed = {}
++    for task in PROFILE_TASKS:
++        app_timeouts["calls"] = []
++        invocation = gateway.invoke_json_with_trace(task, {"items": [{"claim_id": f"c-{task}"}]}, lambda parsed: parsed)
++        assert invocation.validation_accepted and invocation.provider_attempt_count == 1
++        observed[task] = app_timeouts["calls"]
++    assert observed == {"content_support_verification": [120.0], "alpha_classifier": [45.0], "evidence_stance_classifier": [120.0]}
++
++    records = _requests(tmp_path, run_id)
++    assert [r["task"] for r in records] == list(PROFILE_TASKS)
++    for record in records:
++        body = json.loads(record["body"])
++        assert sorted(body) == ["messages", "model", "stream"]  # no max_tokens/temperature/thinking/reasoning control field
++        assert body["model"] == "deepseek-v4-flash" and body["stream"] is False
++        assert record["headers"]["x-stainless-retry-count"] == "0"
++        assert record["headers"]["authorization"] == "REDACTED"
++        assert record["url"] == "https://api.deepseek.com/chat/completions"
++    read_timeouts = {r["task"]: r["headers"]["x-stainless-read-timeout"] for r in records}
++    assert read_timeouts == {"content_support_verification": "120.0", "alpha_classifier": "45.0", "evidence_stance_classifier": "120.0"}
++    assert len(hits) == 3
++
++
++def test_profile_content_support_batch_size_reaches_the_production_call(tmp_path, base_env, monkeypatch):
++    import comqutor_alpha.structure_engine.structured_output_adapter as soa
++
++    run_dir = tmp_path / "run_profile_batch"
++    run_dir.mkdir()
++    (run_dir / "raw_agent_outputs.json").write_text(json.dumps(
++        {"run_id": "run_profile_batch", "ticker": "AMD", "agent_outputs": [{"agent": "news_agent", "raw_output": "AI demand supports GPU demand."}]}))
++    captured = {}
++    real_fn = soa.apply_llm_content_support_verification
++
++    def spy(records, sources, *, llm_gateway=None, batch_size=None):
++        captured["batch_size"] = batch_size
++        return real_fn(records, sources, llm_gateway=llm_gateway, batch_size=batch_size)
++
++    monkeypatch.setattr(soa, "apply_llm_content_support_verification", spy)
++    monkeypatch.setenv("COMQUTOR_WEEK2_CONTENT_SUPPORT_BATCH_SIZE", "5")
++    monkeypatch.setenv(PROFILE_ENV_VAR, "t3_verified_20261008")
++    soa.adapt_run_outputs(run_dir, llm_gateway=None)
++    assert captured["batch_size"] == T3_VERIFIED_20261008.content_support_batch_size == 1
++
++
++def test_unknown_profile_builds_no_gateway_and_records_why(tmp_path, base_env, monkeypatch):
++    monkeypatch.setenv(PROFILE_ENV_VAR, "not_a_profile")
++    assert build_server_week2_llm_gateway("unknown-profile", tmp_path) is None
++    errors = (tmp_path / "unknown-profile" / "error_logs" / "week2_llm_errors.jsonl").read_text(encoding="utf-8")
++    assert "WEEK2_LLM_PROFILE_UNKNOWN" in errors
++
++
++@pytest.mark.parametrize("failure", ["read_timeout_after_send", "http_500"])
++def test_failure_or_unknown_outcome_is_not_a_valid_none_and_is_not_resent(tmp_path, base_env, monkeypatch, failure):
++    """A request that was sent but never answered (unknown) and one answered with an error are each tried once
++    (both retry layers 0) and end as a classification failure -- never as the model's own NONE."""
++    from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
++    from comqutor_alpha.structure_engine.alpha_mapper import (
++        compute_alpha_classification_completion,
++        map_structured_records,
++    )
++
++    monkeypatch.setenv(PROFILE_ENV_VAR, "t3_verified_20261008")
++    hits = []
++
++    def handler(request: httpx.Request) -> httpx.Response:
++        hits.append(request)
++        if failure == "read_timeout_after_send":
++            raise httpx.ReadTimeout("no response", request=request)
++        return httpx.Response(500, json={"error": {"message": "server error"}})
++
++    run_id = f"profile-failure-{failure}"
++    gateway = build_server_week2_llm_gateway(run_id, tmp_path, execution_id=run_id, _base_transport_for_testing=httpx.MockTransport(handler))
++    # production attaches the run's semantic session before mapping (without one, an audited gateway refuses to send at all)
++    from comqutor_alpha.llm_runtime.session import SemanticRuntimeSession
++
++    (tmp_path / run_id).mkdir(exist_ok=True)
++    gateway.attach_semantic_runtime(SemanticRuntimeSession(run_id=run_id, output_directory=tmp_path / run_id, execution_mode="test",
++                                                           provider="deepseek", model="deepseek-v4-flash"))
++    record = {"claim_id": f"{run_id}:agent:claim:1", "claim": "Hyperscaler AI capex keeps rising, lifting accelerator demand.",
++              "evidence": "Hyperscaler AI capex keeps rising, lifting accelerator demand.", "ticker": "NVDA", "agent": "news_agent",
++              "factors": [], "direction": "positive", "claim_quality": "analytical"}
++    matches = map_structured_records([record], load_alpha_taxonomy(), llm_gateway=gateway, concurrency=1)
++    assert len(hits) == 1
++    match = matches[0]
++    assert match.get("matched_alpha") in (None, "")
++    assert match.get("alpha_match_fallback_reason")
++    completion = compute_alpha_classification_completion({"matches": matches})
++    assert completion["valid_none_count"] == 0
++    assert completion["call_failure_count"] == 1
++    records = _requests(tmp_path, run_id)
++    assert len(records) == 1 and records[0]["headers"]["x-stainless-retry-count"] == "0"
+--- /dev/null
++++ after/tests/test_t3_closeout_relation_and_opposition_consumption.py
+@@ -0,0 +1,146 @@
++"""2026-10-08 (T3 closeout): which field each production gate reads when a
++claim could become positive activation evidence.
++
++Contract (docs/specs/product_decisions_and_unknowns.md PD-006, NOT_APPROVED;
++docs/specs/semantic_authority_matrix.csv "evidence stance": "No production
++authority", "CURRENT effect is SHADOW_ONLY"): the LLM direction cannot affect
++Activation. The activation-evidence selector therefore reads the mapper's
++deterministic ``relation`` and ``assertion_status``; these tests pin that an
++LLM ``supports_alpha`` never lifts a claim past those gates or past the
++verified-support gate, and that background, citation-only, conditional,
++opposing and insufficient content-support verdicts never count as verified
++support.
++
++What these tests do NOT claim: a claim the LLM judged opposes_alpha or
++neutral_background but whose text rule says ``activation`` (T3 samples 037,
++038, 040) passes every selector gate today and is kept out of the pool only
++by the source gate -- recorded in the closeout report as an open product
++decision, not asserted here.
++
++Match records are constructed (fields as the production mapper writes them,
++values as observed for t3v3-005/006); the content-support case replays the
++real saved t3v3-006 reply. Zero network.
++"""
++
++from __future__ import annotations
++
++import importlib.util
++import json
++import sys
++from functools import lru_cache
++from pathlib import Path
++from types import SimpleNamespace
++
++import pytest
++
++from comqutor_alpha.graph_engine.evidence_fact_index import (
++    REASON_ASSERTION_NEGATED,
++    REASON_RELATION_NOT_SUPPORTING,
++    select_supporting_alpha_claims,
++)
++from comqutor_alpha.source_provenance import compute_verified_support_eligibility
++from comqutor_alpha.structure_engine import content_support_llm as cs
++from tests._content_support_v2_fixture_helpers import v2_response
++
++REPO = Path(__file__).resolve().parents[1]
++DRIVERS = REPO / "docs/audit_artifacts/round_source_linking_t0_t2"
++MANIFEST = DRIVERS / "round25_t3_minimal_prep_20261008/B1_samples_v4/joint_sample_v4_manifest.json"
++EXECUTION_ID = "t3joint-20261008T170322Z-bd99811e"
++CS_LOGS = REPO / "outputs/t3_joint_evaluations" / EXECUTION_ID / "content_support_verification" / EXECUTION_ID / "error_logs"
++
++
++def _match(*, relation: str, assertion_status: str, stance: str, stance_method: str | None = "llm") -> dict:
++    candidate = {"alpha_id": "A304", "relation": relation, "evidence_stance": stance, "stance_method": stance_method, "score": 0.0}
++    return {"claim_id": "run:portfolio_manager:claim:1", "match_status": "matched", "matched_alpha": "A304", "llm_selected_alpha_id": "A304",
++            "claim": "x", "evidence": "the last four quarters support a trailing inflection, not a forward EPS of $15.72", "score": 0.0,
++            "claim_quality": "analytical", "assertion_status": assertion_status, "eligible_candidates": [], "top_candidates": [candidate],
++            "candidate_scores": [candidate], "matched_evidence_stance": stance}
++
++
++def test_llm_supports_does_not_lift_a_text_rule_mention_into_the_activation_pool():
++    # t3v3-005 / 006 as consumed: LLM selected A304, LLM direction supports_alpha, text rule relation=mention, assertion=negated
++    eligible, excluded, _ = select_supporting_alpha_claims([_match(relation="mention", assertion_status="negated", stance="supports_alpha")], "A304")
++    assert eligible == []
++    assert excluded[0]["reason"] == REASON_RELATION_NOT_SUPPORTING
++
++
++def test_the_negated_assertion_gate_still_applies_behind_the_relation_gate():
++    eligible, excluded, _ = select_supporting_alpha_claims([_match(relation="activation", assertion_status="negated", stance="supports_alpha")], "A304")
++    assert eligible == []
++    assert excluded[0]["reason"] == REASON_ASSERTION_NEGATED
++
++
++@pytest.mark.parametrize("relation", ["invalidation", "risk_relief", "mention"])
++@pytest.mark.parametrize("stance", ["supports_alpha", "opposes_alpha", "neutral_background", "mentions_alpha"])
++def test_text_rule_opposition_relief_and_mention_never_enter_the_pool_whatever_the_llm_direction(relation, stance):
++    eligible, excluded, _ = select_supporting_alpha_claims([_match(relation=relation, assertion_status="asserted", stance=stance)], "A304")
++    assert eligible == []
++    assert excluded[0]["reason"] == REASON_RELATION_NOT_SUPPORTING
++
++
++def test_the_selector_reads_the_mapper_relation_not_the_llm_direction():
++    """Same text-rule relation, opposite LLM directions: identical selector outcome (the direction has no production authority)."""
++    supports = select_supporting_alpha_claims([_match(relation="activation", assertion_status="asserted", stance="supports_alpha")], "A304")
++    opposes = select_supporting_alpha_claims([_match(relation="activation", assertion_status="asserted", stance="opposes_alpha")], "A304")
++    assert [r["claim_id"] for r in supports[0]] == [r["claim_id"] for r in opposes[0]]
++
++
++@lru_cache(maxsize=1)
++def _t3_006():
++    spec = importlib.util.spec_from_file_location("t3_joint_driver_relation_tests", DRIVERS / "t3_joint_sample_driver.py")
++    assert spec is not None and spec.loader is not None
++    driver = importlib.util.module_from_spec(spec)
++    sys.modules[spec.name] = driver
++    spec.loader.exec_module(driver)
++    samples = driver.load_samples(MANIFEST)
++    for s in samples:
++        driver.strip_saved_llm_content_verdict(s["record"])
++    sample = next(s for s in samples if s["sample_id"] == "t3v3-006")
++    item = next(i for v in driver.content_support_request_items(samples).values() for i in v if i.claim_id == sample["record"]["claim_id"])
++    requests = [json.loads(line) for line in (CS_LOGS / "week2_llm_provider_request_audit.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
++    responses = {r["attempt_id"]: r for r in (json.loads(line) for line in (CS_LOGS / "week2_llm_provider_response_audit.jsonl").read_text(encoding="utf-8").splitlines() if line.strip())}
++    req = next(r for r in requests if r["claim_ids"] == [item.claim_id])
++    reply = json.loads(json.loads(responses[req["attempt_id"]]["body"])["choices"][0]["message"]["content"])["items"][0]
++    return item, reply, sample["sources"]
++
++
++class _ReplayGateway:
++    model_name, provider = "deepseek-v4-flash", "deepseek"
++
++    def __init__(self, reply):
++        self.reply = reply
++
++    def invoke_json_with_trace(self, task, payload, validator):
++        return SimpleNamespace(provider_attempt_count=1, provider_status="success", error_code=None, cache_hit=False, validation_accepted=True,
++                               request_control=None, provider_response_metadata=None, token_usage=None, attempt_history=(),
++                               validated_output=validator({"items": [self.reply]}))
++
++    def finalize_semantic_invocation(self, invocation, accepted, fallback_reason=None):
++        pass
++
++
++def _verified(reply) -> dict:
++    item, _, sources = _t3_006()
++    results = {}
++    cs._process_batch([item], _ReplayGateway(reply), cs.ContentSupportRunStats(), results)
++    return compute_verified_support_eligibility(results[item.claim_id], sources)
++
++
++def test_control_the_real_t3v3_006_supports_reply_is_verified_support():
++    _, reply, _ = _t3_006()
++    assert reply["status"] == "SUPPORTS"
++    assert _verified(reply)["eligible"] is True
++
++
++@pytest.mark.parametrize("status,remainder", [("BACKGROUND", ""), ("CITATION_ONLY", ""), ("INSUFFICIENT", ""), ("OPPOSES", ""),
++                                              ("CONDITIONAL", "a condition the material leaves open"), ("SUPPORTS", "a material unsupported remainder")])
++def test_background_citation_insufficient_opposing_and_conditional_verdicts_are_never_verified_support(status, remainder):
++    """Same real request and the same real cited excerpt as the control; only the verdict differs (constructed reply)."""
++    _, real, _ = _t3_006()
++    reply = v2_response(claim_id=real["claim_id"], status=status, used_source_id=real["used_source_id"], used_location=real["used_location"],
++                        supporting_quote_or_data=real["supporting_quote_or_data"], unsupported_remainder=remainder,
++                        materiality="MATERIAL" if remainder else None)
++    if status == "INSUFFICIENT":
++        reply.update({"used_source_id": None, "used_location": None, "supporting_quote_or_data": None})
++    verdict = _verified(reply)
++    assert verdict["eligible"] is False, (status, verdict)

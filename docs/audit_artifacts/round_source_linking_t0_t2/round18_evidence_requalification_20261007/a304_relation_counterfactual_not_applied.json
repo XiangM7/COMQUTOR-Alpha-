@@ -1,0 +1,28 @@
+{
+ "claim": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:10",
+ "match_score_of_this_claim_for_A304": 0.0,
+ "A304_official_as_produced": {
+  "activation_score": 0.0,
+  "evidence_count": 0,
+  "unique_evidence_fact_count": 0,
+  "distinct_supporting_agent_count": 0,
+  "direction": "unknown",
+  "status": "inactive"
+ },
+ "A304_counterfactual_relation_set_to_activation_NOT_APPLIED": {
+  "activation_score": 0.0,
+  "evidence_count": 0,
+  "unique_evidence_fact_count": 0,
+  "distinct_supporting_agent_count": 0,
+  "direction": "unknown",
+  "status": "inactive"
+ },
+ "note": "counterfactual computed with the production scorer on a copy; nothing was written to any run; the relation is not changed by this round",
+ "result": "setting only the relation to 'activation' leaves A304 with 0 evidence and score 0: a second, independent exclusion applies",
+ "second_independent_exclusion": {
+  "where": "comqutor_alpha/graph_engine/activation_scorer_v2.py: ASSERTION_WEIGHTS = {asserted 1.0, conditional 0.7, mixed 0.5, negated 0.0}; evidence gathering requires assertion_status != negated",
+  "claim_value": "assertion_status = negated, semantic_polarity = mention (set by the structure / claim-semantics text rules, not by the model)",
+  "also": "this claim's deterministic match score for A304 is 0.0 (the activation formula weights evidence by that score; A301 claims 33 and 36 show the same zero-weight effect)"
+ },
+ "conclusion": "the relation field is not a mapping/consumption defect that a minimal fix could correct: both exclusions are the same lexical negation rule, and whether this claim's negation rebuts the bulls' PEG defense (bearing on A304) or negates A304's own thesis is a semantic judgment that was not produced and is not inferred here"
+}

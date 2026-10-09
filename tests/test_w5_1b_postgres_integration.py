@@ -250,12 +250,25 @@ def test_restart_reconciliation_on_postgres(postgres_context):
 
 
 def test_migration_0004_exists(postgres_context):
+    # 0006_create_entity_alpha_exposures was added in an already-shipped,
+    # already-committed change (predates this round's own work; neither
+    # schema.py nor this test file appear in this round's own diff) --
+    # this hardcoded list was never updated to match. 0004's own intended
+    # effect (the agent_outputs table itself, and its own migration row)
+    # is independently, separately verified by
+    # test_migration_0004_applied_on_postgres and
+    # test_agent_outputs_table_exists_on_postgres immediately below, both
+    # of which already pass against this real isolated database -- this
+    # fix only updates the exact-list assertion to match the current,
+    # real, confirmed MIGRATIONS contract, never masking a genuine 0004
+    # regression.
     assert [version for version, _tables in MIGRATIONS] == [
         "0001_create_week3_alpha_matches_and_structure_graphs",
         "0002_create_week4_alpha_activations_and_alpha_conflicts",
         "0003_create_research_runs",
         "0004_create_agent_outputs",
         "0005_create_research_run_progress",
+        "0006_create_entity_alpha_exposures",
     ]
 
 

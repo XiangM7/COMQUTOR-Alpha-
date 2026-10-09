@@ -1,0 +1,30 @@
+{
+ "tests/test_w5_demo_seed.py::test_default_targets_are_isolated_under_demo_root": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[outputs/runs-sqlite:///.demo/w5/comqutor_demo.db-environment0]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[.demo/w5/outputs/runs-sqlite:///normal-development.db-environment1]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[.demo/w5/outputs/runs-postgresql://localhost/comqutor-environment2]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_unsafe_targets_require_explicit_confirmation[.demo/w5/outputs/runs-sqlite:///.demo/w5/comqutor_demo.db-environment3]": [
+  "PASSED",
+  ""
+ ],
+ "tests/test_w5_demo_seed.py::test_seed_is_complete_idempotent_and_reusable_without_provider": [
+  "FAILED",
+  "scripts.seed_w5_demo.DemoSeedError: NVDA_MAIN_CONFLICT_NOT_ARBITRATED"
+ ],
+ "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded": [
+  "FAILED",
+  "scripts.seed_w5_demo.DemoSeedError: NVDA_MAIN_CONFLICT_NOT_ARBITRATED"
+ ]
+}

@@ -1,0 +1,2357 @@
+{
+  "based_on_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+  "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+  "executed_at": "2026-10-06T00:14:59.702583+00:00",
+  "candidate_source_content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+  "analysis_date": "2026-10-05",
+  "evidence_cutoff_at": "2026-10-05T17:36:24",
+  "evidence_cutoff_basis": "MAX_SOURCE_FETCHED_AT",
+  "git_commit": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "git_dirty": true,
+  "claim_count": 20,
+  "max_calls": 20,
+  "max_tokens": 8192,
+  "stats": {
+    "llm_gateway_used": true,
+    "requested_count": 20,
+    "llm_verified_count": 16,
+    "fallback_count": 4,
+    "fallback_reason_counts": {
+      "audit_write_failed": 0,
+      "budget_exhausted": 0,
+      "content_hash_stale": 0,
+      "duplicate_result": 0,
+      "identity_mismatch": 0,
+      "invalid_status": 0,
+      "malformed_response": 0,
+      "missing_result": 0,
+      "provider_error": 3,
+      "quote_or_data_not_found": 1,
+      "source_not_in_candidates": 0,
+      "time_invalid": 0,
+      "timeout": 0
+    },
+    "status_counts": {
+      "BACKGROUND": 5,
+      "CITATION_ONLY": 0,
+      "CONDITIONAL": 1,
+      "INSUFFICIENT": 1,
+      "OPPOSES": 0,
+      "SUPPORTS": 9
+    },
+    "batch_count": 20,
+    "logical_provider_calls": 20,
+    "real_provider_attempts": 20,
+    "attempt_log": [
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:17"
+        ],
+        "provider_status": "provider_error",
+        "error_code": "WEEK2_LLM_OUTPUT_TRUNCATED",
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": false,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "b0d76d58-d961-46c7-87ba-c4c1629a8754",
+          "response_model": "deepseek-flash",
+          "finish_reason": "length",
+          "raw_usage": {
+            "completion_tokens": 8192,
+            "prompt_tokens": 1975,
+            "total_tokens": 10167,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 8192,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 1792
+            },
+            "prompt_cache_hit_tokens": 1792,
+            "prompt_cache_miss_tokens": 183
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1975,
+          "output_tokens": 8192,
+          "total_tokens": 10167
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:54"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "06e8a4b0-38f6-42ae-af5e-9b98aa1cd987",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 6677,
+            "prompt_tokens": 1924,
+            "total_tokens": 8601,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 6443,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1284
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1924,
+          "output_tokens": 6677,
+          "total_tokens": 8601
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:24"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "c83c242a-3f0a-41bd-8d9b-8c055279f5a1",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 3711,
+            "prompt_tokens": 1928,
+            "total_tokens": 5639,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 3493,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1288
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1928,
+          "output_tokens": 3711,
+          "total_tokens": 5639
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:16"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "e61f6006-ec11-499e-9031-699e30876f44",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 3746,
+            "prompt_tokens": 1919,
+            "total_tokens": 5665,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 3545,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1279
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1919,
+          "output_tokens": 3746,
+          "total_tokens": 5665
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:8"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "56701959-8c8d-411a-bf89-7e980438fe59",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 5191,
+            "prompt_tokens": 1979,
+            "total_tokens": 7170,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 4908,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1339
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1979,
+          "output_tokens": 5191,
+          "total_tokens": 7170
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:28"
+        ],
+        "provider_status": "provider_error",
+        "error_code": "WEEK2_LLM_OUTPUT_TRUNCATED",
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": false,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "25b7e66a-6eed-4d1a-842a-ebb6f7649929",
+          "response_model": "deepseek-flash",
+          "finish_reason": "length",
+          "raw_usage": {
+            "completion_tokens": 8192,
+            "prompt_tokens": 1974,
+            "total_tokens": 10166,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 8192,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 1792
+            },
+            "prompt_cache_hit_tokens": 1792,
+            "prompt_cache_miss_tokens": 182
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1974,
+          "output_tokens": 8192,
+          "total_tokens": 10166
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:31"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "086f43e7-9f0d-46f0-baa6-e0ad84224c68",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 3059,
+            "prompt_tokens": 1918,
+            "total_tokens": 4977,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 2838,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1278
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1918,
+          "output_tokens": 3059,
+          "total_tokens": 4977
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "83632587-5570-428b-93c7-7b5fb5a3dddd",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 6695,
+            "prompt_tokens": 1960,
+            "total_tokens": 8655,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 6458,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1320
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1960,
+          "output_tokens": 6695,
+          "total_tokens": 8655
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:48"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "dd5cd311-0210-4f25-9dec-cce1e35414bf",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 5980,
+            "prompt_tokens": 1966,
+            "total_tokens": 7946,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 5680,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1326
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1966,
+          "output_tokens": 5980,
+          "total_tokens": 7946
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:29"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "0476c89d-f495-409a-b5e4-6e6a8b963436",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 7165,
+            "prompt_tokens": 1929,
+            "total_tokens": 9094,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 6964,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1289
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1929,
+          "output_tokens": 7165,
+          "total_tokens": 9094
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:53"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "9e7a3aa3-7397-446f-b539-abdc348f9247",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 6945,
+            "prompt_tokens": 1936,
+            "total_tokens": 8881,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 6727,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 1792
+            },
+            "prompt_cache_hit_tokens": 1792,
+            "prompt_cache_miss_tokens": 144
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1936,
+          "output_tokens": 6945,
+          "total_tokens": 8881
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:8"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "bcbdab19-562b-4911-a251-46394fd454e7",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 3697,
+            "prompt_tokens": 1958,
+            "total_tokens": 5655,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 3549,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1318
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1958,
+          "output_tokens": 3697,
+          "total_tokens": 5655
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "6bf14ebe-721c-4b81-a52c-bf234e98fac9",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 4432,
+            "prompt_tokens": 1965,
+            "total_tokens": 6397,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 4211,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1325
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1965,
+          "output_tokens": 4432,
+          "total_tokens": 6397
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:61"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "82d25da0-8eb8-4f8f-8265-1f7df29f5465",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 7499,
+            "prompt_tokens": 1919,
+            "total_tokens": 9418,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 7310,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1279
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1919,
+          "output_tokens": 7499,
+          "total_tokens": 9418
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:7"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "56488b95-6109-4486-b63f-e631c7c017fb",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 4864,
+            "prompt_tokens": 1926,
+            "total_tokens": 6790,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 4636,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1286
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1926,
+          "output_tokens": 4864,
+          "total_tokens": 6790
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:12"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "02114dba-fab5-4e2b-b8ab-81dfd5222bed",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 6243,
+            "prompt_tokens": 1942,
+            "total_tokens": 8185,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 6018,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 1792
+            },
+            "prompt_cache_hit_tokens": 1792,
+            "prompt_cache_miss_tokens": 150
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1942,
+          "output_tokens": 6243,
+          "total_tokens": 8185
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:38"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "d4213795-6634-472d-b402-deb4239c7ba4",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 5887,
+            "prompt_tokens": 1945,
+            "total_tokens": 7832,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 5640,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1305
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1945,
+          "output_tokens": 5887,
+          "total_tokens": 7832
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:13"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "686008c2-9134-4f37-9918-05c7d1162ae7",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 397,
+            "prompt_tokens": 1887,
+            "total_tokens": 2284,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 248,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1247
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1887,
+          "output_tokens": 397,
+          "total_tokens": 2284
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:119"
+        ],
+        "provider_status": "success",
+        "error_code": null,
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": true,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "1c4d3f5d-4248-412c-978f-294589d1facc",
+          "response_model": "deepseek-flash",
+          "finish_reason": "stop",
+          "raw_usage": {
+            "completion_tokens": 2815,
+            "prompt_tokens": 1906,
+            "total_tokens": 4721,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 2607,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1266
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1906,
+          "output_tokens": 2815,
+          "total_tokens": 4721
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      {
+        "claim_ids": [
+          "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:107"
+        ],
+        "provider_status": "provider_error",
+        "error_code": "WEEK2_LLM_OUTPUT_TRUNCATED",
+        "cache_hit": false,
+        "provider_attempt_count": 1,
+        "validation_accepted": false,
+        "request_control": {
+          "schema_version": "comqutor.semantic_call_request_control.v1",
+          "endpoint": "https://api.deepseek.com",
+          "request_model": "deepseek-v4-flash",
+          "max_tokens_field": "max_tokens",
+          "max_tokens_value": 8192
+        },
+        "provider_response_metadata": {
+          "schema_version": "comqutor.semantic_call_provider_response.v1",
+          "provider_request_id": "c9570b97-7c7a-464e-99df-c1264739585c",
+          "response_model": "deepseek-flash",
+          "finish_reason": "length",
+          "raw_usage": {
+            "completion_tokens": 8192,
+            "prompt_tokens": 1953,
+            "total_tokens": 10145,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 8192,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cache_write_tokens": null,
+              "cached_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 1313
+          }
+        },
+        "token_usage": {
+          "input_tokens": 1953,
+          "output_tokens": 8192,
+          "total_tokens": 10145
+        },
+        "attempt_history": [],
+        "model_name": "deepseek-v4-flash",
+        "provider": "deepseek"
+      }
+    ]
+  },
+  "records": [
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:17",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:17",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "aggressive_risk_analyst",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "AMD's forward EPS of $15.63 versus TTM $3.92 is a 4x ramp, and the PEG of 0.64 says that if even 70% of that ramp lands, you're buying growth at a discount.",
+      "evidence": "AMD's forward EPS of $15.63 versus TTM $3.92 is a 4x ramp, and the PEG of 0.64 says that if even 70% of that ramp lands, you're buying growth at a discount.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "positive",
+      "confidence": 0.75,
+      "source_type": "analyst",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "claim_index": 16,
+      "source_section": null,
+      "assertion_status": "conditional",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "PENDING_REVIEW",
+      "content_support_method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "PENDING_REVIEW",
+        "method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:17",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": null
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_STATE_OR_CHANGE_SIGNAL",
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_6373e765fb2f",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "merged_agents": [
+        "aggressive_risk_analyst"
+      ],
+      "content_support_llm_fallback_reason": "provider_error"
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:54",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:54",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "bear_researcher",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "That forward EPS of $15.63 is a sell-side consensus number \u2014 and sell-side estimates for high-beta semis are notoriously backward-looking and slow to cut.",
+      "evidence": "That forward EPS of $15.63 is a sell-side consensus number \u2014 and sell-side estimates for high-beta semis are notoriously backward-looking and slow to cut.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "negative",
+      "confidence": 0.75,
+      "source_type": "analyst",
+      "output_type": "research_debate",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "claim_index": 53,
+      "source_section": "6. The Bull's PEG Argument Is Circular",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "PENDING_REVIEW",
+      "content_support_method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "PENDING_REVIEW",
+        "method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:54",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": null
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL",
+        "ANALYTICAL_STATE_OR_CHANGE_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_8a846580cf32",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "merged_agents": [
+        "bear_researcher"
+      ],
+      "content_support_llm_fallback_reason": "quote_or_data_not_found"
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:24",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:24",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "conservative_risk_analyst",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "You say the PEG of 0.64 means we're \"buying growth at a discount.\" But that PEG is computed off the very forward estimate that has to be delivered.",
+      "evidence": "You say the PEG of 0.64 means we're \"buying growth at a discount.\" But that PEG is computed off the very forward estimate that has to be delivered.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "positive",
+      "confidence": 0.55,
+      "source_type": "analyst",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "claim_index": 23,
+      "source_section": null,
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "BACKGROUND",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "BACKGROUND",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:24",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL",
+        "ANALYTICAL_STATE_OR_CHANGE_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_3d096cc0beca",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "merged_agents": [
+        "conservative_risk_analyst"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "BACKGROUND",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "excerpt",
+        "supporting_quote_or_data": "PEG Ratio=0.64 Price to Book=15.329561 EPS (TTM)=3.92 Forward EPS=15.63089",
+        "rationale": "The source confirms the PEG ratio and forward EPS figures, but it does not itself state that the PEG is calculated from the forward estimate or that the forward estimate must be delivered.",
+        "supported_proposition": "The saved material contains a PEG Ratio of 0.64 and a Forward EPS of 15.63089.",
+        "unsupported_remainder": "That the PEG of 0.64 is computed off the very forward estimate that has to be delivered."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:16",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:16",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "neutral_risk_analyst",
+      "timestamp": "2026-10-05T17:36:25Z",
+      "claim": "And your insistence on sizing the residual against the 52-week low of $188.22 is, frankly, not risk management \u2014 it's capitulation pricing.",
+      "evidence": "And your insistence on sizing the residual against the 52-week low of $188.22 is, frankly, not risk management \u2014 it's capitulation pricing.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "neutral",
+      "confidence": 0.75,
+      "source_type": "analyst",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "claim_index": 15,
+      "source_section": null,
+      "assertion_status": "negated",
+      "semantic_polarity": "mention",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "BACKGROUND",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "BACKGROUND",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:16",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_75ec0e2b674d",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "merged_agents": [
+        "neutral_risk_analyst"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "BACKGROUND",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.fifty_two_week_low",
+        "supporting_quote_or_data": "188.22",
+        "rationale": "The source confirms the 52-week low value of $188.22, but it does not contain material assessing whether sizing the residual against that level is not risk management or is capitulation pricing. It therefore provides context for the numeric reference only, not the evaluative proposition.",
+        "supported_proposition": "the 52-week low is $188.22",
+        "unsupported_remainder": "that sizing the residual against that level is not risk management and is capitulation pricing"
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:8",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:8",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "research_manager",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "Third, valuation rigor: the bull's PEG of 0.64 is circular \u2014 it's built on the very sell-side forward EPS estimate that is in question, and if the 4x ramp from TTM $3.92 to $15.63 comes in at 3x, the multiple de-rates violently.",
+      "evidence": "Third, valuation rigor: the bull's PEG of 0.64 is circular \u2014 it's built on the very sell-side forward EPS estimate that is in question, and if the 4x ramp from TTM $3.92 to $15.63 comes in at 3x, the multiple de-rates violently.",
+      "entities": [
+        "AMD",
+        "valuation",
+        "rates"
+      ],
+      "factors": [],
+      "direction": "negative",
+      "confidence": 0.75,
+      "source_type": "unknown",
+      "output_type": "research_debate",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan"
+      ],
+      "claim_index": 7,
+      "source_section": null,
+      "assertion_status": "conditional",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "BACKGROUND",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "BACKGROUND",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:8",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_4a4ba70c36be",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan"
+      ],
+      "merged_agents": [
+        "research_manager"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "BACKGROUND",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "excerpt",
+        "supporting_quote_or_data": "PEG Ratio=0.64 Price to Book=15.329561 EPS (TTM)=3.92 Forward EPS=15.63089",
+        "rationale": "The candidate supplies the PEG and EPS figures referenced, but it does not state that PEG is circular, that the forward EPS estimate is sell-side or in question, or that a 3x ramp would cause the multiple to de-rate violently. It is relevant valuation context but does not establish or reject the claim's argumentative conclusion.",
+        "supported_proposition": "PEG Ratio is 0.64; TTM EPS is 3.92; Forward EPS is 15.63089.",
+        "unsupported_remainder": "The assertions that the bull's PEG of 0.64 is circular because it is built on the very sell-side forward EPS estimate in question, and that if the 4x ramp from TTM $3.92 to $15.63 comes in at 3x the multiple de-rates violently."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:28",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:28",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "fundamental_agent",
+      "timestamp": "2026-10-05T17:37:54Z",
+      "claim": "The TTM P/E of 161x versus a forward P/E of 40.4x implies the market is pricing an enormous forward earnings ramp (forward EPS $15.63 vs TTM EPS $3.92, 4x growth).",
+      "evidence": "The TTM P/E of 161x versus a forward P/E of 40.4x implies the market is pricing an enormous forward earnings ramp (forward EPS $15.63 vs TTM EPS $3.92, 4x growth).",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "positive",
+      "confidence": 0.75,
+      "source_type": "filing",
+      "output_type": "analyst",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "claim_index": 27,
+      "source_section": "1. Company Profile & Market Snapshot",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "PENDING_REVIEW",
+      "content_support_method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "PENDING_REVIEW",
+        "method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:28",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": null
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_STATE_OR_CHANGE_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_ce63891cec06",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "merged_agents": [
+        "fundamental_agent"
+      ],
+      "content_support_llm_fallback_reason": "provider_error"
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:31",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:31",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "conservative_risk_analyst",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "For a 2.45-beta, long-duration asset, a hawkish repricing is precisely the kind of shock that compresses multiples fastest.",
+      "evidence": "For a 2.45-beta, long-duration asset, a hawkish repricing is precisely the kind of shock that compresses multiples fastest.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "unknown",
+      "confidence": 0.55,
+      "source_type": "analyst",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "claim_index": 30,
+      "source_section": null,
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "BACKGROUND",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "BACKGROUND",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:31",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_cffa01e29d66",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "merged_agents": [
+        "conservative_risk_analyst"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "BACKGROUND",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.beta",
+        "supporting_quote_or_data": "2.454",
+        "rationale": "The source confirms AMD's beta value of 2.454, which is relevant context for the '2.45-beta' descriptor. It does not state that AMD is a long-duration asset, nor does it contain any material about hawkish repricing or multiple compression, so it neither supports nor opposes the core proposition.",
+        "supported_proposition": "AMD has a beta of approximately 2.45.",
+        "unsupported_remainder": "The claim that this is a long-duration asset and that a hawkish repricing is precisely the kind of shock that compresses multiples fastest."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "aggressive_risk_analyst",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "But I'd argue the smarter aggressive play is to hold the full position, sell covered calls into the October FOMC vol spike to monetize the event risk, and add on any pullback toward the 50-day average of $513.53.",
+      "evidence": "But I'd argue the smarter aggressive play is to hold the full position, sell covered calls into the October FOMC vol spike to monetize the event risk, and add on any pullback toward the 50-day average of $513.53.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "negative",
+      "confidence": 0.75,
+      "source_type": "analyst",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "claim_index": 41,
+      "source_section": null,
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL",
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_24019200d639",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "merged_agents": [
+        "aggressive_risk_analyst"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.fifty_day_average",
+        "supporting_quote_or_data": "513.5342",
+        "rationale": "The source provides AMD's 50-day average as 513.5342, confirming the numeric level referenced in the claim. It does not establish the strategic recommendation to hold, sell covered calls into the October FOMC vol spike, or add on a pullback as the smarter aggressive play.",
+        "supported_proposition": "The 50-day average is $513.53.",
+        "unsupported_remainder": "The recommendation that the smarter aggressive play is to hold the full position, sell covered calls into the October FOMC vol spike to monetize the event risk, and add on any pullback toward that 50-day average."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:48",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:48",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "conservative_risk_analyst",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "If anything, I'd argue for the upper end of that range, and I'd want the residual sized against the 52-week low of $188.22, not the 50-day average, because that's the actual downside reference in a genuine de-rating.",
+      "evidence": "If anything, I'd argue for the upper end of that range, and I'd want the residual sized against the 52-week low of $188.22, not the 50-day average, because that's the actual downside reference in a genuine de-rating.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "neutral",
+      "confidence": 0.75,
+      "source_type": "analyst",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "claim_index": 47,
+      "source_section": null,
+      "assertion_status": "negated",
+      "semantic_polarity": "mention",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:48",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_2c2491b03503",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "merged_agents": [
+        "conservative_risk_analyst"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "excerpt",
+        "supporting_quote_or_data": "52 Week Low=188.22 50 Day Average=513.5342",
+        "rationale": "The candidate confirms the factual values cited in the claim: AMD's 52-week low is 188.22 and its 50-day average is 513.5342. It does not, however, state or establish the analyst's recommendation to size the residual against the 52-week low rather than the 50-day average, nor that the 52-week low is the actual downside reference in a genuine de-rating, nor does it identify the 'upper end of that range.'",
+        "supported_proposition": "AMD's 52-week low is $188.22 and its 50-day average is $513.5342.",
+        "unsupported_remainder": "The recommendation to size the residual against the 52-week low rather than the 50-day average, the assertion that the 52-week low is the actual downside reference in a genuine de-rating, and the argument for the upper end of an unspecified range."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:29",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:29",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "fundamental_agent",
+      "timestamp": "2026-10-05T17:37:54Z",
+      "claim": "The PEG of 0.64 suggests that if that growth materializes, the valuation is not stretched on a growth-adjusted basis \u2014 but the entire thesis rests on execution of that ramp.",
+      "evidence": "The PEG of 0.64 suggests that if that growth materializes, the valuation is not stretched on a growth-adjusted basis \u2014 but the entire thesis rests on execution of that ramp.",
+      "entities": [
+        "AMD",
+        "valuation"
+      ],
+      "factors": [],
+      "direction": "neutral",
+      "confidence": 0.55,
+      "source_type": "filing",
+      "output_type": "analyst",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "claim_index": 28,
+      "source_section": "1. Company Profile & Market Snapshot",
+      "assertion_status": "negated",
+      "semantic_polarity": "mention",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:29",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL",
+        "ANALYTICAL_STATE_OR_CHANGE_SIGNAL",
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_ecacca7d6e7f",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "merged_agents": [
+        "fundamental_agent"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.peg_ratio",
+        "supporting_quote_or_data": "0.64",
+        "rationale": "The saved material confirms the PEG Ratio is 0.64, but it does not state that this PEG suggests the valuation is not stretched on a growth-adjusted basis if growth materializes, nor does it mention the thesis resting on execution of that ramp.",
+        "supported_proposition": "The PEG is 0.64.",
+        "unsupported_remainder": "that this suggests if that growth materializes, the valuation is not stretched on a growth-adjusted basis \u2014 but the entire thesis rests on execution of that ramp."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:53",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:53",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "bear_researcher",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "The bull leans hard on the PEG of 0.64 as proof AMD is \"cheap on a growth-adjusted basis.\" But PEG is only as good as the growth estimate feeding it.",
+      "evidence": "The bull leans hard on the PEG of 0.64 as proof AMD is \"cheap on a growth-adjusted basis.\" But PEG is only as good as the growth estimate feeding it.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "positive",
+      "confidence": 0.55,
+      "source_type": "analyst",
+      "output_type": "research_debate",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "claim_index": 52,
+      "source_section": "6. The Bull's PEG Argument Is Circular",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "BACKGROUND",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "BACKGROUND",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:53",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL",
+        "ANALYTICAL_STATE_OR_CHANGE_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_8fd3c359a056",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "merged_agents": [
+        "bear_researcher"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "BACKGROUND",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.peg_ratio",
+        "supporting_quote_or_data": "0.64",
+        "rationale": "The source confirms AMD's PEG ratio is 0.64, but it does not state that the bull relies on it as proof of cheapness or that PEG depends on the growth estimate feeding it. It is relevant context but does not support or oppose the claim's overall proposition.",
+        "supported_proposition": "AMD's PEG ratio is 0.64.",
+        "unsupported_remainder": "The bull leans hard on the PEG of 0.64 as proof AMD is \"cheap on a growth-adjusted basis,\" and PEG is only as good as the growth estimate feeding it."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:8",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:8",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "portfolio_manager",
+      "timestamp": "2026-10-05T17:36:25Z",
+      "claim": "The conservative analyst's three scenarios (multiple already paid for the front-running; a hawkish rate path compressing a 2.45-beta long-duration multiple; a headline beat flattered by a $483M non-operating investment gain) require no demand collapse.",
+      "evidence": "The conservative analyst's three scenarios (multiple already paid for the front-running; a hawkish rate path compressing a 2.45-beta long-duration multiple; a headline beat flattered by a $483M non-operating investment gain) require no demand collapse.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "positive",
+      "confidence": 0.85,
+      "source_type": "unknown",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision"
+      ],
+      "claim_index": 7,
+      "source_section": "Synthesis of the Risk Debate",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "PENDING_REVIEW",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "PENDING_REVIEW",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:8",
+        "linked_source_id": null,
+        "content_hash": null
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_b126af88c2ab",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision"
+      ],
+      "merged_agents": [
+        "portfolio_manager"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "INSUFFICIENT",
+        "used_source_id": null,
+        "used_location": null,
+        "supporting_quote_or_data": null,
+        "rationale": "The allowed candidate only provides AMD fundamentals including beta 2.454; it contains no material about the conservative analyst's three scenarios, front-running, hawkish rate path, $483M non-operating investment gain, or demand collapse, so it does not bear on the proposition.",
+        "supported_proposition": "",
+        "unsupported_remainder": "The conservative analyst's three scenarios (multiple already paid for the front-running; a hawkish rate path compressing a 2.45-beta long-duration multiple; a headline beat flattered by a $483M non-operating investment gain) require no demand collapse."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "neutral_risk_analyst",
+      "timestamp": "2026-10-05T17:36:25Z",
+      "claim": "When you say \"every dip is a gift,\" you're describing a strategy that works beautifully until it doesn't, and with a 2.45 beta, the \"doesn't\" is a 30% drawdown that wipes out a year of gains.",
+      "evidence": "When you say \"every dip is a gift,\" you're describing a strategy that works beautifully until it doesn't, and with a 2.45 beta, the \"doesn't\" is a 30% drawdown that wipes out a year of gains.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "unknown",
+      "confidence": 0.75,
+      "source_type": "analyst",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "claim_index": 8,
+      "source_section": null,
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_00fd176e5f71",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "merged_agents": [
+        "neutral_risk_analyst"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.beta",
+        "supporting_quote_or_data": "2.454",
+        "rationale": "The source data_snapshot.beta value is 2.454, which supports the claim's stated 2.45 beta figure. However, the source does not establish the further claim that the strategy's failure produces a 30% drawdown that wipes out a year of gains.",
+        "supported_proposition": "AMD has a beta of 2.45.",
+        "unsupported_remainder": "the claim that the strategy's failure is a 30% drawdown that wipes out a year of gains, and the surrounding 'every dip is a gift' strategy characterization."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:61",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:61",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "bull_researcher",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "PEG of 0.64 \u2014 cheap if the forward ramp is delivered, and the Q2 print says it's on track.",
+      "evidence": "PEG of 0.64 \u2014 cheap if the forward ramp is delivered, and the Q2 print says it's on track.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "unknown",
+      "confidence": 0.55,
+      "source_type": "analyst",
+      "output_type": "research_debate",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "claim_index": 60,
+      "source_section": "7. Bottom Line: The Bear Is Right About Valuation, Wrong About the Business",
+      "assertion_status": "conditional",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:61",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_7ac4510f8be8",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "merged_agents": [
+        "bull_researcher"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.peg_ratio",
+        "supporting_quote_or_data": "0.64",
+        "rationale": "The source directly lists PEG ratio 0.64, which supports only the factual PEG component. It does not state that AMD is cheap, that the forward ramp is delivered, or that the Q2 print says it is on track.",
+        "supported_proposition": "PEG of 0.64",
+        "unsupported_remainder": "cheap if the forward ramp is delivered, and the Q2 print says it's on track"
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:7",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:7",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "research_manager",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "There is no current-data scenario where AMD gets both strong demand AND falling rates, and for a long-duration, high-beta (2.45) asset a rising discount rate is a direct multiple headwind.",
+      "evidence": "There is no current-data scenario where AMD gets both strong demand AND falling rates, and for a long-duration, high-beta (2.45) asset a rising discount rate is a direct multiple headwind.",
+      "entities": [
+        "AMD",
+        "rates"
+      ],
+      "factors": [
+        "Rate Cut Cycle"
+      ],
+      "direction": "negative",
+      "confidence": 0.85,
+      "source_type": "unknown",
+      "output_type": "research_debate",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan"
+      ],
+      "claim_index": 6,
+      "source_section": null,
+      "assertion_status": "asserted",
+      "semantic_polarity": "invalidation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:7",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_STATE_OR_CHANGE_SIGNAL",
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+        "ANALYTICAL_DIRECTIONAL_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_c683351f64e4",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan"
+      ],
+      "merged_agents": [
+        "research_manager"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "CONDITIONAL",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.beta",
+        "supporting_quote_or_data": "2.454",
+        "rationale": "The candidate confirms AMD's beta is 2.454, which supports the high-beta 2.45 component, but it contains no material on current-data demand/rates scenarios, long duration, or a rising discount rate acting as a multiple headwind. The full proposition therefore depends on assumptions the material does not establish.",
+        "supported_proposition": "AMD is a high-beta asset with beta 2.454, i.e. approximately 2.45.",
+        "unsupported_remainder": "There is no current-data scenario where AMD gets both strong demand AND falling rates, and a rising discount rate is a direct multiple headwind for this long-duration asset."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:12",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:12",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "portfolio_manager",
+      "timestamp": "2026-10-05T17:36:25Z",
+      "claim": "Where the conservative analyst overreaches: He is right on valuation, right on rate transmission, right on earnings quality \u2014 but he commits a category error by sizing the residual against the 52-week low of $188.22.",
+      "evidence": "Where the conservative analyst overreaches: He is right on valuation, right on rate transmission, right on earnings quality \u2014 but he commits a category error by sizing the residual against the 52-week low of $188.22.",
+      "entities": [
+        "AMD",
+        "valuation"
+      ],
+      "factors": [],
+      "direction": "unknown",
+      "confidence": 0.75,
+      "source_type": "unknown",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision"
+      ],
+      "claim_index": 11,
+      "source_section": "Synthesis of the Risk Debate",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:12",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_3f6835cce159",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision"
+      ],
+      "merged_agents": [
+        "portfolio_manager"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.fifty_two_week_low",
+        "supporting_quote_or_data": "188.22",
+        "rationale": "The source confirms only the numeric 52-week low value of $188.22 for AMD. It contains no material about whether the conservative analyst is right on valuation, rate transmission, or earnings quality, nor about any category error in sizing a residual against that low.",
+        "supported_proposition": "AMD's 52-week low is $188.22.",
+        "unsupported_remainder": "The claims that the conservative analyst is right on valuation, right on rate transmission, right on earnings quality, and that he commits a category error by sizing the residual against the 52-week low are not supported by the provided material."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:38",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:38",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "portfolio_manager",
+      "timestamp": "2026-10-05T17:36:25Z",
+      "claim": "Invalidation: A daily close below the 50-day average ($513.53) on volume warrants trimming the residual further; the 52-week low of $188.22 is a reference for tail-risk sizing, not a target.",
+      "evidence": "Invalidation: A daily close below the 50-day average ($513.53) on volume warrants trimming the residual further; the 52-week low of $188.22 is a reference for tail-risk sizing, not a target.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "neutral",
+      "confidence": 0.75,
+      "source_type": "unknown",
+      "output_type": "risk_portfolio",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision"
+      ],
+      "claim_index": 37,
+      "source_section": "Final Decision",
+      "assertion_status": "negated",
+      "semantic_polarity": "mention",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:38",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_57c5c58cf0b8",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision"
+      ],
+      "merged_agents": [
+        "portfolio_manager"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "excerpt: '52 Week Low=188.22 50 Day Average=513.5342'",
+        "supporting_quote_or_data": "52 Week Low=188.22 50 Day Average=513.5342",
+        "rationale": "The source confirms the 50-day average and 52-week low values referenced in the claim, but it does not state the invalidation rule, the volume condition, the trimming action, or the tail-risk sizing/not-a-target characterization.",
+        "supported_proposition": "The 50-day average is $513.53 and the 52-week low is $188.22.",
+        "unsupported_remainder": "A daily close below the 50-day average on volume warrants trimming the residual further; the 52-week low of $188.22 is a reference for tail-risk sizing, not a target."
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:13",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:13",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "bull_researcher",
+      "timestamp": "2026-10-05T17:36:24Z",
+      "claim": "But look at the PEG of 0.64.",
+      "evidence": "But look at the PEG of 0.64.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "unknown",
+      "confidence": 0.4,
+      "source_type": "analyst",
+      "output_type": "research_debate",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "claim_index": 12,
+      "source_section": "1. The Growth Story Is Not a Narrative \u2014 It's Verified in the Numbers",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "SUPPORTS",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "SUPPORTS",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:13",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RELATION_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_af87f589df4f",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "merged_agents": [
+        "bull_researcher"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "data_snapshot.peg_ratio",
+        "supporting_quote_or_data": "0.64",
+        "rationale": "The allowed candidate's data snapshot directly lists AMD's PEG ratio as 0.64, matching the claim's stated value.",
+        "supported_proposition": "The PEG is 0.64.",
+        "unsupported_remainder": ""
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:119",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:119",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "fundamental_agent",
+      "timestamp": "2026-10-05T17:39:10Z",
+      "claim": "Beta of 2.45 \u2014 this is a high-volatility instrument that will amplify any broad semiconductor or AI-theme",
+      "evidence": "Beta of 2.45 \u2014 this is a high-volatility instrument that will amplify any broad semiconductor or AI-theme",
+      "entities": [
+        "AMD",
+        "AI",
+        "semiconductor"
+      ],
+      "factors": [],
+      "direction": "unknown",
+      "confidence": 0.55,
+      "source_type": "filing",
+      "output_type": "analyst",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "claim_index": 118,
+      "source_section": "The bear case / risk factors (evidence-based)",
+      "assertion_status": "asserted",
+      "semantic_polarity": "activation",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "CONDITIONAL",
+      "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "CONDITIONAL",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:119",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd"
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_a5c9c8b374b2",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "merged_agents": [
+        "fundamental_agent"
+      ],
+      "content_support_llm_detail": {
+        "schema_version": "content_support.llm.v1",
+        "llm_status": "SUPPORTS",
+        "used_source_id": "src_5bd8a947130d1949",
+        "used_location": "excerpt / data_snapshot.beta",
+        "supporting_quote_or_data": "Beta=2.454",
+        "rationale": "The candidate source lists AMD's beta as 2.454, which confirms the numeric beta assertion of approximately 2.45. It does not state that AMD is a high-volatility instrument or that it will amplify any broad semiconductor or AI-theme.",
+        "supported_proposition": "AMD's beta is approximately 2.45 (source value: Beta=2.454).",
+        "unsupported_remainder": "the characterization as a high-volatility instrument and the projection that it will amplify any broad semiconductor or AI-theme"
+      },
+      "content_support_llm_fallback_reason": null
+    },
+    {
+      "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:107",
+      "agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:107",
+      "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+      "ticker": "AMD",
+      "agent": "fundamental_agent",
+      "timestamp": "2026-10-05T17:39:10Z",
+      "claim": "Forward EPS of $15.63 vs TTM $3.92 implies the sell-side expects a 4x earnings ramp; the PEG of 0.64 says the stock is not expensive if that ramp is delivered.",
+      "evidence": "Forward EPS of $15.63 vs TTM $3.92 implies the sell-side expects a 4x earnings ramp; the PEG of 0.64 says the stock is not expensive if that ramp is delivered.",
+      "entities": [
+        "AMD"
+      ],
+      "factors": [],
+      "direction": "neutral",
+      "confidence": 0.75,
+      "source_type": "filing",
+      "output_type": "analyst",
+      "source_agent_output_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report",
+      "source_refs": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "claim_index": 106,
+      "source_section": "The bull case (evidence-based)",
+      "assertion_status": "negated",
+      "semantic_polarity": "mention",
+      "extraction_method": "deterministic_splitter",
+      "source_link_status": "VALID",
+      "linked_source_id": "src_5bd8a947130d1949",
+      "source_link_method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+      "content_support_status": "PENDING_REVIEW",
+      "content_support_method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+      "content_support_review": {
+        "schema_version": "content_support_review.v1",
+        "status": "PENDING_REVIEW",
+        "method": "UNVERIFIED_OFFLINE_CONTENT_MATCH",
+        "reviewer": null,
+        "rationale": null,
+        "reviewed_at": null,
+        "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:107",
+        "linked_source_id": "src_5bd8a947130d1949",
+        "content_hash": null
+      },
+      "claim_quality": "analytical",
+      "claim_quality_reason_codes": [
+        "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+      ],
+      "analysis_eligible": true,
+      "duplicate_group_id": "dupgroup_dc82bc1ff47c",
+      "duplicate_count": 1,
+      "merged_source_agent_output_ids": [
+        "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report"
+      ],
+      "merged_agents": [
+        "fundamental_agent"
+      ],
+      "content_support_llm_fallback_reason": "provider_error"
+    }
+  ]
+}

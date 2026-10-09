@@ -6,6 +6,7 @@ import sqlalchemy as sa
 from comqutor_alpha.storage.db.engine import (
     DatabaseConfigurationError,
     build_engine,
+    enforce_required_database_name,
     resolve_database_url,
 )
 from comqutor_alpha.storage.db.migrations import apply_migrations
@@ -557,6 +558,123 @@ class TestProductionDatabaseFallback:
 
         assert url.startswith("sqlite:///")
         assert str(tmp_path) in url
+
+
+class TestRequiredDatabaseNameGuard:
+    """2026-10-02 incident fix: a real NVDA research run's PostgreSQL writes
+    (research_runs, agent_outputs, alpha_matches, alpha_activations,
+    alpha_conflicts, entity_alpha_exposures, structure_graphs,
+    research_run_progress -- 1040+ rows total) landed in the production
+    database instead of an isolated test one, because an isolated-database
+    launcher's own COMQUTOR_DATABASE_URL override was silently clobbered by
+    a *later* script in its own exec chain re-sourcing .env. The launcher's
+    env-var check had already passed, in a different process, before the
+    variable it protected was overwritten one handoff later.
+
+    COMQUTOR_REQUIRE_DATABASE_NAME is the fix: a second, independent guard,
+    checked at the actual write-connection construction point
+    (build_write_repository_from_env) inside whichever process ends up
+    calling it -- so it sees the real, final COMQUTOR_DATABASE_URL, not
+    merely what an earlier script intended. These tests use only local
+    SQLite files/unreachable addresses -- no real Postgres server and no
+    Provider call is needed to prove this guard fires (or doesn't) at the
+    right moment."""
+
+    @pytest.fixture(autouse=True)
+    def _clean_env(self, monkeypatch):
+        monkeypatch.delenv("COMQUTOR_DATABASE_URL", raising=False)
+        monkeypatch.delenv("COMQUTOR_ENV", raising=False)
+        monkeypatch.delenv("COMQUTOR_REQUIRE_DATABASE_NAME", raising=False)
+
+    def test_unset_guard_is_a_complete_noop(self, tmp_path):
+        """No existing caller/deployment sets this var -- behavior must be
+        byte-for-byte unchanged when it's absent."""
+        repo = build_write_repository_from_env(output_root=tmp_path)
+        repo.persist_run(
+            run_id="r1", ticker="NVDA", alpha_matches_payload=_alpha_matches_payload(), graph_payload=_graph_payload()
+        )
+        assert repo.get_graph("r1") is not None
+
+    def test_matching_database_name_succeeds(self, monkeypatch, tmp_path):
+        """When the guard is set and the resolved target genuinely matches,
+        the write path proceeds exactly as normal -- the guard never blocks
+        a correctly-targeted run."""
+        # Resolve what the local SQLite fallback URL would be, then require
+        # exactly that -- proving the positive path with no network at all.
+        expected_url = resolve_database_url(output_root=tmp_path)
+        from sqlalchemy.engine import make_url
+
+        monkeypatch.setenv("COMQUTOR_REQUIRE_DATABASE_NAME", make_url(expected_url).database)
+
+        repo = build_write_repository_from_env(output_root=tmp_path)
+        repo.persist_run(
+            run_id="r1", ticker="NVDA", alpha_matches_payload=_alpha_matches_payload(), graph_payload=_graph_payload()
+        )
+
+        assert repo.get_graph("r1") is not None
+
+    def test_mismatched_database_name_refuses_before_any_connection_is_attempted(self, monkeypatch, tmp_path):
+        """The exact incident scenario: COMQUTOR_DATABASE_URL resolves to
+        the wrong (here, production-looking) database. Uses a TEST-NET-1
+        address (192.0.2.1, RFC 5737 -- guaranteed unroutable) so that if
+        the guard did NOT fire before connecting, this test would hang/error
+        on a real connection attempt instead of failing fast and clean."""
+        monkeypatch.setenv(
+            "COMQUTOR_DATABASE_URL",
+            "postgresql+psycopg://user:pass@192.0.2.1:5999/comqutor_alpha",
+        )
+        monkeypatch.setenv("COMQUTOR_REQUIRE_DATABASE_NAME", "comqutor_alpha_test")
+
+        import comqutor_alpha.storage.db.repository as repository_module
+
+        engine_calls = []
+        monkeypatch.setattr(
+            repository_module,
+            "build_engine",
+            lambda *a, **k: engine_calls.append((a, k)),
+        )
+
+        with pytest.raises(GraphPersistenceError) as exc_info:
+            build_write_repository_from_env(output_root=tmp_path)
+
+        assert exc_info.value.reason_code == "DATABASE_TARGET_MISMATCH"
+        assert engine_calls == []  # build_engine (and thus any real connection) was never reached
+        assert "comqutor_alpha" not in str(exc_info.value)  # never leaks the target name
+        assert "192.0.2.1" not in str(exc_info.value)  # never leaks the DSN/host
+
+    def test_read_only_repository_is_unaffected_by_the_guard(self, monkeypatch, tmp_path):
+        """The guard is write-path-only (build_write_repository_from_env),
+        matching its own docstring ("checked at the actual write-connection
+        construction point"); a GET/read request must never be blocked by
+        it even when a mismatch would exist, since build_repository_from_env
+        never passes enforce_database_name=True."""
+        monkeypatch.setenv(
+            "COMQUTOR_DATABASE_URL",
+            "postgresql+psycopg://user:pass@192.0.2.1:5999/comqutor_alpha",
+        )
+        monkeypatch.setenv("COMQUTOR_REQUIRE_DATABASE_NAME", "comqutor_alpha_test")
+
+        import comqutor_alpha.storage.db.repository as repository_module
+
+        monkeypatch.setattr(
+            repository_module, "build_engine", lambda *a, **k: build_engine("sqlite:///:memory:")
+        )
+
+        # Must not raise DatabaseConfigurationError/GraphPersistenceError.
+        build_repository_from_env(output_root=tmp_path)
+
+    def test_enforce_required_database_name_unit_level(self, monkeypatch):
+        """Direct unit coverage of the parsing/comparison logic itself,
+        independent of the repository-layer wiring above."""
+        monkeypatch.delenv("COMQUTOR_REQUIRE_DATABASE_NAME", raising=False)
+        enforce_required_database_name("postgresql+psycopg://u:p@host/anything")  # no-op, unset
+
+        monkeypatch.setenv("COMQUTOR_REQUIRE_DATABASE_NAME", "comqutor_alpha_test")
+        enforce_required_database_name("postgresql+psycopg://u:p@host/comqutor_alpha_test")  # matches
+
+        with pytest.raises(DatabaseConfigurationError) as exc_info:
+            enforce_required_database_name("postgresql+psycopg://u:p@host/comqutor_alpha")
+        assert exc_info.value.reason_code == "DATABASE_TARGET_MISMATCH"
 
     def test_build_repository_from_env_wraps_production_config_error(self, monkeypatch, tmp_path):
         monkeypatch.setenv("COMQUTOR_ENV", "production")

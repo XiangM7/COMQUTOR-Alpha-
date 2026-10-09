@@ -211,11 +211,16 @@ class TestConflictUsesSharedEvidenceFactIndex:
         assert conflict["evidence_strength"] == round(expected_strength, 4)
         assert conflict["conflict_score"] == round(expected_score, 4)
 
-    def test_all_six_declared_pairs_still_evaluated(self):
-        """Regression guard against the real alpha taxonomy's 6 canonical
+    def test_all_eight_declared_pairs_still_evaluated(self):
+        """Regression guard against the real alpha taxonomy's declared
         pairs -- Track B must never reduce pair coverage. Unaffected by B2:
         pair enumeration/evaluation happens for every declared pair
-        regardless of admissibility outcome."""
+        regardless of admissibility outcome. 8, not 6: PD-017-REVISED
+        (docs/specs/product_decisions_and_unknowns.md) added A102__A304 and
+        A201__A304 as reciprocal, conditionally-evaluable pairs alongside
+        the original 6 mandatory pairs (alpha_loader.MANDATORY_CONFLICT_
+        WEIGHTS still lists exactly those original 6 -- this asserts the
+        full declared set, a superset of "mandatory")."""
         from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 
         taxonomy = load_alpha_taxonomy()
@@ -225,6 +230,6 @@ class TestConflictUsesSharedEvidenceFactIndex:
         result = detect_alpha_conflicts(
             run_id="run1", ticker="NVDA", activation_payload=activation, alpha_matches=[], taxonomy=taxonomy
         )
-        assert result["arbitration"]["declared_pair_count"] == 6
-        assert len(result["arbitration"]["candidate_evaluations"]) == 6
+        assert result["arbitration"]["declared_pair_count"] == 8
+        assert len(result["arbitration"]["candidate_evaluations"]) == 8
         assert result["formula_version"] == CONFLICT_FORMULA_VERSION

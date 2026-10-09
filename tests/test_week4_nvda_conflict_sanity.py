@@ -65,10 +65,18 @@ def _run_nvda_conflict_fixture(tmp_path):
 
     matches_payload = json.loads((tmp_path / run_id / "alpha_matches.json").read_text(encoding="utf-8"))
 
+    # T1 gate-bypass fix (2026-09-29): graph["activation"] is now the
+    # OFFICIAL, verified-only pool (require_verified_evidence_gate=True on
+    # the real run_research_request entrypoint) -- this fixture's claims
+    # are never source-linked/human-reviewed, so that pool honestly shows
+    # zero evidence everywhere. This file predates the verified-evidence
+    # gate and tests B2 admissibility's own formula against REAL,
+    # deterministic evidence -- unaffected by the gate at
+    # activation_versions["v2"], the same unmodified scorer's raw output.
     result = detect_alpha_conflicts(
         run_id=run_id,
         ticker="NVDA",
-        activation_payload=graph["activation"],
+        activation_payload=graph["activation_versions"]["v2"],
         alpha_matches=matches_payload["matches"],
     )
     return run_id, result

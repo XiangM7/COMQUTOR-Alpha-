@@ -1,0 +1,2587 @@
+{
+ "run_id": "recovery-20261007T053635Z-26d6cd1a",
+ "root_research_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+ "provisional": "stance = production deterministic classifier; no real direction result exists",
+ "stance_audit_summary": {
+  "claim_alpha_pair_count": 4953,
+  "supports_alpha_count": 476,
+  "opposes_alpha_count": 34,
+  "mentions_alpha_count": 500,
+  "neutral_background_count": 3872,
+  "supports_counter_alpha_count": 71,
+  "manual_review_required_count": 1835,
+  "unknown_count": 0,
+  "llm_stance_count": 0,
+  "deterministic_fallback_count": 0,
+  "fallback_reason_counts": {
+   "duplicate_result": 0,
+   "identity_mismatch": 0,
+   "invalid_counter_alpha": 0,
+   "invalid_stance": 0,
+   "malformed_response": 0,
+   "missing_result": 0,
+   "provider_error": 0,
+   "timeout": 0
+  }
+ },
+ "stance_effect_mode_label": {
+  "effect_mode": "shadow",
+  "stance_effect_applied": false
+ },
+ "graph": {
+  "evidence_gate_applied": true,
+  "dominant_alphas": [],
+  "policy": "t1_verified_evidence_gate_required_policy.v1"
+ },
+ "funnel": [
+  {
+   "alpha_id": "A001",
+   "alpha_name": "Rate Cut Cycle",
+   "1_matched_claims": 4,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {
+    "SOURCE_LINK_NOT_VALID": 4
+   },
+   "3_claim_quality_among_matched": {
+    "context_only|analysis_eligible=True": 3,
+    "analytical|analysis_eligible=True": 1
+   },
+   "3_raw_pool_claims_v2": 1,
+   "3_raw_pool_unique_evidence_count_v2": 1,
+   "4_unique_evidence_facts_v2": 1,
+   "5_distinct_agents_v2": 1,
+   "5_ticker_specific_v2": 1,
+   "6_alpha_direction_v2": "positive",
+   "6_deterministic_stance_mix_of_matched": {
+    "neutral_background": 3,
+    "supports_alpha": 1
+   },
+   "6_stance_methods": {
+    "None": 4
+   },
+   "raw_view_v2": {
+    "activation_score": 35.6132,
+    "uncapped_score": 35.6132,
+    "status": "watch",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 1,
+    "unique_evidence_fact_count": 1,
+    "distinct_supporting_agent_count": 1,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "INSUFFICIENT_UNIQUE_EVIDENCE",
+     "INSUFFICIENT_AGENT_INDEPENDENCE",
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "INSUFFICIENT_UNIQUE_EVIDENCE",
+     "INSUFFICIENT_AGENT_INDEPENDENCE",
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": null,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": null,
+    "would_block_dominant": false,
+    "would_block_regime_level": false,
+    "reason_codes": [
+     "EXPOSURE_QUALIFICATION_APPLIED",
+     "EXPOSURE_SEED_MISSING",
+     "SEED_ENTRY_MISSING"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 1
+   }
+  },
+  {
+   "alpha_id": "A003",
+   "alpha_name": "Liquidity Expansion",
+   "1_matched_claims": 0,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {},
+   "3_claim_quality_among_matched": {},
+   "3_raw_pool_claims_v2": 0,
+   "3_raw_pool_unique_evidence_count_v2": 0,
+   "4_unique_evidence_facts_v2": 0,
+   "5_distinct_agents_v2": 0,
+   "5_ticker_specific_v2": 0,
+   "6_alpha_direction_v2": "unknown",
+   "6_deterministic_stance_mix_of_matched": {},
+   "6_stance_methods": {},
+   "raw_view_v2": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "inactive",
+    "direction": "unknown",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": null,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": null,
+    "would_block_dominant": false,
+    "would_block_regime_level": false,
+    "reason_codes": [
+     "EXPOSURE_QUALIFICATION_APPLIED",
+     "EXPOSURE_SEED_MISSING",
+     "SEED_ENTRY_MISSING"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {}
+  },
+  {
+   "alpha_id": "A101",
+   "alpha_name": "AI Expansion",
+   "1_matched_claims": 9,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {
+    "SOURCE_LINK_NOT_VALID": 8,
+    "NOT_REVIEWED": 1
+   },
+   "3_claim_quality_among_matched": {
+    "analytical|analysis_eligible=True": 7,
+    "context_only|analysis_eligible=True": 2
+   },
+   "3_raw_pool_claims_v2": 5,
+   "3_raw_pool_unique_evidence_count_v2": 2,
+   "4_unique_evidence_facts_v2": 2,
+   "5_distinct_agents_v2": 2,
+   "5_ticker_specific_v2": 1,
+   "6_alpha_direction_v2": "positive",
+   "6_deterministic_stance_mix_of_matched": {
+    "supports_alpha": 5,
+    "neutral_background": 2,
+    "mentions_alpha": 2
+   },
+   "6_stance_methods": {
+    "None": 9
+   },
+   "raw_view_v2": {
+    "activation_score": 34.2937,
+    "uncapped_score": 34.2937,
+    "status": "watch",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 2,
+    "unique_evidence_fact_count": 2,
+    "distinct_supporting_agent_count": 2,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": 0.8,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.4,
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 4,
+    "NOT_REVIEWED": 1
+   }
+  },
+  {
+   "alpha_id": "A102",
+   "alpha_name": "Inference Explosion",
+   "1_matched_claims": 0,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {},
+   "3_claim_quality_among_matched": {},
+   "3_raw_pool_claims_v2": 0,
+   "3_raw_pool_unique_evidence_count_v2": 0,
+   "4_unique_evidence_facts_v2": 0,
+   "5_distinct_agents_v2": 0,
+   "5_ticker_specific_v2": 0,
+   "6_alpha_direction_v2": "unknown",
+   "6_deterministic_stance_mix_of_matched": {},
+   "6_stance_methods": {},
+   "raw_view_v2": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "inactive",
+    "direction": "unknown",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": 0.55,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.275,
+    "would_block_dominant": true,
+    "would_block_regime_level": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_DOMINANT_THRESHOLD",
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {}
+  },
+  {
+   "alpha_id": "A103",
+   "alpha_name": "AI Infrastructure",
+   "1_matched_claims": 5,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {
+    "SOURCE_LINK_NOT_VALID": 5
+   },
+   "3_claim_quality_among_matched": {
+    "context_only|analysis_eligible=True": 2,
+    "analytical|analysis_eligible=True": 3
+   },
+   "3_raw_pool_claims_v2": 1,
+   "3_raw_pool_unique_evidence_count_v2": 0,
+   "4_unique_evidence_facts_v2": 0,
+   "5_distinct_agents_v2": 0,
+   "5_ticker_specific_v2": 0,
+   "6_alpha_direction_v2": "positive",
+   "6_deterministic_stance_mix_of_matched": {
+    "neutral_background": 2,
+    "opposes_alpha": 1,
+    "supports_alpha": 1,
+    "mentions_alpha": 1
+   },
+   "6_stance_methods": {
+    "None": 5
+   },
+   "raw_view_v2": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "inactive",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": 0.65,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.325,
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 1
+   }
+  },
+  {
+   "alpha_id": "A201",
+   "alpha_name": "Semiconductor Supercycle",
+   "1_matched_claims": 20,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {
+    "SOURCE_LINK_NOT_VALID": 12,
+    "DISCLOSURE_TIME_UNKNOWN": 2,
+    "NOT_REVIEWED": 6
+   },
+   "3_claim_quality_among_matched": {
+    "context_only|analysis_eligible=True": 8,
+    "analytical|analysis_eligible=True": 12
+   },
+   "3_raw_pool_claims_v2": 11,
+   "3_raw_pool_unique_evidence_count_v2": 4,
+   "4_unique_evidence_facts_v2": 4,
+   "5_distinct_agents_v2": 3,
+   "5_ticker_specific_v2": 1,
+   "6_alpha_direction_v2": "positive",
+   "6_deterministic_stance_mix_of_matched": {
+    "neutral_background": 14,
+    "supports_alpha": 5,
+    "opposes_alpha": 1
+   },
+   "6_stance_methods": {
+    "None": 20
+   },
+   "raw_view_v2": {
+    "activation_score": 36.874,
+    "uncapped_score": 36.874,
+    "status": "watch",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 4,
+    "unique_evidence_fact_count": 4,
+    "distinct_supporting_agent_count": 3,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": 0.85,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.425,
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 6,
+    "NOT_REVIEWED": 5
+   }
+  },
+  {
+   "alpha_id": "A301",
+   "alpha_name": "Revenue Expansion",
+   "1_matched_claims": 43,
+   "2_content_support_eligible_claims": 1,
+   "2_ineligible_reason_counts": {
+    "NOT_REVIEWED": 9,
+    "SOURCE_LINK_NOT_VALID": 24,
+    "DISCLOSURE_TIME_UNKNOWN": 7,
+    "ELIGIBLE": 1,
+    "SUPPORT_STATUS_NOT_RESOLVED": 2
+   },
+   "3_claim_quality_among_matched": {
+    "analytical|analysis_eligible=True": 26,
+    "context_only|analysis_eligible=True": 17
+   },
+   "3_raw_pool_claims_v2": 23,
+   "3_raw_pool_unique_evidence_count_v2": 10,
+   "4_unique_evidence_facts_v2": 10,
+   "5_distinct_agents_v2": 2,
+   "5_ticker_specific_v2": 1,
+   "6_alpha_direction_v2": "positive",
+   "6_deterministic_stance_mix_of_matched": {
+    "neutral_background": 29,
+    "supports_alpha": 11,
+    "mentions_alpha": 3
+   },
+   "6_stance_methods": {
+    "None": 43
+   },
+   "raw_view_v2": {
+    "activation_score": 44.8992,
+    "uncapped_score": 44.8992,
+    "status": "watch",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 10,
+    "unique_evidence_fact_count": 10,
+    "distinct_supporting_agent_count": 2,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": 0.7,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.35,
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 15,
+    "SUPPORT_STATUS_NOT_RESOLVED": 1,
+    "NOT_REVIEWED": 4,
+    "DISCLOSURE_TIME_UNKNOWN": 3
+   }
+  },
+  {
+   "alpha_id": "A304",
+   "alpha_name": "Multiple Compression",
+   "1_matched_claims": 51,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {
+    "SOURCE_LINK_NOT_VALID": 38,
+    "NOT_REVIEWED": 7,
+    "SUPPORT_STATUS_NOT_RESOLVED": 5,
+    "CONTENT_VERSION_CHANGED_SINCE_REVIEW": 1
+   },
+   "3_claim_quality_among_matched": {
+    "analytical|analysis_eligible=True": 35,
+    "context_only|analysis_eligible=True": 16
+   },
+   "3_raw_pool_claims_v2": 25,
+   "3_raw_pool_unique_evidence_count_v2": 7,
+   "4_unique_evidence_facts_v2": 7,
+   "5_distinct_agents_v2": 3,
+   "5_ticker_specific_v2": 2,
+   "6_alpha_direction_v2": "negative",
+   "6_deterministic_stance_mix_of_matched": {
+    "mentions_alpha": 9,
+    "neutral_background": 29,
+    "supports_alpha": 12,
+    "opposes_alpha": 1
+   },
+   "6_stance_methods": {
+    "None": 51
+   },
+   "raw_view_v2": {
+    "activation_score": 41.1987,
+    "uncapped_score": 41.1987,
+    "status": "watch",
+    "direction": "negative",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 7,
+    "unique_evidence_fact_count": 7,
+    "distinct_supporting_agent_count": 3,
+    "ticker_specific_evidence_count": 2,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": 0.75,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.375,
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 19,
+    "SUPPORT_STATUS_NOT_RESOLVED": 4,
+    "NOT_REVIEWED": 2
+   }
+  },
+  {
+   "alpha_id": "A501",
+   "alpha_name": "Recession Risk",
+   "1_matched_claims": 14,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {
+    "SOURCE_LINK_NOT_VALID": 14
+   },
+   "3_claim_quality_among_matched": {
+    "analytical|analysis_eligible=True": 13,
+    "context_only|analysis_eligible=True": 1
+   },
+   "3_raw_pool_claims_v2": 11,
+   "3_raw_pool_unique_evidence_count_v2": 6,
+   "4_unique_evidence_facts_v2": 6,
+   "5_distinct_agents_v2": 1,
+   "5_ticker_specific_v2": 3,
+   "6_alpha_direction_v2": "negative",
+   "6_deterministic_stance_mix_of_matched": {
+    "mentions_alpha": 2,
+    "supports_alpha": 10,
+    "neutral_background": 2
+   },
+   "6_stance_methods": {
+    "None": 14
+   },
+   "raw_view_v2": {
+    "activation_score": 37.1696,
+    "uncapped_score": 37.1696,
+    "status": "watch",
+    "direction": "negative",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 6,
+    "unique_evidence_fact_count": 6,
+    "distinct_supporting_agent_count": 1,
+    "ticker_specific_evidence_count": 3,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "INSUFFICIENT_AGENT_INDEPENDENCE",
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "INSUFFICIENT_AGENT_INDEPENDENCE",
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": null,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": null,
+    "would_block_dominant": false,
+    "would_block_regime_level": false,
+    "reason_codes": [
+     "EXPOSURE_QUALIFICATION_APPLIED",
+     "EXPOSURE_SEED_MISSING",
+     "SEED_ENTRY_MISSING"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 11
+   }
+  },
+  {
+   "alpha_id": "A601",
+   "alpha_name": "Narrative Momentum",
+   "1_matched_claims": 16,
+   "2_content_support_eligible_claims": 0,
+   "2_ineligible_reason_counts": {
+    "SOURCE_LINK_NOT_VALID": 15,
+    "NOT_REVIEWED": 1
+   },
+   "3_claim_quality_among_matched": {
+    "analytical|analysis_eligible=True": 10,
+    "context_only|analysis_eligible=True": 6
+   },
+   "3_raw_pool_claims_v2": 6,
+   "3_raw_pool_unique_evidence_count_v2": 3,
+   "4_unique_evidence_facts_v2": 3,
+   "5_distinct_agents_v2": 1,
+   "5_ticker_specific_v2": 1,
+   "6_alpha_direction_v2": "positive",
+   "6_deterministic_stance_mix_of_matched": {
+    "mentions_alpha": 4,
+    "supports_alpha": 5,
+    "neutral_background": 7
+   },
+   "6_stance_methods": {
+    "None": 16
+   },
+   "raw_view_v2": {
+    "activation_score": 29.1224,
+    "uncapped_score": 29.1224,
+    "status": "inactive",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 3,
+    "unique_evidence_fact_count": 3,
+    "distinct_supporting_agent_count": 1,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "INSUFFICIENT_AGENT_INDEPENDENCE",
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "INSUFFICIENT_AGENT_INDEPENDENCE",
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "official_view_v2_verified": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "official_qualification": {
+    "policy_version": "evidence_source_role_v1",
+    "raw_unique_evidence_fact_count": 0,
+    "qualified_unique_evidence_fact_count": 0,
+    "qualification_reason_counts": {}
+   },
+   "7_exposure": {
+    "historical_mapping": 0.75,
+    "current_evidence": 0.0,
+    "agent_confidence": 0.0,
+    "final_exposure": 0.375,
+    "would_block_dominant": false,
+    "would_block_regime_level": true,
+    "reason_codes": [
+     "EXPOSURE_BELOW_REGIME_THRESHOLD",
+     "EXPOSURE_QUALIFICATION_APPLIED"
+    ]
+   },
+   "8_activation_level_official": "candidate",
+   "9_status_official": "candidate",
+   "3_raw_qualifying_claims_by_content_eligibility": {
+    "SOURCE_LINK_NOT_VALID": 6
+   }
+  }
+ ],
+ "conflict_candidates": [
+  {
+   "pair": "A001 vs A501",
+   "outcome": "rejected",
+   "reason_codes": [
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A001",
+    "qualifying_claims": 1,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 811,
+     "WRONG_ALPHA": 154,
+     "NON_ANALYTICAL_QUALITY": 3
+    },
+    "alpha_direction_raw_v2": "positive",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 35.6132,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A501",
+    "qualifying_claims": 11,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 83,
+     "WRONG_ALPHA": 20,
+     "UNSUPPORTED_RELATION": 2,
+     "NON_ANALYTICAL_QUALITY": 1
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 37.1696,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  },
+  {
+   "pair": "A003 vs A501",
+   "outcome": "rejected",
+   "reason_codes": [
+    "MISSING_LEFT_EVIDENCE",
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A003",
+    "qualifying_claims": 0,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 809,
+     "WRONG_ALPHA": 152
+    },
+    "alpha_direction_raw_v2": "unknown",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 0.0,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A501",
+    "qualifying_claims": 11,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 83,
+     "WRONG_ALPHA": 20,
+     "UNSUPPORTED_RELATION": 2,
+     "NON_ANALYTICAL_QUALITY": 1
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 37.1696,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  },
+  {
+   "pair": "A101 vs A304",
+   "outcome": "rejected",
+   "reason_codes": [
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A101",
+    "qualifying_claims": 5,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 808,
+     "WRONG_ALPHA": 149,
+     "NON_ANALYTICAL_QUALITY": 2,
+     "UNSUPPORTED_RELATION": 2
+    },
+    "alpha_direction_raw_v2": "positive",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 34.2937,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A304",
+    "qualifying_claims": 25,
+    "excluded": {
+     "UNSUPPORTED_RELATION": 10,
+     "NON_COMMITTED_MATCH": 87,
+     "NON_ANALYTICAL_QUALITY": 16,
+     "WRONG_ALPHA": 24
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 41.1987,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  },
+  {
+   "pair": "A102 vs A304",
+   "outcome": "rejected",
+   "reason_codes": [
+    "MISSING_LEFT_EVIDENCE",
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A102",
+    "qualifying_claims": 0,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 722,
+     "WRONG_ALPHA": 117
+    },
+    "alpha_direction_raw_v2": "unknown",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 0.0,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A304",
+    "qualifying_claims": 25,
+    "excluded": {
+     "UNSUPPORTED_RELATION": 10,
+     "NON_COMMITTED_MATCH": 87,
+     "NON_ANALYTICAL_QUALITY": 16,
+     "WRONG_ALPHA": 24
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 41.1987,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  },
+  {
+   "pair": "A201 vs A304",
+   "outcome": "rejected",
+   "reason_codes": [
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A201",
+    "qualifying_claims": 11,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 27,
+     "WRONG_ALPHA": 17,
+     "NON_ANALYTICAL_QUALITY": 8,
+     "UNSUPPORTED_RELATION": 1
+    },
+    "alpha_direction_raw_v2": "positive",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 36.874,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A304",
+    "qualifying_claims": 25,
+    "excluded": {
+     "UNSUPPORTED_RELATION": 10,
+     "NON_COMMITTED_MATCH": 87,
+     "NON_ANALYTICAL_QUALITY": 16,
+     "WRONG_ALPHA": 24
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 41.1987,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  },
+  {
+   "pair": "A301 vs A304",
+   "outcome": "rejected",
+   "reason_codes": [
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A301",
+    "qualifying_claims": 23,
+    "excluded": {
+     "NON_ANALYTICAL_QUALITY": 17,
+     "WRONG_ALPHA": 11,
+     "NON_COMMITTED_MATCH": 33,
+     "UNSUPPORTED_RELATION": 3
+    },
+    "alpha_direction_raw_v2": "positive",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 44.8992,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A304",
+    "qualifying_claims": 25,
+    "excluded": {
+     "UNSUPPORTED_RELATION": 10,
+     "NON_COMMITTED_MATCH": 87,
+     "NON_ANALYTICAL_QUALITY": 16,
+     "WRONG_ALPHA": 24
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 41.1987,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  },
+  {
+   "pair": "A304 vs A601",
+   "outcome": "rejected",
+   "reason_codes": [
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A304",
+    "qualifying_claims": 25,
+    "excluded": {
+     "UNSUPPORTED_RELATION": 10,
+     "NON_COMMITTED_MATCH": 87,
+     "NON_ANALYTICAL_QUALITY": 16,
+     "WRONG_ALPHA": 24
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 41.1987,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A601",
+    "qualifying_claims": 6,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 31,
+     "WRONG_ALPHA": 6,
+     "NON_ANALYTICAL_QUALITY": 6,
+     "UNSUPPORTED_RELATION": 4
+    },
+    "alpha_direction_raw_v2": "positive",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 29.1224,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  },
+  {
+   "pair": "A501 vs A601",
+   "outcome": "rejected",
+   "reason_codes": [
+    "DIRECTION_ROLE_UNRESOLVED"
+   ],
+   "side_a": {
+    "alpha_id": "A501",
+    "qualifying_claims": 11,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 83,
+     "WRONG_ALPHA": 20,
+     "UNSUPPORTED_RELATION": 2,
+     "NON_ANALYTICAL_QUALITY": 1
+    },
+    "alpha_direction_raw_v2": "negative",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 37.1696,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "side_b": {
+    "alpha_id": "A601",
+    "qualifying_claims": 6,
+    "excluded": {
+     "NON_COMMITTED_MATCH": 31,
+     "WRONG_ALPHA": 6,
+     "NON_ANALYTICAL_QUALITY": 6,
+     "UNSUPPORTED_RELATION": 4
+    },
+    "alpha_direction_raw_v2": "positive",
+    "alpha_direction_official": "unknown",
+    "activation_score_raw_v2": 29.1224,
+    "activation_score_official": 0.0,
+    "activation_level_official": "candidate"
+   },
+   "admissibility_executed": false
+  }
+ ],
+ "conflicts_summary": {
+  "admitted_conflict_count": 0,
+  "candidate_conflict_count": 0,
+  "arbitration": {
+   "declared_pair_count": 8,
+   "admitted_count": 0,
+   "suppressed_count": 0,
+   "rejected_count": 8
+  }
+ },
+ "nineteen": [
+  {
+   "n": 1,
+   "claim_id": "market_agent:market_report:claim:65",
+   "claim": "Bullish scenario: Continued momentum carries price toward the Bollinger upper band at 691.33.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_388228ad9e12e09d",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_DIRECTIONAL_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 2,
+   "claim_id": "market_agent:market_report:claim:85",
+   "claim": "Dimension: Momentum; Indicator: MACD; Value (2026-10-06): 36.93; Signal: Bullish; Interpretation: Above signal (33.01)",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_388228ad9e12e09d",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_DIRECTIONAL_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 3,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:10",
+   "claim": "Beta: 2.454 (very high volatility)",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 4,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:31",
+   "claim": "Revenue grew from $7,685M (Q2'25) \u2192 $9,246M \u2192 $10,270M \u2192 $10,253M \u2192 $11,536M (Q2'26).",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_582ac24bf4319648",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": false,
+     "reason_code": "DISCLOSURE_TIME_UNKNOWN"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": "A301",
+    "matched_alpha": "A301",
+    "match_status": "matched",
+    "reason": "llm semantic classifier selected from full canonical taxonomy",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "direction_judgment": {
+    "real_direction_result": null,
+    "note": "no real direction result exists (direction task not completed)",
+    "production_deterministic_stance": "supports_alpha",
+    "method": null,
+    "confidence_band": "high"
+   },
+   "in_raw_pool_v2": true,
+   "in_official_pool_v2_verified": false,
+   "raw_pool_exclusion_reason_in_conflict_audit": null,
+   "raw_view_fact_group": {
+    "evidence_fact_group_id": "b3fa4a0a4e8666e8cb8cfcc4",
+    "representative_claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:31",
+    "member_claim_ids": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:31"
+    ],
+    "supporting_agents": [
+     "fundamental_agent"
+    ],
+    "activation_eligible": true,
+    "members_source_role_detail": [
+     {
+      "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:31",
+      "source_agent": "fundamental_agent",
+      "source_role": "PRIMARY_RESEARCH",
+      "activation_eligible": true,
+      "activation_qualification_reason": "PRIMARY_QUALIFIED"
+     }
+    ]
+   },
+   "alpha_level_context_v2": {
+    "activation_score": 44.8992,
+    "uncapped_score": 44.8992,
+    "status": "watch",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 10,
+    "unique_evidence_fact_count": 10,
+    "distinct_supporting_agent_count": 2,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "alpha_level_context_official": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "first_blocking_conditions": [
+    "verified-evidence gate: DISCLOSURE_TIME_UNKNOWN"
+   ]
+  },
+  {
+   "n": 5,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:33",
+   "claim": "The Q1'26 flat-to-down print ($10,253M vs $10,270M) was a pause, but Q2'26 re-accelerated sharply.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_582ac24bf4319648",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": false,
+     "reason_code": "DISCLOSURE_TIME_UNKNOWN"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RELATION_SIGNAL",
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": "A301",
+    "matched_alpha": "A301",
+    "match_status": "matched",
+    "reason": "llm semantic classifier selected from full canonical taxonomy",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "direction_judgment": {
+    "real_direction_result": null,
+    "note": "no real direction result exists (direction task not completed)",
+    "production_deterministic_stance": "neutral_background",
+    "method": null,
+    "confidence_band": "low"
+   },
+   "in_raw_pool_v2": true,
+   "in_official_pool_v2_verified": false,
+   "raw_pool_exclusion_reason_in_conflict_audit": null,
+   "raw_view_fact_group": {
+    "evidence_fact_group_id": "f3828e5e06827fa8a317582c",
+    "representative_claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:33",
+    "member_claim_ids": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:33"
+    ],
+    "supporting_agents": [
+     "fundamental_agent"
+    ],
+    "activation_eligible": true,
+    "members_source_role_detail": [
+     {
+      "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:33",
+      "source_agent": "fundamental_agent",
+      "source_role": "PRIMARY_RESEARCH",
+      "activation_eligible": true,
+      "activation_qualification_reason": "PRIMARY_QUALIFIED"
+     }
+    ]
+   },
+   "alpha_level_context_v2": {
+    "activation_score": 44.8992,
+    "uncapped_score": 44.8992,
+    "status": "watch",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 10,
+    "unique_evidence_fact_count": 10,
+    "distinct_supporting_agent_count": 2,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "alpha_level_context_official": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "first_blocking_conditions": [
+    "verified-evidence gate: DISCLOSURE_TIME_UNKNOWN"
+   ]
+  },
+  {
+   "n": 6,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:36",
+   "claim": "Gross profit nearly doubled YoY ($6,203M vs $3,059M).",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_582ac24bf4319648",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": false,
+     "reason_code": "DISCLOSURE_TIME_UNKNOWN"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": "A301",
+    "matched_alpha": "A301",
+    "match_status": "matched",
+    "reason": "llm semantic classifier selected from full canonical taxonomy",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "direction_judgment": {
+    "real_direction_result": null,
+    "note": "no real direction result exists (direction task not completed)",
+    "production_deterministic_stance": "neutral_background",
+    "method": null,
+    "confidence_band": "low"
+   },
+   "in_raw_pool_v2": true,
+   "in_official_pool_v2_verified": false,
+   "raw_pool_exclusion_reason_in_conflict_audit": null,
+   "raw_view_fact_group": {
+    "evidence_fact_group_id": "19f3b0c31cdc4104e08eefb9",
+    "representative_claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:36",
+    "member_claim_ids": [
+     "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:36"
+    ],
+    "supporting_agents": [
+     "fundamental_agent"
+    ],
+    "activation_eligible": true,
+    "members_source_role_detail": [
+     {
+      "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:36",
+      "source_agent": "fundamental_agent",
+      "source_role": "PRIMARY_RESEARCH",
+      "activation_eligible": true,
+      "activation_qualification_reason": "PRIMARY_QUALIFIED"
+     }
+    ]
+   },
+   "alpha_level_context_v2": {
+    "activation_score": 44.8992,
+    "uncapped_score": 44.8992,
+    "status": "watch",
+    "direction": "positive",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 10,
+    "unique_evidence_fact_count": 10,
+    "distinct_supporting_agent_count": 2,
+    "ticker_specific_evidence_count": 1,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "alpha_level_context_official": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "first_blocking_conditions": [
+    "verified-evidence gate: DISCLOSURE_TIME_UNKNOWN"
+   ]
+  },
+  {
+   "n": 7,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:59",
+   "claim": "Verified: Total Assets rose to $84,464M as of 2026-06-30, from $79,642M as of 2026-03-31 (sequential QoQ) [fragmentid: srcd889dd1e36a5d55a:frag:0].",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_d889dd1e36a5d55a",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": false,
+     "reason_code": "DISCLOSURE_TIME_UNKNOWN"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 8,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:81",
+   "claim": "Verified: Free Cash Flow fell to $1,558M as of 2026-06-30, from $2,566M as of 2026-03-31 (sequential QoQ) [fragmentid: src4045667791b919f9:frag:0].",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_4045667791b919f9",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": false,
+     "reason_code": "DISCLOSURE_TIME_UNKNOWN"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 9,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:88",
+   "claim": "Operating cash flow remains robust at $2,366M, though down from $2,955M in Q1'26.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_4045667791b919f9",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": false,
+     "reason_code": "DISCLOSURE_TIME_UNKNOWN"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 10,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:105",
+   "claim": "Very high beta (2.454) \u2014 AMD will amplify any macro risk-off move.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+    "ANALYTICAL_DIRECTIONAL_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 11,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:117",
+   "claim": "Category: Market; Metric: Beta; Value: 2.454; Signal: High volatility",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RISK_OR_FORECAST_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 12,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:118",
+   "claim": "Category: Market; Metric: 52W Range; Value: $188.22 \u2013 $658.52; Signal: Tripled off low",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 13,
+   "claim_id": "fundamental_agent:fundamentals_report:claim:132",
+   "claim": "Category: Cash Flow; Metric: TTM FCF; Value: $8.841B; Signal: Strong absolute",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_DIRECTIONAL_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 14,
+   "claim_id": "bull_researcher:investment_debate_state.bull_history:claim:64",
+   "claim": "But the MACD line (36.93) remains above the signal line (33.01) \u2014 the bullish crossover is intact.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_388228ad9e12e09d",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RELATION_SIGNAL",
+    "ANALYTICAL_DIRECTIONAL_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 15,
+   "claim_id": "bear_researcher:investment_debate_state.bear_history:claim:13",
+   "claim": "And it's an estimate that requires AMD to grow earnings roughly 4x from the current TTM EPS of $3.92 [fragmentid: src7e133fa786f7aaa0:frag:0].",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_STATE_OR_CHANGE_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 16,
+   "claim_id": "bear_researcher:investment_debate_state.bear_history:claim:17",
+   "claim": "But the forward estimate is $15.72.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RELATION_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 17,
+   "claim_id": "aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+   "claim": "Downside to the 10 EMA at 618.52 [fragmentid: src388228ad9e12e09d:frag:0] is about 5.5%.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_388228ad9e12e09d",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RISK_OR_FORECAST_SIGNAL",
+    "ANALYTICAL_DIRECTIONAL_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  },
+  {
+   "n": 18,
+   "claim_id": "portfolio_manager:final_trade_decision:claim:10",
+   "claim": "His second overreach is the PEG defense \u2014 he calls 0.64 \"priced for a ramp that the last four quarters of data actually support,\" but the last four quarters support a trailing inflection, not a forward EPS of $15.72 [fragmentid: src7e133fa786f7aaa0:frag:0] against a current quarterly run-rate of $1.38 [fragmentid: src582ac24bf4319648:frag:0].",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_7e133fa786f7aaa0",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": false,
+     "reason_code": "CONTENT_VERSION_CHANGED_SINCE_REVIEW"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RELATION_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": "A304",
+    "matched_alpha": "A304",
+    "match_status": "matched",
+    "reason": "llm semantic classifier selected from full canonical taxonomy",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "direction_judgment": {
+    "real_direction_result": null,
+    "note": "no real direction result exists (direction task not completed)",
+    "production_deterministic_stance": "mentions_alpha",
+    "method": null,
+    "confidence_band": "high"
+   },
+   "in_raw_pool_v2": false,
+   "in_official_pool_v2_verified": false,
+   "raw_pool_exclusion_reason_in_conflict_audit": "UNSUPPORTED_RELATION",
+   "raw_view_fact_group": null,
+   "alpha_level_context_v2": {
+    "activation_score": 41.1987,
+    "uncapped_score": 41.1987,
+    "status": "watch",
+    "direction": "negative",
+    "activation_level": null,
+    "target_level": null,
+    "qualified_level": null,
+    "evidence_count": 7,
+    "unique_evidence_fact_count": 7,
+    "distinct_supporting_agent_count": 3,
+    "ticker_specific_evidence_count": 2,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "reason_codes": [
+     "NO_LOCAL_STRUCTURE_SUPPORT"
+    ],
+    "blocked_reason_codes": null,
+    "is_blocked": null
+   },
+   "alpha_level_context_official": {
+    "activation_score": 0.0,
+    "uncapped_score": 0.0,
+    "status": "candidate",
+    "direction": "unknown",
+    "activation_level": "candidate",
+    "target_level": "candidate",
+    "qualified_level": "candidate",
+    "evidence_count": 0,
+    "unique_evidence_fact_count": 0,
+    "distinct_supporting_agent_count": 0,
+    "ticker_specific_evidence_count": 0,
+    "local_edge_count": 0,
+    "regime_gate_passed": false,
+    "cap_reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "reason_codes": [
+     "NO_QUALIFYING_EVIDENCE"
+    ],
+    "blocked_reason_codes": [],
+    "is_blocked": false
+   },
+   "first_blocking_conditions": [
+    "verified-evidence gate: CONTENT_VERSION_CHANGED_SINCE_REVIEW",
+    "evidence qualification (raw view): excluded as UNSUPPORTED_RELATION"
+   ]
+  },
+  {
+   "n": 19,
+   "claim_id": "portfolio_manager:final_trade_decision:claim:22",
+   "claim": "The asymmetry at $654.91 is negative, and the internal evidence confirms it.",
+   "content_support": {
+    "source_link_status": "VALID",
+    "linked_source_id": "src_388228ad9e12e09d",
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "review_status": "SUPPORTS",
+    "basis": null,
+    "eligibility_for_scoring": {
+     "eligible": true,
+     "reason_code": "ELIGIBLE",
+     "support_status": "SUPPORTS"
+    }
+   },
+   "claim_quality": "analytical",
+   "analysis_eligible": true,
+   "quality_reason_codes": [
+    "ANALYTICAL_RELATION_SIGNAL",
+    "ANALYTICAL_DIRECTIONAL_SIGNAL"
+   ],
+   "classification": {
+    "model_selected_alpha": null,
+    "matched_alpha": null,
+    "match_status": "no_match",
+    "reason": "llm semantic classifier determined no canonical Alpha materially fits",
+    "alpha_match_method": "llm",
+    "fallback_reason": null
+   },
+   "first_blocking_conditions": [
+    "classification: the model returned NONE ('no canonical Alpha materially fits') -- the claim never became Alpha evidence; this is a real classification result, not a source or verification shortfall"
+   ]
+  }
+ ],
+ "eligibility_reason_counts_all_claims": {
+  "SOURCE_LINK_NOT_VALID": 714,
+  "NOT_REVIEWED": 107,
+  "ELIGIBLE": 40,
+  "SUPPORT_STATUS_NOT_RESOLVED": 89,
+  "SOURCE_OPPOSES_CLAIM": 1,
+  "DISCLOSURE_TIME_UNKNOWN": 23,
+  "CONTENT_VERSION_CHANGED_SINCE_REVIEW": 1
+ },
+ "eligible_claims_total": 40,
+ "eligible_claims": [
+  {
+   "claim_id": "market_agent:market_report:claim:19",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "market_agent:market_report:claim:23",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "market_agent:market_report:claim:27",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "market_agent:market_report:claim:47",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "market_agent:market_report:claim:59",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "market_agent:market_report:claim:65",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "market_agent:market_report:claim:85",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:2",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:7",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:8",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:9",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:10",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:11",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:12",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:15",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:16",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:17",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:83",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:105",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:113",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:117",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:118",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:123",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "fundamental_agent:fundamentals_report:claim:132",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "bull_researcher:investment_debate_state.bull_history:claim:12",
+   "outcome": "matched A301",
+   "in_raw_pool": false,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "bull_researcher:investment_debate_state.bull_history:claim:37",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "bull_researcher:investment_debate_state.bull_history:claim:64",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "bull_researcher:investment_debate_state.bull_history:claim:67",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "bear_researcher:investment_debate_state.bear_history:claim:11",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "bear_researcher:investment_debate_state.bear_history:claim:13",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "bear_researcher:investment_debate_state.bear_history:claim:17",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "research_manager:investment_plan:claim:69",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:23",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:32",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "conservative_risk_analyst:risk_debate_state.conservative_history:claim:31",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "conservative_risk_analyst:risk_debate_state.conservative_history:claim:42",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "portfolio_manager:final_trade_decision:claim:22",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "analytical",
+   "in_nineteen": true
+  },
+  {
+   "claim_id": "portfolio_manager:final_trade_decision:claim:26",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  },
+  {
+   "claim_id": "portfolio_manager:final_trade_decision:claim:46",
+   "outcome": "model NONE",
+   "in_raw_pool": null,
+   "claim_quality": "context_only",
+   "in_nineteen": false
+  }
+ ],
+ "t1_related_counts": {
+  "source_link_status": {
+   "NOT_PROVIDED": 714,
+   "VALID": 261
+  },
+  "content_support_method_among_linked": {
+   "ORIGINAL_AGENT_CITED_UNVERIFIED_SUPPORT": 42,
+   "LLM_CONTENT_SUPPORT_VERIFIED": 152,
+   "UNVERIFIED_OFFLINE_CONTENT_MATCH": 65,
+   "AUTOMATED_DATA_FACT_VERIFIED": 2
+  },
+  "content_support_status_among_linked": {
+   "PENDING_REVIEW": 143,
+   "SUPPORTS": 64,
+   "CONDITIONAL": 49,
+   "OPPOSES": 1,
+   "BACKGROUND": 4
+  },
+  "eligibility_reason_counts_all": {
+   "SOURCE_LINK_NOT_VALID": 714,
+   "NOT_REVIEWED": 107,
+   "ELIGIBLE": 40,
+   "SUPPORT_STATUS_NOT_RESOLVED": 89,
+   "SOURCE_OPPOSES_CLAIM": 1,
+   "DISCLOSURE_TIME_UNKNOWN": 23,
+   "CONTENT_VERSION_CHANGED_SINCE_REVIEW": 1
+  }
+ }
+}

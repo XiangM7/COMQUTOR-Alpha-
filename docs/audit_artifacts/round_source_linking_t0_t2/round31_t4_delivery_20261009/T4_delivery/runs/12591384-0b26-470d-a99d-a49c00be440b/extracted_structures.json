@@ -1,0 +1,823 @@
+{
+  "schema_version": "week2.extracted_structures.v2",
+  "run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+  "ticker": "NVDA",
+  "nodes": [
+    {
+      "id": "ai_capex",
+      "label": "AI CapEx",
+      "canonical_factor": "AI CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:39",
+        "canrel_bb96b1c191a4520f",
+        "canrel_ab26b9e286a5a193",
+        "canrel_e25dc7fd3f9a0c9c",
+        "canrel_501f170512f04422"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:39",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:9",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:35"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan"
+      ],
+      "evidence": [
+        "The risk is being short when the AI capex cycle keeps compounding and NVDA keeps printing $96B quarters.",
+        "The classic killer of a capex cycle — recession — is being priced *out*.",
+        "Recession risk at 6% and falling, AI-bubble-burst-2026 at 6% and falling. The bull is correct that the classic killer of a capex cycle is not currently being priced in.",
+        "Recession risk at 6% and falling."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "ai_demand",
+      "label": "AI Demand",
+      "canonical_factor": "AI Demand",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:70",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:88"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:70",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:88"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "evidence": [
+        "Note this is about IBM, not NVDA, but the framing is sector-wide: the market's concern is not whether AI demand exists, but when it converts to revenue.",
+        "If those hyperscalers slow their capex — and the \"AI demand timing is the key question\" headline from the Truist/IBM note suggests the market is already debating when, not if — the moat doesn't matter."
+      ],
+      "score": 0.4
+    },
+    {
+      "id": "ai_infrastructure",
+      "label": "AI Infrastructure",
+      "canonical_factor": "AI Infrastructure",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:68",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:76",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:110",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:27"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:68",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:76",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:110",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:27"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan"
+      ],
+      "evidence": [
+        "\"Silicon Motion Boosts AI Infrastructure Capabilities: Reason to Buy?\" [fragmentid: not provided] — continued AI infrastructure investment activity at the component level.",
+        "Sector synthesis: The AI infrastructure buildout narrative remains intact and is being reinforced by enterprise adoption headlines, but the price action is showing fatigue (chips retreating on good news).",
+        "Category: Sector demand; Datapoint / Headline: \"Silicon Motion Boosts AI Infrastructure Capabilities\"; Value / Direction: Positive; NVDA Implication: AI infrastructure investment ongoing; Source Marker: [fragmentid: not provided]",
+        "The bull's response (sovereign AI as incremental demand) is undercut by the bear's observation that the prediction market on a US government stake in NVDA is at 8% and falling."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "gpu_demand",
+      "label": "GPU Demand",
+      "canonical_factor": "GPU Demand",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:41",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:72",
+        "canrel_e25dc7fd3f9a0c9c"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:41",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:72",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:39"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "evidence": [
+        "The absence of a rate-cut tailwind means NVDA must earn its return through fundamental delivery (revenue growth, GPU demand), not through multiple expansion.",
+        "Falling AI inference/usage prices are a double-edged sword for NVDA: they expand usage volumes (bullish for GPU demand) while potentially pressuring the pricing power of the broader AI stack.",
+        "The risk is being short when the AI capex cycle keeps compounding and NVDA keeps printing $96B quarters."
+      ],
+      "score": 0.7
+    },
+    {
+      "id": "inference_demand",
+      "label": "Inference Demand",
+      "canonical_factor": "Inference Demand",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:73"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:73"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report"
+      ],
+      "evidence": [
+        "\"Zscaler (ZS) Is Up 9.1% After Reaffirming 2027 Outlook and Expanding AI Security Partnership\" [fragmentid: not provided] — enterprise AI adoption continuing."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "liquidity_expansion",
+      "label": "Liquidity Expansion",
+      "canonical_factor": "Liquidity Expansion",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:114"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:114"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report"
+      ],
+      "evidence": [
+        "Category: Geopolitics; Datapoint / Headline: Oil falls to $103; no US attack on Iran pre-midterms; Value / Direction: Risk-positive; NVDA Implication: De-escalation supports risk appetite; Source Marker: [fragmentid: not provided]"
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "narrative_momentum",
+      "label": "Narrative Momentum",
+      "canonical_factor": "Narrative Momentum",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:37",
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:67",
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:75",
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:88",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:75",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:77",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:25",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:36",
+        "canrel_93f4afd2f1ceeaf7",
+        "canrel_2bb127012db78ce7",
+        "canrel_60dca68ef5557ef7"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:37",
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:67",
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:75",
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:88",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:75",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:77",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:25",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:36",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:23",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:33",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:25"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "So why does no one sell?\" — the single most analytically interesting post: it explicitly names the crowded-trade / career-risk dynamic (\"Fund managers who sell and turn out to be early lose their jobs\").",
+        "Crowded-trade reflexivity — the WSB post articulates the mechanism precisely: nobody sells because nobody can afford to be early, which means when selling starts it can be disorderly.",
+        "Signal: Bubble / crowded-trade anxiety; Direction: Bearish (contrarian); Source: StockTwits + Reddit; Supporting evidence: \"Super Intelligence bubble...",
+        "The most defensible synthesis is that NVDA sentiment is elevated but unstable — slow money refuses to sell, fast money is buying puts into an imminent earnings event, and the dominant narrative has shifted from \"AI is the future\" to \"everyone knows it's a bubble, so why isn't anyone selling?\" That is a reflexive, crowded-trade condition rather than a clean directional signal.",
+        "Quantum is not a near-term NVDA threat, but it is a narrative-momentum competitor for the same marginal risk dollar.",
+        "This is the classic late-cycle signature of a crowded trade: fundamentals fine, momentum decelerating.",
+        "You call the fast-money-bearish, slow-money-bullish split \"the single most bullish configuration possible.\" But the report's own read is that this is \"a reflexive, crowded-trade condition rather than a clean directional signal,\" with confidence explicitly rated LOW.",
+        "A coiled spring with deteriorating momentum is not the same as a coiled spring with improving momentum."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "nvda_revenue_growth",
+      "label": "NVDA Revenue Growth",
+      "canonical_factor": "Revenue Growth",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:61",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:41",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:65",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:110",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:125",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:13",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:42",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:30",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:56",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:53",
+        "canrel_c46c3eb286eb6101",
+        "canrel_19e7fec40855bdb5",
+        "canrel_d94e017e5203b051",
+        "canrel_f0fa535deaaaa5cd",
+        "canrel_93f4afd2f1ceeaf7",
+        "canrel_10a738dc15db5e37",
+        "canrel_2bb127012db78ce7",
+        "canrel_60dca68ef5557ef7"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:61",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:41",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:65",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:110",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:125",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:13",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:42",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:30",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:56",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:53",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:107",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:38",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:11",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:23",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:4",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:33",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:25"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "Imminent earnings — repeatedly flagged as the next resolution event; a beat-and-raise would likely validate the Reddit holders and squeeze the put-buyers.",
+        "The absence of a rate-cut tailwind means NVDA must earn its return through fundamental delivery (revenue growth, GPU demand), not through multiple expansion.",
+        "Accounts receivable ballooned to $63,059M from $40,710M — a +54.9% QoQ jump against revenue growth of +17.9%.",
+        "EPS: grew from $1.08 to $2.46 (+128% YoY), though the latest quarter's EPS growth (+2.9% QoQ) decelerated sharply versus revenue growth (+17.9% QoQ) due to the non-operating gain comparison and higher tax.",
+        "Deceleration: QoQ revenue growth has slowed from 21.9% to 17.9% over four quarters.",
+        "Yes, accounts receivable rose +54.9% QoQ to $63,059M against revenue growth of +17.9%.",
+        "The bear's own sentiment report flags earnings as \"imminent\" and \"two-sided.\" A beat-and-raise against a 14.5x forward multiple is asymmetric to the upside.",
+        "That is a material deterioration in cash collection velocity, and it happened while revenue growth was decelerating from 19.8% to 17.9% QoQ.",
+        "Revenue growth to not decelerate further (it's already slowed from 21.9% to 17.9% QoQ over four quarters).",
+        "The bull is correct that a beat-and-raise against a 14.5x forward multiple is asymmetric to the upside.",
+        "A PEG of **0.29** for a company growing revenue **106% YoY** is not \"priced for perfection\" — it's **priced for skepticism**.",
+        "the forward P/E of 14.50 requires EPS to roughly double, and it requires that doubling to happen in a no-rate-cut regime with a 2.2 beta and a rising 2027 AI-bubble probability.",
+        "the current price at 230.77 embeds a perfect-outcome assumption that the cash flow statement has not yet confirmed",
+        "A PEG under 0.3 on a company with 117% ROE and 75% gross margins is not \"priced for perfection\" — it's priced for a mild disappointment.",
+        "A coiled spring with deteriorating momentum is not the same as a coiled spring with improving momentum.",
+        "The forward P/E of 14.50 versus trailing 29.17 implies EPS roughly doubling from $7.91 to $15.91 — that's not a mild expectation, that's a consensus growth curve that has to be delivered almost exactly."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "rate_cut_cycle",
+      "label": "Rate Cut Cycle",
+      "canonical_factor": "Rate Cut Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:19",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:41",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:118",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:123",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:107",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:4",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:37",
+        "canrel_9a5d30d57e97aed8",
+        "canrel_7742146309ccafc6",
+        "canrel_b5b536d7ac8a48e6",
+        "canrel_9d19c900b831cc05"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:19",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:41",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:118",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:123",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:107",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:4",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:37",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:23",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:29",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:8"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "That is a \"melt-up or grind\" regime, not a crash regime — supportive for NVDA's multiple holding, but with no rate-cut tailwind to bail out valuation.",
+        "The absence of a rate-cut tailwind means NVDA must earn its return through fundamental delivery (revenue growth, GPU demand), not through multiple expansion.",
+        "The available evidence describes a low-recession, no-rate-cut, low-near-term-AI-crash regime — an environment that is structurally supportive but tactically demanding for NVDA.",
+        "The absence of a rate-cut catalyst and the presence of a rising 2027 AI-bubble probability argue against chasing strength at extended valuations.",
+        "\"Valuation is cheap on forward numbers.\" No — the forward P/E of 14.50 requires EPS to roughly double, and it requires that doubling to happen in a no-rate-cut regime with a 2.2 beta and a rising 2027 AI-bubble probability.",
+        "The bear's case rests on three counter-pillars: (1) momentum decay is a leading signal of growth-curve repricing, (2) receivables grew 3x faster than revenue with DSO expanding 14 days in one quarter while the company borrowed $26B and FCF fell 56%, and (3) the forward multiple requires EPS to roughly double in a no-rate-cut regime with a 2.2 beta.",
+        "The report's own bottom line: \"a low-recession, no-rate-cut, low-near-term-AI-crash regime — an environment that is structurally supportive.\" You're both treating the no-rate-cut environment as a headwind, but the market has already priced 96% probability of no cuts.",
+        "A no-cut regime means **discount rates stay elevated**, which mechanically compresses the present value of long-duration growth cash flows.",
+        "with a 2.216 beta and a 24x book multiple, the stock is the most rate-sensitive expression of the AI trade",
+        "A no-cut regime means discount rates stay elevated, which mechanically compresses the present value of long-duration growth cash flows.",
+        "a no-cut regime mechanically compresses the present value of long-duration growth cash flows, and NVDA is the archetypal long-duration asset with a 2.216 beta"
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "recession_risk",
+      "label": "Recession Risk",
+      "canonical_factor": "Recession Risk",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:11",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:45",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:85",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:52",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:90",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:9",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:35",
+        "canrel_bb96b1c191a4520f",
+        "canrel_ab26b9e286a5a193",
+        "canrel_501f170512f04422"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:11",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:45",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report:claim:85",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:52",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:90",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:9",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:35"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "evidence": [
+        "Recession risk is low and falling.",
+        "Implication: Low recession risk is supportive of continued enterprise and hyperscaler IT/AI spending.",
+        "Recession risk is not the threat; valuation and crowding are.",
+        "Recession risk: 6% and falling — capex cycles don't die at 6% recession odds.",
+        "The bull says recession risk at 6% and AI-bubble-burst-2026 at 6% are \"tail risks being priced out.\" I agree with the near-term read.",
+        "Recession risk at 6% and falling, AI-bubble-burst-2026 at 6% and falling.",
+        "Recession risk at 6% and falling.",
+        "The classic killer of a capex cycle — recession — is being priced *out*.",
+        "Recession risk at 6% and falling, AI-bubble-burst-2026 at 6% and falling. The bull is correct that the classic killer of a capex cycle is not currently being priced in."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "valuation_risk",
+      "label": "Valuation Risk",
+      "canonical_factor": "Valuation Risk",
+      "node_type": "factor",
+      "source_records": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:66",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:124",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:155",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:32",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:12",
+        "canrel_9a5d30d57e97aed8",
+        "canrel_c46c3eb286eb6101",
+        "canrel_19e7fec40855bdb5",
+        "canrel_7742146309ccafc6",
+        "canrel_d94e017e5203b051",
+        "canrel_f0fa535deaaaa5cd",
+        "canrel_b5b536d7ac8a48e6",
+        "canrel_10a738dc15db5e37",
+        "canrel_9d19c900b831cc05"
+      ],
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report:claim:66",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:124",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:155",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:32",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:12",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:107",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:23",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:38",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:11",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:29",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:4",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:8"
+      ],
+      "source_agent_output_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:sentiment_agent:sentiment_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan",
+        "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "Valuation/concentration risk at a $6T market cap — the \"priced for perfection\" concern is now appearing even in promotional content.",
+        "Valuation risk: Price/Book of 24.3 and Beta of 2.216 mean high sensitivity to any growth disappointment or multiple compression.",
+        "Category: Valuation; Metric: Price/Book; Latest Value: 24.33; Prior Quarter: —; Direction: —; Signal: Valuation Risk",
+        "A PEG of 0.29 for a company growing revenue 106% YoY is not \"priced for perfection\" — it's priced for skepticism.",
+        "A 14.5x forward P/E on a company with this growth profile is not \"priced for perfection\" in the conventional sense.",
+        "A no-cut regime means **discount rates stay elevated**, which mechanically compresses the present value of long-duration growth cash flows.",
+        "A PEG of **0.29** for a company growing revenue **106% YoY** is not \"priced for perfection\" — it's **priced for skepticism**.",
+        "the forward P/E of 14.50 requires EPS to roughly double, and it requires that doubling to happen in a no-rate-cut regime with a 2.2 beta and a rising 2027 AI-bubble probability.",
+        "with a 2.216 beta and a 24x book multiple, the stock is the most rate-sensitive expression of the AI trade",
+        "the current price at 230.77 embeds a perfect-outcome assumption that the cash flow statement has not yet confirmed",
+        "A PEG under 0.3 on a company with 117% ROE and 75% gross margins is not \"priced for perfection\" — it's priced for a mild disappointment.",
+        "A no-cut regime means discount rates stay elevated, which mechanically compresses the present value of long-duration growth cash flows.",
+        "The forward P/E of 14.50 versus trailing 29.17 implies EPS roughly doubling from $7.91 to $15.91 — that's not a mild expectation, that's a consensus growth curve that has to be delivered almost exactly.",
+        "a no-cut regime mechanically compresses the present value of long-duration growth cash flows, and NVDA is the archetypal long-duration asset with a 2.216 beta"
+      ],
+      "score": 0.85
+    }
+  ],
+  "edges": [
+    {
+      "source": "ai_capex",
+      "target": "gpu_demand",
+      "source_label": "AI CapEx",
+      "target_label": "GPU Demand",
+      "edge_type": "causal",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives GPU Demand.",
+      "source_record_id": "canrel_e25dc7fd3f9a0c9c",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:39"
+      ],
+      "relation_id": "canrel_e25dc7fd3f9a0c9c",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "The risk is being short when the AI capex cycle keeps compounding and NVDA keeps printing $96B quarters.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.75,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_7742146309ccafc6",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:23"
+      ],
+      "relation_id": "canrel_7742146309ccafc6",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan",
+      "evidence": "with a 2.216 beta and a 24x book multiple, the stock is the most rate-sensitive expression of the AI trade",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.85,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_9a5d30d57e97aed8",
+      "source_claim_ids": [],
+      "relation_id": "canrel_9a5d30d57e97aed8",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:news_agent:news_report",
+      "evidence": "A no-cut regime means **discount rates stay elevated**, which mechanically compresses the present value of long-duration growth cash flows.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_9d19c900b831cc05",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:8"
+      ],
+      "relation_id": "canrel_9d19c900b831cc05",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision",
+      "evidence": "a no-cut regime mechanically compresses the present value of long-duration growth cash flows, and NVDA is the archetypal long-duration asset with a 2.216 beta",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.8,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_b5b536d7ac8a48e6",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:29"
+      ],
+      "relation_id": "canrel_b5b536d7ac8a48e6",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "A no-cut regime means discount rates stay elevated, which mechanically compresses the present value of long-duration growth cash flows.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "nvda_revenue_growth",
+      "source_label": "Narrative Momentum",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum conflicts with Revenue Growth.",
+      "source_record_id": "canrel_2bb127012db78ce7",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:33"
+      ],
+      "relation_id": "canrel_2bb127012db78ce7",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "A coiled spring with deteriorating momentum is not the same as a coiled spring with improving momentum.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "nvda_revenue_growth",
+      "source_label": "Narrative Momentum",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum conflicts with Revenue Growth.",
+      "source_record_id": "canrel_60dca68ef5557ef7",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:25"
+      ],
+      "relation_id": "canrel_60dca68ef5557ef7",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision",
+      "evidence": "A coiled spring with deteriorating momentum is not the same as a coiled spring with improving momentum.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "nvda_revenue_growth",
+      "source_label": "Narrative Momentum",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum conflicts with Revenue Growth.",
+      "source_record_id": "canrel_93f4afd2f1ceeaf7",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history:claim:23"
+      ],
+      "relation_id": "canrel_93f4afd2f1ceeaf7",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "A coiled spring with deteriorating momentum is not the same as a coiled spring with improving momentum.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "nvda_revenue_growth",
+      "target": "valuation_risk",
+      "source_label": "NVDA Revenue Growth",
+      "target_label": "Valuation Risk",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Revenue Growth conflicts with Valuation Risk.",
+      "source_record_id": "canrel_10a738dc15db5e37",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history:claim:4"
+      ],
+      "relation_id": "canrel_10a738dc15db5e37",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "The forward P/E of 14.50 versus trailing 29.17 implies EPS roughly doubling from $7.91 to $15.91 — that's not a mild expectation, that's a consensus growth curve that has to be delivered almost exactly.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "ai_capex",
+      "source_label": "Recession Risk",
+      "target_label": "AI CapEx",
+      "edge_type": "conflicting",
+      "confidence": 0.5,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with AI CapEx.",
+      "source_record_id": "canrel_501f170512f04422",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:35"
+      ],
+      "relation_id": "canrel_501f170512f04422",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "Recession risk at 6% and falling.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "ai_capex",
+      "source_label": "Recession Risk",
+      "target_label": "AI CapEx",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with AI CapEx.",
+      "source_record_id": "canrel_ab26b9e286a5a193",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:9"
+      ],
+      "relation_id": "canrel_ab26b9e286a5a193",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan",
+      "evidence": "Recession risk at 6% and falling, AI-bubble-burst-2026 at 6% and falling. The bull is correct that the classic killer of a capex cycle is not currently being priced in.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "ai_capex",
+      "source_label": "Recession Risk",
+      "target_label": "AI CapEx",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with AI CapEx.",
+      "source_record_id": "canrel_bb96b1c191a4520f",
+      "source_claim_ids": [],
+      "relation_id": "canrel_bb96b1c191a4520f",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "The classic killer of a capex cycle — recession — is being priced *out*.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_19e7fec40855bdb5",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history:claim:107"
+      ],
+      "relation_id": "canrel_19e7fec40855bdb5",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "the forward P/E of 14.50 requires EPS to roughly double, and it requires that doubling to happen in a no-rate-cut regime with a 2.2 beta and a rising 2027 AI-bubble probability.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_c46c3eb286eb6101",
+      "source_claim_ids": [],
+      "relation_id": "canrel_c46c3eb286eb6101",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "A PEG of **0.29** for a company growing revenue **106% YoY** is not \"priced for perfection\" — it's **priced for skepticism**.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_d94e017e5203b051",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:38"
+      ],
+      "relation_id": "canrel_d94e017e5203b051",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan",
+      "evidence": "the current price at 230.77 embeds a perfect-outcome assumption that the cash flow statement has not yet confirmed",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_f0fa535deaaaa5cd",
+      "source_claim_ids": [
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:11"
+      ],
+      "relation_id": "canrel_f0fa535deaaaa5cd",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "A PEG under 0.3 on a company with 117% ROE and 75% gross margins is not \"priced for perfection\" — it's priced for a mild disappointment.",
+      "extraction_method": "tradingagents_canonical_output"
+    }
+  ],
+  "metadata": {
+    "node_count": 11,
+    "edge_count": 16,
+    "extractor": "llm_with_deterministic_validation_and_fallback",
+    "extractor_version": "week2.structure_extractor.v2",
+    "llm_enabled": true,
+    "llm_edge_count": 0,
+    "deterministic_edge_count": 0,
+    "canonical_relation_edge_count": 16
+  }
+}

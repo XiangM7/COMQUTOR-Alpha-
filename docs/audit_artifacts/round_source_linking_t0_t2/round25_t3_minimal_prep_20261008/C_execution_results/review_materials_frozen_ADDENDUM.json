@@ -1,0 +1,709 @@
+{
+ "schema_version": "t3_review_materials_frozen.v1",
+ "frozen_at": "2026-10-08T17:41:26.444336+00:00",
+ "frozen_before_prediction": true,
+ "review_form": {
+  "path": "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/B1_samples_v4/review_form_v4.json",
+  "sha256": "6842817f90dd3c4fba1c5adc84301cea2ac971a613d20e51959f54edd756ff42"
+ },
+ "collection_record_sha256": "8446979cccfd579efb7d9f1119365ba06874d1129837a1cda13bc22eb7987746",
+ "rule": "the reviewer receives review_form_v4.json plus these items, and nothing selected after the predictions exist",
+ "markets": {
+  "US recession by end of 2026": {
+   "status": "COLLECTED",
+   "market_id": "609655",
+   "question_as_listed": "US recession by end of 2026?",
+   "resolution_definition": "This market will resolve to “Yes” if either of the following conditions is met:\n\n1.  The seasonally adjusted annualized percent change in quarterly U.S. real GDP from the previous quarter is less than 0.0 for two consecutive quarters between Q2 2025 and Q4 2026 (inclusive), as reported by the Bureau of Economic Analysis (BEA). \n\n2.  The National Bureau of Economic Research (NBER) publicly announces that a recession has occurred in the United States, at any point during 2025 or 2026, with the announcement made by the time the BEA releases the advance estimate for Q4 2026.\n\nOtherwise, this market will resolve to \"No\". \n\nNote that advance estimates will be considered. For example, if upon release, the advance estimate for Q3 2025 was negative, and the Q2 2025's most recent, up-to-date estimate was also negative, this market would resolve to \"Yes\". If on December 31, 2026 the latest estimate for quarterly GDP in Q3 2025 was negative, this market will stay open until the Advance estimate of Q4 2026 is published, at which point it will resolve to \"Yes\" if Q4 2026 was negative or if the NBER declares a recession by then.\n\nThis market will remain open until either i) one of the specified conditions is met; or ii) the GDP advance estimate for Q4 2026 is released. If the GDP advance estimate for Q4 2026 has not been released by June 30, 2027, 11:59 PM ET, this market will resolve based on the available releases at that time.\n\nThe resolution source will be the official announcements from the NBER and the BEA’s estimate of seasonally adjusted annualized percent change in quarterly US real GDP from previous quarters as released by the Bureau of Economic Analysis (BEA), https://www.bea.gov/data/gdp/gross-domestic-product",
+   "resolves_by": "2027-01-31T00:00:00Z",
+   "outcomes": "[\"Yes\", \"No\"]",
+   "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+   "points_in_window": [
+    {
+     "observed_at_utc": "2026-09-24T00:00:35+00:00",
+     "yes_price": 0.075
+    },
+    {
+     "observed_at_utc": "2026-09-25T00:00:28+00:00",
+     "yes_price": 0.105
+    },
+    {
+     "observed_at_utc": "2026-09-26T00:00:21+00:00",
+     "yes_price": 0.095
+    },
+    {
+     "observed_at_utc": "2026-09-27T00:00:21+00:00",
+     "yes_price": 0.09
+    },
+    {
+     "observed_at_utc": "2026-09-28T00:00:35+00:00",
+     "yes_price": 0.085
+    },
+    {
+     "observed_at_utc": "2026-09-29T00:00:22+00:00",
+     "yes_price": 0.085
+    },
+    {
+     "observed_at_utc": "2026-09-30T00:00:24+00:00",
+     "yes_price": 0.085
+    },
+    {
+     "observed_at_utc": "2026-10-01T00:00:26+00:00",
+     "yes_price": 0.085
+    },
+    {
+     "observed_at_utc": "2026-10-02T00:00:24+00:00",
+     "yes_price": 0.085
+    },
+    {
+     "observed_at_utc": "2026-10-03T00:00:28+00:00",
+     "yes_price": 0.075
+    },
+    {
+     "observed_at_utc": "2026-10-04T00:00:23+00:00",
+     "yes_price": 0.075
+    },
+    {
+     "observed_at_utc": "2026-10-05T00:00:29+00:00",
+     "yes_price": 0.08
+    },
+    {
+     "observed_at_utc": "2026-10-06T00:00:27+00:00",
+     "yes_price": 0.075
+    }
+   ],
+   "excluded_points": [
+    {
+     "observed_at_utc": "2026-10-08T17:03:25+00:00",
+     "yes_price": 0.065,
+     "why": "outside the requested window (the API also returned the price at collection time)"
+    }
+   ],
+   "source": {
+    "url": "https://clob.polymarket.com/prices-history?market=100379208559626151022751801118534484742123694725746262280150222742563282755057&startTs=1790208000&endTs=1791331200&fidelity=1440",
+    "retrieved_at": "2026-10-08T17:03:53.547121+00:00",
+    "status_code": 200,
+    "response_sha256": "8abdfbd7dd6ec23f2a8e24428086f91417831440292697ae69d9a25ab4cf83d4",
+    "file": "02_clob_prices_history_us_recession_by_end_of_2026.json"
+   },
+   "market_lookup": {
+    "file": "01_gamma_public_search.json",
+    "response_sha256": "01b020e9ab28c4784bbac92dfab4bab2963b58a0f75c735effc59eef6f23780d",
+    "retrieved_at": "2026-10-08T17:03:53.413797+00:00"
+   }
+  },
+  "UK recession in 2026": {
+   "status": "COLLECTED",
+   "market_id": "2061857",
+   "question_as_listed": "UK Recession in 2026?",
+   "resolution_definition": "This market will resolve to “Yes” if the United Kingdom’s seasonally adjusted quarter-on-quarter percent change in real GDP, as reported by the Office for National Statistics, is less than 0.0 for two consecutive quarters between Q1 and Q4 2026. Otherwise, this market will resolve to “No”.\n\nThis market includes estimates reported in both the Office for National Statistics’ GDP first quarterly estimate, UK releases and the updated GDP quarterly national accounts, UK releases for the relevant quarters. Monthly GDP estimates will not be considered.\n\nThis market’s resolution will be based on the most recently available qualifying estimates for the relevant quarters at the time of each relevant release. Any two consecutive quarters with qualifying negative GDP growth will be sufficient for a “Yes” resolution, regardless of prior or later revisions.\n\nFor example, if upon release the relevant estimate for Q2 2026 is negative, and Q1 2026’s most recently available qualifying estimate is also negative, this market will resolve to “Yes”. If the relevant estimate for Q2 2026 is negative, and the initial estimate for Q1 2026 was negative, but Q1 2026’s most recently available qualifying estimate at the time of the Q2 release is positive, this will not qualify.\n\nThis market will resolve as soon as a qualifying recession occurs. If no qualifying recession has occurred and the most recently available qualifying estimates for both Q3 2026 and Q4 2026 are positive at the time of the release of the GDP first quarterly estimate, UK for Q4 2026, this market will resolve to “No” at that time. If the most recently available qualifying estimate for either Q3 2026 or Q4 2026 is negative at that time, this market will remain open until the GDP quarterly national accounts, UK release for Q4 2026 is published. If that release is not published by April 30, 2027, 11:59 PM ET, this market will resolve based on the available qualifying data at that time.\n\nThe resolution source for this market will be the Office for National Statistics, specifically its \"GDP first quarterly estimate, UK\" and \"GDP quarterly national accounts, UK\" releases for the relevant quarters.",
+   "resolves_by": "2027-05-01T03:59:00Z",
+   "outcomes": "[\"Yes\", \"No\"]",
+   "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+   "points_in_window": [
+    {
+     "observed_at_utc": "2026-09-24T00:00:31+00:00",
+     "yes_price": 0.125
+    },
+    {
+     "observed_at_utc": "2026-09-25T00:00:23+00:00",
+     "yes_price": 0.13
+    },
+    {
+     "observed_at_utc": "2026-09-26T00:00:19+00:00",
+     "yes_price": 0.135
+    },
+    {
+     "observed_at_utc": "2026-09-27T00:00:18+00:00",
+     "yes_price": 0.085
+    },
+    {
+     "observed_at_utc": "2026-09-28T00:00:33+00:00",
+     "yes_price": 0.085
+    },
+    {
+     "observed_at_utc": "2026-09-29T00:00:19+00:00",
+     "yes_price": 0.095
+    },
+    {
+     "observed_at_utc": "2026-09-30T00:00:21+00:00",
+     "yes_price": 0.095
+    },
+    {
+     "observed_at_utc": "2026-10-01T00:00:22+00:00",
+     "yes_price": 0.095
+    },
+    {
+     "observed_at_utc": "2026-10-02T00:00:21+00:00",
+     "yes_price": 0.08
+    },
+    {
+     "observed_at_utc": "2026-10-03T00:00:24+00:00",
+     "yes_price": 0.075
+    },
+    {
+     "observed_at_utc": "2026-10-04T00:00:20+00:00",
+     "yes_price": 0.075
+    },
+    {
+     "observed_at_utc": "2026-10-05T00:00:24+00:00",
+     "yes_price": 0.07
+    },
+    {
+     "observed_at_utc": "2026-10-06T00:00:23+00:00",
+     "yes_price": 0.07
+    }
+   ],
+   "excluded_points": [
+    {
+     "observed_at_utc": "2026-10-08T17:03:23+00:00",
+     "yes_price": 0.07,
+     "why": "outside the requested window (the API also returned the price at collection time)"
+    }
+   ],
+   "source": {
+    "url": "https://clob.polymarket.com/prices-history?market=32511249017846832981142962381877287418136960572472642849693931731577450160584&startTs=1790208000&endTs=1791331200&fidelity=1440",
+    "retrieved_at": "2026-10-08T17:03:53.929262+00:00",
+    "status_code": 200,
+    "response_sha256": "ab47fee614d11bb7c8fddcb1ec0febf6b5fb4db5f16d75f650acc61d5552074d",
+    "file": "03_clob_prices_history_uk_recession_in_2026.json"
+   },
+   "market_lookup": {
+    "file": "01_gamma_public_search.json",
+    "response_sha256": "01b020e9ab28c4784bbac92dfab4bab2963b58a0f75c735effc59eef6f23780d",
+    "retrieved_at": "2026-10-08T17:03:53.413797+00:00"
+   }
+  },
+  "Japan recession in 2026": {
+   "status": "COLLECTED",
+   "market_id": "2062005",
+   "question_as_listed": "Japan recession in 2026?",
+   "resolution_definition": "This market will resolve to “Yes” if Japan’s seasonally adjusted quarter-on-quarter percent change in real GDP (Quarterly Real Growth Rate, Seasonally Adjusted Series, Quarter-to-Quarter), as reported by the Cabinet Office, is less than 0.0 for two consecutive quarters between Q4 2025 and Q4 2026. Otherwise, this market will resolve to “No”.\n\nThis market includes estimates reported in both the Cabinet Office’s Quarterly Estimates of GDP (First Preliminary Estimates) and Quarterly Estimates of GDP (Second Preliminary Estimates) releases for the relevant quarters.\n\nThis market’s resolution will be based on the most recently available qualifying estimates for the relevant quarters at the time of each relevant release. Any two consecutive quarters with qualifying negative GDP growth will be sufficient for a “Yes” resolution, regardless of prior or later revisions.\n\nFor example, if upon release the relevant estimate for Q2 2026 is negative, and Q1 2026’s most recently available qualifying estimate is also negative, this market will resolve to “Yes”. If the relevant estimate for Q2 2026 is negative, and the initial estimate for Q1 2026 was negative, but Q1 2026’s most recently available qualifying estimate at the time of the Q2 release is positive, this will not qualify.\n\nThis market will resolve as soon as a qualifying recession occurs. If no qualifying recession has occurred and the most recently available qualifying estimates for both Q3 2026 and Q4 2026 are positive at the time of the release of the Quarterly Estimates of GDP (First Preliminary Estimates) for Q4 2026, this market will resolve to “No” at that time. If the most recently available qualifying estimate for either Q3 2026 or Q4 2026 is negative at that time, this market will remain open until the Quarterly Estimates of GDP (Second Preliminary Estimates) for Q4 2026 is published. If that release is not published by April 30, 2027, 11:59 PM ET, this market will resolve based on the available qualifying data at that time.\n\nThe resolution source for this market will be the Cabinet Office, specifically its Quarterly Estimates of GDP (First Preliminary Estimates) and Quarterly Estimates of GDP (Second Preliminary Estimates) releases for the relevant quarters.\n\nNote: January to March will be considered Q1, April to June will be considered Q2, July to September will be considered Q3, and October to December will be considered Q4.",
+   "resolves_by": "2027-05-01T03:59:00Z",
+   "outcomes": "[\"Yes\", \"No\"]",
+   "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+   "points_in_window": [
+    {
+     "observed_at_utc": "2026-09-24T00:00:31+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-09-25T00:00:23+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-09-26T00:00:19+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-09-27T00:00:18+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-09-28T00:00:32+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-09-29T00:00:19+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-09-30T00:00:20+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-10-01T00:00:22+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-10-02T00:00:20+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-10-03T00:00:23+00:00",
+     "yes_price": 0.05
+    },
+    {
+     "observed_at_utc": "2026-10-04T00:00:20+00:00",
+     "yes_price": 0.04
+    },
+    {
+     "observed_at_utc": "2026-10-05T00:00:24+00:00",
+     "yes_price": 0.045
+    },
+    {
+     "observed_at_utc": "2026-10-06T00:00:22+00:00",
+     "yes_price": 0.045
+    }
+   ],
+   "excluded_points": [
+    {
+     "observed_at_utc": "2026-10-08T17:03:23+00:00",
+     "yes_price": 0.05,
+     "why": "outside the requested window (the API also returned the price at collection time)"
+    }
+   ],
+   "source": {
+    "url": "https://clob.polymarket.com/prices-history?market=16364522763036277962941952172705399898262137083148017121857345482184407445373&startTs=1790208000&endTs=1791331200&fidelity=1440",
+    "retrieved_at": "2026-10-08T17:03:54.168671+00:00",
+    "status_code": 200,
+    "response_sha256": "96bb2abd1e7889b6010d6a89c0c9436e16917692876a6f60712fb57e6492827f",
+    "file": "04_clob_prices_history_japan_recession_in_2026.json"
+   },
+   "market_lookup": {
+    "file": "01_gamma_public_search.json",
+    "response_sha256": "01b020e9ab28c4784bbac92dfab4bab2963b58a0f75c735effc59eef6f23780d",
+    "retrieved_at": "2026-10-08T17:03:53.413797+00:00"
+   }
+  }
+ },
+ "items": {
+  "t3v3-037": {
+   "claim_as_of": "run 1bad76a7, started 2026-10-05T17:36:24Z; the run's news agent read live Gamma prices during the run, so the matching value lies between the daily points around that time",
+   "claimed": "US 8% (-1.0pp week); UK 7%; Japan 4%",
+   "material": [
+    {
+     "market": "US recession by end of 2026",
+     "status": "COLLECTED",
+     "question_as_listed": "US recession by end of 2026?",
+     "resolution_definition": "This market will resolve to “Yes” if either of the following conditions is met:\n\n1.  The seasonally adjusted annualized percent change in quarterly U.S. real GDP from the previous quarter is less than 0.0 for two consecutive quarters between Q2 2025 and Q4 2026 (inclusive), as reported by the Bureau of Economic Analysis (BEA). \n\n2.  The National Bureau of Economic Research (NBER) publicly announces that a recession has occurred in the United States, at any point during 2025 or 2026, with the announcement made by the time the BEA releases the advance estimate for Q4 2026.\n\nOtherwise, this market will resolve to \"No\". \n\nNote that advance estimates will be considered. For example, if upon release, the advance estimate for Q3 2025 was negative, and the Q2 2025's most recent, up-to-date estimate was also negative, this market would resolve to \"Yes\". If on December 31, 2026 the latest estimate for quarterly GDP in Q3 2025 was negative, this market will stay open until the Advance estimate of Q4 2026 is published, at which point it will resolve to \"Yes\" if Q4 2026 was negative or if the NBER declares a recession by then.\n\nThis market will remain open until either i) one of the specified conditions is met; or ii) the GDP advance estimate for Q4 2026 is released. If the GDP advance estimate for Q4 2026 has not been released by June 30, 2027, 11:59 PM ET, this market will resolve based on the available releases at that time.\n\nThe resolution source will be the official announcements from the NBER and the BEA’s estimate of seasonally adjusted annualized percent change in quarterly US real GDP from previous quarters as released by the Bureau of Economic Analysis (BEA), https://www.bea.gov/data/gdp/gross-domestic-product",
+     "resolves_by": "2027-01-31T00:00:00Z",
+     "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+     "points_in_window": [
+      {
+       "observed_at_utc": "2026-09-24T00:00:35+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-09-25T00:00:28+00:00",
+       "yes_price": 0.105
+      },
+      {
+       "observed_at_utc": "2026-09-26T00:00:21+00:00",
+       "yes_price": 0.095
+      },
+      {
+       "observed_at_utc": "2026-09-27T00:00:21+00:00",
+       "yes_price": 0.09
+      },
+      {
+       "observed_at_utc": "2026-09-28T00:00:35+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-29T00:00:22+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-30T00:00:24+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-01T00:00:26+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-02T00:00:24+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-03T00:00:28+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-04T00:00:23+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-05T00:00:29+00:00",
+       "yes_price": 0.08
+      },
+      {
+       "observed_at_utc": "2026-10-06T00:00:27+00:00",
+       "yes_price": 0.075
+      }
+     ],
+     "source": {
+      "url": "https://clob.polymarket.com/prices-history?market=100379208559626151022751801118534484742123694725746262280150222742563282755057&startTs=1790208000&endTs=1791331200&fidelity=1440",
+      "retrieved_at": "2026-10-08T17:03:53.547121+00:00",
+      "status_code": 200,
+      "response_sha256": "8abdfbd7dd6ec23f2a8e24428086f91417831440292697ae69d9a25ab4cf83d4",
+      "file": "02_clob_prices_history_us_recession_by_end_of_2026.json"
+     }
+    },
+    {
+     "market": "UK recession in 2026",
+     "status": "COLLECTED",
+     "question_as_listed": "UK Recession in 2026?",
+     "resolution_definition": "This market will resolve to “Yes” if the United Kingdom’s seasonally adjusted quarter-on-quarter percent change in real GDP, as reported by the Office for National Statistics, is less than 0.0 for two consecutive quarters between Q1 and Q4 2026. Otherwise, this market will resolve to “No”.\n\nThis market includes estimates reported in both the Office for National Statistics’ GDP first quarterly estimate, UK releases and the updated GDP quarterly national accounts, UK releases for the relevant quarters. Monthly GDP estimates will not be considered.\n\nThis market’s resolution will be based on the most recently available qualifying estimates for the relevant quarters at the time of each relevant release. Any two consecutive quarters with qualifying negative GDP growth will be sufficient for a “Yes” resolution, regardless of prior or later revisions.\n\nFor example, if upon release the relevant estimate for Q2 2026 is negative, and Q1 2026’s most recently available qualifying estimate is also negative, this market will resolve to “Yes”. If the relevant estimate for Q2 2026 is negative, and the initial estimate for Q1 2026 was negative, but Q1 2026’s most recently available qualifying estimate at the time of the Q2 release is positive, this will not qualify.\n\nThis market will resolve as soon as a qualifying recession occurs. If no qualifying recession has occurred and the most recently available qualifying estimates for both Q3 2026 and Q4 2026 are positive at the time of the release of the GDP first quarterly estimate, UK for Q4 2026, this market will resolve to “No” at that time. If the most recently available qualifying estimate for either Q3 2026 or Q4 2026 is negative at that time, this market will remain open until the GDP quarterly national accounts, UK release for Q4 2026 is published. If that release is not published by April 30, 2027, 11:59 PM ET, this market will resolve based on the available qualifying data at that time.\n\nThe resolution source for this market will be the Office for National Statistics, specifically its \"GDP first quarterly estimate, UK\" and \"GDP quarterly national accounts, UK\" releases for the relevant quarters.",
+     "resolves_by": "2027-05-01T03:59:00Z",
+     "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+     "points_in_window": [
+      {
+       "observed_at_utc": "2026-09-24T00:00:31+00:00",
+       "yes_price": 0.125
+      },
+      {
+       "observed_at_utc": "2026-09-25T00:00:23+00:00",
+       "yes_price": 0.13
+      },
+      {
+       "observed_at_utc": "2026-09-26T00:00:19+00:00",
+       "yes_price": 0.135
+      },
+      {
+       "observed_at_utc": "2026-09-27T00:00:18+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-28T00:00:33+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-29T00:00:19+00:00",
+       "yes_price": 0.095
+      },
+      {
+       "observed_at_utc": "2026-09-30T00:00:21+00:00",
+       "yes_price": 0.095
+      },
+      {
+       "observed_at_utc": "2026-10-01T00:00:22+00:00",
+       "yes_price": 0.095
+      },
+      {
+       "observed_at_utc": "2026-10-02T00:00:21+00:00",
+       "yes_price": 0.08
+      },
+      {
+       "observed_at_utc": "2026-10-03T00:00:24+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-04T00:00:20+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-05T00:00:24+00:00",
+       "yes_price": 0.07
+      },
+      {
+       "observed_at_utc": "2026-10-06T00:00:23+00:00",
+       "yes_price": 0.07
+      }
+     ],
+     "source": {
+      "url": "https://clob.polymarket.com/prices-history?market=32511249017846832981142962381877287418136960572472642849693931731577450160584&startTs=1790208000&endTs=1791331200&fidelity=1440",
+      "retrieved_at": "2026-10-08T17:03:53.929262+00:00",
+      "status_code": 200,
+      "response_sha256": "ab47fee614d11bb7c8fddcb1ec0febf6b5fb4db5f16d75f650acc61d5552074d",
+      "file": "03_clob_prices_history_uk_recession_in_2026.json"
+     }
+    },
+    {
+     "market": "Japan recession in 2026",
+     "status": "COLLECTED",
+     "question_as_listed": "Japan recession in 2026?",
+     "resolution_definition": "This market will resolve to “Yes” if Japan’s seasonally adjusted quarter-on-quarter percent change in real GDP (Quarterly Real Growth Rate, Seasonally Adjusted Series, Quarter-to-Quarter), as reported by the Cabinet Office, is less than 0.0 for two consecutive quarters between Q4 2025 and Q4 2026. Otherwise, this market will resolve to “No”.\n\nThis market includes estimates reported in both the Cabinet Office’s Quarterly Estimates of GDP (First Preliminary Estimates) and Quarterly Estimates of GDP (Second Preliminary Estimates) releases for the relevant quarters.\n\nThis market’s resolution will be based on the most recently available qualifying estimates for the relevant quarters at the time of each relevant release. Any two consecutive quarters with qualifying negative GDP growth will be sufficient for a “Yes” resolution, regardless of prior or later revisions.\n\nFor example, if upon release the relevant estimate for Q2 2026 is negative, and Q1 2026’s most recently available qualifying estimate is also negative, this market will resolve to “Yes”. If the relevant estimate for Q2 2026 is negative, and the initial estimate for Q1 2026 was negative, but Q1 2026’s most recently available qualifying estimate at the time of the Q2 release is positive, this will not qualify.\n\nThis market will resolve as soon as a qualifying recession occurs. If no qualifying recession has occurred and the most recently available qualifying estimates for both Q3 2026 and Q4 2026 are positive at the time of the release of the Quarterly Estimates of GDP (First Preliminary Estimates) for Q4 2026, this market will resolve to “No” at that time. If the most recently available qualifying estimate for either Q3 2026 or Q4 2026 is negative at that time, this market will remain open until the Quarterly Estimates of GDP (Second Preliminary Estimates) for Q4 2026 is published. If that release is not published by April 30, 2027, 11:59 PM ET, this market will resolve based on the available qualifying data at that time.\n\nThe resolution source for this market will be the Cabinet Office, specifically its Quarterly Estimates of GDP (First Preliminary Estimates) and Quarterly Estimates of GDP (Second Preliminary Estimates) releases for the relevant quarters.\n\nNote: January to March will be considered Q1, April to June will be considered Q2, July to September will be considered Q3, and October to December will be considered Q4.",
+     "resolves_by": "2027-05-01T03:59:00Z",
+     "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+     "points_in_window": [
+      {
+       "observed_at_utc": "2026-09-24T00:00:31+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-25T00:00:23+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-26T00:00:19+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-27T00:00:18+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-28T00:00:32+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-29T00:00:19+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-30T00:00:20+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-01T00:00:22+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-02T00:00:20+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-03T00:00:23+00:00",
+       "yes_price": 0.05
+      },
+      {
+       "observed_at_utc": "2026-10-04T00:00:20+00:00",
+       "yes_price": 0.04
+      },
+      {
+       "observed_at_utc": "2026-10-05T00:00:24+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-06T00:00:22+00:00",
+       "yes_price": 0.045
+      }
+     ],
+     "source": {
+      "url": "https://clob.polymarket.com/prices-history?market=16364522763036277962941952172705399898262137083148017121857345482184407445373&startTs=1790208000&endTs=1791331200&fidelity=1440",
+      "retrieved_at": "2026-10-08T17:03:54.168671+00:00",
+      "status_code": 200,
+      "response_sha256": "96bb2abd1e7889b6010d6a89c0c9436e16917692876a6f60712fb57e6492827f",
+      "file": "04_clob_prices_history_japan_recession_in_2026.json"
+     }
+    }
+   ],
+   "not_recoverable": [],
+   "note": "collected on 2026-10-08 FOR THIS VERIFICATION and bound to its execution; this is not material the original run saved, and it was not sent to any model"
+  },
+  "t3v3-038": {
+   "claim_as_of": "run 034a0a60, started 2026-10-02T00:55:24Z; the run's news agent read live Gamma prices during the run, so the matching value lies between the daily points around that time",
+   "claimed": "Japan recession in 2026: 4% Yes; volume $4K",
+   "material": [
+    {
+     "market": "Japan recession in 2026",
+     "status": "COLLECTED",
+     "question_as_listed": "Japan recession in 2026?",
+     "resolution_definition": "This market will resolve to “Yes” if Japan’s seasonally adjusted quarter-on-quarter percent change in real GDP (Quarterly Real Growth Rate, Seasonally Adjusted Series, Quarter-to-Quarter), as reported by the Cabinet Office, is less than 0.0 for two consecutive quarters between Q4 2025 and Q4 2026. Otherwise, this market will resolve to “No”.\n\nThis market includes estimates reported in both the Cabinet Office’s Quarterly Estimates of GDP (First Preliminary Estimates) and Quarterly Estimates of GDP (Second Preliminary Estimates) releases for the relevant quarters.\n\nThis market’s resolution will be based on the most recently available qualifying estimates for the relevant quarters at the time of each relevant release. Any two consecutive quarters with qualifying negative GDP growth will be sufficient for a “Yes” resolution, regardless of prior or later revisions.\n\nFor example, if upon release the relevant estimate for Q2 2026 is negative, and Q1 2026’s most recently available qualifying estimate is also negative, this market will resolve to “Yes”. If the relevant estimate for Q2 2026 is negative, and the initial estimate for Q1 2026 was negative, but Q1 2026’s most recently available qualifying estimate at the time of the Q2 release is positive, this will not qualify.\n\nThis market will resolve as soon as a qualifying recession occurs. If no qualifying recession has occurred and the most recently available qualifying estimates for both Q3 2026 and Q4 2026 are positive at the time of the release of the Quarterly Estimates of GDP (First Preliminary Estimates) for Q4 2026, this market will resolve to “No” at that time. If the most recently available qualifying estimate for either Q3 2026 or Q4 2026 is negative at that time, this market will remain open until the Quarterly Estimates of GDP (Second Preliminary Estimates) for Q4 2026 is published. If that release is not published by April 30, 2027, 11:59 PM ET, this market will resolve based on the available qualifying data at that time.\n\nThe resolution source for this market will be the Cabinet Office, specifically its Quarterly Estimates of GDP (First Preliminary Estimates) and Quarterly Estimates of GDP (Second Preliminary Estimates) releases for the relevant quarters.\n\nNote: January to March will be considered Q1, April to June will be considered Q2, July to September will be considered Q3, and October to December will be considered Q4.",
+     "resolves_by": "2027-05-01T03:59:00Z",
+     "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+     "points_in_window": [
+      {
+       "observed_at_utc": "2026-09-24T00:00:31+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-25T00:00:23+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-26T00:00:19+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-27T00:00:18+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-28T00:00:32+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-29T00:00:19+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-09-30T00:00:20+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-01T00:00:22+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-02T00:00:20+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-03T00:00:23+00:00",
+       "yes_price": 0.05
+      },
+      {
+       "observed_at_utc": "2026-10-04T00:00:20+00:00",
+       "yes_price": 0.04
+      },
+      {
+       "observed_at_utc": "2026-10-05T00:00:24+00:00",
+       "yes_price": 0.045
+      },
+      {
+       "observed_at_utc": "2026-10-06T00:00:22+00:00",
+       "yes_price": 0.045
+      }
+     ],
+     "source": {
+      "url": "https://clob.polymarket.com/prices-history?market=16364522763036277962941952172705399898262137083148017121857345482184407445373&startTs=1790208000&endTs=1791331200&fidelity=1440",
+      "retrieved_at": "2026-10-08T17:03:54.168671+00:00",
+      "status_code": 200,
+      "response_sha256": "96bb2abd1e7889b6010d6a89c0c9436e16917692876a6f60712fb57e6492827f",
+      "file": "04_clob_prices_history_japan_recession_in_2026.json"
+     }
+    }
+   ],
+   "not_recoverable": [
+    "the $4K traded volume as of that date (the market reports only its current cumulative volume)"
+   ],
+   "note": "collected on 2026-10-08 FOR THIS VERIFICATION and bound to its execution; this is not material the original run saved, and it was not sent to any model"
+  },
+  "t3v3-039": {
+   "claim_as_of": "run 034a0a60, started 2026-10-02T00:55:24Z; the run's news agent read live Gamma prices during the run, so the matching value lies between the daily points around that time",
+   "claimed": "8% and falling 2pp on the week (US)",
+   "material": [
+    {
+     "market": "US recession by end of 2026",
+     "status": "COLLECTED",
+     "question_as_listed": "US recession by end of 2026?",
+     "resolution_definition": "This market will resolve to “Yes” if either of the following conditions is met:\n\n1.  The seasonally adjusted annualized percent change in quarterly U.S. real GDP from the previous quarter is less than 0.0 for two consecutive quarters between Q2 2025 and Q4 2026 (inclusive), as reported by the Bureau of Economic Analysis (BEA). \n\n2.  The National Bureau of Economic Research (NBER) publicly announces that a recession has occurred in the United States, at any point during 2025 or 2026, with the announcement made by the time the BEA releases the advance estimate for Q4 2026.\n\nOtherwise, this market will resolve to \"No\". \n\nNote that advance estimates will be considered. For example, if upon release, the advance estimate for Q3 2025 was negative, and the Q2 2025's most recent, up-to-date estimate was also negative, this market would resolve to \"Yes\". If on December 31, 2026 the latest estimate for quarterly GDP in Q3 2025 was negative, this market will stay open until the Advance estimate of Q4 2026 is published, at which point it will resolve to \"Yes\" if Q4 2026 was negative or if the NBER declares a recession by then.\n\nThis market will remain open until either i) one of the specified conditions is met; or ii) the GDP advance estimate for Q4 2026 is released. If the GDP advance estimate for Q4 2026 has not been released by June 30, 2027, 11:59 PM ET, this market will resolve based on the available releases at that time.\n\nThe resolution source will be the official announcements from the NBER and the BEA’s estimate of seasonally adjusted annualized percent change in quarterly US real GDP from previous quarters as released by the Bureau of Economic Analysis (BEA), https://www.bea.gov/data/gdp/gross-domestic-product",
+     "resolves_by": "2027-01-31T00:00:00Z",
+     "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+     "points_in_window": [
+      {
+       "observed_at_utc": "2026-09-24T00:00:35+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-09-25T00:00:28+00:00",
+       "yes_price": 0.105
+      },
+      {
+       "observed_at_utc": "2026-09-26T00:00:21+00:00",
+       "yes_price": 0.095
+      },
+      {
+       "observed_at_utc": "2026-09-27T00:00:21+00:00",
+       "yes_price": 0.09
+      },
+      {
+       "observed_at_utc": "2026-09-28T00:00:35+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-29T00:00:22+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-30T00:00:24+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-01T00:00:26+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-02T00:00:24+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-03T00:00:28+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-04T00:00:23+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-05T00:00:29+00:00",
+       "yes_price": 0.08
+      },
+      {
+       "observed_at_utc": "2026-10-06T00:00:27+00:00",
+       "yes_price": 0.075
+      }
+     ],
+     "source": {
+      "url": "https://clob.polymarket.com/prices-history?market=100379208559626151022751801118534484742123694725746262280150222742563282755057&startTs=1790208000&endTs=1791331200&fidelity=1440",
+      "retrieved_at": "2026-10-08T17:03:53.547121+00:00",
+      "status_code": 200,
+      "response_sha256": "8abdfbd7dd6ec23f2a8e24428086f91417831440292697ae69d9a25ab4cf83d4",
+      "file": "02_clob_prices_history_us_recession_by_end_of_2026.json"
+     }
+    }
+   ],
+   "not_recoverable": [],
+   "note": "collected on 2026-10-08 FOR THIS VERIFICATION and bound to its execution; this is not material the original run saved, and it was not sent to any model"
+  },
+  "t3v3-040": {
+   "claim_as_of": "run 1bad76a7, started 2026-10-05T17:36:24Z; the run's news agent read live Gamma prices during the run, so the matching value lies between the daily points around that time",
+   "claimed": "recession odds are 8% and falling (US)",
+   "material": [
+    {
+     "market": "US recession by end of 2026",
+     "status": "COLLECTED",
+     "question_as_listed": "US recession by end of 2026?",
+     "resolution_definition": "This market will resolve to “Yes” if either of the following conditions is met:\n\n1.  The seasonally adjusted annualized percent change in quarterly U.S. real GDP from the previous quarter is less than 0.0 for two consecutive quarters between Q2 2025 and Q4 2026 (inclusive), as reported by the Bureau of Economic Analysis (BEA). \n\n2.  The National Bureau of Economic Research (NBER) publicly announces that a recession has occurred in the United States, at any point during 2025 or 2026, with the announcement made by the time the BEA releases the advance estimate for Q4 2026.\n\nOtherwise, this market will resolve to \"No\". \n\nNote that advance estimates will be considered. For example, if upon release, the advance estimate for Q3 2025 was negative, and the Q2 2025's most recent, up-to-date estimate was also negative, this market would resolve to \"Yes\". If on December 31, 2026 the latest estimate for quarterly GDP in Q3 2025 was negative, this market will stay open until the Advance estimate of Q4 2026 is published, at which point it will resolve to \"Yes\" if Q4 2026 was negative or if the NBER declares a recession by then.\n\nThis market will remain open until either i) one of the specified conditions is met; or ii) the GDP advance estimate for Q4 2026 is released. If the GDP advance estimate for Q4 2026 has not been released by June 30, 2027, 11:59 PM ET, this market will resolve based on the available releases at that time.\n\nThe resolution source will be the official announcements from the NBER and the BEA’s estimate of seasonally adjusted annualized percent change in quarterly US real GDP from previous quarters as released by the Bureau of Economic Analysis (BEA), https://www.bea.gov/data/gdp/gross-domestic-product",
+     "resolves_by": "2027-01-31T00:00:00Z",
+     "granularity": "one point-in-time Yes price per day, sampled at about 00:00 UTC (CLOB prices-history, fidelity 1440 minutes); not a daily close or average",
+     "points_in_window": [
+      {
+       "observed_at_utc": "2026-09-24T00:00:35+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-09-25T00:00:28+00:00",
+       "yes_price": 0.105
+      },
+      {
+       "observed_at_utc": "2026-09-26T00:00:21+00:00",
+       "yes_price": 0.095
+      },
+      {
+       "observed_at_utc": "2026-09-27T00:00:21+00:00",
+       "yes_price": 0.09
+      },
+      {
+       "observed_at_utc": "2026-09-28T00:00:35+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-29T00:00:22+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-09-30T00:00:24+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-01T00:00:26+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-02T00:00:24+00:00",
+       "yes_price": 0.085
+      },
+      {
+       "observed_at_utc": "2026-10-03T00:00:28+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-04T00:00:23+00:00",
+       "yes_price": 0.075
+      },
+      {
+       "observed_at_utc": "2026-10-05T00:00:29+00:00",
+       "yes_price": 0.08
+      },
+      {
+       "observed_at_utc": "2026-10-06T00:00:27+00:00",
+       "yes_price": 0.075
+      }
+     ],
+     "source": {
+      "url": "https://clob.polymarket.com/prices-history?market=100379208559626151022751801118534484742123694725746262280150222742563282755057&startTs=1790208000&endTs=1791331200&fidelity=1440",
+      "retrieved_at": "2026-10-08T17:03:53.547121+00:00",
+      "status_code": 200,
+      "response_sha256": "8abdfbd7dd6ec23f2a8e24428086f91417831440292697ae69d9a25ab4cf83d4",
+      "file": "02_clob_prices_history_us_recession_by_end_of_2026.json"
+     }
+    }
+   ],
+   "not_recoverable": [],
+   "note": "collected on 2026-10-08 FOR THIS VERIFICATION and bound to its execution; this is not material the original run saved, and it was not sent to any model"
+  }
+ }
+}

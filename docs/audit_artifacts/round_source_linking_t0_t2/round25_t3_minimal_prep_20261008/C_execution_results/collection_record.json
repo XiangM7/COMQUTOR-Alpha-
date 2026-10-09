@@ -1,0 +1,153 @@
+{
+ "requests": [
+  {
+   "name": "gamma_public_search",
+   "url": "https://gamma-api.polymarket.com/public-search",
+   "params": {
+    "q": "recession 2026",
+    "limit_per_type": 20
+   },
+   "retrieved_at": "2026-10-08T17:03:53.413797+00:00",
+   "final_url": "https://gamma-api.polymarket.com/public-search?q=recession+2026&limit_per_type=20",
+   "status_code": 200,
+   "sha256": "01b020e9ab28c4784bbac92dfab4bab2963b58a0f75c735effc59eef6f23780d",
+   "bytes": 27386,
+   "file": "01_gamma_public_search.json"
+  },
+  {
+   "name": "clob_prices_history_us_recession_by_end_of_2026",
+   "url": "https://clob.polymarket.com/prices-history",
+   "params": {
+    "market": "100379208559626151022751801118534484742123694725746262280150222742563282755057",
+    "startTs": 1790208000,
+    "endTs": 1791331200,
+    "fidelity": 1440
+   },
+   "retrieved_at": "2026-10-08T17:03:53.547121+00:00",
+   "final_url": "https://clob.polymarket.com/prices-history?market=100379208559626151022751801118534484742123694725746262280150222742563282755057&startTs=1790208000&endTs=1791331200&fidelity=1440",
+   "status_code": 200,
+   "sha256": "8abdfbd7dd6ec23f2a8e24428086f91417831440292697ae69d9a25ab4cf83d4",
+   "bytes": 390,
+   "file": "02_clob_prices_history_us_recession_by_end_of_2026.json"
+  },
+  {
+   "name": "clob_prices_history_uk_recession_in_2026",
+   "url": "https://clob.polymarket.com/prices-history",
+   "params": {
+    "market": "32511249017846832981142962381877287418136960572472642849693931731577450160584",
+    "startTs": 1790208000,
+    "endTs": 1791331200,
+    "fidelity": 1440
+   },
+   "retrieved_at": "2026-10-08T17:03:53.929262+00:00",
+   "final_url": "https://clob.polymarket.com/prices-history?market=32511249017846832981142962381877287418136960572472642849693931731577450160584&startTs=1790208000&endTs=1791331200&fidelity=1440",
+   "status_code": 200,
+   "sha256": "ab47fee614d11bb7c8fddcb1ec0febf6b5fb4db5f16d75f650acc61d5552074d",
+   "bytes": 387,
+   "file": "03_clob_prices_history_uk_recession_in_2026.json"
+  },
+  {
+   "name": "clob_prices_history_japan_recession_in_2026",
+   "url": "https://clob.polymarket.com/prices-history",
+   "params": {
+    "market": "16364522763036277962941952172705399898262137083148017121857345482184407445373",
+    "startTs": 1790208000,
+    "endTs": 1791331200,
+    "fidelity": 1440
+   },
+   "retrieved_at": "2026-10-08T17:03:54.168671+00:00",
+   "final_url": "https://clob.polymarket.com/prices-history?market=16364522763036277962941952172705399898262137083148017121857345482184407445373&startTs=1790208000&endTs=1791331200&fidelity=1440",
+   "status_code": 200,
+   "sha256": "96bb2abd1e7889b6010d6a89c0c9436e16917692876a6f60712fb57e6492827f",
+   "bytes": 389,
+   "file": "04_clob_prices_history_japan_recession_in_2026.json"
+  }
+ ],
+ "markets": {
+  "US recession by end of 2026": {
+   "status": "COLLECTED",
+   "samples": [
+    "t3v3-037",
+    "t3v3-039",
+    "t3v3-040"
+   ],
+   "market_id": "609655",
+   "question": "US recession by end of 2026?",
+   "yes_token": "100379208559626151022751801118534484742123694725746262280150222742563282755057",
+   "daily_yes_price_utc": {
+    "2026-09-24": 0.075,
+    "2026-09-25": 0.105,
+    "2026-09-26": 0.095,
+    "2026-09-27": 0.09,
+    "2026-09-28": 0.085,
+    "2026-09-29": 0.085,
+    "2026-09-30": 0.085,
+    "2026-10-01": 0.085,
+    "2026-10-02": 0.085,
+    "2026-10-03": 0.075,
+    "2026-10-04": 0.075,
+    "2026-10-05": 0.08,
+    "2026-10-06": 0.075,
+    "2026-10-08": 0.065
+   }
+  },
+  "UK recession in 2026": {
+   "status": "COLLECTED",
+   "samples": [
+    "t3v3-037"
+   ],
+   "market_id": "2061857",
+   "question": "UK Recession in 2026?",
+   "yes_token": "32511249017846832981142962381877287418136960572472642849693931731577450160584",
+   "daily_yes_price_utc": {
+    "2026-09-24": 0.125,
+    "2026-09-25": 0.13,
+    "2026-09-26": 0.135,
+    "2026-09-27": 0.085,
+    "2026-09-28": 0.085,
+    "2026-09-29": 0.095,
+    "2026-09-30": 0.095,
+    "2026-10-01": 0.095,
+    "2026-10-02": 0.08,
+    "2026-10-03": 0.075,
+    "2026-10-04": 0.075,
+    "2026-10-05": 0.07,
+    "2026-10-06": 0.07,
+    "2026-10-08": 0.07
+   }
+  },
+  "Japan recession in 2026": {
+   "status": "COLLECTED",
+   "samples": [
+    "t3v3-037",
+    "t3v3-038"
+   ],
+   "market_id": "2062005",
+   "question": "Japan recession in 2026?",
+   "yes_token": "16364522763036277962941952172705399898262137083148017121857345482184407445373",
+   "daily_yes_price_utc": {
+    "2026-09-24": 0.045,
+    "2026-09-25": 0.045,
+    "2026-09-26": 0.045,
+    "2026-09-27": 0.045,
+    "2026-09-28": 0.045,
+    "2026-09-29": 0.045,
+    "2026-09-30": 0.045,
+    "2026-10-01": 0.045,
+    "2026-10-02": 0.045,
+    "2026-10-03": 0.05,
+    "2026-10-04": 0.04,
+    "2026-10-05": 0.045,
+    "2026-10-06": 0.045,
+    "2026-10-08": 0.05
+   }
+  }
+ },
+ "stopped": null,
+ "window_utc": [
+  "2026-09-24",
+  "2026-10-07"
+ ],
+ "request_cap": 4,
+ "requests_sent": 4
+}

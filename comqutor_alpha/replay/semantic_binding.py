@@ -231,7 +231,26 @@ def _bind_adapter(
     call_id = str(record.get("call_id") or "")
     request = record.get("input_payload")
     output = record.get("validated_output")
-    if not isinstance(request, dict) or set(request) != {"ticker", "agent", "segments"}:
+    # T1 source-linking chain, 2026-09-28 (structured_output_adapter.py's
+    # _llm_batch_enrichment): the real request now also carries
+    # candidate_sources (this run's own already-captured source_id/
+    # fragment_id/excerpt offered to the extraction Agent -- see that
+    # function's own docstring) -- a legitimate, already-shipped, required
+    # key, not an optional extra. This strict allowed-key check was never
+    # updated to match, so it fail-closed on EVERY real structured_adapter
+    # call (never merely a test artifact) until this fix -- found while
+    # investigating tests/replay/*'s cascading eligible_live_source
+    # failures. candidate_sources' own CONTENTS are not independently
+    # re-verified here: this function's job is structural/text-preservation
+    # binding integrity, and candidate_sources' effect on a claim
+    # (cited_source_id) is already validated at generation time by
+    # _validate_llm_batch_enrichment in the real production path.
+    if not isinstance(request, dict) or set(request) != {
+        "ticker",
+        "agent",
+        "segments",
+        "candidate_sources",
+    }:
         _append_unique(audit, "artifact_decision_mismatches", call_id)
         return
     if str(request.get("ticker") or "").upper() != bundle.ticker:

@@ -1,0 +1,1208 @@
+{
+ "L2_alpha_raw_selection_view": {
+  "scoring_status": "SCORED",
+  "scored_sample_count": 40,
+  "unable_to_judge_count": 0,
+  "total_judged_count": 40,
+  "total_sample_count": 40,
+  "overall_accuracy": 0.725,
+  "non_none_precision": 0.875,
+  "non_none_recall": 0.677419,
+  "outcome_code_counts": {
+   "NONE": 16,
+   "MATCHED": 24
+  },
+  "category_counts": {
+   "A304_boundary": 16,
+   "A101_A103": 8,
+   "A001": 4,
+   "A003": 4,
+   "A102": 4,
+   "A501": 4
+  },
+  "confusion_matrix": {
+   "A304": {
+    "NONE": 7,
+    "A304": 7,
+    "A001": 1
+   },
+   "NONE": {
+    "NONE": 8,
+    "A101": 1
+   },
+   "A001": {
+    "NONE": 1,
+    "A001": 3
+   },
+   "A101": {
+    "A101": 3
+   },
+   "A103": {
+    "A101": 1
+   },
+   "A102": {
+    "A102": 4
+   },
+   "A501": {
+    "A501": 4
+   }
+  },
+  "note": "confusion_matrix rows are the human label, columns are the system's outcome (an Alpha ID for MATCHED, or the literal outcome_code for NONE/CALL_FAILED/PARSE_FAILED/UNAVAILABLE/ABSTAINED_AMBIGUOUS/SKIPPED_BUDGET_STOP) -- failures and abstentions are never dropped from this matrix or from scored_sample_count. Items where the reviewer explicitly answered UNABLE_TO_JUDGE are counted in unable_to_judge_count and total_judged_count but excluded from scored_sample_count/accuracy/precision/recall/confusion_matrix -- never coerced into a right-or-wrong comparison.",
+  "view": "RAW model selection before the production gates (alpha_specific_invalidation / positive_requirement); supplement only, the official Alpha result is the post-gate view in score_result_official.json"
+ },
+ "L2_by_cell": {
+  "A001": {
+   "items": 4,
+   "final_agree": 2,
+   "raw_agree": 4
+  },
+  "A003": {
+   "items": 4,
+   "final_agree": 4,
+   "raw_agree": 4
+  },
+  "A101_A103": {
+   "items": 8,
+   "final_agree": 5,
+   "raw_agree": 6
+  },
+  "A102": {
+   "items": 4,
+   "final_agree": 4,
+   "raw_agree": 4
+  },
+  "A304_boundary": {
+   "items": 16,
+   "final_agree": 7,
+   "raw_agree": 7
+  },
+  "A501": {
+   "items": 4,
+   "final_agree": 4,
+   "raw_agree": 4
+  }
+ },
+ "L2_disagreements_post_gate": [
+  {
+   "sample_id": "t3v3-001",
+   "reviewer": "A304",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-003",
+   "reviewer": "A304",
+   "system_raw": "A001",
+   "system_final": "A001"
+  },
+  {
+   "sample_id": "t3v3-007",
+   "reviewer": "A304",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-009",
+   "reviewer": "A304",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-011",
+   "reviewer": "A304",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-012",
+   "reviewer": "A304",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-014",
+   "reviewer": "A304",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-015",
+   "reviewer": "A304",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-016",
+   "reviewer": "A001",
+   "system_raw": "NONE",
+   "system_final": "NONE"
+  },
+  {
+   "sample_id": "t3v3-019",
+   "reviewer": "A001",
+   "system_raw": "A001",
+   "system_final": "SELECTED_BUT_NOT_MATCHED"
+  },
+  {
+   "sample_id": "t3v3-022R",
+   "reviewer": "NONE",
+   "system_raw": "A101",
+   "system_final": "A101"
+  },
+  {
+   "sample_id": "t3v3-024R",
+   "reviewer": "A103",
+   "system_raw": "A101",
+   "system_final": "A101"
+  },
+  {
+   "sample_id": "t3v3-027R",
+   "reviewer": "A001",
+   "system_raw": "A001",
+   "system_final": "SELECTED_BUT_NOT_MATCHED"
+  },
+  {
+   "sample_id": "t3v3-028",
+   "reviewer": "A001",
+   "system_raw": "A001",
+   "system_final": "SELECTED_BUT_NOT_MATCHED"
+  }
+ ],
+ "reviewer_distributions": {
+  "R1_claim_fidelity": {
+   "UNABLE_TO_JUDGE": 30,
+   "FAITHFUL": 8,
+   "MATERIAL_DEVIATION": 1,
+   "MINOR_DEVIATION": 1
+  },
+  "R1_source_relation": {
+   "CONDITIONAL": 29,
+   "SUPPORTS": 8,
+   "CITATION_ONLY": 1,
+   "UNABLE_TO_JUDGE": 2
+  },
+  "R2_alpha": {
+   "A304": 15,
+   "NONE": 9,
+   "A001": 4,
+   "A101": 3,
+   "A103": 1,
+   "A102": 4,
+   "A501": 4
+  },
+  "R3_direction": {
+   "supports_alpha": 23,
+   "opposes_alpha": 6,
+   "NOT_APPLICABLE": 9,
+   "mentions_alpha": 1,
+   "neutral_background": 1
+  },
+  "R4_evidence_eligibility": {
+   "DOES_NOT_QUALIFY": 36,
+   "QUALIFIES": 4
+  }
+ },
+ "reviewer_QUALIFIES_items": [
+  {
+   "sample_id": "t3v3-005",
+   "reviewer_alpha": "A304",
+   "reviewer_direction": "supports_alpha",
+   "system_final": "A304",
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "RELATION_NOT_SUPPORTING",
+    "verified_support": "NOT_REVIEWED"
+   }
+  },
+  {
+   "sample_id": "t3v3-006",
+   "reviewer_alpha": "A304",
+   "reviewer_direction": "supports_alpha",
+   "system_final": "A304",
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "RELATION_NOT_SUPPORTING",
+    "verified_support": "ELIGIBLE"
+   }
+  },
+  {
+   "sample_id": "t3v3-014",
+   "reviewer_alpha": "A304",
+   "reviewer_direction": "supports_alpha",
+   "system_final": "NONE",
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-039",
+   "reviewer_alpha": "A501",
+   "reviewer_direction": "opposes_alpha",
+   "system_final": "A501",
+   "system_L3": "opposes_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "RELATION_NOT_SUPPORTING",
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  }
+ ],
+ "per_sample": [
+  {
+   "sample_id": "t3v3-001",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-002",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "TASK_FAILED: quote_or_data_not_found",
+   "system_L2_raw": "A304",
+   "system_L2_final": "A304",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "NON_ANALYTICAL_QUALITY",
+    "verified_support": "NOT_REVIEWED"
+   }
+  },
+  {
+   "sample_id": "t3v3-003",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "CONDITIONAL",
+   "system_L2_raw": "A001",
+   "system_L2_final": "A001",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "opposes_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "RELATION_NOT_SUPPORTING",
+    "verified_support": "SUPPORT_STATUS_NOT_RESOLVED"
+   }
+  },
+  {
+   "sample_id": "t3v3-004",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "A304",
+   "system_L2_final": "A304",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-005",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "QUALIFIES"
+   },
+   "system_L1": "TASK_FAILED: quote_or_data_not_found",
+   "system_L2_raw": "A304",
+   "system_L2_final": "A304",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "RELATION_NOT_SUPPORTING",
+    "verified_support": "NOT_REVIEWED"
+   }
+  },
+  {
+   "sample_id": "t3v3-006",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "QUALIFIES"
+   },
+   "system_L1": "SUPPORTS",
+   "system_L2_raw": "A304",
+   "system_L2_final": "A304",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "RELATION_NOT_SUPPORTING",
+    "verified_support": "ELIGIBLE"
+   }
+  },
+  {
+   "sample_id": "t3v3-007",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-008",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "A304",
+   "system_L2_final": "A304",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-009",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "PARTIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "opposes_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "CONDITIONAL",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-010",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-011",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-012",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "PENDING_REVIEW",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-013",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "PARTIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "PENDING_REVIEW",
+   "system_L2_raw": "A304",
+   "system_L2_final": "A304",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SUPPORT_STATUS_NOT_RESOLVED"
+   }
+  },
+  {
+   "sample_id": "t3v3-014",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "QUALIFIES"
+   },
+   "system_L1": "BACKGROUND",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-015",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "TASK_FAILED: quote_or_data_not_found",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-016",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "material_status": "PARTIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A001",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "PENDING_REVIEW",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-017",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "PARTIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "CONDITIONAL",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-018",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A101",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "CONDITIONAL",
+   "system_L2_raw": "A101",
+   "system_L2_final": "A101",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SUPPORT_STATUS_NOT_RESOLVED"
+   }
+  },
+  {
+   "sample_id": "t3v3-019",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "PARTIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A001",
+    "R3_direction": "opposes_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "TASK_FAILED: quote_or_data_not_found",
+   "system_L2_raw": "A001",
+   "system_L2_final": "SELECTED_BUT_NOT_MATCHED",
+   "gate_override": {
+    "alpha_specific_invalidation": true
+   },
+   "L2_final_agrees": false,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-020",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A101",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "CONDITIONAL",
+   "system_L2_raw": "A101",
+   "system_L2_final": "A101",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SUPPORT_STATUS_NOT_RESOLVED"
+   }
+  },
+  {
+   "sample_id": "t3v3-021",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-022R",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A101",
+   "system_L2_final": "A101",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-023",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A101",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A101",
+   "system_L2_final": "A101",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-024R",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A103",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A101",
+   "system_L2_final": "A101",
+   "gate_override": {},
+   "L2_final_agrees": false,
+   "L2_raw_agrees": false,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-025",
+   "cell": "A001",
+   "ticker": "AMD",
+   "material_status": "PARTIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link TIME_INVALID: the production pass only checks VALID links",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-026",
+   "cell": "A001",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "MATERIAL_DEVIATION",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A304",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A304",
+   "system_L2_final": "A304",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-027R",
+   "cell": "A001",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "CITATION_ONLY",
+    "R2_alpha": "A001",
+    "R3_direction": "mentions_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A001",
+   "system_L2_final": "SELECTED_BUT_NOT_MATCHED",
+   "gate_override": {
+    "alpha_specific_invalidation": true
+   },
+   "L2_final_agrees": false,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-028",
+   "cell": "A001",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A001",
+    "R3_direction": "opposes_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A001",
+   "system_L2_final": "SELECTED_BUT_NOT_MATCHED",
+   "gate_override": {
+    "alpha_specific_invalidation": true
+   },
+   "L2_final_agrees": false,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-029",
+   "cell": "A003",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "TASK_FAILED: quote_or_data_not_found",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-030",
+   "cell": "A003",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "CONDITIONAL",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-031",
+   "cell": "A003",
+   "ticker": "AMD",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "FAITHFUL",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "TASK_FAILED: quote_or_data_not_found",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-032",
+   "cell": "A003",
+   "ticker": "AMD",
+   "material_status": "NO_FACTUAL_ELEMENT",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "UNABLE_TO_JUDGE",
+    "R2_alpha": "NONE",
+    "R3_direction": "NOT_APPLICABLE",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "NONE",
+   "system_L2_final": "NONE",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "NOT_APPLICABLE",
+   "system_L4": null
+  },
+  {
+   "sample_id": "t3v3-033",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "material_status": "PARTIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A102",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A102",
+   "system_L2_final": "A102",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "NON_ANALYTICAL_QUALITY",
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-034",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A102",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A102",
+   "system_L2_final": "A102",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "NON_ANALYTICAL_QUALITY",
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-035",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "material_status": "COMPLETE",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A102",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A102",
+   "system_L2_final": "A102",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "NON_ANALYTICAL_QUALITY",
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-036",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "material_status": "NO_FACTUAL_ELEMENT",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "UNABLE_TO_JUDGE",
+    "R2_alpha": "A102",
+    "R3_direction": "supports_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A102",
+   "system_L2_final": "A102",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "supports_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-037",
+   "cell": "A501",
+   "ticker": "AMD",
+   "material_status": "NO_MATERIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A501",
+    "R3_direction": "opposes_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A501",
+   "system_L2_final": "A501",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "opposes_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-038",
+   "cell": "A501",
+   "ticker": "NVDA",
+   "material_status": "NO_MATERIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A501",
+    "R3_direction": "neutral_background",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A501",
+   "system_L2_final": "A501",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "neutral_background",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-039",
+   "cell": "A501",
+   "ticker": "NVDA",
+   "material_status": "NO_MATERIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "MINOR_DEVIATION",
+    "R1_source_relation": "SUPPORTS",
+    "R2_alpha": "A501",
+    "R3_direction": "opposes_alpha",
+    "R4_evidence_eligibility": "QUALIFIES"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A501",
+   "system_L2_final": "A501",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "opposes_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": "RELATION_NOT_SUPPORTING",
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  },
+  {
+   "sample_id": "t3v3-040",
+   "cell": "A501",
+   "ticker": "AMD",
+   "material_status": "NO_MATERIAL",
+   "reviewer": {
+    "R1_claim_fidelity": "UNABLE_TO_JUDGE",
+    "R1_source_relation": "CONDITIONAL",
+    "R2_alpha": "A501",
+    "R3_direction": "opposes_alpha",
+    "R4_evidence_eligibility": "DOES_NOT_QUALIFY"
+   },
+   "system_L1": "NOT_SUBMITTED: source link NOT_PROVIDED: the production pass only checks VALID links",
+   "system_L2_raw": "A501",
+   "system_L2_final": "A501",
+   "gate_override": {},
+   "L2_final_agrees": true,
+   "L2_raw_agrees": true,
+   "system_L3": "opposes_alpha",
+   "system_L4": {
+    "activation_pool_eligible": false,
+    "conflict_side_eligible": false,
+    "selector_excluded": null,
+    "verified_support": "SOURCE_LINK_NOT_VALID"
+   }
+  }
+ ],
+ "note": "each link keeps its own denominator; reviewer R4 is single-claim semantic eligibility and does not assert any production gate passed"
+}

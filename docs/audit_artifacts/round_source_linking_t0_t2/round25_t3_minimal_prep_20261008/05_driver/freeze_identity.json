@@ -1,0 +1,64 @@
+{
+ "schema_version": "t3_joint_sample_driver.v1",
+ "frozen_at": "2026-10-08T15:49:58.762249+00:00",
+ "sample_manifest": {
+  "path": "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/04_joint_sample/joint_sample_v3_manifest.json",
+  "sha256": "b49224c39f670892d5fe23910588824aa543798771a7b3fa2129adc71e6d8a81"
+ },
+ "review_form": {
+  "path": "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/04_joint_sample/review_form_v3.json",
+  "sha256": "35f5a40a7d0ad384ef300e76cb3adef0dbb6610f07da2bb2e8ae57015f53c8ec"
+ },
+ "taxonomy": {
+  "path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+  "sha256": "c6d523beaee4942c71756a3fddbb8213d4ba2f8653fded088d73031ca80f3bfa"
+ },
+ "prompts": {
+  "content_support_verification": {
+   "version": "content_support.llm.v2.1",
+   "identity_sha256": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06"
+  },
+  "alpha_classifier": {
+   "version": "week2.alpha_classifier.v7",
+   "identity_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95"
+  },
+  "evidence_stance_classifier": {
+   "version": "evidence_stance.llm_classifier.v3",
+   "identity_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2"
+  }
+ },
+ "code": {
+  "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "tracked_diff_sha256": "ed8ea188c22a85d2524a9603528544e9b51358bfab2259da0abc4b9819a384c3",
+  "untracked_source_snapshot": "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/code_snapshot"
+ },
+ "config": {
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "timeout_seconds": {
+   "content_support_verification": 120.0,
+   "alpha_classifier": 45.0,
+   "evidence_stance_classifier": 120.0
+  },
+  "max_tokens": {
+   "content_support_verification": null,
+   "alpha_classifier": null,
+   "evidence_stance_classifier": null
+  },
+  "max_requests": {
+   "content_support_verification": 17,
+   "alpha_classifier": 7,
+   "evidence_stance_classifier": 5
+  },
+  "reuse_saved_alpha_answers": true,
+  "application_retries": 0,
+  "sdk_retries": 0,
+  "alpha_classifier_concurrency": 4,
+  "stance_concurrency": 4,
+  "content_support_batch_size": 1,
+  "alpha_classifier_path": "single (one claim per request; use_batched_classifier=False, the production default)",
+  "stance_batch_size": 10,
+  "cache": "none -- the gateway is built without a semantic response cache",
+  "unsent_parameters": "temperature, top_p, thinking / reasoning settings, response_format: not sent -> provider defaults"
+ }
+}

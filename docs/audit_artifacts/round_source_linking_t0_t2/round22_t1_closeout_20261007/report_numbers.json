@@ -1,0 +1,90 @@
+{
+ "execution": "dependency-20261007T220450Z-33128621",
+ "claims_total": 975,
+ "link_methods_among_the_linked": {
+  "linked_total": 261,
+  "ORIGINAL_AGENT_MARKER_CITED": 88,
+  "NORMALIZED_FIELD_MATCH_CANDIDATE": 172,
+  "CONTENT_MATCH_CANDIDATE": 1,
+  "reading": "ORIGINAL_AGENT_MARKER_CITED = the agent wrote the saved fragment marker; NORMALIZED_FIELD_MATCH_CANDIDATE = a deterministic field/number match by the system; CONTENT_MATCH_CANDIDATE = a deterministic whole-excerpt content match (one claim: the company-name heading of the fundamentals report); title matching accounts for none. 88 + 172 + 1 = 261.",
+  "the_one_content_match_claim": [
+   "fundamental_agent:fundamentals_report:claim:2"
+  ]
+ },
+ "technical_failure_subset": {
+  "population": "the 261 linked claims (NOT a subset of the 141 linked analytical claims)",
+  "technical_fallbacks": 107,
+  "by_reason": {
+   "quote_or_data_not_found": 57,
+   "timeout": 42,
+   "malformed_response": 8
+  },
+  "by_claim_quality": {
+   "context_only": 37,
+   "analytical": 70
+  },
+  "matched_an_alpha": 24,
+  "analytical_and_matched_an_alpha": 17,
+  "analytical_and_matched_by_alpha": {
+   "A301": 5,
+   "A101": 1,
+   "A304": 5,
+   "A201": 5,
+   "A601": 1
+  },
+  "in_the_51_key_conclusions": 11,
+  "note": "No retry was made in this closeout; the real status and reason of each stays as saved. The saved record of a rejected 'quote_or_data_not_found' keeps no copy of the rejected quote, so its cause (a fabricated quote vs a locating/format problem) cannot be told from the saved data.",
+  "rejected_quote_retained_on_the_record": 0
+ },
+ "key_conclusions": {
+  "count": 51,
+  "status_counts": {
+   "source_support": {
+    "NOT_LINKED": 27,
+    "TECHNICAL_INCOMPLETE": 11,
+    "MODEL_JUDGED_INSUFFICIENT": 5,
+    "VERIFIED_SUPPORT": 4,
+    "PARTIAL_SUPPORT": 3,
+    "BACKGROUND_ONLY": 1
+   },
+   "alpha_match": {
+    "MODEL_NONE": 42,
+    "MATCHED": 9
+   },
+   "stance": {
+    "NOT_APPLICABLE": 42,
+    "RELATION_UNRESOLVED": 4,
+    "RULE_ONLY": 5
+   },
+   "scoring": {
+    "NOT_SCORED": 51
+   }
+  }
+ },
+ "analytical_claims": {
+  "total": 500,
+  "linked": 141,
+  "with_a_number": 188,
+  "with_a_number_and_unlinked": 47,
+  "reading": "an analytical claim without a number is judged by importance (key conclusion or not), not by the absence of a number; the 27 unlinked key conclusions are shown as 'not linked / not verified'"
+ },
+ "sources_by_type": {
+  "news": 30,
+  "market": 1,
+  "financial": 4
+ },
+ "news_sources_with_saved_body": 0,
+ "selected_analysts": [
+  "market",
+  "news",
+  "fundamentals"
+ ],
+ "linked_by_source_type": {
+  "market": 129,
+  "financial": 132
+ },
+ "eligible_by_source_type": {
+  "market": 16,
+  "financial": 48
+ }
+}

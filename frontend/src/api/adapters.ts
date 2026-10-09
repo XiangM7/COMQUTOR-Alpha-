@@ -13,6 +13,8 @@
 import type {
   ActivationDisplayLevel,
   AgentOutputsResponse,
+  AlphaClassificationCompletion,
+  AlphaClassificationStatus,
   AlphaConflict,
   AlphaEvidenceDetail,
   AlphaInvalidationCondition,
@@ -47,6 +49,8 @@ import type {
   HealthResponse,
   CanonicalResearchResponse,
   ReadinessResponse,
+  ExternalSource,
+  ExternalSourceStatus,
   ReplayAllResult,
   ReplayAllRunResult,
   ResearchArtifacts,
@@ -54,6 +58,8 @@ import type {
   ResearchSubmissionResult,
   RunHistoryResponse,
   RunStatusResult,
+  StageDisclosure,
+  StageDisclosureStage,
   StructureGraphEdge,
   StructureGraphNode,
   StructureGraphResponse,
@@ -134,6 +140,66 @@ export function looksLikeErrorEnvelope(payload: unknown): payload is {
 } {
   if (!isRecord(payload)) return false;
   return isString(payload.status);
+}
+
+
+const ALPHA_CLASSIFICATION_STATUSES = [
+  "incomplete",
+  "complete_no_active",
+  "complete_active_no_dominant",
+  "complete_has_dominant",
+] as const;
+
+function adaptAlphaClassificationStatus(value: unknown): AlphaClassificationStatus | null {
+  return typeof value === "string" && (ALPHA_CLASSIFICATION_STATUSES as readonly string[]).includes(value)
+    ? (value as AlphaClassificationStatus)
+    : null;
+}
+
+/** Strict: every count must be a non-negative integer and `complete` a
+ * boolean, else the whole object is dropped to null -- a half-valid
+ * completion record must never render as a confident number. */
+function adaptAlphaClassificationCompletion(value: unknown): AlphaClassificationCompletion | null {
+  if (!isRecord(value)) return null;
+  const counts = [
+    value.total_claims,
+    value.valid_select_count,
+    value.valid_none_count,
+    value.call_failure_count,
+    value.not_executed_count,
+  ];
+  if (!counts.every((n) => isNumber(n) && Number.isInteger(n) && n >= 0)) return null;
+  if (!isBoolean(value.complete)) return null;
+  return {
+    total_claims: value.total_claims as number,
+    valid_select_count: value.valid_select_count as number,
+    valid_none_count: value.valid_none_count as number,
+    call_failure_count: value.call_failure_count as number,
+    not_executed_count: value.not_executed_count as number,
+    complete: value.complete,
+  };
+}
+
+function adaptStageDisclosure(value: unknown): StageDisclosure | null {
+  if (!isRecord(value) || !isString(value.schema_version) || !Array.isArray(value.stages)) return null;
+  const stages: StageDisclosureStage[] = [];
+  for (const raw of value.stages) {
+    if (!isRecord(raw) || !isString(raw.stage) || !isString(raw.status)) continue;
+    stages.push({
+      stage: raw.stage,
+      task: isString(raw.task) ? raw.task : null,
+      status: raw.status,
+      calls: isNumber(raw.calls) ? raw.calls : null,
+      http_requests: isNumber(raw.http_requests) ? raw.http_requests : null,
+      outcomes: isRecord(raw.outcomes) ? (raw.outcomes as Record<string, number>) : null,
+    });
+  }
+  return {
+    schema_version: value.schema_version,
+    stages,
+    degraded_stages: isStringArray(value.degraded_stages) ? value.degraded_stages : [],
+    notes: isStringArray(value.notes) ? value.notes : [],
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -496,6 +562,12 @@ function adaptConflictEvidenceUIItems(value: unknown): ConflictEvidenceUIItem[] 
     };
     if (isString(raw.counter_target_alpha_id)) item.counter_target_alpha_id = raw.counter_target_alpha_id;
     if (isString(raw.supports_counter_alpha_id)) item.supports_counter_alpha_id = raw.supports_counter_alpha_id;
+    if ("external_source" in raw) {
+      item.external_source = raw.external_source === null ? null : adaptExternalSource(raw.external_source);
+    }
+    if (isExternalSourceStatus(raw.external_source_status)) {
+      item.external_source_status = raw.external_source_status;
+    }
     items.push(item);
   }
   return items;
@@ -1008,6 +1080,9 @@ export function adaptCanonicalResearchResponse(payload: unknown): AdaptResult<Ca
     main_conflict: mainConflict,
     conflict_status: payload.conflict_status === "ready" ? "ready" : "not_ready",
     summary: isString(payload.summary) ? payload.summary : "",
+    alpha_classification_status: adaptAlphaClassificationStatus(payload.alpha_classification_status),
+    alpha_classification_completion: adaptAlphaClassificationCompletion(payload.alpha_classification_completion),
+    stage_disclosure: adaptStageDisclosure(payload.stage_disclosure),
     data_sanity_status: dataSanityStatus as DataSanityStatus,
     data_sanity_warning_count: payload.data_sanity_warning_count,
     data_sanity_critical_count: payload.data_sanity_critical_count,
@@ -1401,6 +1476,38 @@ export function adaptConflictsResponse(payload: unknown): AdaptResult<ConflictsR
 // Agent outputs
 // ---------------------------------------------------------------------------
 
+const EXTERNAL_SOURCE_STATUSES: readonly ExternalSourceStatus[] = ["TRACEABLE", "PARTIAL", "UNAVAILABLE"];
+
+function isExternalSourceStatus(value: unknown): value is ExternalSourceStatus {
+  return typeof value === "string" && (EXTERNAL_SOURCE_STATUSES as readonly string[]).includes(value);
+}
+
+// John MVP Final Gap Closure -- Structured External Source Traceability.
+// Explicit, named extraction only -- never a generic passthrough of
+// whatever the response happens to contain (same convention as every
+// other adapter in this file). A malformed/incomplete external_source
+// object degrades to null rather than a partially-populated object.
+function adaptExternalSource(payload: unknown): ExternalSource | null {
+  if (!isRecord(payload)) return null;
+  const { source_id, source_type, metadata_status } = payload;
+  if (!isString(source_id) || !isString(source_type) || !isExternalSourceStatus(metadata_status)) {
+    return null;
+  }
+  return {
+    source_id,
+    source_type,
+    name: nullableString(payload.name),
+    title: nullableString(payload.title),
+    url: nullableString(payload.url),
+    published_at: nullableString(payload.published_at),
+    retrieved_at: nullableString(payload.retrieved_at),
+    external_record_id: nullableString(payload.external_record_id),
+    locator: nullableString(payload.locator),
+    provider: nullableString(payload.provider),
+    metadata_status,
+  };
+}
+
 function adaptStructuredAgentOutputRecord(payload: unknown): AdaptResult<StructuredAgentOutputRecord> {
   if (!isRecord(payload)) return fail("record is not an object");
   const { claim_id, source_agent_output_id, run_id, ticker, agent, claim, evidence, direction } = payload;
@@ -1439,6 +1546,12 @@ function adaptStructuredAgentOutputRecord(payload: unknown): AdaptResult<Structu
   if (isString(payload.assertion_status)) record.assertion_status = payload.assertion_status;
   if (isString(payload.semantic_polarity)) record.semantic_polarity = payload.semantic_polarity;
   if (isString(payload.extraction_method)) record.extraction_method = payload.extraction_method;
+  if ("external_source" in payload) {
+    record.external_source = payload.external_source === null ? null : adaptExternalSource(payload.external_source);
+  }
+  if (isExternalSourceStatus(payload.external_source_status)) {
+    record.external_source_status = payload.external_source_status;
+  }
   return ok(record);
 }
 
@@ -1619,5 +1732,30 @@ export function adaptReadinessResponse(payload: unknown): AdaptResult<ReadinessR
     real_execution_reason: nullableString(payload.real_execution_reason),
     live_semantic_pipeline,
     live_semantic_pipeline_reason: nullableString(payload.live_semantic_pipeline_reason),
+    ...readinessInstanceIdentity(payload),
   });
+}
+
+/** Optional instance identity fields of /ready (database backend, Week 2
+ * profile, code version) -- each degrades to null when missing or mis-typed. */
+function readinessInstanceIdentity(payload: Record<string, unknown>): Pick<
+  ReadinessResponse,
+  "database_backend" | "week2_execution_profile" | "code_version"
+> {
+  const db = payload.database_backend;
+  const week2 = payload.week2_semantic;
+  const code = payload.code_identity;
+  let codeVersion: string | null = null;
+  if (isRecord(code) && isString(code.git_head)) {
+    const head = code.git_head.slice(0, 7);
+    const diff = isString(code.tracked_diff_sha256) ? code.tracked_diff_sha256.slice(0, 8) : "";
+    codeVersion = code.uncommitted_changes === true ? `${head}+uncommitted(${diff})` : head;
+  }
+  return {
+    database_backend: isRecord(db)
+      ? { dialect: nullableString(db.dialect), database: nullableString(db.database) }
+      : null,
+    week2_execution_profile: isRecord(week2) ? nullableString(week2.execution_profile) : null,
+    code_version: codeVersion,
+  };
 }

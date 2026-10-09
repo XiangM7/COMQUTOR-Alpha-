@@ -1,0 +1,114 @@
+{
+  "schema_version": "v0.2.evidence_error_statistics.day2.v1",
+  "row_level_authority": {
+    "primary_file": "docs/audit_artifacts/evidence_review_summary_v2.json",
+    "primary_sha256": "2f01795c41aa17c61a52bd03abd2224e51390e83a7b5ee0c2f981640212b8519",
+    "cross_check_file": "docs/audit_artifacts/item2_blind_holdout5_comparison.csv",
+    "cross_check_sha256": "ebbcc96a4af6c6fedf282aaa67bc5bc117127d8673b3353009c35e511adedd6e",
+    "total_rows": 200
+  },
+  "alpha_match": {
+    "numerator_correct": 166,
+    "denominator_total_scored": 200,
+    "failures": 34,
+    "excluded_count": 0,
+    "exclusion_reason": "none -- every one of the 200 rows is alpha-scored",
+    "accuracy_percent": 83.0
+  },
+  "polarity": {
+    "numerator_correct": 52,
+    "denominator_total_scored": 61,
+    "failures": 9,
+    "excluded_count": 139,
+    "exclusion_reason": "139 rows have polarity_eligible=False in the row-level authority (138 rows carry no polarity claim at all; 1 row, holdout5-005/AMD, is explicitly excluded via the pre-existing, general directional_eligibility_contract -- adjudication_outcome=BOTH_REASONABLE_AMBIGUOUS -> eligibility_class=AMBIGUOUS_DIRECTION, not a new decision made in this task).",
+    "accuracy_percent": 85.25
+  },
+  "error_accounting": {
+    "alpha_error_records": 34,
+    "polarity_error_records": 9,
+    "total_error_records": 43,
+    "overlapping_samples": 5,
+    "overlapping_sample_ids": [
+      "holdout5-003",
+      "holdout5-016",
+      "holdout5-017",
+      "holdout5-057",
+      "holdout5-154"
+    ],
+    "distinct_erroneous_samples": 38
+  },
+  "critical_reversal": {
+    "accepted_gate_count": 0,
+    "raw_pre_exclusion_count": 1,
+    "raw_pre_exclusion_ids": [
+      "holdout5-005"
+    ],
+    "excluded_ambiguous_rows": [
+      {
+        "review_id": "holdout5-005",
+        "ticker": "AMD",
+        "sentence": "This is not independent fundamental research arriving at $1,250 through bottom-up earnings modeling.",
+        "adjudication_outcome": "BOTH_REASONABLE_AMBIGUOUS",
+        "eligibility_class": "AMBIGUOUS_DIRECTION",
+        "rationale": "A genuine directional-framing disagreement on a negatively-phrased sentence, not an obvious error on either side -- flagged, not adjudicated (no post-freeze relabeling performed). Reviewed: supports_alpha (implies the price target is narrative/sentiment-driven rather than fundamentals-driven, invoking A601's reflexive attention-flow mechanism). System: opposes_alpha.",
+        "source_artifact": "docs/audit_artifacts/item2_blind_holdout5_internal_report.md (Section 11)"
+      }
+    ]
+  },
+  "expected_values_from_task_prompt": {
+    "alpha_match": {
+      "total_scored": 200,
+      "correct": 166,
+      "failures": 34,
+      "accuracy": "83.00%"
+    },
+    "polarity": {
+      "total_scored": 61,
+      "correct": 52,
+      "failures": 9,
+      "accuracy": "85.25%"
+    },
+    "error_accounting": {
+      "alpha_error_records": 34,
+      "polarity_error_records": 9,
+      "total_error_records": 43,
+      "overlapping_samples": 5,
+      "distinct_erroneous_samples": 38
+    },
+    "critical_reversal": {
+      "accepted_gate_count": 0,
+      "raw_pre_exclusion_count": 1
+    }
+  },
+  "discrepancy_report": {
+    "naive_comparison_csv_derivation_disagrees_with_authoritative_row_level_eligibility": {
+      "found": true,
+      "detail": "Deriving polarity stats directly from item2_blind_holdout5_comparison.csv's own polarity_correct column (any non-blank value) yields 62 scored / 10 failures -- one row too many -- because that CSV carries no explicit eligibility field and so does not apply the directional_eligibility_contract's AMBIGUOUS_DIRECTION exclusion for holdout5-005. The authoritative figure (61/9) comes from evidence_review_summary_v2.json's row_level_audit.detailed_rows, which carries the already-adjudicated polarity_eligible field. This is reported explicitly rather than silently reconciled.",
+      "csv_naive_polarity_denominator": 62,
+      "csv_naive_polarity_failures": 10,
+      "authoritative_polarity_denominator": 61,
+      "authoritative_polarity_failures": 9
+    },
+    "alpha_match_csv_vs_summary_agreement": {
+      "csv_alpha_correct": 166,
+      "csv_alpha_incorrect": 34,
+      "summary_alpha_correct": 166,
+      "summary_alpha_incorrect": 34,
+      "agree": true
+    }
+  },
+  "verification": {
+    "alpha_denominator_matches_expected": true,
+    "alpha_correct_matches_expected": true,
+    "alpha_failures_matches_expected": true,
+    "polarity_denominator_matches_expected": true,
+    "polarity_correct_matches_expected": true,
+    "polarity_failures_matches_expected": true,
+    "total_error_records_matches_expected": true,
+    "overlapping_samples_matches_expected": true,
+    "distinct_erroneous_samples_matches_expected": true,
+    "critical_reversal_accepted_gate_matches_expected": true,
+    "critical_reversal_raw_matches_expected": true,
+    "all_verified_against_authoritative_row_level_source": true
+  }
+}

@@ -66,11 +66,17 @@ def test_section_d_real_msft_conflicts_drop_misattributed_display_claims_without
     """Same real historical MSFT run. Recomputing detect_alpha_conflicts
     with the CURRENT code (Section D's fix) against the exact same real
     activation payload and alpha_matches already on disk reproduces the
-    identical admitted conflicts, identical conflict_score, and identical
-    main_conflict as the OLD persisted conflicts.json (proving the frozen
+    identical admitted conflicts, identical conflict_score for every pair that
+    existed in the OLD persisted conflicts.json (proving the frozen
     conflict-score formula is untouched) -- while the DISPLAYED bull/bear
     claim counts drop, because claims whose evidence_stance was not
-    "supports_alpha" for that side are no longer shown as if they were."""
+    "supports_alpha" for that side are no longer shown as if they were.
+
+    T2 (2026-10-07): the taxonomy now declares A102__A304 reciprocally, so
+    that pair is evaluable and the UNCHANGED evidence gate admits it on this
+    frozen input (3 bull / 11 bear supporting facts). It is the one admitted
+    pair the old file cannot contain, and it also becomes the recomputed main
+    conflict. Being evaluable never forced either outcome: the evidence did."""
     activation_payload = json.loads((MSFT_RUN_DIR / "alpha_activations.json").read_text())["activation"]
     alpha_matches = json.loads((MSFT_RUN_DIR / "alpha_matches.json").read_text())["matches"]
     metadata = json.loads((MSFT_RUN_DIR / "metadata.json").read_text())
@@ -86,13 +92,22 @@ def test_section_d_real_msft_conflicts_drop_misattributed_display_claims_without
     old_by_id = {c["conflict_id"]: c for c in old.get("conflicts", [])}
     new_by_id = {c["conflict_id"]: c for c in new.get("conflicts", [])}
 
-    # Same admitted conflicts, same main_conflict, same frozen score.
-    assert set(new_by_id) == set(old_by_id) == {"A101__A304", "A304__A601"}
-    assert new["main_conflict"]["conflict_id"] == old["main_conflict"]["conflict_id"] == "A101__A304"
-    for conflict_id in new_by_id:
+    # Same admitted conflicts for every pair that existed before the taxonomy declared A102__A304, same frozen score.
+    newly_evaluable_pairs = {"A102__A304"}  # T2: declared reciprocally in alpha_taxonomy_v1.yaml (content_version 1.1.0)
+    assert set(old_by_id) == {"A101__A304", "A304__A601"}
+    assert set(new_by_id) - newly_evaluable_pairs == set(old_by_id)
+    assert old["main_conflict"]["conflict_id"] == "A101__A304"  # what the OLD persisted file recorded
+    for conflict_id in old_by_id:
         assert new_by_id[conflict_id]["conflict_score"] == old_by_id[conflict_id]["conflict_score"]
         assert new_by_id[conflict_id]["bull_raw_claim_count"] == old_by_id[conflict_id]["bull_raw_claim_count"]
         assert new_by_id[conflict_id]["bear_raw_claim_count"] == old_by_id[conflict_id]["bear_raw_claim_count"]
+
+    # T2: the newly evaluable pair is admitted by the unchanged evidence gate on this frozen input, and becomes the main conflict.
+    assert "A102__A304" in new_by_id
+    a102_a304 = next(e for e in new["arbitration"]["candidate_evaluations"] if {e["alpha_a"], e["alpha_b"]} == {"A102", "A304"})
+    assert a102_a304["admissibility"]["status"] == "admitted"
+    assert a102_a304["admissibility"]["reason_codes"] == []
+    assert new["main_conflict"]["conflict_id"] == "A102__A304"
 
     # But the OLD persisted display claim_ids include claims that should
     # never have counted as that side's evidence -- the fix removes them.

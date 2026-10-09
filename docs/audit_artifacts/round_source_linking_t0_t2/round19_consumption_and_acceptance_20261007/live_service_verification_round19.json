@@ -1,0 +1,145 @@
+{
+  "mode": "live service http://127.0.0.1:8000 (restarted this round)",
+  "method": "GET only",
+  "checks": {
+    "service_ready_with_isolated_database": {
+      "ok": true,
+      "ready": {
+        "status": "ready",
+        "database": "ready",
+        "job_manager": "ready",
+        "real_execution": "configured",
+        "real_execution_reason": null,
+        "live_semantic_pipeline": "ready",
+        "live_semantic_pipeline_reason": null,
+        "profile": {
+          "profile_id": "comqutor_deepseek_default_v1",
+          "profile_display_name": "DeepSeek Default Research",
+          "provider": "deepseek",
+          "quick_model": "deepseek-v4-flash",
+          "deep_model": "deepseek-v4-flash",
+          "thinking": "disabled",
+          "max_debate_rounds": 1,
+          "max_risk_discuss_rounds": 1
+        }
+      }
+    },
+    "lineage_block_present_and_correct": {
+      "ok": true,
+      "lineage": {
+        "based_on_run_id": "recovery-20261007T053635Z-26d6cd1a",
+        "root_research_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+        "execution_type": "alpha_evidence_requalification",
+        "lineage_artifact": "requalification_lineage.json"
+      }
+    },
+    "requalification_summary_equals_artifact": {
+      "ok": true,
+      "eligible_after": 64
+    },
+    "classification_incompleteness_still_disclosed": {
+      "ok": true,
+      "completion": {
+        "total_claims": 975,
+        "valid_select_count": 162,
+        "valid_none_count": 812,
+        "call_failure_count": 1,
+        "not_executed_count": 0,
+        "not_executed_configuration_count": 0,
+        "not_executed_fault_count": 0,
+        "complete": false
+      }
+    },
+    "parent_has_recovery_lineage_and_original_has_none": {
+      "ok": true,
+      "parent_lineage_type": "alpha_classification_recovery"
+    },
+    "history_lists_all_three_runs": {
+      "ok": true,
+      "statuses": {
+        "requal-20261007T174744Z-6640": "completed",
+        "recovery-20261007T053635Z-26": "completed",
+        "c904d4cc-dc09-495c-aec5-b056": "completed"
+      }
+    },
+    "read_time_eligibility_equals_stored": {
+      "ok": true,
+      "api_visible": 500,
+      "analytical_claims_in_run": 500,
+      "mismatches": 0,
+      "sample": [],
+      "requalified_claims_visible_via_api": 7,
+      "requalified_visible_api_codes": {
+        "ELIGIBLE": 7
+      },
+      "note": "the route returns the product-findings view = the analytical claims only; the other claims are in the artifacts and the Export"
+    },
+    "api_claim_set_equals_parent": {
+      "ok": true
+    },
+    "graph_scores_and_levels_equal_artifact_for_all_10_alphas": {
+      "ok": true,
+      "a301": 21.3056,
+      "level": "candidate",
+      "score_diffs": {},
+      "level_diffs": {}
+    },
+    "exposures_equal_artifact": {
+      "ok": true,
+      "compared": 10,
+      "a301": 0.5
+    },
+    "conflicts_equal_artifact": {
+      "ok": true,
+      "admitted": 0,
+      "rejected": 8
+    },
+    "artifact_listing_complete_and_hashes_match": {
+      "ok": true,
+      "artifacts": 17
+    },
+    "new_artifacts_readable_lineage_download": {
+      "ok": true
+    },
+    "new_artifacts_readable_eligibility_download": {
+      "ok": true,
+      "claims_requalified": 24
+    },
+    "export_zip_byte_identical_to_execution_files": {
+      "ok": true,
+      "members": 17,
+      "bytes": 881025,
+      "mismatching_members": [],
+      "annotated_sources": [
+        "src_4045667791b919f9",
+        "src_582ac24bf4319648",
+        "src_d889dd1e36a5d55a"
+      ]
+    },
+    "export_scores_equal_artifacts": {
+      "ok": true
+    },
+    "published_at_never_backfilled": {
+      "ok": true
+    },
+    "original_run_directory_byte_identical_to_before_round19": {
+      "ok": true,
+      "files": 29,
+      "changed": []
+    },
+    "recovery_run_directory_byte_identical_to_before_round19": {
+      "ok": true,
+      "files": 29,
+      "changed": []
+    },
+    "requalification_run_directory_byte_identical_to_before_round19": {
+      "ok": true,
+      "files": 22,
+      "changed": []
+    },
+    "direction_execution_directory_byte_identical_to_before_round19": {
+      "ok": true,
+      "files": 6
+    }
+  }
+}

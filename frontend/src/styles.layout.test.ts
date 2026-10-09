@@ -100,3 +100,109 @@ describe("Conflict card evidence UI layout (styles.css)", () => {
     expect(ruleBody(".evidence-ui-item")).toMatch(/overflow-wrap:\s*anywhere/);
   });
 });
+
+describe("Research landing page (styles.css)", () => {
+  it("navigation is sticky and translucent over the scrolling page", () => {
+    const body = ruleBody(".app-header");
+    expect(body).toMatch(/position:\s*sticky/);
+    expect(body).toMatch(/top:\s*0/);
+    expect(body).toMatch(/backdrop-filter:\s*saturate\(180%\)\s*blur\(20px\)/);
+  });
+
+  it("the Recent runs menu floats over the page instead of pushing content down", () => {
+    const body = ruleBody(".recent-runs-menu");
+    expect(body).toMatch(/position:\s*absolute/);
+    expect(body).toMatch(/z-index:\s*5/);
+    expect(ruleBody(".research-actions")).toMatch(/position:\s*relative/);
+  });
+
+  it("a long run history scrolls inside the menu instead of growing it", () => {
+    const body = ruleBody(".recent-runs-scroll");
+    expect(body).toMatch(/max-height:\s*336px/);
+    expect(body).toMatch(/overflow-y:\s*auto/);
+  });
+
+  it("the ticker input is large, bold and shown in capitals", () => {
+    const body = ruleBody(".ticker-input");
+    expect(body).toMatch(/font-size:\s*32px/);
+    expect(body).toMatch(/text-transform:\s*uppercase/);
+  });
+
+  it("the only autoplay motion (evidence trace) and the menu respect prefers-reduced-motion", () => {
+    const block = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.trace-node,[\s\S]*?\n\}/)?.[0];
+    if (block == null) {
+      throw new Error("no prefers-reduced-motion block covers .trace-node");
+    }
+    expect(block).toMatch(/\.recent-runs-menu/);
+    expect(block).toMatch(/\.trace-link/);
+    expect(block).toMatch(/animation:\s*none/);
+  });
+
+  it("trace connectors are hidden on narrow screens", () => {
+    const block = [...css.matchAll(/@media \(max-width: 720px\)\s*\{[\s\S]*?\n\}/g)]
+      .map((match) => match[0])
+      .find((candidate) => candidate.includes(".trace-link"));
+    if (block == null) {
+      throw new Error("no @media (max-width: 720px) block for the landing page");
+    }
+    expect(block).toMatch(/\.trace-link\s*\{\s*display:\s*none/);
+  });
+});
+
+describe("Processing page (styles.css)", () => {
+  it("lays out two columns that wrap on narrow screens, the stages panel capped at 280px", () => {
+    expect(ruleBody(".processing-layout")).toMatch(/flex-wrap:\s*wrap/);
+    expect(ruleBody(".processing-main")).toMatch(/min-width:\s*0/);
+    const panel = ruleBody(".stages-panel");
+    expect(panel).toMatch(/max-width:\s*280px/);
+    expect(panel).toMatch(/min-width:\s*0/);
+  });
+
+  it("gives the pipeline scene one fixed height so the page never jumps between scenes", () => {
+    expect(ruleBody(".pipeline-stage")).toMatch(/height:\s*168px/);
+    // The card is sized by that stage, not by its own minimum.
+    expect(ruleBody(".pipeline-card")).not.toMatch(/min-height/);
+  });
+
+  it("animates the progress width smoothly while the band only marks the active stretch", () => {
+    expect(ruleBody(".progress-fill")).toMatch(/transition:\s*width/);
+    expect(ruleBody(".progress-band")).toMatch(/animation:\s*band-shimmer/);
+  });
+
+  it("lets the ticker be transformed, so it can fly in from the Research page", () => {
+    expect(ruleBody(".processing-ticker")).toMatch(/display:\s*inline-block/);
+  });
+
+  it("keeps the Start button blue while a run is being started", () => {
+    const body = ruleBody(".cta-button-busy:disabled");
+    expect(body).toMatch(/background:\s*var\(--color-primary\)/);
+    expect(body).not.toMatch(/not-allowed/);
+  });
+
+  it("never plays the entrance animation on the ticker or the progress track", () => {
+    const rule = css.match(/\.processing-enter \.rise-1,[^{]*\{([^}]*)\}/);
+    if (rule == null) {
+      throw new Error("entrance animation rule not found");
+    }
+    expect(rule[0]).not.toMatch(/\.processing-ticker|\.progress-track|\.progress-fill/);
+    expect(rule[1]).toMatch(/animation:\s*rise/);
+  });
+
+  it("grows the sheet out of the card from its top-left corner", () => {
+    const sheet = ruleBody(".price-sheet");
+    expect(sheet).toMatch(/transform-origin:\s*0 0/);
+    expect(sheet).toMatch(/position:\s*fixed/);
+    expect(ruleBody(".price-sheet-backdrop")).toMatch(/backdrop-filter:\s*blur\(14px\)/);
+  });
+
+  it("turns off the band, the pulses and the entrance when reduced motion is requested", () => {
+    const block = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.processing-enter[\s\S]*?\n\}/)?.[0];
+    if (block == null) {
+      throw new Error("no prefers-reduced-motion block for the Processing page");
+    }
+    for (const selector of [".progress-band", ".scene-dot-pulse", ".scene-dot-offbeat", ".stage-dot-current", ".processing-enter .rise-3"]) {
+      expect(block).toContain(selector);
+    }
+    expect(block).toMatch(/animation:\s*none/);
+  });
+});

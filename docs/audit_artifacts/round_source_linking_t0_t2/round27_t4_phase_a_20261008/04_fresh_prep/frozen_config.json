@@ -1,0 +1,260 @@
+{
+ "schema": "t4.fresh_run_frozen_config.v1",
+ "frozen_at": "2026-10-08T23:05:57.698023+00:00",
+ "ticker": "NVDA",
+ "who_starts_the_run": "the project owner, by clicking Start Research on http://127.0.0.1:5177/research -- never a script, API call or recorder",
+ "instance": {
+  "api": "http://127.0.0.1:8002",
+  "web": "http://127.0.0.1:5177/research",
+  "pid": 51194,
+  "output_root": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/t4_runs"
+ },
+ "ready": {
+  "status": "ready",
+  "database": "ready",
+  "job_manager": "ready",
+  "real_execution": "configured",
+  "real_execution_reason": null,
+  "live_semantic_pipeline": "ready",
+  "live_semantic_pipeline_reason": null,
+  "profile": {
+   "profile_id": "comqutor_deepseek_default_v1",
+   "profile_display_name": "DeepSeek Default Research",
+   "provider": "deepseek",
+   "quick_model": "deepseek-v4-flash",
+   "deep_model": "deepseek-v4-flash",
+   "thinking": "disabled",
+   "max_debate_rounds": 1,
+   "max_risk_discuss_rounds": 1
+  },
+  "database_backend": {
+   "dialect": "postgresql",
+   "database": "comqutor_alpha_t4_test",
+   "reason": null
+  },
+  "week2_semantic": {
+   "enabled": true,
+   "execution_profile": "t3_verified_20261008",
+   "profile_error": null,
+   "model": "deepseek-v4-flash",
+   "max_calls": 1800,
+   "request_response_audit": true
+  },
+  "code_identity": {
+   "status": "known",
+   "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+   "uncommitted_changes": true,
+   "tracked_diff_sha256": "b5e911981051408a03b10262727267782ab309b7881f26f06fefa12b773c0763",
+   "untracked_runtime_source_sha256": "a61cb62cfe56a0d89ca39bccc090675372bd51458a157c77d5667300a4378842",
+   "computed_at": "2026-10-08T23:05:45.557995+00:00"
+  }
+ },
+ "process_environment_allowlisted": {
+  "COMQUTOR_API_HOST": "127.0.0.1",
+  "COMQUTOR_API_PORT": "8002",
+  "COMQUTOR_CORS_ORIGINS": "http://127.0.0.1:5177",
+  "COMQUTOR_OUTPUT_DIR": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/t4_runs",
+  "COMQUTOR_REQUIRE_DATABASE_NAME": "comqutor_alpha_t4_test",
+  "COMQUTOR_REQUIRE_DATABASE_DIALECT": "postgresql",
+  "COMQUTOR_REAL_TRADINGAGENTS_ENABLED": "true",
+  "COMQUTOR_REAL_FORCE_REFRESH_ENABLED": "false",
+  "COMQUTOR_DATA_SANITY_ENABLED": "true",
+  "COMQUTOR_JOB_TIMEOUT_SECONDS": "14400",
+  "COMQUTOR_JOB_MAX_WORKERS": "1",
+  "COMQUTOR_RESEARCH_AGENT_MAX_ACTUAL_REQUESTS": "100",
+  "COMQUTOR_RESEARCH_AGENT_MAX_RETRIES": "0",
+  "COMQUTOR_WEEK2_LLM_ENABLED": "true",
+  "COMQUTOR_WEEK2_LLM_PROFILE": "t3_verified_20261008",
+  "COMQUTOR_WEEK2_LLM_PROVIDER": "deepseek",
+  "COMQUTOR_WEEK2_LLM_MODEL": "deepseek-v4-flash",
+  "COMQUTOR_WEEK2_LLM_TIMEOUT_SECONDS": "45",
+  "COMQUTOR_WEEK2_LLM_MAX_RETRIES": "0",
+  "COMQUTOR_WEEK2_LLM_MAX_CALLS": "1800"
+ },
+ "process_credentials_present": {
+  "DEEPSEEK_API_KEY": true,
+  "OPENAI_API_KEY": false,
+  "ANTHROPIC_API_KEY": true,
+  "COMQUTOR_WEEK2_LLM_BASE_URL": false,
+  "TRADINGAGENTS_LLM_BACKEND_URL": false
+ },
+ "process_database": {
+  "dialect": "postgresql",
+  "database": "comqutor_alpha_t4_test"
+ },
+ "effective_config": {
+  "week2": {
+   "enabled": true,
+   "execution_profile": "t3_verified_20261008",
+   "profile_error": null,
+   "provider": "deepseek",
+   "model": "deepseek-v4-flash",
+   "base_url_configured": false,
+   "request_response_audit": true,
+   "max_calls": 1800,
+   "shared_timeout_seconds_other_tasks": 45.0,
+   "gateway_max_retries": 0,
+   "tasks": {
+    "content_support_verification": {
+     "client_read_timeout_seconds": 120.0,
+     "application_timeout_seconds": 120.0,
+     "application_retries": 0,
+     "sdk_retries": 0,
+     "batch_size": 1,
+     "max_tokens": null
+    },
+    "alpha_classifier": {
+     "client_read_timeout_seconds": 45.0,
+     "application_timeout_seconds": 45.0,
+     "application_retries": 0,
+     "sdk_retries": 0,
+     "path": "single",
+     "concurrency": 4,
+     "max_tokens": null
+    },
+    "evidence_stance_classifier": {
+     "client_read_timeout_seconds": 120.0,
+     "application_timeout_seconds": 120.0,
+     "application_retries": 0,
+     "sdk_retries": 0,
+     "batch_size": 10,
+     "concurrency": 4
+    }
+   }
+  },
+  "agents": {
+   "max_actual_requests": "100",
+   "max_retries": "0",
+   "profile_id": "comqutor_deepseek_default_v1",
+   "provider": "deepseek",
+   "quick_model": "deepseek-v4-flash",
+   "deep_model": "deepseek-v4-flash",
+   "thinking": "disabled",
+   "max_debate_rounds": 1,
+   "max_risk_discuss_rounds": 1
+  }
+ },
+ "prompt_identities": {
+  "content_support_verification": {
+   "prompt_sha256": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+   "prompt_version": "content_support.llm.v2.1",
+   "input_schema_version": "content_support.llm.input.v2",
+   "output_schema_version": "content_support.llm.output.v2.1",
+   "taxonomy_version": null,
+   "t3_verified_pin": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+   "equals_t3_pin": true
+  },
+  "alpha_classifier": {
+   "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+   "prompt_version": "week2.alpha_classifier.v7",
+   "input_schema_version": "week2.alpha_classifier.input.v2",
+   "output_schema_version": "week2.alpha_classifier.output.v3",
+   "taxonomy_version": "alpha_taxonomy_v1",
+   "t3_verified_pin": "ac48723f",
+   "equals_t3_pin": true
+  },
+  "evidence_stance_classifier": {
+   "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+   "prompt_version": "evidence_stance.llm_classifier.v3",
+   "input_schema_version": "evidence_stance.llm_classifier.input.v1",
+   "output_schema_version": "evidence_stance.llm_classifier.output.v1",
+   "taxonomy_version": "alpha_taxonomy_v1",
+   "t3_verified_pin": "d9455fd5ff33",
+   "equals_t3_pin": true
+  },
+  "claim_batch_enrichment": {
+   "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+   "prompt_version": "week2.claim_batch_enrichment.v1",
+   "input_schema_version": "week2.claim_batch_enrichment.input.v1",
+   "output_schema_version": "week2.claim_batch_enrichment.output.v1",
+   "taxonomy_version": null,
+   "t3_verified_pin": null,
+   "equals_t3_pin": null
+  },
+  "structure_extractor": {
+   "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+   "prompt_version": "week2.structure_extractor.v1",
+   "input_schema_version": "week2.structure_extractor.input.v1",
+   "output_schema_version": "week2.structure_extractor.output.v1",
+   "taxonomy_version": null,
+   "t3_verified_pin": null,
+   "equals_t3_pin": null
+  },
+  "research_agents_tradingagents_source": {
+   "files": 73,
+   "sha256_of_path_and_file_sha_listing": "42ff54644ad580e09fd5c5301235f7330ef52ff02f9cf3c809b6a6bedf9ccb49",
+   "note": "TradingAgents prompts live in this source tree; no separate prompt registry"
+  }
+ },
+ "code_identity_reported_by_process": {
+  "status": "known",
+  "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "uncommitted_changes": true,
+  "tracked_diff_sha256": "b5e911981051408a03b10262727267782ab309b7881f26f06fefa12b773c0763",
+  "untracked_runtime_source_sha256": "a61cb62cfe56a0d89ca39bccc090675372bd51458a157c77d5667300a4378842",
+  "computed_at": "2026-10-08T23:05:45.557995+00:00"
+ },
+ "code_snapshot": {
+  "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "tracked_diff_sha256": "b5e911981051408a03b10262727267782ab309b7881f26f06fefa12b773c0763",
+  "tracked_diff_bytes": 1080483,
+  "changed_tracked_files": 134,
+  "untracked_runtime_source_files": 25,
+  "untracked_runtime_source_sha256": "a61cb62cfe56a0d89ca39bccc090675372bd51458a157c77d5667300a4378842",
+  "files": {
+   "tracked_diff": "code_snapshot/tracked_diff_vs_HEAD.diff",
+   "untracked_runtime_source": "code_snapshot/untracked_runtime_source.tar.gz",
+   "untracked_listing": "code_snapshot/untracked_runtime_source_files.txt",
+   "git_status": "code_snapshot/git_status_porcelain.txt"
+  },
+  "matches_running_process": {
+   "git_head": true,
+   "tracked_diff_sha256": true,
+   "untracked_runtime_source_sha256": true
+  }
+ },
+ "caps_and_stop_rules": {
+  "caps": {
+   "week2_max_calls": 1800,
+   "research_agent_max_actual_requests": 100,
+   "research_agent_max_retries": 0,
+   "week2_retries": 0,
+   "job_timeout_seconds": 14400
+  },
+  "hard_guards": {
+   "week2_max_calls": "shared Week 2 budget: a request is reserved before it is sent; past the cap every further call is refused unsent (budget_exhausted) and the run is saved partial (rehearsal_budget60.json)",
+   "research_agent_max_actual_requests": "research-agent request cap (runners/request_budget.py), retries 0",
+   "job_timeout_seconds": "the job manager terminates the run at this wall time and records it failed (allowed range 30-14400)",
+   "retries": "both layers 0 (profile + COMQUTOR_RESEARCH_AGENT_MAX_RETRIES=0); unknown outcomes are never resent"
+  },
+  "no_usd_guard": "there is no dollar cap in the product; the cost figures below are estimates, not limits",
+  "absolute_cost_bound_at_caps_usd": {
+   "value": 27.54,
+   "how": "every Week 2 request at the costliest step's average peak cost + every research-agent request at its average peak cost -- an unrealistic bound"
+  }
+ },
+ "checks": {
+  "ready_status_ready": true,
+  "real_execution_configured": true,
+  "live_semantic_pipeline_ready": true,
+  "database_is_t4_postgresql": true,
+  "process_env_database_is_t4_postgresql": true,
+  "process_requires_t4_database": true,
+  "week2_profile_selected": true,
+  "week2_enabled": true,
+  "port_and_origin": true,
+  "week2_max_calls_equals_cap": true,
+  "agent_request_cap_equals_cap": true,
+  "agent_retries_zero": true,
+  "week2_retries_zero": true,
+  "job_timeout_equals_cap": true,
+  "single_job_worker": true,
+  "force_refresh_off": true,
+  "request_response_audit_on": true,
+  "provider_credential_present": true,
+  "no_proxy_override": true,
+  "code_snapshot_matches_running_process": true,
+  "week2_prompts_equal_t3_pins": true
+ },
+ "all_checks_pass": true
+}

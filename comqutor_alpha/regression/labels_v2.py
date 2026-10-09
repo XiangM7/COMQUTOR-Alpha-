@@ -234,11 +234,18 @@ def _validate_ticker_block(
             seen[pair] = category
 
 
-def load_j2_labels_v2(path: str | Path | None = None) -> dict[str, Any]:
+def load_j2_labels_v2(path: str | Path | None = None, *, taxonomy_path: str | Path | None = None) -> dict[str, Any]:
     """Loads and structurally validates the J2 v0.2 label file. Raises
     :class:`LabelV2ValidationError` for any structural/vocabulary/mutual-
     exclusivity violation. Never reads an environment variable to alter
-    ``evaluation_mode``/``formal_product_owner_approval``/``approved_by``."""
+    ``evaluation_mode``/``formal_product_owner_approval``/``approved_by``.
+
+    ``taxonomy_path`` (T2, 2026-10-07): the taxonomy the declared conflict
+    pairs and Alpha ids are validated AGAINST. Before this parameter existed
+    the label file was always validated against the DEFAULT taxonomy, so a
+    caller that named a different taxonomy (the formal acceptance entry) got
+    a label/taxonomy compatibility check against a file it was not using.
+    ``None`` keeps the old behavior (the default taxonomy)."""
     import yaml
 
     resolved_path = Path(path) if path is not None else DEFAULT_LABEL_V2_PATH
@@ -253,7 +260,7 @@ def load_j2_labels_v2(path: str | Path | None = None) -> dict[str, Any]:
 
     _validate_top_level(raw)
 
-    taxonomy = load_alpha_taxonomy()
+    taxonomy = load_alpha_taxonomy(taxonomy_path)
     known_alpha_ids = frozenset(taxonomy.keys())
     canonical_pairs = _canonical_conflict_pairs(taxonomy)
 

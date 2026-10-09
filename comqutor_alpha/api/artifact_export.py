@@ -20,7 +20,7 @@ from comqutor_alpha.api.unclassified_findings import (
     build_unclassified_findings_export,
 )
 from comqutor_alpha.conflict_engine.conflict_admissibility import CANDIDATE as B2_CANDIDATE
-from comqutor_alpha.storage.file_store import run_dir_for, save_json_record
+from comqutor_alpha.storage.file_store import load_json_record_if_exists, run_dir_for, save_json_record
 from comqutor_alpha.structure_engine.evidence_stance import (
     CLASSIFIER_VERSION as EVIDENCE_STANCE_VERSION,
 )
@@ -72,11 +72,47 @@ REPLAY_REQUIRED_ARTIFACT_FILENAMES = tuple(
 # anything. Joins this set rather than REQUIRED_ARTIFACT_FILENAMES for the
 # exact same reason evidence_stance_audit.json does: it must never change
 # John's existing artifact_completeness / "completed" status gate.
+SOURCE_REGISTRY_FILENAME = "source_registry.json"
 PRODUCT_EXTENSION_ARTIFACT_FILENAMES = (
     "entity_alpha_exposures.json",
     "summary.json",
     EVIDENCE_STANCE_AUDIT_FILENAME,
     UNCLASSIFIED_FINDINGS_FILENAME,
+    # John MVP Final Gap Closure -- Structured External Source
+    # Traceability: joins this set for the exact same reason as the two
+    # entries above -- written only when at least one genuine source was
+    # captured (comqutor_alpha.adapters.tradingagents_output_writer), so it
+    # must never change John's existing artifact_completeness/"completed"
+    # gate for a run with no news tool calls or a historical run.
+    SOURCE_REGISTRY_FILENAME,
+)
+# Round 15 (2026-10-06): artifacts that exist ONLY in a derived alpha-
+# classification recovery execution. Listed in the manifest (and therefore in
+# the export bundle) only when the file is actually present, so every other
+# run's artifact_manifest.json is byte-for-byte what it was before.
+PRESENT_ONLY_ARTIFACT_FILENAMES = (
+    "recovery_lineage.json",
+    "evidence_stance_followup_manifest.json",
+    "direction_lineage.json",
+    "evidence_stance_direction_results.json",
+    "requalification_lineage.json",
+    "evidence_eligibility_requalification.json",
+    # T1 closure: written only for a run that declares the fact-dependency contract (and by the offline execution
+    # that recomputes a run under it); any other run's manifest is byte-for-byte what it was.
+    "evidence_trace.json",
+    "dependency_lineage.json",
+    # T1 closeout (Round 22): written by the run itself only when a call site captured them (see capture_artifacts), so any
+    # other run's manifest is byte-for-byte what it was.
+    "derived_inputs.json",
+    "provider_response_audit.json",
+    # T4 (2026-10-08): the run's unified LLM usage/cost report (comqutor_alpha.llm.run_usage_report), written at finalization
+    # by runs that reach it; any other run's manifest is byte-for-byte what it was.
+    "llm_usage_report.json",
+    "provider_stop.json",
+    "week2_gateway_budget.json",
+    # T4 round 32 (2026-10-09): stage completion / degradation disclosure (comqutor_alpha.api.stage_disclosure), written at
+    # finalization by runs that reach it; any other run's manifest is byte-for-byte what it was.
+    "stage_disclosure.json",
 )
 # Written last, once every other artifact above already exists.
 MANIFEST_ARTIFACT_FILENAME = "artifact_manifest.json"
@@ -568,6 +604,33 @@ def finalize_completed_run_artifacts(
                 run_id, UNCLASSIFIED_FINDINGS_FILENAME, unclassified_findings, output_root=output_root
             )
 
+        # T1 closure: the claim-level evidence trace -- joined from the artifacts this run already saved, never a
+        # second computation of scoring. Only for a run that declares the fact-dependency contract (metadata.json);
+        # every other run keeps its artifact set, and the API still builds the same trace on demand from the same
+        # builder, so the two can never disagree.
+        evidence_trace = None
+        run_metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
+        if isinstance(run_metadata, dict) and run_metadata.get("fact_dependency_contract"):
+            from comqutor_alpha.api.evidence_trace import EVIDENCE_TRACE_FILENAME, build_evidence_trace_artifact
+
+            evidence_trace = build_evidence_trace_artifact(run_id, output_root)
+            if evidence_trace is not None:
+                save_json_record(run_id, EVIDENCE_TRACE_FILENAME, evidence_trace, output_root=output_root)
+
+        # T4 round 32: which model-assisted sub-steps were degraded or fell back, from this run's own ledger and stage
+        # artifacts -- the same builder the API uses, so the Export and the page can never disagree.
+        # Written only for a run that saved a semantic call ledger (every other run's artifact set is unchanged).
+        from comqutor_alpha.api.stage_disclosure import (
+            LEDGER_FILENAME,
+            STAGE_DISCLOSURE_FILENAME,
+            build_stage_disclosure,
+        )
+
+        stage_disclosure = None
+        if (run_dir_for(run_id, output_root) / LEDGER_FILENAME).is_file():
+            stage_disclosure = build_stage_disclosure(run_dir_for(run_id, output_root))
+            save_json_record(run_id, STAGE_DISCLOSURE_FILENAME, stage_disclosure, output_root=output_root)
+
         dominant_alphas = graph_payload.get("dominant_alphas")
         dominant_alpha_ids = [
             a.get("alpha_id") for a in dominant_alphas if isinstance(a, dict) and a.get("alpha_id")
@@ -601,6 +664,8 @@ def finalize_completed_run_artifacts(
         "summary": summary,
         "evidence_stance_audit": evidence_stance_audit,
         "unclassified_findings": unclassified_findings,
+        "evidence_trace": evidence_trace,
+        "stage_disclosure": stage_disclosure,
     }
 
 
@@ -683,6 +748,9 @@ def build_and_write_artifact_manifest(
     )
     compat_entry["compatibility_alias_of"] = "conflicts.json"
     entries.append(compat_entry)
+    for filename in PRESENT_ONLY_ARTIFACT_FILENAMES:
+        if (run_dir / filename).exists():
+            entries.append(_manifest_entry(run_dir, filename, run_id=run_id, ticker=ticker, required=False))
 
     required_count = len(required_filenames)
     present_required_count = required_count - len(missing_required)
@@ -713,6 +781,7 @@ __all__ = [
     "REQUIRED_ARTIFACT_FILENAMES",
     "REPLAY_REQUIRED_ARTIFACT_FILENAMES",
     "PRODUCT_EXTENSION_ARTIFACT_FILENAMES",
+    "PRESENT_ONLY_ARTIFACT_FILENAMES",
     "MANIFEST_ARTIFACT_FILENAME",
     "CONFLICT_RESULTS_COMPATIBILITY_FILENAME",
     "ARTIFACT_COMPLETENESS_PASS",

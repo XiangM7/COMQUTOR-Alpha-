@@ -1,0 +1,39 @@
+$ python3 tools/run_with_network_trap.py docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/tools/reconcile_not_sent.py --out-json 03_not_sent_reconcile/reconcile.json --out-md 03_not_sent_reconcile/对账.md
+{
+ "send_ledger": {
+  "ledger_records": 1220,
+  "sent_with_http_attempt": 1204,
+  "http_attempts": 1204,
+  "gateway_budget_reservations": 1204,
+  "wire_audit_request_rows": 1204,
+  "wire_audit_reply_rows": 1198,
+  "same_run_cache_hits_not_sent": 10,
+  "cache_hits_by_task": {
+   "alpha_classifier": 10
+  },
+  "refused_locally_input_too_large": 6,
+  "refused_by_task": {
+   "structured_adapter": 1,
+   "content_support_verification": 5
+  },
+  "other_not_sent": 0,
+  "identity": "1220 = 1204 sent + 10 cache hits + 6 refused",
+  "balances": true
+ },
+ "facts": {
+  "refused": 6,
+  "refused_cs": 5,
+  "refused_adapter": 1,
+  "refused_labelled_malformed": 5,
+  "claim_labels_malformed_saved": 8,
+  "real_malformed_replies": 3,
+  "corrected_to_input_too_large": 5,
+  "final_ledger_messages": 6
+ },
+ "statements_inconsistent": [
+  "6 个请求输入超限，且被标成 `malformed_response`"
+ ],
+ "quotes_missing": []
+}
+exit code: 0 | network attempts: 0
+[exit 0]

@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+collecting ... collected 14 items
+
+tests/test_t1_market_source_fields_postgres_integration.py::test_real_market_chain_record_round_trips_through_isolated_postgres_after_a_genuine_reconnect PASSED [  7%]
+tests/test_t1_market_source_fields_postgres_integration.py::test_pre_migration_style_market_row_without_source_linking_fields_still_reads_cleanly PASSED [ 14%]
+tests/test_week4_postgres_persistence.py::test_migration_0002_and_tables_exist PASSED [ 21%]
+tests/test_week4_postgres_persistence.py::test_migration_reapply_is_idempotent_and_records_0002_exactly_once PASSED [ 28%]
+tests/test_week4_postgres_persistence.py::test_week4_json_columns_are_real_jsonb PASSED [ 35%]
+tests/test_week4_postgres_persistence.py::test_activation_unique_constraint_is_enforced PASSED [ 42%]
+tests/test_week4_postgres_persistence.py::test_conflict_unique_constraint_is_enforced PASSED [ 50%]
+tests/test_week4_postgres_persistence.py::test_round_trip_all_outcomes_and_main_reconstruction PASSED [ 57%]
+tests/test_week4_postgres_persistence.py::test_retry_replace_semantics PASSED [ 64%]
+tests/test_week4_postgres_persistence.py::test_run_isolation_including_same_ticker[False] PASSED [ 71%]
+tests/test_week4_postgres_persistence.py::test_run_isolation_including_same_ticker[True] PASSED [ 78%]
+tests/test_week4_postgres_persistence.py::test_transaction_rollback_preserves_prior_state PASSED [ 85%]
+tests/test_week4_postgres_persistence.py::test_full_path_reconnect_readback_and_export_consistency_with_independent_reevaluation PASSED [ 92%]
+tests/test_content_support_reevaluation_postgres_integration.py::test_reevaluation_official_result_and_history_protection_on_real_postgres PASSED [100%]
+
+============================== 14 passed in 6.44s ==============================

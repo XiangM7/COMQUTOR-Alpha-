@@ -1,0 +1,68 @@
+{
+ "source": "the execution's own wire request audit, every request (read-only)",
+ "tasks": {
+  "content_support_verification": {
+   "requests": 17,
+   "x-stainless-read-timeout": [
+    "120.0"
+   ],
+   "x-stainless-retry-count": [
+    "0"
+   ],
+   "authorization": [
+    "REDACTED"
+   ],
+   "body_keys": [
+    "messages,model,stream"
+   ],
+   "model": [
+    "deepseek-v4-flash"
+   ],
+   "url": [
+    "https://api.deepseek.com/chat/completions"
+   ]
+  },
+  "alpha_classifier": {
+   "requests": 40,
+   "x-stainless-read-timeout": [
+    "45.0"
+   ],
+   "x-stainless-retry-count": [
+    "0"
+   ],
+   "authorization": [
+    "REDACTED"
+   ],
+   "body_keys": [
+    "messages,model,stream"
+   ],
+   "model": [
+    "deepseek-v4-flash"
+   ],
+   "url": [
+    "https://api.deepseek.com/chat/completions"
+   ]
+  },
+  "evidence_stance_classifier": {
+   "requests": 3,
+   "x-stainless-read-timeout": [
+    "120.0"
+   ],
+   "x-stainless-retry-count": [
+    "0"
+   ],
+   "authorization": [
+    "REDACTED"
+   ],
+   "body_keys": [
+    "messages,model,stream"
+   ],
+   "model": [
+    "deepseek-v4-flash"
+   ],
+   "url": [
+    "https://api.deepseek.com/chat/completions"
+   ]
+  }
+ }
+}

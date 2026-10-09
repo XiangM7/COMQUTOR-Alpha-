@@ -41,6 +41,7 @@ from typing import Any
 
 from comqutor_alpha.alpha_library.alpha_loader import load_alpha_taxonomy
 from comqutor_alpha.alpha_library.alpha_schema import AlphaDefinition
+from comqutor_alpha.graph_engine.claim_data_grounding import grounded_points
 from comqutor_alpha.graph_engine.evidence_source_role import (
     EVIDENCE_SOURCE_ROLE_CONTRACT_VERSION,
     qualify_evidence_group,
@@ -384,6 +385,10 @@ def _gather_qualifying_evidence(
             "semantic_polarity": str(record.get("semantic_polarity") or "unknown").strip().lower(),
             "duplicate_group_id": duplicate_group_ids.get(claim_id),
             "relation_triple": relation_triples.get(claim_id),
+            # T1 closure (claim_data_points.v1): saved observations this claim states / relies on; empty unless the
+            # run opted in, in which case the shared Evidence Fact Index never fires its dependency pass.
+            "data_stated": grounded_points(record, "stated"),
+            "data_inputs": grounded_points(record, "inputs"),
             "record": record,
         }
     return [by_claim_id[claim_id] for claim_id in sorted(by_claim_id)], warnings
@@ -409,6 +414,18 @@ def _group_evidence(
             semantic_polarity=item.get("semantic_polarity", "unknown"),
             duplicate_group_id=item.get("duplicate_group_id"),
             relation_triple=item.get("relation_triple"),
+            data_stated=item.get("data_stated") or (),
+            data_inputs=item.get("data_inputs") or (),
+            # T1 source-linking chain: only a VALIDATED link is ever used as
+            # a merge signal -- a historical claim (or one whose extraction
+            # never ran source-linking) simply has neither field set, so
+            # this pass is a byte-identical no-op for every already-frozen
+            # run (see comqutor_alpha.source_provenance.SOURCE_LINK_VALID).
+            linked_source_id=(
+                item.get("linked_source_id")
+                if item.get("source_link_status") == "VALID" and item.get("linked_source_id")
+                else None
+            ),
         )
         for item in qualifying
     ]

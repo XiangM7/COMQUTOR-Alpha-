@@ -1,0 +1,158 @@
+{
+ "label": "budget60",
+ "week2_max_calls": 60,
+ "run_id": "t4-rehearsal-budget60-d1c6e4af",
+ "response_status": "partial",
+ "response_error_code": null,
+ "db_status": null,
+ "requests_seen_by_transport": 60,
+ "requests_by_task": {
+  "claim_batch_enrichment": 8,
+  "content_support_verification": 52
+ },
+ "wire_shape_by_task": {
+  "claim_batch_enrichment": [
+   {
+    "read_timeout": "45.0",
+    "retry_count": "0",
+    "body_keys": "messages,model,stream",
+    "model": "deepseek-v4-flash",
+    "url": "https://api.deepseek.com/chat/completions",
+    "requests": 8
+   }
+  ],
+  "content_support_verification": [
+   {
+    "read_timeout": "120.0",
+    "retry_count": "0",
+    "body_keys": "messages,model,stream",
+    "model": "deepseek-v4-flash",
+    "url": "https://api.deepseek.com/chat/completions",
+    "requests": 52
+   }
+  ]
+ },
+ "alpha_plans_applied": {
+  "not_requested": 1040
+ },
+ "alpha_misrouted_or_misrecorded": [],
+ "alpha_classification_completion": {
+  "total_claims": 1040,
+  "valid_select_count": 0,
+  "valid_none_count": 0,
+  "call_failure_count": 0,
+  "not_executed_count": 1040,
+  "not_executed_configuration_count": 0,
+  "not_executed_fault_count": 1040,
+  "complete": false
+ },
+ "ledger_records_by_task_and_status": {
+  "structured_adapter:success": 8,
+  "content_support_verification:success": 52,
+  "content_support_verification:budget_exhausted": 70,
+  "alpha_classifier:budget_exhausted": 1040,
+  "structure_extractor:budget_exhausted": 16
+ },
+ "ledger_attempts_total": 60,
+ "audit_request_rows": 60,
+ "usage_report_totals": {
+  "logical_calls": 1186,
+  "served_from_cache": 0,
+  "not_sent": 1126,
+  "not_sent_reasons": {
+   "WEEK2_LLM_CALL_BUDGET_EXHAUSTED": 1126
+  },
+  "budget_reservations": 60,
+  "actual_http_requests": 60,
+  "retries": 0,
+  "outcomes": {
+   "success": 60,
+   "failure": 0,
+   "timeout": 0,
+   "unknown": 0
+  },
+  "tokens_known": {
+   "input": 6000,
+   "output": 600,
+   "reasoning": null,
+   "cache_hit": 3600,
+   "cache_miss": 2400
+  },
+  "requests_with_usage": 60,
+  "requests_missing_usage": 0,
+  "usage_missing_ratio": 0.0,
+  "cache_split_reported_requests": 60,
+  "cost_estimate_usd": {
+   "off_peak_floor": 0.00072,
+   "peak_ceiling": 0.00144,
+   "requests_estimated": 60,
+   "requests_not_estimable": 0,
+   "not_estimable_reasons": {}
+  }
+ },
+ "artifacts": [
+  "alpha_activations.json",
+  "alpha_matches.json",
+  "artifact_manifest.json",
+  "conflicts.json",
+  "data_sanity.json",
+  "entity_alpha_exposures.json",
+  "evidence_facts.json",
+  "evidence_stance_audit.json",
+  "extracted_structures.json",
+  "formal_acceptance.json",
+  "llm_semantic_calls.jsonl",
+  "llm_semantic_manifest.json",
+  "llm_usage_report.json",
+  "market_data_snapshot.json",
+  "metadata.json",
+  "raw_agent_outputs.json",
+  "run_audit.json",
+  "source_registry.json",
+  "structure_graph.json",
+  "structured_adapter_authority_routing.json",
+  "structured_agent_outputs.json",
+  "summary.json",
+  "unclassified_findings.json",
+  "week3_pipeline_status.json"
+ ],
+ "metadata_run_environment": {
+  "enabled": true,
+  "execution_profile": "t3_verified_20261008",
+  "profile_error": null,
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "base_url_configured": false,
+  "request_response_audit": true,
+  "max_calls": 60,
+  "shared_timeout_seconds_other_tasks": 45.0,
+  "gateway_max_retries": 0,
+  "tasks": {
+   "content_support_verification": {
+    "client_read_timeout_seconds": 120.0,
+    "application_timeout_seconds": 120.0,
+    "application_retries": 0,
+    "sdk_retries": 0,
+    "batch_size": 1,
+    "max_tokens": null
+   },
+   "alpha_classifier": {
+    "client_read_timeout_seconds": 45.0,
+    "application_timeout_seconds": 45.0,
+    "application_retries": 0,
+    "sdk_retries": 0,
+    "path": "single",
+    "concurrency": 4,
+    "max_tokens": null
+   },
+   "evidence_stance_classifier": {
+    "client_read_timeout_seconds": 120.0,
+    "application_timeout_seconds": 120.0,
+    "application_retries": 0,
+    "sdk_retries": 0,
+    "batch_size": 10,
+    "concurrency": 4
+   }
+  }
+ }
+}

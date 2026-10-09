@@ -1,0 +1,143 @@
+{
+  "run_id": "review-20261006T035335Z-3d569e97",
+  "ticker": "AMD",
+  "analysis_date": "2026-10-05",
+  "created_at": "2026-10-05T17:36:24Z",
+  "selected_analysts": [
+    "news",
+    "fundamentals"
+  ],
+  "agents": [
+    "news_agent",
+    "fundamental_agent",
+    "bull_researcher",
+    "bear_researcher",
+    "research_manager",
+    "trader",
+    "aggressive_risk_analyst",
+    "conservative_risk_analyst",
+    "neutral_risk_analyst",
+    "portfolio_manager"
+  ],
+  "source": "TradingAgents",
+  "output_version": "week1a.raw_agent_outputs.v1",
+  "llm_provider": "deepseek",
+  "quick_model": "deepseek-v4-flash",
+  "deep_model": "deepseek-v4-flash",
+  "artifacts": {
+    "metadata": true,
+    "raw_agent_outputs": true,
+    "final_report": false
+  },
+  "based_on_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+  "execution_type": "round10_llm_content_support_independent_recompute_v2",
+  "claim_provenance": {
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:66": {
+      "execution_id": "phase-c-20261005T233842Z-1b2550ac",
+      "post_processing_version": "content_support.llm.v2.1",
+      "note": "OFFLINE REPLAY (zero-cost, no new Provider call): the real original v1-shaped Provider response from execution_id=phase-c-20261005T233842Z-1b2550ac was reprocessed through the current, real, unmodified _process_batch (which now also runs v2.1's structural self-consistency check). Result: FALLBACK_INTERNAL_CONTRADICTION -- the old response lacks the v2.1-required support_basis/unsupported_remainder_materiality fields, so it cannot be resolved as a v2.1 judgment; content_support_status correctly remains PENDING_REVIEW, never upgraded. This round's own fresh retry on claim:66 (execution phase-c-20261006T034452Z-1ab992d0) also truncated and produced no new data. claim:66's real v2.1 status remains genuinely UNRESOLVED -- determining it requires a new, real v2.1 Provider call, not covered by this round's authorization."
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:17": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:54": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:24": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:16": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:8": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:28": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:31": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42": {
+      "execution_id": "phase-c-20261006T034452Z-1ab992d0",
+      "post_processing_version": "content_support.llm.v2.1",
+      "note": "real, validated result from this round's 6-claim limited verification"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:48": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:29": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result (this round attempted a v2.1 retry, which truncated and produced no new data -- the earlier real v1 result is retained, not erased)"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bear_researcher:investment_debate_state.bear_history:claim:53": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:8": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:61": {
+      "execution_id": "phase-c-20261006T034452Z-1ab992d0",
+      "post_processing_version": "content_support.llm.v2.1",
+      "note": "real, validated result from this round's 6-claim limited verification"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:7": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:12": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:38": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result (this round attempted a v2.1 retry, which truncated and produced no new data -- the earlier real v1 result is retained, not erased)"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:13": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:119": {
+      "execution_id": "phase-c-20261006T034452Z-1ab992d0",
+      "post_processing_version": "content_support.llm.v2.1",
+      "note": "real, validated result from this round's 6-claim limited verification"
+    },
+    "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:107": {
+      "execution_id": "phase-c-20261006T000643Z-bb63dfd7",
+      "post_processing_version": "content_support.llm.v1 (with 2026-10-06 multi-field citation fix)",
+      "note": "real v1 result"
+    }
+  },
+  "input_structured_agent_outputs_source": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+  "input_structured_agent_outputs_sha256": "f65cbe928b82b096451733da88ee99d1ecd031dea234d93dd2bb7878c80f9031"
+}

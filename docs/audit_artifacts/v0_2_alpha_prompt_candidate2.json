@@ -1,0 +1,60 @@
+{
+  "schema_version": "v0.2.alpha_prompt_candidate2.v1",
+  "baseline_prompt_hashes": {
+    "alpha_classifier": "a2ca2a32be2d5c22301a0905112727d2c43aece60b1d9e680c8092c3d67c25d8",
+    "alpha_classifier_batch": "0caa5b77b77a97618e92e1b3f254edf8749bae5aa4a21a42ba5d60a539effff0"
+  },
+  "candidate1_hashes_REJECTED": {
+    "alpha_classifier": "36bf5a632dee1e3cd8f4b2ac04fa3498db63cf99275d309157365c59c5bf77e9",
+    "alpha_classifier_batch": "291f69db9c495eebc75c52cbf5d9ce9f97401af3ec7a735765f01f43af6d876e",
+    "status": "REJECTED_NET_REGRESSION",
+    "result": "148/200 (74.00%) -> 139/200 (69.50%), 25 new regressions"
+  },
+  "candidate2_hashes": {
+    "alpha_classifier": "70303c5ffeae42f872bca601a8f9f228a5fae934482acae96acc67c47f69572f",
+    "alpha_classifier_batch": "a4f4b1744060f2bfe291ec4bc75981f0ae855b791ef04a78bc2503943e07d13e",
+    "prompt_version": "week2.alpha_classifier.v5 (batch: week2.alpha_classifier_batch.v3)"
+  },
+  "candidate1_failure_mechanism": "Candidate 1 added an UNCONDITIONAL rule that a bare, standalone financial figure/ratio is 'never sufficient by itself' to select an Alpha. 21 of 25 regressions were previously-correct classifications built entirely around a domain-standard financial metric (capex/PP&E growth for infrastructure buildout, revenue/FCF/EPS/margin growth for fundamental growth, a valuation multiple for valuation risk) that the model now suppressed to decision=none, because the rule gave it no way to recognize that these specific KINDS of figures already ARE the conventional, recognized evidence for their Alpha, with no additional causal sentence needed. 3 of 25 traced instead to the newly-added trigger_signals data itself (A101's signals literally include 'AI capex', creating new overlap with A103-targeted hyperscaler-capex claims). 1 of 25 was a new false positive from a figure inside a negated/rebuttal clause.",
+  "regression_category_analysis": "See docs/audit_artifacts/v0_2_day4c_candidate1_regression_analysis.json for the full 25-row breakdown (3 categories: NUMERIC_FUNDAMENTAL_OR_VALUATION_METRIC_SUPPRESSED_TO_NONE=21, CAPEX_LANGUAGE_MISASSIGNED_TO_A101_VIA_TRIGGER_SIGNAL_OVERLAP=3, NEW_FALSE_POSITIVE_FROM_NEGATION_MISHANDLING=1)",
+  "candidate2_conceptual_changes": [
+    {
+      "change": "Made the 'bare figure' rule CONDITIONAL rather than absolute: a financial figure/ratio IS sufficient evidence when that KIND of figure is itself standard, conventional evidence for a specific Alpha's mechanism (capex/infrastructure figures -> infrastructure buildout; revenue/FCF/EPS/margin growth figures -> fundamental growth; a valuation multiple/ratio -> valuation risk/relief) -- even with no explicit causal sentence. Insufficiency is now scoped only to figures with NO standard Alpha-relevant interpretation (a bare stock price, a date, an administrative number).",
+      "why_general_not_sample_specific": "Defined by KIND of figure and its domain-standard interpretation (a general financial-analysis convention), never by any specific holdout sentence, ticker, or sample ID."
+    },
+    {
+      "change": "Added explicit trigger-signal-overlap disambiguation: when two Alphas' own trigger_signals/confirmation_signals share surface wording, resolve by which Alpha's underlying MECHANISM the evidence describes, not by which Alpha's signal list contains a matching word.",
+      "why_general_not_sample_specific": "States a general resolution principle (mechanism over surface vocabulary) applicable to any current or future taxonomy entry, using the taxonomy's own already-existing A101/A103 illustrative pair (not a holdout sample)."
+    },
+    {
+      "change": "Added explicit negation-scoping: a figure appearing inside a negated, rebutted, or dismissed clause does not by itself satisfy the positive-connection requirement for the side of the argument it is used to negate.",
+      "why_general_not_sample_specific": "A general sentence-polarity rule, independent of any specific claim's wording."
+    },
+    {
+      "change": "Retained (unchanged from Candidate 1) the taxonomy-data enrichment (trigger_signals/confirmation_signals surfaced to the model) and the paraphrase-tolerance guidance -- these were not the source of Candidate 1's regressions.",
+      "why_general_not_sample_specific": "Applies uniformly to the full taxonomy via the existing _alpha_taxonomy_request_block function."
+    }
+  ],
+  "gold_taxonomy_unchanged": true,
+  "no_new_alpha_ids_added": true,
+  "no_ticker_specific_or_sample_id_content": true,
+  "local_non_provider_tests": "384 passed, 1 skipped (Provider smoke test), 0 failed -- prompt construction/schema/parser/taxonomy-injection engineering checks only, NOT semantic validation",
+  "development_diagnostic_run": {
+    "status": "DEVELOPMENT_METRIC_ONLY -- Holdout #4 is DEVELOPMENT_AFTER_FIRST_INSPECTION data, never independent validation",
+    "run_count": 1,
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "correct": 145,
+    "denominator": 200,
+    "accuracy_percent": 72.5,
+    "comparison": {
+      "pre_remediation_baseline": "148/200 = 74.00%",
+      "candidate1_rejected": "139/200 = 69.50%",
+      "candidate2_development": "145/200 = 72.50%"
+    },
+    "of_25_candidate1_regressions_now_fixed": 16,
+    "new_regressions_vs_pre_remediation_baseline": 18,
+    "honest_conclusion": "Candidate 2 is a clear improvement over Candidate 1 (fixes 16/25 of Candidate 1's own regressions, +5.5 points vs Candidate 1) but still does NOT recover the original pre-remediation baseline on this development set (72.50% vs 74.00%) -- it introduces 18 of its own new regressions relative to that baseline, mostly new false positives (expected=None, now selecting a real Alpha) on generic-content rows. Per explicit instruction, this single development run is not used to further tune the prompt in this task."
+  },
+  "final_independent_holdout_identity_no_results_inspected": "N/A -- no untouched independent Alpha holdout exists (see docs/audit_artifacts/v0_2_alpha_holdout_provenance.json); Section 14 final validation was not performed."
+}

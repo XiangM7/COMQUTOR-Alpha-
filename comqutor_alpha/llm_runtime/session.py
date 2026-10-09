@@ -74,6 +74,14 @@ class SemanticCallTrace:
     cache_hit: bool = False
     cache_error_code: str | None = None
     finalized: bool = False
+    # 2026-10-06 (round 14, claim-identity traceability): the business
+    # claim_id(s) this call is for, supplied by the caller out-of-band --
+    # never part of input_payload, never hashed into cache_key above.
+    claim_ids: tuple[str, ...] | None = None
+    # Populated only on a real cache hit (see start_call below), from the
+    # reused entry's own source_call_id -- lets finalize_call cite which
+    # earlier call's record this one's output actually came from.
+    cache_source_call_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -252,6 +260,7 @@ class SemanticRuntimeSession:
         output_schema_version: str,
         taxonomy_version: str | None,
         input_payload: Mapping[str, Any],
+        claim_ids: Sequence[str] | None = None,
     ) -> SemanticCallTrace:
         clean_payload, redacted_count = _sanitize_payload(dict(input_payload))
         if not isinstance(clean_payload, dict):  # defensive; input root is a mapping
@@ -293,6 +302,7 @@ class SemanticRuntimeSession:
             cache_key=cache_key,
             started_at=self._timestamp(),
             started_monotonic=self._monotonic(),
+            claim_ids=tuple(claim_ids) if claim_ids else None,
         )
 
     def start_call(
@@ -305,6 +315,7 @@ class SemanticRuntimeSession:
         output_schema_version: str,
         input_payload: Mapping[str, Any],
         taxonomy_version: str | None = None,
+        claim_ids: Sequence[str] | None = None,
     ) -> SemanticCallStart:
         try:
             trace = self._allocate_trace(
@@ -315,6 +326,7 @@ class SemanticRuntimeSession:
                 output_schema_version=output_schema_version,
                 taxonomy_version=taxonomy_version,
                 input_payload=input_payload,
+                claim_ids=claim_ids,
             )
         except Exception as exc:
             self._mark_degraded("SEMANTIC_RUNTIME_CALL_START_FAILED", exc, incomplete=True)
@@ -367,6 +379,13 @@ class SemanticRuntimeSession:
             self._mark_degraded(trace.cache_error_code)
             return SemanticCallStart(trace, None, trace.cache_error_code)
         trace.cache_hit = True
+        # 2026-10-06 (round 14): record which earlier call's record actually
+        # produced this cached value, so THIS claim's own persisted record
+        # (in finalize_call below) can explicitly cite its real source,
+        # rather than only being flagged as "hit=True" with no origin.
+        # entry.get(...) is safe to call unconditionally -- absent on a
+        # pre-this-round cache entry, which then simply stays None.
+        trace.cache_source_call_id = entry.get("source_call_id")
         return SemanticCallStart(trace, entry.get("validated_output"))
 
     def _claim_finalization(self, trace: SemanticCallTrace) -> bool:
@@ -390,6 +409,10 @@ class SemanticRuntimeSession:
         error_code: str | None,
         execution_policy: Mapping[str, Any] | None = None,
         token_usage: Mapping[str, int | None] | None = None,
+        request_control: Mapping[str, Any] | None = None,
+        provider_response: Mapping[str, Any] | None = None,
+        request_attempts: Sequence[Mapping[str, Any]] | None = None,
+        error_message: str | None = None,
     ) -> bool:
         if trace is None or not self._claim_finalization(trace):
             if trace is not None:
@@ -451,19 +474,37 @@ class SemanticRuntimeSession:
                 "completed_at": completed_at,
                 "latency_ms": latency_ms,
                 "token_usage": safe_token_usage,
-                "cache": {"cache_key": trace.cache_key, "hit": trace.cache_hit},
+                "cache": (
+                    {
+                        "cache_key": trace.cache_key,
+                        "hit": trace.cache_hit,
+                        "source_call_id": trace.cache_source_call_id,
+                    }
+                    if trace.cache_hit and trace.cache_source_call_id is not None
+                    else {"cache_key": trace.cache_key, "hit": trace.cache_hit}
+                ),
                 "retry_count": retry_count,
                 "validation_status": validation_status,
                 "provider_status": provider_status,
                 "fallback_used": fallback_used,
                 "fallback_reason": fallback_reason,
                 "error_code": error_code,
-                "error_message": None,
+                # 2026-10-09 (T4 round 32): a short, credential-free explanation supplied by the gateway (today only for a
+                # locally refused, never-sent oversized request); None for every other call, as before.
+                "error_message": error_message,
             }
             if execution_policy is not None:
                 record["execution_policy"] = dict(execution_policy)
             if self.profile_id is not None:
                 record["profile_id"] = self.profile_id
+            if request_control is not None:
+                record["request_control"] = dict(request_control)
+            if provider_response is not None:
+                record["provider_response"] = dict(provider_response)
+            if request_attempts:
+                record["request_attempts"] = [dict(item) for item in request_attempts]
+            if trace.claim_ids is not None:
+                record["claim_ids"] = list(trace.claim_ids)
             self.recorder.append(record)
         except Exception as exc:
             self._mark_degraded("SEMANTIC_RECORDER_APPEND_FAILED", exc, incomplete=True)

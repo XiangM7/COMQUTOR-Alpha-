@@ -156,6 +156,27 @@ class TradingAgentsGraph:
         if temperature is not None and temperature != "":
             kwargs["temperature"] = float(temperature)
 
+        # Per-call output-token cap, cross-provider (both AnthropicClient and
+        # OpenAIClient's own _PASSTHROUGH_KWARGS already accept "max_tokens").
+        # Added 2026-09-30 (T3/T4 joint-verification execution-path task):
+        # this config key previously had no effect anywhere -- the Research
+        # Agent layer had no enforceable per-call output limit of any kind.
+        # Only set when the caller explicitly supplies it; never a silently
+        # invented default that could change existing behavior for every
+        # caller that never set this key.
+        max_tokens = self.config.get("max_tokens")
+        if max_tokens is not None and max_tokens != "":
+            kwargs["max_tokens"] = int(max_tokens)
+
+        # Per-call retry cap, cross-provider (both AnthropicClient and
+        # OpenAIClient's own _PASSTHROUGH_KWARGS already accept
+        # "max_retries" -- only nothing in this config-forwarding method
+        # ever set it before). Added alongside max_tokens for the same
+        # 2026-09-30 T3/T4 joint-verification execution-path task.
+        max_retries = self.config.get("max_retries")
+        if max_retries is not None and max_retries != "":
+            kwargs["max_retries"] = int(max_retries)
+
         return kwargs
 
     def _create_tool_nodes(self) -> dict[str, ToolNode]:

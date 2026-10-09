@@ -37,6 +37,7 @@ from comqutor_alpha.research_lifecycle import (
 from comqutor_alpha.storage.db.engine import (
     DatabaseConfigurationError,
     build_engine,
+    enforce_required_database_name,
     resolve_database_url,
     sqlite_file_path,
 )
@@ -135,6 +136,19 @@ def _strict_number(
     if not math.isfinite(number) or not minimum <= number <= maximum:
         _invalid_payload(reason_code)
     return number
+
+
+def _optional_json_object(value: Any, *, reason_code: str) -> dict[str, Any] | None:
+    """T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-28):
+    content_support_review is the one nested-object field on agent_outputs
+    -- validated as a plain, JSON-serializable mapping (never a raw
+    passthrough of an unexpected shape), exactly the same "never trust an
+    unvalidated shape" discipline every other field in this row gets."""
+    if value is None:
+        return None
+    if not isinstance(value, Mapping):
+        _invalid_payload(reason_code)
+    return dict(value)
 
 
 def _string_list(value: Any, *, reason_code: str, maximum_items: int = 128) -> list[str]:
@@ -421,6 +435,30 @@ class GraphPersistenceRepository:
                     "extraction_method": _optional_text(
                         record.get("extraction_method"), maximum=64, reason_code=reason
                     ),
+                    # T1 source-linking chain (COMQUTOR Alpha next-round
+                    # task, 2026-09-28): additive, all-optional -- a record
+                    # from before this feature (or the deterministic-only
+                    # path, which never invents a citation) simply omits
+                    # these, and they persist as NULL, never a fabricated
+                    # value.
+                    "source_link_status": _optional_text(
+                        record.get("source_link_status"), maximum=24, reason_code=reason
+                    ),
+                    "linked_source_id": _optional_text(
+                        record.get("linked_source_id"), maximum=64, reason_code=reason
+                    ),
+                    "source_link_method": _optional_text(
+                        record.get("source_link_method"), maximum=32, reason_code=reason
+                    ),
+                    "content_support_status": _optional_text(
+                        record.get("content_support_status"), maximum=24, reason_code=reason
+                    ),
+                    "content_support_method": _optional_text(
+                        record.get("content_support_method"), maximum=64, reason_code=reason
+                    ),
+                    "content_support_review": _optional_json_object(
+                        record.get("content_support_review"), reason_code=reason
+                    ),
                     "created_at": now,
                 }
             _reject_sensitive_agent_output(row, reason_code=reason)
@@ -518,6 +556,12 @@ class GraphPersistenceRepository:
             "assertion_status",
             "semantic_polarity",
             "extraction_method",
+            "source_link_status",
+            "linked_source_id",
+            "source_link_method",
+            "content_support_status",
+            "content_support_method",
+            "content_support_review",
         ):
             if normalized[key] is not None:
                 public[key] = normalized[key]
@@ -1589,10 +1633,12 @@ class GraphPersistenceRepository:
 
 
 def _resolve_engine_and_url(
-    output_root: str | None, *, create_if_missing: bool
+    output_root: str | None, *, create_if_missing: bool, enforce_database_name: bool = False
 ) -> tuple[Engine, str]:
     try:
         database_url = resolve_database_url(output_root)
+        if enforce_database_name:
+            enforce_required_database_name(database_url)
     except DatabaseConfigurationError as exc:
         raise GraphPersistenceError(exc.reason_code) from exc
     engine = build_engine(database_url, create_if_missing=create_if_missing)
@@ -1622,8 +1668,18 @@ def build_write_repository_from_env(output_root: str | None = None) -> GraphPers
     Creates the local SQLite directory/file if that is the resolved backend,
     and ensures required schema exists (applying migrations if needed).
     Only the POST/write pipeline may call this -- never a GET/read request.
+
+    2026-10-02 incident fix: also enforces ``COMQUTOR_REQUIRE_DATABASE_NAME``
+    (see ``comqutor_alpha.storage.db.engine.enforce_required_database_name``)
+    -- a second, independent guard checked at this actual write-connection
+    construction point, in whichever process ends up calling it (the main
+    API process's synchronous claim path, or a spawned background worker's
+    own call), immediately before any engine/connection/schema-migration is
+    attempted. Unset (every existing deployment/test): no behavior change.
     """
-    engine, database_url = _resolve_engine_and_url(output_root, create_if_missing=True)
+    engine, database_url = _resolve_engine_and_url(
+        output_root, create_if_missing=True, enforce_database_name=True
+    )
     repository = GraphPersistenceRepository(engine, database_url=database_url)
     repository.ensure_schema()
     return repository

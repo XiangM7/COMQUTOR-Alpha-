@@ -1,0 +1,157 @@
+{
+ "label": "after",
+ "code_identity": {
+  "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "tracked_diff_sha256": "0070cdf44b9717c8ce751f22224f84afe8d24abce21c19ff501b9426cb9fa8f3",
+  "untracked_runtime_source_sha256": "10ee75185ae8032bc9bdf304152a87c1d22db08120cdd546d31925277e21f0f6"
+ },
+ "current_prompt": {
+  "prompt_version": "week2.claim_batch_enrichment.v2",
+  "prompt_sha256": "fc01ae0d261f63bf081610a22c99486186d10677d94ddbabb21f2fa602d4f628"
+ },
+ "saved_replies": [
+  {
+   "call_sequence": 1,
+   "attempt_id": "12591384-0b26-470d-a99d-a49c00be440b:2",
+   "reply_items": 64,
+   "reply_item_fields": [
+    "claim",
+    "confidence",
+    "direction",
+    "entities",
+    "evidence",
+    "factors",
+    "segment_id",
+    "source_section"
+   ],
+   "reply_body_sha256_unchanged": true,
+   "ledger_prompt_version": "week2.claim_batch_enrichment.v2",
+   "ledger_prompt_sha256": "fc01ae0d261f63bf081610a22c99486186d10677d94ddbabb21f2fa602d4f628",
+   "ledger_input_schema_version": "week2.claim_batch_enrichment.input.v2",
+   "ledger_output_schema_version": "week2.claim_batch_enrichment.output.v2",
+   "prompt_mentions_cited_source_id": true,
+   "request_body_equals_the_run's_saved_request": false,
+   "outcome": {
+    "enrichment_returned": false,
+    "provider_status": "success",
+    "validation_status": "rejected",
+    "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED",
+    "fallback_used": true
+   },
+   "production_validator_message": "enrichment item fields do not match the strict schema"
+  },
+  {
+   "call_sequence": 8,
+   "attempt_id": "12591384-0b26-470d-a99d-a49c00be440b:8",
+   "reply_items": 30,
+   "reply_item_fields": [
+    "claim",
+    "confidence",
+    "direction",
+    "entities",
+    "evidence",
+    "factors",
+    "segment_id",
+    "source_section"
+   ],
+   "reply_body_sha256_unchanged": true,
+   "ledger_prompt_version": "week2.claim_batch_enrichment.v2",
+   "ledger_prompt_sha256": "fc01ae0d261f63bf081610a22c99486186d10677d94ddbabb21f2fa602d4f628",
+   "ledger_input_schema_version": "week2.claim_batch_enrichment.input.v2",
+   "ledger_output_schema_version": "week2.claim_batch_enrichment.output.v2",
+   "prompt_mentions_cited_source_id": true,
+   "request_body_equals_the_run's_saved_request": false,
+   "outcome": {
+    "enrichment_returned": false,
+    "provider_status": "success",
+    "validation_status": "rejected",
+    "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED",
+    "fallback_used": true
+   },
+   "production_validator_message": "enrichment item fields do not match the strict schema"
+  }
+ ],
+ "batch_sizes": [
+  {
+   "call_sequence": 0,
+   "agent": "sentiment_agent",
+   "segments": 64,
+   "input_chars_in_run": 29048,
+   "input_chars_this_code": 29048,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  },
+  {
+   "call_sequence": 1,
+   "agent": "market_agent",
+   "segments": 64,
+   "input_chars_in_run": 28113,
+   "input_chars_this_code": 30158,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  },
+  {
+   "call_sequence": 2,
+   "agent": "news_agent",
+   "segments": 64,
+   "input_chars_in_run": 27137,
+   "input_chars_this_code": 27137,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  },
+  {
+   "call_sequence": 3,
+   "agent": "fundamental_agent",
+   "segments": 64,
+   "input_chars_in_run": 49441,
+   "input_chars_this_code": 52243,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  },
+  {
+   "call_sequence": 4,
+   "agent": "sentiment_agent",
+   "segments": 27,
+   "input_chars_in_run": 13587,
+   "input_chars_this_code": 13587,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  },
+  {
+   "call_sequence": 5,
+   "agent": "market_agent",
+   "segments": 45,
+   "input_chars_in_run": 18974,
+   "input_chars_this_code": 21260,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  },
+  {
+   "call_sequence": 6,
+   "agent": "news_agent",
+   "segments": 59,
+   "input_chars_in_run": 28348,
+   "input_chars_this_code": 28348,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  },
+  {
+   "call_sequence": 7,
+   "agent": "fundamental_agent",
+   "segments": 64,
+   "input_chars_in_run": 61127,
+   "input_chars_this_code": 62985,
+   "sent_this_code": false,
+   "refused_locally_this_code": true
+  },
+  {
+   "call_sequence": 8,
+   "agent": "fundamental_agent",
+   "segments": 30,
+   "input_chars_in_run": 47807,
+   "input_chars_this_code": 49585,
+   "sent_this_code": true,
+   "refused_locally_this_code": false
+  }
+ ]
+}

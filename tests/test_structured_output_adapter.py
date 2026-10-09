@@ -88,6 +88,7 @@ def test_llm_batch_enrichment_rejects_invalid_confidence(confidence):
                 "direction": "bullish",
                 "confidence": confidence,
                 "source_section": None,
+                "cited_source_id": None,
             }
         ]
     }
@@ -175,6 +176,148 @@ def test_adapter_writes_file_and_logs_invalid_rows(tmp_path):
     assert "raw_preview" in entries[0]
     assert "record_preview" in entries[0]
     assert str(tmp_path) not in json.dumps(entries[0])
+
+
+def test_content_support_batch_size_env_var_reaches_the_real_call(tmp_path, monkeypatch):
+    """2026-10-06 (AMD Fresh Run production-wiring task): COMQUTOR_WEEK2_
+    CONTENT_SUPPORT_BATCH_SIZE must reach apply_llm_content_support_
+    verification's own batch_size parameter -- confirmed by patching that
+    exact function (imported into this module's own namespace) and
+    capturing its real call kwargs, not by guessing from behavior."""
+    import comqutor_alpha.structure_engine.structured_output_adapter as soa
+
+    run_dir = tmp_path / "run_batch_size_wiring"
+    run_dir.mkdir()
+    (run_dir / "raw_agent_outputs.json").write_text(
+        json.dumps(
+            {
+                "run_id": "run_batch_size_wiring",
+                "ticker": "AMD",
+                "agent_outputs": [
+                    {"agent": "news_agent", "raw_output": "AI demand supports GPU demand."},
+                ],
+            }
+        )
+    )
+
+    captured_kwargs = {}
+    real_fn = soa.apply_llm_content_support_verification
+
+    def _spy(records, sources, *, llm_gateway=None, batch_size=None):
+        captured_kwargs["batch_size"] = batch_size
+        return real_fn(records, sources, llm_gateway=llm_gateway, batch_size=batch_size)
+
+    monkeypatch.setattr(soa, "apply_llm_content_support_verification", _spy)
+    monkeypatch.setenv("COMQUTOR_WEEK2_CONTENT_SUPPORT_BATCH_SIZE", "1")
+
+    soa.adapt_run_outputs(run_dir, llm_gateway=None)
+    assert captured_kwargs["batch_size"] == 1
+
+
+def test_content_support_batch_size_unset_means_none_no_behavior_change(tmp_path, monkeypatch):
+    """The additive default: no env var set means batch_size=None is
+    passed through unchanged, exactly matching every existing caller's
+    behavior before this round's wiring fix."""
+    import comqutor_alpha.structure_engine.structured_output_adapter as soa
+
+    run_dir = tmp_path / "run_batch_size_default"
+    run_dir.mkdir()
+    (run_dir / "raw_agent_outputs.json").write_text(
+        json.dumps(
+            {
+                "run_id": "run_batch_size_default",
+                "ticker": "AMD",
+                "agent_outputs": [
+                    {"agent": "news_agent", "raw_output": "AI demand supports GPU demand."},
+                ],
+            }
+        )
+    )
+
+    captured_kwargs = {}
+    real_fn = soa.apply_llm_content_support_verification
+
+    def _spy(records, sources, *, llm_gateway=None, batch_size=None):
+        captured_kwargs["batch_size"] = batch_size
+        return real_fn(records, sources, llm_gateway=llm_gateway, batch_size=batch_size)
+
+    monkeypatch.setattr(soa, "apply_llm_content_support_verification", _spy)
+    monkeypatch.delenv("COMQUTOR_WEEK2_CONTENT_SUPPORT_BATCH_SIZE", raising=False)
+
+    soa.adapt_run_outputs(run_dir, llm_gateway=None)
+    assert captured_kwargs["batch_size"] is None
+
+
+def test_audit_enabled_gateway_forces_sequential_processing_no_crash(tmp_path):
+    """2026-10-06 (AMD Fresh Run, round 11): reproduces, offline and at zero
+    real cost, the exact crash a real paid AMD run hit --
+    WEEK2_LLM_AUDIT_CONCURRENT_ATTEMPT -- when a Week2LLMGateway with
+    enable_request_response_audit=True is shared across adapt_run_outputs'
+    own concurrent multi-agent dispatch (_adapt_run_outputs_concurrently).
+    Confirms the fix: concurrency is forced to 1 whenever the gateway's own
+    audit mode is on, so no two agents' LLM calls ever overlap on the same
+    Gateway instance."""
+    import time
+
+    from comqutor_alpha.llm_runtime.cache import InMemoryLLMResponseCache
+    from comqutor_alpha.llm_runtime.session import SemanticRuntimeSession
+    from comqutor_alpha.structure_engine.structured_output_adapter import adapt_run_outputs
+    from comqutor_alpha.structure_engine.week2_llm import Week2LLMGateway
+
+    run_dir = tmp_path / "run_audit_concurrency_fix"
+    run_dir.mkdir()
+    (run_dir / "raw_agent_outputs.json").write_text(
+        json.dumps(
+            {
+                "run_id": "run_audit_concurrency_fix",
+                "ticker": "AMD",
+                "agent_outputs": [
+                    {"agent": "news_agent", "raw_output": "AI demand supports GPU demand."},
+                    {"agent": "fundamental_agent", "raw_output": "Revenue growth supports margin expansion."},
+                    {"agent": "market_agent", "raw_output": "Price momentum supports technical breakout."},
+                ],
+            }
+        )
+    )
+
+    class _SlowModel:
+        def __init__(self):
+            self.calls = 0
+
+        def invoke(self, prompt):
+            self.calls += 1
+            time.sleep(0.05)
+            raise AssertionError("should be cut off by call_with_timeout first")
+
+    model = _SlowModel()
+    gateway = Week2LLMGateway(
+        model,
+        run_id="run_audit_concurrency_fix",
+        output_root=str(tmp_path),
+        timeout_seconds=0.01,
+        max_retries=0,
+        max_calls=1500,
+        provider="deepseek",
+        model_name="deepseek-v4-flash",
+        enable_request_response_audit=True,
+    )
+    semantic_runtime = SemanticRuntimeSession(
+        run_id="run_audit_concurrency_fix",
+        output_directory=str(run_dir),
+        execution_mode="live",
+        provider="deepseek",
+        model="deepseek-v4-flash",
+        cache=InMemoryLLMResponseCache(),
+    )
+    gateway.attach_semantic_runtime(semantic_runtime)
+
+    # concurrency=4 forces the concurrent dispatch path to be eligible (3
+    # agent outputs, concurrency > 1) -- the fix must override this back to
+    # sequential because the gateway's own audit mode is on.
+    output = adapt_run_outputs(run_dir, llm_gateway=gateway, concurrency=4)
+
+    assert len(output["records"]) == 3
+    assert model.calls == 3, "every agent's claim_batch_enrichment call must still happen, just sequentially"
 
 
 def test_error_log_redacts_secret_like_tokens_from_previews():
@@ -355,10 +498,13 @@ def _segments_with_ids(raw_record, raw_text):
     return segments
 
 
-def _valid_enrichment_payload(segments, *, direction="unknown", confidence=0.8):
+def _valid_enrichment_payload(segments, *, direction="unknown", confidence=0.8, cited_source_id=None):
     """A batch-enrichment response that echoes every input segment's own
     claim/evidence/source_section back verbatim (as the contract requires)
-    while adding the given direction/confidence."""
+    while adding the given direction/confidence. ``cited_source_id`` (T1
+    source-linking chain) is a single value applied to every segment in
+    this batch for simplicity -- tests needing per-segment citations build
+    their own payload dict directly."""
     return {
         "claims": [
             {
@@ -370,6 +516,7 @@ def _valid_enrichment_payload(segments, *, direction="unknown", confidence=0.8):
                 "factors": [],
                 "direction": direction,
                 "confidence": confidence,
+                "cited_source_id": cited_source_id,
             }
             for segment in segments
         ]
@@ -680,6 +827,7 @@ def test_llm_merging_two_segments_into_one_falls_back_the_whole_batch():
                 "factors": [],
                 "direction": "unknown",
                 "confidence": 0.5,
+                "cited_source_id": None,
             },
             {
                 "segment_id": segments[1]["segment_id"],
@@ -690,6 +838,7 @@ def test_llm_merging_two_segments_into_one_falls_back_the_whole_batch():
                 "factors": [],
                 "direction": "unknown",
                 "confidence": 0.5,
+                "cited_source_id": None,
             },
         ]
     }

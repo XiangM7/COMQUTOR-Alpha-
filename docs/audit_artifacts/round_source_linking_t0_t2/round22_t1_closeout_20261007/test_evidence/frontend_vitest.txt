@@ -1,0 +1,365 @@
+
+ RUN  v2.1.9 /Users/xiangmao/COMQUTOR-Alpha-/frontend
+
+stderr | src/components/StructuralSnapshot.test.tsx > StructuralSnapshot > renders the active Alpha list with human-readable names paired to each ID
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/pages/StructureGraphPage.test.tsx > StructureGraphPage run switching > never continues to display a previous run's graph while the newly-selected run is still loading
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/pages/ConflictRadarPage.test.tsx > ConflictRadarPage > renders main_conflict using only backend-provided fields
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/pages/ResearchRunPage.test.tsx > ResearchRunPage > renders a completed run's summary and structured analyst outputs
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/AlphaCard.test.tsx (34 tests) 1636ms
+   ✓ AlphaCard > omits the evidence-fact breakdown and overlap warning when the API predates these fields 362ms
+ ✓ src/components/StructuralSnapshot.test.tsx (20 tests) 1903ms
+   ✓ StructuralSnapshot > shows the Main Structural Conflict present state with both sides' ID and human-readable name 642ms
+ ✓ src/components/ConflictEvidenceSections.test.tsx (19 tests) 2115ms
+   ✓ ConflictEvidenceSections > Show all/Show less never drops evidence, and Bull/Bear/Counter expand states never interfere 1263ms
+stderr | src/pages/ProcessingPage.test.tsx > ProcessingPage > renders real backend progress: heading, bar value, percent, caption, elapsed
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/pages/ConflictRadarPage.test.tsx (9 tests) 2020ms
+   ✓ ConflictRadarPage > renders main_conflict using only backend-provided fields 760ms
+   ✓ ConflictRadarPage > orders the conflict list using the backend-provided order (never re-sorted client-side) 599ms
+ ✓ src/pages/StructureGraphPage.test.tsx (10 tests) 2850ms
+   ✓ StructureGraphPage run switching > never continues to display a previous run's graph while the newly-selected run is still loading 984ms
+   ✓ StructureGraphPage alpha-level partition > places each alpha in exactly one of Active/Dominant/Regime-level/Candidate using activation_level/qualified_level directly, never is_blocked 578ms
+   ✓ StructureGraphPage alpha-level partition > routes a capped_active alpha to its own dedicated section, not Active and not a generic Blocked level (A, B, C, F, H) 407ms
+stderr | src/pages/ProcessingPage.test.tsx > ProcessingPage > never grows the percentage client-side between polls
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+
+stderr | src/pages/ProcessingPage.test.tsx > ProcessingPage > counts the estimate and the elapsed time down in real time between polls
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+
+stderr | src/pages/ProcessingPage.test.tsx > ProcessingPage > counts the estimate and the elapsed time down in real time between polls
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+
+stderr | src/pages/ProcessingPage.test.tsx > ProcessingPage > says it is taking longer once the estimate has run out, not a negative or stuck zero
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+
+stderr | src/pages/ProcessingPage.test.tsx > ProcessingPage > says it is taking longer once the estimate has run out, not a negative or stuck zero
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+
+stderr | src/pages/ProcessingPage.test.tsx > ProcessingPage > shows the finished state with a View results button and never navigates on its own
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+Warning: An update to ProcessingPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ProcessingPage (/Users/xiangmao/COMQUTOR-Alpha-/frontend/src/pages/ProcessingPage.tsx:71:43)
+    at RenderedRoute (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/Users/xiangmao/COMQUTOR-Alpha-/frontend/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+
+ ✓ src/utils/processingStages.test.ts (32 tests) 50ms
+ ✓ src/pages/ProcessingPage.test.tsx (30 tests) 4028ms
+   ✓ ProcessingPage > renders real backend progress: heading, bar value, percent, caption, elapsed 1083ms
+stderr | src/pages/ResearchPage.test.tsx > ResearchPage > does not render ReplayAllPanel or its 'Reprocess saved outputs' heading
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/components/RecentRunsMenu.test.tsx > RecentRunsMenu -- disclosure > is collapsed by default and does not request history until opened
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/api/adapters.test.ts (22 tests) 12ms
+ ✓ src/components/ConflictCard.test.tsx (13 tests) 509ms
+ ✓ src/pages/ResearchRunPage.test.tsx (63 tests) 6539ms
+   ✓ ResearchRunPage > renders a completed run's summary and structured analyst outputs 795ms
+   ✓ ResearchRunPage > splits findings into independent Positive and Negative panels 322ms
+   ✓ ResearchRunPage > More/Less expand and collapse > expands to show every eligible finding (up to 20) when More is clicked 313ms
+ ✓ src/pages/ResearchPage.test.tsx (18 tests) 2531ms
+   ✓ ResearchPage > does not render ReplayAllPanel or its 'Reprocess saved outputs' heading 427ms
+ ✓ src/components/RecentRunsMenu.test.tsx (28 tests) 2627ms
+   ✓ RecentRunsMenu -- disclosure > is collapsed by default and does not request history until opened 316ms
+ ✓ src/styles.layout.test.ts (24 tests) 44ms
+ ✓ src/components/ConflictEvidenceBasis.test.tsx (6 tests) 1232ms
+   ✓ Conflict evidence: View basis > offers View basis on every evidence item of every side (bull, bear and both counter groups), fetching only on click 441ms
+ ✓ src/components/EvidenceTraceDetail.test.tsx (13 tests) 1690ms
+   ✓ EvidenceTraceView > shows the actual material, where the claim sits in it, and the verification status -- not an internal id 412ms
+ ✓ src/api/evidenceTrace.test.ts (9 tests) 35ms
+ ✓ src/components/ResearchForm.test.tsx (15 tests) 1312ms
+   ✓ ResearchForm > disables Start research until a ticker is entered 370ms
+ ✓ src/api/client.test.ts (13 tests) 178ms
+stderr | src/App.test.tsx > App routing > redirects the root path to /research
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/hooks/useRunPolling.test.ts (10 tests) 301ms
+stderr | src/components/ReplayAllPanel.test.tsx > ReplayAllPanel > shows the reprocess button on the Research page
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ExternalSourceDisplay.test.tsx (14 tests) 499ms
+ ✓ src/App.test.tsx (15 tests) 2017ms
+   ✓ App routing > renders each of the three run pages while preserving run_id in the URL 333ms
+stderr | src/components/ContentSupportReviewPanel.test.tsx > ContentSupportReviewPanel > is collapsed by default and does not fetch history until expanded
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/utils/transitionHandoff.test.ts (10 tests) 315ms
+ ✓ src/components/ReplayAllPanel.test.tsx (9 tests) 1171ms
+   ✓ ReplayAllPanel > shows the reprocess button on the Research page 355ms
+ ✓ src/components/ContentSupportReviewPanel.test.tsx (6 tests) 1383ms
+   ✓ ContentSupportReviewPanel > a failed save is shown as a failure, never displayed as success 407ms
+   ✓ ContentSupportReviewPanel > a successful save shows the saved verdict and a link to the new execution's results 360ms
+ ✓ src/components/CandidateConflictCard.test.tsx (7 tests) 660ms
+ ✓ src/components/PriceHistoryCard.test.tsx (13 tests) 3064ms
+   ✓ PriceHistoryCard > shows the 3-month summary and says the prices are sample data 362ms
+   ✓ PriceHistorySheet > opens as a modal dialog with focus inside it 339ms
+   ✓ PriceHistorySheet > switches between 1M, 3M and 6M 401ms
+   ✓ PriceHistorySheet > keeps Tab inside the dialog 608ms
+ ✓ src/utils/priceHistory.test.ts (13 tests) 203ms
+stderr | src/components/AppShell.test.tsx > AppShell > shows a research-only, not-financial-advice positioning statement
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/AppShell.test.tsx (14 tests) 726ms
+stderr | src/pages/ProcessingPage.retry.test.tsx > ProcessingPage failed-run retry > POSTs only ticker/date/analysts and navigates a 202 to the new processing run
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/pages/OperatorPage.test.tsx > OperatorPage > has an explicit operator-role heading and explanatory copy
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/pages/OperatorPage.test.tsx (7 tests) 991ms
+   ✓ OperatorPage > has an explicit operator-role heading and explanatory copy 320ms
+ ✓ src/pages/ProcessingPage.retry.test.tsx (5 tests) 1577ms
+   ✓ ProcessingPage failed-run retry > POSTs only ticker/date/analysts and navigates a 202 to the new processing run 785ms
+ ✓ src/hooks/useRunNotification.test.ts (8 tests) 213ms
+ ✓ src/graph/StructureGraphView.test.tsx (5 tests) 346ms
+ ✓ src/graph/layout.test.ts (7 tests) 7ms
+ ✓ src/api/derivedRunResponse.test.ts (2 tests) 19ms
+ ✓ src/hooks/useAlphaLibrary.test.ts (3 tests) 269ms
+ ✓ src/utils/runFormat.test.ts (8 tests) 51ms
+ ✓ src/utils/activationLevelDisplay.test.ts (12 tests) 7ms
+ ✓ src/hooks/useResearchSubmission.test.ts (3 tests) 79ms
+ ✓ src/utils/serverStatus.test.ts (7 tests) 5ms
+ ✓ src/tests/productLanguage.test.ts (1 test) 31ms
+
+ Test Files  40 passed (40)
+      Tests  557 passed (557)
+   Start at  17:34:31
+   Duration  24.20s (transform 4.14s, setup 6.61s, collect 17.39s, tests 45.25s, environment 51.03s, prepare 8.94s)
+

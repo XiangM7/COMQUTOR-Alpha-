@@ -146,7 +146,8 @@ def test_case10_production_semantic_artifacts_are_not_modified():
 
     frozen_hashes = {
         "comqutor_alpha/structure_engine/alpha_mapper.py": "506a228eb10e0b77b2058c9eaa327ae0ec44ba36b1515e5e6400187ffe65a6fd",
-        "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+        # T2 (2026-10-07): taxonomy content change (reciprocal A102/A201<->A304, content_version 1.1.0); see its content_change_log
+        "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c6d523beaee4942c71756a3fddbb8213d4ba2f8653fded088d73031ca80f3bfa",
     }
     for path, expected in frozen_hashes.items():
         actual = hashlib.sha256((REPO_ROOT / path).read_bytes()).hexdigest()

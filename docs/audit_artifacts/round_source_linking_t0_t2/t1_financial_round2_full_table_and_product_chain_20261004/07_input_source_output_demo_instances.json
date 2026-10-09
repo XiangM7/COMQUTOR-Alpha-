@@ -1,0 +1,238 @@
+{
+  "round": "Round 2 (2026-10-04)",
+  "instance_1_non_summary_row_source_snapshot": {
+    "label": "FIXED OFFLINE DATA -- not a real Provider call",
+    "claim_this_proves": "full-table capture: every line item x every period the Agent actually receives is persisted, not only the one summary row (Total Assets)",
+    "input_dataframe_given_to_the_tool": {
+      "2026-04-30 00:00:00": {
+        "Total Assets": 120000000000.0,
+        "Cash And Cash Equivalents": 45000000000.0,
+        "Ordinary Shares Number": 24700000000.0
+      },
+      "2026-01-31 00:00:00": {
+        "Total Assets": 110000000000.0,
+        "Cash And Cash Equivalents": 40000000000.0,
+        "Ordinary Shares Number": 24600000000.0
+      }
+    },
+    "tool_output_text_the_agent_actually_receives": "# Balance Sheet data for NVDA (quarterly)\n# Data retrieved on: 2026-10-04 16:14:30\n\n,2026-04-30,2026-01-31\nTotal Assets,120000000000.0,110000000000.0\nCash And Cash Equivalents,45000000000.0,40000000000.0\nOrdinary Shares Number,24700000000.0,24600000000.0\n\n\nVerified balance sheet: NVDA's Total Assets rose to 120000000000.0 as of 2026-04-30, from 110000000000.0 as of 2026-01-31 (sequential quarter-over-quarter, 2026-04-30 vs 2026-01-31) (quarterly) [source_id: src_16b74b94fe735b00] [fragment_id: src_16b74b94fe735b00:frag:0].",
+    "source_registry_record_actually_persisted": {
+      "source_type": "financial",
+      "name": "Yahoo Finance",
+      "title": "NVDA balance sheet Total Assets snapshot 2026-04-30 (quarterly)",
+      "url": "",
+      "published_at": null,
+      "provider": "yfinance",
+      "excerpt": "NVDA balance sheet (quarterly) Total Assets: 2026-04-30=120000000000.0; 2026-01-31=110000000000.0 | NVDA balance sheet (quarterly) Cash And Cash Equivalents: 2026-04-30=45000000000.0; 2026-01-31=40000000000.0 | NVDA balance sheet (quarterly) Ordinary Shares Number: 2026-04-30=24700000000.0; 2026-01-31=24600000000.0",
+      "instrument": "NVDA",
+      "observation_date": "2026-04-30",
+      "unit": "UNKNOWN_CURRENCY",
+      "data_snapshot": {
+        "statement_type": "balance sheet",
+        "line_item": "Total Assets",
+        "value": 120000000000.0,
+        "freq": "quarterly",
+        "periods": {
+          "2026-04-30": 120000000000.0,
+          "2026-01-31": 110000000000.0
+        },
+        "comparison": {
+          "current_period": "2026-04-30",
+          "current_value": 120000000000.0,
+          "prior_period": "2026-01-31",
+          "prior_value": 110000000000.0,
+          "delta": 10000000000.0,
+          "method": "current_value_minus_prior_value",
+          "period_relationship": "sequential quarter-over-quarter, 2026-04-30 vs 2026-01-31"
+        },
+        "all_line_items": {
+          "Total Assets": {
+            "2026-04-30": 120000000000.0,
+            "2026-01-31": 110000000000.0
+          },
+          "Cash And Cash Equivalents": {
+            "2026-04-30": 45000000000.0,
+            "2026-01-31": 40000000000.0
+          },
+          "Ordinary Shares Number": {
+            "2026-04-30": 24700000000.0,
+            "2026-01-31": 24600000000.0
+          }
+        },
+        "line_item_units": {
+          "Total Assets": "UNKNOWN_CURRENCY",
+          "Cash And Cash Equivalents": "UNKNOWN_CURRENCY",
+          "Ordinary Shares Number": "shares"
+        }
+      }
+    },
+    "non_summary_rows_present_in_data_snapshot_all_line_items": {
+      "Cash And Cash Equivalents": {
+        "2026-04-30": 45000000000.0,
+        "2026-01-31": 40000000000.0
+      },
+      "Ordinary Shares Number": {
+        "2026-04-30": 24700000000.0,
+        "2026-01-31": 24600000000.0
+      }
+    },
+    "non_summary_rows_correctly_classified_by_real_unit_type": {
+      "Cash And Cash Equivalents": "UNKNOWN_CURRENCY",
+      "Ordinary Shares Number (a share COUNT, never a bare currency amount)": "shares"
+    }
+  },
+  "instance_2_product_reference_chain_via_real_api_and_export": {
+    "label": "FIXED OFFLINE DATA -- not a real Provider call; zero real LLM (deterministic echo gateway)",
+    "claim_this_proves": "an ANALYTICAL claim citing a captured fact is locatable via the REAL API path AND the REAL Export entrypoint, through genuine persistence/reload -- the engineering reference chain, not model compliance",
+    "run_id": "1cc7b92f-ee5d-44c2-8105-0e49bbab818d",
+    "pipeline_entrypoint": "run_research_request (real production entrypoint; LLM gateway is the deterministic echo gateway, zero real model calls; yf.Ticker monkeypatched at the external boundary)",
+    "step_a_pure_fact_persisted_in_source_registry": {
+      "source_type": "financial",
+      "data_snapshot": {
+        "currency": null,
+        "market_cap": 3000000000000.0,
+        "trailing_pe": 35.2,
+        "field_units": {
+          "market_cap": "UNKNOWN_CURRENCY",
+          "trailing_pe": "ratio"
+        }
+      }
+    },
+    "step_b_api_response_record": {
+      "endpoint": "get_agent_outputs_response (same function GET /api/research/{run_id}/agent-outputs calls)",
+      "claim_id": "1cc7b92f-ee5d-44c2-8105-0e49bbab818d:fundamental_agent:fundamentals_report:claim:1",
+      "claim": "NVDA's valuation outlook is strengthening, with the verified fundamentals snapshot showing the trailing P/E multiple has risen alongside market cap [sourceid: srcbbd2a6d3bdf3bca0] [fragmentid: srcbbd2a6d3bdf3bca0:frag:0].",
+      "source_link_status": "VALID",
+      "source_link_method": "ORIGINAL_AGENT_MARKER_CITED",
+      "linked_source_id": "src_bbd2a6d3bdf3bca0",
+      "linked_source": {
+        "source_id": "src_bbd2a6d3bdf3bca0",
+        "fragment_id": "src_bbd2a6d3bdf3bca0:frag:0",
+        "source_type": "financial",
+        "name": "Yahoo Finance",
+        "title": "NVDA fundamentals snapshot 2026-08-09 12:00:00",
+        "url": null,
+        "published_at": "2026-08-09T12:00:00",
+        "retrieved_at": "2026-10-04T23:14:30Z",
+        "external_record_id": null,
+        "locator": null,
+        "provider": "yfinance",
+        "metadata_status": "PARTIAL",
+        "excerpt": "NVDA fundamentals as retrieved on 2026-08-09 12:00:00 Market Cap=3000000000000.0 PE Ratio (TTM)=35.2",
+        "content_hash": "4b26af5f0932590db8dc5d1300effa2d9ae3b7bc08ff899e8a3a4b7a4f0f98b9",
+        "instrument": "NVDA",
+        "observation_date": "2026-08-09",
+        "timezone": null,
+        "unit": null,
+        "data_snapshot": {
+          "currency": null,
+          "market_cap": 3000000000000.0,
+          "trailing_pe": 35.2,
+          "field_units": {
+            "market_cap": "UNKNOWN_CURRENCY",
+            "trailing_pe": "ratio"
+          }
+        },
+        "calculation_method": null,
+        "calculation_version": null,
+        "calculation_params": null
+      }
+    },
+    "step_c_export_bundle_record": {
+      "endpoint": "get_run_export_bundle (same function GET /api/research/{run_id}/export calls -- zips already-persisted files from disk verbatim, never recomputes)",
+      "export_status_code": 200,
+      "export_content_type": "application/zip",
+      "export_zip_filename": "NVDA_1cc7b92f_research_export.zip",
+      "exported_structured_agent_outputs_record": {
+        "claim_id": "1cc7b92f-ee5d-44c2-8105-0e49bbab818d:fundamental_agent:fundamentals_report:claim:1",
+        "agent_output_id": "1cc7b92f-ee5d-44c2-8105-0e49bbab818d:fundamental_agent:fundamentals_report:claim:1",
+        "run_id": "1cc7b92f-ee5d-44c2-8105-0e49bbab818d",
+        "ticker": "NVDA",
+        "agent": "fundamental_agent",
+        "timestamp": "2026-10-04T23:14:30Z",
+        "claim": "NVDA's valuation outlook is strengthening, with the verified fundamentals snapshot showing the trailing P/E multiple has risen alongside market cap [sourceid: srcbbd2a6d3bdf3bca0] [fragmentid: srcbbd2a6d3bdf3bca0:frag:0].",
+        "evidence": "NVDA's valuation outlook is strengthening, with the verified fundamentals snapshot showing the trailing P/E multiple has risen alongside market cap [sourceid: srcbbd2a6d3bdf3bca0] [fragmentid: srcbbd2a6d3bdf3bca0:frag:0].",
+        "entities": [
+          "NVDA",
+          "valuation"
+        ],
+        "factors": [],
+        "direction": "unknown",
+        "confidence": 0.55,
+        "source_type": "filing",
+        "output_type": "analyst",
+        "source_agent_output_id": "1cc7b92f-ee5d-44c2-8105-0e49bbab818d:fundamental_agent:fundamentals_report",
+        "source_refs": [
+          "1cc7b92f-ee5d-44c2-8105-0e49bbab818d:fundamental_agent:fundamentals_report"
+        ],
+        "claim_index": 0,
+        "source_section": null,
+        "assertion_status": "asserted",
+        "semantic_polarity": "activation",
+        "extraction_method": "deterministic_splitter",
+        "source_link_status": "VALID",
+        "linked_source_id": "src_bbd2a6d3bdf3bca0",
+        "source_link_method": "ORIGINAL_AGENT_MARKER_CITED",
+        "content_support_status": "PENDING_REVIEW",
+        "content_support_method": "ORIGINAL_AGENT_CITED_UNVERIFIED_SUPPORT",
+        "content_support_review": {
+          "schema_version": "content_support_review.v1",
+          "status": "PENDING_REVIEW",
+          "method": "ORIGINAL_AGENT_CITED_UNVERIFIED_SUPPORT",
+          "reviewer": null,
+          "rationale": null,
+          "reviewed_at": null,
+          "claim_id": "1cc7b92f-ee5d-44c2-8105-0e49bbab818d:fundamental_agent:fundamentals_report:claim:1",
+          "linked_source_id": "src_bbd2a6d3bdf3bca0",
+          "content_hash": null
+        },
+        "claim_quality": "analytical",
+        "claim_quality_reason_codes": [
+          "ANALYTICAL_RELATION_SIGNAL"
+        ],
+        "analysis_eligible": true,
+        "duplicate_group_id": "dupgroup_625b871067c3",
+        "duplicate_count": 1,
+        "merged_source_agent_output_ids": [
+          "1cc7b92f-ee5d-44c2-8105-0e49bbab818d:fundamental_agent:fundamentals_report"
+        ],
+        "merged_agents": [
+          "fundamental_agent"
+        ]
+      },
+      "exported_source_registry_source": {
+        "source_id": "src_bbd2a6d3bdf3bca0",
+        "source_type": "financial",
+        "name": "Yahoo Finance",
+        "title": "NVDA fundamentals snapshot 2026-08-09 12:00:00",
+        "url": null,
+        "published_at": "2026-08-09T12:00:00",
+        "retrieved_at": "2026-10-04T23:14:30Z",
+        "external_record_id": null,
+        "locator": null,
+        "provider": "yfinance",
+        "excerpt": "NVDA fundamentals as retrieved on 2026-08-09 12:00:00 Market Cap=3000000000000.0 PE Ratio (TTM)=35.2",
+        "content_hash": "4b26af5f0932590db8dc5d1300effa2d9ae3b7bc08ff899e8a3a4b7a4f0f98b9",
+        "fragment_id": "src_bbd2a6d3bdf3bca0:frag:0",
+        "instrument": "NVDA",
+        "observation_date": "2026-08-09",
+        "timezone": null,
+        "unit": null,
+        "data_snapshot": {
+          "currency": null,
+          "market_cap": 3000000000000.0,
+          "trailing_pe": 35.2,
+          "field_units": {
+            "market_cap": "UNKNOWN_CURRENCY",
+            "trailing_pe": "ratio"
+          }
+        },
+        "calculation_method": null,
+        "calculation_version": null,
+        "calculation_params": null,
+        "metadata_status": "PARTIAL"
+      }
+    },
+    "api_and_export_agree": true
+  }
+}

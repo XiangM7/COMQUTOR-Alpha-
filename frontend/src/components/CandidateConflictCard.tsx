@@ -20,7 +20,7 @@ function bear(evaluation: ConflictCandidateEvaluation): string | null {
   return evaluation.bear_alpha_id ?? null;
 }
 
-export function CandidateConflictCard({ evaluation }: { evaluation: ConflictCandidateEvaluation }) {
+export function CandidateConflictCard({ evaluation, runId }: { evaluation: ConflictCandidateEvaluation; runId?: string }) {
   const admissibility = evaluation.admissibility;
   const bullAlphaId = bull(evaluation);
   const bearAlphaId = bear(evaluation);
@@ -95,6 +95,7 @@ export function CandidateConflictCard({ evaluation }: { evaluation: ConflictCand
           evidenceUi={evaluation.evidence_ui}
           bullAlphaId={bullAlphaId}
           bearAlphaId={bearAlphaId}
+          runId={runId}
         />
       ) : null}
     </article>

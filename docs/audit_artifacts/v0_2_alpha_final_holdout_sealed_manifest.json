@@ -1,0 +1,67 @@
+{
+  "schema_version": "alpha_final_holdout_sealed_manifest.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "split": "final_independent_set",
+  "status": "FINAL_GOLD_FROZEN",
+  "status_history": [
+    {
+      "status": "SEALED_UNADJUDICATED_NOT_USED_FOR_TUNING",
+      "as_of": "Day 4E through Day 4G"
+    },
+    {
+      "status": "FINAL_GOLD_ADJUDICATION_IN_PROGRESS",
+      "as_of": "Day 4H",
+      "reason": "blind adjudication packet created and about to be handed to the independent external adjudicator -- claim/evidence content is now exposed to that adjudicator, though NOT to the system under test"
+    },
+    {
+      "status": "FINAL_GOLD_PENDING_RESERVE_REPLACEMENT_ADJUDICATION",
+      "as_of": "Day 4H (round 2)",
+      "reason": "first-pass 150-sample adjudication imported (130 accepted, 20 excluded); 20 reserve replacements drawn and blind packet created; Final Gold not yet frozen"
+    },
+    {
+      "status": "FINAL_GOLD_PENDING_RESERVE_REPLACEMENT_ROUND2_ADJUDICATION",
+      "as_of": "Day 4H (round 3)",
+      "reason": "round-1 replacement adjudication imported (16 accepted, 4 excluded); round-2 replacements drawn and blind packet created; current accepted Final Gold population = 146; Final Gold not yet frozen"
+    },
+    {
+      "status": "FINAL_GOLD_PENDING_RESERVE_REPLACEMENT_ROUND3_ADJUDICATION",
+      "as_of": "Day 4H (round 4)",
+      "reason": "round-2 replacement adjudication imported (2 accepted, 2 excluded); round-3 replacements drawn and blind packet created; current accepted Final Gold population = 148; Final Gold not yet frozen"
+    },
+    {
+      "status": "FINAL_GOLD_FROZEN",
+      "as_of": "Day 4H (final round)",
+      "reason": "All 150 slots resolved (130 first-pass + 16 round-1 + 2 round-2 + 2 round-3 reserve replacements). Final Gold frozen at docs/audit_artifacts/v0_2_alpha_final_gold_v1.json, SHA256 a3c402ce391cfba1bd49d3d84a352e222e2775118f24b9ebf2a003183e2392de."
+    }
+  ],
+  "sample_count": 150,
+  "content_hash_sha256": "a7c84445247f0ce0fdf187e6e73d62c04eb82e64557c40a98704a49bcd4bf70c",
+  "sample_id_list_hash_sha256": "ce657f9a3862491de35a687daaedcc240c3ee9b3884c17aa7d837d44ccae8402",
+  "random_seed_reference": {
+    "ticker_stratified_draw_seed": 20260917,
+    "split_shuffle_seed": 20261017,
+    "blinded_numbering_seed": 20260919
+  },
+  "source_population_summary": "Drawn from the same 42,048-item untouched raw claim/evidence pool documented in v0_2_new_alpha_holdout_split.json (61 persisted research runs, 8 tickers, 838 known-touched claim_ids excluded). Ticker distribution within this split is disclosed below for provenance only.",
+  "ticker_distribution": {
+    "AMD": 23,
+    "QQQ": 19,
+    "TSM": 17,
+    "MU": 22,
+    "MSFT": 20,
+    "NVDA": 16,
+    "GOOGL": 20,
+    "SNDK": 13
+  },
+  "content_exposure": "This manifest FILE itself still contains no claim text, no evidence text, no claim_id, and no run_id for any individual sample -- only aggregate counts and cryptographic hashes. The underlying 150 samples' claim/evidence text has, as of Day 4H, been materialized into a separate blind adjudication packet (docs/audit_artifacts/v0_2_alpha_final_adjudication_packet.json) for the independent external adjudicator -- see adjudicator_sample_exposure below. This is a deliberate, policy-governed exposure to the adjudicator, distinct from and not equivalent to exposure to the system under test.",
+  "adjudicator_sample_exposure": 150,
+  "system_under_test_sample_exposure": 0,
+  "candidate3_final_evaluations": 0,
+  "provider_final_evaluations": 0,
+  "used_for_tuning": false,
+  "unseal_conditions": "This split may be unsealed and EXECUTED AGAINST THE PRODUCTION ALPHA SEMANTIC PATH exactly once, only after the development set (100 samples) has been fully adjudicated and used to develop/validate a future Candidate 3 (DONE, Day 4G), AND only after this final set's own Gold labels have been frozen from independent adjudication (IN PROGRESS, Day 4H) -- and only as the single final independent validation of that candidate. 'Unsealing' here means Candidate 3 execution against these samples, which remains at 0 -- it does NOT mean adjudicator content exposure, which has now begun by design.",
+  "provider_calls_this_task": 0,
+  "model_performance_inspected": false,
+  "final_gold_reference": "docs/audit_artifacts/v0_2_alpha_final_gold_v1.json",
+  "final_gold_sha256": "a3c402ce391cfba1bd49d3d84a352e222e2775118f24b9ebf2a003183e2392de"
+}

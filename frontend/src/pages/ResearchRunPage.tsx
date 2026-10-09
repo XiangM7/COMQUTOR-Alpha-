@@ -5,11 +5,15 @@ import { RunStatusBanner } from "../components/RunStatusBanner";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
 import { EmptyState } from "../components/EmptyState";
+import { ExternalSourceDisplay } from "../components/ExternalSourceDisplay";
+import { ContentSupportReviewPanel } from "../components/ContentSupportReviewPanel";
+import { KeyConclusionsPanel } from "../components/KeyConclusionsPanel";
 import { StructuralSnapshot } from "../components/StructuralSnapshot";
+import { StageDisclosurePanel } from "../components/StageDisclosurePanel";
 import { useRunPolling } from "../hooks/useRunPolling";
 import { useResearchRun } from "../hooks/useResearchRun";
-import { describeApiError } from "../api/errors";
-import { getApiBaseUrl } from "../api/client";
+import { ApiError, describeApiError } from "../api/errors";
+import { exportResearchRun, getApiBaseUrl } from "../api/client";
 import { UNCLASSIFIED_FINDING_REASONS } from "../api/types";
 import type {
   AlphaMemoryPhiStructure,
@@ -56,7 +60,7 @@ const DEFAULT_FINDINGS_SHOWN = 1;
 
 // One finding card. Direction is never repeated here -- it is already
 // expressed once by the enclosing panel's own heading (Section G3).
-function FindingCard({ record }: { record: StructuredAgentOutputRecord }) {
+function FindingCard({ runId, record }: { runId: string; record: StructuredAgentOutputRecord }) {
   return (
     <li className="analyst-output-card">
       <dl className="analyst-output-meta-list">
@@ -72,6 +76,16 @@ function FindingCard({ record }: { record: StructuredAgentOutputRecord }) {
       <p className="analyst-output-confidence">
         Confidence {(record.confidence * 100).toFixed(0)}% · <code>{record.claim_id}</code>
       </p>
+      <ExternalSourceDisplay
+        source={record.external_source}
+        status={record.external_source_status}
+        linkedSource={record.linked_source}
+        sourceLinkStatus={record.source_link_status}
+        contentSupportStatus={record.content_support_status}
+      />
+      {record.source_link_status === "VALID" ? (
+        <ContentSupportReviewPanel runId={runId} claimId={record.claim_id} />
+      ) : null}
     </li>
   );
 }
@@ -81,11 +95,13 @@ function FindingCard({ record }: { record: StructuredAgentOutputRecord }) {
 // how many eligible records exist upstream. This limit is presentation-only
 // -- it never returns to the backend, and never affects the API/artifact/DB.
 function DirectionalFindingsPanel({
+  runId,
   direction,
   title,
   emptyMessage,
   records,
 }: {
+  runId: string;
   direction: "positive" | "negative";
   title: string;
   emptyMessage: string;
@@ -107,7 +123,7 @@ function DirectionalFindingsPanel({
         <>
           <ul className="analyst-output-list">
             {shown.map((record) => (
-              <FindingCard key={record.claim_id} record={record} />
+              <FindingCard key={record.claim_id} runId={runId} record={record} />
             ))}
           </ul>
           {moreCount > 0 ? (
@@ -562,6 +578,55 @@ function DataQualityPanel({ response }: { response: CanonicalResearchResponse })
   );
 }
 
+// John MVP Gap Closure, Gap B (User-Facing Result Export). Distinct from
+// UnclassifiedFindingsPanel's QA-only "Download full audit" link above --
+// this is the main, user-facing research export: the run's complete
+// already-persisted artifact set (ticker/date/run_id, evidence, Alpha
+// structure, Conflict Radar + invalidation, provenance manifest), bundled
+// server-side from files already on disk. Never recomputes research, never
+// calls a Provider. Loading/failure are both rendered explicitly -- a
+// failed export must never look like it silently succeeded.
+function ExportResearchButton({ runId }: { runId: string }) {
+  const [isExporting, setIsExporting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  async function handleExport() {
+    if (isExporting) return;
+    setIsExporting(true);
+    setErrorMessage(null);
+    try {
+      const { blob, filename } = await exportResearchRun(runId);
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (cause) {
+      const apiError = cause instanceof ApiError ? cause : ApiError.network();
+      if (!apiError.isAborted) setErrorMessage(describeApiError(apiError));
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  return (
+    <div className="export-research-control">
+      <button
+        type="button"
+        className="button button-secondary"
+        onClick={handleExport}
+        disabled={isExporting}
+      >
+        {isExporting ? "Preparing export…" : "Export research"}
+      </button>
+      {errorMessage ? <ErrorPanel title="Export failed" message={errorMessage} onRetry={handleExport} /> : null}
+    </div>
+  );
+}
+
 export function ResearchRunPage() {
   const { runId } = useParams<{ runId: string }>();
   const location = useLocation();
@@ -599,9 +664,12 @@ export function ResearchRunPage() {
               Run ID: <code>{shortenRunId(runId)}</code>
             </p>
           </div>
-          <button type="button" className="button button-secondary" onClick={refresh}>
-            Refresh
-          </button>
+          <div className="run-header-actions">
+            {shouldLoadResult ? <ExportResearchButton runId={runId} /> : null}
+            <button type="button" className="button button-secondary" onClick={refresh}>
+              Refresh
+            </button>
+          </div>
         </div>
         <dl className="run-header-meta">
           {"analysis_date" in (pollStatus ?? {}) ? (
@@ -660,12 +728,15 @@ export function ResearchRunPage() {
             <section className="panel research-summary-panel">
               <h2>Research summary</h2>
               <p>{research.summary}</p>
+              <StageDisclosurePanel disclosure={research.stage_disclosure} />
             </section>
           ) : null}
 
           {research && "summary" in research ? (
             <StructuralSnapshot runId={runId} research={research} />
           ) : null}
+
+          {research && "summary" in research ? <KeyConclusionsPanel runId={runId} /> : null}
 
           {research && "data_sanity_status" in research ? (
             <section className="panel data-quality-panel">
@@ -676,18 +747,27 @@ export function ResearchRunPage() {
 
           <section className="panel analyst-outputs-panel">
             <h2>Analyst findings</h2>
+            <p className="evidence-source-disclosure">
+              This evidence text is each agent&apos;s own research output. Where the underlying research
+              genuinely supplied one, each finding below shows its real external source (publisher,
+              title, date, or link) — otherwise it honestly shows source metadata as unavailable. A{" "}
+              <code>claim_id</code> is always an internal reference only, never external source
+              verification by itself.
+            </p>
             {agentOutputs && "structured_agent_outputs" in agentOutputs ? (
               allRecords.length === 0 ? (
                 <EmptyState title="No structured analyst outputs yet" />
               ) : (
                 <div className="directional-findings-columns">
                   <DirectionalFindingsPanel
+                    runId={runId ?? ""}
                     direction="positive"
                     title="Positive findings"
                     emptyMessage="No eligible positive findings were identified."
                     records={allRecords}
                   />
                   <DirectionalFindingsPanel
+                    runId={runId ?? ""}
                     direction="negative"
                     title="Negative findings"
                     emptyMessage="No eligible negative findings were identified."

@@ -1,0 +1,120 @@
+{
+ "package": "T4_delivery",
+ "1_manifest": {
+  "files_listed": 254,
+  "missing": [],
+  "mismatched": [],
+  "unlisted": [],
+  "ok": true
+ },
+ "2_references": {
+  "report_paths_checked": 87,
+  "missing_paths": [],
+  "readme_commands": 11,
+  "readme_problems": [],
+  "ok": true
+ },
+ "3_statistics": {
+  "exit_code": 0,
+  "summary": [
+   "cross-checks: {\"run2.check_pool_ledger_equals_structure_graph\": true, \"run2.check_ledger_rows_equal_claims\": true, \"run2.check_reservations_equal_wire_audit_equal_attempts\": true, \"run2.check_cs_identity\": true, \"run1.check_pool_ledger_equals_structure_graph\": true, \"run1.check_ledger_rows_equal_claims\": true, \"run1.check_reservations_equal_wire_audit_equal_attempts\": true, \"run1.check_cs_identity\": true} | missing values written as 0/NONE/empty: {\"run2.ledger_missing_written_as_zero_or_none\": 0, \"run1.ledger_missing_written_as_zero_or_none\": 0}",
+   "figures: 70, mismatched: 0, not cited: 0"
+  ],
+  "ok": true
+ },
+ "4_export": {
+  "run2_12591384": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_download_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+   "page_equals_api": true,
+   "equals_sha_recorded_in_round30": true,
+   "ok": true
+  },
+  "run1_fa642639": {
+   "entries": 20,
+   "byte_mismatch_vs_run_dir": [],
+   "api_export_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_download_sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38",
+   "page_equals_api": true,
+   "ok": true
+  },
+  "ok": true
+ },
+ "5_secrets": {
+  "blobs_scanned": 361,
+  "hits": [],
+  "hit_count": 0,
+  "env_value_keys_checked": [],
+  "redacted_header_or_field_values_seen": {
+   "placeholder": 5,
+   "REDACTED": 2246
+  },
+  "fixture_or_redacted_matches": {
+   "api_key_sk:sk-testsecret0123456789abcdef": 2,
+   "db_url_with_password:pass": 2,
+   "db_url_with_password:p": 3,
+   "db_url_with_password:***REDACTED***": 3,
+   "db_url_with_password:fake": 24
+  },
+  "ok": true
+ },
+ "6_identity": {
+  "tracked_diff_file_sha256": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+  "untracked_recomputed": "38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad",
+  "run2_12591384": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "run1_fa642639": {
+   "tracked_matches": true,
+   "untracked_matches": true,
+   "week2_config_equals_frozen": true,
+   "agent_config_equals_frozen": true,
+   "database": "postgresql comqutor_alpha_t4_test",
+   "ok": true
+  },
+  "ok": true
+ },
+ "optional_chapters": {
+  "results": [
+   {
+    "video": "video/fresh_run2_12591384/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/frozen_round27/t4_demo_frozen.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   },
+   {
+    "video": "video/fresh_run1_fa642639/t4_demo_fresh.mp4",
+    "stream_md5_equal": true,
+    "equals_recorded": true
+   }
+  ],
+  "ok": true
+ },
+ "optional_regenerate_ledgers": {
+  "repo_tracked_diff_sha256_now": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+  "repo_code_equals_run_code": true,
+  "run2_12591384": {
+   "exit_code": 0,
+   "files_differing": [],
+   "ok": true
+  },
+  "run1_fa642639": {
+   "exit_code": 0,
+   "files_differing": [],
+   "ok": true
+  },
+  "ok": true
+ },
+ "all_ok": true
+}

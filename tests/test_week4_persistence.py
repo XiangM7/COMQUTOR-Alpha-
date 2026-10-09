@@ -22,6 +22,7 @@ from comqutor_alpha.storage.db.repository import (
     build_repository_from_env,
 )
 from comqutor_alpha.storage.db.schema import (
+    COLUMN_MIGRATIONS,
     MIGRATIONS,
     agent_outputs,
     alpha_activations,
@@ -183,7 +184,13 @@ class TestWeek4Schema:
 class TestMigration0002:
     def test_fresh_database_applies_0001_then_0002_and_reapply_is_empty(self):
         engine = build_engine("sqlite:///:memory:")
-        assert apply_migrations(engine) == [version for version, _ in MIGRATIONS]
+        # apply_migrations combines BOTH table-creation migrations
+        # (MIGRATIONS) and additive-column migrations (COLUMN_MIGRATIONS,
+        # T1 source-linking chain, 2026-09-28 -- e.g.
+        # "0007_add_agent_outputs_source_linking_columns") -- its return
+        # value is genuinely the union of both, not just MIGRATIONS alone.
+        expected = [version for version, _ in MIGRATIONS] + [version for version, _, _ in COLUMN_MIGRATIONS]
+        assert apply_migrations(engine) == expected
         assert apply_migrations(engine) == []
         with engine.connect() as conn:
             versions = conn.execute(sa.select(schema_migrations.c.version)).scalars().all()
@@ -227,6 +234,7 @@ class TestMigration0002:
             "0004_create_agent_outputs",
             "0005_create_research_run_progress",
             "0006_create_entity_alpha_exposures",
+            "0007_add_agent_outputs_source_linking_columns",
         ]
         with engine.connect() as conn:
             assert conn.scalar(sa.select(sa.func.count()).select_from(alpha_matches)) == 1
@@ -239,6 +247,7 @@ class TestMigration0002:
             "0004_create_agent_outputs",
             "0005_create_research_run_progress",
             "0006_create_entity_alpha_exposures",
+            "0007_add_agent_outputs_source_linking_columns",
         ]
 
 
@@ -390,20 +399,24 @@ class TestActivationPersistence:
 
 
 class TestConflictPersistence:
-    def test_all_six_candidate_outcomes_and_admitted_details_are_persisted(self):
+    def test_all_eight_candidate_outcomes_and_admitted_details_are_persisted(self):
         _, repo = _engine_and_repo()
         _, conflict = _persist(repo)
         rows = repo.get_alpha_conflicts("w42_run")
-        assert len(rows) == 6
+        # 8 declared pairs (PD-017-REVISED: 6 original mandatory + A102__A304
+        # + A201__A304) -- this fixture's activation payload has no A102/A201
+        # entry at all, so those two candidates land in "rejected"
+        # (MISSING_LEFT_ACTIVATION/MISSING_RIGHT_ACTIVATION), never silently
+        # dropped from the row count.
+        assert len(rows) == 8
         assert {row["outcome"] for row in rows} == {"admitted", "suppressed", "rejected"}
         admitted = repo.get_alpha_conflicts("w42_run", outcome="admitted")
         assert len(admitted) == conflict["arbitration"]["admitted_count"] == 1
         # Step 6 (Primary vs Secondary Evidence Qualification): evidence_qualification
-        # is an in-memory/API-only additive diagnostic field, not yet persisted through
-        # the Week4 DB whitelist -- documented gap, stripped here exactly like other
-        # additive fields are stripped before an API-vs-DB-reconstruction comparison.
-        expected_conflict = {k: v for k, v in conflict["conflicts"][0].items() if k != "evidence_qualification"}
-        assert admitted[0]["conflict_json"] == expected_conflict
+        # is now persisted through the Week4 DB whitelist (2026-09-30 fix --
+        # week4_persistence.py's _whitelist_conflict previously dropped it
+        # silently; see _whitelist_evidence_qualification's own docstring).
+        assert admitted[0]["conflict_json"] == conflict["conflicts"][0]
         assert admitted[0]["conflict_rank"] == 0
         assert admitted[0]["is_main_conflict"] is True
         assert admitted[0]["conflict_score"] is not None
@@ -421,12 +434,18 @@ class TestConflictPersistence:
             assert row["is_main_conflict"] is False
             assert row["conflict_score"] is None
 
-    def test_pairs_are_canonical_unique_and_a102_a304_is_absent(self):
+    def test_pairs_are_canonical_unique_and_include_a102_a304_per_pd017_revised(self):
+        """PD-017-REVISED (docs/specs/product_decisions_and_unknowns.md)
+        added A102__A304 and A201__A304 as declared, evaluable taxonomy
+        pairs -- superseding this test's original PD-017-era premise that
+        A102/A304 could never appear together. Canonical uniqueness/
+        ordering is still real, still asserted."""
         _, repo = _engine_and_repo()
         _persist(repo)
         pairs = [(row["alpha_a"], row["alpha_b"]) for row in repo.get_alpha_conflicts("w42_run")]
         assert pairs == sorted(set(pairs))
-        assert ("A102", "A304") not in pairs
+        assert ("A102", "A304") in pairs
+        assert ("A201", "A304") in pairs
 
     def test_unknown_conflict_fields_are_not_persisted(self):
         _, repo = _engine_and_repo()
@@ -519,15 +538,9 @@ class TestReconstruction:
         _, conflict = _persist(repo)
         reconstructed = repo.get_week4_conflict_result("w42_run")
         # Step 6 (Primary vs Secondary Evidence Qualification): evidence_qualification
-        # is an in-memory/API-only additive diagnostic field, not yet persisted through
-        # the Week4 DB whitelist -- documented gap, stripped from every conflict dict
-        # here exactly like other additive fields are stripped before an
-        # API-vs-DB-reconstruction comparison.
+        # now round-trips exactly (2026-09-30 fix -- see
+        # _whitelist_evidence_qualification's own docstring).
         expected = copy.deepcopy(conflict)
-        for c in expected["conflicts"]:
-            c.pop("evidence_qualification", None)
-        if expected["main_conflict"] is not None:
-            expected["main_conflict"].pop("evidence_qualification", None)
         assert reconstructed == expected
         assert reconstructed["main_conflict"] == expected["main_conflict"]
         assert reconstructed["arbitration"] == expected["arbitration"]
@@ -555,7 +568,7 @@ class TestReconstruction:
         }
         assert reconstructed["conflicts"] == []
         assert reconstructed["main_conflict"] is None
-        assert len(reconstructed["arbitration"]["candidate_evaluations"]) == 6
+        assert len(reconstructed["arbitration"]["candidate_evaluations"]) == 8
 
     @pytest.mark.parametrize(
         "update_values",
@@ -618,12 +631,12 @@ class TestAtomicReplaceAndIsolation:
         _persist(repo, score=90)
         assert repo.get_week4_conflict_result("w42_run") == first
         assert len(repo.get_alpha_activations("w42_run")) == 7
-        assert len(repo.get_alpha_conflicts("w42_run")) == 6
+        assert len(repo.get_alpha_conflicts("w42_run")) == 8
 
         _persist(repo, score=70)
         assert repo.get_alpha_activations("w42_run")[2]["activation_score"] == 70
         assert len(repo.get_alpha_activations("w42_run")) == 7
-        assert len(repo.get_alpha_conflicts("w42_run")) == 6
+        assert len(repo.get_alpha_conflicts("w42_run")) == 8
 
     @pytest.mark.parametrize("failing_table", ["alpha_activations", "alpha_conflicts"])
     def test_database_failure_rolls_back_both_tables_and_preserves_prior_state(self, failing_table):
@@ -733,16 +746,26 @@ def test_real_nvda_w41_to_w42_persistence_sanity(tmp_path):
     run_id = response["run_id"]
     graph = get_persisted_structure_graph(run_id, output_root=tmp_path, graph_repository=repo)
     matches = json.loads((tmp_path / run_id / "alpha_matches.json").read_text(encoding="utf-8"))
+    # T1 gate-bypass fix (2026-09-29): graph["activation"] is now the
+    # OFFICIAL, verified-only pool (require_verified_evidence_gate=True on
+    # the real run_research_request entrypoint) -- this fixture's claims
+    # are never source-linked/human-reviewed, so that pool honestly shows
+    # zero evidence everywhere. This test predates the verified-evidence
+    # gate and is a W4.1->W4.2 PERSISTENCE sanity check (real conflict
+    # detection input -> real DB round-trip), not a gate-semantics test --
+    # it uses the raw v2 diagnostic view (activation_versions["v2"]), the
+    # same unmodified scorer's real, differentiated output.
+    raw_v2_activation = graph["activation_versions"]["v2"]
     conflict = detect_alpha_conflicts(
         run_id=run_id,
         ticker="NVDA",
-        activation_payload=graph["activation"],
+        activation_payload=raw_v2_activation,
         alpha_matches=matches["matches"],
     )
     repo.persist_week4_results(
         run_id=run_id,
         ticker="NVDA",
-        activation_payload=graph["activation"],
+        activation_payload=raw_v2_activation,
         conflict_payload=conflict,
     )
 

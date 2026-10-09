@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import re
 import unicodedata
 from collections.abc import Mapping
@@ -14,9 +15,30 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from comqutor_alpha.structure_engine.content_support_llm import apply_llm_content_support_verification
+from comqutor_alpha.source_provenance import (
+    REVIEW_METHOD_AGENT_CITED_UNVERIFIED_SUPPORT,
+    REVIEW_METHOD_ORIGINAL_AGENT_CITED_UNVERIFIED_SUPPORT,
+    REVIEW_METHOD_UNREVIEWED,
+    REVIEW_METHOD_UNVERIFIED_OFFLINE_CONTENT_MATCH,
+    SOURCE_LINK_NOT_PROVIDED,
+    SOURCE_LINK_VALID,
+    SUPPORT_NOT_APPLICABLE,
+    SUPPORT_PENDING_REVIEW,
+    apply_automated_content_support_verification,
+    build_content_support_review,
+    extract_all_source_markers_from_text,
+    extract_source_marker_from_text,
+    match_evidence_to_source_candidates,
+    match_evidence_to_source_candidates_normalized,
+    public_source_fields,
+    resolve_evidence_cutoff_at,
+    validate_source_reference,
+)
 from comqutor_alpha.storage.file_store import (
     append_jsonl_record,
     load_json_record,
+    load_json_record_if_exists,
     save_json_record,
     validate_run_id_for_path,
 )
@@ -32,11 +54,13 @@ from comqutor_alpha.structure_engine.claim_quality import (
     classify_claim_quality,
 )
 from comqutor_alpha.structure_engine.claim_semantics import analyze_claim_semantics
+from comqutor_alpha.structure_engine.derived_fact_verification import verify_percent_comparison_claim
 from comqutor_alpha.structure_engine.factor_normalizer import (
     extract_known_factors_from_text,
     normalize_factor_label,
 )
 from comqutor_alpha.structure_engine.week2_llm import resolve_structured_adapter_concurrency
+from comqutor_alpha.structure_engine.week2_llm import _selected_profile_or_none as _selected_week2_execution_profile
 from comqutor_alpha.structure_engine.structure_schema import (
     VALID_DIRECTIONS,
     clamp_score,
@@ -88,6 +112,12 @@ POSITIVE_WORDS = (
     "supporting",
     "improving",
     "recovering",
+    # Day 3 (MSFT-A102-DIRECT-INFERENCE-TRIGGER root-cause fix): a
+    # pricing-power/competitive-moat metaphor ("toll booth on the highway
+    # of X") is common cross-ticker bullish framing that the prior list had
+    # no coverage for at all, leaving affected claims at direction=unknown
+    # regardless of ticker -- not an MSFT-specific term.
+    "toll booth",
 )
 NEGATIVE_WORDS = (
     "bearish",
@@ -276,6 +306,85 @@ def load_raw_agent_outputs(run_dir):
 
 def normalize_agent_name(agent):
     return str(agent or "unknown_agent").strip().lower().replace(" ", "_")
+
+
+# Round 3 (2026-10-04), section 3: "只提供本步骤实际可见的相关依据,不把整个
+# run注册表无差别塞进每个请求" -- derived from a direct read of each real
+# TradingAgents node's own prompt-building code (not a guess):
+#   - market_analyst.py / news_analyst.py / fundamentals_analyst.py each
+#     build their prompt EXCLUSIVELY from their own tool-call loop
+#     (state["messages"]) -- confirmed by direct read, none of the three
+#     reads another analyst's report field at all. Each is therefore only
+#     legitimately offered the ONE source_type its own tools produce.
+#   - sentiment_analyst.py / social_media_analyst.py: same self-contained
+#     shape, but this round captures no source_type for either (out of
+#     scope, unchanged) -- empty visible set, never the whole registry.
+#   - bull_researcher.py / bear_researcher.py: read market_report +
+#     sentiment_report + news_report + fundamentals_report directly.
+#   - research_manager.py: reads ONLY investment_debate_state.history (the
+#     bull/bear debate text) -- transitively the SAME union the debate
+#     itself was given, never a NEW direct source.
+#   - trader.py: reads ONLY investment_plan (research_manager's own
+#     output) -- same transitive union again, never a new direct source.
+#   - aggressive/conservative/neutral risk debators: read all 4 raw
+#     reports directly PLUS trader_investment_plan.
+#   - portfolio_manager.py: reads risk_debate_state history +
+#     investment_plan + trader_investment_plan -- same transitive union.
+# Every downstream (non-analyst) agent therefore shares the exact same
+# union -- there is no finer-grained split available without rebuilding
+# the graph's own text-chaining architecture (out of scope this round).
+# "macro" is offered to the SAME agents as "news" (get_macro_indicators is
+# one of news_analyst's own tools, confirmed by direct read of
+# news_analyst.py's tool list).
+_DOWNSTREAM_VISIBLE_SOURCE_TYPES = frozenset({"market", "news", "macro", "financial"})
+_AGENT_VISIBLE_SOURCE_TYPES: dict[str, frozenset[str]] = {
+    "market_agent": frozenset({"market"}),
+    "news_agent": frozenset({"news", "macro"}),
+    "sentiment_agent": frozenset(),
+    "social_media_agent": frozenset(),
+    "fundamental_agent": frozenset({"financial"}),
+    "bull_researcher": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+    "bear_researcher": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+    "research_manager": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+    "trader": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+    "aggressive_risk_analyst": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+    "conservative_risk_analyst": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+    "neutral_risk_analyst": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+    "portfolio_manager": _DOWNSTREAM_VISIBLE_SOURCE_TYPES,
+}
+
+
+def visible_source_types_for_agent(agent: str) -> frozenset[str] | None:
+    """Returns the set of ``source_type``s legitimately visible to
+    ``agent`` at the step that produced its raw_output, or ``None`` for an
+    agent not in the known map (a future/unrecognized agent name --
+    ``None`` means "do not scope, pass the full registry unchanged",
+    strictly more permissive than an empty set, so an unrecognized agent
+    is never silently starved of every source it might legitimately need;
+    see ``scope_sources_for_agent``)."""
+    return _AGENT_VISIBLE_SOURCE_TYPES.get(normalize_agent_name(agent))
+
+
+def scope_sources_for_agent(
+    agent: str, sources: list[dict[str, Any]] | None
+) -> list[dict[str, Any]] | None:
+    """Filters ``sources`` down to only the entries whose ``source_type``
+    was actually visible to ``agent`` at generation time (see
+    ``visible_source_types_for_agent``'s own derivation). A source that
+    exists in this run's registry but was never shown to THIS agent can
+    therefore never be accepted as this agent's own explicit citation or
+    content-match candidate -- closing the exact gap John 下一轮开发任务单
+    section 3 point 5 names: "整个registry里存在但该步骤未提供的来源,不能
+    因此被当成合法的Agent显式引用". Returns ``sources`` unchanged when the
+    agent is unrecognized (see ``visible_source_types_for_agent``) or when
+    ``sources`` is falsy."""
+    if not sources:
+        return sources
+    visible = visible_source_types_for_agent(agent)
+    if visible is None:
+        return sources
+    return [s for s in sources if isinstance(s, dict) and s.get("source_type") in visible]
+
 
 # Infer the source type of the agent based on its name and raw text
 def infer_source_type(agent, raw_text):
@@ -837,6 +946,14 @@ def safe_default_record(
         "claim_quality": QUALITY_NON_SUBSTANTIVE,
         "claim_quality_reason_codes": ["PLACEHOLDER_UNKNOWN"],
         "analysis_eligible": False,
+        # T1 source-linking chain: a placeholder is never a real claim, so
+        # it never has content to evaluate a source link against -- honest
+        # NOT_PROVIDED/NOT_APPLICABLE, never a fabricated link.
+        "source_link_status": SOURCE_LINK_NOT_PROVIDED,
+        "linked_source_id": None,
+        "source_link_method": "NONE",
+        "content_support_status": SUPPORT_NOT_APPLICABLE,
+        "content_support_method": "PLACEHOLDER_RECORD",
     }
 
 
@@ -869,6 +986,20 @@ def _chunk_segments(segments: list[dict[str, Any]], batch_size: int) -> list[lis
 # segment_id it was given -- it may add entities/factors/direction/
 # confidence, but it can never omit a segment, invent a new one, merge/split
 # segments, or rewrite claim/evidence/source_section.
+#
+# cited_source_id (T1 source-linking chain, COMQUTOR Alpha next-round task,
+# 2026-09-28): a REQUIRED field (nullable), not an optional extra key -- the
+# strict "response field set must equal exactly this set" check below would
+# otherwise let a caller omit it silently. The LLM may only ever cite an id
+# that THIS SAME request's own "candidate_sources" offered for THAT segment
+# (see _llm_batch_enrichment) -- never an arbitrary run-registry id it was
+# never shown, never a candidate offered only for another segment, and never
+# a string it invents.
+# T4 round 34 (D1 fix, 2026-10-09): the prompt (week2.claim_batch_enrichment.
+# v2) now asks for this field, and a citation outside the segment's own
+# offered candidates REJECTS the reply (the whole batch falls back, like any
+# other contract violation) instead of being silently nulled -- a nulled
+# forgery was indistinguishable from a legitimate "no citation" answer.
 _LLM_BATCH_ENRICHMENT_REQUIRED_FIELDS = {
     "segment_id",
     "claim",
@@ -878,17 +1009,33 @@ _LLM_BATCH_ENRICHMENT_REQUIRED_FIELDS = {
     "direction",
     "confidence",
     "source_section",
+    "cited_source_id",
 }
 
 
 def _validate_llm_batch_enrichment(
-    payload: Mapping[str, Any], batch_segments: list[dict[str, Any]]
+    payload: Mapping[str, Any],
+    batch_segments: list[dict[str, Any]],
+    *,
+    candidate_source_ids: frozenset[str] = frozenset(),
+    candidate_source_ids_by_segment: Mapping[str, frozenset[str]] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Validate one LLM batch-enrichment response against its own input
     batch. Raises ``ValueError`` (causing the whole batch to fall back to
     deterministic enrichment -- see ``_llm_batch_enrichment``) on any
     violation. Returns ``{segment_id: {"entities", "factors", "direction",
-    "confidence"}}`` covering every input segment_id exactly once.
+    "confidence", "cited_source_id"}}`` covering every input segment_id
+    exactly once.
+
+    ``candidate_source_ids_by_segment`` (what production passes): for each
+    segment_id, the source/fragment ids THIS call's own request offered for
+    that segment in ``candidate_sources`` -- the scope its
+    ``cited_source_id`` must belong to. Narrower than "exists anywhere in the
+    run's source_registry.json" and narrower than "offered somewhere in this
+    batch": an id offered only for another segment, or real elsewhere in the
+    run but never offered, is rejected. ``candidate_source_ids`` (a single
+    set applied to every segment) is used only when the per-segment mapping
+    is not given.
     """
     if set(payload) != {"claims"}:
         raise ValueError("batch enrichment response has unexpected fields")
@@ -942,11 +1089,27 @@ def _validate_llm_batch_enrichment(
         if not math.isfinite(confidence) or not 0.0 <= confidence <= 1.0:
             raise ValueError("confidence must be between zero and one")
 
+        cited_source_id = item.get("cited_source_id")
+        if cited_source_id is not None:
+            if not isinstance(cited_source_id, str) or not cited_source_id.strip():
+                raise ValueError("cited_source_id must be a non-empty string or null")
+            allowed = (
+                candidate_source_ids_by_segment.get(segment_id, frozenset())
+                if candidate_source_ids_by_segment is not None
+                else candidate_source_ids
+            )
+            if cited_source_id not in allowed:
+                # A forged id, a real id never offered, or a candidate offered
+                # only for another segment: never trusted, and never silently
+                # turned into a "no citation" answer.
+                raise ValueError("cited_source_id is not one of the candidate sources offered for this segment")
+
         enrichment_by_id[segment_id] = {
             "entities": [str(value)[:200] for value in entities if str(value).strip()],
             "factors": [str(value)[:200] for value in factors if str(value).strip()],
             "direction": direction,
             "confidence": confidence,
+            "cited_source_id": cited_source_id,
         }
 
     if seen_ids != set(by_id):
@@ -955,12 +1118,99 @@ def _validate_llm_batch_enrichment(
     return enrichment_by_id
 
 
+def _candidate_sources_for_batch(
+    batch_segments: list[dict[str, Any]], sources: list[dict[str, Any]] | None
+) -> list[dict[str, Any]]:
+    """T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-28):
+    the exact, narrow set of this run's own source_registry.json entries
+    offered to THIS batch's enrichment call -- every segment's own
+    claim+evidence text is checked via the same deterministic content
+    matcher (comqutor_alpha.source_provenance.match_evidence_to_source_
+    candidates) already used for the content-match fallback, and any
+    source it flags for ANY segment in this batch is offered to the WHOLE
+    batch (the LLM sees the same request either way; a segment-level
+    citation is still checked against this same set at validation time).
+    This is deliberately a narrow, batch-scoped subset of the full
+    registry -- never the whole run's registry -- so a citation's backend
+    validation can check "was this actually offered to this step", not
+    merely "does this id exist somewhere in the run".
+
+    Round 3 (2026-10-04): also offers a source the NORMALIZED numeric
+    matcher (``match_evidence_to_source_candidates_normalized``) flags for
+    any segment -- a reformatted number (thousands separators/M-billion-K
+    scale/display-precision rounding) deserves the SAME chance to be
+    offered to the extraction LLM as an exact-substring match does. An
+    ambiguous number (2+ distinct sources) contributes no candidate here
+    either, exactly like its single-candidate caller in
+    ``_annotate_source_link``.
+
+    T4 round 34 (D1 fix): the matching itself is per segment
+    (``_candidate_fragment_ids_by_segment``); this is the union. The request
+    states which segments each candidate was matched for, and a citation is
+    checked against its own segment's candidates only.
+    """
+    offered_fragment_ids = set().union(*_candidate_fragment_ids_by_segment(batch_segments, sources).values())
+    if not offered_fragment_ids:
+        return []
+    return [s for s in sources if isinstance(s, dict) and s.get("fragment_id") in offered_fragment_ids]
+
+
+def _candidate_fragment_ids_by_segment(
+    batch_segments: list[dict[str, Any]], sources: list[dict[str, Any]] | None
+) -> dict[str, set[str]]:
+    """For each segment_id of the batch, the fragment ids the deterministic
+    matchers flag for THAT segment's own claim+evidence text (exact and
+    normalized-numeric, as described in ``_candidate_sources_for_batch``).
+    A segment with no match maps to an empty set."""
+    by_segment: dict[str, set[str]] = {}
+    for segment in batch_segments:
+        offered: set[str] = set()
+        if sources:
+            offered.update(match_evidence_to_source_candidates(segment.get("evidence"), segment.get("claim"), sources))
+            offered.update(
+                match_evidence_to_source_candidates_normalized(
+                    segment.get("evidence"), segment.get("claim"), sources
+                )["candidates"]
+            )
+        by_segment.setdefault(segment["segment_id"], set()).update(offered)
+    return by_segment
+
+
+# AGENT-STAGE COVERAGE (T1 source-linking chain, COMQUTOR Alpha next-round
+# task, 2026-09-28): the real pipeline is
+#   fetch (tradingagents.dataflows.*, e.g. yfinance_news.py's
+#          _capture_news_source -- a side-channel registry write only, never
+#          changes what the caller prints into the report text)
+#   -> ORIGINAL research agent (news_analyst/bull_researcher/bear_researcher/
+#      etc. -- generates its own free-text report via its own LLM call;
+#      confirmed by direct read of e.g. tradingagents/agents/analysts/
+#      news_analyst.py's own prompt construction: it receives NO source_id/
+#      fragment_id/excerpt of its own -- its prompt is built exclusively
+#      from tool_names/current_date/instrument_context)
+#   -> EXTRACTION-stage enrichment Agent (`_llm_batch_enrichment`, below --
+#      a SEPARATE, LATER LLM call that segments the original agent's
+#      ALREADY-GENERATED raw_output text and is the ONLY call in this chain
+#      that receives `candidate_sources`/returns `cited_source_id`)
+#   -> persistence (`_build_records_from_segments`/`_annotate_source_link`).
+#
+# `candidate_sources`/`cited_source_id` therefore cover ONLY the extraction
+# stage -- this is an "抽取阶段引用闭环" (extraction-stage citation closure),
+# NOT an original-agent citation closure. The extraction Agent's after-the-
+# fact discovery of a content-matching candidate, or even its own
+# AGENT_CITED selection of an offered candidate, must never be described as
+# "the original research agent has already cited the source" -- the
+# original agent's own generation-time input still carries no source_id/
+# fragment_id at all. Threading source_id/fragment_id into the ORIGINAL
+# research agent's own prompt/tool-output (so IT can cite at generation
+# time, not just have its output matched afterward) remains unimplemented
+# and out of scope for this round.
 def _llm_batch_enrichment(
     llm_gateway: Any,
     *,
     ticker: str,
     agent: str,
     batch_segments: list[dict[str, Any]],
+    sources: list[dict[str, Any]] | None = None,
 ) -> dict[str, dict[str, Any]] | None:
     if llm_gateway is None or not batch_segments:
         return None
@@ -973,10 +1223,49 @@ def _llm_batch_enrichment(
         }
         for segment in batch_segments
     ]
-    request = {"ticker": ticker, "agent": agent, "segments": payload_segments}
+    # T1 source-linking chain: the real Agent input for this extraction
+    # step now carries this run's own already-captured source_id/
+    # fragment_id/excerpt for every candidate source relevant to this
+    # batch -- never the model's own invention, always a real, already-
+    # persisted registry entry (comqutor_alpha.source_provenance.
+    # public_source_fields, the same whitelist projection API/export use).
+    # T4 round 34 (D1 fix, input.v2): each candidate also lists segment_ids --
+    # the segments its excerpt was matched for, i.e. the only segments it may
+    # be cited for -- and the validator checks each citation against its own
+    # segment's candidates.
+    fragment_ids_by_segment = _candidate_fragment_ids_by_segment(batch_segments, sources)
+    candidate_sources = _candidate_sources_for_batch(batch_segments, sources)
+    request = {
+        "ticker": ticker,
+        "agent": agent,
+        "segments": payload_segments,
+        "candidate_sources": [
+            {
+                "source_id": s.get("source_id"),
+                "fragment_id": s.get("fragment_id"),
+                "excerpt": s.get("excerpt"),
+                "segment_ids": [
+                    segment["segment_id"]
+                    for segment in batch_segments
+                    if s.get("fragment_id") in fragment_ids_by_segment.get(segment["segment_id"], ())
+                ],
+            }
+            for s in candidate_sources
+        ],
+    }
+    candidate_source_ids_by_segment = {
+        segment_id: frozenset(
+            {s.get("source_id") for s in candidate_sources if s.get("fragment_id") in fragment_ids}
+            | {s.get("fragment_id") for s in candidate_sources if s.get("fragment_id") in fragment_ids}
+        )
+        - {None}
+        for segment_id, fragment_ids in fragment_ids_by_segment.items()
+    }
 
     def validator(payload):
-        return _validate_llm_batch_enrichment(payload, batch_segments)
+        return _validate_llm_batch_enrichment(
+            payload, batch_segments, candidate_source_ids_by_segment=candidate_source_ids_by_segment
+        )
 
     if getattr(llm_gateway, "semantic_runtime", None) is not None and callable(
         getattr(llm_gateway, "invoke_json_with_trace", None)
@@ -1008,7 +1297,222 @@ def _normalized_values(values: Any) -> list[str]:
         return []
     return list(dict.fromkeys(str(value) for value in values if str(value).strip()))
 
-def _build_records_from_segments(segments, raw_record, run_id, ticker, agent, raw_text, base_id, source_agent_output_id):
+SOURCE_LINK_METHOD_AGENT_CITED = "AGENT_CITED"
+# T1 follow-up, 2026-09-28: a literal [fragment_id: ...] marker (see
+# tradingagents.dataflows.yfinance_news._source_reference_marker) found
+# INSIDE the claim's own evidence/claim text -- proof the ORIGINAL research
+# agent's own free-text output preserved the real reference its own tool
+# message offered it, distinct from SOURCE_LINK_METHOD_AGENT_CITED (the
+# SEPARATE, LATER extraction-stage Agent's own structured citation).
+SOURCE_LINK_METHOD_ORIGINAL_AGENT_MARKER = "ORIGINAL_AGENT_MARKER_CITED"
+SOURCE_LINK_METHOD_CONTENT_MATCH_CANDIDATE = "CONTENT_MATCH_CANDIDATE"
+# Round 3 (2026-10-04): a SPECIFIC already-saved numeric field (not a
+# whole-excerpt substring) located via comqutor_alpha.source_provenance.
+# match_evidence_to_source_candidates_normalized -- handles thousands
+# separators/M-billion-K scale suffixes/display-precision rounding that
+# the whole-excerpt matcher above cannot. Always its own distinct method
+# name, never folded into SOURCE_LINK_METHOD_CONTENT_MATCH_CANDIDATE, so a
+# reader never confuses "the whole excerpt text overlapped" with "one
+# specific number, reformatted, was located."
+SOURCE_LINK_METHOD_NORMALIZED_FIELD_MATCH = "NORMALIZED_FIELD_MATCH_CANDIDATE"
+SOURCE_LINK_METHOD_NONE = "NONE"
+
+
+def _annotate_source_link(
+    record: dict[str, Any],
+    sources: list[dict[str, Any]] | None,
+    evidence_cutoff: str | None,
+    agent_cited_source_id: str | None = None,
+) -> None:
+    """T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-26,
+    extended 2026-09-28): attaches ``source_link_status``/
+    ``linked_source_id``/``source_link_method``/``content_support_status``/
+    ``content_support_method`` to ``record`` in place, real production
+    behavior (not a demo/tool script).
+
+    Three ways a candidate id can arise, checked in this PRIORITY order:
+
+      1. ``agent_cited_source_id`` -- an explicit citation the extraction-
+         stage Agent itself returned (see ``_llm_batch_enrichment``'s
+         ``cited_source_id``), ALREADY validated by
+         ``_validate_llm_batch_enrichment`` against exactly the
+         ``candidate_sources`` this batch's own request offered (never the
+         whole run's registry) -- an explicit reference, never a guess.
+      2. :func:`comqutor_alpha.source_provenance.extract_source_marker_from_text`
+         -- a literal ``[fragment_id: ...]`` marker found inside the
+         claim's OWN evidence/claim text, proving the ORIGINAL research
+         agent's own free-text output preserved the real reference its own
+         tool message offered it (see ``tradingagents.dataflows.
+         yfinance_news._source_reference_marker``) -- distinct from (1),
+         which is the SEPARATE, LATER extraction-stage Agent's own
+         structured citation. Checked only when (1) did not already
+         produce a valid link.
+      3. :func:`match_evidence_to_source_candidates` -- deterministic,
+         content-based matching with no explicit reference at all, only
+         text overlap. This is ONLY an auxiliary candidate method, used
+         solely when neither (1) nor (2) produced a valid link;
+         ``source_link_method`` always names which path produced the
+         result, so a caller never confuses an explicit reference with a
+         same-text coincidence.
+
+    Every path's candidate must still pass :func:`validate_source_reference`
+    (exists in THIS run's own registry, has locatable content, satisfies
+    the evidence cutoff) before ever being treated as ``SOURCE_LINK_VALID``
+    -- an explicit citation/marker is validated exactly like a content-
+    match candidate, never trusted merely for being explicit.
+
+    ``SOURCE_LINK_VALID`` is never, by itself, treated as content support:
+    a genuinely linked claim gets ``content_support_status =
+    SUPPORT_PENDING_REVIEW`` (this module can prove a claim's evidence text
+    traces to a real, in-scope source -- it cannot judge whether that
+    source's content actually backs the claim's assertion, an explicitly
+    separate semantic question this module never answers -- see
+    ``comqutor_alpha.source_provenance``'s own module docstring).
+    ``SUPPORT_NOT_APPLICABLE`` marks a claim with no valid link to evaluate
+    support against at all.
+    """
+    if not sources:
+        record["source_link_status"] = SOURCE_LINK_NOT_PROVIDED
+        record["linked_source_id"] = None
+        record["source_link_method"] = SOURCE_LINK_METHOD_NONE
+        record["content_support_status"] = SUPPORT_NOT_APPLICABLE
+        record["content_support_method"] = "NO_SOURCE_REGISTRY"
+        record["content_support_review"] = build_content_support_review(
+            SUPPORT_NOT_APPLICABLE, method=REVIEW_METHOD_UNREVIEWED, claim_id=record.get("claim_id")
+        )
+        return
+
+    result = None
+    method = SOURCE_LINK_METHOD_NONE
+    if agent_cited_source_id:
+        validated = validate_source_reference(agent_cited_source_id, sources=sources, evidence_cutoff=evidence_cutoff)
+        result = validated
+        method = SOURCE_LINK_METHOD_AGENT_CITED
+
+    if result is None or result["source_link_status"] != SOURCE_LINK_VALID:
+        marker_fragment_id = extract_source_marker_from_text(record.get("evidence"), sources) or (
+            extract_source_marker_from_text(record.get("claim"), sources)
+        )
+        if marker_fragment_id:
+            validated = validate_source_reference(marker_fragment_id, sources=sources, evidence_cutoff=evidence_cutoff)
+            if result is None or validated["source_link_status"] == SOURCE_LINK_VALID:
+                result = validated
+                method = SOURCE_LINK_METHOD_ORIGINAL_AGENT_MARKER
+
+    if result is None or result["source_link_status"] != SOURCE_LINK_VALID:
+        candidates = match_evidence_to_source_candidates(record.get("evidence"), record.get("claim"), sources)
+        for candidate in candidates:
+            validated = validate_source_reference(candidate, sources=sources, evidence_cutoff=evidence_cutoff)
+            if validated["source_link_status"] == SOURCE_LINK_VALID:
+                result = validated
+                method = SOURCE_LINK_METHOD_CONTENT_MATCH_CANDIDATE
+                break
+            if result is None:
+                result = validated
+                method = SOURCE_LINK_METHOD_CONTENT_MATCH_CANDIDATE
+
+    # Round 3 (2026-10-04), section 5: a SEPARATE, additive pass -- tried
+    # only when nothing above has already produced SOURCE_LINK_VALID --
+    # for a claim that reformats one specific already-saved NUMBER
+    # (thousands separators / M-billion-K scale / display-precision
+    # rounding) that the whole-excerpt matcher above cannot handle.
+    # Ambiguity (the same number genuinely present in 2+ distinct sources)
+    # is recorded, never guessed -- no candidate is accepted for it.
+    normalized_match = None
+    if result is None or result["source_link_status"] != SOURCE_LINK_VALID:
+        normalized_match = match_evidence_to_source_candidates_normalized(
+            record.get("evidence"), record.get("claim"), sources, instrument=record.get("ticker")
+        )
+        if normalized_match["ambiguous_numbers"]:
+            record["source_link_ambiguous_candidates"] = normalized_match["ambiguous_numbers"]
+        for candidate in normalized_match["candidates"]:
+            validated = validate_source_reference(candidate, sources=sources, evidence_cutoff=evidence_cutoff)
+            if validated["source_link_status"] == SOURCE_LINK_VALID:
+                result = validated
+                method = SOURCE_LINK_METHOD_NORMALIZED_FIELD_MATCH
+                break
+            if result is None:
+                result = validated
+                method = SOURCE_LINK_METHOD_NORMALIZED_FIELD_MATCH
+
+    if result is None:
+        result = validate_source_reference(None, sources=sources, evidence_cutoff=evidence_cutoff)
+        method = SOURCE_LINK_METHOD_NONE
+
+    record["source_link_status"] = result["source_link_status"]
+    record["linked_source_id"] = result["linked_source_id"]
+    record["source_link_method"] = method if result["source_link_status"] != SOURCE_LINK_NOT_PROVIDED else SOURCE_LINK_METHOD_NONE
+
+    # Round 3 (2026-10-04), section 3.7: "一个声明确需多个引用时...不得丢掉
+    # 除第一项外的来源". `linked_source_id` above stays exactly the single
+    # PRIMARY reference (unchanged, backward compatible with every existing
+    # reader). `linked_source_ids` is a NEW, additive, plural field -- every
+    # DISTINCT additional source_id this same claim/evidence text also
+    # carries a real, independently-validated reference to (another
+    # marker, or another normalized field match), primary one listed
+    # first. Legacy records/readers that only know `linked_source_id`
+    # continue to work unchanged; nothing here replaces or narrows that
+    # field.
+    if result["source_link_status"] == SOURCE_LINK_VALID:
+        extra_ids: list[str] = [result["linked_source_id"]]
+        for text_field in (record.get("evidence"), record.get("claim")):
+            for fragment_id in extract_all_source_markers_from_text(text_field, sources):
+                extra_validated = validate_source_reference(fragment_id, sources=sources, evidence_cutoff=evidence_cutoff)
+                extra_source_id = extra_validated.get("linked_source_id")
+                if extra_validated["source_link_status"] == SOURCE_LINK_VALID and extra_source_id not in extra_ids:
+                    extra_ids.append(extra_source_id)
+        if normalized_match is None:
+            normalized_match = match_evidence_to_source_candidates_normalized(
+                record.get("evidence"), record.get("claim"), sources, instrument=record.get("ticker")
+            )
+        for fragment_id in normalized_match["candidates"]:
+            extra_validated = validate_source_reference(fragment_id, sources=sources, evidence_cutoff=evidence_cutoff)
+            extra_source_id = extra_validated.get("linked_source_id")
+            if extra_validated["source_link_status"] == SOURCE_LINK_VALID and extra_source_id not in extra_ids:
+                extra_ids.append(extra_source_id)
+        if len(extra_ids) > 1:
+            record["linked_source_ids"] = extra_ids
+    if result["source_link_status"] == SOURCE_LINK_VALID:
+        record["content_support_status"] = SUPPORT_PENDING_REVIEW
+        if method == SOURCE_LINK_METHOD_AGENT_CITED:
+            review_method = REVIEW_METHOD_AGENT_CITED_UNVERIFIED_SUPPORT
+        elif method == SOURCE_LINK_METHOD_ORIGINAL_AGENT_MARKER:
+            review_method = REVIEW_METHOD_ORIGINAL_AGENT_CITED_UNVERIFIED_SUPPORT
+        else:
+            review_method = REVIEW_METHOD_UNVERIFIED_OFFLINE_CONTENT_MATCH
+        record["content_support_method"] = review_method
+        record["content_support_review"] = build_content_support_review(
+            SUPPORT_PENDING_REVIEW,
+            method=review_method,
+            claim_id=record.get("claim_id"),
+            linked_source_id=result.get("linked_source_id"),
+        )
+        # Automated eligibility round (2026-10-06): production cannot gate
+        # scoring on a human reviewer who may never click anything -- a
+        # real, deterministic, re-checkable automated verification (data
+        # fact / derived calculation, see ``verify_data_fact_or_
+        # derived_calculation``) upgrades the PENDING_REVIEW default set
+        # above to SUPPORTS when, and only when, it actually succeeds.
+        # Narrow and conservative by construction: a compound claim mixing
+        # a real number with unverifiable interpretation is left exactly as
+        # PENDING_REVIEW above, never upgraded.
+        automated = apply_automated_content_support_verification(record, sources=sources)
+        if automated is not None:
+            record["content_support_status"] = automated["content_support_status"]
+            record["content_support_method"] = automated["content_support_method"]
+            record["content_support_review"] = automated["content_support_review"]
+    else:
+        record["content_support_status"] = SUPPORT_NOT_APPLICABLE
+        record["content_support_method"] = "NOT_LINKED"
+        record["content_support_review"] = build_content_support_review(
+            SUPPORT_NOT_APPLICABLE, method=REVIEW_METHOD_UNREVIEWED, claim_id=record.get("claim_id")
+        )
+
+
+def _build_records_from_segments(
+    segments, raw_record, run_id, ticker, agent, raw_text, base_id, source_agent_output_id,
+    sources=None, evidence_cutoff=None,
+):
     """Build full structured records from one extraction path's segments.
 
     Every record is tagged with ``claim_quality``/``claim_quality_reason_codes``
@@ -1074,6 +1578,20 @@ def _build_records_from_segments(segments, raw_record, run_id, ticker, agent, ra
             "semantic_polarity": semantics.semantic_polarity,
             "extraction_method": segment.get("extraction_method", "deterministic_splitter"),
         }
+        _annotate_source_link(record, sources, evidence_cutoff, agent_cited_source_id=segment.get("cited_source_id"))
+        # Round 3 (2026-10-04), section 4: real production wiring -- every
+        # claim passes through the SAME limited derived-calculation
+        # verifier the offline diagnostic/tests use (never a test-only
+        # helper). Purely additive: a non-None verdict is stamped as
+        # `derived_fact_check`; it NEVER touches source_link_status,
+        # content_support_status, claim_quality, or any eligibility gate
+        # computed above/below it. A claim whose text does not match the
+        # one recognized percent-comparison shape gets no field at all
+        # (verify_percent_comparison_claim returns None) -- never a
+        # fabricated "not applicable" verdict for every other claim shape.
+        derived_check = verify_percent_comparison_claim(claim, sources)
+        if derived_check is not None:
+            record["derived_fact_check"] = derived_check
         if validate_structured_output(record):
             quality = classify_claim_quality(
                 claim,
@@ -1132,7 +1650,7 @@ def _tally_rejections(rejected_records, quality_audit):
 # every segment directly.
 def adapt_raw_agent_outputs(
     raw_record, run_id, ticker, *, llm_gateway=None, filter_audit=None, quality_audit=None,
-    canonical_relations_audit=None,
+    canonical_relations_audit=None, sources=None, evidence_cutoff=None,
 ):
     if not isinstance(raw_record, dict):
         return [safe_default_record(
@@ -1203,7 +1721,7 @@ def adapt_raw_agent_outputs(
             if quality_audit is not None:
                 quality_audit["llm_batch_count"] += 1
             enrichment = _llm_batch_enrichment(
-                llm_gateway, ticker=ticker, agent=agent, batch_segments=batch
+                llm_gateway, ticker=ticker, agent=agent, batch_segments=batch, sources=sources
             )
             if enrichment is not None:
                 enriched_batch = []
@@ -1215,9 +1733,16 @@ def adapt_raw_agent_outputs(
                     merged["direction"] = item["direction"]
                     merged["confidence"] = item["confidence"]
                     merged["extraction_method"] = "llm_strict_json"
+                    # T1 source-linking chain: the Agent's own validated
+                    # citation (already checked against this batch's own
+                    # offered candidate set by _validate_llm_batch_
+                    # enrichment) -- None when the Agent cited nothing, or
+                    # cited something outside the offered set.
+                    merged["cited_source_id"] = item["cited_source_id"]
                     enriched_batch.append(merged)
                 batch_records = _build_records_from_segments(
-                    enriched_batch, raw_record, run_id, ticker, agent, raw_text, base_id, source_agent_output_id
+                    enriched_batch, raw_record, run_id, ticker, agent, raw_text, base_id, source_agent_output_id,
+                    sources=sources, evidence_cutoff=evidence_cutoff,
                 )
             elif quality_audit is not None:
                 quality_audit["llm_batch_fallback_count"] += 1
@@ -1229,7 +1754,8 @@ def adapt_raw_agent_outputs(
                 merged["extraction_method"] = "deterministic_splitter"
                 det_batch.append(merged)
             batch_records = _build_records_from_segments(
-                det_batch, raw_record, run_id, ticker, agent, raw_text, base_id, source_agent_output_id
+                det_batch, raw_record, run_id, ticker, agent, raw_text, base_id, source_agent_output_id,
+                sources=sources, evidence_cutoff=evidence_cutoff,
             )
         all_records.extend(batch_records)
 
@@ -1333,8 +1859,11 @@ class _DeferredFinalizeGatewayProxy:
         self._real = real_gateway
         self.buffered_finalizations: list[tuple[Any, bool, str | None]] = []
 
-    def invoke_json_with_trace(self, task: str, payload: Mapping[str, Any], validator: Any) -> Any:
-        return self._real.invoke_json_with_trace(task, payload, validator)
+    def invoke_json_with_trace(self, task: str, payload: Mapping[str, Any], validator: Any, **kwargs: Any) -> Any:
+        # Transparent: any optional keyword the real gateway accepts (e.g.
+        # the out-of-band claim_ids= identity added in round 14) passes
+        # through untouched rather than being silently dropped or rejected.
+        return self._real.invoke_json_with_trace(task, payload, validator, **kwargs)
 
     def finalize_semantic_invocation(self, invocation: Any, *, accepted: bool, fallback_reason: str | None = None) -> None:
         self.buffered_finalizations.append((invocation, accepted, fallback_reason))
@@ -1360,15 +1889,26 @@ def _run_one_raw_agent_output(
     run_id: str,
     ticker: str,
     proxy: "_DeferredFinalizeGatewayProxy",
+    sources: list[dict[str, Any]] | None = None,
+    evidence_cutoff: str | None = None,
 ) -> tuple[int, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     """One concurrency-safe unit of work: adapt_raw_agent_outputs is called
     completely unmodified, with its own fresh, thread-local filter_audit/
     quality_audit/canonical_relations_audit accumulators (never shared with
     any other raw_record's own call) -- so no shared-list/dict mutation is
-    even possible during the concurrent phase."""
+    even possible during the concurrent phase. ``sources`` is this run's own
+    already-loaded, read-only source_registry.json sources list (or
+    ``None``) -- the same value for every raw_record, safe to share
+    unguarded across threads since it is never mutated here."""
     local_filter_audit: list[dict[str, Any]] = []
     local_quality_audit = _new_quality_audit()
     local_canonical_relations: list[dict[str, Any]] = []
+    agent_key = normalize_agent_name(
+        (raw_record.get("agent") or raw_record.get("tradingagents_agent"))
+        if isinstance(raw_record, dict)
+        else "unknown_agent"
+    )
+    scoped_sources = scope_sources_for_agent(agent_key, sources)
     adapted_records = adapt_raw_agent_outputs(
         raw_record,
         run_id,
@@ -1377,6 +1917,8 @@ def _run_one_raw_agent_output(
         filter_audit=local_filter_audit,
         quality_audit=local_quality_audit,
         canonical_relations_audit=local_canonical_relations,
+        sources=scoped_sources,
+        evidence_cutoff=evidence_cutoff,
     )
     return index, adapted_records, local_filter_audit, local_canonical_relations, local_quality_audit
 
@@ -1387,6 +1929,8 @@ def _adapt_run_outputs_concurrently(
     ticker: str,
     llm_gateway: Any,
     concurrency: int,
+    sources: list[dict[str, Any]] | None = None,
+    evidence_cutoff: str | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any], dict[str, dict[str, Any]]]:
     """John Requirement B, Phase B2 Slice 2B: bounded concurrency across
     independent raw agent outputs. Each raw_record's own call is fully
@@ -1412,7 +1956,10 @@ def _adapt_run_outputs_concurrently(
     proxies = [_DeferredFinalizeGatewayProxy(llm_gateway) for _ in raw_agent_outputs]
     with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="comqutor-structured-adapter") as executor:
         futures = [
-            executor.submit(_run_one_raw_agent_output, index, raw_record, run_id, ticker, proxies[index])
+            executor.submit(
+                _run_one_raw_agent_output, index, raw_record, run_id, ticker, proxies[index],
+                sources, evidence_cutoff,
+            )
             for index, raw_record in enumerate(raw_agent_outputs)
         ]
         completed = [future.result() for future in futures]
@@ -1486,8 +2033,45 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None, concurrency=None):
     ticker = str(raw_payload.get("ticker") or "unknown").upper()
     raw_agent_outputs = raw_payload.get("agent_outputs", []) or []
 
+    # T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-26;
+    # time-contract fix, round7 follow-up, 2026-10-06): best-effort load of
+    # this SAME run's own already-persisted source_registry.json (absent for
+    # a historical run, or a run with no real news tool calls -- honest
+    # empty list, never an error). The evidence-cutoff a linked source's own
+    # published_at must not be later than (look-ahead safety, re-asserted
+    # here independently of tradingagents.dataflows.yfinance_news's own
+    # fetch-time window filter) now prefers the real, tz-aware moment this
+    # run's own sources were actually fetched (``resolve_evidence_cutoff_at``
+    # -- see its own docstring) over the bare ``analysis_date`` calendar
+    # string, which round7 traced as the root cause of every one of a real
+    # run's SOURCE_LINK_TIME_INVALID false positives: a bare date parses to
+    # that date's own MIDNIGHT, incorrectly rejecting a same-day source
+    # fetched at any real time after 00:00:00. ``analysis_date`` remains the
+    # fallback, unchanged, when no source has a usable ``retrieved_at``.
+    source_registry = load_json_record_if_exists(run_id, "source_registry.json", output_root=output_root)
+    sources = source_registry.get("sources") if isinstance(source_registry, dict) else None
+    run_metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
+    analysis_date = run_metadata.get("analysis_date") if isinstance(run_metadata, dict) else None
+    evidence_cutoff, evidence_cutoff_basis = resolve_evidence_cutoff_at(analysis_date, sources)
+
     if concurrency is None:
         concurrency = resolve_structured_adapter_concurrency()
+
+    # 2026-10-06 (round 11 -> round 13): round 11 found a real defect here --
+    # Week2LLMGateway's request/response audit mode tracked at most one
+    # pending attempt via a single, Gateway-wide slot, and this function's
+    # own concurrent dispatch (multiple raw agent outputs onto a
+    # ThreadPoolExecutor, all sharing one llm_gateway) crashed the real run's
+    # whole structured_agent_outputs stage the moment two agents'
+    # claim_batch_enrichment calls overlapped. Round 11's own fix forced
+    # concurrency=1 whenever audit was on -- a deliberately labeled temporary
+    # compatibility shim. Round 13 replaced the Gateway's own single-slot
+    # design with real, independent per-attempt identity (contextvars.
+    # ContextVar, explicitly propagated across call_with_timeout's nested
+    # executor boundary -- see week2_llm.py's own _current_audit_attempt
+    # docstring), so concurrent audited dispatch is now genuinely safe. The
+    # forced-serial override is therefore REMOVED: ``concurrency`` keeps its
+    # real, original meaning in every case, audit-enabled or not.
 
     if llm_gateway is None or concurrency <= 1 or len(raw_agent_outputs) <= 1:
         records = []
@@ -1508,6 +2092,7 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None, concurrency=None):
             )
             call_audit = _new_quality_audit()
             filter_start = len(filter_audit)
+            scoped_sources = scope_sources_for_agent(agent_key, sources)
             adapted_records = adapt_raw_agent_outputs(
                 raw_record,
                 run_id,
@@ -1516,6 +2101,8 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None, concurrency=None):
                 filter_audit=filter_audit,
                 quality_audit=call_audit,
                 canonical_relations_audit=canonical_relations,
+                sources=scoped_sources,
+                evidence_cutoff=evidence_cutoff,
             )
             call_filtered = filter_audit[filter_start:]
 
@@ -1548,7 +2135,7 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None, concurrency=None):
                 records.append(record)
     else:
         records, filter_audit, canonical_relations, global_audit, per_agent = _adapt_run_outputs_concurrently(
-            raw_agent_outputs, run_id, ticker, llm_gateway, concurrency
+            raw_agent_outputs, run_id, ticker, llm_gateway, concurrency, sources, evidence_cutoff
         )
         for record in records:
             if record.get("adapter_warning"):
@@ -1639,6 +2226,38 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None, concurrency=None):
             }
         )
 
+    # Round 9 (2026-10-06): additive post-pass over the FULL, already-built
+    # records list -- mirrors alpha_mapper's own "map_structured_records
+    # then apply_llm_stance_upgrade" shape exactly (see evidence_stance_llm
+    # .apply_llm_stance_upgrade). A zero-cost no-op whenever llm_gateway is
+    # None (every existing caller's default, and Architecture Replay, which
+    # never passes one) -- ``records`` is returned unchanged. Never touches
+    # source_link_status or any field this function already set above;
+    # only ever upgrades content_support_status/method/review (and the
+    # additive content_support_llm_detail/content_support_llm_fallback_
+    # reason diagnostic fields) for a claim that is SOURCE_LINK_VALID and
+    # was not already resolved by the cheaper deterministic verifier inside
+    # _annotate_source_link above.
+    # 2026-10-06 (AMD Fresh Run production-wiring task): additive, opt-in
+    # per-run batch-size override -- unset (every existing caller) means
+    # the module's own BATCH_SIZE default, unchanged. A real function
+    # parameter read from its own env var at the point of use, never a
+    # module-global mutated after import (see content_support_llm.py's own
+    # apply_llm_content_support_verification docstring for why that
+    # approach silently fails).
+    _content_support_batch_size_raw = os.environ.get("COMQUTOR_WEEK2_CONTENT_SUPPORT_BATCH_SIZE")
+    _content_support_batch_size = (
+        int(_content_support_batch_size_raw) if _content_support_batch_size_raw else None
+    )
+    # 2026-10-08 (T3 closeout): a selected execution profile's batch size
+    # replaces the env override (week2_execution_profile.py).
+    _execution_profile = _selected_week2_execution_profile()
+    if _execution_profile is not None:
+        _content_support_batch_size = _execution_profile.content_support_batch_size
+    records, content_support_llm_stats = apply_llm_content_support_verification(
+        records, sources, llm_gateway=llm_gateway, batch_size=_content_support_batch_size
+    )
+
     canonical_relation_block_count = sum(
         1
         for raw_record in raw_agent_outputs
@@ -1698,6 +2317,17 @@ def adapt_run_outputs(run_dir, *, llm_gateway=None, concurrency=None):
             "canonical_relation_block_count": canonical_relation_block_count,
             "canonical_relations_validated_count": canonical_relations_validated_count,
             "canonical_relations_rejected_count": canonical_relations_rejected_count,
+            # Time-contract fix (round7 follow-up, 2026-10-06): the REAL
+            # evidence-cutoff moment actually used for every source-link
+            # time-validity check this adapter run performed, explicitly
+            # recorded (never left implicit) -- see
+            # ``source_provenance.resolve_evidence_cutoff_at``.
+            "evidence_cutoff_at": evidence_cutoff,
+            "evidence_cutoff_basis": evidence_cutoff_basis,
+            "analysis_date": analysis_date,
+            # Round 9 (2026-10-06): real LLM content-support verification
+            # run stats -- all zero/False when llm_gateway is None.
+            "content_support_llm": content_support_llm_stats.to_dict(),
         },
     }
 

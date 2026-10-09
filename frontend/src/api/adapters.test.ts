@@ -275,3 +275,57 @@ describe("adaptAlphaLibraryResponse -- GET /api/alpha-library (John Follow-Up Re
     expect(result.ok).toBe(false);
   });
 });
+
+
+describe("adaptCanonicalResearchResponse -- alpha classification completion (round 14)", () => {
+  const completion = {
+    total_claims: 975,
+    valid_select_count: 0,
+    valid_none_count: 2,
+    call_failure_count: 973,
+    not_executed_count: 0,
+    complete: false,
+  };
+
+  it("passes the backend's shared status and completion counts through verbatim", () => {
+    const result = adaptCanonicalResearchResponse(
+      validPayload({ alpha_classification_status: "incomplete", alpha_classification_completion: completion })
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.alpha_classification_status).toBe("incomplete");
+    expect(result.value.alpha_classification_completion).toEqual(completion);
+  });
+
+  it("accepts each of the four documented states", () => {
+    for (const status of [
+      "incomplete",
+      "complete_no_active",
+      "complete_active_no_dominant",
+      "complete_has_dominant",
+    ]) {
+      const result = adaptCanonicalResearchResponse(validPayload({ alpha_classification_status: status }));
+      expect(result.ok && result.value.alpha_classification_status).toBe(status);
+    }
+  });
+
+  it("maps an unknown status or an absent field to null, never a guessed state", () => {
+    const unknown = adaptCanonicalResearchResponse(validPayload({ alpha_classification_status: "mostly_done" }));
+    expect(unknown.ok && unknown.value.alpha_classification_status).toBeNull();
+    const absent = adaptCanonicalResearchResponse(validPayload());
+    expect(absent.ok && absent.value.alpha_classification_status).toBeNull();
+    expect(absent.ok && absent.value.alpha_classification_completion).toBeNull();
+  });
+
+  it("drops a half-valid completion record to null rather than rendering partial numbers", () => {
+    for (const bad of [
+      { ...completion, call_failure_count: -1 },
+      { ...completion, total_claims: 9.5 },
+      { ...completion, complete: "no" },
+      { ...completion, not_executed_count: undefined },
+    ]) {
+      const result = adaptCanonicalResearchResponse(validPayload({ alpha_classification_completion: bad }));
+      expect(result.ok && result.value.alpha_classification_completion).toBeNull();
+    }
+  });
+});

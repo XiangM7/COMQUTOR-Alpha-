@@ -1,0 +1,74 @@
+{
+ "package": "T4_final",
+ "1_manifest": {
+  "files_listed": 176,
+  "missing": [],
+  "mismatched": [],
+  "unlisted": [],
+  "ok": true
+ },
+ "2_references": {
+  "report_paths_checked": 73,
+  "missing_paths": [],
+  "readme_commands": 6,
+  "readme_problems": [],
+  "ok": true
+ },
+ "3_statistics": {
+  "exit_code": 0,
+  "summary": [
+   "figures: 61, failing: 0"
+  ],
+  "ok": true
+ },
+ "4_artifacts": {
+  "round31_zip_sha_matches": true,
+  "derived_execution_exports": {
+   "t4r32-replay-20261009T202841Z-12f19149": {
+    "members": 21,
+    "manifest_files": 20,
+    "byte_mismatch": [],
+    "stage_disclosure_in_zip": true,
+    "stage_disclosure_equals_run_dir": true
+   }
+  },
+  "demo_page_download_sha_equals_fresh2_export": true,
+  "ok": true
+ },
+ "5_secrets": {
+  "blobs_scanned": 555,
+  "hit_count": 0,
+  "hits": [],
+  "env_value_keys_checked": [
+   "ANTHROPIC_API_KEY",
+   "COMQUTOR_DATABASE_URL:password",
+   "COMQUTOR_TEST_DATABASE_URL:password",
+   "DEEPSEEK_API_KEY",
+   "POSTGRES_PASSWORD"
+  ],
+  "fixture_or_redacted_matches": {
+   "db_url_with_password:pass": 6,
+   "db_url_with_password:p": 9,
+   "api_key_sk:sk-testsecret0123456789abcdef": 3,
+   "db_url_with_password:fake": 24,
+   "db_url_with_password:***REDACTED***": 3
+  },
+  "ok": true
+ },
+ "6_identity": {
+  "tracked_diff_file_sha256": "6cdd51e345929a1936845a416dd8a38c6f00ea3d0293afa03282d002dc96857c",
+  "untracked_recomputed": "10ee75185ae8032bc9bdf304152a87c1d22db08120cdd546d31925277e21f0f6",
+  "equals_recorded_final_identity": true,
+  "verify_instance_ran_final_code": true,
+  "demo_instance_ran_final_code": true,
+  "tests_ran_on_final_code_unchanged": {
+   "new": true,
+   "replay": true,
+   "pg": true,
+   "affected": true,
+   "frontend": true
+  },
+  "ok": true
+ },
+ "all_ok": true
+}

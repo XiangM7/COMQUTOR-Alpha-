@@ -1,0 +1,1035 @@
+{
+  "schema_version": "alpha_dev_gold.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "status": "DEVELOPMENT_GOLD_FROZEN",
+  "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+  "system_predictions_seen_during_adjudication": false,
+  "sample_count": 100,
+  "provenance_summary": {
+    "original_development_samples": 85,
+    "round1_reserve_replacements": 12,
+    "round2_reserve_replacements": 3
+  },
+  "replacement_chain_reference": "docs/audit_artifacts/v0_2_alpha_dev_replacement_log.json",
+  "note": "No COMQUTOR Alpha prediction, mapper score, Provider result, Candidate 1/2 result, or system confidence is present anywhere in this document. Every label was assigned by an independent external LLM adjudication process that never saw system output.",
+  "samples": [
+    {
+      "final_development_slot": "gold-dev-001",
+      "source_sample_id": "nh-dev-001",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Bullish analyst sentiment and a price target state an outcome/opinion but no canonical Alpha mechanism or underlying driver.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-002",
+      "source_sample_id": "nh-dev-002",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A301",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly states accelerating revenue growth and an 85% YoY increase, directly engaging Revenue Expansion.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-003",
+      "source_sample_id": "nh-dev-003",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A301",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Record revenue is the most direct canonical mechanism in the mixed financial/technical statement; the valuation figures are not themselves framed as rich-valuation downside risk.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-004",
+      "source_sample_id": "nh-dev-004",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A Bollinger-band resistance level is a technical level and does not substantively engage any canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-005",
+      "source_sample_id": "nh-dev-005",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A strong operating margin is a profitability metric, not by itself a demand/revenue, AI, cycle, valuation-compression, macro, or narrative mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-006",
+      "source_sample_id": "nh-dev-006",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A304",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly argues that growth is insufficient to justify a 19x price-to-sales multiple, directly expressing rich-valuation downside risk.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-007",
+      "source_sample_id": "nh-dev-007",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A301",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim describes a specific expected $14B revenue contribution from a product, directly engaging a revenue-expansion mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-008",
+      "source_sample_id": "nh-dev-008",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "ROA is a profitability/efficiency metric and does not directly instantiate any canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-009",
+      "source_sample_id": "nh-dev-009",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A standalone forward-EPS figure is a bare metric without a revision, demand driver, or other canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-010",
+      "source_sample_id": "nh-dev-010",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Saying a generic fundamental bull case was not refuted gives no concrete driver or mechanism for any canonical Alpha.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-011",
+      "source_sample_id": "nh-dev-011",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "High switching costs between foundries describe competitive stickiness, which is not one of the canonical Alpha mechanisms.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-012",
+      "source_sample_id": "nh-dev-012",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Low probabilities of reaching revenue thresholds express skepticism about an outcome but do not positively instantiate a canonical Alpha thesis; no alternative canonical mechanism is asserted.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-013",
+      "source_sample_id": "nh-dev-013",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "RSI neutralization is a technical-momentum observation, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-014",
+      "source_sample_id": "nh-dev-014",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Earnings-quality distortion from investment gains is an accounting-quality issue not represented by the canonical Alpha taxonomy.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-015",
+      "source_sample_id": "nh-dev-015",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The statement calls AI strategy a growth driver but does not describe training/adoption-driven accelerator demand, inference demand, or AI-infrastructure buildout; the AI mention alone is insufficient.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-016",
+      "source_sample_id": "nh-dev-016",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "NVIDIA's accelerator-market dominance and CUDA moat describe competitive position, not an increase in AI demand, inference workload, or infrastructure buildout.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-017",
+      "source_sample_id": "nh-dev-017",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Hike/no-cut probabilities negate a rate-cut thesis but do not assert a different canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-018",
+      "source_sample_id": "nh-dev-018",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A competitor's one-day move used as a relative bearish read supplies no canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-019",
+      "source_sample_id": "nh-dev-019",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A101",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly describes a large long-horizon demand backdrop for data-center GPUs, directly engaging accelerator demand from the AI theme.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-020",
+      "source_sample_id": "nh-dev-020",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Losing streak, RSI/MACD, and EMA position are technical-market signals and do not directly engage a canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-021",
+      "source_sample_id": "nh-dev-021",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The statement rebuts a 'priced for perfection' framing but does not itself assert rich-valuation downside or another concrete canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-022",
+      "source_sample_id": "nh-dev-022",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Capex translating into FCF growth is a cash-flow/capital-efficiency claim; without AI/data-center infrastructure context or a revenue-demand mechanism it does not map directly to a canonical Alpha.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-023",
+      "source_sample_id": "nh-dev-023",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Calling a company important in the AI supply chain is a thematic description without a concrete training, inference, infrastructure, revenue, or other canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-024",
+      "source_sample_id": "nh-dev-024",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The statement describes a downside scenario in which AI-capex cuts lead to slower revenue growth; under the rubric this is a negation/invalidation path rather than a positive instance of a single canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-025",
+      "source_sample_id": "nh-dev-025",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A601",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Multiple explicitly bullish opinion pieces and a surge prediction are evidence of investor attention and narrative-driven bullish momentum.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-026",
+      "source_sample_id": "nh-dev-026",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A rising 200-day moving average is a technical trend signal and does not instantiate a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-027",
+      "source_sample_id": "nh-dev-027",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Low recession odds and high hike odds negate A501/A001-style theses but do not positively assert any canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-028",
+      "source_sample_id": "nh-dev-028",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A standalone MACD value is a technical indicator with no canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-029",
+      "source_sample_id": "nh-dev-029",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim says an optimistic scenario is being used to justify valuation but does not state that valuation is rich/high enough to create downside risk or otherwise instantiate A304.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-030",
+      "source_sample_id": "nh-dev-030",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A possible bullish shift based on moving averages is a technical-momentum signal; A601 requires narrative/attention-driven reflexive flows, not technical momentum alone.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-031",
+      "source_sample_id": "nh-dev-031",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A legal liability defense is outside the canonical Alpha taxonomy.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-032",
+      "source_sample_id": "nh-dev-032",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A faster HBM4 yield ramp and competitive positioning describe product execution; they do not directly establish a semiconductor-cycle upturn, revenue expansion, or another canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-033",
+      "source_sample_id": "nh-dev-035",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A large historical stock-price run near a 52-week high is a price outcome/technical momentum observation without a narrative-flow mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-034",
+      "source_sample_id": "nh-dev-037",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A301",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly reports 15% year-over-year revenue growth, directly engaging Revenue Expansion.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-035",
+      "source_sample_id": "nh-dev-038",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Stop/support coincidence and cascading selling describe technical execution/liquidity around a price level, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-036",
+      "source_sample_id": "nh-dev-039",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A601",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Positive news flow, StockTwits sentiment, and product-launch enthusiasm directly describe investor attention/sentiment supporting momentum.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-037",
+      "source_sample_id": "nh-dev-040",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A103",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim states that AI demand flows through foundry and advanced-packaging capacity, directly tying AI buildout to infrastructure/capacity demand.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-038",
+      "source_sample_id": "nh-dev-042",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "MACD/RSI signs of a bottom are technical indicators and do not directly instantiate a canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-039",
+      "source_sample_id": "nh-dev-043",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A bullish moving-average stack is a technical trend configuration, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-040",
+      "source_sample_id": "nh-dev-044",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A304",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly links elevated rates to downside for high-multiple growth stocks, directly engaging discount-rate-driven multiple-compression risk.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-041",
+      "source_sample_id": "nh-dev-045",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Book value as a price floor is a valuation reference but not the rich-multiple/downside mechanism defined by A304.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-042",
+      "source_sample_id": "nh-dev-046",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Capex spending without proven return is an investment-efficiency concern; it does not by itself establish AI-infrastructure demand or rich-multiple compression.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-043",
+      "source_sample_id": "nh-dev-047",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A generic bullish weekly-chart comment is a technical/sentiment outcome without an underlying canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-044",
+      "source_sample_id": "nh-dev-050",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Calling NVIDIA 'foundational infrastructure' of the AI economy is thematic rhetoric; it does not state a concrete infrastructure buildout, inference, or accelerator-demand mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-045",
+      "source_sample_id": "nh-dev-053",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A bullish brokerage recommendation states an opinion/outcome without the underlying canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-046",
+      "source_sample_id": "nh-dev-054",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Price above a 200-day moving average is a technical trend signal, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-047",
+      "source_sample_id": "nh-dev-056",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "No rate cuts negates A001, while 'earnings growth' is too generic here to establish A301's strong-demand/revenue-guidance/EPS-revision mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-048",
+      "source_sample_id": "nh-dev-057",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Saying a forward EPS estimate is not guaranteed is a caution about forecast uncertainty, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-049",
+      "source_sample_id": "nh-dev-059",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Calling something a constructive institutional thesis is generic sentiment and does not identify the mechanism behind it.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-050",
+      "source_sample_id": "nh-dev-060",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A301",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly connects a forward EPS estimate with strong earnings-growth expectations, which most directly engages the EPS/repricing side of Revenue Expansion.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-051",
+      "source_sample_id": "nh-dev-061",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A recommendation to tier position trimming is trade execution/risk management, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-052",
+      "source_sample_id": "nh-dev-062",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim adjudicates between breakout/trim execution choices using price levels; it does not state any canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-053",
+      "source_sample_id": "nh-dev-063",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A201",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Dependence on NAND flash average selling prices directly engages semiconductor-cycle pricing, a core Semiconductor Supercycle mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-054",
+      "source_sample_id": "nh-dev-064",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A pre-defined exposure reduction at specific price levels is execution/risk management, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-055",
+      "source_sample_id": "nh-dev-066",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A304",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly links a 27x earnings multiple to high discount-rate sensitivity, directly engaging multiple-compression risk.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-056",
+      "source_sample_id": "nh-dev-067",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A large year-to-year profit swing is evidence of cyclicality, but the text itself does not identify a chip-cycle inventory/pricing/demand mechanism required by A201.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-057",
+      "source_sample_id": "nh-dev-068",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A standalone set of historical financial figures does not itself state growth, demand, revision, or another canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-058",
+      "source_sample_id": "nh-dev-069",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A stock doubling from its low is a price-momentum outcome; A601 requires investor-attention/narrative-driven reflexive flows, which are not stated.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-059",
+      "source_sample_id": "nh-dev-070",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A negative MACD histogram is a technical indicator, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-060",
+      "source_sample_id": "nh-dev-071",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The phrase 'AI trade' is a thematic mention coupled with risk management, but no AI-demand, inference, infrastructure, or narrative-flow mechanism is stated.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-061",
+      "source_sample_id": "nh-dev-072",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Taiwan geopolitical tail risk is not represented by any canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-062",
+      "source_sample_id": "nh-dev-073",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A hypothetical conservative-guidance downside due to supply/export constraints is an invalidation/downside scenario rather than a direct positive instance of a canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-063",
+      "source_sample_id": "nh-dev-074",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "An 8% one-day rally is a price outcome without an underlying driver; the rubric explicitly treats outcome-only evidence as NONE.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-064",
+      "source_sample_id": "nh-dev-075",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A301",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly reports accelerating 24% year-over-year revenue growth, directly engaging Revenue Expansion.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-065",
+      "source_sample_id": "nh-dev-076",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Negative MACD statistics are technical signals and do not instantiate a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-066",
+      "source_sample_id": "nh-dev-077",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A declining 50-day moving average is a technical trend signal, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-067",
+      "source_sample_id": "nh-dev-078",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Strong FCF generation and low capex describe capital efficiency, not a demand/revenue, AI-infrastructure, cycle, valuation, macro, or narrative mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-068",
+      "source_sample_id": "nh-dev-079",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim shows an AI application producing a real-world commercial outcome, but it does not state inference-compute demand (A102), accelerator demand (A101), or the strong-demand/revenue-guidance mechanism of A301.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-069",
+      "source_sample_id": "nh-dev-081",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A generic capex increase without AI/data-center/power/networking/server context is insufficient to establish AI Infrastructure.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-070",
+      "source_sample_id": "nh-dev-082",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A probability of exceeding a revenue threshold is a forward metric but lacks the growth, guidance revision, or strong-demand context needed to substantively engage A301.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-071",
+      "source_sample_id": "nh-dev-083",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "ATR-based position sizing is trade risk management, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-072",
+      "source_sample_id": "nh-dev-085",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A person's negative real-time assessment and 'skin in the game' are sentiment/credibility statements without a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-073",
+      "source_sample_id": "nh-dev-086",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Elevated trading volume is a market-activity observation without the investor-attention/narrative mechanism required by A601.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-074",
+      "source_sample_id": "nh-dev-087",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Higher-for-longer/no-cut expectations negate a rate-cut cycle and raise discount rates, but without a rich/high-multiple downside claim they do not fully instantiate A304.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-075",
+      "source_sample_id": "nh-dev-088",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim is about technical bearish signals, a directionally agnostic 'coiled spring,' and a support/stop shelf; none is a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-076",
+      "source_sample_id": "nh-dev-089",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A standalone 50-day moving-average value is a technical metric with no canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-077",
+      "source_sample_id": "nh-dev-090",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim combines negative technical momentum with unspecified hyperscaler caution; without the missing substance of the Evercore thesis, no canonical Alpha mechanism is established.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-078",
+      "source_sample_id": "nh-dev-092",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Market capitalization size is a standalone market-data metric and does not instantiate a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-079",
+      "source_sample_id": "nh-dev-093",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A single historical earnings figure is a bare outcome and does not state growth, demand, revisions, or another canonical mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-080",
+      "source_sample_id": "nh-dev-094",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Price being far below a short-term EMA is a technical trend observation, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-081",
+      "source_sample_id": "nh-dev-095",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A301",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly refers to a revenue surge and demand-building, making Revenue Expansion the most direct canonical mechanism despite the separate inventory caution.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-082",
+      "source_sample_id": "nh-dev-096",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A601",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A group of stocks soaring specifically on AI tailwinds is a theme-driven cross-name momentum pattern, directly engaging narrative/reflexive momentum.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-083",
+      "source_sample_id": "nh-dev-097",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "MACD turning negative after a price correction is a technical timing observation, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-084",
+      "source_sample_id": "nh-dev-099",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "A601",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "An external earnings warning is described as pressuring the broader AI-linked trade and reinforcing institutional caution, a narrative/sentiment transmission mechanism across the theme.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-085",
+      "source_sample_id": "nh-dev-100",
+      "provenance": "ORIGINAL_DEVELOPMENT_SAMPLE",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The phrase 'peak-cycle pricing' indicates cyclicality, but the text alone does not identify the semiconductor/chip-cycle context required to assign A201 without relying on ticker inference.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION"
+    },
+    {
+      "final_development_slot": "gold-dev-086",
+      "source_sample_id": "nh-reserve-002",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The series reports gross-profit levels rising over time, but it does not state the strong-demand/revenue-guidance/EPS-revision mechanism required by A301 or any other canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-034"
+    },
+    {
+      "final_development_slot": "gold-dev-087",
+      "source_sample_id": "nh-reserve-003",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Cash and short-term investment balances are balance-sheet liquidity metrics, not the market-wide liquidity/risk-appetite mechanism of A003 and not another canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-036"
+    },
+    {
+      "final_development_slot": "gold-dev-088",
+      "source_sample_id": "nh-reserve-004",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "A304",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly argues that a 24x forward P/E is a premium to the market while earnings growth is flat, directly expressing rich-valuation downside risk.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-041"
+    },
+    {
+      "final_development_slot": "gold-dev-089",
+      "source_sample_id": "nh-reserve-005",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A historical total-assets series is a balance-sheet size metric and does not directly instantiate any canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-048"
+    },
+    {
+      "final_development_slot": "gold-dev-090",
+      "source_sample_id": "nh-reserve-006",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A 200-SMA breach and support-failure instruction are technical/risk-management signals, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-049"
+    },
+    {
+      "final_development_slot": "gold-dev-091",
+      "source_sample_id": "nh-reserve-007",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The statement says revenue is appearing but provides no demand, growth, guidance, EPS-revision, or repricing mechanism sufficient to instantiate A301.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-051"
+    },
+    {
+      "final_development_slot": "gold-dev-092",
+      "source_sample_id": "nh-reserve-008",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "A301",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly cites 372% revenue growth as the company-specific fundamental driver overwhelming macro headwinds, directly engaging Revenue Expansion.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-052"
+    },
+    {
+      "final_development_slot": "gold-dev-093",
+      "source_sample_id": "nh-reserve-009",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "A301",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Raised guidance is an explicit trigger signal for Revenue Expansion and directly instantiates A301.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-055"
+    },
+    {
+      "final_development_slot": "gold-dev-094",
+      "source_sample_id": "nh-reserve-010",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Short-term stabilization and a flattening 10 EMA are technical observations, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-058"
+    },
+    {
+      "final_development_slot": "gold-dev-095",
+      "source_sample_id": "nh-reserve-012",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A declining 50-day SMA being called lagging is a technical-indicator statement and does not engage a canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-080"
+    },
+    {
+      "final_development_slot": "gold-dev-096",
+      "source_sample_id": "nh-reserve-013",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The historical Palm Pilot comparison describes infrastructure investment with weak consumer adoption, but it does not state an AI buildout, inference, accelerator-demand, or other current canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-084"
+    },
+    {
+      "final_development_slot": "gold-dev-097",
+      "source_sample_id": "nh-reserve-014",
+      "provenance": "ROUND1_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A prior price low producing a durable bounce is a technical price-level observation, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-091"
+    },
+    {
+      "final_development_slot": "gold-dev-098",
+      "source_sample_id": "nh-reserve-016",
+      "provenance": "ROUND2_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The statement recommends tranche-based position sizing because of generic valuation and competitive risks, but it does not state the rich/high-multiple downside mechanism required by A304 or any other canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-033",
+      "replaces_excluded_round1_reserve": "nh-reserve-001"
+    },
+    {
+      "final_development_slot": "gold-dev-099",
+      "source_sample_id": "nh-reserve-017",
+      "provenance": "ROUND2_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A break below a price level toward the lower band and 200 SMA is a technical price-path observation, not a canonical Alpha mechanism.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-065",
+      "replaces_excluded_round1_reserve": "nh-reserve-011"
+    },
+    {
+      "final_development_slot": "gold-dev-100",
+      "source_sample_id": "nh-reserve-018",
+      "provenance": "ROUND2_RESERVE_REPLACEMENT",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "A near-term swing low followed by a rally is a technical price-action observation and does not substantively engage any canonical Alpha thesis.",
+      "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+      "replaces_excluded_original": "nh-dev-098",
+      "replaces_excluded_round1_reserve": "nh-reserve-015"
+    }
+  ]
+}

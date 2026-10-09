@@ -31,13 +31,23 @@ import {
   type AdaptResult,
 } from "./adapters";
 import { ApiError } from "./errors";
+import {
+  adaptEvidenceTraceItemResponse,
+  adaptKeyConclusionsResponse,
+  type EvidenceTraceItemResult,
+  type KeyConclusionsResult,
+} from "./evidenceTrace";
 import type {
   AgentOutputsResult,
   AlphaLibraryResponse,
   CanonicalResearchResult,
   ConflictsResult,
+  ContentSupportReviewLogResult,
+  ContentSupportReviewSubmissionOutcome,
+  ContentSupportReviewVerdict,
   HealthResponse,
   ReadinessResponse,
+  ReevaluationExecutionsResult,
   ReplayAllResult,
   ResearchSubmissionRequest,
   ResearchSubmissionResult,
@@ -237,6 +247,108 @@ export async function getAgentOutputs(
   return adaptOrThrow(adaptAgentOutputsResponse(body));
 }
 
+/** GET /api/research/{run_id}/evidence-trace?claim_id= -- one claim's source material, location, verification and
+ * scoring as four separate statuses (T1 closure). Read-only; built server-side from the run's own saved artifacts. */
+export async function getEvidenceTrace(
+  runId: string,
+  claimId: string,
+  options: RequestOptions = {}
+): Promise<EvidenceTraceItemResult> {
+  const body = await performRequest(
+    `/api/research/${encodeURIComponent(runId)}/evidence-trace`,
+    { signal: options.signal },
+    { claim_id: claimId }
+  );
+  if (looksLikeErrorEnvelope(body) && isFailureShape(body)) {
+    return body;
+  }
+  return adaptOrThrow(adaptEvidenceTraceItemResponse(body));
+}
+
+/** GET /api/research/{run_id}/evidence-trace?scope=key -- the final-decision claims with their four statuses. */
+export async function getKeyConclusions(
+  runId: string,
+  options: RequestOptions = {}
+): Promise<KeyConclusionsResult> {
+  const body = await performRequest(
+    `/api/research/${encodeURIComponent(runId)}/evidence-trace`,
+    { signal: options.signal },
+    { scope: "key" }
+  );
+  if (looksLikeErrorEnvelope(body) && isFailureShape(body)) {
+    return body;
+  }
+  return adaptOrThrow(adaptKeyConclusionsResponse(body));
+}
+
+/** POST /api/research/{run_id}/claims/{claim_id}/review -- minimal human
+ * content-support review entrypoint (T1 verified-support eligibility gate,
+ * 2026-09-28). Never fabricates a review: the server itself refuses an
+ * empty reviewer/rationale (400 REVIEWER_REQUIRED/RATIONALE_REQUIRED) --
+ * this function surfaces that failure body as-is rather than throwing, so
+ * the caller can render it inline next to the form instead of a generic
+ * error boundary. History protection: this NEVER mutates the original
+ * run's own data -- it appends an independent review record and (by
+ * default) triggers a NEW execution_id; see the response's own
+ * `reevaluation` field. */
+export async function submitContentSupportReview(
+  runId: string,
+  claimId: string,
+  request: { status: ContentSupportReviewVerdict; reviewer: string; rationale: string; trigger_reevaluation?: boolean },
+  options: RequestOptions = {}
+): Promise<ContentSupportReviewSubmissionOutcome> {
+  const body = await performRequest(
+    `/api/research/${encodeURIComponent(runId)}/claims/${encodeURIComponent(claimId)}/review`,
+    {
+      method: "POST",
+      signal: options.signal,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    }
+  );
+  if (!body || typeof body !== "object" || !("status" in body)) {
+    throw ApiError.contractMismatch();
+  }
+  return body as ContentSupportReviewSubmissionOutcome;
+}
+
+/** GET /api/research/{run_id}/content-support-reviews -- the full,
+ * append-only review log for this run (optionally filtered to one claim),
+ * in submission order. Never an error for "nothing reviewed yet" -- an
+ * empty list. */
+export async function getContentSupportReviews(
+  runId: string,
+  params: { claimId?: string } = {},
+  options: RequestOptions = {}
+): Promise<ContentSupportReviewLogResult> {
+  const body = await performRequest(
+    `/api/research/${encodeURIComponent(runId)}/content-support-reviews`,
+    { signal: options.signal },
+    { claim_id: params.claimId }
+  );
+  if (!body || typeof body !== "object" || !("status" in body)) {
+    throw ApiError.contractMismatch();
+  }
+  return body as ContentSupportReviewLogResult;
+}
+
+/** GET /api/research/{run_id}/reevaluations -- every re-evaluation
+ * execution ever triggered for this run, oldest first. Each `execution_id`
+ * is a normal, complete run_id, readable through every existing GET route
+ * (e.g. link to `/runs/{execution_id}/research`). */
+export async function getReevaluationExecutions(
+  runId: string,
+  options: RequestOptions = {}
+): Promise<ReevaluationExecutionsResult> {
+  const body = await performRequest(`/api/research/${encodeURIComponent(runId)}/reevaluations`, {
+    signal: options.signal,
+  });
+  if (!body || typeof body !== "object" || !("status" in body)) {
+    throw ApiError.contractMismatch();
+  }
+  return body as ReevaluationExecutionsResult;
+}
+
 export async function getResearchHistory(
   params: { limit?: number; cursor?: string; ticker?: string; status?: string } = {},
   options: RequestOptions = {}
@@ -255,6 +367,79 @@ export async function getResearchHistory(
     return body;
   }
   return adaptOrThrow(adaptRunHistoryResponse(body));
+}
+
+/** Suggested filename embedded in the server's own Content-Disposition
+ * header (e.g. `attachment; filename="NVDA_ded99ecd_research_export.zip"`).
+ * Falls back to a safe generic name only if the header is ever missing or
+ * unparseable -- never blocks the download on it. */
+function filenameFromContentDisposition(header: string | null, fallback: string): string {
+  if (!header) return fallback;
+  const match = /filename="?([^";]+)"?/i.exec(header);
+  return match?.[1] ?? fallback;
+}
+
+/** GET /api/research/{run_id}/export -- a ZIP bundle of this run's already-
+ * persisted artifact set (John MVP Gap Closure, Gap B: Result Export).
+ * Never recomputes research and never calls a Provider server-side; this
+ * is a plain, read-only file download. Distinct from the QA-only
+ * unclassified-findings download (`/artifacts/unclassified_findings.json`)
+ * -- this is the main, user-facing research export. Throws ApiError on any
+ * failure (missing run, run not yet finalized, network failure) so the
+ * caller can render a visible failure state rather than appearing to
+ * succeed. */
+export async function exportResearchRun(
+  runId: string,
+  options: RequestOptions = {}
+): Promise<{ blob: Blob; filename: string }> {
+  let response: Response;
+  try {
+    response = await fetch(buildUrl(`/api/research/${encodeURIComponent(runId)}/export`), {
+      signal: options.signal,
+      headers: { Accept: "application/zip, application/json" },
+    });
+  } catch (cause) {
+    if (cause instanceof DOMException && cause.name === "AbortError") {
+      throw ApiError.aborted();
+    }
+    throw ApiError.network();
+  }
+
+  if (!response.ok) {
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      try {
+        const body = await response.json();
+        if (looksLikeErrorEnvelope(body)) {
+          throw ApiError.http(
+            response.status,
+            body.error_code ?? null,
+            body.message ?? `Export failed with status ${response.status}.`
+          );
+        }
+      } catch (cause) {
+        if (cause instanceof ApiError) throw cause;
+        // fall through to the generic error below
+      }
+    }
+    throw ApiError.http(response.status, null, `Export failed with status ${response.status}.`);
+  }
+
+  let blob: Blob;
+  try {
+    blob = await response.blob();
+  } catch {
+    throw ApiError.invalidResponse("The exported research package could not be read.");
+  }
+  if (blob.size === 0) {
+    throw ApiError.invalidResponse("The exported research package was empty.");
+  }
+
+  const filename = filenameFromContentDisposition(
+    response.headers.get("content-disposition"),
+    `${runId}_research_export.zip`
+  );
+  return { blob, filename };
 }
 
 export async function replayAllSavedOutputs(options: RequestOptions = {}): Promise<ReplayAllResult> {

@@ -1,0 +1,24 @@
+{
+  "schema_version": "v0.2.alpha_validation_leakage_audit.v1",
+  "scope": "No new validation samples were selected in this task -- this documents the EXCLUSION methodology and the current known-touched claim_id set that any future new-holdout sampling must exclude, per Section 7's own request.",
+  "known_touched_claim_id_counts": {
+    "holdout1": 100,
+    "holdout2": 141,
+    "holdout3": 152,
+    "holdout4": 200,
+    "holdout5": 200,
+    "old50": 45,
+    "total_union_deduplicated": 838
+  },
+  "pairwise_overlap_confirmed_zero": "All five holdouts + old-50 confirmed pairwise non-overlapping by claim_id, consistent with each holdout's own documented exclusion-of-prior-sets construction discipline.",
+  "leakage_checks_to_apply_to_any_future_new_holdout_sample": [
+    "duplicate sample_id (within the new set itself)",
+    "exact claim_id duplicate against the union of H1-H5 + old-50 claim_ids (recorded above)",
+    "exact-text duplicate (claim+evidence string match) against H1-H5 + old-50",
+    "normalized-text duplicate (via the repository's existing normalize_claim_for_dedupe utility) against H1-H5 + old-50, per H2/H4's own established practice",
+    "overlap with any literal example sentence used in the alpha_classifier/alpha_classifier_batch prompt text (none currently embeds a holdout sentence -- confirmed by direct prompt-text inspection; only the generic, non-holdout 'A101 vs A103' illustrative phrasing is used)",
+    "overlap with any hardcoded test fixture claim/evidence string (tests/test_alpha_mapper*.py, tests/test_ai_alpha_mapper_discrimination.py, tests/test_week2_llm*.py)",
+    "overlap with any sample_id or claim referenced in v0_2_day4_alpha_holdout_failure_analysis.json, v0_2_day4c_candidate1_regression_analysis.json, or v0_2_alpha_prompt_candidate2.json (Candidate 1/2 design artifacts)"
+  ],
+  "exclusions_this_task": "None -- no new sample was proposed or selected in this task, so no exclusion decision was made. This audit exists to hand the exact exclusion set and checklist to whichever future task performs Section 5/6's actual sampling."
+}

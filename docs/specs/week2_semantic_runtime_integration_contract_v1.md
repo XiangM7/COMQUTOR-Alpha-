@@ -54,7 +54,7 @@ The metadata-only versions are:
 
 | Gateway task | Semantic task | Prompt version |
 |---|---|---|
-| `claim_batch_enrichment` | `structured_adapter` | `week2.claim_batch_enrichment.v1` |
+| `claim_batch_enrichment` | `structured_adapter` | `week2.claim_batch_enrichment.v2` (2026-10-09, asks for `cited_source_id`; v1 retired, kept for replay identity) |
 | `alpha_classifier` | `alpha_classifier` | `week2.alpha_classifier.v1` |
 | `structure_extractor` | `structure_extractor` | `week2.structure_extractor.v1` |
 

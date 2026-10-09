@@ -1,0 +1,11 @@
+# read-only GET checks of the running 8002 backend and 5177 frontend, 2026-10-09T21:58:40Z
+$ curl -s http://127.0.0.1:8002/ready
+{"status":"ready","database":"ready","job_manager":"ready","real_execution":"configured","real_execution_reason":null,"live_semantic_pipeline":"ready","live_semantic_pipeline_reason":null,"profile":{"profile_id":"comqutor_deepseek_default_v1","profile_display_name":"DeepSeek Default Research","provider":"deepseek","quick_model":"deepseek-v4-flash","deep_model":"deepseek-v4-flash","thinking":"disabled","max_debate_rounds":1,"max_risk_discuss_rounds":1},"database_backend":{"dialect":"postgresql","database":"comqutor_alpha_t4_test","reason":null},"week2_semantic":{"enabled":true,"execution_profile":"t3_verified_20261008","profile_error":null,"model":"deepseek-v4-flash","max_calls":1800,"request_response_audit":true},"code_identity":{"status":"known","git_head":"7a9aefa5c7b5c820515447c6289aeef80eac9bdc","uncommitted_changes":true,"tracked_diff_sha256":"1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363","untracked_runtime_source_sha256":"38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad","computed_at":"2026-10-09T00:47:09.822357+00:00"}}
+$ curl -s 'http://127.0.0.1:8002/api/research?limit=10'  (statuses only)
+[('12591384-0b26-470d-a99d-a49c00be440b', 'completed'), ('fa642639-8d93-4f9a-9de1-2c4d789eade8', 'partial'), ('t4-simulated-interrupted-20261008', 'failed'), ('t4-simulated-failure-20261008', 'completed'), ('t4-frozen-nvda-034a0a60-20261008', 'completed'), ('dependency-20261008T213350Z-89497ab9', 'completed'), ('dependency-20261008T213330Z-d6f60d8d', 'partial')]
+$ curl -s http://127.0.0.1:8002/api/research/12591384-0b26-470d-a99d-a49c00be440b  (has stage_disclosure?)
+status completed | stage_disclosure key present: False
+$ curl -s -o /dev/null -w '%{http_code} %{size_download}' http://127.0.0.1:5177/src/components/StageDisclosurePanel.tsx
+200 12666
+$ curl -s http://127.0.0.1:5177/src/api/adapters.ts | grep -c stage_disclosure
+1

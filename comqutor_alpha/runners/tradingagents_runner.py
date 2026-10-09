@@ -23,6 +23,7 @@ HTTP responses, run history, and the web UI keep saying ``sentiment``, and
 from __future__ import annotations
 
 import contextlib
+import json
 import logging
 import time
 from collections.abc import Mapping
@@ -32,7 +33,17 @@ from comqutor_alpha.research_progress import (
     PUBLIC_ANALYST_ORDER,
     normalize_public_analysts,
 )
-from comqutor_alpha.runners.diagnostics import TradingAgentsDiagnosticCallback
+from comqutor_alpha.run_provider_stop import RunProviderStopped, run_provider_stop
+from comqutor_alpha.runners.diagnostics import (
+    TradingAgentsDiagnosticCallback,
+    TradingAgentsUsageStatsCallback,
+    summarize_usage_records,
+)
+from comqutor_alpha.runners.request_budget import (
+    RequestBudgetGuard,
+    ResearchAgentBudgetExceeded,
+    wrap_chat_model_with_budget_guard,
+)
 from comqutor_alpha.storage.file_store import resolve_output_root
 
 logger = logging.getLogger(__name__)
@@ -162,6 +173,7 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
         from comqutor_alpha.adapters.tradingagents_output_writer import (
             save_comqutor_run_outputs,
         )
+        from tradingagents.dataflows.source_capture import source_capture_scope
         from tradingagents.graph.trading_graph import TradingAgentsGraph
     except Exception as exc:
         raise RuntimeError(f"Unable to import TradingAgents graph entrypoint: {exc}") from exc
@@ -173,7 +185,11 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
         comqutor_structure_output_contract_scope,
     )
 
-    with comqutor_structure_output_contract_scope():
+    # John MVP Final Gap Closure -- Structured External Source Traceability:
+    # scoped around the exact same propagate() call, nothing else -- see
+    # tradingagents.dataflows.source_capture's own docstring for why this
+    # can never change graph.propagate()'s return value.
+    with comqutor_structure_output_contract_scope(), source_capture_scope() as captured_sources:
         final_state, _processed_signal = graph.propagate(
             str(ticker),
             str(analysis_date),
@@ -186,6 +202,7 @@ def run_original_tradingagents_research(payload, output_root="outputs/runs"):
         selected_analysts=public_analysts,
         analysis_date=analysis_date,
         output_root=Path(output_root),
+        captured_sources=captured_sources,
     )
     return run_dir
 
@@ -248,6 +265,7 @@ def _relocate_run_outputs(temp_run_dir, target_run_id, output_root):
     only identity fields are rewritten."""
     from comqutor_alpha.storage.file_store import (
         load_json_record,
+        load_json_record_if_exists,
         run_dir_for,
         save_json_record,
         validate_run_id_for_path,
@@ -279,6 +297,22 @@ def _relocate_run_outputs(temp_run_dir, target_run_id, output_root):
         if isinstance(agent_output_id, str) and agent_output_id.startswith(old_prefix):
             record["agent_output_id"] = new_prefix + agent_output_id[len(old_prefix):]
     save_json_record(safe_target, "raw_agent_outputs.json", raw_payload, output_root=output_root)
+
+    # John MVP Final Gap Closure -- Structured External Source
+    # Traceability: source_registry.json (when a run actually captured any
+    # genuine sources) is written by the same pre-relocation
+    # save_comqutor_run_outputs call as metadata.json/raw_agent_outputs.json
+    # above, so it carries the same stale temp run_id unless rewritten here
+    # too. Optional artifact -- a run with no captured sources never wrote
+    # one, so this is a no-op for it, never an error. load_json_record_if_exists
+    # returns {} (falsy) rather than None when the file is absent -- `if
+    # registry:` (not `isinstance(registry, dict)`, which {} also satisfies)
+    # is required to avoid writing a bogus {"run_id": ...}-only file here.
+    registry = load_json_record_if_exists(safe_target, "source_registry.json", output_root=output_root)
+    if registry:
+        registry["run_id"] = safe_target
+        save_json_record(safe_target, "source_registry.json", registry, output_root=output_root)
+
     return target_dir
 
 ## Streaming Research
@@ -322,6 +356,10 @@ def run_streaming_tradingagents_research(
         payload.get("selected_analysts") or list(PUBLIC_ANALYST_ORDER)
     )
     asset_type = str(_require_payload_value(payload, "asset_type"))
+    # Read early for the usage-stats callback's own correlation field --
+    # pure dict read, no effect on the relocation logic near the end of
+    # this function which still independently re-reads payload["run_id"].
+    run_id_for_stats = payload.get("run_id") or f"{ticker}:{analysis_date}"
 
     try:
         from comqutor_alpha.adapters.tradingagents_output_writer import (
@@ -341,12 +379,61 @@ def run_streaming_tradingagents_research(
         "tradingagents_diagnostic stage=GRAPH_CONSTRUCTION_START run=%s:%s elapsed=0.0s",
         ticker, analysis_date,
     )
-    graph = (graph_factory or _default_streaming_graph_factory)(internal_analysts, config)
+
+    # Real, enforced Research Agent request-count cap (2026-09-30, fifth
+    # follow-up round) -- opt-in via payload["research_agent_max_actual_requests"]
+    # so every existing caller/test that never sets this key is completely
+    # unaffected. CRITICAL, empirically-confirmed prerequisite: the
+    # underlying chat client's OWN max_retries must be forced to 0 BEFORE
+    # construction, never patched afterward -- a real transport-level test
+    # (see tests/test_request_budget.py's transport-boundary suite) proved
+    # that mutating an already-constructed ChatOpenAI's .max_retries field
+    # does NOT change its real retry behavior (the underlying openai SDK
+    # client is already built with the original value baked in), and that
+    # the SDK's own default max_retries causes 3 real transport calls for
+    # what LangChain's own .invoke() sees as one -- invisible to any
+    # wrapper sitting above it. Forcing max_retries=0 here, before
+    # TradingAgentsGraph ever constructs the real client, is what makes
+    # this wrapper's own retry loop (max_retries=research_agent_max_retries
+    # below) the ONE AND ONLY place a retry happens, with full visibility.
+    # TRADINGAGENTS_MAX_RETRIES (an operator's own config value) is
+    # deliberately overridden here, never silently combined with the
+    # guard's own retry count -- avoiding exactly the "hidden or duplicate
+    # retry" failure mode this round's own task explicitly warned about.
+    research_agent_max_actual_requests = payload.get("research_agent_max_actual_requests")
+    graph_construction_config = config
+    if research_agent_max_actual_requests is not None:
+        graph_construction_config = {**config, "max_retries": 0}
+
+    graph = (graph_factory or _default_streaming_graph_factory)(internal_analysts, graph_construction_config)
     graph.ticker = str(ticker)
     logger.info(
         "tradingagents_diagnostic stage=GRAPH_CONSTRUCTION_END run=%s:%s elapsed=%.3fs",
         ticker, analysis_date, time.monotonic() - _setup_start,
     )
+
+    # Both LLM instances TradingAgentsGraph already constructed (with their
+    # own underlying client's max_retries forced to 0 above) are wrapped IN
+    # PLACE (see comqutor_alpha.runners.request_budget's own docstring for
+    # why a callback cannot do this -- confirmed empirically that a
+    # callback exception here would be swallowed and the real call would
+    # proceed anyway). deep_thinking_llm/quick_thinking_llm share ONE
+    # guard, since the budget is a total across the whole run, not per-model.
+    research_agent_budget_guard: RequestBudgetGuard | None = None
+    # 2026-10-08 (T4 round 28): the run's provider-refusal stop, shared with this run's Week 2 gateway (keyed by the
+    # claimed run_id); checked by the guard before every request.
+    provider_stop = run_provider_stop(payload["run_id"]) if payload.get("run_id") else None
+    if research_agent_max_actual_requests is not None:
+        research_agent_budget_guard = RequestBudgetGuard(
+            int(research_agent_max_actual_requests), provider_stop=provider_stop
+        )
+        research_agent_max_retries = int(payload.get("research_agent_max_retries") or 0)
+        for llm_attr in ("deep_thinking_llm", "quick_thinking_llm"):
+            llm = getattr(graph, llm_attr, None)
+            if llm is not None:
+                wrap_chat_model_with_budget_guard(
+                    llm, research_agent_budget_guard, max_retries=research_agent_max_retries
+                )
 
     resolve_pending = getattr(graph, "_resolve_pending_entries", None)
     if callable(resolve_pending):
@@ -416,9 +503,17 @@ def run_streaming_tradingagents_research(
         diagnostic_callback = TradingAgentsDiagnosticCallback(
             run_label=f"{ticker}:{analysis_date}"
         )
+        # T4 request-level statistics offline prep (this round): a second,
+        # additive callback alongside the diagnostic one above -- same real
+        # call boundary, never replacing it. Records are flushed to
+        # tradingagents_llm_calls.jsonl in the final run directory after
+        # save_comqutor_run_outputs below, once that directory is known.
+        usage_stats_callback = TradingAgentsUsageStatsCallback(
+            run_id=run_id_for_stats, agent_label=f"{ticker}:{analysis_date}"
+        )
         stream_args = graph.propagator.get_graph_args()
-        stream_args.setdefault("config", {}).setdefault("callbacks", []).append(
-            diagnostic_callback
+        stream_args.setdefault("config", {}).setdefault("callbacks", []).extend(
+            [diagnostic_callback, usage_stats_callback]
         )
         if checkpoint_enabled:
             stream_args.setdefault("config", {}).setdefault("configurable", {})[
@@ -434,16 +529,106 @@ def run_streaming_tradingagents_research(
             comqutor_structure_output_contract_scope,
         )
 
+        from tradingagents.dataflows.source_capture import source_capture_scope
+
         final_state: dict = {}
         reached: set[str] = set()
         stream_start = time.monotonic()
         chunk_count = 0
+        captured_sources: list = []
         logger.info(
             "tradingagents_diagnostic stage=STREAM_LOOP_START run=%s:%s elapsed=0.0s",
             ticker, analysis_date,
         )
+
+        def _partial_save_on_stop(exc: BaseException) -> None:
+            """Best-effort partial save when the run is stopped -- by the research-agent request budget or (T4
+            round 28) by a provider refusal (HTTP 401/403/429): whatever real chunks arrived before the stop are
+            still real, already-computed research output -- never discarded just because the run didn't reach its
+            own natural end -- and so are the already-collected usage records of the requests that were sent. A
+            failure while saving must never mask the original stop."""
+            stop_trigger = provider_stop.triggered if provider_stop is not None else None
+            stopped_reason = (
+                "RESEARCH_AGENT_REQUEST_BUDGET_EXCEEDED"
+                if isinstance(exc, ResearchAgentBudgetExceeded)
+                else "PROVIDER_REFUSAL_RUN_STOPPED"
+            )
+            logger.error(
+                "tradingagents_diagnostic stage=STREAM_LOOP_%s "
+                "run=%s:%s elapsed=%.3fs chunks_received=%d actual_requests_made=%s "
+                "max_actual_requests=%s reason=%s",
+                stopped_reason, ticker, analysis_date, time.monotonic() - stream_start, chunk_count,
+                research_agent_budget_guard.actual_requests_made if research_agent_budget_guard else None,
+                research_agent_budget_guard.max_actual_requests if research_agent_budget_guard else None,
+                str(exc),
+            )
+            partial_run_dir = None
+            if final_state:
+                try:
+                    resolved_output_root = resolve_output_root(output_root)
+                    partial_run_dir = save_comqutor_run_outputs(
+                        final_state=final_state,
+                        ticker=ticker,
+                        config=config,
+                        selected_analysts=public_analysts,
+                        analysis_date=analysis_date,
+                        output_root=resolved_output_root,
+                        captured_sources=captured_sources,
+                    )
+                    # Same claimed-run_id relocation the normal completion
+                    # path applies below -- a partial save is discoverable by
+                    # its own real run_id, not a throwaway temp directory.
+                    claimed_run_id = payload.get("run_id")
+                    if claimed_run_id:
+                        partial_run_dir = _relocate_run_outputs(
+                            partial_run_dir, claimed_run_id, resolved_output_root
+                        )
+                    metadata_path = Path(partial_run_dir) / "metadata.json"
+                    if metadata_path.exists():
+                        metadata = json.loads(metadata_path.read_text())
+                        metadata["stopped_reason"] = stopped_reason
+                        metadata["stopped_detail"] = str(exc)
+                        if stop_trigger is not None:
+                            metadata["provider_stop"] = stop_trigger
+                        metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True))
+                    logger.error(
+                        "tradingagents_diagnostic stage=PARTIAL_SAVE_ON_%s "
+                        "run=%s:%s partial_run_dir=%s",
+                        stopped_reason, ticker, analysis_date, partial_run_dir,
+                    )
+                except Exception:
+                    partial_run_dir = None
+                    logger.exception(
+                        "tradingagents_diagnostic stage=PARTIAL_SAVE_ON_STOP_FAILED "
+                        "run=%s:%s -- the original stop is unaffected",
+                        ticker, analysis_date,
+                    )
+            # Provider stop only (a budget stop keeps its earlier behavior exactly): the stop record and the usage
+            # records of the requests that were sent are kept even when no agent output could be saved -- then in the
+            # claimed run's own directory.
+            if stop_trigger is None:
+                return
+            try:
+                target_dir = Path(partial_run_dir) if partial_run_dir else None
+                if target_dir is None and payload.get("run_id"):
+                    target_dir = Path(resolve_output_root(output_root)) / str(payload["run_id"])
+                if target_dir is not None:
+                    target_dir.mkdir(parents=True, exist_ok=True)
+                    provider_stop.attach_artifact_dir(target_dir)
+                    with (target_dir / "tradingagents_llm_calls.jsonl").open("w", encoding="utf-8") as handle:
+                        for record in usage_stats_callback.records:
+                            handle.write(json.dumps(record, sort_keys=True) + "\n")
+            except Exception:
+                logger.exception(
+                    "tradingagents_diagnostic stage=STOP_RECORD_SAVE_FAILED run=%s:%s", ticker, analysis_date
+                )
+
         try:
-            with comqutor_structure_output_contract_scope():
+            # John MVP Final Gap Closure -- Structured External Source
+            # Traceability: scoped around the exact same stream() call,
+            # nothing else -- never changes a single chunk's content.
+            with comqutor_structure_output_contract_scope(), source_capture_scope() as sink:
+                captured_sources = sink
                 for chunk in graph.graph.stream(init_state, **stream_args):
                     if isinstance(chunk, Mapping):
                         chunk_count += 1
@@ -460,7 +645,14 @@ def run_streaming_tradingagents_research(
                             progress_reporter,
                             reached,
                         )
+        except (ResearchAgentBudgetExceeded, RunProviderStopped) as exc:
+            _partial_save_on_stop(exc)
+            raise
         except Exception as exc:
+            if provider_stop is not None and provider_stop.triggered is not None:
+                # 2026-10-08 (T4 round 28): the provider refused (401/403/429) and the refusal itself ended the
+                # stream -- saved exactly like a budget stop
+                _partial_save_on_stop(exc)
             logger.error(
                 "tradingagents_diagnostic stage=STREAM_LOOP_ERROR run=%s:%s "
                 "elapsed=%.3fs chunks_received=%d exc_type=%s exc_message=%s "
@@ -515,9 +707,33 @@ def run_streaming_tradingagents_research(
         selected_analysts=public_analysts,
         analysis_date=analysis_date,
         output_root=resolved_output_root,
+        captured_sources=captured_sources,
     )
 
     claimed_run_id = payload.get("run_id")
     if claimed_run_id:
         run_dir = _relocate_run_outputs(run_dir, claimed_run_id, resolved_output_root)
+
+    # T4 request-level statistics offline prep (this round): write the
+    # usage-stats callback's own real, already-collected records only after
+    # run_dir reaches its final, post-relocation location -- avoids needing
+    # a second rewrite pass the way _relocate_run_outputs performs for
+    # metadata.json/raw_agent_outputs.json above. Best-effort: a failure
+    # here must never fail a real research run that otherwise succeeded.
+    try:
+        usage_records = usage_stats_callback.records
+        run_dir_path = Path(run_dir)
+        with (run_dir_path / "tradingagents_llm_calls.jsonl").open("w", encoding="utf-8") as handle:
+            for record in usage_records:
+                handle.write(json.dumps(record, sort_keys=True) + "\n")
+        summary = summarize_usage_records(usage_records)
+        (run_dir_path / "tradingagents_llm_usage_summary.json").write_text(
+            json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8"
+        )
+    except Exception:
+        logger.exception(
+            "tradingagents_usage_stats_flush_failed run=%s:%s -- research run output is unaffected",
+            ticker, analysis_date,
+        )
+
     return run_dir

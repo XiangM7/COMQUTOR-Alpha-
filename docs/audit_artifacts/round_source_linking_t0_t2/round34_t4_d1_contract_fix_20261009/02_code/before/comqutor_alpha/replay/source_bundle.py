@@ -1,0 +1,1228 @@
+"""Fail-closed, read-only loading for Exact Semantic Replay sources."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import math
+import re
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+EXACT_REPLAY_SEMANTIC_ARTIFACT_MISSING = "EXACT_REPLAY_SEMANTIC_ARTIFACT_MISSING"
+EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID = "EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID"
+EXACT_REPLAY_SEMANTIC_NOT_READY = "EXACT_REPLAY_SEMANTIC_NOT_READY"
+EXACT_REPLAY_SEMANTIC_CALL_CORRUPTED = "EXACT_REPLAY_SEMANTIC_CALL_CORRUPTED"
+EXACT_REPLAY_SEMANTIC_INPUT_MISMATCH = "EXACT_REPLAY_SEMANTIC_INPUT_MISMATCH"
+EXACT_REPLAY_SEMANTIC_OUTPUT_MISMATCH = "EXACT_REPLAY_SEMANTIC_OUTPUT_MISMATCH"
+EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH = "EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH"
+EXACT_REPLAY_SEMANTIC_CALL_AMBIGUOUS = "EXACT_REPLAY_SEMANTIC_CALL_AMBIGUOUS"
+EXACT_REPLAY_SEMANTIC_BINDING_MISSING = "EXACT_REPLAY_SEMANTIC_BINDING_MISSING"
+EXACT_REPLAY_SEMANTIC_BINDING_ORPHAN = "EXACT_REPLAY_SEMANTIC_BINDING_ORPHAN"
+EXACT_REPLAY_SEMANTIC_RUN_ID_MISMATCH = "EXACT_REPLAY_SEMANTIC_RUN_ID_MISMATCH"
+EXACT_REPLAY_TICKER_IDENTITY_MISMATCH = "EXACT_REPLAY_TICKER_IDENTITY_MISMATCH"
+EXACT_REPLAY_SOURCE_ARTIFACT_INVALID = "EXACT_REPLAY_SOURCE_ARTIFACT_INVALID"
+EXACT_REPLAY_SOURCE_ARTIFACT_HASH_MISMATCH = (
+    "EXACT_REPLAY_SOURCE_ARTIFACT_HASH_MISMATCH"
+)
+EXACT_REPLAY_STAGING_WRITE_FAILED = "EXACT_REPLAY_STAGING_WRITE_FAILED"
+EXACT_REPLAY_OUTPUT_VALIDATION_FAILED = "EXACT_REPLAY_OUTPUT_VALIDATION_FAILED"
+EXACT_REPLAY_PROVIDER_CALL_ATTEMPTED = "EXACT_REPLAY_PROVIDER_CALL_ATTEMPTED"
+EXACT_REPLAY_DATABASE_WRITE_ATTEMPTED = "EXACT_REPLAY_DATABASE_WRITE_ATTEMPTED"
+EXACT_REPLAY_MODE_FALLBACK_FORBIDDEN = "EXACT_REPLAY_MODE_FALLBACK_FORBIDDEN"
+# Distinct from EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH (task IS a recognized
+# binding target, but its prompt/schema/taxonomy identity doesn't match the
+# expected one): this code means the task identity itself has no binding
+# implementation at all. Task-support and version-identity validation are
+# deliberately separate concepts (semantic_binding.py's dispatch loop checks
+# support first, version second) so an unsupported task is never misreported
+# as a version mismatch.
+EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED = "EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED"
+
+SEMANTIC_CALLS_FILENAME = "llm_semantic_calls.jsonl"
+SEMANTIC_MANIFEST_FILENAME = "llm_semantic_manifest.json"
+SEMANTIC_CALL_SCHEMA_VERSION = "comqutor.semantic_call.v1"
+SEMANTIC_MANIFEST_SCHEMA_VERSION = "comqutor.semantic_manifest.v1"
+
+_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+_CACHE_KEY_PATTERN = re.compile(r"^comqutor:llm:v1:[0-9a-f]{64}$")
+_ERROR_CODE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]{0,127}$")
+_HOME_PATH_PATTERN = re.compile(
+    r"(?:(?:/Users|/home)/[^/\s]+/[^\s,;]*|[A-Za-z]:\\Users\\[^\\\s]+\\[^\s,;]*)"
+)
+_SENSITIVE_TEXT_PATTERNS = (
+    re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]+"),
+    re.compile(
+        r"(?i)\b(api[_-]?key|authorization|password|secret|access[_-]?token|refresh[_-]?token)"
+        r"\s*[\"']?\s*[:=]\s*[\"']?[^\s,;\"'}]+"
+    ),
+    re.compile(r"\b(?:sk|rk|pk)-[A-Za-z0-9_-]{6,}\b"),
+    _HOME_PATH_PATTERN,
+)
+_SENSITIVE_KEYS = frozenset(
+    {
+        "apikey",
+        "authorization",
+        "password",
+        "secret",
+        "accesstoken",
+        "refreshtoken",
+        "privatekey",
+    }
+)
+_SEMANTIC_TASKS = frozenset(
+    {
+        "structured_adapter",
+        "alpha_classifier",
+        "structure_extractor",
+        # Registered alongside llm_runtime/contracts.py's SEMANTIC_TASKS
+        # (post-Alpha-Authority-Migration cleanup): a live-pipeline task,
+        # exactly like the three above, not the offline-only
+        # structured_claim_shadow task, which is deliberately excluded from
+        # this replay-source-bundle vocabulary. Omitting it here (while
+        # present in contracts.py) would trade today's fail-safe degraded
+        # call for a KeyError in _task_counts's dict.fromkeys(_SEMANTIC_TASKS)
+        # lookup the first time a real evidence_stance_classifier record
+        # reaches an exact-replay bundle.
+        "evidence_stance_classifier",
+        # Step 5A (v0.1.2.1) execution-capacity repair: batched sibling of
+        # "alpha_classifier" -- a later-added, conditionally-present task
+        # exactly like evidence_stance_classifier above (never one of the
+        # three MANIFEST_ORIGINAL_TASKS, which stay unchanged).
+        "alpha_classifier_batch",
+        # 2026-10-08 (T3 closeout): registered alongside llm_runtime/
+        # contracts.py's SEMANTIC_TASKS, for the same KeyError reason as
+        # evidence_stance_classifier above. Exact Replay has no binding for
+        # this task (replay/semantic_binding.py), so a run carrying its
+        # records reports EXACT_REPLAY_SEMANTIC_TASK_UNSUPPORTED -- such runs
+        # were never exact-replay ready before either (their semantic record
+        # set was incomplete).
+        "content_support_verification",
+    }
+)
+# Must stay exactly equal to llm_runtime/manifest.py's own
+# MANIFEST_ORIGINAL_TASKS (tests/llm_runtime/test_no_production_importers.py
+# deliberately keeps this module off llm_runtime's approved-importer
+# allowlist, so this is a duplicated literal, not a shared import;
+# tests/replay/test_semantic_source_bundle_validation.py's
+# test_derived_manifest_original_tasks_constant_matches_manifest_module
+# cross-checks the two stay in sync). Used by _derived_manifest below to
+# reproduce the live manifest writer's exact "tasks" dict shape: the
+# original three tasks always present, any later-added task (here,
+# evidence_stance_classifier) only when at least one such record is
+# actually present.
+_MANIFEST_ORIGINAL_TASKS = frozenset({"structured_adapter", "alpha_classifier", "structure_extractor"})
+_PROVIDER_CALLED_STATUSES = frozenset({"success", "timeout", "provider_error"})
+_RECORD_FIELDS = frozenset(
+    {
+        "schema_version",
+        "call_id",
+        "run_id",
+        "call_sequence",
+        "task",
+        "execution_mode",
+        "prompt_version",
+        "prompt_sha256",
+        "input_schema_version",
+        "output_schema_version",
+        "provider",
+        "model",
+        "taxonomy_version",
+        "input_payload",
+        "input_sha256",
+        "raw_output_text",
+        "raw_output_sha256",
+        "validated_output",
+        "validated_output_sha256",
+        "started_at",
+        "completed_at",
+        "latency_ms",
+        "token_usage",
+        "cache",
+        "retry_count",
+        "validation_status",
+        "provider_status",
+        "fallback_used",
+        "fallback_reason",
+        "error_code",
+        "error_message",
+    }
+)
+# 2026-10-01 (v7 limited real-verification round): this module keeps its own
+# separate copy of the record field schema (see the "duplicated literal, not
+# a shared import" note on _MANIFEST_ORIGINAL_TASKS above -- the same
+# pattern applies here), and _record_contract_errors' exact `set(record) !=
+# _RECORD_FIELDS` check never accounted for ANY of
+# comqutor_alpha.llm_runtime.contracts.py's additive optional fields
+# (execution_policy, profile_id, request_control, provider_response,
+# request_attempts) at all -- a latent bug that never manifested only
+# because no test fixture's fake model ever populated request_control/
+# provider_response (they require a real ChatOpenAI-family model exposing
+# _get_request_payload/response_metadata), and request_attempts did not
+# exist until this round. Confirmed as a real, live bug once
+# request_attempts started being populated unconditionally for every real
+# attempt: a real v7 execution's own saved calls (e.g.
+# t3live_20261001T230846Z_16d44096, which also has real request_control/
+# provider_response) would fail Exact Replay here with
+# SEMANTIC_RECORD_FIELDS_INVALID despite being perfectly valid records.
+# Fixed the same way contracts.py already does it: required fields must all
+# be present; any additional field must be one of this known optional set;
+# anything else still fails closed exactly as before.
+_OPTIONAL_RECORD_FIELDS = frozenset(
+    {
+        "execution_policy", "profile_id", "request_control", "provider_response",
+        "request_attempts", "persist_sequence",
+        # 2026-10-06 (round 14): mirrors llm_runtime/contracts.py's new
+        # optional out-of-band claim identity. Without this entry, replaying
+        # any run recorded after that change failed closed with
+        # SEMANTIC_RECORD_FIELDS_INVALID (the same latent-mirror trap this
+        # comment block already documents for earlier additive fields).
+        "claim_ids",
+    }
+)
+_MANIFEST_FIELDS = frozenset(
+    {
+        "schema_version",
+        "run_id",
+        "calls_file",
+        "calls_file_sha256",
+        "record_count",
+        "tasks",
+        "accepted_count",
+        "rejected_count",
+        "fallback_count",
+        "cache_hit_count",
+        "provider_call_count",
+        "prompt_versions",
+        "models",
+        "complete",
+        "exact_replay_ready",
+        "created_at",
+        "finalized_at",
+    }
+)
+
+_JSON_ARTIFACTS = (
+    "metadata.json",
+    SEMANTIC_MANIFEST_FILENAME,
+    "raw_agent_outputs.json",
+    "structured_agent_outputs.json",
+    "alpha_matches.json",
+    "extracted_structures.json",
+    "structure_graph.json",
+    "entity_alpha_exposures.json",
+    "conflicts.json",
+    "run_audit.json",
+    "artifact_manifest.json",
+)
+REQUIRED_SOURCE_ARTIFACTS = (*_JSON_ARTIFACTS, SEMANTIC_CALLS_FILENAME)
+SEMANTIC_ARTIFACT_COPY_FILENAMES = (
+    SEMANTIC_CALLS_FILENAME,
+    SEMANTIC_MANIFEST_FILENAME,
+    "structured_agent_outputs.json",
+    "alpha_matches.json",
+    "extracted_structures.json",
+)
+
+_SUPPORTED_ARTIFACT_SCHEMAS = {
+    "structured_agent_outputs.json": "week1a.structured_agent_outputs.v2",
+    "alpha_matches.json": "week2.alpha_matches.v2",
+    "extracted_structures.json": "week2.extracted_structures.v2",
+    "structure_graph.json": "week3.structure_graph.v2",
+    "entity_alpha_exposures.json": "entity_alpha_exposure.run.v1",
+    "conflicts.json": "conflicts.export.v1",
+    "artifact_manifest.json": "artifact_manifest.export.v1",
+}
+# 2026-10-01 (v6/v7 Exact Replay identity compatibility fix): each task now
+# maps to a TUPLE of accepted identities instead of a single dict. Minimal
+# change to the existing shape -- every task that still has exactly one
+# authorized identity is simply that identity wrapped in a 1-tuple, with its
+# own value completely unchanged. This exists because a real prompt version
+# bump (alpha_classifier v6 -> v7, this round) must not retroactively break
+# Exact Replay for bundles saved under the PRIOR version -- v6 and v7 are
+# each independently valid, matched as a whole identity (task + prompt_
+# version + prompt_sha256 + both schema versions + taxonomy_version
+# together), never by mixing fields from two different accepted identities
+# (a record claiming prompt_version=v7 with v6's own prompt_sha256, or any
+# other cross-identity combination, matches neither tuple entry and is
+# rejected exactly like an unknown version -- see _validate_call_versions
+# below, which checks each candidate identity as one atomic unit via a
+# single `all()` per candidate, never per-field across candidates).
+_SUPPORTED_CALL_IDENTITIES: dict[str, tuple[dict[str, Any], ...]] = {
+    "structured_adapter": (
+        {
+            "prompt_version": "week2.claim_batch_enrichment.v1",
+            "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+            "input_schema_version": "week2.claim_batch_enrichment.input.v1",
+            "output_schema_version": "week2.claim_batch_enrichment.output.v1",
+            "taxonomy_version": None,
+        },
+    ),
+    # Updated (Pure-LLM Alpha Semantic Authority task) from the pre-migration
+    # week2.alpha_classifier.v2 identity to the current, authorized v3
+    # identity (decision vocabulary select/defer -> select/none; deterministic
+    # logic is never a semantic fallback source -- see week2_llm.py's
+    # _TASK_RUNTIME_METADATA["alpha_classifier"] for the full rationale).
+    # output_schema_version bumps to v2 alongside the prompt since the
+    # response contract's own decision vocabulary changed; input_schema_
+    # version is unchanged (request shape unchanged). prompt_sha256
+    # recomputed live via Week2LLMGateway.prompt_identity_sha256
+    # ("alpha_classifier") against the new prompt text, not hand-derived.
+    # This is not a relaxation -- an exact-replay bundle still fails closed
+    # on any identity this dict does not list; only the single already-
+    # authorized, already-shipped current value changed.
+    # 2026-09-29 (T2/Replay verification, this round): re-pinned again --
+    # same FROZEN_HASHES-style drift pattern as the two prior updates to
+    # this same entry (see the comment above). week2_llm.py's own
+    # _TASK_RUNTIME_METADATA["alpha_classifier"] had already been bumped to
+    # v6/output.v3 (and its prompt text gained substantial disambiguation
+    # guidance -- A101/A103/A601 datacenter/power/cooling framing,
+    # hypothetical/rebuttal framing rules, etc.) across prior sessions on
+    # this branch, but this registry was simply never updated to match --
+    # it still listed the stale v3/output.v2 identity. Found while
+    # investigating why every tests/replay/* test using the shared
+    # eligible_live_source fixture failed closed with
+    # EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH. version labels and
+    # prompt_sha256 both taken live from week2_llm.py's own current state
+    # (_TASK_RUNTIME_METADATA / Week2LLMGateway.prompt_identity_sha256),
+    # never hand-derived -- this is registry maintenance to match already-
+    # shipped, already-authorized prompt content, never a relaxation of
+    # what this bundle-validity gate accepts.
+    #
+    # 2026-10-01 (v6/v7 Exact Replay identity compatibility fix): v6 is kept
+    # here VERBATIM, unchanged, specifically so bundles saved under v6 --
+    # including the real, already-authorized execution
+    # t3live_20261001T014648Z_1fb9c9d5 -- keep passing Exact Replay exactly
+    # as before. v7 (the AI-review-comparison-round prompt edit; see
+    # week2_llm.py's own _TASK_RUNTIME_METADATA["alpha_classifier"] comment
+    # for the full per-clause rationale) is added as a SECOND, independently
+    # valid identity, not a replacement. Both prompt_sha256 values taken
+    # live from Week2LLMGateway.prompt_identity_sha256("alpha_classifier")
+    # at each version's own introduction, never hand-derived. A record must
+    # match one identity's fields as a whole -- week2.alpha_classifier.v7
+    # paired with v6's own prompt_sha256 (or any other cross-identity field
+    # combination) matches neither tuple entry and fails closed exactly like
+    # an unrecognized version, by construction (see _validate_call_versions).
+    "alpha_classifier": (
+        {
+            "prompt_version": "week2.alpha_classifier.v6",
+            "prompt_sha256": "bb2dbdf0f3fc9a43291233494c2f355275b4fe6fddc71cd63fd1377f9ba109d9",
+            "input_schema_version": "week2.alpha_classifier.input.v2",
+            "output_schema_version": "week2.alpha_classifier.output.v3",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+        {
+            "prompt_version": "week2.alpha_classifier.v7",
+            "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+            "input_schema_version": "week2.alpha_classifier.input.v2",
+            "output_schema_version": "week2.alpha_classifier.output.v3",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+    ),
+    "structure_extractor": (
+        {
+            "prompt_version": "week2.structure_extractor.v1",
+            "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+            "input_schema_version": "week2.structure_extractor.input.v1",
+            "output_schema_version": "week2.structure_extractor.output.v1",
+            "taxonomy_version": None,
+        },
+    ),
+    # Added (Step 5A v0.1.2.1 execution-capacity repair): batched sibling of
+    # "alpha_classifier" -- IDENTICAL semantic decision criteria, only the
+    # I/O envelope changed (one claim per call -> many claims per call,
+    # matched by claim_id). A genuinely distinct request/response contract,
+    # so it gets its own registered identity here rather than being merged
+    # into "alpha_classifier"'s. prompt_sha256 computed live via
+    # Week2LLMGateway.prompt_identity_sha256("alpha_classifier_batch").
+    # 2026-09-29: re-pinned alongside "alpha_classifier" above for the same
+    # reason -- its own classification rules are copied verbatim from
+    # "alpha_classifier" (per week2_llm.py's own comment), so the same
+    # already-shipped disambiguation-guidance addition changed this prompt
+    # text too; week2_llm.py's own _TASK_RUNTIME_METADATA
+    # ["alpha_classifier_batch"] had already been bumped to v4/output.v2,
+    # this registry simply hadn't been updated to match. Version labels and
+    # prompt_sha256 both taken live from week2_llm.py's own current state.
+    "alpha_classifier_batch": (
+        {
+            "prompt_version": "week2.alpha_classifier_batch.v4",
+            "prompt_sha256": "f217bdbeb5a68f80f1447a1178f97b2a4c314d90f445cf92b356b164c33ebc2e",
+            "input_schema_version": "week2.alpha_classifier_batch.input.v1",
+            "output_schema_version": "week2.alpha_classifier_batch.output.v2",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+    ),
+    # Added (post-Alpha-Authority-Migration registry cleanup): B1 Evidence
+    # Stance's own LLM upgrade task, registered here for the first time
+    # alongside SEMANTIC_TASKS/_SEMANTIC_TASKS above -- current B1 v3
+    # identity, unchanged by this task (see week2_llm.py's
+    # _TASK_RUNTIME_METADATA["evidence_stance_classifier"]).
+    "evidence_stance_classifier": (
+        {
+            "prompt_version": "evidence_stance.llm_classifier.v3",
+            "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+            "input_schema_version": "evidence_stance.llm_classifier.input.v1",
+            "output_schema_version": "evidence_stance.llm_classifier.output.v1",
+            "taxonomy_version": "alpha_taxonomy_v1",
+        },
+    ),
+    # 2026-10-08 (T3 closeout): content support's current v2.1 identity,
+    # prompt_sha256 read live from Week2LLMGateway.prompt_identity_sha256
+    # ("content_support_verification") -- the value the T3 execution's signed
+    # plan pinned.
+    "content_support_verification": (
+        {
+            "prompt_version": "content_support.llm.v2.1",
+            "prompt_sha256": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+            "input_schema_version": "content_support.llm.input.v2",
+            "output_schema_version": "content_support.llm.output.v2.1",
+            "taxonomy_version": None,
+        },
+    ),
+}
+
+
+class ExactReplayError(RuntimeError):
+    """A stable, secret-free Exact Replay failure."""
+
+    def __init__(
+        self,
+        reason_code: str,
+        *,
+        artifact: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        self.reason_code = reason_code
+        self.artifact = artifact
+        self.details = dict(details or {})
+        suffix = f":{artifact}" if artifact else ""
+        super().__init__(f"{reason_code}{suffix}")
+
+
+@dataclass(frozen=True)
+class SourceFileSnapshot:
+    relative_path: str
+    size_bytes: int
+    sha256: str
+    mtime_ns: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "relative_path": self.relative_path,
+            "size_bytes": self.size_bytes,
+            "sha256": self.sha256,
+            "mtime_ns": self.mtime_ns,
+        }
+
+
+@dataclass(frozen=True)
+class ExactSemanticSourceBundle:
+    source_directory: Path
+    source_run_id: str
+    ticker: str
+    metadata: dict[str, Any]
+    raw_agent_outputs: dict[str, Any]
+    semantic_manifest: dict[str, Any]
+    semantic_calls: tuple[dict[str, Any], ...]
+    structured_agent_outputs: dict[str, Any]
+    alpha_matches: dict[str, Any]
+    extracted_structures: dict[str, Any]
+    structure_graph: dict[str, Any]
+    entity_alpha_exposures: dict[str, Any]
+    conflicts: dict[str, Any]
+    run_audit: dict[str, Any]
+    artifact_manifest: dict[str, Any]
+    source_files: tuple[SourceFileSnapshot, ...]
+    # T1 source-linking chain (2026-09-29 T2/Replay verification fix):
+    # OPTIONAL -- a run from before source-linking existed, or one with no
+    # genuinely source-linked claims (every non-news/market/financial/macro
+    # chain), has no source_registry.json at all, and that must degrade to
+    # None here exactly like score_and_assemble_structure_graph's own
+    # opportunistic contract already treats a missing registry (see
+    # routes_research.py's live-pipeline call site) -- never required,
+    # never fabricated. When PRESENT, its own byte content is still covered
+    # by this bundle's whole-directory before/after integrity snapshot
+    # (_snapshot_source_directory), so a tampered registry still fails
+    # closed even though it is not one of REQUIRED_SOURCE_ARTIFACTS.
+    source_registry: dict[str, Any] | None = None
+
+    def artifact_path(self, filename: str) -> Path:
+        if filename not in REQUIRED_SOURCE_ARTIFACTS:
+            raise ExactReplayError(
+                EXACT_REPLAY_SOURCE_ARTIFACT_INVALID,
+                artifact=filename,
+            )
+        path = self.source_directory / filename
+        _require_safe_file(path, self.source_directory, filename)
+        return path
+
+
+def _sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def _validate_json_value(value: Any, ancestors: set[int] | None = None) -> None:
+    if value is None or isinstance(value, (str, bool, int)):
+        return
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("non-finite JSON number")
+        return
+    active = ancestors if ancestors is not None else set()
+    if isinstance(value, dict):
+        identity = id(value)
+        if identity in active or any(not isinstance(key, str) for key in value):
+            raise ValueError("invalid canonical JSON object")
+        active.add(identity)
+        try:
+            for item in value.values():
+                _validate_json_value(item, active)
+        finally:
+            active.remove(identity)
+        return
+    if isinstance(value, list):
+        identity = id(value)
+        if identity in active:
+            raise ValueError("invalid canonical JSON array")
+        active.add(identity)
+        try:
+            for item in value:
+                _validate_json_value(item, active)
+        finally:
+            active.remove(identity)
+        return
+    raise ValueError("unsupported canonical JSON value")
+
+
+def sha256_canonical_json(value: Any) -> str:
+    """Frozen semantic-artifact hash without importing the live runtime."""
+
+    _validate_json_value(value)
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return _sha256_bytes(encoded)
+
+
+def _aware_timestamp(value: Any) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def _nonnegative_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _nonnegative_number(value: Any) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+        and value >= 0
+    )
+
+
+def _contains_sensitive_value(value: Any) -> bool:
+    if isinstance(value, dict):
+        for key, item in value.items():
+            normalized = re.sub(r"[^a-z]", "", str(key).lower())
+            if normalized in _SENSITIVE_KEYS or _contains_sensitive_value(item):
+                return True
+    elif isinstance(value, list):
+        return any(_contains_sensitive_value(item) for item in value)
+    elif isinstance(value, str):
+        return any(pattern.search(value) for pattern in _SENSITIVE_TEXT_PATTERNS)
+    return False
+
+
+def _record_contract_errors(record: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    record_keys = set(record)
+    if (_RECORD_FIELDS - record_keys) or (record_keys - _RECORD_FIELDS - _OPTIONAL_RECORD_FIELDS):
+        errors.append("SEMANTIC_RECORD_FIELDS_INVALID")
+        return errors
+    claim_ids = record.get("claim_ids")
+    if "claim_ids" in record and claim_ids is not None and (
+        not isinstance(claim_ids, (list, tuple))
+        or not all(isinstance(item, str) and item.strip() for item in claim_ids)
+    ):
+        errors.append("SEMANTIC_CLAIM_IDS_INVALID")
+    if record.get("schema_version") != SEMANTIC_CALL_SCHEMA_VERSION:
+        errors.append("SEMANTIC_SCHEMA_VERSION_INVALID")
+    for key in (
+        "call_id",
+        "run_id",
+        "prompt_version",
+        "input_schema_version",
+        "output_schema_version",
+        "provider",
+        "model",
+    ):
+        if not isinstance(record.get(key), str) or not record[key].strip():
+            errors.append(f"SEMANTIC_STRING_REQUIRED:{key}")
+    if not _nonnegative_int(record.get("call_sequence")):
+        errors.append("SEMANTIC_CALL_SEQUENCE_INVALID")
+    if "persist_sequence" in record and record["persist_sequence"] is not None and not _nonnegative_int(
+        record["persist_sequence"]
+    ):
+        errors.append("SEMANTIC_PERSIST_SEQUENCE_INVALID")
+    if record.get("task") not in _SEMANTIC_TASKS:
+        errors.append("SEMANTIC_TASK_INVALID")
+    if record.get("execution_mode") not in {"live", "shadow", "replay_fixture", "test"}:
+        errors.append("SEMANTIC_EXECUTION_MODE_INVALID")
+    taxonomy = record.get("taxonomy_version")
+    if taxonomy is not None and (not isinstance(taxonomy, str) or not taxonomy.strip()):
+        errors.append("SEMANTIC_TAXONOMY_VERSION_INVALID")
+    for key in ("prompt_sha256", "input_sha256"):
+        if not isinstance(record.get(key), str) or not _SHA256_PATTERN.fullmatch(
+            record[key]
+        ):
+            errors.append(f"SEMANTIC_SHA256_FORMAT_INVALID:{key}")
+    input_payload = record.get("input_payload")
+    if not isinstance(input_payload, dict):
+        errors.append("SEMANTIC_INPUT_NOT_OBJECT")
+    else:
+        try:
+            actual = sha256_canonical_json(input_payload)
+        except (TypeError, ValueError):
+            errors.append("SEMANTIC_INPUT_NOT_CANONICAL_JSON")
+        else:
+            if actual != record.get("input_sha256"):
+                errors.append("SEMANTIC_INPUT_HASH_MISMATCH")
+    if record.get("raw_output_text") is not None or record.get("raw_output_sha256") is not None:
+        errors.append("SEMANTIC_RAW_OUTPUT_NOT_NULL")
+    output = record.get("validated_output")
+    output_hash = record.get("validated_output_sha256")
+    if output is None:
+        if output_hash is not None:
+            errors.append("SEMANTIC_VALIDATED_HASH_WITHOUT_OUTPUT")
+    else:
+        try:
+            actual_output = sha256_canonical_json(output)
+        except (TypeError, ValueError):
+            errors.append("SEMANTIC_OUTPUT_NOT_CANONICAL_JSON")
+        else:
+            if actual_output != output_hash:
+                errors.append("SEMANTIC_OUTPUT_HASH_MISMATCH")
+    started = _aware_timestamp(record.get("started_at"))
+    completed = _aware_timestamp(record.get("completed_at"))
+    if started is None or completed is None or completed < started:
+        errors.append("SEMANTIC_TIMESTAMP_INVALID")
+    if not _nonnegative_number(record.get("latency_ms")):
+        errors.append("SEMANTIC_LATENCY_INVALID")
+    if not _nonnegative_int(record.get("retry_count")):
+        errors.append("SEMANTIC_RETRY_COUNT_INVALID")
+    token_usage = record.get("token_usage")
+    token_keys = {"input_tokens", "output_tokens", "total_tokens"}
+    if not isinstance(token_usage, dict) or set(token_usage) != token_keys:
+        errors.append("SEMANTIC_TOKEN_USAGE_INVALID")
+    elif any(
+        value is not None and not _nonnegative_int(value)
+        for value in token_usage.values()
+    ):
+        errors.append("SEMANTIC_TOKEN_COUNT_INVALID")
+    elif all(_nonnegative_int(token_usage[key]) for key in token_keys) and (
+        token_usage["total_tokens"]
+        != token_usage["input_tokens"] + token_usage["output_tokens"]
+    ):
+        errors.append("SEMANTIC_TOKEN_TOTAL_MISMATCH")
+    cache = record.get("cache")
+    if (
+        not isinstance(cache, dict)
+        # source_call_id (round 14): optional, only on a cache-hit record;
+        # mirrors contracts.validate_semantic_call_record.
+        or not ({"cache_key", "hit"} <= set(cache) <= {"cache_key", "hit", "source_call_id"})
+        or not isinstance(cache.get("cache_key"), str)
+        or not _CACHE_KEY_PATTERN.fullmatch(cache["cache_key"])
+        or not isinstance(cache.get("hit"), bool)
+        or (
+            cache.get("source_call_id") is not None
+            and not (isinstance(cache["source_call_id"], str) and cache["source_call_id"].strip())
+        )
+    ):
+        errors.append("SEMANTIC_CACHE_INVALID")
+    validation = record.get("validation_status")
+    provider = record.get("provider_status")
+    fallback = record.get("fallback_used")
+    if validation not in {"accepted", "rejected", "not_run"}:
+        errors.append("SEMANTIC_VALIDATION_STATUS_INVALID")
+    if provider not in {
+        "success",
+        "timeout",
+        "provider_error",
+        "budget_exhausted",
+        "not_called",
+    }:
+        errors.append("SEMANTIC_PROVIDER_STATUS_INVALID")
+    if not isinstance(fallback, bool):
+        errors.append("SEMANTIC_FALLBACK_FLAG_INVALID")
+    if fallback is True and (
+        not isinstance(record.get("fallback_reason"), str)
+        or not record["fallback_reason"].strip()
+    ):
+        errors.append("SEMANTIC_FALLBACK_REASON_REQUIRED")
+    if fallback is False and record.get("fallback_reason") is not None:
+        errors.append("SEMANTIC_FALLBACK_REASON_UNEXPECTED")
+    if validation == "accepted" and output is None:
+        errors.append("SEMANTIC_ACCEPTED_OUTPUT_MISSING")
+    if validation in {"rejected", "not_run"} and output is not None:
+        errors.append("SEMANTIC_UNACCEPTED_OUTPUT_PRESENT")
+    cache_hit = cache.get("hit") if isinstance(cache, dict) else None
+    if cache_hit is True and (
+        provider != "not_called"
+        or validation != "accepted"
+        or record.get("retry_count") != 0
+        or fallback is not False
+    ):
+        errors.append("SEMANTIC_CACHE_HIT_STATUS_INVALID")
+    error_code = record.get("error_code")
+    if error_code is not None and (
+        not isinstance(error_code, str) or not _ERROR_CODE_PATTERN.fullmatch(error_code)
+    ):
+        errors.append("SEMANTIC_ERROR_CODE_INVALID")
+    if provider in {"timeout", "provider_error", "budget_exhausted"} and not error_code:
+        errors.append("SEMANTIC_ERROR_CODE_REQUIRED")
+    if provider == "success" and (
+        error_code is not None or record.get("error_message") is not None
+    ):
+        errors.append("SEMANTIC_SUCCESS_ERROR_UNEXPECTED")
+    error_message = record.get("error_message")
+    if error_message is not None and not isinstance(error_message, str):
+        errors.append("SEMANTIC_ERROR_MESSAGE_INVALID")
+    if _contains_sensitive_value(record):
+        errors.append("SEMANTIC_SENSITIVE_VALUE_FORBIDDEN")
+    return errors
+
+
+def _call_collection_errors(records: list[dict[str, Any]]) -> list[str]:
+    """2026-10-02 (concurrent-audit-loss incident fix): mirrors contracts.py's
+    own validate_semantic_call_records -- ordering is checked on
+    persist_sequence (recorder-assigned, true append order) wherever a
+    record carries it, never on call_sequence (caller-assigned, call-START
+    order), which real concurrent dispatch can legitimately persist out of
+    order. A record with no persist_sequence (a pre-fix artifact) falls
+    back to the original call_sequence-based check, unchanged, among other
+    such records for the same run."""
+    errors: list[str] = []
+    seen_ids: set[str] = set()
+    last_persist_sequence: dict[str, int] = {}
+    last_call_sequence: dict[str, int] = {}
+    for record in records:
+        errors.extend(_record_contract_errors(record))
+        call_id = record.get("call_id")
+        if isinstance(call_id, str):
+            if call_id in seen_ids:
+                errors.append("SEMANTIC_DUPLICATE_CALL_ID")
+            seen_ids.add(call_id)
+        run_id = record.get("run_id")
+        if not isinstance(run_id, str):
+            continue
+        persist_sequence = record.get("persist_sequence")
+        if _nonnegative_int(persist_sequence):
+            previous_persist = last_persist_sequence.get(run_id)
+            if previous_persist is not None and persist_sequence <= previous_persist:
+                errors.append("SEMANTIC_PERSIST_SEQUENCE_NOT_MONOTONIC")
+            last_persist_sequence[run_id] = persist_sequence
+            continue
+        sequence = record.get("call_sequence")
+        if _nonnegative_int(sequence):
+            previous = last_call_sequence.get(run_id)
+            if previous is not None and sequence <= previous:
+                errors.append("SEMANTIC_CALL_SEQUENCE_NOT_MONOTONIC")
+            last_call_sequence[run_id] = sequence
+    return errors
+
+
+def _require_source_directory(source_run_dir: str | Path) -> Path:
+    lexical = Path(source_run_dir).expanduser()
+    if ".." in lexical.parts:
+        raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_INVALID)
+    if not lexical.exists() or not lexical.is_dir() or lexical.is_symlink():
+        raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_INVALID)
+    return lexical.resolve()
+
+
+def _require_safe_file(path: Path, source_directory: Path, artifact: str) -> None:
+    if path.is_symlink() or not path.is_file():
+        raise ExactReplayError(
+            EXACT_REPLAY_SOURCE_ARTIFACT_INVALID,
+            artifact=artifact,
+        )
+    try:
+        path.resolve().relative_to(source_directory)
+    except ValueError as exc:
+        raise ExactReplayError(
+            EXACT_REPLAY_SOURCE_ARTIFACT_INVALID,
+            artifact=artifact,
+        ) from exc
+
+
+def _snapshot_source_directory(source_directory: Path) -> tuple[SourceFileSnapshot, ...]:
+    snapshots: list[SourceFileSnapshot] = []
+    for path in sorted(source_directory.rglob("*")):
+        if path.is_symlink():
+            raise ExactReplayError(
+                EXACT_REPLAY_SOURCE_ARTIFACT_INVALID,
+                artifact=path.relative_to(source_directory).as_posix(),
+            )
+        if not path.is_file():
+            continue
+        _require_safe_file(path, source_directory, path.name)
+        payload = path.read_bytes()
+        stat = path.stat()
+        snapshots.append(
+            SourceFileSnapshot(
+                relative_path=path.relative_to(source_directory).as_posix(),
+                size_bytes=len(payload),
+                sha256=_sha256_bytes(payload),
+                mtime_ns=stat.st_mtime_ns,
+            )
+        )
+    return tuple(snapshots)
+
+
+def _load_json(path: Path, source_directory: Path, artifact: str) -> dict[str, Any]:
+    _require_safe_file(path, source_directory, artifact)
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ExactReplayError(
+            (
+                EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID
+                if artifact == SEMANTIC_MANIFEST_FILENAME
+                else EXACT_REPLAY_SOURCE_ARTIFACT_INVALID
+            ),
+            artifact=artifact,
+        ) from exc
+    if not isinstance(value, dict):
+        raise ExactReplayError(
+            EXACT_REPLAY_SOURCE_ARTIFACT_INVALID,
+            artifact=artifact,
+        )
+    return value
+
+
+def _load_calls(path: Path, source_directory: Path) -> tuple[dict[str, Any], ...]:
+    _require_safe_file(path, source_directory, SEMANTIC_CALLS_FILENAME)
+    try:
+        payload = path.read_bytes()
+        if not payload or not payload.endswith(b"\n"):
+            raise ValueError("calls file is empty or has a partial tail")
+        records: list[dict[str, Any]] = []
+        for line in payload.splitlines():
+            if not line:
+                raise ValueError("calls file contains an empty line")
+            item = json.loads(line.decode("utf-8"))
+            if not isinstance(item, dict):
+                raise ValueError("semantic call is not an object")
+            records.append(item)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        raise ExactReplayError(
+            EXACT_REPLAY_SEMANTIC_CALL_CORRUPTED,
+            artifact=SEMANTIC_CALLS_FILENAME,
+        ) from exc
+    errors = _call_collection_errors(records)
+    if errors:
+        if "SEMANTIC_SCHEMA_VERSION_INVALID" in errors:
+            raise ExactReplayError(
+                EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH,
+                artifact=SEMANTIC_CALLS_FILENAME,
+            )
+        raise ExactReplayError(
+            EXACT_REPLAY_SEMANTIC_CALL_CORRUPTED,
+            artifact=SEMANTIC_CALLS_FILENAME,
+            details={"reason_codes": sorted(set(errors))},
+        )
+    return tuple(records)
+
+
+def _derived_manifest(
+    source_directory: Path,
+    manifest: dict[str, Any],
+    calls: tuple[dict[str, Any], ...],
+) -> dict[str, Any]:
+    if set(manifest) != _MANIFEST_FIELDS:
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID)
+    if manifest.get("calls_file") != SEMANTIC_CALLS_FILENAME:
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID)
+    calls_payload = (source_directory / SEMANTIC_CALLS_FILENAME).read_bytes()
+    if not isinstance(manifest.get("calls_file_sha256"), str) or not _SHA256_PATTERN.fullmatch(
+        manifest["calls_file_sha256"]
+    ):
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID)
+    created_at = manifest.get("created_at")
+    finalized_at = manifest.get("finalized_at")
+    if (
+        _aware_timestamp(created_at) is None
+        or _aware_timestamp(finalized_at) is None
+        or manifest.get("complete") is not True
+    ):
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID)
+    run_id = manifest.get("run_id")
+    if not isinstance(run_id, str) or not run_id or any(
+        record.get("run_id") != run_id for record in calls
+    ):
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID)
+    # Pre-populate every _SEMANTIC_TASKS key (never just MANIFEST_ORIGINAL_
+    # TASKS) so a real, non-original task's record (e.g.
+    # evidence_stance_classifier) is never a KeyError here -- then drop any
+    # entry that is both zero AND not one of the original three, so this
+    # independent recomputation reproduces the SAME shape the live manifest
+    # writer (llm_runtime/manifest.py) actually persists: the original
+    # three tasks always present, any later-added task only when at least
+    # one such record is actually present. Without this filter, a real
+    # exact-replay-eligible run whose Alpha decision is "none" for every
+    # claim (B1's evidence_stance_classifier legitimately never fires --
+    # see evidence_stance_llm.retained_target_alpha_ids) would fail
+    # EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID purely from this recomputation
+    # disagreeing with the real manifest on an absent, never-called task's
+    # own zero count.
+    task_counts = dict.fromkeys(sorted(_SEMANTIC_TASKS), 0)
+    for record in calls:
+        task_counts[str(record["task"])] += 1
+    task_counts = {
+        task: count
+        for task, count in task_counts.items()
+        if count > 0 or task in _MANIFEST_ORIGINAL_TASKS
+    }
+    exact_ready = bool(
+        calls
+        and all(
+            record["validation_status"] == "accepted"
+            and record["validated_output"] is not None
+            and record["validated_output_sha256"] is not None
+            and record["fallback_used"] is False
+            and record["provider_status"]
+            not in {"timeout", "provider_error", "budget_exhausted"}
+            for record in calls
+        )
+    )
+    return {
+        "schema_version": SEMANTIC_MANIFEST_SCHEMA_VERSION,
+        "run_id": run_id,
+        "calls_file": SEMANTIC_CALLS_FILENAME,
+        "calls_file_sha256": _sha256_bytes(calls_payload),
+        "record_count": len(calls),
+        "tasks": task_counts,
+        "accepted_count": sum(
+            record["validation_status"] == "accepted" for record in calls
+        ),
+        "rejected_count": sum(
+            record["validation_status"] == "rejected" for record in calls
+        ),
+        "fallback_count": sum(bool(record["fallback_used"]) for record in calls),
+        "cache_hit_count": sum(bool(record["cache"]["hit"]) for record in calls),
+        "provider_call_count": sum(
+            1 + int(record["retry_count"])
+            for record in calls
+            if record["provider_status"] in _PROVIDER_CALLED_STATUSES
+        ),
+        "prompt_versions": sorted({str(record["prompt_version"]) for record in calls}),
+        "models": sorted({str(record["model"]) for record in calls}),
+        "complete": True,
+        "exact_replay_ready": exact_ready,
+        "created_at": created_at,
+        "finalized_at": finalized_at,
+    }
+
+
+def _validate_manifest(
+    source_directory: Path,
+    manifest: dict[str, Any],
+    calls: tuple[dict[str, Any], ...] | None = None,
+) -> None:
+    if manifest.get("schema_version") != SEMANTIC_MANIFEST_SCHEMA_VERSION:
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH)
+    # Readiness is a first-class eligibility gate.  Report it directly even
+    # though the manifest's self-verifier will also reject a forged readiness
+    # flag for an otherwise-ready calls file.
+    if manifest.get("complete") is not True or manifest.get("exact_replay_ready") is not True:
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_NOT_READY)
+    if calls is None:
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID)
+    expected = _derived_manifest(source_directory, manifest, calls)
+    mismatched = sorted(
+        field for field in _MANIFEST_FIELDS if manifest.get(field) != expected.get(field)
+    )
+    if mismatched:
+        call_corruption = "calls_file_sha256" in mismatched
+        raise ExactReplayError(
+            (
+                EXACT_REPLAY_SEMANTIC_CALL_CORRUPTED
+                if call_corruption
+                else EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID
+            ),
+            artifact=SEMANTIC_MANIFEST_FILENAME,
+            details={"mismatched_fields": mismatched},
+        )
+
+
+def _validate_call_versions(calls: tuple[dict[str, Any], ...]) -> None:
+    for record in calls:
+        if record.get("schema_version") != SEMANTIC_CALL_SCHEMA_VERSION:
+            raise ExactReplayError(EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH)
+        task = record.get("task")
+        candidates = _SUPPORTED_CALL_IDENTITIES.get(str(task))
+        # Each candidate identity is matched as one atomic unit (all its own
+        # fields must agree with the record together) -- never by checking
+        # one field against one candidate and another field against a
+        # different candidate, which would let a record mix, for example,
+        # one version's prompt_version with a different version's own
+        # prompt_sha256 and still pass.
+        if candidates is None or not any(
+            all(record.get(key) == value for key, value in identity.items())
+            for identity in candidates
+        ):
+            raise ExactReplayError(
+                EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH,
+                details={"task": task, "call_id": record.get("call_id")},
+            )
+        if record.get("execution_mode") != "live":
+            raise ExactReplayError(EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH)
+        if (
+            record.get("validation_status") != "accepted"
+            or record.get("validated_output") is None
+            or record.get("fallback_used") is not False
+            or record.get("provider_status")
+            in {"timeout", "provider_error", "budget_exhausted"}
+        ):
+            raise ExactReplayError(EXACT_REPLAY_SEMANTIC_NOT_READY)
+
+
+def _identity(payload: dict[str, Any]) -> tuple[str, str]:
+    return str(payload.get("run_id") or ""), str(payload.get("ticker") or "").upper()
+
+
+def _validate_source_identity(
+    *,
+    source_directory: Path,
+    payloads: dict[str, dict[str, Any]],
+    calls: tuple[dict[str, Any], ...],
+) -> tuple[str, str]:
+    metadata = payloads["metadata.json"]
+    source_run_id, ticker = _identity(metadata)
+    if not source_run_id or source_directory.name != source_run_id:
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_RUN_ID_MISMATCH)
+    if not ticker:
+        raise ExactReplayError(EXACT_REPLAY_TICKER_IDENTITY_MISMATCH)
+
+    for filename, payload in payloads.items():
+        if filename == SEMANTIC_MANIFEST_FILENAME:
+            artifact_run_id = str(payload.get("run_id") or "")
+            artifact_ticker = ticker
+        else:
+            artifact_run_id, artifact_ticker = _identity(payload)
+        if artifact_run_id != source_run_id:
+            raise ExactReplayError(
+                EXACT_REPLAY_SEMANTIC_RUN_ID_MISMATCH,
+                artifact=filename,
+            )
+        if (
+            filename not in {SEMANTIC_MANIFEST_FILENAME, "run_audit.json"}
+            and (not artifact_ticker or artifact_ticker != ticker)
+        ):
+            raise ExactReplayError(
+                EXACT_REPLAY_TICKER_IDENTITY_MISMATCH,
+                artifact=filename,
+            )
+
+    for record in calls:
+        if record.get("run_id") != source_run_id:
+            raise ExactReplayError(EXACT_REPLAY_SEMANTIC_RUN_ID_MISMATCH)
+
+    structured = payloads["structured_agent_outputs.json"].get("records")
+    matches = payloads["alpha_matches.json"].get("matches")
+    if not isinstance(structured, list) or not isinstance(matches, list):
+        raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_INVALID)
+    for record in (*structured, *matches):
+        if not isinstance(record, dict):
+            raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_INVALID)
+        if str(record.get("run_id") or "") != source_run_id:
+            raise ExactReplayError(EXACT_REPLAY_SEMANTIC_RUN_ID_MISMATCH)
+        if str(record.get("ticker") or "").upper() != ticker:
+            raise ExactReplayError(EXACT_REPLAY_TICKER_IDENTITY_MISMATCH)
+    return source_run_id, ticker
+
+
+def _validate_artifact_contracts(payloads: dict[str, dict[str, Any]]) -> None:
+    for filename, expected_schema in _SUPPORTED_ARTIFACT_SCHEMAS.items():
+        if payloads[filename].get("schema_version") != expected_schema:
+            raise ExactReplayError(
+                EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH,
+                artifact=filename,
+            )
+    if payloads["artifact_manifest.json"].get("artifact_completeness") != "pass":
+        raise ExactReplayError(
+            EXACT_REPLAY_SOURCE_ARTIFACT_INVALID,
+            artifact="artifact_manifest.json",
+        )
+
+    structured = payloads["structured_agent_outputs.json"]
+    alpha_matches = payloads["alpha_matches.json"]
+    extracted = payloads["extracted_structures.json"]
+    if structured.get("adapter_version") != "week1.claim_extraction.v2":
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH)
+    if alpha_matches.get("mapper_version") != "week2.alpha_mapper.v2":
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH)
+    metadata = extracted.get("metadata")
+    if not isinstance(metadata, dict) or metadata.get("extractor_version") != "week2.structure_extractor.v2":
+        raise ExactReplayError(EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH)
+    if not isinstance(extracted.get("nodes"), list) or not isinstance(extracted.get("edges"), list):
+        raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_INVALID)
+
+
+def _validate_manifest_artifact_hashes(
+    source_directory: Path,
+    artifact_manifest: dict[str, Any],
+) -> None:
+    entries = artifact_manifest.get("artifacts")
+    if not isinstance(entries, list):
+        raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_INVALID)
+    by_name = {
+        str(entry.get("artifact_name")): entry
+        for entry in entries
+        if isinstance(entry, dict) and entry.get("artifact_name")
+    }
+    for filename in (
+        "structured_agent_outputs.json",
+        "alpha_matches.json",
+        "structure_graph.json",
+        "entity_alpha_exposures.json",
+        "conflicts.json",
+    ):
+        entry = by_name.get(filename)
+        if entry is None or entry.get("status") != "valid":
+            raise ExactReplayError(
+                EXACT_REPLAY_SOURCE_ARTIFACT_INVALID,
+                artifact=filename,
+            )
+        actual = _sha256_bytes((source_directory / filename).read_bytes())
+        if entry.get("sha256") != actual:
+            raise ExactReplayError(
+                EXACT_REPLAY_SOURCE_ARTIFACT_HASH_MISMATCH,
+                artifact=filename,
+            )
+
+
+def load_exact_semantic_source_bundle(
+    source_run_dir: str | Path,
+) -> ExactSemanticSourceBundle:
+    """Load and verify one eligible live run without modifying it."""
+
+    source_directory = _require_source_directory(source_run_dir)
+    missing = [name for name in REQUIRED_SOURCE_ARTIFACTS if not (source_directory / name).exists()]
+    if missing:
+        raise ExactReplayError(
+            EXACT_REPLAY_SEMANTIC_ARTIFACT_MISSING,
+            artifact=missing[0],
+            details={"missing_artifacts": missing},
+        )
+
+    before = _snapshot_source_directory(source_directory)
+    payloads = {
+        filename: _load_json(source_directory / filename, source_directory, filename)
+        for filename in _JSON_ARTIFACTS
+    }
+    calls = _load_calls(source_directory / SEMANTIC_CALLS_FILENAME, source_directory)
+    _validate_manifest(
+        source_directory,
+        payloads[SEMANTIC_MANIFEST_FILENAME],
+        calls,
+    )
+    _validate_call_versions(calls)
+    source_run_id, ticker = _validate_source_identity(
+        source_directory=source_directory,
+        payloads=payloads,
+        calls=calls,
+    )
+    _validate_artifact_contracts(payloads)
+    _validate_manifest_artifact_hashes(
+        source_directory,
+        payloads["artifact_manifest.json"],
+    )
+    after = _snapshot_source_directory(source_directory)
+    if before != after:
+        raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_HASH_MISMATCH)
+
+    # OPTIONAL (see ExactSemanticSourceBundle.source_registry's own
+    # docstring): absent for a pre-source-linking or no-source-linked-
+    # evidence run; present and malformed still fails closed rather than
+    # being silently ignored (the SAME artifact-invalid contract every
+    # other required artifact uses via _load_json above).
+    source_registry_path = source_directory / "source_registry.json"
+    source_registry = (
+        _load_json(source_registry_path, source_directory, "source_registry.json")
+        if source_registry_path.exists()
+        else None
+    )
+
+    return ExactSemanticSourceBundle(
+        source_directory=source_directory,
+        source_run_id=source_run_id,
+        ticker=ticker,
+        metadata=payloads["metadata.json"],
+        raw_agent_outputs=payloads["raw_agent_outputs.json"],
+        semantic_manifest=payloads[SEMANTIC_MANIFEST_FILENAME],
+        semantic_calls=calls,
+        structured_agent_outputs=payloads["structured_agent_outputs.json"],
+        alpha_matches=payloads["alpha_matches.json"],
+        extracted_structures=payloads["extracted_structures.json"],
+        structure_graph=payloads["structure_graph.json"],
+        entity_alpha_exposures=payloads["entity_alpha_exposures.json"],
+        conflicts=payloads["conflicts.json"],
+        run_audit=payloads["run_audit.json"],
+        artifact_manifest=payloads["artifact_manifest.json"],
+        source_files=before,
+        source_registry=source_registry,
+    )
+
+
+def verify_source_bundle_unchanged(bundle: ExactSemanticSourceBundle) -> bool:
+    """Recheck path, size, hash, and mtime for every source-run file."""
+
+    current = _snapshot_source_directory(bundle.source_directory)
+    if current != bundle.source_files:
+        raise ExactReplayError(EXACT_REPLAY_SOURCE_ARTIFACT_HASH_MISMATCH)
+    return True
+
+
+__all__ = [
+    "ExactReplayError",
+    "ExactSemanticSourceBundle",
+    "SourceFileSnapshot",
+    "REQUIRED_SOURCE_ARTIFACTS",
+    "SEMANTIC_ARTIFACT_COPY_FILENAMES",
+    "load_exact_semantic_source_bundle",
+    "verify_source_bundle_unchanged",
+    "sha256_canonical_json",
+    "EXACT_REPLAY_SEMANTIC_ARTIFACT_MISSING",
+    "EXACT_REPLAY_SEMANTIC_MANIFEST_INVALID",
+    "EXACT_REPLAY_SEMANTIC_NOT_READY",
+    "EXACT_REPLAY_SEMANTIC_CALL_CORRUPTED",
+    "EXACT_REPLAY_SEMANTIC_INPUT_MISMATCH",
+    "EXACT_REPLAY_SEMANTIC_OUTPUT_MISMATCH",
+    "EXACT_REPLAY_SEMANTIC_VERSION_MISMATCH",
+    "EXACT_REPLAY_SEMANTIC_CALL_AMBIGUOUS",
+    "EXACT_REPLAY_SEMANTIC_BINDING_MISSING",
+    "EXACT_REPLAY_SEMANTIC_BINDING_ORPHAN",
+    "EXACT_REPLAY_SEMANTIC_RUN_ID_MISMATCH",
+    "EXACT_REPLAY_TICKER_IDENTITY_MISMATCH",
+    "EXACT_REPLAY_SOURCE_ARTIFACT_INVALID",
+    "EXACT_REPLAY_SOURCE_ARTIFACT_HASH_MISMATCH",
+    "EXACT_REPLAY_STAGING_WRITE_FAILED",
+    "EXACT_REPLAY_OUTPUT_VALIDATION_FAILED",
+    "EXACT_REPLAY_PROVIDER_CALL_ATTEMPTED",
+    "EXACT_REPLAY_DATABASE_WRITE_ATTEMPTED",
+    "EXACT_REPLAY_MODE_FALLBACK_FORBIDDEN",
+]

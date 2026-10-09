@@ -1,0 +1,232 @@
+{
+  "schema_version": "t3_targeted_diagnostic_sample.v1",
+  "note": "Task-sheet Section 五 item 5(c): prepare a 40-item targeted diagnostic sample for A304/A101/A103. HONEST GAP: only 27 real samples touching these three alphas exist in the frozen 150-sample Candidate-3 Final Gold set (docs/audit_artifacts/v0_2_candidate3_final_predictions.json) -- 16 errors + 11 correct predictions. This is the REAL total, not padded to 40 with fabricated or unrelated samples, per the task sheet's own explicit instruction not to fabricate material when it is insufficient. A genuinely larger sample would require either (a) drawing NEW claims from a live run (a T3/T4 paid-Provider activity explicitly out of this round's scope) or (b) searching every other historical evaluation artifact in docs/audit_artifacts/ for additional A304/A101/A103-labeled samples outside this specific Candidate-3 gold set, which was not attempted here given this round's own time/scope bounds -- listed here as a genuine follow-up option, not done.",
+  "source_artifact": "docs/audit_artifacts/v0_2_candidate3_final_predictions.json",
+  "source_gold_artifact": "docs/audit_artifacts/v0_2_alpha_final_gold_v1.json",
+  "target_alphas": [
+    "A101",
+    "A103",
+    "A304"
+  ],
+  "real_sample_count": 27,
+  "requested_sample_count": 40,
+  "shortfall": 13,
+  "samples": [
+    {
+      "sample_id": "gold-final-001",
+      "claim_id": "66794ad5-b3a9-4fcc-aa5f-7a6d7957b7c1:bear_researcher:investment_debate_state.bear_history:claim:61",
+      "claim_text": "Trading 71% above your long-term average is not a sign of strength for new buyers — it's a quantification of mean reversion risk.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-008",
+      "claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bear_researcher:investment_debate_state.bear_history:claim:24",
+      "claim_text": "The market isn't rewarding visibility; it's setting a trap.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-019",
+      "claim_id": "299bb6af-5217-422e-bd47-1b3b07c57192:bear_researcher:investment_debate_state.bear_history:claim:61",
+      "claim_text": "The bull's PEG argument is mathematically flawed and should be dismissed outright.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-030",
+      "claim_id": "a4dae9c5-0443-48ac-a313-10151922b923:news_agent:news_report:claim:5",
+      "claim_text": "QQQ, as the highest-duration large-cap growth vehicle in the market, is the most exposed index product to this repricing.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-041",
+      "claim_id": "6cd2566d-e0f1-4306-995f-74f39efb21eb:conservative_risk_analyst:risk_debate_state.conservative_history:claim:45",
+      "claim_text": "The Trefis headline asking \"Has Microsoft Stock Run Ahead Of Its AI Payoff?\" is not \"clickbait\"; it is the central question of this investment.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-048",
+      "claim_id": "40bd7e3d-2759-45bc-97ec-8f1cf96c2266:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:24",
+      "claim_text": "On \"Forward EPS Assumes 95% Growth Continues\" The neutral analyst will argue that the forward EPS of $15.40 assumes 95% growth, which is \"too aggressive.\" Let me challenge that assumption with the actual trajectory.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-051",
+      "claim_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1:bull_researcher:investment_debate_state.bull_history:claim:98",
+      "claim_text": "Factor: Valuation; Bear View: 120x trailing P/E; Bull Counter: 30.4x forward P/E, PEG 1.03; Verdict: Fairly valued",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-052",
+      "claim_id": "1a338ced-118e-44d2-b3f6-2444bfb9d7e6:neutral_risk_analyst:risk_debate_state.neutral_history:claim:55",
+      "claim_text": "The question is not whether TSM is a great company; it is whether the current price offers a favorable risk-reward.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-057",
+      "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:news_agent:news_report:claim:38",
+      "claim_text": "Zscaler fell 4% despite an earnings beat, as FY2027 growth guidance overshadowed results — raising \"whether even the strongest growth numbers can justify where these stocks are priced.\"",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-059",
+      "claim_id": "fc09821e-c7cf-40a7-bd76-c98172e16992:bull_researcher:investment_debate_state.bull_history:claim:23",
+      "claim_text": "CoreWeave's CEO says they are \"struggling to keep up with demand for Nvidia chips.\" Every single one of these demand signals flows through TSM's foundry and CoWoS advanced packaging.",
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-061",
+      "claim_id": "fadaa93c-8cd5-40df-a1bb-53ac4ccd1fb3:bull_researcher:investment_debate_state.bull_history:claim:147",
+      "claim_text": "Bear: \"The valuation is stretched at 23x forward earnings.\"",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-072",
+      "claim_id": "b71765a0-1c9f-435a-a5f7-4ce0ea8d28a6:news_agent:news_report:claim:61",
+      "claim_text": "Rate environment: 89% probability of no Fed cuts in 2026, with 19-year-high yields — a headwind for high-multiple growth stocks.",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "NONE",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-074",
+      "claim_id": "0a44ec41-c181-488d-94b8-00a333e85ddb:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:14",
+      "claim_text": "Nvidia just told the market its AI boom runs through fiscal 2028 with demand exceeding supply.",
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A101",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-077",
+      "claim_id": "66794ad5-b3a9-4fcc-aa5f-7a6d7957b7c1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:53",
+      "claim_text": "When hyperscalers get squeezed by investors to justify their AI capex spending, they do not stop spending.",
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-079",
+      "claim_id": "40bd7e3d-2759-45bc-97ec-8f1cf96c2266:fundamental_agent:fundamentals_report:claim:80",
+      "claim_text": "Any slowdown in AI spending could trigger significant multiple compression.",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-083",
+      "claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:bull_researcher:investment_debate_state.bull_history:claim:3",
+      "claim_text": "On Valuation: \"Priced for Perfection\"",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-084",
+      "claim_id": "fadaa93c-8cd5-40df-a1bb-53ac4ccd1fb3:bull_researcher:investment_debate_state.bull_history:claim:14",
+      "claim_text": "Google Cloud & AI Infrastructure: The massive CapEx buildout ($44.92B in Q2 2026 alone) is directly monetizing through cloud services and AI inference demand.",
+      "historical_gold_label": "A103",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-085",
+      "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:trader:trader_investment_plan:claim:3",
+      "claim_text": "However, the bear's medium-term tactical case is equally compelling: a 72% probability of a rate hike and 93% odds of no cuts repricing long-duration growth at 29x PE, a broad crack in the software/media complex (Netflix -4%, Adobe -7%, UiPath -14%, Zscaler -4%), and deteriorating momentum with the MACD histogram negative since August 21.",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-092",
+      "claim_id": "8d21c047-fc0a-4d94-957d-3787f353a544:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:36",
+      "claim_text": "Yes, NAND storage demand from AI data centers is real and secular.",
+      "historical_gold_label": "A103",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-097",
+      "claim_id": "07ddc074-9ab2-4b16-8957-acbf94012144:bear_researcher:investment_debate_state.bear_history:claim:52",
+      "claim_text": "And the stock is trading at 8.3x book value—a premium that requires flawless execution.",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-099",
+      "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:18",
+      "claim_text": "You are applying a backward-looking multiple to a forward-looking earnings explosion.",
+      "historical_gold_label": "A301",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-100",
+      "claim_id": "a8d47429-a47a-446b-93c4-dd718b8e2ff9:news_agent:news_report:claim:56",
+      "claim_text": "Factor: AI CapEx / GPU Demand; Signal: Bullish; Evidence: CoreWeave-HRT deal (Vera Rubin); Lambda $1B debt for Nvidia chips; demand outpacing supply; Implication for NVDA: Sustained demand & pricing power",
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A101",
+      "historical_candidate3_correct": true
+    },
+    {
+      "sample_id": "gold-final-106",
+      "claim_id": "64568bfb-fe0c-453c-9872-831a8dc339a0:conservative_risk_analyst:risk_debate_state.conservative_history:claim:21",
+      "claim_text": "You can't simultaneously argue the multiple is dangerously rich and that the forward multiple already embeds aggressive growth expectations.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-127",
+      "claim_id": "52c23371-c374-4064-a91c-20c599ffa79c:neutral_risk_analyst:risk_debate_state.neutral_history:claim:56",
+      "claim_text": "The hawkish Fed and rising yields are a real headwind, but the low recession probability supports continued AI capex.",
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "NONE",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-132",
+      "claim_id": "e8e0f398-7b26-4462-8135-a1410ea5b335:conservative_risk_analyst:risk_debate_state.conservative_history:claim:52",
+      "claim_text": "When rates rise, the discount rate rises, and the multiple compresses.",
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "NONE",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-144",
+      "claim_id": "299bb6af-5217-422e-bd47-1b3b07c57192:fundamental_agent:fundamentals_report:claim:64",
+      "claim_text": "Capital Expenditure Surge: Net PPE has grown dramatically from $184.6B (FY2024) to $338.9B (Q2 2026), underscoring the massive infrastructure buildout.",
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": false
+    },
+    {
+      "sample_id": "gold-final-147",
+      "claim_id": "949f685a-3945-4fd0-b7b9-362b37c90721:bull_researcher:investment_debate_state.bull_history:claim:66",
+      "claim_text": "A strong economy means continued hyperscaler capex, continued enterprise AI adoption, and continued demand for AMD’s data center products.",
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A101",
+      "historical_candidate3_correct": true
+    }
+  ]
+}

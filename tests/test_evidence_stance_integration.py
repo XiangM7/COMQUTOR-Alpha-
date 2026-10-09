@@ -306,7 +306,11 @@ def test_33_34_35_conflict_outcomes_are_real_and_internally_consistent(real_comp
     # replay-verification runs, so the exact counts legitimately differ).
     conflict_result = real_completed_run["conflict_result"]
     arb = conflict_result["arbitration"]
-    assert arb["declared_pair_count"] == 6
+    # 8, not the original MVP-10 6: PD-017-REVISED (alpha_taxonomy_v1.yaml's
+    # own content_change_log) added two new reciprocal conflict_alphas
+    # declarations (A102<->A304, A201<->A304), already authorized and
+    # already shipped -- this hardcoded count predates that change.
+    assert arb["declared_pair_count"] == 8
     assert (
         arb["admitted_count"] + arb["suppressed_count"] + arb["rejected_count"]
         == arb["declared_pair_count"]

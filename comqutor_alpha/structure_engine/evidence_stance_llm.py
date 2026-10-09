@@ -66,9 +66,17 @@ FALLBACK_IDENTITY_MISMATCH = "identity_mismatch"
 FALLBACK_INVALID_STANCE = "invalid_stance"
 FALLBACK_INVALID_COUNTER_ALPHA = "invalid_counter_alpha"
 FALLBACK_DUPLICATE_RESULT = "duplicate_result"
+# 2026-10-08 (T4 round 28): never sent -- an earlier request of the run got
+# HTTP 401/403/429 and the run was stopped (comqutor_alpha.run_provider_stop).
+FALLBACK_PROVIDER_STOPPED = "provider_stopped"
+# 2026-10-09 (T4 round 32): never sent -- input over the gateway's local size limit (WEEK2_LLM_INPUT_TOO_LARGE); same
+# reason string as alpha_mapper / content_support_llm. Previously folded into malformed_response.
+FALLBACK_INPUT_TOO_LARGE = "input_too_large"
 
 VALID_FALLBACK_REASONS = frozenset(
     {
+        FALLBACK_PROVIDER_STOPPED,
+        FALLBACK_INPUT_TOO_LARGE,
         FALLBACK_PROVIDER_ERROR,
         FALLBACK_TIMEOUT,
         FALLBACK_MALFORMED_RESPONSE,
@@ -210,9 +218,13 @@ def _validate_batch_shape(payload: Any) -> list[Any]:
 def _reason_from_invocation(invocation: Any) -> str:
     status = getattr(invocation, "provider_status", None)
     error_code = getattr(invocation, "error_code", None)
+    if error_code == "WEEK2_LLM_RUN_STOPPED_AFTER_PROVIDER_REFUSAL":
+        return FALLBACK_PROVIDER_STOPPED
     if status == "timeout":
         return FALLBACK_TIMEOUT
-    if error_code in {"WEEK2_LLM_INVALID_JSON", "WEEK2_LLM_VALIDATION_FAILED", "WEEK2_LLM_INPUT_TOO_LARGE"}:
+    if error_code == "WEEK2_LLM_INPUT_TOO_LARGE":
+        return FALLBACK_INPUT_TOO_LARGE
+    if error_code in {"WEEK2_LLM_INVALID_JSON", "WEEK2_LLM_VALIDATION_FAILED"}:
         return FALLBACK_MALFORMED_RESPONSE
     return FALLBACK_PROVIDER_ERROR
 

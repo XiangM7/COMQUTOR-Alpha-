@@ -1,0 +1,60 @@
+/* T1 closure: evidence trace + key-conclusion status. Kept in its own file so the shared stylesheet is untouched. */
+.evidence-basis-toggle { margin-top: 0.5rem; }
+.evidence-basis-button { font-size: 0.85rem; padding: 0.25rem 0.6rem; }
+.evidence-trace { border-left: 3px solid #4b6cb7; padding: 0.5rem 0 0.5rem 0.9rem; margin-top: 0.6rem; font-size: 0.9rem; }
+.evidence-trace h5 { margin: 0.9rem 0 0.35rem; font-size: 0.95rem; }
+.evidence-trace h6 { margin: 0.6rem 0 0.25rem; font-size: 0.85rem; }
+.evidence-trace-loading, .evidence-trace-note, .evidence-trace-no-content { color: #5b6270; font-size: 0.85rem; }
+.evidence-trace-error { color: #a12626; }
+.evidence-trace-statuses { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.6rem; }
+.evidence-trace-status { border: 1px solid #d5d9e3; border-radius: 6px; padding: 0.5rem 0.6rem; background: #fafbfd; }
+.evidence-trace-status h5 { margin-top: 0; }
+.evidence-trace-status-label { margin: 0.2rem 0; }
+.evidence-trace-status-extra { margin: 0.2rem 0; color: #3b4252; font-size: 0.8rem; }
+.evidence-trace-status-reason { margin: 0.2rem 0 0; font-size: 0.82rem; color: #3b4252; }
+.evidence-trace-chip { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em; border-radius: 999px; padding: 0.05rem 0.5rem; background: #e6eaf5; color: #2c3a66; }
+.evidence-trace-chip-warning { background: #fff1d6; color: #7a4b00; }
+.evidence-trace-agent-wording { background: #fff8e8; border: 1px solid #f1d9a4; border-radius: 6px; padding: 0.4rem 0.6rem; }
+.evidence-trace-status-verified-support { border-color: #8cc79b; background: #f3fbf5; }
+.evidence-trace-status-technical-incomplete, .evidence-trace-status-partial-support, .evidence-trace-status-relation-unresolved { border-color: #e2c27a; background: #fffaf0; }
+.evidence-trace-status-not-linked, .evidence-trace-status-not-scored { border-color: #d5d9e3; }
+.evidence-trace-meta { display: grid; grid-template-columns: max-content 1fr; gap: 0.15rem 0.8rem; margin: 0.3rem 0; }
+.evidence-trace-meta > div { display: contents; }
+.evidence-trace-meta dt { color: #5b6270; }
+.evidence-trace-meta dd { margin: 0; word-break: break-word; }
+.evidence-trace-sources { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.8rem; }
+.evidence-trace-material { border-collapse: collapse; margin: 0.4rem 0; font-size: 0.82rem; }
+.evidence-trace-material caption { text-align: left; color: #5b6270; padding-bottom: 0.2rem; }
+.evidence-trace-material th, .evidence-trace-material td { border: 1px solid #e0e3ec; padding: 0.15rem 0.5rem; text-align: left; }
+.evidence-trace-cell-used td { background: #eef6ff; font-weight: 600; }
+.evidence-trace-unit { font-weight: 400; color: #5b6270; }
+.evidence-trace blockquote { margin: 0.3rem 0; padding: 0.3rem 0.6rem; border-left: 3px solid #c8cfe0; background: #f6f7fb; white-space: pre-wrap; word-break: break-word; }
+.evidence-trace-calculations { list-style: none; padding: 0; display: grid; gap: 0.6rem; }
+.evidence-trace-calculation-inputs { margin: 0.2rem 0 0.2rem 1rem; padding: 0; }
+.key-conclusions-panel .key-conclusions-group { margin: 0.6rem 0; }
+.key-conclusions-panel summary { cursor: pointer; font-weight: 600; }
+.key-conclusions-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.4rem; }
+.key-conclusions-table th, .key-conclusions-table td { border-bottom: 1px solid #e0e3ec; padding: 0.35rem 0.45rem; vertical-align: top; text-align: left; }
+.key-conclusion-status-label { display: block; font-size: 0.75rem; color: #3b4252; margin-top: 0.15rem; }
+.key-conclusion-detail-row > td { background: #fbfcfe; }
+.key-conclusions-summary { font-size: 0.85rem; color: #3b4252; }
+
+/* T1 closeout: historical use in a conflict, and the legacy-run note, are visually separate from the current basis */
+.evidence-trace-historical-use {
+  border-left: 3px solid var(--evidence-trace-border, #b8c4d6);
+  padding-left: 0.75rem;
+}
+.evidence-trace-current-basis-heading {
+  margin: 0.75rem 0 0.25rem;
+}
+.evidence-trace-legacy-note {
+  margin: 0 0 0.5rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--evidence-trace-note-bg, rgba(120, 140, 170, 0.12));
+  border-radius: 4px;
+}
+.evidence-trace-derived-inputs {
+  margin: 0.25rem 0;
+  font-size: 0.875em;
+}
+

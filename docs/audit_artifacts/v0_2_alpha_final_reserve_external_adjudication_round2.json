@@ -1,0 +1,43 @@
+{
+  "schema_version": "alpha_final_reserve_external_adjudication.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "round": 2,
+  "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+  "system_predictions_seen": false,
+  "candidate3_outputs_seen": false,
+  "sample_count": 4,
+  "labels": [
+    {
+      "replacement_slot": 1,
+      "sample_id": "nh-reserve-039",
+      "expected_label": "A101",
+      "confidence": "medium",
+      "ambiguity_flag": null,
+      "adjudication_reason": "The claim explicitly links enterprise AI adoption and continued hyperscaler spending to continued demand for AMD data-center products; the most direct canonical mechanism is AI-driven accelerator/product demand under A101."
+    },
+    {
+      "replacement_slot": 2,
+      "sample_id": "nh-reserve-040",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "NOT_A_SUBSTANTIVE_CLAIM",
+      "adjudication_reason": "The sentence is only a meta-conclusion about the debate ('Neither side has a decisive edge') and does not state a substantive market or economic mechanism."
+    },
+    {
+      "replacement_slot": 3,
+      "sample_id": "nh-reserve-041",
+      "expected_label": "NONE",
+      "confidence": "low",
+      "ambiguity_flag": "NOT_A_SUBSTANTIVE_CLAIM",
+      "adjudication_reason": "This is a setup/transition sentence promising an explanation of an 'analytical trap' but does not state the underlying mechanism."
+    },
+    {
+      "replacement_slot": 4,
+      "sample_id": "nh-reserve-042",
+      "expected_label": "NONE",
+      "confidence": "high",
+      "ambiguity_flag": null,
+      "adjudication_reason": "Maintaining the current position without adding or trimming is a portfolio-action decision, not a canonical Alpha mechanism."
+    }
+  ]
+}

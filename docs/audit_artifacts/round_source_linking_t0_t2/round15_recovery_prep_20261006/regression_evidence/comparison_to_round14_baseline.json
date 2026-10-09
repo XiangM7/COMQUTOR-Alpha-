@@ -1,0 +1,42 @@
+{
+  "unfiltered_run": {
+    "totals": {
+      "passed": 4881,
+      "failed": 39,
+      "skipped": 56,
+      "error": 3
+    },
+    "baseline_nodeids": 37,
+    "still_failing_from_baseline": 37,
+    "new_failures_not_in_baseline": [
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherDatabaseIsolationEndToEnd::test_caller_override_survives_the_env_reload",
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherDatabaseIsolationEndToEnd::test_no_caller_override_uses_env_value_unchanged",
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherWeek2MaxRetriesIsolationEndToEnd::test_caller_override_survives_the_env_reload",
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherWeek2MaxRetriesIsolationEndToEnd::test_no_caller_override_uses_env_value_unchanged",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ],
+    "baseline_nodeids_now_passing": [],
+    "baseline_nodeids_absent_from_this_run": []
+  },
+  "round14_filter_applied_to_this_run": {
+    "round14_filter": "pytest tests/ -q -p no:cacheprovider --ignore=tests/test_live_launcher_database_isolation.py -k \"not live and not fresh_run and not nvda_fresh and not qqq\"",
+    "kept_totals": {
+      "passed": 4694,
+      "failed": 34,
+      "skipped": 56,
+      "error": 3
+    },
+    "dropped_totals": {
+      "passed": 187,
+      "failed": 5
+    },
+    "kept_failures_equal_round14_baseline": true,
+    "failing_among_dropped": [
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherDatabaseIsolationEndToEnd::test_caller_override_survives_the_env_reload",
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherDatabaseIsolationEndToEnd::test_no_caller_override_uses_env_value_unchanged",
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherWeek2MaxRetriesIsolationEndToEnd::test_caller_override_survives_the_env_reload",
+      "tests/test_live_launcher_database_isolation.py::TestLiveLauncherWeek2MaxRetriesIsolationEndToEnd::test_no_caller_override_uses_env_value_unchanged",
+      "tests/test_w5_demo_seed.py::test_only_nvda_and_qqq_are_seeded"
+    ]
+  }
+}

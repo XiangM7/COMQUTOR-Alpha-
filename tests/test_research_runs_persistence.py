@@ -74,6 +74,10 @@ def test_migration_idempotent_reapply_is_a_no_op():
 def test_migration_does_not_alter_0001_0002_semantics():
     engine = build_engine("sqlite:///:memory:")
     applied = apply_migrations(engine)
+    # 0007 (T1 source-linking chain, 2026-09-28): an additive, nullable-
+    # column migration on agent_outputs, already verified against real
+    # Postgres (see schema.py's own COLUMN_MIGRATIONS comment) -- this
+    # list was never updated after that migration shipped.
     assert applied == [
         "0001_create_week3_alpha_matches_and_structure_graphs",
         "0002_create_week4_alpha_activations_and_alpha_conflicts",
@@ -81,6 +85,7 @@ def test_migration_does_not_alter_0001_0002_semantics():
         "0004_create_agent_outputs",
         "0005_create_research_run_progress",
         "0006_create_entity_alpha_exposures",
+        "0007_add_agent_outputs_source_linking_columns",
     ]
 
 

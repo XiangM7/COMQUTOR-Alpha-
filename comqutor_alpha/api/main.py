@@ -100,6 +100,10 @@ try:
             # (outputs/replays)" -- no other route reads this.
             app.state.replay_output_root = replay_output_root
             app.state.job_manager = None
+            # T4 (2026-10-08): pin this process's code identity at startup (the code it loaded), reported by /ready.
+            from comqutor_alpha.run_environment import process_code_identity
+
+            process_code_identity()
 
             # Startup reconciliation: local single-instance semantics --
             # any queued/running row surviving from a previous process is

@@ -11,51 +11,31 @@ function localTodayIso(): string {
 }
 
 describe("ResearchForm", () => {
-  it("defaults to all four analysts selected, in the product display order", () => {
-    render(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} />);
-    const checkboxes = screen.getAllByRole("checkbox");
-    expect(checkboxes).toHaveLength(4);
-    for (const label of ["Market", "Sentiment", "News", "Fundamentals"]) {
-      expect(screen.getByLabelText(label)).toBeChecked();
-    }
-    const labels = checkboxes.map((box) => box.closest("label")?.textContent?.trim());
-    expect(labels).toEqual(["Market", "Sentiment", "News", "Fundamentals"]);
-  });
-
-  it("exposes exactly three user input categories: ticker, date, analysts", () => {
+  it("exposes exactly one user input: the ticker", () => {
     const { container } = render(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} />);
     expect(screen.getByLabelText(/ticker/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/analysis date/i)).toBeInTheDocument();
-    expect(screen.getAllByRole("checkbox")).toHaveLength(4);
+    // No date picker, no analyst selection.
+    expect(screen.queryByLabelText(/analysis date/i)).toBeNull();
+    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.queryByText(/analysts team/i)).toBeNull();
     // No Advanced options, no force refresh, no provider/model/key inputs.
     expect(container.querySelector("details")).toBeNull();
     expect(screen.queryByText(/advanced options/i)).toBeNull();
     expect(screen.queryByLabelText(/force refresh/i)).toBeNull();
-    const inputs = Array.from(container.querySelectorAll("input"));
-    expect(inputs).toHaveLength(6); // ticker + date + 4 analyst checkboxes
+    expect(container.querySelectorAll("input")).toHaveLength(1);
   });
 
-  it("defaults the analysis date to today", () => {
-    render(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} />);
-    expect(screen.getByLabelText(/analysis date/i)).toHaveValue(localTodayIso());
-  });
-
-  it("rejects an analysis date later than today", async () => {
+  it("disables Start research until a ticker is entered", async () => {
     const user = userEvent.setup();
-    const onSubmit = vi.fn();
-    render(<ResearchForm isSubmitting={false} onSubmit={onSubmit} />);
+    render(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} />);
+    const start = screen.getByRole("button", { name: /start research/i });
+    expect(start).toBeDisabled();
 
-    const dateInput = screen.getByLabelText(/analysis date/i);
-    // fireEvent-style direct value set: the max attribute blocks typing a
-    // future date through the picker, but a manual value must still be
-    // validated client-side.
-    await user.clear(dateInput);
-    await user.type(dateInput, "2099-01-01");
-    await user.type(screen.getByLabelText(/ticker/i), "NVDA");
-    await user.click(screen.getByRole("button", { name: /start research/i }));
+    await user.type(screen.getByLabelText(/ticker/i), "   ");
+    expect(start).toBeDisabled();
 
-    expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent(/cannot be later than today/i);
+    await user.type(screen.getByLabelText(/ticker/i), "nvda");
+    expect(start).toBeEnabled();
   });
 
   it("normalizes the ticker (trim + uppercase) before submitting", async () => {
@@ -71,19 +51,25 @@ describe("ResearchForm", () => {
     );
   });
 
-  it("requires at least one analyst to be selected", async () => {
+  it("submits with Enter from the ticker field", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
     render(<ResearchForm isSubmitting={false} onSubmit={onSubmit} />);
 
-    for (const label of ["Market", "Sentiment", "News", "Fundamentals"]) {
-      await user.click(screen.getByLabelText(label));
-    }
-    await user.type(screen.getByLabelText(/ticker/i), "NVDA");
-    await user.click(screen.getByRole("button", { name: /start research/i }));
+    await user.type(screen.getByLabelText(/ticker/i), "amd{Enter}");
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ ticker: "AMD" }));
+  });
+
+  it("does not submit on Enter while the ticker is empty", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<ResearchForm isSubmitting={false} onSubmit={onSubmit} />);
+
+    await user.type(screen.getByLabelText(/ticker/i), "{Enter}");
 
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent(/select at least one analyst/i);
   });
 
   it("submits exactly ticker/analysis_date/selected_analysts and nothing else", async () => {
@@ -99,12 +85,6 @@ describe("ResearchForm", () => {
       "analysis_date",
       "selected_analysts",
       "ticker",
-    ]);
-    expect(request.selected_analysts).toEqual([
-      "market",
-      "sentiment",
-      "news",
-      "fundamentals",
     ]);
     for (const forbidden of [
       "provider",
@@ -128,17 +108,11 @@ describe("ResearchForm", () => {
     }
   });
 
-  it("deduplicates and canonically orders the analyst selection", async () => {
+  it("always sends the full analyst team in the frozen product order", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
     render(<ResearchForm isSubmitting={false} onSubmit={onSubmit} />);
 
-    // Toggle a couple off and back on in a scrambled order -- the payload
-    // must still come out canonical.
-    await user.click(screen.getByLabelText("Market"));
-    await user.click(screen.getByLabelText("News"));
-    await user.click(screen.getByLabelText("News"));
-    await user.click(screen.getByLabelText("Market"));
     await user.type(screen.getByLabelText(/ticker/i), "NVDA");
     await user.click(screen.getByRole("button", { name: /start research/i }));
 
@@ -146,16 +120,71 @@ describe("ResearchForm", () => {
     expect(request.selected_analysts).toEqual(["market", "sentiment", "news", "fundamentals"]);
   });
 
-  it("disables the submit button while a submission is in flight", () => {
+  it("always sends today's local date explicitly, never leaving it to a server default", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<ResearchForm isSubmitting={false} onSubmit={onSubmit} />);
+
+    await user.type(screen.getByLabelText(/ticker/i), "NVDA");
+    await user.click(screen.getByRole("button", { name: /start research/i }));
+
+    const request = onSubmit.mock.calls[0]?.[0] as { analysis_date: string };
+    expect(request.analysis_date).toBe(localTodayIso());
+  });
+
+  it("shows Starting… on a busy, disabled button while a submission is in flight", () => {
     render(<ResearchForm isSubmitting onSubmit={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /submitting/i })).toBeDisabled();
+    const button = screen.getByRole("button", { name: "Starting…" });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
+    expect(button).toHaveClass("cta-button-busy");
+    expect(button).toHaveAttribute("data-transition", "cta");
+  });
+
+  it("swaps the input for the ticker as plain text while submitting, so it can fly into the next page", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} />);
+    await user.type(screen.getByLabelText(/ticker/i), "  nvda ");
+
+    rerender(<ResearchForm isSubmitting onSubmit={vi.fn()} />);
+
+    expect(screen.queryByRole("textbox")).toBeNull();
+    const text = document.querySelector('[data-transition="ticker"]');
+    expect(text).toHaveTextContent("NVDA");
+
+    // A failed start brings the input back with what was typed.
+    rerender(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} />);
+    expect(screen.getByRole("textbox")).toHaveValue("  nvda ");
+  });
+
+  it("ignores a second submit while one is in flight", () => {
+    const onSubmit = vi.fn();
+    render(<ResearchForm isSubmitting onSubmit={onSubmit} />);
+    const form = document.querySelector("form")!;
+    if (form.requestSubmit) {
+      form.requestSubmit();
+    } else {
+      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    }
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("renders the leading action before Start research, outside the ticker form", () => {
+    render(
+      <ResearchForm isSubmitting={false} onSubmit={vi.fn()} leadingAction={<button type="button">Recent runs</button>} />
+    );
+    const recent = screen.getByRole("button", { name: "Recent runs" });
+    const start = screen.getByRole("button", { name: /start research/i });
+    expect(recent.compareDocumentPosition(start) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(recent.closest("form")).toBeNull();
   });
 
   // Live-research readiness guard (operational safety fix): the two fresh
   // live runs (NVDA/SNDK) that recorded zero Alpha activation happened
   // because a live submission was allowed through while Week2's semantic
   // pipeline was not ready. The form must never let that happen again.
-  it("disables Start research and shows the reason when disabledReason is set", () => {
+  it("disables Start research and shows the reason when disabledReason is set", async () => {
+    const user = userEvent.setup();
     render(
       <ResearchForm
         isSubmitting={false}
@@ -163,6 +192,7 @@ describe("ResearchForm", () => {
         disabledReason="Live semantic pipeline not ready. Live research was not started."
       />
     );
+    await user.type(screen.getByLabelText(/ticker/i), "NVDA");
     expect(screen.getByRole("button", { name: /start research/i })).toBeDisabled();
     expect(screen.getByText(/live semantic pipeline not ready/i)).toBeInTheDocument();
   });
@@ -181,15 +211,21 @@ describe("ResearchForm", () => {
     // The button itself is disabled (already covered above); this proves
     // the handler's own early-return guard also blocks a submit that
     // somehow still reaches it (e.g. pressing Enter in a text field).
-    const form = screen.getByRole("button", { name: /start research/i }).closest("form")!;
-    form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    const form = screen.getByLabelText(/ticker/i).closest("form")!;
+    if (form.requestSubmit) {
+      form.requestSubmit();
+    } else {
+      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    }
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("re-enables the submit button once disabledReason clears", () => {
+  it("re-enables the submit button once disabledReason clears", async () => {
+    const user = userEvent.setup();
     const { rerender } = render(
       <ResearchForm isSubmitting={false} onSubmit={vi.fn()} disabledReason="Live semantic pipeline not ready." />
     );
+    await user.type(screen.getByLabelText(/ticker/i), "NVDA");
     expect(screen.getByRole("button", { name: /start research/i })).toBeDisabled();
     rerender(<ResearchForm isSubmitting={false} onSubmit={vi.fn()} disabledReason={null} />);
     expect(screen.getByRole("button", { name: /start research/i })).not.toBeDisabled();

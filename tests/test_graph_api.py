@@ -100,10 +100,16 @@ def test_get_graph_returns_the_exact_persisted_run(tmp_path):
 
 def test_new_run_uses_structure_graph_schema_v2(tmp_path):
     """Structure Graph Schema v2 contract test #1/#4: a freshly-completed
-    run's persisted graph declares schema_version v2, carries both
+    run's persisted graph declares schema_version v2, carries all three
     activation_versions blocks, and its primary_activation_version is the
-    Activation v2 formula -- read back through the real GET .../graph API
-    path, not asserted from a hand-built fixture."""
+    verified-gate Activation v2 formula -- read back through the real GET
+    .../graph API path, not asserted from a hand-built fixture.
+
+    T1 gate-bypass fix (2026-09-29): require_verified_evidence_gate=True on
+    the real run_research_request entrypoint now makes the verified-gate
+    view official unconditionally -- v2_verified is always present and
+    "activation" always equals it, never the plain v2 formula version, even
+    for a run with no source-linked/reviewed claims."""
     repo = _repo()
     response = run_research_request(_payload(), output_root=tmp_path, graph_repository=repo)
     run_id = response["run_id"]
@@ -112,10 +118,15 @@ def test_new_run_uses_structure_graph_schema_v2(tmp_path):
 
     assert graph["status"] == "ok"
     assert graph["schema_version"] == "week3.structure_graph.v2"
-    assert graph["primary_activation_version"] == "activation.v2.evidence_local_structure.v1"
-    assert set(graph["activation_versions"]) == {"v1", "v2"}
-    assert graph["activation"] == graph["activation_versions"]["v2"]
+    assert graph["primary_activation_version"] == (
+        "activation.v2.evidence_local_structure.verified_gate.v1"
+    )
+    assert set(graph["activation_versions"]) == {"v1", "v2", "v2_verified"}
+    assert graph["activation"] == graph["activation_versions"]["v2_verified"]
     assert graph["activation_versions"]["v1"]["formula_version"] == "week3.activation.mvp_v1"
+    assert graph["activation_versions"]["v2"]["formula_version"] == (
+        "activation.v2.evidence_local_structure.v1"
+    )
 
 
 def test_historical_v1_only_run_is_still_readable_via_the_api(tmp_path):

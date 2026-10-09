@@ -1,0 +1,172 @@
+{
+ "plan": "hang",
+ "job_timeout_seconds": 30,
+ "week2_max_calls": 4,
+ "port": 8003,
+ "database": "comqutor_alpha_t4_rehearsal_test",
+ "server_pid": 23101,
+ "ready": {
+  "status": "ready",
+  "database": "ready",
+  "job_manager": "ready",
+  "real_execution": "disabled",
+  "real_execution_reason": null,
+  "live_semantic_pipeline": "not_applicable",
+  "live_semantic_pipeline_reason": null,
+  "profile": {
+   "profile_id": "comqutor_deepseek_default_v1",
+   "profile_display_name": "DeepSeek Default Research",
+   "provider": "deepseek",
+   "quick_model": "deepseek-v4-flash",
+   "deep_model": "deepseek-v4-flash",
+   "thinking": "disabled",
+   "max_debate_rounds": 1,
+   "max_risk_discuss_rounds": 1
+  },
+  "database_backend": {
+   "dialect": "postgresql",
+   "database": "comqutor_alpha_t4_rehearsal_test",
+   "reason": null
+  },
+  "week2_semantic": {
+   "enabled": true,
+   "execution_profile": "t3_verified_20261008",
+   "profile_error": null,
+   "model": "deepseek-v4-flash",
+   "max_calls": 4,
+   "request_response_audit": true
+  },
+  "code_identity": {
+   "status": "known",
+   "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+   "uncommitted_changes": true,
+   "tracked_diff_sha256": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+   "untracked_runtime_source_sha256": "38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad",
+   "computed_at": "2026-10-09T00:45:40.551375+00:00"
+  }
+ },
+ "submission": {
+  "http_status": 202,
+  "body": {
+   "run_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179",
+   "ticker": "NVDA",
+   "status": "queued",
+   "run_status": "queued",
+   "stage": "accepted",
+   "cache_disposition": "created"
+  }
+ },
+ "run_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179",
+ "status_transitions": [
+  {
+   "t": 1.21,
+   "status": "queued",
+   "stage": "accepted",
+   "error_code": null
+  },
+  {
+   "t": 3.59,
+   "status": "running",
+   "stage": "research_pipeline",
+   "error_code": null
+  },
+  {
+   "t": 31.28,
+   "status": "failed",
+   "stage": "failed",
+   "error_code": "RESEARCH_TIMEOUT"
+  }
+ ],
+ "terminal_status": {
+  "run_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179",
+  "ticker": "NVDA",
+  "analysis_date": "2026-09-03",
+  "selected_analysts": [
+   "market",
+   "sentiment",
+   "news",
+   "fundamentals"
+  ],
+  "status": "failed",
+  "stage": "failed",
+  "error_code": "RESEARCH_TIMEOUT",
+  "message": "Research run exceeded the configured timeout.",
+  "created_at": "2026-10-09T00:45:42.258871+00:00",
+  "started_at": "2026-10-09T00:45:44.541689+00:00",
+  "completed_at": "2026-10-09T00:46:12.395981+00:00",
+  "updated_at": "2026-10-09T00:46:12.395981+00:00",
+  "profile_id": "offline_fixture_v1",
+  "profile_display_name": null,
+  "progress_percent": 79,
+  "current_stage": "failed",
+  "completed_units": 2,
+  "total_units": 15,
+  "progress_message": "Research run exceeded the configured timeout.",
+  "elapsed_seconds": 27,
+  "eta_status": "unavailable",
+  "estimated_remaining_seconds_min": null,
+  "estimated_remaining_seconds_max": null,
+  "eta_sample_count": 0
+ },
+ "response_after_termination": {
+  "status": "partial",
+  "artifacts": {
+   "metadata": true,
+   "raw_agent_outputs": true,
+   "structured_agent_outputs": true,
+   "final_report": false,
+   "alpha_matches": false,
+   "extracted_structures": false,
+   "structured_output_error_logs": false,
+   "week2_llm_error_logs": true,
+   "week2_pipeline_error_logs": false
+  },
+  "alpha_classification_completion": {
+   "total_claims": 0,
+   "valid_select_count": 0,
+   "valid_none_count": 0,
+   "call_failure_count": 0,
+   "not_executed_count": 0,
+   "not_executed_configuration_count": 0,
+   "not_executed_fault_count": 0,
+   "complete": false
+  },
+  "provider_stop": null
+ },
+ "server_exit_code": -15,
+ "run_dir_files": [
+  "error_logs/week2_llm_errors.jsonl",
+  "error_logs/week2_llm_provider_request_audit.jsonl",
+  "error_logs/week2_llm_provider_response_audit.jsonl",
+  "llm_semantic_calls.jsonl",
+  "metadata.json",
+  "raw_agent_outputs.json",
+  "structured_adapter_authority_routing.json",
+  "structured_agent_outputs.json"
+ ],
+ "provider_requests": {
+  "total": 4,
+  "by_task": {
+   "alpha_classifier": 4
+  },
+  "held_open": [
+   {
+    "task": "alpha_classifier",
+    "index": 3,
+    "pid": 23132,
+    "at": 1791506749.573833,
+    "claim": "Critically, the bear's case is a tactical timing thesis, not a solvency thesis, so a Sell would require a fundamental breakdown that was never delivered.",
+    "held_open": true
+   },
+   {
+    "task": "alpha_classifier",
+    "index": 4,
+    "pid": 23132,
+    "at": 1791506749.5755782,
+    "claim": "Position Sizing: Maintain existing core position; no new capital at current levels.",
+    "held_open": true
+   }
+  ]
+ },
+ "blocked_non_loopback_connections": 0
+}

@@ -30,6 +30,18 @@ LLM_CACHE_ENTRY_SCHEMA_VERSION = "comqutor.llm_cache_entry.v1"
 # supplies it, has no "execution_policy" key at all and validates exactly
 # as before. Only structured_claim_shadow currently ever sets it.
 EXECUTION_POLICY_SCHEMA_VERSION = "comqutor.semantic_call_execution_policy.v1"
+# 2026-10-01 (DeepSeek max_tokens/max_completion_tokens compatibility round):
+# two further OPTIONAL, additive sub-objects on SemanticCallRecord, following
+# the exact same pattern as execution_policy above. A record that never sets
+# them (every record persisted before this addition, and every task that
+# doesn't populate them) has no "request_control"/"provider_response" key at
+# all and validates exactly as before. Sanitized by construction -- neither
+# sub-object carries auth headers or credentials, and the existing
+# ``_secret_issues`` sweep below (already applied to the whole record) also
+# recurses into both, so an accidental credential field fails validation
+# rather than being silently persisted.
+REQUEST_CONTROL_SCHEMA_VERSION = "comqutor.semantic_call_request_control.v1"
+PROVIDER_RESPONSE_SCHEMA_VERSION = "comqutor.semantic_call_provider_response.v1"
 
 SEMANTIC_TASKS = frozenset(
     {
@@ -58,6 +70,14 @@ SEMANTIC_TASKS = frozenset(
         # call instead of one), so it gets its own registered task/cache
         # identity rather than being silently merged into "alpha_classifier".
         "alpha_classifier_batch",
+        # 2026-10-08 (T3 closeout): content_support_verification (content_
+        # support_llm.py, LLM_TASK_NAME) is a live-pipeline task with its own
+        # prompt/schema identity (week2_llm.py's _TASK_RUNTIME_METADATA) but
+        # was never registered here, so every one of its calls failed to start
+        # a semantic record (SEMANTIC_RUNTIME_CALL_START_FAILED) and was absent
+        # from llm_semantic_calls.jsonl. Registry completion only, like
+        # evidence_stance_classifier above: no prompt, schema or judgment change.
+        "content_support_verification",
     }
 )
 EXECUTION_MODES = frozenset({"live", "shadow", "replay_fixture", "test"})
@@ -129,7 +149,17 @@ _SEMANTIC_RECORD_FIELDS = frozenset(
 
 # Optional -- never counted as "missing" when absent, so every record
 # persisted before this field existed still validates unchanged.
-_OPTIONAL_SEMANTIC_RECORD_FIELDS = frozenset({"execution_policy", "profile_id"})
+# "persist_sequence" (2026-10-02, concurrent-audit-loss incident fix):
+# assigned by SemanticCallRecorder.append() itself, in true append/
+# completion order -- distinct from "call_sequence" (assigned by the
+# caller at call-START time, see validate_semantic_call_records below for
+# why both fields are validated, separately, for monotonicity).
+_OPTIONAL_SEMANTIC_RECORD_FIELDS = frozenset(
+    {
+        "execution_policy", "profile_id", "request_control", "provider_response",
+        "request_attempts", "persist_sequence", "claim_ids",
+    }
+)
 _EXECUTION_POLICY_FIELDS = frozenset(
     {"schema_version", "effective_timeout_seconds", "effective_max_retries", "execution_policy_source"}
 )
@@ -141,6 +171,19 @@ _OPTIONAL_EXECUTION_POLICY_FIELDS = frozenset(
         "final_status",
         "attempt_history",
     }
+)
+
+# 2026-10-01: sanitized actual request-control parameters (never auth
+# headers/credentials -- see REQUEST_CONTROL_SCHEMA_VERSION above).
+_REQUEST_CONTROL_FIELDS = frozenset({"schema_version", "endpoint", "request_model"})
+_OPTIONAL_REQUEST_CONTROL_FIELDS = frozenset({"max_tokens_field", "max_tokens_value"})
+
+# 2026-10-01: Provider-reported response metadata (its own request/
+# completion id, the returned model name, and its raw usage object --
+# distinct from the already-normalized three-field token_usage above).
+_PROVIDER_RESPONSE_FIELDS = frozenset({"schema_version"})
+_OPTIONAL_PROVIDER_RESPONSE_FIELDS = frozenset(
+    {"provider_request_id", "response_model", "raw_usage", "finish_reason"}
 )
 
 _CACHE_ENTRY_FIELDS = frozenset(
@@ -158,6 +201,14 @@ _CACHE_ENTRY_FIELDS = frozenset(
         "created_at",
         "expires_at",
         "source_run_id",
+        # 2026-10-06 (round 14, claim-identity traceability): the call_id of
+        # the ORIGINAL (non-cache-hit) SemanticCallRecord that produced this
+        # entry -- optional, additive, same treatment as source_run_id.
+        # Lets a later cache-hit record explicitly cite which earlier call
+        # it reused output from, without touching cache_key/input_sha256
+        # (which stay governed purely by semantic content, never by which
+        # claim_id asked).
+        "source_call_id",
     }
 )
 
@@ -180,9 +231,13 @@ class TokenUsage:
 class CacheMetadata:
     cache_key: str
     hit: bool
+    source_call_id: str | None = None
 
     def to_dict(self) -> dict[str, str | bool]:
-        return {"cache_key": self.cache_key, "hit": self.hit}
+        value: dict[str, str | bool] = {"cache_key": self.cache_key, "hit": self.hit}
+        if self.source_call_id is not None:
+            value["source_call_id"] = self.source_call_id
+        return value
 
 
 @dataclass(frozen=True)
@@ -223,6 +278,16 @@ class SemanticCallRecord:
     # never supplies it, so existing tasks' persisted shape is unchanged.
     execution_policy: Mapping[str, Any] | None = None
     profile_id: str | None = None
+    # Optional, additive (see REQUEST_CONTROL_SCHEMA_VERSION/
+    # PROVIDER_RESPONSE_SCHEMA_VERSION above). Same None-default,
+    # omitted-from-to_dict() behavior as execution_policy/profile_id.
+    request_control: Mapping[str, Any] | None = None
+    provider_response: Mapping[str, Any] | None = None
+    request_attempts: Sequence[Mapping[str, Any]] | None = None
+    # 2026-10-06 (round 14, claim-identity traceability): optional,
+    # additive -- the business claim_id(s) this call was for, supplied by
+    # the caller out-of-band (never part of input_payload/the cache key).
+    claim_ids: Sequence[str] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         base = {
@@ -262,6 +327,14 @@ class SemanticCallRecord:
             base["execution_policy"] = dict(self.execution_policy)
         if self.profile_id is not None:
             base["profile_id"] = self.profile_id
+        if self.request_control is not None:
+            base["request_control"] = dict(self.request_control)
+        if self.provider_response is not None:
+            base["provider_response"] = dict(self.provider_response)
+        if self.request_attempts:
+            base["request_attempts"] = [dict(item) for item in self.request_attempts]
+        if self.claim_ids is not None:
+            base["claim_ids"] = list(self.claim_ids)
         return base
 
 
@@ -280,6 +353,10 @@ class LLMCacheEntry:
     created_at: str
     expires_at: str | None = None
     source_run_id: str | None = None
+    # 2026-10-06 (round 14): the call_id of the original record that
+    # created this entry -- optional, additive, same None-default/omitted-
+    # from-to_dict() treatment as source_run_id.
+    source_call_id: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         value = {
@@ -298,6 +375,8 @@ class LLMCacheEntry:
         }
         if self.source_run_id is not None:
             value["source_run_id"] = self.source_run_id
+        if self.source_call_id is not None:
+            value["source_call_id"] = self.source_call_id
         return value
 
 
@@ -408,6 +487,28 @@ def validate_semantic_call_record(
             _issue(issues, "SEMANTIC_STRING_REQUIRED", "Non-empty string required", f"$.{key}")
     if "profile_id" in value and value["profile_id"] is not None and not _nonempty_string(value["profile_id"]):
         _issue(issues, "SEMANTIC_PROFILE_ID_INVALID", "profile_id must be a non-empty string", "$.profile_id")
+    if (
+        "persist_sequence" in value
+        and value["persist_sequence"] is not None
+        and not _nonnegative_int(value["persist_sequence"])
+    ):
+        _issue(
+            issues,
+            "SEMANTIC_PERSIST_SEQUENCE_INVALID",
+            "persist_sequence must be null or a non-negative integer",
+            "$.persist_sequence",
+        )
+    if "claim_ids" in value and value["claim_ids"] is not None:
+        claim_ids = value["claim_ids"]
+        if not isinstance(claim_ids, (list, tuple)) or not all(
+            _nonempty_string(item) for item in claim_ids
+        ):
+            _issue(
+                issues,
+                "SEMANTIC_CLAIM_IDS_INVALID",
+                "claim_ids must be null or a list of non-empty strings",
+                "$.claim_ids",
+            )
     if not _nonnegative_int(value["call_sequence"]):
         _issue(
             issues,
@@ -531,7 +632,12 @@ def validate_semantic_call_record(
         _issue(issues, "SEMANTIC_CACHE_METADATA_INVALID", "cache must be an object", "$.cache")
     else:
         cache_values = dict(cache)
-        if set(cache_values) != {"cache_key", "hit"}:
+        # source_call_id (2026-10-06, round 14): optional, additive -- only
+        # present on a cache-hit record, citing which earlier call's record
+        # created the entry this one reused. Required keys unchanged.
+        if not {"cache_key", "hit"} <= set(cache_values) or not set(cache_values) <= {
+            "cache_key", "hit", "source_call_id",
+        }:
             _issue(issues, "SEMANTIC_CACHE_FIELDS_INVALID", "cache fields must match v1", "$.cache")
         if not isinstance(cache_values.get("cache_key"), str) or not _CACHE_KEY_PATTERN.fullmatch(
             cache_values.get("cache_key", "")
@@ -539,6 +645,15 @@ def validate_semantic_call_record(
             _issue(issues, "SEMANTIC_CACHE_KEY_INVALID", "Versioned cache key required", "$.cache.cache_key")
         if not isinstance(cache_values.get("hit"), bool):
             _issue(issues, "SEMANTIC_CACHE_HIT_INVALID", "cache.hit must be boolean", "$.cache.hit")
+        if "source_call_id" in cache_values and cache_values["source_call_id"] is not None and not _nonempty_string(
+            cache_values["source_call_id"]
+        ):
+            _issue(
+                issues,
+                "SEMANTIC_CACHE_SOURCE_CALL_ID_INVALID",
+                "cache.source_call_id must be null or a non-empty string",
+                "$.cache.source_call_id",
+            )
 
     validation_status = value["validation_status"]
     provider_status = value["provider_status"]
@@ -616,6 +731,20 @@ def validate_semantic_call_record(
                 "SEMANTIC_NOT_CALLED_RAW_OUTPUT_FORBIDDEN",
                 "not_called cannot report raw Provider output",
                 "$.raw_output_text",
+            )
+        if value.get("request_control") is not None:
+            _issue(
+                issues,
+                "SEMANTIC_NOT_CALLED_REQUEST_CONTROL_FORBIDDEN",
+                "not_called cannot report request_control",
+                "$.request_control",
+            )
+        if value.get("provider_response") is not None:
+            _issue(
+                issues,
+                "SEMANTIC_NOT_CALLED_PROVIDER_RESPONSE_FORBIDDEN",
+                "not_called cannot report provider_response",
+                "$.provider_response",
             )
 
     cache_hit = cache_values.get("hit")
@@ -723,6 +852,159 @@ def validate_semantic_call_record(
                         "$.execution_policy.attempt_history",
                     )
 
+    if "request_control" in value:
+        control = value["request_control"]
+        if control is not None:
+            if not isinstance(control, Mapping):
+                _issue(
+                    issues,
+                    "SEMANTIC_REQUEST_CONTROL_NOT_OBJECT",
+                    "request_control must be an object or null",
+                    "$.request_control",
+                )
+            else:
+                control_missing = sorted(_REQUEST_CONTROL_FIELDS - control.keys())
+                control_unknown = sorted(
+                    control.keys() - _REQUEST_CONTROL_FIELDS - _OPTIONAL_REQUEST_CONTROL_FIELDS
+                )
+                for key in control_missing:
+                    _issue(
+                        issues,
+                        "SEMANTIC_REQUEST_CONTROL_FIELD_MISSING",
+                        "Required field is missing",
+                        f"$.request_control.{key}",
+                    )
+                for key in control_unknown:
+                    _issue(
+                        issues,
+                        "SEMANTIC_REQUEST_CONTROL_UNKNOWN_FIELD",
+                        "Unknown field is not allowed",
+                        f"$.request_control.{key}",
+                    )
+                if not control_missing:
+                    if control["schema_version"] != REQUEST_CONTROL_SCHEMA_VERSION:
+                        _issue(
+                            issues,
+                            "SEMANTIC_REQUEST_CONTROL_SCHEMA_VERSION_INVALID",
+                            "Unsupported request_control schema version",
+                            "$.request_control.schema_version",
+                        )
+                    if not _nonempty_string(control["endpoint"]):
+                        _issue(
+                            issues,
+                            "SEMANTIC_REQUEST_CONTROL_ENDPOINT_INVALID",
+                            "endpoint must be a non-empty string",
+                            "$.request_control.endpoint",
+                        )
+                    if not _nonempty_string(control["request_model"]):
+                        _issue(
+                            issues,
+                            "SEMANTIC_REQUEST_CONTROL_MODEL_INVALID",
+                            "request_model must be a non-empty string",
+                            "$.request_control.request_model",
+                        )
+                if (
+                    "max_tokens_field" in control
+                    and control["max_tokens_field"] is not None
+                    and not _nonempty_string(control["max_tokens_field"])
+                ):
+                    _issue(
+                        issues,
+                        "SEMANTIC_REQUEST_CONTROL_FIELD_NAME_INVALID",
+                        "max_tokens_field must be null or a non-empty string",
+                        "$.request_control.max_tokens_field",
+                    )
+                if (
+                    "max_tokens_value" in control
+                    and control["max_tokens_value"] is not None
+                    and not _nonnegative_int(control["max_tokens_value"])
+                ):
+                    _issue(
+                        issues,
+                        "SEMANTIC_REQUEST_CONTROL_VALUE_INVALID",
+                        "max_tokens_value must be null or a non-negative integer",
+                        "$.request_control.max_tokens_value",
+                    )
+
+    if "provider_response" in value:
+        provider_response = value["provider_response"]
+        if provider_response is not None:
+            if not isinstance(provider_response, Mapping):
+                _issue(
+                    issues,
+                    "SEMANTIC_PROVIDER_RESPONSE_NOT_OBJECT",
+                    "provider_response must be an object or null",
+                    "$.provider_response",
+                )
+            else:
+                response_missing = sorted(_PROVIDER_RESPONSE_FIELDS - provider_response.keys())
+                response_unknown = sorted(
+                    provider_response.keys()
+                    - _PROVIDER_RESPONSE_FIELDS
+                    - _OPTIONAL_PROVIDER_RESPONSE_FIELDS
+                )
+                for key in response_missing:
+                    _issue(
+                        issues,
+                        "SEMANTIC_PROVIDER_RESPONSE_FIELD_MISSING",
+                        "Required field is missing",
+                        f"$.provider_response.{key}",
+                    )
+                for key in response_unknown:
+                    _issue(
+                        issues,
+                        "SEMANTIC_PROVIDER_RESPONSE_UNKNOWN_FIELD",
+                        "Unknown field is not allowed",
+                        f"$.provider_response.{key}",
+                    )
+                if (
+                    not response_missing
+                    and provider_response["schema_version"] != PROVIDER_RESPONSE_SCHEMA_VERSION
+                ):
+                    _issue(
+                        issues,
+                        "SEMANTIC_PROVIDER_RESPONSE_SCHEMA_VERSION_INVALID",
+                        "Unsupported provider_response schema version",
+                        "$.provider_response.schema_version",
+                    )
+                for key in ("provider_request_id", "response_model", "finish_reason"):
+                    if (
+                        key in provider_response
+                        and provider_response[key] is not None
+                        and not _nonempty_string(provider_response[key])
+                    ):
+                        _issue(
+                            issues,
+                            "SEMANTIC_PROVIDER_RESPONSE_STRING_INVALID",
+                            f"{key} must be null or a non-empty string",
+                            f"$.provider_response.{key}",
+                        )
+                if (
+                    "raw_usage" in provider_response
+                    and provider_response["raw_usage"] is not None
+                    and not isinstance(provider_response["raw_usage"], Mapping)
+                ):
+                    _issue(
+                        issues,
+                        "SEMANTIC_PROVIDER_RESPONSE_RAW_USAGE_INVALID",
+                        "raw_usage must be null or an object",
+                        "$.provider_response.raw_usage",
+                    )
+
+    # 2026-10-01: one entry per real attempt (base + every retry), never
+    # overwritten by a later attempt -- deliberately validated as lightly as
+    # execution_policy's own "attempt_history" field (just confirm it's a
+    # list; per-item shape is internal diagnostic detail, not a contract
+    # callers depend on), rather than a full nested schema.
+    if "request_attempts" in value and value["request_attempts"] is not None:
+        if not isinstance(value["request_attempts"], list):
+            _issue(
+                issues,
+                "SEMANTIC_REQUEST_ATTEMPTS_NOT_LIST",
+                "request_attempts must be null or a list",
+                "$.request_attempts",
+            )
+
     issues.extend(_secret_issues(value))
     return validation_success() if not issues else validation_failure(*issues)
 
@@ -730,7 +1012,20 @@ def validate_semantic_call_record(
 def validate_semantic_call_records(
     records: Sequence[Mapping[str, Any] | SemanticCallRecord],
 ) -> ValidationResult:
-    """Validate an ordered collection, including identity and sequence invariants."""
+    """Validate an ordered collection, including identity and sequence invariants.
+
+    2026-10-02 (concurrent-audit-loss incident fix): the ordering invariant
+    checked here is now ``persist_sequence`` (assigned by
+    ``SemanticCallRecorder.append()`` itself, in true append/completion
+    order) wherever a record carries it -- never ``call_sequence``
+    (assigned by the caller at call-START time), which a real concurrent
+    run can legitimately persist out of order (a later-started call
+    completing, and being appended, before an earlier-started one). A
+    record with no ``persist_sequence`` at all (a historical, pre-fix
+    artifact) falls back to the original ``call_sequence``-based check,
+    scoped only among other such records for the same run -- so an
+    existing, already-validated replay bundle from before this fix keeps
+    validating exactly as it always did, with no backfill required."""
 
     if not isinstance(records, Sequence) or isinstance(records, (str, bytes, bytearray)):
         return validation_failure(
@@ -738,7 +1033,8 @@ def validate_semantic_call_records(
         )
     issues: list[ValidationIssue] = []
     seen_ids: set[str] = set()
-    last_sequence_by_run: dict[str, int] = {}
+    last_persist_sequence_by_run: dict[str, int] = {}
+    last_call_sequence_by_run: dict[str, int] = {}
     for index, record in enumerate(records):
         result = validate_semantic_call_record(record)
         issues.extend(
@@ -759,17 +1055,33 @@ def validate_semantic_call_records(
                 )
             seen_ids.add(call_id)
         run_id = value.get("run_id")
-        sequence = value.get("call_sequence")
-        if isinstance(run_id, str) and _nonnegative_int(sequence):
-            previous = last_sequence_by_run.get(run_id)
-            if previous is not None and sequence <= previous:
+        if not isinstance(run_id, str):
+            continue
+        persist_sequence = value.get("persist_sequence")
+        if _nonnegative_int(persist_sequence):
+            previous_persist = last_persist_sequence_by_run.get(run_id)
+            if previous_persist is not None and persist_sequence <= previous_persist:
+                _issue(
+                    issues,
+                    "SEMANTIC_PERSIST_SEQUENCE_NOT_MONOTONIC",
+                    "persist_sequence must increase strictly for each run",
+                    f"$[{index}].persist_sequence",
+                )
+            last_persist_sequence_by_run[run_id] = persist_sequence
+            continue
+        # No persist_sequence on this record at all (pre-fix artifact):
+        # preserve the original call_sequence-based check, unchanged.
+        call_sequence = value.get("call_sequence")
+        if _nonnegative_int(call_sequence):
+            previous_call = last_call_sequence_by_run.get(run_id)
+            if previous_call is not None and call_sequence <= previous_call:
                 _issue(
                     issues,
                     "SEMANTIC_CALL_SEQUENCE_NOT_MONOTONIC",
                     "call_sequence must increase strictly for each run",
                     f"$[{index}].call_sequence",
                 )
-            last_sequence_by_run[run_id] = sequence
+            last_call_sequence_by_run[run_id] = call_sequence
     return validation_success() if not issues else validation_failure(*issues)
 
 
@@ -786,7 +1098,7 @@ def validate_cache_entry(
         )
     value = _cache_entry_mapping(entry)
     issues: list[ValidationIssue] = []
-    required = _CACHE_ENTRY_FIELDS - {"source_run_id"}
+    required = _CACHE_ENTRY_FIELDS - {"source_run_id", "source_call_id"}
     for key in sorted(required - value.keys()):
         _issue(issues, "CACHE_ENTRY_REQUIRED_FIELD_MISSING", "Required field is missing", f"$.{key}")
     for key in sorted(value.keys() - _CACHE_ENTRY_FIELDS):
@@ -841,6 +1153,8 @@ def validate_cache_entry(
         _issue(issues, "CACHE_ENTRY_RUN_ID_FORBIDDEN", "run_id cannot be part of the cache entry key contract", "$.run_id")
     if value.get("source_run_id") is not None and not _nonempty_string(value.get("source_run_id")):
         _issue(issues, "CACHE_ENTRY_SOURCE_RUN_ID_INVALID", "source_run_id must be non-empty", "$.source_run_id")
+    if value.get("source_call_id") is not None and not _nonempty_string(value.get("source_call_id")):
+        _issue(issues, "CACHE_ENTRY_SOURCE_CALL_ID_INVALID", "source_call_id must be non-empty", "$.source_call_id")
     issues.extend(_secret_issues(value))
     return validation_success() if not issues else validation_failure(*issues)
 
@@ -889,6 +1203,11 @@ def cache_entry_from_record(
         created_at=created_at,
         expires_at=expires_at,
         source_run_id=source_run_id,
+        # The eligibility check above already requires cache.hit is False --
+        # this record IS the original, so its own call_id is the source a
+        # later cache-hit record can cite. Derived here, not threaded in as
+        # a caller-supplied parameter, since it is always exactly this.
+        source_call_id=value["call_id"],
     )
     entry_result = validate_cache_entry(entry)
     if not entry_result.valid:

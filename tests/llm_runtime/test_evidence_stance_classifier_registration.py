@@ -57,8 +57,14 @@ def test_a_registered_in_replay_source_bundle_semantic_tasks():
 
 
 def test_a_registered_in_replay_supported_call_identities():
+    """2026-10-01: _SUPPORTED_CALL_IDENTITIES[task] is now a tuple of
+    accepted identities (to let alpha_classifier accept both its v6 and v7
+    prompt identity without breaking Exact Replay for either) -- every other
+    task, including this one, still has exactly one."""
     assert TASK in _SUPPORTED_CALL_IDENTITIES
-    identity = _SUPPORTED_CALL_IDENTITIES[TASK]
+    identities = _SUPPORTED_CALL_IDENTITIES[TASK]
+    assert len(identities) == 1
+    identity = identities[0]
     assert identity["prompt_version"] == _TASK_RUNTIME_METADATA[TASK]["prompt_version"]
     assert identity["input_schema_version"] == _TASK_RUNTIME_METADATA[TASK]["input_schema_version"]
     assert identity["output_schema_version"] == _TASK_RUNTIME_METADATA[TASK]["output_schema_version"]

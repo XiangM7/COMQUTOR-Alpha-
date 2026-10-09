@@ -1,0 +1,97 @@
+{
+ "verified_at_utc": "2026-10-08T00:45:21+00:00",
+ "list": {
+  "path": "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/amd_34_fixed_acceptance_list.json",
+  "csv": "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/amd_34_fixed_acceptance_list.csv",
+  "schema_version": "amd_34_fixed_acceptance_list.v2",
+  "item_count": 34
+ },
+ "historical_run": {
+  "run_id": "d5b60b8a-66b8-44c1-9f55-ee345e58c48d",
+  "evidence_cutoff": "2026-09-21",
+  "conflict": "A301__A304"
+ },
+ "zero_calls": "no Provider, search or data-fetch is possible in this script: only pure production functions on files read from disk",
+ "all_checks_pass": true,
+ "checks": {
+  "H_saved_files_unchanged": {
+   "ok": true,
+   "json_sha256": "c44dbe344686d168df889ba59ac40ff92e3f18fbb96307c830ba74b2df685708",
+   "csv_sha256": "fb8d6d9a1f15a543202950c1b8aa57ea98e5d168dc3556c2ef52b20326fa7ef3",
+   "expected": {
+    "json": "c44dbe344686d168df889ba59ac40ff92e3f18fbb96307c830ba74b2df685708",
+    "csv": "fb8d6d9a1f15a543202950c1b8aa57ea98e5d168dc3556c2ef52b20326fa7ef3"
+   }
+  },
+  "R_34_rederived_from_historical_conflict": {
+   "ok": true,
+   "rederived_count": 34,
+   "saved_count": 34,
+   "conflict_id": "A301__A304",
+   "conflict_status": "admitted",
+   "by_side": {
+    "bull": 15,
+    "bear": 17,
+    "counter": 2
+   },
+   "ordinals_contiguous": true
+  },
+  "M_mechanisms_rerun_equal_saved": {
+   "ok": true,
+   "mismatches": [],
+   "link_status": {
+    "NOT_PROVIDED": 34
+   },
+   "eligibility": {
+    "SOURCE_LINK_NOT_VALID": 34
+   }
+  },
+  "S_three_facts_separate": {
+   "ok": true,
+   "adopted_in_historical_run": {
+    "True": 34
+   },
+   "eligible_under_current_rules": {
+    "False": 34
+   },
+   "adopted_in_independent_execution": {
+    "未执行": 34
+   },
+   "reading": "adopted=true while eligible=false proves the fields are not derived from each other; 'eligible' is a recomputation, never an adoption"
+  },
+  "U_unverified_stays_unverified_nothing_dropped": {
+   "ok": true,
+   "csv_rows": 34,
+   "john_categories": {
+    "D": 2,
+    "B": 11,
+    "C": 21
+   },
+   "registry_material": {
+    "sources": 46,
+    "source_types": [
+     "news"
+    ],
+    "with_excerpt": 0,
+    "with_data_snapshot": 0,
+    "sources_with_published_at": 46
+   },
+   "registry_material_recomputed": {
+    "sources": 46,
+    "with_excerpt": 0,
+    "with_data_snapshot": 0
+   }
+  },
+  "N_no_backfill_and_no_independent_execution": {
+   "ok": true,
+   "newer_amd_run_markers_found_in_list": [],
+   "other_runs_scanned": 82,
+   "files_scanned": 175,
+   "other_runs_whose_metadata_lineage_checkpoint_or_manifest_mentions_the_historical_run": []
+  },
+  "P_historical_run_read_only": {
+   "ok": true,
+   "files_hashed": 24
+  }
+ }
+}

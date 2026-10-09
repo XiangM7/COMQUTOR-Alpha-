@@ -1,0 +1,739 @@
+{
+ "schema_version": "t3_round25_a304_five_situations.v1",
+ "prompt": {
+  "version": "week2.alpha_classifier.v7",
+  "identity_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95"
+ },
+ "situations": {
+  "S1_MENTIONS_VALUATION": "提到了估值 -- valuation vocabulary without a valuation conclusion",
+  "S2_DISCUSSES_VALUATION_RISK": "讨论估值风险 -- raises or frames valuation risk (incl. as a question) without asserting it",
+  "S3_REFUTES_VALUATION_RISK": "反驳估值风险 -- argues against a valuation-risk view (with or without its own verdict)",
+  "S4_CONDITIONAL_RISK": "提出条件性风险 -- a hypothetical / conditional or general-mechanism compression statement",
+  "S5_DATA_SUPPORTS_COMPRESSION": "已有数据支持估值压缩 -- a stated multiple characterized as rich / compression asserted with data",
+  "X_PRICE_HISTORY": "(adjacent) price moved vs its own history -- not a valuation-vs-fundamentals claim",
+  "X_DRIVER_PLUS_CONSEQUENCE": "(adjacent) a macro driver (rates) and its valuation consequence in one sentence",
+  "X_GENERIC_RISK": "(adjacent) generic risk rhetoric naming no mechanism"
+ },
+ "clauses_by_situation": {
+  "S1_MENTIONS_VALUATION": [
+   9,
+   14
+  ],
+  "S2_DISCUSSES_VALUATION_RISK": [
+   0,
+   1,
+   12,
+   14
+  ],
+  "S3_REFUTES_VALUATION_RISK": [
+   4,
+   11,
+   14
+  ],
+  "S4_CONDITIONAL_RISK": [
+   0,
+   11,
+   12
+  ],
+  "S5_DATA_SUPPORTS_COMPRESSION": [
+   10,
+   12
+  ],
+  "X_PRICE_HISTORY": [
+   13
+  ],
+  "X_DRIVER_PLUS_CONSEQUENCE": [],
+  "X_GENERIC_RISK": [
+   8,
+   9
+  ]
+ },
+ "triage_note": "situation_triage is the coding agent's reading of the text, NOT a reference label; it is never scored",
+ "situation_counts_in_population": {
+  "X_PRICE_HISTORY": 1,
+  "X_GENERIC_RISK": 1,
+  "S3_REFUTES_VALUATION_RISK": 5,
+  "S2_DISCUSSES_VALUATION_RISK": 4,
+  "X_DRIVER_PLUS_CONSEQUENCE": 2,
+  "S4_CONDITIONAL_RISK": 2,
+  "S5_DATA_SUPPORTS_COMPRESSION": 3
+ },
+ "a304_items": [
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-001",
+   "t3_sample_id": "gold-final-001",
+   "claim_text": "Trading 71% above your long-term average is not a sign of strength for new buyers — it's a quantification of mean reversion risk.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_none",
+    "predicted": null,
+    "outcome": "NONE"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE",
+   "situation_triage": "X_PRICE_HISTORY",
+   "v7_clauses": [
+    {
+     "n": 13,
+     "text": "A claim that price has moved relative to its OWN trading history (for example a percentage above or below a moving average) is a price-technical observation, not a valuation-vs-fundamentals claim, and does not by itself satisfy A304 even when the Evidence calls it a 'reversion' or 'repricing' risk"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-008",
+   "t3_sample_id": "gold-final-008",
+   "claim_text": "The market isn't rewarding visibility; it's setting a trap.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": null,
+   "v6_outcome": "NONE",
+   "v7_dev": null,
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE",
+   "situation_triage": "X_GENERIC_RISK",
+   "v7_clauses": [
+    {
+     "n": 8,
+     "text": "Use decision=none with selected_alpha_id=null only when no single canonical Alpha materially fits the Evidence at all -- when the Evidence does not substantively engage any Alpha's thesis, or is generic or background market commentary with no specific Alpha-relevant mechanism"
+    },
+    {
+     "n": 9,
+     "text": "The Evidence's own words must state the specific mechanism an Alpha's own thesis describes -- not merely that the claim shares an industry, sector, or ticker context with that Alpha, and not a conclusion a reader would have to compute from a bare listing of figures across periods or categories that the Evidence itself never characterizes as a trend"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-020",
+   "t3_sample_id": "gold-final-019",
+   "claim_text": "The bull's PEG argument is mathematically flawed and should be dismissed outright.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_none",
+    "predicted": null,
+    "outcome": "NONE"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE",
+   "situation_triage": "S3_REFUTES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 4,
+     "text": "Opposing an Alpha's thesis still means the Evidence substantively engages that Alpha -- select it; do not convert a genuine, substantive opposition into decision=none merely because the Evidence argues against the thesis rather than for it"
+    },
+    {
+     "n": 11,
+     "text": "A hypothetical, conditional-downside, rebuttal, or skepticism framing (for example 'if X happens, Y would...', a statement arguing against another framing, or a low stated probability of reaching a threshold) must be judged by what it actually asserts is true now, never treated as affirmative evidence for the thesis whose surface vocabulary it happens to use"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-033",
+   "t3_sample_id": "gold-final-030",
+   "claim_text": "QQQ, as the highest-duration large-cap growth vehicle in the market, is the most exposed index product to this repricing.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": null,
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_selected",
+    "predicted": null,
+    "outcome": "SELECTED_BUT_NOT_MATCHED"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "UNABLE_TO_JUDGE",
+   "situation_triage": "S2_DISCUSSES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 0,
+     "text": "First identify what the Evidence's own words actually assert as a present-tense proposition: is it the author's own stated conclusion, a view the author merely reports or quotes from someone else without endorsing it, a question (including a rhetorical one defending why a question matters), the setup for a rebuttal whose actual substantiating content is not given in this Evidence (for example 'let"
+    },
+    {
+     "n": 1,
+     "text": "Only the author's own asserted, present-tense conclusion can be classified -- a bare question, an unendorsed quotation, or an unsubstantiated rebuttal setup is not yet a conclusion to classify, even if it uses an Alpha-relevant word"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-045",
+   "t3_sample_id": "gold-final-041",
+   "claim_text": "The Trefis headline asking \"Has Microsoft Stock Run Ahead Of Its AI Payoff?\" is not \"clickbait\"; it is the central question of this investment.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_none",
+    "predicted": null,
+    "outcome": "NONE"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE",
+   "situation_triage": "S2_DISCUSSES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 0,
+     "text": "First identify what the Evidence's own words actually assert as a present-tense proposition: is it the author's own stated conclusion, a view the author merely reports or quotes from someone else without endorsing it, a question (including a rhetorical one defending why a question matters), the setup for a rebuttal whose actual substantiating content is not given in this Evidence (for example 'let"
+    },
+    {
+     "n": 1,
+     "text": "Only the author's own asserted, present-tense conclusion can be classified -- a bare question, an unendorsed quotation, or an unsubstantiated rebuttal setup is not yet a conclusion to classify, even if it uses an Alpha-relevant word"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-055",
+   "t3_sample_id": "gold-final-048",
+   "claim_text": "On \"Forward EPS Assumes 95% Growth Continues\" The neutral analyst will argue that the forward EPS of $15.40 assumes 95% growth, which is \"too aggressive.\" Let me challenge that assumption with the actual trajectory.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": "A301",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_none",
+    "predicted": null,
+    "outcome": "NONE"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE",
+   "situation_triage": "S3_REFUTES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 4,
+     "text": "Opposing an Alpha's thesis still means the Evidence substantively engages that Alpha -- select it; do not convert a genuine, substantive opposition into decision=none merely because the Evidence argues against the thesis rather than for it"
+    },
+    {
+     "n": 11,
+     "text": "A hypothetical, conditional-downside, rebuttal, or skepticism framing (for example 'if X happens, Y would...', a statement arguing against another framing, or a low stated probability of reaching a threshold) must be judged by what it actually asserts is true now, never treated as affirmative evidence for the thesis whose surface vocabulary it happens to use"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-058",
+   "t3_sample_id": "gold-final-051",
+   "claim_text": "Factor: Valuation; Bear View: 120x trailing P/E; Bull Counter: 30.4x forward P/E, PEG 1.03; Verdict: Fairly valued",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "invalid_output",
+    "predicted": null,
+    "outcome": "PARSE_FAILED"
+   },
+   "chatgpt_ai_review": "A304",
+   "label_2026_10_05": "A304",
+   "situation_triage": "S3_REFUTES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 4,
+     "text": "Opposing an Alpha's thesis still means the Evidence substantively engages that Alpha -- select it; do not convert a genuine, substantive opposition into decision=none merely because the Evidence argues against the thesis rather than for it"
+    },
+    {
+     "n": 11,
+     "text": "A hypothetical, conditional-downside, rebuttal, or skepticism framing (for example 'if X happens, Y would...', a statement arguing against another framing, or a low stated probability of reaching a threshold) must be judged by what it actually asserts is true now, never treated as affirmative evidence for the thesis whose surface vocabulary it happens to use"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-059",
+   "t3_sample_id": "gold-final-052",
+   "claim_text": "The question is not whether TSM is a great company; it is whether the current price offers a favorable risk-reward.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_none",
+    "predicted": null,
+    "outcome": "NONE"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE",
+   "situation_triage": "S2_DISCUSSES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 0,
+     "text": "First identify what the Evidence's own words actually assert as a present-tense proposition: is it the author's own stated conclusion, a view the author merely reports or quotes from someone else without endorsing it, a question (including a rhetorical one defending why a question matters), the setup for a rebuttal whose actual substantiating content is not given in this Evidence (for example 'let"
+    },
+    {
+     "n": 1,
+     "text": "Only the author's own asserted, present-tense conclusion can be classified -- a bare question, an unendorsed quotation, or an unsubstantiated rebuttal setup is not yet a conclusion to classify, even if it uses an Alpha-relevant word"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-083",
+   "t3_sample_id": "gold-final-072",
+   "claim_text": "Rate environment: 89% probability of no Fed cuts in 2026, with 19-year-high yields — a headwind for high-multiple growth stocks.",
+   "historical_gold": "A304",
+   "candidate3": "NONE",
+   "v6": null,
+   "v6_outcome": "MATCHED",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A001",
+   "label_2026_10_05": "A001",
+   "situation_triage": "X_DRIVER_PLUS_CONSEQUENCE",
+   "v7_clauses": []
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-115",
+   "t3_sample_id": "gold-final-099",
+   "claim_text": "You are applying a backward-looking multiple to a forward-looking earnings explosion.",
+   "historical_gold": "A301",
+   "candidate3": "A304",
+   "v6": "A301",
+   "v6_outcome": "MATCHED",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A301",
+   "label_2026_10_05": "A301",
+   "situation_triage": "S3_REFUTES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 4,
+     "text": "Opposing an Alpha's thesis still means the Evidence substantively engages that Alpha -- select it; do not convert a genuine, substantive opposition into decision=none merely because the Evidence argues against the thesis rather than for it"
+    },
+    {
+     "n": 11,
+     "text": "A hypothetical, conditional-downside, rebuttal, or skepticism framing (for example 'if X happens, Y would...', a statement arguing against another framing, or a low stated probability of reaching a threshold) must be judged by what it actually asserts is true now, never treated as affirmative evidence for the thesis whose surface vocabulary it happens to use"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-final-124",
+   "t3_sample_id": null,
+   "claim_text": "You can't simultaneously argue the multiple is dangerously rich and that the forward multiple already embeds aggressive growth expectations.",
+   "historical_gold": "NONE",
+   "candidate3": "A304",
+   "v6": null,
+   "v6_outcome": null,
+   "v7_dev": null,
+   "chatgpt_ai_review": null,
+   "label_2026_10_05": null,
+   "situation_triage": "S3_REFUTES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 4,
+     "text": "Opposing an Alpha's thesis still means the Evidence substantively engages that Alpha -- select it; do not convert a genuine, substantive opposition into decision=none merely because the Evidence argues against the thesis rather than for it"
+    },
+    {
+     "n": 11,
+     "text": "A hypothetical, conditional-downside, rebuttal, or skepticism framing (for example 'if X happens, Y would...', a statement arguing against another framing, or a low stated probability of reaching a threshold) must be judged by what it actually asserts is true now, never treated as affirmative evidence for the thesis whose surface vocabulary it happens to use"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "historical_A304_error",
+   "gold_set_id": "nh-reserve-020",
+   "t3_sample_id": null,
+   "claim_text": "When rates rise, the discount rate rises, and the multiple compresses.",
+   "historical_gold": "A304",
+   "candidate3": "NONE",
+   "v6": null,
+   "v6_outcome": null,
+   "v7_dev": null,
+   "chatgpt_ai_review": null,
+   "label_2026_10_05": null,
+   "situation_triage": "S4_CONDITIONAL_RISK",
+   "v7_clauses": [
+    {
+     "n": 0,
+     "text": "First identify what the Evidence's own words actually assert as a present-tense proposition: is it the author's own stated conclusion, a view the author merely reports or quotes from someone else without endorsing it, a question (including a rhetorical one defending why a question matters), the setup for a rebuttal whose actual substantiating content is not given in this Evidence (for example 'let"
+    },
+    {
+     "n": 11,
+     "text": "A hypothetical, conditional-downside, rebuttal, or skepticism framing (for example 'if X happens, Y would...', a statement arguing against another framing, or a low stated probability of reaching a threshold) must be judged by what it actually asserts is true now, never treated as affirmative evidence for the thesis whose surface vocabulary it happens to use"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    }
+   ]
+  },
+  {
+   "population": "old_pool_A304_boundary_other",
+   "gold_set_id": null,
+   "t3_sample_id": "gold-final-057",
+   "claim_text": "Zscaler fell 4% despite an earnings beat, as FY2027 growth guidance overshadowed results — raising \"whether even the strongest growth numbers can justify where these stocks are priced.\"",
+   "historical_gold": "A304",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A304",
+   "label_2026_10_05": "A301",
+   "situation_triage": "S2_DISCUSSES_VALUATION_RISK",
+   "v7_clauses": [
+    {
+     "n": 0,
+     "text": "First identify what the Evidence's own words actually assert as a present-tense proposition: is it the author's own stated conclusion, a view the author merely reports or quotes from someone else without endorsing it, a question (including a rhetorical one defending why a question matters), the setup for a rebuttal whose actual substantiating content is not given in this Evidence (for example 'let"
+    },
+    {
+     "n": 1,
+     "text": "Only the author's own asserted, present-tense conclusion can be classified -- a bare question, an unendorsed quotation, or an unsubstantiated rebuttal setup is not yet a conclusion to classify, even if it uses an Alpha-relevant word"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    },
+    {
+     "n": 14,
+     "text": "The mere appearance of a valuation-sounding word (for example 'PEG', 'valuation', 'multiple', 'compression') is not sufficient on its own -- per the proposition-identification step above, a question about whether a price is justified, or a rebuttal of someone else's valuation argument that does not itself assert a valuation conclusion, does not satisfy A304 either"
+    }
+   ]
+  },
+  {
+   "population": "old_pool_A304_boundary_other",
+   "gold_set_id": null,
+   "t3_sample_id": "gold-final-061",
+   "claim_text": "Bear: \"The valuation is stretched at 23x forward earnings.\"",
+   "historical_gold": "A304",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_selected",
+    "predicted": "A304",
+    "outcome": "MATCHED"
+   },
+   "chatgpt_ai_review": "A304",
+   "label_2026_10_05": "A304",
+   "situation_triage": "S5_DATA_SUPPORTS_COMPRESSION",
+   "v7_clauses": [
+    {
+     "n": 10,
+     "text": "A single financial figure or ratio that the Evidence already characterizes in its own words as a growth, decline, or valuation-relevant trend (for example 'grew', 'increased', 'record', 'accelerating', 'compressed', 'declined') remains sufficient on its own -- this targets only uncharacterized data listings and industry/ticker context, never a figure the Evidence itself already interprets"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    }
+   ]
+  },
+  {
+   "population": "old_pool_A304_boundary_other",
+   "gold_set_id": null,
+   "t3_sample_id": "gold-final-079",
+   "claim_text": "Any slowdown in AI spending could trigger significant multiple compression.",
+   "historical_gold": "A304",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_none",
+    "predicted": null,
+    "outcome": "NONE"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE",
+   "situation_triage": "S4_CONDITIONAL_RISK",
+   "v7_clauses": [
+    {
+     "n": 0,
+     "text": "First identify what the Evidence's own words actually assert as a present-tense proposition: is it the author's own stated conclusion, a view the author merely reports or quotes from someone else without endorsing it, a question (including a rhetorical one defending why a question matters), the setup for a rebuttal whose actual substantiating content is not given in this Evidence (for example 'let"
+    },
+    {
+     "n": 11,
+     "text": "A hypothetical, conditional-downside, rebuttal, or skepticism framing (for example 'if X happens, Y would...', a statement arguing against another framing, or a low stated probability of reaching a threshold) must be judged by what it actually asserts is true now, never treated as affirmative evidence for the thesis whose surface vocabulary it happens to use"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    }
+   ]
+  },
+  {
+   "population": "old_pool_A304_boundary_other",
+   "gold_set_id": null,
+   "t3_sample_id": "gold-final-083",
+   "claim_text": "On Valuation: \"Priced for Perfection\"",
+   "historical_gold": "A304",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A304",
+   "label_2026_10_05": "A304",
+   "situation_triage": "S5_DATA_SUPPORTS_COMPRESSION",
+   "v7_clauses": [
+    {
+     "n": 10,
+     "text": "A single financial figure or ratio that the Evidence already characterizes in its own words as a growth, decline, or valuation-relevant trend (for example 'grew', 'increased', 'record', 'accelerating', 'compressed', 'declined') remains sufficient on its own -- this targets only uncharacterized data listings and industry/ticker context, never a figure the Evidence itself already interprets"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    }
+   ]
+  },
+  {
+   "population": "old_pool_A304_boundary_other",
+   "gold_set_id": null,
+   "t3_sample_id": "gold-final-085",
+   "claim_text": "However, the bear's medium-term tactical case is equally compelling: a 72% probability of a rate hike and 93% odds of no cuts repricing long-duration growth at 29x PE, a broad crack in the software/media complex (Netflix -4%, Adobe -7%, UiPath -14%, Zscaler -4%), and deteriorating momentum with the MACD histogram negative since August 21.",
+   "historical_gold": "A304",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": {
+    "raw": "llm_selected",
+    "predicted": null,
+    "outcome": "SELECTED_BUT_NOT_MATCHED"
+   },
+   "chatgpt_ai_review": "A001",
+   "label_2026_10_05": "A001",
+   "situation_triage": "X_DRIVER_PLUS_CONSEQUENCE",
+   "v7_clauses": []
+  },
+  {
+   "population": "old_pool_A304_boundary_other",
+   "gold_set_id": null,
+   "t3_sample_id": "gold-final-097",
+   "claim_text": "And the stock is trading at 8.3x book value—a premium that requires flawless execution.",
+   "historical_gold": "A304",
+   "candidate3": "A304",
+   "v6": "A304",
+   "v6_outcome": "MATCHED",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A304",
+   "label_2026_10_05": "A304",
+   "situation_triage": "S5_DATA_SUPPORTS_COMPRESSION",
+   "v7_clauses": [
+    {
+     "n": 10,
+     "text": "A single financial figure or ratio that the Evidence already characterizes in its own words as a growth, decline, or valuation-relevant trend (for example 'grew', 'increased', 'record', 'accelerating', 'compressed', 'declined') remains sufficient on its own -- this targets only uncharacterized data listings and industry/ticker context, never a figure the Evidence itself already interprets"
+    },
+    {
+     "n": 12,
+     "text": "A304 (Multiple Compression) requires the Evidence to assert that valuation is rich RELATIVE TO FUNDAMENTALS -- a stated multiple (P/E, P/S, PEG, book value, or similar) characterized in the Evidence's own words as high, stretched, rich, or unsupported by fundamentals, or an explicit statement that strong fundamentals are not preventing downside"
+    }
+   ]
+  }
+ ],
+ "a101_a103_items": [
+  {
+   "t3_sample_id": "gold-final-059",
+   "claim_text": "CoreWeave's CEO says they are \"struggling to keep up with demand for Nvidia chips.\" Every single one of these demand signals flows through TSM's foundry and CoWoS advanced packaging.",
+   "historical_gold": "A101",
+   "candidate3": "A103",
+   "v6": "A103",
+   "v7_dev": {
+    "raw": "llm_selected",
+    "predicted": "A103",
+    "outcome": "MATCHED"
+   },
+   "chatgpt_ai_review": "A103",
+   "label_2026_10_05": "A103"
+  },
+  {
+   "t3_sample_id": "gold-final-074",
+   "claim_text": "Nvidia just told the market its AI boom runs through fiscal 2028 with demand exceeding supply.",
+   "historical_gold": "A101",
+   "candidate3": "A101",
+   "v6": "A101",
+   "v7_dev": {
+    "raw": "llm_selected",
+    "predicted": "A101",
+    "outcome": "MATCHED"
+   },
+   "chatgpt_ai_review": "A101",
+   "label_2026_10_05": "A101"
+  },
+  {
+   "t3_sample_id": "gold-final-077",
+   "claim_text": "When hyperscalers get squeezed by investors to justify their AI capex spending, they do not stop spending.",
+   "historical_gold": "A101",
+   "candidate3": "A103",
+   "v6": "A103",
+   "v7_dev": {
+    "raw": "llm_selected",
+    "predicted": "A103",
+    "outcome": "MATCHED"
+   },
+   "chatgpt_ai_review": "A101",
+   "label_2026_10_05": "A103"
+  },
+  {
+   "t3_sample_id": "gold-final-084",
+   "claim_text": "Google Cloud & AI Infrastructure: The massive CapEx buildout ($44.92B in Q2 2026 alone) is directly monetizing through cloud services and AI inference demand.",
+   "historical_gold": "A103",
+   "candidate3": "A103",
+   "v6": "A103",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A103",
+   "label_2026_10_05": "A102"
+  },
+  {
+   "t3_sample_id": "gold-final-092",
+   "claim_text": "Yes, NAND storage demand from AI data centers is real and secular.",
+   "historical_gold": "A103",
+   "candidate3": "A103",
+   "v6": "A103",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A103",
+   "label_2026_10_05": "A103"
+  },
+  {
+   "t3_sample_id": "gold-final-100",
+   "claim_text": "Factor: AI CapEx / GPU Demand; Signal: Bullish; Evidence: CoreWeave-HRT deal (Vera Rubin); Lambda $1B debt for Nvidia chips; demand outpacing supply; Implication for NVDA: Sustained demand & pricing power",
+   "historical_gold": "A101",
+   "candidate3": "A101",
+   "v6": "A101",
+   "v7_dev": null,
+   "chatgpt_ai_review": "A101",
+   "label_2026_10_05": "A101"
+  },
+  {
+   "t3_sample_id": "gold-final-127",
+   "claim_text": "The hawkish Fed and rising yields are a real headwind, but the low recession probability supports continued AI capex.",
+   "historical_gold": "A101",
+   "candidate3": "NONE",
+   "v6": "A103",
+   "v7_dev": {
+    "raw": "llm_selected",
+    "predicted": "A103",
+    "outcome": "MATCHED"
+   },
+   "chatgpt_ai_review": "A501",
+   "label_2026_10_05": "A501"
+  },
+  {
+   "t3_sample_id": "gold-final-144",
+   "claim_text": "Capital Expenditure Surge: Net PPE has grown dramatically from $184.6B (FY2024) to $338.9B (Q2 2026), underscoring the massive infrastructure buildout.",
+   "historical_gold": "NONE",
+   "candidate3": "A103",
+   "v6": "A103",
+   "v7_dev": {
+    "raw": "llm_none",
+    "predicted": null,
+    "outcome": "NONE"
+   },
+   "chatgpt_ai_review": "NONE",
+   "label_2026_10_05": "NONE"
+  }
+ ],
+ "open_semantic_questions_for_john": [
+  {
+   "id": "A304-Q1 conditional valuation risk (S4)",
+   "samples": [
+    "gold-final-079 'Any slowdown in AI spending could trigger significant multiple compression.'",
+    "nh-reserve-020 'When rates rise, the discount rate rises, and the multiple compresses.'"
+   ],
+   "conflict": "historical Gold = A304 for both; clause 11 (conditional framing judged by what it asserts now, already in v6) and clause 12 (A304 needs valuation asserted rich vs fundamentals) point to NONE; v7 dev returned NONE for 079; the 2026-10-05 label is NONE",
+   "question": "Is a conditional or general-mechanism compression statement evidence for A304 (whose thesis is itself a risk), or NONE?"
+  },
+  {
+   "id": "A304-Q2 refutation that states its own valuation verdict (S3)",
+   "samples": [
+    "gold-final-051 '... Bull Counter: 30.4x forward P/E, PEG 1.03; Verdict: Fairly valued'",
+    "gold-final-099 'You are applying a backward-looking multiple to a forward-looking earnings explosion.'"
+   ],
+   "conflict": "clause 4 says a substantive opposition still selects the Alpha (A304 with an opposing stance); historical Gold = NONE (051) and A301 (099); the 2026-10-05 label is A304 for 051 and A301 for 099",
+   "question": "Does an explicit 'fairly valued / not rich' verdict engage A304 as opposition, or is it NONE (or the growth Alpha it argues from)?"
+  },
+  {
+   "id": "A304-Q3 valuation risk raised as a question (S2)",
+   "samples": [
+    "gold-final-041 (Trefis headline 'central question')",
+    "gold-final-052 'whether the current price offers a favorable risk-reward'",
+    "gold-final-057 '... raising whether even the strongest growth numbers can justify where these stocks are priced.'"
+   ],
+   "conflict": "historical Gold labels these inconsistently (NONE, NONE, A304); clauses 0/1 treat a question as not yet a conclusion; the 2026-10-05 label for 057 is A301",
+   "question": "Is a reported or rhetorical valuation question ever A304 evidence?"
+  },
+  {
+   "id": "A304-Q4 macro driver + valuation consequence in one claim",
+   "samples": [
+    "gold-final-072 '89% probability of no Fed cuts ... a headwind for high-multiple growth stocks.'",
+    "gold-final-085 '... odds of no cuts repricing long-duration growth at 29x PE ...'"
+   ],
+   "conflict": "historical Gold = A304 for both; ChatGPT AI_REVIEW and the 2026-10-05 label = A001 for both; no prompt clause sets a priority (already flagged in the v7 adjudication document, section 5)",
+   "question": "When a claim states a rate driver and its valuation consequence, which Alpha does it engage -- the driver (A001) or the consequence (A304)?"
+  },
+  {
+   "id": "A101/A103-Q5 named foundry / packaging capacity carrying chip demand",
+   "samples": [
+    "gold-final-059 '... demand for Nvidia chips. Every single one of these demand signals flows through TSM's foundry and CoWoS advanced packaging.'"
+   ],
+   "conflict": "historical Gold = A101; clause 17 (prefer A103 when foundry/advanced-packaging capacity is named) produces A103 -- Candidate-3, v6, v7 dev, ChatGPT and the 2026-10-05 label all say A103",
+   "question": "Does the facility tie-break rule reflect John's intended A101/A103 boundary, or should chip-demand claims stay A101 even when they name the foundry they flow through?"
+  },
+  {
+   "id": "A101/A103-Q6 'AI capex / spending' with no named facility",
+   "samples": [
+    "gold-final-077 'When hyperscalers get squeezed ... to justify their AI capex spending, they do not stop spending.'"
+   ],
+   "conflict": "historical Gold = A101 and ChatGPT = A101; Candidate-3, v6, v7 dev and the 2026-10-05 label = A103 (flagged in the v7 adjudication document, section 5)",
+   "question": "Which Alpha does bare 'AI capex continues' engage?"
+  },
+  {
+   "id": "A101/A103-Q7 AI infrastructure capex monetized through inference",
+   "samples": [
+    "gold-final-084 'Google Cloud & AI Infrastructure: The massive CapEx buildout ... monetizing through cloud services and AI inference demand.'"
+   ],
+   "conflict": "historical Gold, Candidate-3, v6 and ChatGPT = A103; the 2026-10-05 label = A102",
+   "question": "When infrastructure buildout and inference demand are both named, is it A103 or A102?"
+  }
+ ],
+ "not_done": "no prompt, code, threshold or taxonomy change; no historical Gold label changed; nothing adjudicated"
+}

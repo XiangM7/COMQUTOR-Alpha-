@@ -1,0 +1,113 @@
+{
+  "schema_version": "candidate3_fresh_e2e_summary.v1",
+  "run_type": "FRESH_END_TO_END_VALIDATION",
+  "candidate3_classifier_hash_sha256": "d53b2d7511f4c4a8089db746d09e4c79cb38f22597dac6459920ca3deac1171d",
+  "candidate3_batch_hash_sha256": "a03c8f673ffd387a866bc8dd585c4c96cf5464b80a50cb6e4c3fc5f894f68379",
+  "evidence_tiers_explicitly_not_merged": {
+    "1_frozen_regression_evidence": "docs/audit_artifacts/v0_2_day4_frozen_regression.json and related -- historical, frozen-input evidence. Not touched or altered by this task.",
+    "2_independent_alpha_validation": {
+      "artifact": "docs/audit_artifacts/v0_2_candidate3_final_validation_result.json",
+      "type": "ONE_SHOT_INDEPENDENT_FINAL_VALIDATION",
+      "result": "124 / 150 = 82.67%",
+      "target": ">= 80.00%",
+      "target_met": true
+    },
+    "3_independent_polarity_validation": {
+      "artifact": "docs/audit_artifacts/item2_blind_holdout2_summary.json",
+      "type": "ELIGIBLE_INDEPENDENT_FINAL_EVIDENCE (per docs/audit_artifacts/v0_2_independent_polarity_gate_audit.json)",
+      "result": "123 / 141 = 87.23%",
+      "target": ">= 80.00%",
+      "target_met": true
+    },
+    "4_fresh_e2e_evidence": {
+      "artifacts": [
+        "docs/audit_artifacts/v0_2_candidate3_fresh_e2e_nvda.json",
+        "docs/audit_artifacts/v0_2_candidate3_fresh_e2e_qqq.json"
+      ],
+      "type": "FRESH_END_TO_END_VALIDATION (operational/product evidence, no accuracy denominator -- not a scored gate)",
+      "nvda_run_id": "ded99ecd-a186-4a90-859e-0f1a0efa43db",
+      "qqq_run_id": "0d890564-2479-4361-94e8-25c48af3b9a8"
+    }
+  },
+  "explicit_non_merger_note": "These four tiers are never combined, averaged, or substituted for one another. The Alpha/polarity accuracy percentages above are NOT recomputed, diluted, or affected by NVDA/QQQ's Fresh E2E structural outcomes in any way.",
+  "nvda_summary": {
+    "run_id": "ded99ecd-a186-4a90-859e-0f1a0efa43db",
+    "status": "completed",
+    "wall_clock_seconds": 1923,
+    "dominant_alphas": [
+      "A301",
+      "A304"
+    ],
+    "active_alphas": [
+      "A601"
+    ],
+    "main_conflict": "A304__A601",
+    "main_conflict_on_nvda_allowed_list": false,
+    "main_conflict_canonical_taxonomy_pair": true,
+    "fresh_run_conflict_status": "REVIEW_REQUIRED",
+    "provider_calls": 819,
+    "retries": 18,
+    "timeouts": 0,
+    "artifact_completeness": "9/9 pass"
+  },
+  "qqq_summary": {
+    "run_id": "0d890564-2479-4361-94e8-25c48af3b9a8",
+    "status": "completed",
+    "wall_clock_seconds": 1721,
+    "dominant_alphas": [],
+    "active_alphas": [
+      "A003",
+      "A304",
+      "A501",
+      "A601"
+    ],
+    "main_conflict": "A003__A501",
+    "main_conflict_on_qqq_allowed_list": true,
+    "fresh_run_conflict_status": "PASS",
+    "historical_off_list_a301_a304_reproduced": false,
+    "provider_calls": 812,
+    "retries": 24,
+    "timeouts": 0,
+    "artifact_completeness": "9/9 pass"
+  },
+  "raw_performance_accounting": {
+    "nvda": {
+      "wall_clock_seconds": 1923,
+      "upstream_calls": "12 TradingAgents agents + 819 semantic Provider calls",
+      "alpha_classification_calls": 754,
+      "total_provider_calls": 819,
+      "retries": 18,
+      "timeouts": 0,
+      "tokens": "NOT_AVAILABLE (field present, null)",
+      "measured_cost": "NOT_AVAILABLE",
+      "estimated_cost": "NOT_MADE -- no reliable token basis exists to estimate from"
+    },
+    "qqq": {
+      "wall_clock_seconds": 1721,
+      "upstream_calls": "12 TradingAgents agents + 812 semantic Provider calls",
+      "alpha_classification_calls": 747,
+      "total_provider_calls": 812,
+      "retries": 24,
+      "timeouts": 0,
+      "tokens": "NOT_AVAILABLE (field present, null)",
+      "measured_cost": "NOT_AVAILABLE",
+      "estimated_cost": "NOT_MADE -- no reliable token basis exists to estimate from"
+    },
+    "no_runtime_to_cost_inference_made": "Confirmed: no percentage reduction in wall-clock time (QQQ 1721s vs NVDA 1923s, ~10.5% shorter) was used to infer any proportional cost difference -- cost remains NOT_AVAILABLE for both, independently."
+  },
+  "post_run_integrity": {
+    "final_alpha_gold_sha256_unchanged": true,
+    "candidate3_classifier_hash_unchanged": true,
+    "candidate3_batch_hash_unchanged": true,
+    "production_code_changed": false
+  },
+  "day5_readiness": {
+    "alpha_gate_closed": true,
+    "polarity_gate_closed": true,
+    "nvda_fresh_e2e_complete_and_inspectable": true,
+    "qqq_fresh_e2e_complete_and_inspectable": true,
+    "LATEST_VERSION_FRESH_E2E_REQUIREMENT_COMPLETE": true,
+    "DAY_5_READY": true,
+    "day5_ready_meaning": "Ready to BEGIN the separate Day 5 package/demo task -- not that Day 5 itself has already passed. Formal Gold PASS is not automatically declared from Fresh completion alone."
+  }
+}

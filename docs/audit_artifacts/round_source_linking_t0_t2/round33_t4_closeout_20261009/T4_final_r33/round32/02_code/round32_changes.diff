@@ -1,0 +1,1018 @@
+--- fresh_code/comqutor_alpha/structure_engine/week2_llm.py
++++ round32_final/comqutor_alpha/structure_engine/week2_llm.py
+@@ -933,6 +933,19 @@
+     # attempt's own real finish_reason/usage survives even once a
+     # subsequent retry supersedes it as the invocation's own final outcome.
+     request_attempts: tuple[Mapping[str, Any], ...] = ()
++    # 2026-10-09 (T4 round 32): set only when the request was refused LOCALLY because its input exceeded the size limit
++    # (error_code WEEK2_LLM_INPUT_TOO_LARGE): the measured input length and the limit it was checked against. Such a
++    # request is never sent: no budget reservation, no HTTP request, no response, no usage.
++    input_chars: int | None = None
++    input_limit_chars: int | None = None
++
++
++def input_too_large_error_message(input_chars: int | None, limit_chars: int | None) -> str:
++    """The semantic ledger's error_message for a locally refused, never-sent request (T4 round 32)."""
++    return (
++        f"not sent: input of {input_chars} characters exceeds the {limit_chars}-character limit; refused locally "
++        "before any budget reservation or HTTP request (no provider response, no usage)"
++    )
+ 
+ 
+ def _now() -> str:
+@@ -1692,6 +1705,8 @@
+                 validation_accepted=False,
+                 error_code="WEEK2_LLM_INPUT_TOO_LARGE",
+                 cache_error_code=cache_error_code,
++                input_chars=len(serialized),
++                input_limit_chars=MAX_PROMPT_PAYLOAD_CHARS,
+             )
+ 
+         provider_attempts = 0
+@@ -2050,6 +2065,8 @@
+                 effective_timeout_seconds=effective_timeout,
+                 effective_max_retries=effective_retries,
+                 execution_policy_source=execution_policy_source,
++                input_chars=len(prompt),
++                input_limit_chars=max_prompt_chars,
+             )
+ 
+         provider_attempts = 0
+@@ -2302,6 +2319,9 @@
+                     invocation.error_code if invocation.provider_status == "not_called" else None
+                 )
+             )
++            error_message = None
++            if invocation.error_code == "WEEK2_LLM_INPUT_TOO_LARGE" and invocation.input_chars is not None:
++                error_message = input_too_large_error_message(invocation.input_chars, invocation.input_limit_chars)
+             self.semantic_runtime.finalize_call(
+                 invocation.trace_handle,
+                 provider_status=invocation.provider_status,
+@@ -2311,6 +2331,8 @@
+                 fallback_used=True,
+                 fallback_reason=reason,
+                 error_code=persisted_error_code,
++                # passed only when set, so a semantic runtime without the parameter keeps working unchanged
++                **({"error_message": error_message} if error_message is not None else {}),
+                 execution_policy=execution_policy,
+                 token_usage=invocation.token_usage,
+                 request_control=invocation.request_control,
+--- fresh_code/comqutor_alpha/structure_engine/content_support_llm.py
++++ round32_final/comqutor_alpha/structure_engine/content_support_llm.py
+@@ -189,10 +189,16 @@
+ # 2026-10-08 (T4 round 28): never sent -- an earlier request of the run got
+ # HTTP 401/403/429 and the run was stopped (comqutor_alpha.run_provider_stop).
+ FALLBACK_PROVIDER_STOPPED = "provider_stopped"
++# 2026-10-09 (T4 round 32): never sent -- the request's input exceeded the gateway's local size limit
++# (WEEK2_LLM_INPUT_TOO_LARGE). Same reason string alpha_mapper already uses for this gateway code. Previously folded
++# into malformed_response, which wrongly read as "the model's response did not match the required format" although
++# no request was sent and no response exists.
++FALLBACK_INPUT_TOO_LARGE = "input_too_large"
+ 
+ VALID_FALLBACK_REASONS = frozenset(
+     {
+         FALLBACK_PROVIDER_STOPPED,
++        FALLBACK_INPUT_TOO_LARGE,
+         FALLBACK_PROVIDER_ERROR,
+         FALLBACK_TIMEOUT,
+         FALLBACK_BUDGET_EXHAUSTED,
+@@ -425,7 +431,9 @@
+         return FALLBACK_BUDGET_EXHAUSTED
+     if status == "audit_unavailable" or error_code == "WEEK2_LLM_AUDIT_WRITE_FAILED":
+         return FALLBACK_AUDIT_WRITE_FAILED
+-    if error_code in {"WEEK2_LLM_INVALID_JSON", "WEEK2_LLM_VALIDATION_FAILED", "WEEK2_LLM_INPUT_TOO_LARGE"}:
++    if error_code == "WEEK2_LLM_INPUT_TOO_LARGE":
++        return FALLBACK_INPUT_TOO_LARGE
++    if error_code in {"WEEK2_LLM_INVALID_JSON", "WEEK2_LLM_VALIDATION_FAILED"}:
+         return FALLBACK_MALFORMED_RESPONSE
+     return FALLBACK_PROVIDER_ERROR
+ 
+@@ -1018,6 +1026,9 @@
+                 "attempt_history": list(getattr(invocation, "attempt_history", None) or ()),
+                 "model_name": getattr(llm_gateway, "model_name", None),
+                 "provider": getattr(llm_gateway, "provider", None),
++                # 2026-10-09 (T4 round 32): measured input size / limit of a locally refused (never-sent) request
++                "input_chars": getattr(invocation, "input_chars", None),
++                "input_limit_chars": getattr(invocation, "input_limit_chars", None),
+             }
+         )
+ 
+--- fresh_code/comqutor_alpha/structure_engine/evidence_stance_llm.py
++++ round32_final/comqutor_alpha/structure_engine/evidence_stance_llm.py
+@@ -69,10 +69,14 @@
+ # 2026-10-08 (T4 round 28): never sent -- an earlier request of the run got
+ # HTTP 401/403/429 and the run was stopped (comqutor_alpha.run_provider_stop).
+ FALLBACK_PROVIDER_STOPPED = "provider_stopped"
++# 2026-10-09 (T4 round 32): never sent -- input over the gateway's local size limit (WEEK2_LLM_INPUT_TOO_LARGE); same
++# reason string as alpha_mapper / content_support_llm. Previously folded into malformed_response.
++FALLBACK_INPUT_TOO_LARGE = "input_too_large"
+ 
+ VALID_FALLBACK_REASONS = frozenset(
+     {
+         FALLBACK_PROVIDER_STOPPED,
++        FALLBACK_INPUT_TOO_LARGE,
+         FALLBACK_PROVIDER_ERROR,
+         FALLBACK_TIMEOUT,
+         FALLBACK_MALFORMED_RESPONSE,
+@@ -218,7 +222,9 @@
+         return FALLBACK_PROVIDER_STOPPED
+     if status == "timeout":
+         return FALLBACK_TIMEOUT
+-    if error_code in {"WEEK2_LLM_INVALID_JSON", "WEEK2_LLM_VALIDATION_FAILED", "WEEK2_LLM_INPUT_TOO_LARGE"}:
++    if error_code == "WEEK2_LLM_INPUT_TOO_LARGE":
++        return FALLBACK_INPUT_TOO_LARGE
++    if error_code in {"WEEK2_LLM_INVALID_JSON", "WEEK2_LLM_VALIDATION_FAILED"}:
+         return FALLBACK_MALFORMED_RESPONSE
+     return FALLBACK_PROVIDER_ERROR
+ 
+--- fresh_code/comqutor_alpha/llm_runtime/session.py
++++ round32_final/comqutor_alpha/llm_runtime/session.py
+@@ -412,6 +412,7 @@
+         request_control: Mapping[str, Any] | None = None,
+         provider_response: Mapping[str, Any] | None = None,
+         request_attempts: Sequence[Mapping[str, Any]] | None = None,
++        error_message: str | None = None,
+     ) -> bool:
+         if trace is None or not self._claim_finalization(trace):
+             if trace is not None:
+@@ -488,7 +489,9 @@
+                 "fallback_used": fallback_used,
+                 "fallback_reason": fallback_reason,
+                 "error_code": error_code,
+-                "error_message": None,
++                # 2026-10-09 (T4 round 32): a short, credential-free explanation supplied by the gateway (today only for a
++                # locally refused, never-sent oversized request); None for every other call, as before.
++                "error_message": error_message,
+             }
+             if execution_policy is not None:
+                 record["execution_policy"] = dict(execution_policy)
+--- fresh_code/comqutor_alpha/direction_evaluation.py
++++ round32_final/comqutor_alpha/direction_evaluation.py
+@@ -48,7 +48,7 @@
+ 
+ # A response that was never obtained (or never parsed): the whole batch fell back for ONE of these reasons.
+ WHOLE_BATCH_FAILURE_REASONS = frozenset(
+-    {esl.FALLBACK_TIMEOUT, esl.FALLBACK_PROVIDER_ERROR, esl.FALLBACK_MALFORMED_RESPONSE}
++    {esl.FALLBACK_TIMEOUT, esl.FALLBACK_PROVIDER_ERROR, esl.FALLBACK_MALFORMED_RESPONSE, esl.FALLBACK_INPUT_TOO_LARGE}
+ )
+ EXPECTED_REQUEST_URL = "https://api.deepseek.com/chat/completions"
+ EXPECTED_REQUEST_BODY_KEYS = frozenset({"messages", "model", "stream"})
+--- fresh_code/comqutor_alpha/api/evidence_trace.py
++++ round32_final/comqutor_alpha/api/evidence_trace.py
+@@ -87,6 +87,7 @@
+     "provider_error": "the verification request failed at the provider",
+     "budget_exhausted": "the request budget was exhausted before this claim was verified",
+     "provider_stopped": "not sent: an earlier model request of this run was refused by the provider (HTTP 401/403/429) and the run was stopped",
++    "input_too_large": "not sent: the verification request exceeded the local input-size limit and was never sent to the model (no response, no usage)",
+ }
+ ALPHA_MATCH_LABELS = {
+     "MATCHED": "Matched to an Alpha by the model's selection",
+--- fresh_code/comqutor_alpha/api/routes_research.py
++++ round32_final/comqutor_alpha/api/routes_research.py
+@@ -28,6 +28,7 @@
+ )
+ from comqutor_alpha.api.evidence_trace import get_evidence_trace_response
+ from comqutor_alpha.api.formal_acceptance_artifact import write_formal_acceptance_artifact
++from comqutor_alpha.api.stage_disclosure import build_stage_disclosure
+ from comqutor_alpha.api.unclassified_findings import (
+     ARTIFACT_FILENAME as UNCLASSIFIED_FINDINGS_ARTIFACT_FILENAME,
+     DEFAULT_DISPLAY_LIMIT as UNCLASSIFIED_FINDINGS_DISPLAY_LIMIT,
+@@ -890,6 +891,9 @@
+         ),
+         "alpha_classification_status": alpha_classification_display_status,
+         "summary": summary,
++        # 2026-10-09 (T4 round 32): which model-assisted sub-steps were degraded or fell back, read from the run's own
++        # semantic ledger and stage artifacts (comqutor_alpha.api.stage_disclosure). Additive; status is unchanged.
++        "stage_disclosure": build_stage_disclosure(run_dir),
+         "entity_alpha_exposures": exposure_records,
+         "entity_alpha_exposure_status": (
+             "ready" if entity_exposure_path.exists() else "unavailable"
+--- fresh_code/comqutor_alpha/api/artifact_export.py
++++ round32_final/comqutor_alpha/api/artifact_export.py
+@@ -110,6 +110,9 @@
+     "llm_usage_report.json",
+     "provider_stop.json",
+     "week2_gateway_budget.json",
++    # T4 round 32 (2026-10-09): stage completion / degradation disclosure (comqutor_alpha.api.stage_disclosure), written at
++    # finalization by runs that reach it; any other run's manifest is byte-for-byte what it was.
++    "stage_disclosure.json",
+ )
+ # Written last, once every other artifact above already exists.
+ MANIFEST_ARTIFACT_FILENAME = "artifact_manifest.json"
+@@ -614,6 +617,20 @@
+             if evidence_trace is not None:
+                 save_json_record(run_id, EVIDENCE_TRACE_FILENAME, evidence_trace, output_root=output_root)
+ 
++        # T4 round 32: which model-assisted sub-steps were degraded or fell back, from this run's own ledger and stage
++        # artifacts -- the same builder the API uses, so the Export and the page can never disagree.
++        # Written only for a run that saved a semantic call ledger (every other run's artifact set is unchanged).
++        from comqutor_alpha.api.stage_disclosure import (
++            LEDGER_FILENAME,
++            STAGE_DISCLOSURE_FILENAME,
++            build_stage_disclosure,
++        )
++
++        stage_disclosure = None
++        if (run_dir_for(run_id, output_root) / LEDGER_FILENAME).is_file():
++            stage_disclosure = build_stage_disclosure(run_dir_for(run_id, output_root))
++            save_json_record(run_id, STAGE_DISCLOSURE_FILENAME, stage_disclosure, output_root=output_root)
++
+         dominant_alphas = graph_payload.get("dominant_alphas")
+         dominant_alpha_ids = [
+             a.get("alpha_id") for a in dominant_alphas if isinstance(a, dict) and a.get("alpha_id")
+@@ -648,6 +665,7 @@
+         "evidence_stance_audit": evidence_stance_audit,
+         "unclassified_findings": unclassified_findings,
+         "evidence_trace": evidence_trace,
++        "stage_disclosure": stage_disclosure,
+     }
+ 
+ 
+--- /dev/null
++++ round32_final/comqutor_alpha/api/stage_disclosure.py
+@@ -0,0 +1,296 @@
++"""Stage completion / degradation disclosure of one run (T4 round 32, 2026-10-09).
++
++``build_stage_disclosure`` reads only what the run already saved -- the semantic call ledger
++(``llm_semantic_calls.jsonl``), ``structured_agent_outputs.json``, ``extracted_structures.json``,
++``structure_graph.json``, ``alpha_matches.json`` and the Week 3 status marker -- and reports, per model-assisted
++stage, how many calls produced a result that was used, how many fell back and why, and which fields therefore come
++from deterministic processing rather than a model judgment. Nothing is recomputed and no status is changed: a run's
++``completed`` status keeps its existing meaning (flow finished, Alpha classification without call failures); this
++block is what tells a reader which sub-steps were degraded.
++
++Ground truth for "sent or not" is the ledger itself (``request_attempts`` empty + ``WEEK2_LLM_INPUT_TOO_LARGE``),
++so a historical record whose fallback label predates the round-32 fix is still disclosed correctly here without
++rewriting it. A run without a ledger is reported as ``not_recorded`` -- never as complete.
++"""
++
++from __future__ import annotations
++
++import json
++import threading
++from collections import Counter
++from pathlib import Path
++from typing import Any
++
++SCHEMA_VERSION = "comqutor.stage_disclosure.v1"
++STAGE_DISCLOSURE_FILENAME = "stage_disclosure.json"
++LEDGER_FILENAME = "llm_semantic_calls.jsonl"
++
++STATUS_MODEL_COMPLETE = "model_complete"  # every call produced a model result that was used
++STATUS_DEGRADED = "degraded"  # some calls fell back / were not accepted
++STATUS_MODEL_NOT_USED = "model_not_used"  # no call produced a used model result
++STATUS_NOT_RUN = "not_run"  # the stage made no model call
++STATUS_NOT_RECORDED = "not_recorded"  # the run saved no ledger to tell
++
++_ADAPTER_FIELDS = ["entities", "factors", "direction", "confidence", "cited_source_id"]
++_INPUT_FILES = ("llm_semantic_calls.jsonl", "structured_agent_outputs.json", "extracted_structures.json", "structure_graph.json",
++                "week3_pipeline_status.json")
++_cache_lock = threading.Lock()
++_cache: dict[str, tuple[tuple, dict[str, Any]]] = {}  # run dir -> (input files' (size, mtime_ns), disclosure)
++
++
++def _load_json(path: Path) -> Any:
++    try:
++        return json.loads(path.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return None
++
++
++def _load_ledger(run_dir: Path) -> list[dict[str, Any]] | None:
++    path = run_dir / LEDGER_FILENAME
++    if not path.is_file():
++        return None
++    records = []
++    try:
++        for line in path.read_text(encoding="utf-8").splitlines():
++            if line.strip():
++                value = json.loads(line)
++                if isinstance(value, dict):
++                    records.append(value)
++    except (OSError, ValueError):
++        return None
++    return records
++
++
++def _outcome(record: dict[str, Any]) -> str:
++    """One logical call's outcome from its own ledger fields."""
++    attempts = record.get("request_attempts") or []
++    cache = record.get("cache") or {}
++    if record.get("validation_status") == "accepted" and not record.get("fallback_used"):
++        return "used_from_cache" if cache.get("hit") and not attempts else "used"
++    if not attempts and not cache.get("hit"):
++        code = record.get("error_code")
++        if code == "WEEK2_LLM_INPUT_TOO_LARGE":
++            return "not_sent_input_too_large"
++        if code == "WEEK2_LLM_RUN_STOPPED_AFTER_PROVIDER_REFUSAL":
++            return "not_sent_provider_stopped"
++        if record.get("provider_status") == "budget_exhausted" or code == "WEEK2_LLM_CALL_BUDGET_EXHAUSTED":
++            return "not_sent_budget_exhausted"
++        return f"not_sent:{code or 'unknown'}"
++    status = record.get("provider_status")
++    if status == "timeout":
++        return "timeout"
++    if status == "provider_error":
++        return "provider_error"
++    reason = str(record.get("fallback_reason") or record.get("error_code") or "rejected")
++    if reason == "WEEK2_LLM_EMPTY_RESULT_FALLBACK":
++        return "valid_empty_result_not_used"
++    return f"reply_not_accepted:{reason}"
++
++
++def _stage_status(outcomes: Counter, *, used_keys: tuple[str, ...] = ("used", "used_from_cache")) -> str:
++    total = sum(outcomes.values())
++    if total == 0:
++        return STATUS_NOT_RUN
++    used = sum(outcomes.get(key, 0) for key in used_keys)
++    if used == total:
++        return STATUS_MODEL_COMPLETE
++    return STATUS_MODEL_NOT_USED if used == 0 else STATUS_DEGRADED
++
++
++def _task_block(ledger: list[dict[str, Any]], task: str) -> tuple[list[dict[str, Any]], Counter]:
++    calls = [r for r in ledger if r.get("task") == task]
++    return calls, Counter(_outcome(r) for r in calls)
++
++
++def _http_requests(calls: list[dict[str, Any]]) -> int:
++    return sum(len(r.get("request_attempts") or []) for r in calls)
++
++
++def _outcome_phrase(outcomes: Counter) -> str:
++    labels = {
++        "timeout": "timed out",
++        "not_sent_input_too_large": "not sent (input over the local size limit)",
++        "not_sent_provider_stopped": "not sent (run stopped after a provider refusal)",
++        "not_sent_budget_exhausted": "not sent (call budget exhausted)",
++        "provider_error": "failed at the provider",
++        "valid_empty_result_not_used": "returned a valid empty result, deterministic processing used instead",
++    }
++    parts = []
++    for key, count in sorted(outcomes.items()):
++        if key in ("used", "used_from_cache"):
++            continue
++        if key.startswith("reply_not_accepted:"):
++            parts.append(f"{count} reply not accepted ({key.split(':', 1)[1]})")
++        else:
++            parts.append(f"{count} {labels.get(key, key)}")
++    return ", ".join(parts)
++
++
++def build_stage_disclosure(run_dir: str | Path) -> dict[str, Any]:
++    """Cached per run directory and invalidated whenever one of the input files changes (the page polls this)."""
++    run_dir = Path(run_dir)
++    key = str(run_dir.resolve())
++    stamp = tuple((p.stat().st_size, p.stat().st_mtime_ns) if p.is_file() else None for p in (run_dir / n for n in _INPUT_FILES))
++    with _cache_lock:
++        hit = _cache.get(key)
++        if hit is not None and hit[0] == stamp:
++            return json.loads(json.dumps(hit[1]))
++    disclosure = _build_stage_disclosure(run_dir)
++    with _cache_lock:
++        _cache[key] = (stamp, disclosure)
++    return json.loads(json.dumps(disclosure))
++
++
++def _build_stage_disclosure(run_dir: Path) -> dict[str, Any]:
++    ledger = _load_ledger(run_dir)
++    structured = _load_json(run_dir / "structured_agent_outputs.json") or {}
++    extracted = _load_json(run_dir / "extracted_structures.json") or {}
++    graph = _load_json(run_dir / "structure_graph.json") or {}
++    week3 = _load_json(run_dir / "week3_pipeline_status.json") or {}
++    meta = structured.get("metadata") if isinstance(structured, dict) else None
++    meta = meta if isinstance(meta, dict) else {}
++
++    if ledger is None:
++        return {
++            "schema_version": SCHEMA_VERSION,
++            "source": "not_recorded: this run saved no semantic call ledger",
++            "stages": [],
++            "degraded_stages": [],
++            "notes": ["This run saved no semantic call ledger, so sub-step completion cannot be disclosed (not recorded)."],
++        }
++
++    stages: list[dict[str, Any]] = []
++    notes: list[str] = []
++
++    # --- claim enrichment (structured_adapter) ---------------------------------------------------------------------
++    calls, outcomes = _task_block(ledger, "structured_adapter")
++    segments = sum(len((r.get("input_payload") or {}).get("segments") or []) for r in calls)
++    used_segments = sum(len((r.get("input_payload") or {}).get("segments") or []) for r in calls if _outcome(r).startswith("used"))
++    methods = Counter(str(r.get("extraction_method")) for r in structured.get("records") or [] if isinstance(r, dict))
++    status = _stage_status(outcomes)
++    stage = {
++        "stage": "claim_enrichment",
++        "task": "structured_adapter",
++        "status": status,
++        "calls": len(calls),
++        "http_requests": _http_requests(calls),
++        "outcomes": dict(sorted(outcomes.items())),
++        "segments_in_calls": segments,
++        "segments_with_model_result_used": used_segments,
++        "record_extraction_methods": dict(sorted(methods.items())),
++        "fields_from_model": _ADAPTER_FIELDS if status == STATUS_MODEL_COMPLETE else ([] if status == STATUS_MODEL_NOT_USED else "mixed: see record_extraction_methods"),
++        "fields_from_deterministic_processing": _ADAPTER_FIELDS if status in (STATUS_MODEL_NOT_USED, STATUS_NOT_RUN) else ([] if status == STATUS_MODEL_COMPLETE else "mixed: see record_extraction_methods"),
++    }
++    stages.append(stage)
++    if status not in (STATUS_MODEL_COMPLETE, STATUS_NOT_RUN):
++        notes.append(
++            f"Claim enrichment: {len(calls) - sum(outcomes.get(k, 0) for k in ('used', 'used_from_cache'))} of {len(calls)} batches "
++            f"did not use a model result ({_outcome_phrase(outcomes)}); for those claims entities, factors, direction, "
++            "confidence and cited source come from deterministic extraction, not from a model judgment "
++            "(a direction of 'unknown' there means 'not judged', not a model answer)."
++        )
++
++    # --- content support verification -------------------------------------------------------------------------------
++    calls, outcomes = _task_block(ledger, "content_support_verification")
++    status = _stage_status(outcomes)
++    stages.append({
++        "stage": "content_support_verification",
++        "task": "content_support_verification",
++        "status": status,
++        "calls": len(calls),
++        "claims_in_calls": sum(len(r.get("claim_ids") or []) for r in calls),
++        "http_requests": _http_requests(calls),
++        "outcomes": dict(sorted(outcomes.items())),
++    })
++    if status not in (STATUS_MODEL_COMPLETE, STATUS_NOT_RUN):
++        notes.append(
++            f"Content support verification: {sum(outcomes.get(k, 0) for k in ('used', 'used_from_cache'))} of {len(calls)} "
++            f"requested verifications produced an accepted model result ({_outcome_phrase(outcomes)}); the others stay "
++            "pending review -- a technical failure or a request that was never sent is not a judgment that the claim is unsupported."
++        )
++
++    # --- Alpha classification ----------------------------------------------------------------------------------------
++    calls, outcomes = _task_block(ledger, "alpha_classifier")
++    status = _stage_status(outcomes)
++    stages.append({
++        "stage": "alpha_classification",
++        "task": "alpha_classifier",
++        "status": status,
++        "calls": len(calls),
++        "http_requests": _http_requests(calls),
++        "outcomes": dict(sorted(outcomes.items())),
++    })
++    if status not in (STATUS_MODEL_COMPLETE, STATUS_NOT_RUN):
++        failed = len(calls) - sum(outcomes.get(k, 0) for k in ("used", "used_from_cache"))
++        notes.append(
++            f"Alpha classification: {failed} of {len(calls)} claims have no usable classification ({_outcome_phrase(outcomes)}); "
++            "they are never counted as 'no Alpha'."
++        )
++
++    # --- evidence stance --------------------------------------------------------------------------------------------
++    calls, outcomes = _task_block(ledger, "evidence_stance_classifier")
++    status = _stage_status(outcomes)
++    stages.append({
++        "stage": "evidence_stance",
++        "task": "evidence_stance_classifier",
++        "status": status,
++        "calls": len(calls),
++        "items_in_calls": sum(len((r.get("input_payload") or {}).get("items") or []) for r in calls),
++        "http_requests": _http_requests(calls),
++        "outcomes": dict(sorted(outcomes.items())),
++    })
++    if status not in (STATUS_MODEL_COMPLETE, STATUS_NOT_RUN):
++        failed = len(calls) - sum(outcomes.get(k, 0) for k in ("used", "used_from_cache"))
++        notes.append(f"Evidence stance: {failed} of {len(calls)} batches without a used model result ({_outcome_phrase(outcomes)}); "
++                     "those items keep the deterministic rule stance.")
++
++    # --- structure extraction and the graph (kept separate) ---------------------------------------------------------
++    calls, outcomes = _task_block(ledger, "structure_extractor")
++    status = _stage_status(outcomes)
++    xmeta = extracted.get("metadata") if isinstance(extracted, dict) else None
++    xmeta = xmeta if isinstance(xmeta, dict) else {}
++    edges_by_source = {
++        "model_structure_extraction": xmeta.get("llm_edge_count"),
++        "deterministic_grammar": xmeta.get("deterministic_edge_count"),
++        "tradingagents_canonical_relations": xmeta.get("canonical_relation_edge_count"),
++    }
++    stages.append({
++        "stage": "structure_extraction",
++        "task": "structure_extractor",
++        "status": status,
++        "calls": len(calls),
++        "http_requests": _http_requests(calls),
++        "outcomes": dict(sorted(outcomes.items())),
++        "extracted_edges_by_source": edges_by_source,
++    })
++    if status not in (STATUS_MODEL_COMPLETE, STATUS_NOT_RUN):
++        notes.append(
++            f"Structure extraction: {len(calls) - sum(outcomes.get(k, 0) for k in ('used', 'used_from_cache'))} of {len(calls)} "
++            f"model calls contributed no edge ({_outcome_phrase(outcomes)}); extracted edges by source: "
++            f"model {edges_by_source['model_structure_extraction']}, deterministic grammar {edges_by_source['deterministic_grammar']}, "
++            f"TradingAgents canonical relations {edges_by_source['tradingagents_canonical_relations']}."
++        )
++    metrics = graph.get("graph_metrics") if isinstance(graph, dict) else None
++    metrics = metrics if isinstance(metrics, dict) else {}
++    built = bool(graph) and week3.get("outcome") == "success"
++    stages.append({
++        "stage": "structure_graph",
++        "task": None,
++        "status": "built" if built else "not_built",
++        "nodes": metrics.get("node_count"),
++        "edges": metrics.get("edge_count"),
++        "note": "Graph construction finishing is separate from model structure extraction succeeding; see structure_extraction.",
++    })
++
++    degraded = [s["stage"] for s in stages if s["status"] in (STATUS_DEGRADED, STATUS_MODEL_NOT_USED)]
++    return {
++        "schema_version": SCHEMA_VERSION,
++        "source": f"{LEDGER_FILENAME} and the run's saved stage artifacts (read-only; nothing recomputed)",
++        "llm_record_count": meta.get("llm_record_count"),
++        "stages": stages,
++        "degraded_stages": degraded,
++        "notes": notes,
++    }
++
++
++__all__ = ["LEDGER_FILENAME", "SCHEMA_VERSION", "STAGE_DISCLOSURE_FILENAME", "build_stage_disclosure"]
+--- fresh_code/comqutor_alpha/storage/file_store.py
++++ round32_final/comqutor_alpha/storage/file_store.py
+@@ -81,6 +81,9 @@
+     # (technical indicators) and the sanitized raw provider response. Never required, never backfilled.
+     "derived_inputs.json",
+     "provider_response_audit.json",
++    # T4 round 32 (2026-10-09): stage completion / degradation disclosure (comqutor_alpha.api.stage_disclosure), written
++    # at finalization by runs that saved a semantic call ledger. Additive, present-only, never backfilled.
++    "stage_disclosure.json",
+ }
+ ALLOWED_ARTIFACT_PATHS = {
+     *ALLOWED_ARTIFACT_FILENAMES,
+--- fresh_code/tests/test_structured_adapter_concurrency.py
++++ round32_final/tests/test_structured_adapter_concurrency.py
+@@ -360,9 +360,29 @@
+     remediation-specific functions (alpha_specific_invalidation_matched /
+     alpha_positive_requirement_satisfied) -- the A001 remediation lives
+     entirely outside structured_adapter's own module and code path."""
++    import ast
++    import io
++    import tokenize
++
+     import comqutor_alpha.structure_engine.structured_output_adapter as soa
+ 
+-    module_source = Path(soa.__file__).read_text(encoding="utf-8")
++    raw_source = Path(soa.__file__).read_text(encoding="utf-8")
++    # 2026-10-09 (T4 round 32): the property is about CODE references, so '#' comments are stripped before the
++    # substring checks. The original whole-file substring check also matched prose: a Round 9 (2026-10-05) comment
++    # that only compares a post-pass's *shape* to alpha_mapper's ("mirrors alpha_mapper's own ...") failed it although
++    # the module neither imports nor calls alpha_mapper. Everything else the old check covered -- imports, names,
++    # attributes, string literals and docstrings -- is still checked, plus an explicit AST import check below.
++    module_source = tokenize.untokenize(
++        (tok.type, tok.string) for tok in tokenize.generate_tokens(io.StringIO(raw_source).readline) if tok.type != tokenize.COMMENT
++    )
+     assert "alpha_mapper" not in module_source
+     assert "alpha_specific_invalidation_matched" not in module_source
+     assert "alpha_positive_requirement_satisfied" not in module_source
++    imported = set()
++    for node in ast.walk(ast.parse(raw_source)):
++        if isinstance(node, ast.Import):
++            imported.update(alias.name for alias in node.names)
++        elif isinstance(node, ast.ImportFrom):
++            imported.add(node.module or "")
++            imported.update(f"{node.module}.{alias.name}" for alias in node.names)
++    assert not any("alpha_mapper" in name for name in imported)
+--- fresh_code/tests/structured_output_shadow/test_shadow_semantic_runtime.py
++++ round32_final/tests/structured_output_shadow/test_shadow_semantic_runtime.py
+@@ -49,6 +49,12 @@
+         # alpha_classifier, registered here for the first time -- additive,
+         # no existing task removed or changed.
+         "alpha_classifier_batch",
++        # 2026-10-08 (T3 closeout, Round 26): content_support_verification
++        # registered in contracts.SEMANTIC_TASKS (registry completion: its
++        # calls had failed to start a semantic record) -- additive, no
++        # existing task removed or changed. This expectation was not updated
++        # at the time (T4 round 32 correction).
++        "content_support_verification",
+     } == SEMANTIC_TASKS
+ 
+ 
+--- fresh_code/tests/test_semantic_artifact_live_pipeline.py
++++ round32_final/tests/test_semantic_artifact_live_pipeline.py
+@@ -284,6 +284,15 @@
+         before = _without_dynamic_metadata(_load(legacy_root / run_id / filename))
+         after = _without_dynamic_metadata(_load(integrated_root / run_id / filename))
+         assert before == after, filename
++    # T4 round 32: stage_disclosure is DERIVED from the semantic-runtime sidecar ledger itself, so it legitimately differs
++    # between the two sides (no ledger -> "not_recorded"); every other response field must still be identical.
++    legacy_disclosure = legacy_response.pop("stage_disclosure")
++    integrated_disclosure = integrated_response.pop("stage_disclosure")
++    assert legacy_disclosure["source"].startswith("not_recorded") and legacy_disclosure["stages"] == []
++    assert {s["stage"] for s in integrated_disclosure["stages"]} == {
++        "claim_enrichment", "content_support_verification", "alpha_classification", "evidence_stance",
++        "structure_extraction", "structure_graph",
++    }
+     assert _without_dynamic_metadata(legacy_response) == _without_dynamic_metadata(
+         integrated_response
+     )
+--- /dev/null
++++ round32_final/tests/test_t4_round32_not_sent_and_stage_disclosure.py
+@@ -0,0 +1,194 @@
++"""T4 round 32 (2026-10-09): a request refused locally because its input is too large is recorded as "not sent"
++(never as a malformed model response), and every run discloses which model-assisted sub-steps fell back.
++
++Zero provider calls. The content-support tests use the production gateway builder, a real semantic session and the
++unmodified ``_process_batch`` with the SAVED payloads of the second NVDA Fresh run (12591384) -- the oversized request
++it never sent and one request it sent -- plus that run's saved real response body as the only fake (the bottom HTTP
++transport). The end-to-end test reuses the round-28 harness (real research pipeline, fixed responses at the transport).
++"""
++
++from __future__ import annotations
++
++import io
++import json
++import zipfile
++from pathlib import Path
++from types import SimpleNamespace
++
++import httpx
++import pytest
++
++from comqutor_alpha.llm_runtime.session import SemanticRuntimeSession
++from comqutor_alpha.structure_engine import content_support_llm as cs, evidence_stance_llm as esl
++from tests.test_t4_round28_provider_stop import (  # noqa: F401
++    MockWeek2Provider,
++    _install,
++    _run,
++    needs_source,
++    week2_env,
++)
++
++REPO = Path(__file__).resolve().parents[1]
++FRESH2 = REPO / "outputs" / "t4_runs" / "12591384-0b26-470d-a99d-a49c00be440b"
++needs_fresh2 = pytest.mark.skipif(not (FRESH2 / "llm_semantic_calls.jsonl").is_file(), reason="saved NVDA Fresh run 12591384 not present")
++
++
++def _jsonl(path: Path) -> list[dict]:
++    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()] if path.is_file() else []
++
++
++def _fresh2_cs_calls():
++    ledger = _jsonl(FRESH2 / "llm_semantic_calls.jsonl")
++    calls = [r for r in ledger if r["task"] == "content_support_verification"]
++    oversized = [r for r in calls if r.get("error_code") == "WEEK2_LLM_INPUT_TOO_LARGE"]
++    sent_supports = [r for r in calls if r.get("request_attempts") and r["validation_status"] == "accepted"]
++    records = {r["claim_id"]: r for r in json.loads((FRESH2 / "structured_agent_outputs.json").read_text(encoding="utf-8"))["records"]}
++    responses = {r["attempt_id"]: r for r in _jsonl(FRESH2 / "error_logs" / "week2_llm_provider_response_audit.jsonl")}
++    return oversized, sent_supports, records, responses
++
++
++def _item(call: dict, records: dict) -> cs.ContentSupportRequestItem:
++    """The production request builder applied to the run's saved records and source registry; its payload must be
++    exactly the payload the run recorded for this call (the request body is unchanged)."""
++    sources = json.loads((FRESH2 / "source_registry.json").read_text(encoding="utf-8"))["sources"]
++    claim_id = call["claim_ids"][0]
++    item = next(i for i in cs.build_content_support_request_items(list(records.values()), sources) if i.claim_id == claim_id)
++    assert item.payload == call["input_payload"]["items"][0]
++    return item
++
++
++@pytest.fixture
++def profile_env(monkeypatch):
++    for name, value in {
++        "COMQUTOR_WEEK2_LLM_ENABLED": "1",
++        "COMQUTOR_WEEK2_LLM_PROVIDER": "deepseek",
++        "COMQUTOR_WEEK2_LLM_MODEL": "deepseek-v4-flash",
++        "COMQUTOR_WEEK2_LLM_BASE_URL": "https://api.deepseek.com",
++        "COMQUTOR_WEEK2_LLM_PROFILE": "t3_verified_20261008",
++        "DEEPSEEK_API_KEY": "test-not-a-key",
++    }.items():
++        monkeypatch.setenv(name, value)
++
++
++def test_not_sent_reason_mapping_is_input_too_large_for_content_support_and_stance():
++    refused = SimpleNamespace(provider_status="not_called", error_code="WEEK2_LLM_INPUT_TOO_LARGE")
++    assert cs._reason_from_invocation(refused) == cs.FALLBACK_INPUT_TOO_LARGE == "input_too_large"
++    assert esl._reason_from_invocation(refused) == esl.FALLBACK_INPUT_TOO_LARGE == "input_too_large"
++    # a real malformed reply keeps its own reason
++    for module in (cs, esl):
++        assert module._reason_from_invocation(SimpleNamespace(provider_status="success", error_code="WEEK2_LLM_VALIDATION_FAILED")) == "malformed_response"
++        assert module.FALLBACK_INPUT_TOO_LARGE in module.VALID_FALLBACK_REASONS
++
++
++@needs_fresh2
++def test_saved_oversized_request_is_not_sent_and_the_saved_sent_request_behaves_as_before(tmp_path, profile_env):
++    from comqutor_alpha.structure_engine.week2_llm import (
++        MAX_PROMPT_PAYLOAD_CHARS,
++        build_server_week2_llm_gateway,
++    )
++
++    oversized, sent_supports, records, responses = _fresh2_cs_calls()
++    assert len(oversized) == 5
++    big, normal = _item(oversized[0], records), _item(sent_supports[0], records)
++    normal_body = responses[sent_supports[0]["request_attempts"][0]["attempt_id"]]["body"]
++    arrivals: list[str] = []
++
++    def handler(request: httpx.Request) -> httpx.Response:
++        content = json.loads(request.content)["messages"][0]["content"]
++        claim_id = json.loads(content[content.index('{"items"'):])["items"][0]["claim_id"]
++        arrivals.append(claim_id)
++        assert claim_id == normal.claim_id, "the oversized request reached the transport"
++        return httpx.Response(200, content=normal_body.encode("utf-8"), headers={"content-type": "application/json"})
++
++    run_id = "r32-not-sent"
++    (tmp_path / run_id).mkdir()
++    gateway = build_server_week2_llm_gateway(run_id, tmp_path, execution_id=run_id, _base_transport_for_testing=httpx.MockTransport(handler))
++    session = SemanticRuntimeSession(run_id=run_id, output_directory=tmp_path / run_id, execution_mode="test", provider="deepseek", model="deepseek-v4-flash")
++    gateway.attach_semantic_runtime(session)
++    stats, results = cs.ContentSupportRunStats(), {}
++
++    reservations_before = gateway.call_count
++    cs._process_batch([big], gateway, stats, results)
++    assert arrivals == [] and gateway.call_count == reservations_before  # no HTTP request, no budget reservation
++    cs._process_batch([normal], gateway, stats, results)
++    assert arrivals == [normal.claim_id] and gateway.call_count == reservations_before + 1
++
++    # the claim: technical "not sent", never a verdict and never a malformed model response
++    refused = results[big.claim_id]
++    assert refused["content_support_llm_fallback_reason"] == "input_too_large"
++    assert refused["content_support_status"] == records[big.claim_id]["content_support_status"] == "PENDING_REVIEW"
++    assert refused.get("content_support_llm_detail") is None
++    # the ledger: not_called, no attempt, no usage, the measured size and the limit
++    ledger = {r["claim_ids"][0]: r for r in _jsonl(tmp_path / run_id / "llm_semantic_calls.jsonl")}
++    rec = ledger[big.claim_id]
++    serialized = json.dumps({"items": [big.payload]}, ensure_ascii=False, default=str)
++    assert len(serialized) > MAX_PROMPT_PAYLOAD_CHARS
++    assert rec["provider_status"] == "not_called" and not rec.get("request_attempts") and rec["validation_status"] == "not_run"
++    assert rec["error_code"] == "WEEK2_LLM_INPUT_TOO_LARGE" and rec["fallback_reason"] == "input_too_large"
++    assert f"input of {len(serialized)} characters exceeds the {MAX_PROMPT_PAYLOAD_CHARS}-character limit" in rec["error_message"]
++    assert rec["token_usage"] == {"input_tokens": None, "output_tokens": None, "total_tokens": None}
++    attempt_log = {tuple(e["claim_ids"]): e for e in stats.attempt_log}
++    assert attempt_log[(big.claim_id,)]["input_chars"] == len(serialized)
++    assert attempt_log[(big.claim_id,)]["input_limit_chars"] == MAX_PROMPT_PAYLOAD_CHARS
++    assert attempt_log[(big.claim_id,)]["provider_attempt_count"] == 0
++    # the legitimate request: same verdict as the Fresh run saved, error_message stays empty
++    assert results[normal.claim_id]["content_support_status"] == records[normal.claim_id]["content_support_status"]
++    assert ledger[normal.claim_id]["validation_status"] == "accepted" and ledger[normal.claim_id]["error_message"] is None
++    assert stats.fallback_reason_counts["input_too_large"] == 1 and stats.fallback_reason_counts["malformed_response"] == 0
++
++
++def test_evidence_trace_reads_input_too_large_as_not_sent():
++    from comqutor_alpha.api.evidence_trace import _source_support_status
++
++    out = _source_support_status({"source_link_status": "VALID", "content_support_status": "PENDING_REVIEW",
++                                  "content_support_llm_fallback_reason": "input_too_large"}, {"eligible": False}, {})
++    assert out["status_code"] == "TECHNICAL_INCOMPLETE"
++    assert "not sent" in out["reason"] and "format" not in out["reason"]
++
++
++@needs_fresh2
++def test_stage_disclosure_of_the_saved_fresh_run_reads_the_ledger_not_the_old_label():
++    from comqutor_alpha.api.stage_disclosure import build_stage_disclosure
++
++    disclosure = build_stage_disclosure(FRESH2)
++    stages = {s["stage"]: s for s in disclosure["stages"]}
++    assert disclosure["degraded_stages"] == ["claim_enrichment", "content_support_verification", "structure_extraction"]
++    assert stages["claim_enrichment"]["status"] == "model_not_used"
++    assert stages["claim_enrichment"]["outcomes"] == {"not_sent_input_too_large": 1, "reply_not_accepted:WEEK2_LLM_VALIDATION_FAILED": 1, "timeout": 7}
++    assert stages["claim_enrichment"]["fields_from_deterministic_processing"] == ["entities", "factors", "direction", "confidence", "cited_source_id"]
++    # the five never-sent verifications are disclosed as not sent although their saved label is malformed_response
++    assert stages["content_support_verification"]["outcomes"]["not_sent_input_too_large"] == 5
++    assert stages["content_support_verification"]["outcomes"]["reply_not_accepted:malformed_response"] == 3
++    assert stages["alpha_classification"]["status"] == "model_complete"
++    assert stages["structure_extraction"]["outcomes"] == {"reply_not_accepted:WEEK2_LLM_VALIDATION_FAILED": 1, "valid_empty_result_not_used": 1}
++    assert stages["structure_extraction"]["extracted_edges_by_source"] == {"model_structure_extraction": 0, "deterministic_grammar": 0,
++                                                                            "tradingagents_canonical_relations": 16}
++    assert stages["structure_graph"]["status"] == "built"  # graph built is reported separately from extraction success
++
++
++def test_stage_disclosure_without_a_ledger_is_not_recorded(tmp_path):
++    from comqutor_alpha.api.stage_disclosure import build_stage_disclosure
++
++    disclosure = build_stage_disclosure(tmp_path)
++    assert disclosure["stages"] == [] and disclosure["source"].startswith("not_recorded")
++
++
++@needs_source
++def test_pipeline_api_and_export_carry_the_same_stage_disclosure(week2_env, monkeypatch):  # noqa: F811
++    from comqutor_alpha.api.routes_research import build_research_response, get_run_export_bundle
++
++    provider = MockWeek2Provider()  # fixed responses; the enrichment reply follows the prompt's eight fields
++    _install(monkeypatch, provider)
++    response, run_dir = _run(week2_env, provider, "r32-disclosure")
++    disclosure = response["stage_disclosure"]
++    stages = {s["stage"]: s for s in disclosure["stages"]}
++    assert set(stages) == {"claim_enrichment", "content_support_verification", "alpha_classification", "evidence_stance",
++                           "structure_extraction", "structure_graph"}
++    saved = json.loads((run_dir / "stage_disclosure.json").read_text(encoding="utf-8"))
++    assert saved == disclosure == build_research_response(response["run_id"], str(week2_env["output_root"]))["stage_disclosure"]
++    manifest = json.loads((run_dir / "artifact_manifest.json").read_text(encoding="utf-8"))
++    assert any(a["artifact_name"] == "stage_disclosure.json" and a["status"] == "valid" for a in manifest["artifacts"])
++    code, _, body, _, _ = get_run_export_bundle(response["run_id"], str(week2_env["output_root"]))
++    assert code == 200
++    with zipfile.ZipFile(io.BytesIO(body)) as zf:
++        assert json.loads(zf.read("stage_disclosure.json")) == disclosure
+--- fresh_code/frontend/src/api/types.ts
++++ round32_final/frontend/src/api/types.ts
+@@ -366,6 +366,25 @@
+   | "complete_active_no_dominant"
+   | "complete_has_dominant";
+ 
++/** T4 round 32: one model-assisted sub-step's completion, read from the run's own semantic ledger. */
++export interface StageDisclosureStage {
++  stage: string;
++  task: string | null;
++  /** "model_complete" | "degraded" | "model_not_used" | "not_run" | "not_recorded" | "built" | "not_built" */
++  status: string;
++  calls?: number | null;
++  http_requests?: number | null;
++  outcomes?: Record<string, number> | null;
++}
++
++/** T4 round 32: which sub-steps were degraded or fell back (additive; absent on older backends). */
++export interface StageDisclosure {
++  schema_version: string;
++  stages: StageDisclosureStage[];
++  degraded_stages: string[];
++  notes: string[];
++}
++
+ export interface AlphaClassificationCompletion {
+   total_claims: number;
+   valid_select_count: number;
+@@ -396,6 +415,8 @@
+    * presented as "no such structure exists". */
+   alpha_classification_status?: AlphaClassificationStatus | null;
+   alpha_classification_completion?: AlphaClassificationCompletion | null;
++  /** T4 round 32: sub-step completion / fallback disclosure; null when absent. */
++  stage_disclosure?: StageDisclosure | null;
+   data_sanity_status: DataSanityStatus;
+   data_sanity_warning_count: number;
+   data_sanity_critical_count: number;
+--- fresh_code/frontend/src/api/adapters.ts
++++ round32_final/frontend/src/api/adapters.ts
+@@ -58,6 +58,8 @@
+   ResearchSubmissionResult,
+   RunHistoryResponse,
+   RunStatusResult,
++  StageDisclosure,
++  StageDisclosureStage,
+   StructureGraphEdge,
+   StructureGraphNode,
+   StructureGraphResponse,
+@@ -175,6 +177,28 @@
+     call_failure_count: value.call_failure_count as number,
+     not_executed_count: value.not_executed_count as number,
+     complete: value.complete,
++  };
++}
++
++function adaptStageDisclosure(value: unknown): StageDisclosure | null {
++  if (!isRecord(value) || !isString(value.schema_version) || !Array.isArray(value.stages)) return null;
++  const stages: StageDisclosureStage[] = [];
++  for (const raw of value.stages) {
++    if (!isRecord(raw) || !isString(raw.stage) || !isString(raw.status)) continue;
++    stages.push({
++      stage: raw.stage,
++      task: isString(raw.task) ? raw.task : null,
++      status: raw.status,
++      calls: isNumber(raw.calls) ? raw.calls : null,
++      http_requests: isNumber(raw.http_requests) ? raw.http_requests : null,
++      outcomes: isRecord(raw.outcomes) ? (raw.outcomes as Record<string, number>) : null,
++    });
++  }
++  return {
++    schema_version: value.schema_version,
++    stages,
++    degraded_stages: isStringArray(value.degraded_stages) ? value.degraded_stages : [],
++    notes: isStringArray(value.notes) ? value.notes : [],
+   };
+ }
+ 
+@@ -1058,6 +1082,7 @@
+     summary: isString(payload.summary) ? payload.summary : "",
+     alpha_classification_status: adaptAlphaClassificationStatus(payload.alpha_classification_status),
+     alpha_classification_completion: adaptAlphaClassificationCompletion(payload.alpha_classification_completion),
++    stage_disclosure: adaptStageDisclosure(payload.stage_disclosure),
+     data_sanity_status: dataSanityStatus as DataSanityStatus,
+     data_sanity_warning_count: payload.data_sanity_warning_count,
+     data_sanity_critical_count: payload.data_sanity_critical_count,
+--- /dev/null
++++ round32_final/frontend/src/components/StageDisclosurePanel.tsx
+@@ -0,0 +1,60 @@
++import type { StageDisclosure } from "../api/types";
++
++// T4 round 32: which model-assisted sub-steps of this run were degraded or fell back to deterministic processing,
++// read from the run's own semantic ledger (GET /api/research/{run_id} -> stage_disclosure). A run's "Completed" status
++// means the flow finished; it does not mean every sub-step produced a model result -- this panel says which did not.
++
++const STAGE_LABELS: Record<string, string> = {
++  claim_enrichment: "Claim enrichment",
++  content_support_verification: "Content support verification",
++  alpha_classification: "Alpha classification",
++  evidence_stance: "Evidence stance",
++  structure_extraction: "Model structure extraction",
++  structure_graph: "Structure Graph construction",
++};
++
++const STATUS_LABELS: Record<string, string> = {
++  model_complete: "model result used for every call",
++  degraded: "degraded: some calls fell back",
++  model_not_used: "no model result used (deterministic fallback)",
++  not_run: "no model call",
++  not_recorded: "not recorded",
++  built: "built",
++  not_built: "not built",
++};
++
++export function StageDisclosurePanel({ disclosure }: { disclosure: StageDisclosure | null | undefined }) {
++  if (!disclosure) return null;
++  return (
++    <div className="stage-disclosure" data-testid="stage-disclosure">
++      <h3>Processing completeness</h3>
++      {disclosure.degraded_stages.length === 0 ? (
++        <p>No model-assisted sub-step was degraded.</p>
++      ) : (
++        <ul className="stage-disclosure-notes">
++          {disclosure.notes.map((note) => (
++            <li key={note}>{note}</li>
++          ))}
++        </ul>
++      )}
++      <table className="stage-disclosure-table">
++        <thead>
++          <tr>
++            <th>Sub-step</th>
++            <th>Result</th>
++            <th>Calls</th>
++          </tr>
++        </thead>
++        <tbody>
++          {disclosure.stages.map((stage) => (
++            <tr key={stage.stage}>
++              <td>{STAGE_LABELS[stage.stage] ?? stage.stage}</td>
++              <td>{STATUS_LABELS[stage.status] ?? stage.status}</td>
++              <td>{stage.calls ?? "—"}</td>
++            </tr>
++          ))}
++        </tbody>
++      </table>
++    </div>
++  );
++}
+--- /dev/null
++++ round32_final/frontend/src/components/StageDisclosurePanel.test.tsx
+@@ -0,0 +1,32 @@
++import { render, screen } from "@testing-library/react";
++import { describe, expect, it } from "vitest";
++import { StageDisclosurePanel } from "./StageDisclosurePanel";
++
++describe("StageDisclosurePanel", () => {
++  it("lists degraded sub-steps and keeps graph construction separate from model structure extraction", () => {
++    render(
++      <StageDisclosurePanel
++        disclosure={{
++          schema_version: "comqutor.stage_disclosure.v1",
++          degraded_stages: ["claim_enrichment", "structure_extraction"],
++          notes: ["Claim enrichment: 9 of 9 batches did not use a model result (7 timed out)."],
++          stages: [
++            { stage: "claim_enrichment", task: "structured_adapter", status: "model_not_used", calls: 9 },
++            { stage: "structure_extraction", task: "structure_extractor", status: "model_not_used", calls: 2 },
++            { stage: "structure_graph", task: null, status: "built" },
++          ],
++        }}
++      />,
++    );
++    expect(screen.getByText("Processing completeness")).toBeInTheDocument();
++    expect(screen.getByText(/9 of 9 batches did not use a model result/)).toBeInTheDocument();
++    expect(screen.getAllByText("no model result used (deterministic fallback)")).toHaveLength(2);
++    expect(screen.getByText("Structure Graph construction")).toBeInTheDocument();
++    expect(screen.getByText("built")).toBeInTheDocument();
++  });
++
++  it("renders nothing for a backend that sends no disclosure", () => {
++    const { container } = render(<StageDisclosurePanel disclosure={null} />);
++    expect(container).toBeEmptyDOMElement();
++  });
++});
+--- fresh_code/frontend/src/pages/ResearchRunPage.tsx
++++ round32_final/frontend/src/pages/ResearchRunPage.tsx
+@@ -9,6 +9,7 @@
+ import { ContentSupportReviewPanel } from "../components/ContentSupportReviewPanel";
+ import { KeyConclusionsPanel } from "../components/KeyConclusionsPanel";
+ import { StructuralSnapshot } from "../components/StructuralSnapshot";
++import { StageDisclosurePanel } from "../components/StageDisclosurePanel";
+ import { useRunPolling } from "../hooks/useRunPolling";
+ import { useResearchRun } from "../hooks/useResearchRun";
+ import { ApiError, describeApiError } from "../api/errors";
+@@ -727,6 +728,7 @@
+             <section className="panel research-summary-panel">
+               <h2>Research summary</h2>
+               <p>{research.summary}</p>
++              <StageDisclosurePanel disclosure={research.stage_disclosure} />
+             </section>
+           ) : null}
+ 
+--- fresh_code/frontend/src/styles.css
++++ round32_final/frontend/src/styles.css
+@@ -3008,3 +3008,10 @@
+     display: none;
+   }
+ }
++
++/* T4 round 32: sub-step completion / fallback disclosure under the Research summary */
++.stage-disclosure { margin-top: 12px; }
++.stage-disclosure h3 { font-size: 0.95rem; margin: 0 0 6px; }
++.stage-disclosure-notes { margin: 0 0 8px; padding-left: 18px; font-size: 0.9rem; }
++.stage-disclosure-table { border-collapse: collapse; font-size: 0.85rem; }
++.stage-disclosure-table th, .stage-disclosure-table td { border-bottom: 1px solid #e5e7eb; padding: 3px 10px 3px 0; text-align: left; }

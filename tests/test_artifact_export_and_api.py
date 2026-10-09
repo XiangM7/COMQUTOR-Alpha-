@@ -11,7 +11,10 @@ tests. No network, no Provider, no LLM call anywhere in this file.
 
 from __future__ import annotations
 
+import copy
+import io
 import json
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -20,21 +23,25 @@ from fastapi.testclient import TestClient
 from comqutor_alpha.api.artifact_export import (
     ARTIFACT_COMPLETENESS_FAIL,
     ARTIFACT_COMPLETENESS_PASS,
+    MANIFEST_ARTIFACT_FILENAME,
     REQUIRED_ARTIFACT_FILENAMES,
     build_and_write_artifact_manifest,
     extract_conflicts_export,
     finalize_completed_run_artifacts,
 )
 from comqutor_alpha.api.routes_research import (
+    _attach_external_sources_to_conflicts,
     build_run_audit_payload,
     get_run_artifact_file,
     get_run_artifacts_response,
+    get_run_export_bundle,
     run_research_request,
 )
 from comqutor_alpha.replay.pipeline import run_structure_replay
 from comqutor_alpha.storage.db.engine import build_engine
 from comqutor_alpha.storage.db.migrations import apply_migrations
 from comqutor_alpha.storage.db.repository import GraphPersistenceRepository
+from comqutor_alpha.storage.file_store import save_json_record
 from scripts.w5_demo_fixtures import (
     DEMO_ANALYSIS_DATE,
     DEMO_SELECTED_ANALYSTS,
@@ -391,11 +398,42 @@ def test_replay_ticker_remains_source_ticker(real_replay_bundle):
 
 
 def test_replay_conflict_does_not_get_run_id_mismatch(real_replay_bundle):
+    """T2/Replay verification (2026-09-29): this test's own name is about
+    identity, not semantic admission -- confirms the Sprint 1 Replay
+    Identity Correction fix (replay_run_id rebased BEFORE detect_alpha_
+    conflicts runs, see replay/pipeline.py's own module docstring) holds:
+    no candidate pair is ever rejected merely because this replay's own
+    execution_id differs from the source run's.
+
+    The original assertion here (`admitted_count > 0`) is STALE: it
+    predates "Pure-LLM Alpha Production Boundary Hardening" (see replay/
+    pipeline.py's own module docstring), which correctly and deliberately
+    makes Architecture Replay's Alpha semantic state UNAVAILABLE for every
+    claim (llm_gateway=None -- never a fabricated NONE, never the
+    deterministic scorer's own top candidate standing in as a real semantic
+    decision). With no claim ever carrying a real matched_alpha, no Alpha
+    can reach "active" and no conflict pair can ever legitimately be
+    admitted -- admitted_count == 0 is the CORRECT, structurally guaranteed
+    outcome for THIS replay mode (RAW_REBUILD_DIAGNOSTIC), not a defect.
+    Confirmed directly below by checking every claim's own match_status,
+    rather than merely asserting the count and trusting the reason why."""
     result = real_replay_bundle["result"]
     conflicts = json.loads((Path(result.output_dir) / "conflict_results.json").read_text(encoding="utf-8"))
     for evaluation in conflicts["arbitration"]["candidate_evaluations"]:
         assert "RUN_ID_MISMATCH" not in (evaluation.get("reason_codes") or [])
-    assert conflicts["arbitration"]["admitted_count"] > 0
+
+    alpha_matches = json.loads((Path(result.output_dir) / "alpha_matches.json").read_text(encoding="utf-8"))
+    matches = alpha_matches.get("matches") or []
+    assert matches, "expected the replayed run to still carry real claims"
+    assert all(m.get("match_status") == "unavailable" for m in matches), (
+        "Architecture Replay's Alpha semantic state must be explicitly UNAVAILABLE for "
+        "every claim, never a real match and never a disguised NONE"
+    )
+    assert conflicts["arbitration"]["candidate_evaluations"], (
+        "declared conflict pairs must still be evaluated (never silently skipped) "
+        "even though none can be admitted without real semantic evidence"
+    )
+    assert conflicts["arbitration"]["admitted_count"] == 0
 
 
 def test_replay_bundle_is_artifact_complete(real_replay_bundle):
@@ -438,6 +476,166 @@ def test_path_traversal_is_rejected(real_completed_run):
     assert status_code == 400
     assert raw_bytes is None
     assert error_body["error_code"] == "INVALID_REQUEST"
+
+
+# ---------------------------------------------------------------------------
+# John MVP Gap Closure, Gap B (User-Facing Result Export): the ZIP bundle
+# builder reuses this same real, offline, completed NVDA run and its
+# already-written artifact_manifest.json -- no research recomputation, no
+# Provider call, exactly like every other test in this file.
+# ---------------------------------------------------------------------------
+
+
+def test_export_bundle_zips_every_present_manifest_artifact_unchanged(real_completed_run):
+    manifest = get_run_artifacts_response(real_completed_run["run_id"], real_completed_run["output_root"])
+    expected_present = {
+        entry["artifact_name"]
+        for entry in manifest["artifacts"]
+        if entry.get("exists") and entry.get("status") == "valid"
+    }
+
+    status_code, content_type, raw_bytes, filename, error_body = get_run_export_bundle(
+        real_completed_run["run_id"], real_completed_run["output_root"]
+    )
+
+    assert status_code == 200
+    assert content_type == "application/zip"
+    assert error_body is None
+    assert real_completed_run["run_id"][:8] in filename
+    assert filename.endswith(".zip")
+
+    with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
+        names = set(zf.namelist())
+        # Every artifact the manifest itself considers present and valid
+        # must be in the bundle, plus the manifest describing them.
+        assert expected_present.issubset(names)
+        assert MANIFEST_ARTIFACT_FILENAME in names
+
+        # Bytes come straight from disk, unmodified -- never recomputed or
+        # re-serialized.
+        run_dir = real_completed_run["run_dir"]
+        for name in expected_present:
+            on_disk = (run_dir / name).read_bytes()
+            assert zf.read(name) == on_disk
+
+
+def test_export_bundle_missing_run_returns_404():
+    status_code, content_type, raw_bytes, filename, error_body = get_run_export_bundle(
+        "does-not-exist-run-id", "outputs/runs"
+    )
+    assert status_code == 404
+    assert content_type is None
+    assert raw_bytes is None
+    assert filename is None
+    assert error_body["error_code"] == "RUN_NOT_FOUND"
+
+
+def test_export_bundle_invalid_run_id_returns_400():
+    status_code, _content_type, raw_bytes, filename, error_body = get_run_export_bundle(
+        "../../../../etc/passwd", "outputs/runs"
+    )
+    assert status_code == 400
+    assert raw_bytes is None
+    assert filename is None
+    assert error_body["error_code"] == "INVALID_REQUEST"
+
+
+def test_export_bundle_not_ready_when_manifest_absent(tmp_path):
+    # A run directory that exists but whose finalizer has not written
+    # artifact_manifest.json yet (still running, or predates this sprint) --
+    # an honest EXPORT_NOT_READY, never a partial/fabricated bundle.
+    run_id = "still_running_run_1"
+    run_dir = tmp_path / run_id
+    run_dir.mkdir()
+    (run_dir / "metadata.json").write_text(json.dumps({"run_id": run_id, "ticker": "NVDA"}), encoding="utf-8")
+
+    status_code, content_type, raw_bytes, filename, error_body = get_run_export_bundle(run_id, tmp_path)
+    assert status_code == 409
+    assert content_type is None
+    assert raw_bytes is None
+    assert filename is None
+    assert error_body["error_code"] == "EXPORT_NOT_READY"
+
+
+def test_export_route_wiring_returns_safe_json_error_not_a_crash(real_completed_run):
+    import comqutor_alpha.api.main as main_module
+
+    # As with test_audit_endpoint_includes_ticker_consistency above: the
+    # TestClient app resolves output_root from its own env-based config, not
+    # this fixture's tmp_path, so this legitimately 404s as RUN_NOT_FOUND --
+    # what this test verifies is that the route itself is wired and never
+    # crashes, regardless of output_root resolution.
+    client = TestClient(main_module.app)
+    response = client.get(f"/api/research/{real_completed_run['run_id']}/export")
+    assert response.status_code == 404
+    assert response.json()["error_code"] == "RUN_NOT_FOUND"
+    del client
+
+
+# ---------------------------------------------------------------------------
+# John MVP Final Gap Closure -- Structured External Source Traceability:
+# result export must include the source registry when a run has one, and
+# must not break when it doesn't (backward compatibility).
+# ---------------------------------------------------------------------------
+
+
+def _write_minimal_complete_run(tmp_path, run_id, *, with_source_registry):
+    run_dir = tmp_path / run_id
+    run_dir.mkdir(parents=True)
+    for name in REQUIRED_ARTIFACT_FILENAMES:
+        save_json_record(run_id, name, {"schema_version": "test.v1", "run_id": run_id}, output_root=tmp_path)
+    if with_source_registry:
+        save_json_record(
+            run_id,
+            "source_registry.json",
+            {
+                "schema_version": "source_registry.v1",
+                "run_id": run_id,
+                "ticker": "NVDA",
+                "source_count": 1,
+                "sources": [
+                    {
+                        "source_id": "src_test123",
+                        "source_type": "news",
+                        "name": "Barron's",
+                        "title": "A Genuine Test Headline",
+                        "url": "https://barrons.com/x",
+                        "metadata_status": "TRACEABLE",
+                    }
+                ],
+            },
+            output_root=tmp_path,
+        )
+    build_and_write_artifact_manifest(run_id=run_id, ticker="NVDA", output_root=tmp_path)
+    return run_dir
+
+
+def test_export_includes_source_registry_when_present(tmp_path):
+    run_id = "export_with_sources_run"
+    _write_minimal_complete_run(tmp_path, run_id, with_source_registry=True)
+
+    status_code, content_type, raw_bytes, filename, error_body = get_run_export_bundle(run_id, tmp_path)
+    assert status_code == 200
+    assert error_body is None
+    with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
+        assert "source_registry.json" in zf.namelist()
+        registry = json.loads(zf.read("source_registry.json"))
+        assert registry["sources"][0]["name"] == "Barron's"
+
+
+def test_export_succeeds_without_source_registry_for_a_historical_run(tmp_path):
+    run_id = "export_without_sources_run"
+    _write_minimal_complete_run(tmp_path, run_id, with_source_registry=False)
+
+    status_code, content_type, raw_bytes, filename, error_body = get_run_export_bundle(run_id, tmp_path)
+    assert status_code == 200
+    assert error_body is None
+    with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
+        assert "source_registry.json" not in zf.namelist()
+        # Every required artifact is still present -- absence of sources
+        # never breaks the export.
+        for name in REQUIRED_ARTIFACT_FILENAMES:
+            assert name in zf.namelist()
 
 
 def test_old_run_fallback_does_not_500(tmp_path):
@@ -569,3 +767,109 @@ def test_absent_validation_state_blocks_completed_status(monkeypatch, tmp_path):
     # "acceptable by default" -- only an explicit "pass" is.
     assert response["status"] != "completed", response
     assert response["status"] == "partial", response
+
+
+# ---------------------------------------------------------------------------
+# John MVP Final Gap Closure -- Structured External Source Traceability:
+# _attach_external_sources_to_conflicts (API-layer read-time join over an
+# already-persisted evidence_ui). Never touches conflict_engine.
+# ---------------------------------------------------------------------------
+
+
+def test_attach_external_sources_annotates_matching_evidence_item(tmp_path):
+    run_id = "conflict_source_run"
+    matching_title = "A Genuine Distinctive Headline About This Ticker"
+    save_json_record(
+        run_id,
+        "source_registry.json",
+        {
+            "schema_version": "source_registry.v1",
+            "run_id": run_id,
+            "ticker": "NVDA",
+            "source_count": 1,
+            "sources": [
+                {
+                    "source_id": "src_conflict_test",
+                    "source_type": "news",
+                    "name": "Barron's",
+                    "title": matching_title,
+                    "url": "https://barrons.com/x",
+                    "metadata_status": "TRACEABLE",
+                }
+            ],
+        },
+        output_root=tmp_path,
+    )
+    result = {
+        "main_conflict": {
+            "conflict_id": "c1",
+            "evidence_ui": {
+                "bull_evidence": [
+                    {"evidence_fact_group_id": "g1", "evidence_text": f"Quoting: {matching_title} today."}
+                ],
+                "bear_evidence": [
+                    {"evidence_fact_group_id": "g2", "evidence_text": "Unrelated bear evidence text entirely."}
+                ],
+                "counter_evidence": [],
+            },
+        },
+        "conflicts": [],
+    }
+
+    _attach_external_sources_to_conflicts(result, tmp_path, run_id)
+
+    bull_item = result["main_conflict"]["evidence_ui"]["bull_evidence"][0]
+    assert bull_item["external_source_status"] == "TRACEABLE"
+    assert bull_item["external_source"]["source_id"] == "src_conflict_test"
+
+    bear_item = result["main_conflict"]["evidence_ui"]["bear_evidence"][0]
+    assert bear_item["external_source_status"] == "UNAVAILABLE"
+    assert bear_item["external_source"] is None
+
+
+def test_attach_external_sources_never_touches_admissibility_or_conflict_score(tmp_path):
+    run_id = "conflict_source_semantics_run"
+    result = {
+        "main_conflict": {
+            "conflict_id": "c1",
+            "conflict_score": 42.5,
+            "admissibility": {"status": "admitted"},
+            "evidence_ui": {"bull_evidence": [{"evidence_fact_group_id": "g1", "evidence_text": "x"}]},
+        },
+        "conflicts": [],
+        "arbitration": {"admitted_count": 1},
+    }
+    before = copy.deepcopy(result)
+    before["main_conflict"]["evidence_ui"]["bull_evidence"][0].pop("evidence_fact_group_id")
+
+    _attach_external_sources_to_conflicts(result, tmp_path, run_id)
+
+    assert result["main_conflict"]["conflict_score"] == 42.5
+    assert result["main_conflict"]["admissibility"] == {"status": "admitted"}
+    assert result["arbitration"] == {"admitted_count": 1}
+
+
+def test_attach_external_sources_with_no_registry_leaves_honest_unavailable(tmp_path):
+    run_id = "conflict_no_registry_run"
+    result = {
+        "main_conflict": {
+            "conflict_id": "c1",
+            "evidence_ui": {"bull_evidence": [{"evidence_fact_group_id": "g1", "evidence_text": "anything"}]},
+        },
+        "conflicts": [],
+    }
+
+    _attach_external_sources_to_conflicts(result, tmp_path, run_id)
+
+    item = result["main_conflict"]["evidence_ui"]["bull_evidence"][0]
+    assert item["external_source_status"] == "UNAVAILABLE"
+    assert item["external_source"] is None
+
+
+def test_attach_external_sources_handles_missing_evidence_ui_gracefully(tmp_path):
+    run_id = "conflict_no_evidence_ui_run"
+    result = {"main_conflict": {"conflict_id": "c1"}, "conflicts": []}
+    # Must not raise even though evidence_ui is entirely absent (a payload
+    # predating B5, or a conflict with no evidence_ui at all).
+    _attach_external_sources_to_conflicts(result, tmp_path, run_id)
+    assert result["main_conflict"] == {"conflict_id": "c1"}

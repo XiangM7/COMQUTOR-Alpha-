@@ -55,14 +55,96 @@ def resolve_database_url(output_root: str | None = None) -> str:
     ``DatabaseConfigurationError`` rather than silently persisting to a
     local file that would never be backed up, shared across instances, or
     inspected as "the real database". Development and tests are unaffected.
+    ``COMQUTOR_REQUIRE_DATABASE_DIALECT`` (e.g. ``postgresql``) makes the
+    same refusal explicit for any environment, and also refuses a URL of a
+    different backend.
     """
     env_url = os.environ.get("COMQUTOR_DATABASE_URL", "").strip()
+    required_dialect = os.environ.get("COMQUTOR_REQUIRE_DATABASE_DIALECT", "").strip().lower()
+    if required_dialect:
+        # 2026-10-08 (T4): a launcher that must run on one database backend
+        # (the T4 PostgreSQL verification and Fresh Run instance) sets this;
+        # a missing URL or a URL of another backend is then an explicit
+        # error, never the local SQLite fallback below. Unset: unchanged.
+        if not env_url:
+            raise DatabaseConfigurationError("REQUIRED_DATABASE_URL_MISSING")
+        if describe_database(env_url)["dialect"] != required_dialect:
+            raise DatabaseConfigurationError("DATABASE_DIALECT_MISMATCH")
+        return env_url
     if env_url:
         return env_url
     if _is_production():
         raise DatabaseConfigurationError("PRODUCTION_DATABASE_URL_REQUIRED")
     root = resolve_output_root(output_root)
     return f"sqlite:///{root / DEFAULT_SQLITE_FILENAME}"
+
+
+def describe_database(database_url: str) -> dict[str, str | None]:
+    """Backend name (``postgresql``, ``sqlite``, ...) and database name of a
+    DSN, parsed with SQLAlchemy's URL parser -- never the user, password,
+    host or the DSN itself. Unparseable: both ``None``."""
+    from sqlalchemy.engine import make_url
+
+    try:
+        url = make_url(database_url)
+    except Exception:
+        return {"dialect": None, "database": None}
+    database = url.database
+    if url.get_backend_name() == "sqlite" and database:
+        database = Path(database).name
+    return {"dialect": url.get_backend_name(), "database": database}
+
+
+def enforce_required_database_name(database_url: str) -> None:
+    """Refuse to proceed if ``COMQUTOR_REQUIRE_DATABASE_NAME`` is set and
+    ``database_url`` does not resolve to that exact database name.
+
+    2026-10-02 incident fix: an isolated-database launcher
+    (``run_nvda_fresh_run_isolated_db.sh``) exported an overridden
+    ``COMQUTOR_DATABASE_URL`` in its own process and verified it resolved to
+    a ``_test``-suffixed database -- but the *next* script in its own exec
+    chain (``scripts/start_live_comqutor.sh``) re-sourced ``.env`` afterward
+    (to pick up credentials/other config), which silently overwrote that
+    override back to ``.env``'s own production ``COMQUTOR_DATABASE_URL``
+    before the API process ever started. The launcher's check had already
+    passed, in a different process, before the variable it was protecting
+    was clobbered -- so a real research run wrote 1040+ rows into the
+    production database instead of the isolated test one. A startup-script
+    env-var check is therefore not sufficient on its own: it can verify the
+    environment at one point in one process and still be silently bypassed
+    one handoff later.
+
+    This function is the fix: it is called at the actual write-connection
+    construction point (``build_write_repository_from_env``), inside the
+    final process, immediately before anything connects -- so it sees
+    whatever ``COMQUTOR_DATABASE_URL`` the process *actually* ends up with,
+    not what an earlier script merely intended. ``COMQUTOR_REQUIRE_DATABASE_
+    NAME`` is a second, independent environment variable that a launcher
+    sets alongside its ``COMQUTOR_DATABASE_URL`` override; since ``.env``
+    never defines this variable, re-sourcing ``.env`` cannot clobber it the
+    way it clobbers ``COMQUTOR_DATABASE_URL`` itself -- it survives the
+    exact handoff that caused the incident.
+
+    Unset (the default, every existing caller/deployment): a complete no-op,
+    zero behavior change. Set: parses the database name out of
+    ``database_url`` (via SQLAlchemy's own URL parser, not manual string
+    splitting) and raises ``DatabaseConfigurationError(
+    "DATABASE_TARGET_MISMATCH")`` -- never the raw DSN or a credential -- if
+    it does not match exactly. Raised before :func:`build_engine` is ever
+    called, so no connection, query, or schema-creation attempt is made
+    against the wrong target.
+    """
+    required = os.environ.get("COMQUTOR_REQUIRE_DATABASE_NAME", "").strip()
+    if not required:
+        return
+    from sqlalchemy.engine import make_url
+
+    try:
+        actual = make_url(database_url).database
+    except Exception as exc:
+        raise DatabaseConfigurationError("DATABASE_TARGET_MISMATCH") from exc
+    if actual != required:
+        raise DatabaseConfigurationError("DATABASE_TARGET_MISMATCH")
 
 
 def _is_sqlite_memory_url(url: str) -> bool:

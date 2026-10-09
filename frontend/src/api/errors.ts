@@ -104,6 +104,9 @@ const KNOWN_ERROR_CODE_MESSAGES: Record<string, string> = {
   AGENT_OUTPUTS_UNAVAILABLE: "Agent output storage is temporarily unavailable.",
   AGENT_OUTPUTS_CORRUPTED: "The persisted agent outputs are incomplete.",
   INVALID_RUN_ID: "That run identifier is not valid.",
+  EXPORT_NOT_READY: "This research run has not finished processing yet, so no export package is available.",
+  EXPORT_EMPTY: "No exportable artifacts were found for this research run.",
+  INVALID_REQUEST: "That request was not valid.",
 };
 
 export function describeApiErrorCode(errorCode: string, fallback?: string): string {

@@ -1,176 +1,115 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { describeApiError, describeApiErrorCode } from "../api/errors";
 import type { ResearchRunRecord } from "../api/types";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorPanel } from "../components/ErrorPanel";
 import { LoadingPanel } from "../components/LoadingPanel";
+import { PipelineScene } from "../components/PipelineScene";
+import { PriceHistoryCard } from "../components/PriceHistoryCard";
+import { ProgressSummary } from "../components/ProgressSummary";
+import { StagesPanel } from "../components/StagesPanel";
+import { useElapsedSince } from "../hooks/useElapsedSince";
+import { usePriceHistory } from "../hooks/usePriceHistory";
 import { useResearchSubmission } from "../hooks/useResearchSubmission";
+import { useRunNotification } from "../hooks/useRunNotification";
 import { useRunPolling } from "../hooks/useRunPolling";
+import {
+  ANALYST_ORDER,
+  computeStageProgress,
+  describeCaption,
+  describeEta,
+  formatDuration,
+  type StageProgressInput,
+} from "../utils/processingStages";
+import { formatAnalysisDate } from "../utils/runFormat";
+import { peekRunHandoff, playRunEntrance, takeRunHandoff } from "../utils/transitionHandoff";
+import { canAnimate } from "../utils/motion";
 
-/** The frozen stage vocabulary in execution order (analyst stages are
- * filtered to the run's actual selection). Labels are text -- stage state
- * is additionally marked with a symbol and words, never color alone. */
-const ANALYST_STAGE_BY_KEY: Record<string, { stage: string; label: string }> = {
-  market: { stage: "market_analysis", label: "Market analysis" },
-  sentiment: { stage: "sentiment_analysis", label: "Sentiment analysis" },
-  news: { stage: "news_analysis", label: "News analysis" },
-  fundamentals: { stage: "fundamentals_analysis", label: "Fundamentals analysis" },
-};
+const FULL_ANALYST_TEAM: readonly string[] = ANALYST_ORDER;
 
-const PRE_ANALYST_STAGES: ReadonlyArray<{ stage: string; label: string }> = [
-  { stage: "queued", label: "Queued" },
-  { stage: "initializing", label: "Initializing" },
-];
-
-const POST_ANALYST_STAGES: ReadonlyArray<{ stage: string; label: string }> = [
-  { stage: "research_debate", label: "Research debate" },
-  { stage: "trading_plan", label: "Trading plan" },
-  { stage: "risk_review", label: "Risk review" },
-  { stage: "raw_outputs_saved", label: "Saving agent outputs" },
-  { stage: "structured_claims", label: "Structured claims" },
-  { stage: "alpha_mapping", label: "Alpha mapping" },
-  { stage: "structure_graph", label: "Structure graph" },
-  { stage: "activation_scoring", label: "Activation scoring" },
-  { stage: "conflict_analysis", label: "Conflict analysis" },
-  { stage: "result_persistence", label: "Persisting results" },
-  { stage: "result_assembly", label: "Assembling results" },
-];
-
-const ANALYST_ORDER = ["market", "sentiment", "news", "fundamentals"] as const;
-
-function buildStagePlan(selectedAnalysts: string[]): Array<{ stage: string; label: string }> {
-  const selected = new Set(selectedAnalysts);
-  const analystStages = ANALYST_ORDER.filter((key) => selected.has(key)).flatMap((key) => {
-    const entry = ANALYST_STAGE_BY_KEY[key];
-    return entry ? [entry] : [];
-  });
-  return [...PRE_ANALYST_STAGES, ...analystStages, ...POST_ANALYST_STAGES];
+function describeAnalysts(selected: readonly string[]): string {
+  const ordered = ANALYST_ORDER.filter((key) => selected.includes(key));
+  if (ordered.length === ANALYST_ORDER.length) return "all four analysts";
+  if (ordered.length === 0) return "";
+  const names = ordered.map((key) => key.charAt(0).toUpperCase() + key.slice(1));
+  return `${names.join(", ")} ${ordered.length === 1 ? "analyst" : "analysts"}`;
 }
 
-function formatElapsed(totalSeconds: number): string {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  if (minutes >= 60) {
-    const hours = Math.floor(minutes / 60);
-    return `${hours}h ${minutes % 60}m ${seconds}s`;
-  }
-  return `${minutes}m ${seconds}s`;
+/** Width, in percentage points, of the band that marks the stretch of the
+ * bar being worked on: from the reported percentage to what it will be once
+ * the current step completes. Arithmetic over reported values only -- it
+ * never changes the percentage itself. */
+function activeBandWidth(record: ResearchRunRecord): number {
+  const percent = record.progress_percent;
+  const done = record.completed_units;
+  const total = record.total_units;
+  if (percent === null || done === null || total === null || total <= 0) return 0;
+  const next = Math.min(100, Math.round(((done + 1) / total) * 100));
+  return Math.max(0, next - percent);
 }
 
-function formatEtaRange(minSeconds: number, maxSeconds: number): string {
-  const minMinutes = Math.ceil(minSeconds / 60);
-  const maxMinutes = Math.ceil(maxSeconds / 60);
-  if (maxMinutes <= 1) return "Estimated remaining time: less than a minute";
-  if (minMinutes >= maxMinutes) {
-    return `Estimated remaining time: approximately ${maxMinutes} minutes`;
+function pageTitle(ticker: string | undefined, record: ResearchRunRecord | null): string | null {
+  if (!ticker) return null;
+  switch (record?.status) {
+    case "completed":
+      return `Done · ${ticker}`;
+    case "partial":
+      return `Partial · ${ticker}`;
+    case "failed":
+      return `Failed · ${ticker}`;
+    default:
+      return record?.progress_percent != null ? `${record.progress_percent}% · ${ticker}` : `Researching · ${ticker}`;
   }
-  return `Estimated remaining time: approximately ${minMinutes}–${maxMinutes} minutes`;
-}
-
-function EtaLine({ record }: { record: ResearchRunRecord }) {
-  if (record.eta_status === "available") {
-    const min = record.estimated_remaining_seconds_min;
-    const max = record.estimated_remaining_seconds_max;
-    if (min !== null && max !== null) {
-      return <p className="processing-eta">{formatEtaRange(min, max)}</p>;
-    }
-  }
-  if (record.eta_status === "estimating" || record.eta_status === null) {
-    return <p className="processing-eta">Estimating completion time…</p>;
-  }
-  return null;
-}
-
-function StageChecklist({ record }: { record: ResearchRunRecord }) {
-  const plan = useMemo(() => buildStagePlan(record.selected_analysts), [record.selected_analysts]);
-  const currentIndex = plan.findIndex((entry) => entry.stage === record.current_stage);
-  const completedUnits = Math.max(0, Math.floor(record.completed_units ?? 0));
-  const completedPlanCount = Math.min(plan.length, PRE_ANALYST_STAGES.length + completedUnits);
-
-  let inferredFailureIndex = -1;
-  if (record.status === "failed") {
-    if (currentIndex >= 0) {
-      inferredFailureIndex = currentIndex;
-    } else if (record.started_at === null) {
-      inferredFailureIndex = 0;
-    } else if (completedUnits === 0 && (record.progress_percent ?? 0) < 10) {
-      inferredFailureIndex = 1;
-    } else {
-      inferredFailureIndex = Math.min(completedPlanCount, plan.length - 1);
-    }
-  }
-
-  return (
-    <ol className="processing-stage-list" aria-label="Research stages">
-      {plan.map((entry, index) => {
-        let state: "done" | "current" | "failed" | "pending" = "pending";
-        if (record.status === "completed") {
-          state = "done";
-        } else if (record.status === "partial") {
-          state = index < completedPlanCount ? "done" : "pending";
-        } else if (record.status === "failed") {
-          state =
-            index < inferredFailureIndex
-              ? "done"
-              : index === inferredFailureIndex
-                ? "failed"
-                : "pending";
-        } else if (currentIndex >= 0) {
-          state = index < currentIndex ? "done" : index === currentIndex ? "current" : "pending";
-        } else if (record.completed_units !== null) {
-          state =
-            index < completedPlanCount
-              ? "done"
-              : index === completedPlanCount
-                ? "current"
-                : "pending";
-        }
-        const marker = state === "done" ? "✓" : state === "current" || state === "failed" ? "●" : "○";
-        const stateLabel =
-          state === "done"
-            ? "completed"
-            : state === "current"
-              ? "in progress"
-              : state === "failed"
-                ? "failed"
-                : "pending";
-        return (
-          <li key={entry.stage} className={`processing-stage processing-stage-${state}`}>
-            <span aria-hidden="true" className="processing-stage-marker">
-              {marker}
-            </span>
-            <span className="processing-stage-label">{entry.label}</span>
-            <span className="processing-stage-state">{stateLabel}</span>
-          </li>
-        );
-      })}
-    </ol>
-  );
 }
 
 /**
  * Live progress view for one research run. Everything shown here comes
  * straight from the status endpoint's persisted telemetry -- the page never
  * grows the percentage on its own (no timers incrementing progress), and a
- * transient polling error never marks the run failed. Refreshing the page
- * restores the same run purely from the run_id in the URL.
+ * transient polling error never marks the run failed. Time-based text (the
+ * estimate and the elapsed clock) counts in real time between polls and is
+ * re-calibrated by every poll. Refreshing the page restores the same run
+ * purely from the run_id in the URL.
  */
 export function ProcessingPage() {
   const { runId } = useParams<{ runId: string }>();
   const navigate = useNavigate();
-  const { status: pollStatus, error: pollError, refresh } = useRunPolling(runId);
+  const { status: pollStatus, error: pollError, receivedAt, refresh } = useRunPolling(runId);
   const {
     isSubmitting: isRetrying,
     errorMessage: retryRequestError,
     submit: retryResearch,
   } = useResearchSubmission();
   const [retryResponseError, setRetryResponseError] = useState<string | null>(null);
+  // Present only when this page was opened by "Start research" just now.
+  const [handoff] = useState(() => (runId ? peekRunHandoff(runId) : null));
+  const tickerRef = useRef<HTMLSpanElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   const record: ResearchRunRecord | null =
     pollStatus && "ticker" in pollStatus ? pollStatus : null;
   const statusFailure = pollStatus && !("ticker" in pollStatus) ? pollStatus : null;
   const runStatus = record?.status;
+  const isActive = runStatus === "queued" || runStatus === "running";
+
+  const ticker = record?.ticker ?? handoff?.ticker;
+  const analysisDate = record ? record.analysis_date : (handoff?.analysisDate ?? null);
+  const selectedAnalysts = record?.selected_analysts ?? handoff?.selectedAnalysts ?? FULL_ANALYST_TEAM;
+
+  const sinceSeconds = useElapsedSince(receivedAt, isActive);
+  const notification = useRunNotification(runId, ticker, runStatus);
+  const priceHistory = usePriceHistory(ticker, analysisDate);
+
+  const stageInput: StageProgressInput = record ?? {
+    selected_analysts: [...selectedAnalysts],
+    status: "queued",
+    current_stage: null,
+    completed_units: null,
+    progress_percent: null,
+    started_at: null,
+  };
+  const progress = computeStageProgress(stageInput);
 
   async function handleRetry() {
     if (!record || isRetrying) return;
@@ -202,141 +141,179 @@ export function ProcessingPage() {
     navigate(`/runs/${encodeURIComponent(result.run_id)}/${destination}`);
   }
 
+  // Research -> Processing: the ticker flies into the heading and the Start
+  // button turns into the progress track. Consumed once, so a refresh or a
+  // back step never replays it.
+  useLayoutEffect(() => {
+    if (!runId) return;
+    const taken = takeRunHandoff(runId);
+    if (!taken?.geometry || !canAnimate()) return;
+    window.scrollTo(0, 0);
+    playRunEntrance(taken.geometry, { ticker: tickerRef.current, track: trackRef.current });
+  }, [runId]);
+
+  // Tab title: progress at a glance while the tab is in the background.
+  const title = pageTitle(ticker, record);
   useEffect(() => {
-    if (runStatus !== "completed" || !runId) return;
-    const timer = setTimeout(() => {
-      navigate(`/runs/${encodeURIComponent(runId)}/research`);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, [runStatus, runId, navigate]);
+    if (!title) return;
+    const previous = document.title;
+    document.title = title;
+    return () => {
+      document.title = previous;
+    };
+  }, [title]);
 
   if (!runId) {
     return <EmptyState title="Missing run_id" description="No research run was specified." />;
   }
 
-  const percent = record?.progress_percent;
+  const showLayout = record !== null || handoff !== null;
+  const percent = record ? (record.progress_percent ?? null) : handoff ? 0 : null;
+  const eta = record
+    ? describeEta(record, sinceSeconds)
+    : { headline: "Estimating time…", basis: "Waiting for the first update" };
+  const basis =
+    record && isActive && percent === null ? "Progress reporting is not available for this run yet." : eta.basis;
+  const elapsed =
+    record && isActive && record.elapsed_seconds !== null
+      ? formatDuration(record.elapsed_seconds + sinceSeconds)
+      : null;
+  const caption = describeCaption(record, progress);
+  const subtitle = [
+    analysisDate ? `Analysis date ${formatAnalysisDate(analysisDate)}` : "",
+    describeAnalysts(selectedAnalysts),
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const resultsPath = `/runs/${encodeURIComponent(runId)}/research`;
 
   return (
-    <div className="processing-page">
-      <section className="panel processing-panel">
-        <h1>{record?.ticker ? `Analyzing ${record.ticker}` : "Analyzing research run"}</h1>
+    <div className={handoff ? "processing-page processing-enter" : "processing-page"}>
+      <Link to="/research" className="processing-back">
+        <svg aria-hidden="true" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5.75 1.25 1.25 6l4.5 4.75" />
+        </svg>
+        Research
+      </Link>
 
-        {record?.profile_display_name ? (
-          <p className="processing-profile">Research profile: {record.profile_display_name}</p>
-        ) : null}
+      <div className="processing-title-row">
+        <h1 className="processing-title">
+          {ticker ? (
+            <>
+              <span className="visually-hidden">Analyzing </span>
+              <span ref={tickerRef} className="processing-ticker">
+                {ticker}
+              </span>
+            </>
+          ) : (
+            "Analyzing research run"
+          )}
+        </h1>
+        {subtitle ? <p className="processing-subtitle rise-1">{subtitle}</p> : null}
+      </div>
 
-        {!pollStatus && !pollError ? <LoadingPanel label="Loading run status…" /> : null}
+      {!pollStatus && !pollError && !handoff ? <LoadingPanel label="Loading run status…" /> : null}
 
-        {statusFailure ? (
-          <ErrorPanel
-            title="Run status unavailable"
-            message={statusFailure.message || "The run status could not be loaded."}
-            onRetry={refresh}
-            retryLabel="Refresh status"
-          />
-        ) : null}
+      {statusFailure ? (
+        <ErrorPanel
+          title="Run status unavailable"
+          message={statusFailure.message || "The run status could not be loaded."}
+          onRetry={refresh}
+          retryLabel="Refresh status"
+        />
+      ) : null}
 
-        {record && (runStatus === "queued" || runStatus === "running") ? (
-          <>
-            <div
-              className="processing-progressbar"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              {...(percent !== null && percent !== undefined ? { "aria-valuenow": percent } : {})}
-              aria-label="Research progress"
-            >
-              <div
-                className="processing-progressbar-fill"
-                style={{ width: `${percent ?? 0}%` }}
-              />
-            </div>
-            <p className="processing-progress-summary">
-              {percent !== null && percent !== undefined
-                ? `${percent}% complete`
-                : "Progress reporting is not available for this run yet."}
-              {record.completed_units !== null && record.total_units !== null
-                ? ` · ${record.completed_units} of ${record.total_units} steps`
-                : ""}
-            </p>
-            {record.elapsed_seconds !== null ? (
-              <p className="processing-elapsed">Elapsed time: {formatElapsed(record.elapsed_seconds)}</p>
-            ) : null}
-            <EtaLine record={record} />
-            {record.progress_message ? (
-              <p className="processing-current-step">Current step: {record.progress_message}</p>
-            ) : null}
-          </>
-        ) : null}
+      {pollError && !statusFailure ? (
+        <ErrorPanel
+          title="Connection issue"
+          message={describeApiError(pollError)}
+          onRetry={refresh}
+          retryLabel="Refresh status"
+        />
+      ) : null}
 
-        {record ? <StageChecklist record={record} /> : null}
-
-        {runStatus === "completed" ? (
-          <div className="processing-complete" role="status">
-            <p>Research complete. Opening results…</p>
-            <Link to={`/runs/${encodeURIComponent(runId)}/research`} className="button button-primary">
-              Open results now
-            </Link>
-          </div>
-        ) : null}
-
-        {runStatus === "partial" ? (
-          <div className="processing-partial" role="status">
-            <p>
-              This research run finished only partially -- some stages did not produce results.
-              The available results can still be reviewed.
-            </p>
-            <Link to={`/runs/${encodeURIComponent(runId)}/research`} className="button button-primary">
-              Open partial results
-            </Link>
-          </div>
-        ) : null}
-
-        {runStatus === "failed" && record ? (
-          <div className="processing-failed">
-            <ErrorPanel
-              title="Research run failed"
-              message={record.message || "The research run could not be completed."}
-            />
-            {record.error_code ? (
-              <p className="processing-error-code">
-                Error code: <code>{record.error_code}</code>
-              </p>
-            ) : null}
-            <div className="processing-failed-actions">
-              <button
-                type="button"
-                className="button button-primary"
-                onClick={handleRetry}
-                disabled={isRetrying}
+      {showLayout ? (
+        <div className="processing-layout">
+          <div className="processing-main">
+            {runStatus === "failed" && record ? (
+              <div className="processing-failed">
+                <ErrorPanel
+                  title="Research run failed"
+                  message={record.message || "The research run could not be completed."}
+                />
+                {record.error_code ? (
+                  <p className="processing-error-code">
+                    Error code: <code>{record.error_code}</code>
+                  </p>
+                ) : null}
+                <div className="processing-actions">
+                  <button
+                    type="button"
+                    className="button button-primary"
+                    onClick={handleRetry}
+                    disabled={isRetrying}
+                  >
+                    {isRetrying ? "Retrying…" : "Retry research"}
+                  </button>
+                  <button type="button" className="button button-secondary" onClick={refresh}>
+                    Refresh status
+                  </button>
+                  <Link to="/research" className="button button-secondary">
+                    Return to Research
+                  </Link>
+                </div>
+                {retryRequestError || retryResponseError ? (
+                  <ErrorPanel
+                    title="Retry could not start"
+                    message={retryResponseError ?? retryRequestError ?? "The retry could not be submitted."}
+                  />
+                ) : null}
+              </div>
+            ) : (
+              <ProgressSummary
+                headline={eta.headline}
+                percent={percent}
+                activeBandWidth={record && isActive ? activeBandWidth(record) : 0}
+                basis={basis}
+                elapsed={elapsed}
+                trackRef={trackRef}
               >
-                {isRetrying ? "Retrying…" : "Retry research"}
-              </button>
-              <button type="button" className="button button-secondary" onClick={refresh}>
-                Refresh status
-              </button>
-              <Link to="/research" className="button button-secondary">
-                Return to Research
-              </Link>
+                {runStatus === "completed" ? (
+                  <div className="processing-actions">
+                    <Link to={resultsPath} className="cta-link">
+                      View results
+                    </Link>
+                  </div>
+                ) : null}
+                {runStatus === "partial" ? (
+                  <div className="processing-partial" role="status">
+                    <p>
+                      This research run finished only partially -- some stages did not produce results.
+                      The available results can still be reviewed.
+                    </p>
+                    <div className="processing-actions">
+                      <Link to={resultsPath} className="cta-link">
+                        Open partial results
+                      </Link>
+                    </div>
+                  </div>
+                ) : null}
+              </ProgressSummary>
+            )}
+
+            <div className="rise-3">
+              <PipelineScene progress={progress} caption={caption} live={isActive || record === null} />
             </div>
-            {retryRequestError || retryResponseError ? (
-              <ErrorPanel
-                title="Retry could not start"
-                message={retryResponseError ?? retryRequestError ?? "The retry could not be submitted."}
-              />
+            {priceHistory ? (
+              <div className="rise-3">
+                <PriceHistoryCard history={priceHistory} />
+              </div>
             ) : null}
           </div>
-        ) : null}
 
-        {pollError && !statusFailure ? (
-          <ErrorPanel
-            title="Connection issue"
-            message={describeApiError(pollError)}
-            onRetry={refresh}
-            retryLabel="Refresh status"
-          />
-        ) : null}
-      </section>
+          <StagesPanel className="rise-3" progress={progress} notification={notification} showNotify={isActive || record === null} />
+        </div>
+      ) : null}
     </div>
   );
 }

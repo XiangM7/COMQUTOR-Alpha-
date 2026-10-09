@@ -1,0 +1,176 @@
+ M comqutor_alpha/adapters/tradingagents_output_writer.py
+ M comqutor_alpha/api/agent_output_reader.py
+ M comqutor_alpha/api/artifact_export.py
+ M comqutor_alpha/api/routes_research.py
+ M comqutor_alpha/runners/tradingagents_runner.py
+ M comqutor_alpha/storage/file_store.py
+ M comqutor_alpha/structure_engine/structured_output_adapter.py
+ M comqutor_alpha/structure_engine/week2_llm.py
+ M frontend/src/api/adapters.ts
+ M frontend/src/api/client.ts
+ M frontend/src/api/errors.ts
+ M frontend/src/api/types.ts
+ M frontend/src/components/ConflictEvidenceSections.test.tsx
+ M frontend/src/components/ConflictEvidenceSections.tsx
+ M frontend/src/pages/ResearchPage.test.tsx
+ M frontend/src/pages/ResearchPage.tsx
+ M frontend/src/pages/ResearchRunPage.test.tsx
+ M frontend/src/pages/ResearchRunPage.tsx
+ M frontend/src/styles.css
+ M tests/test_agent_outputs_api.py
+ M tests/test_artifact_export_and_api.py
+ M tests/test_tradingagents_output_writer.py
+ M tests/test_tradingagents_progress_runner.py
+ M tests/test_week2_llm_semantic_runtime_integration.py
+ M tests/test_week4_golden_closure.py
+ M tradingagents/dataflows/yfinance_news.py
+?? comqutor_alpha/source_provenance.py
+?? docs/audit_artifacts/item2_blind_holdout4_provider_audit_day4b_postremediation.json
+?? docs/audit_artifacts/item2_blind_holdout4_provider_audit_day4c_candidate2_dev.json
+?? docs/audit_artifacts/item2_blind_holdout4_system_alpha_day4b_postremediation.json
+?? docs/audit_artifacts/item2_blind_holdout4_system_alpha_day4c_candidate2_dev.json
+?? docs/audit_artifacts/round_source_linking_t0_t2/
+?? docs/audit_artifacts/v0_2_alpha_candidate_history.json
+?? docs/audit_artifacts/v0_2_alpha_candidate_history.md
+?? docs/audit_artifacts/v0_2_alpha_dev_adjudication_packet.json
+?? docs/audit_artifacts/v0_2_alpha_dev_adjudication_packet.md
+?? docs/audit_artifacts/v0_2_alpha_dev_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_dev_external_adjudication_summary.md
+?? docs/audit_artifacts/v0_2_alpha_dev_gold_v1.json
+?? docs/audit_artifacts/v0_2_alpha_dev_gold_v1.md
+?? docs/audit_artifacts/v0_2_alpha_dev_human_labels.json
+?? docs/audit_artifacts/v0_2_alpha_dev_replacement_log.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_external_adjudication_round2.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_external_adjudication_summary.md
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_packet.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_packet.md
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_round2_packet.json
+?? docs/audit_artifacts/v0_2_alpha_dev_reserve_replacement_round2_packet.md
+?? docs/audit_artifacts/v0_2_alpha_dev_review_queue.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_blindness_audit.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_blindness_audit.md
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet.md
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet_manifest.json
+?? docs/audit_artifacts/v0_2_alpha_final_adjudication_packet_manifest.md
+?? docs/audit_artifacts/v0_2_alpha_final_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_freeze_manifest.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_freeze_manifest.md
+?? docs/audit_artifacts/v0_2_alpha_final_gold_labels_working.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_v1.json
+?? docs/audit_artifacts/v0_2_alpha_final_gold_v1.md
+?? docs/audit_artifacts/v0_2_alpha_final_holdout_sealed_manifest.json
+?? docs/audit_artifacts/v0_2_alpha_final_replacement_log.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_external_adjudication.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_external_adjudication_round2.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_external_adjudication_round3.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_packet.md
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round2_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round2_packet.md
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round3_packet.json
+?? docs/audit_artifacts/v0_2_alpha_final_reserve_replacement_round3_packet.md
+?? docs/audit_artifacts/v0_2_alpha_holdout_provenance.json
+?? docs/audit_artifacts/v0_2_alpha_holdout_provenance.md
+?? docs/audit_artifacts/v0_2_alpha_human_adjudication_rubric.md
+?? docs/audit_artifacts/v0_2_alpha_prompt_candidate2.json
+?? docs/audit_artifacts/v0_2_alpha_prompt_candidate2.md
+?? docs/audit_artifacts/v0_2_alpha_provider_prompt_remediation.json
+?? docs/audit_artifacts/v0_2_alpha_provider_prompt_remediation.md
+?? docs/audit_artifacts/v0_2_alpha_validation_leakage_audit.json
+?? docs/audit_artifacts/v0_2_alpha_validation_leakage_audit.md
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_provider_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_result.json
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_result.md
+?? docs/audit_artifacts/v0_2_candidate3_baseline_dev_system_alpha_raw.json
+?? docs/audit_artifacts/v0_2_candidate3_candidate3_dev_provider_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_candidate3_dev_system_alpha_raw.json
+?? docs/audit_artifacts/v0_2_candidate3_dev_error_analysis.json
+?? docs/audit_artifacts/v0_2_candidate3_dev_error_analysis.md
+?? docs/audit_artifacts/v0_2_candidate3_dev_result.json
+?? docs/audit_artifacts/v0_2_candidate3_dev_result.md
+?? docs/audit_artifacts/v0_2_candidate3_final_error_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_final_error_audit.md
+?? docs/audit_artifacts/v0_2_candidate3_final_predictions.json
+?? docs/audit_artifacts/v0_2_candidate3_final_provider_audit.json
+?? docs/audit_artifacts/v0_2_candidate3_final_system_alpha_raw.json
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_result.json
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_result.md
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_run_manifest.json
+?? docs/audit_artifacts/v0_2_candidate3_final_validation_run_manifest.md
+?? docs/audit_artifacts/v0_2_candidate3_freeze_manifest.json
+?? docs/audit_artifacts/v0_2_candidate3_freeze_manifest.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_nvda.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_nvda.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_plan.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_plan.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_qqq.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_qqq.md
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_summary.json
+?? docs/audit_artifacts/v0_2_candidate3_fresh_e2e_summary.md
+?? docs/audit_artifacts/v0_2_day3_review_resolution.json
+?? docs/audit_artifacts/v0_2_day3_review_resolution.md
+?? docs/audit_artifacts/v0_2_day4_alpha_holdout_failure_analysis.json
+?? docs/audit_artifacts/v0_2_day4_alpha_holdout_failure_analysis.md
+?? docs/audit_artifacts/v0_2_day4_fresh_e2e.json
+?? docs/audit_artifacts/v0_2_day4_fresh_e2e.md
+?? docs/audit_artifacts/v0_2_day4_frozen_regression.json
+?? docs/audit_artifacts/v0_2_day4_frozen_regression.md
+?? docs/audit_artifacts/v0_2_day4_independent_validation.json
+?? docs/audit_artifacts/v0_2_day4_independent_validation.md
+?? docs/audit_artifacts/v0_2_day4_six_ticker_validation.json
+?? docs/audit_artifacts/v0_2_day4_six_ticker_validation.md
+?? docs/audit_artifacts/v0_2_day4_validation_manifest.md
+?? docs/audit_artifacts/v0_2_day4b_provider_validation_result.json
+?? docs/audit_artifacts/v0_2_day4c_candidate1_regression_analysis.json
+?? docs/audit_artifacts/v0_2_day4c_candidate1_regression_analysis.md
+?? docs/audit_artifacts/v0_2_day4f_closure.json
+?? docs/audit_artifacts/v0_2_day4f_closure.md
+?? docs/audit_artifacts/v0_2_day5_freeze_decision.json
+?? docs/audit_artifacts/v0_2_demo_walkthrough_checklist.json
+?? docs/audit_artifacts/v0_2_demo_walkthrough_checklist.md
+?? docs/audit_artifacts/v0_2_demo_walkthrough_script.md
+?? docs/audit_artifacts/v0_2_evidence_error_statistics.json
+?? docs/audit_artifacts/v0_2_evidence_error_statistics.md
+?? docs/audit_artifacts/v0_2_final_alpha_adjudication_policy.json
+?? docs/audit_artifacts/v0_2_final_alpha_adjudication_policy.md
+?? docs/audit_artifacts/v0_2_final_delivery_package.json
+?? docs/audit_artifacts/v0_2_final_delivery_package.md
+?? docs/audit_artifacts/v0_2_final_performance_log.json
+?? docs/audit_artifacts/v0_2_final_performance_log.md
+?? docs/audit_artifacts/v0_2_independent_polarity_gate_audit.json
+?? docs/audit_artifacts/v0_2_independent_polarity_gate_audit.md
+?? docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml
+?? docs/audit_artifacts/v0_2_john_rule_baseline_diff.json
+?? docs/audit_artifacts/v0_2_john_rule_baseline_diff.md
+?? docs/audit_artifacts/v0_2_labeled_alpha_data_inventory.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit.md
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_final.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_final.md
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_postfix.json
+?? docs/audit_artifacts/v0_2_mvp_functional_completeness_audit_postfix.md
+?? docs/audit_artifacts/v0_2_new_alpha_holdout_creation_plan.md
+?? docs/audit_artifacts/v0_2_new_alpha_holdout_split.json
+?? docs/audit_artifacts/v0_2_new_alpha_holdout_split.md
+?? docs/audit_artifacts/v0_2_qqq_conflict_review.json
+?? docs/audit_artifacts/v0_2_qqq_conflict_review.md
+?? docs/audit_artifacts/v0_2_rule_evidence_output_audit.json
+?? docs/audit_artifacts/v0_2_rule_evidence_output_audit.md
+?? docs/audit_artifacts/v0_2_semantic_fix_day2.json
+?? docs/audit_artifacts/v0_2_semantic_fix_day2.md
+?? docs/audit_artifacts/v0_2_semantic_reproducibility_audit.json
+?? docs/audit_artifacts/v0_2_semantic_reproducibility_audit.md
+?? docs/audit_artifacts/v0_2_validation_freeze_plan.md
+?? frontend/src/components/ExternalSourceDisplay.test.tsx
+?? frontend/src/components/ExternalSourceDisplay.tsx
+?? scripts/human_adjudicate_alpha_dev.py
+?? scripts/run_day4b_holdout4_system_alpha_postremediation.py
+?? scripts/run_day4c_holdout4_system_alpha_candidate2.py
+?? scripts/run_day4g_candidate3_baseline_dev.py
+?? scripts/run_day4i_candidate3_final_validation.py
+?? tests/test_candidate3_alpha_classifier_guardrail.py
+?? tests/test_source_capture.py
+?? tests/test_source_provenance.py
+?? tradingagents/dataflows/source_capture.py

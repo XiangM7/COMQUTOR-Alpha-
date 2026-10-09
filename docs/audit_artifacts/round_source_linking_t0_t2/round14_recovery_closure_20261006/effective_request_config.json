@@ -1,0 +1,155 @@
+{
+  "captured_at_note": "zero network; MockTransport only; real create_llm_client via pass-through spy",
+  "create_llm_client_constructor_kwargs": [
+    {
+      "provider": "deepseek",
+      "model": "deepseek-v4-flash",
+      "base_url": null,
+      "timeout": 45.0,
+      "max_retries": 0,
+      "http_client": "<httpx.Client>",
+      "api_key_supplied": false
+    }
+  ],
+  "gateway_effective_attributes": {
+    "timeout_seconds": 45.0,
+    "max_retries": 0,
+    "max_calls": 973,
+    "provider": "deepseek",
+    "model_name": "deepseek-v4-flash",
+    "alpha_classifier_has_task_model_override": false
+  },
+  "serialized_request": {
+    "url": "https://api.deepseek.com/chat/completions",
+    "method": "POST",
+    "body_keys": [
+      "messages",
+      "model",
+      "stream"
+    ],
+    "body_without_messages": {
+      "model": "deepseek-v4-flash",
+      "stream": false
+    },
+    "messages_count": 1,
+    "message_roles": [
+      "user"
+    ],
+    "message_content_sha256": "3beec8765be7daa96764f291242099c586fc39f4a09b124fa795e95c8fbd654f",
+    "message_content_chars": 9274,
+    "header_names": [
+      "accept",
+      "accept-encoding",
+      "authorization",
+      "connection",
+      "content-length",
+      "content-type",
+      "host",
+      "user-agent",
+      "x-stainless-arch",
+      "x-stainless-async",
+      "x-stainless-lang",
+      "x-stainless-os",
+      "x-stainless-package-version",
+      "x-stainless-raw-response",
+      "x-stainless-read-timeout",
+      "x-stainless-retry-count",
+      "x-stainless-runtime",
+      "x-stainless-runtime-version"
+    ],
+    "x-stainless-read-timeout": "45.0",
+    "x-stainless-retry-count": "0"
+  },
+  "request_control_snapshot": {
+    "schema_version": "comqutor.semantic_call_request_control.v1",
+    "endpoint": "https://api.deepseek.com",
+    "request_model": "deepseek-v4-flash",
+    "max_tokens_field": null,
+    "max_tokens_value": null
+  },
+  "parameter_provenance": {
+    "model": "EXPLICIT (env set by recovery launcher)",
+    "provider": "EXPLICIT (env set by recovery launcher)",
+    "max_calls": "EXPLICIT (env set by recovery launcher)",
+    "application_max_retries": "EXPLICIT env by recovery launcher (=0). WARNING: repo .env sets COMQUTOR_WEEK2_LLM_MAX_RETRIES=1; load_dotenv is override=False, so the launcher's explicit export is the ONLY thing keeping this at 0 -- a launcher that forgets it silently gets the .env value",
+    "client_level_max_retries": "hardcoded 0 by build_server_week2_llm_gateway (client_kwargs max_retries=0), not env-controlled",
+    "concurrency": "EXPLICIT (env set by recovery launcher)",
+    "request_audit": "EXPLICIT (env set by recovery launcher)",
+    "timeout_seconds": "FROM REPO .env (=45s), injected by tradingagents/__init__ load_dotenv at import; overrides the code default 20.0s. Not set by the recovery launcher -> a launcher/.env change silently changes it; recommend the launcher export it explicitly to freeze it",
+    "alpha_classifier_max_tokens": "DEFAULT: no per-task override, no max_tokens sent (env var deliberately unset; matches original run's request_control.max_tokens_value=None)",
+    "thinking_reasoning_control": "not set by this repo's request-building path: see serialized_request.body_without_messages for exactly what the client sends (any 'thinking'/'reasoning' key would appear there)",
+    "resolved_alpha_classifier_concurrency": 4
+  },
+  "identity_proofs_vs_original_c904d4cc": {
+    "prompt_identity_now": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "prompt_identity_in_original_real_calls": [
+      "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95"
+    ],
+    "prompt_identity_unchanged": true,
+    "request_input_identity_checks": [
+      {
+        "original_call_id": "c904d4cc-dc09-495c-aec5-b056979948e1:semantic:7:9c1a57ed70b944ba9d8f446262ca55fc",
+        "original_input_sha256": "d96f815e0ff7d171dc45e2cd8df94f5c0d6ca65dab0f2b831743347590dcbe02",
+        "frozen_records_with_same_claim_text": 3,
+        "rebuilt_input_sha256_candidates": [
+          "d96f815e0ff7d171dc45e2cd8df94f5c0d6ca65dab0f2b831743347590dcbe02",
+          "d96f815e0ff7d171dc45e2cd8df94f5c0d6ca65dab0f2b831743347590dcbe02",
+          "d96f815e0ff7d171dc45e2cd8df94f5c0d6ca65dab0f2b831743347590dcbe02"
+        ],
+        "matches_original": true
+      },
+      {
+        "original_call_id": "c904d4cc-dc09-495c-aec5-b056979948e1:semantic:954:965dc0a4ff3540e5b9d2ec85f8c5e5a7",
+        "original_input_sha256": "25c326757510eb4c1c395bdeaa3a58226a5675cd23064865c580866fc7533d11",
+        "frozen_records_with_same_claim_text": 1,
+        "rebuilt_input_sha256_candidates": [
+          "25c326757510eb4c1c395bdeaa3a58226a5675cd23064865c580866fc7533d11"
+        ],
+        "matches_original": true
+      }
+    ],
+    "all_request_inputs_unchanged": true
+  },
+  "env_values_injected_by_repo_dotenv_at_import": {
+    "COMQUTOR_WEEK2_LLM_TIMEOUT_SECONDS": "45"
+  },
+  "observed_in_original_real_alpha_calls": [
+    {
+      "latency_ms": 1845,
+      "token_usage": {
+        "input_tokens": 1962,
+        "output_tokens": 85,
+        "total_tokens": 2047
+      },
+      "reasoning_tokens": 72,
+      "finish_reason": "stop",
+      "response_model_reported_by_provider": "deepseek-flash"
+    },
+    {
+      "latency_ms": 2967,
+      "token_usage": {
+        "input_tokens": 1966,
+        "output_tokens": 459,
+        "total_tokens": 2425
+      },
+      "reasoning_tokens": 446,
+      "finish_reason": "stop",
+      "response_model_reported_by_provider": "deepseek-flash"
+    }
+  ],
+  "explicit_env_for_recovery": {
+    "COMQUTOR_WEEK2_LLM_ENABLED": "1",
+    "COMQUTOR_WEEK2_LLM_PROVIDER": "deepseek",
+    "COMQUTOR_WEEK2_LLM_MODEL": "deepseek-v4-flash",
+    "COMQUTOR_WEEK2_LLM_MAX_RETRIES": "0",
+    "COMQUTOR_WEEK2_LLM_MAX_CALLS": "973",
+    "COMQUTOR_WEEK2_LLM_CONCURRENCY": "4",
+    "COMQUTOR_WEEK2_LLM_ENABLE_REQUEST_AUDIT": "1"
+  },
+  "env_deliberately_left_unset": [
+    "COMQUTOR_WEEK2_LLM_TIMEOUT_SECONDS",
+    "COMQUTOR_WEEK2_ALPHA_CLASSIFIER_MAX_TOKENS",
+    "COMQUTOR_WEEK2_LLM_BASE_URL",
+    "TRADINGAGENTS_LLM_BACKEND_URL"
+  ]
+}

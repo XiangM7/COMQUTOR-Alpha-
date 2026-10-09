@@ -1,0 +1,48 @@
+{
+  "schema_version": "final_alpha_adjudication_policy.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "applies_to": "final_independent_set (150 samples)",
+  "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+  "frozen_before_candidate3_execution_on_final_set": true,
+  "visible_to_adjudicator": [
+    "blinded sample_id / sample number",
+    "ticker",
+    "opaque run_id",
+    "claim",
+    "evidence",
+    "frozen canonical Alpha taxonomy (alpha_id, name_en, core_thesis)",
+    "frozen adjudication rubric (docs/audit_artifacts/v0_2_alpha_human_adjudication_rubric.md)"
+  ],
+  "never_visible_to_adjudicator": [
+    "Candidate 3 prediction",
+    "any COMQUTOR matched_alpha_id",
+    "mapper score",
+    "plausible_alphas",
+    "system confidence",
+    "system explanation",
+    "Provider result",
+    "Candidate 1 result",
+    "Candidate 2 result",
+    "Candidate 3 result",
+    "production prompt worked examples",
+    "historical expected labels for the same sample"
+  ],
+  "exclusion_rule": "A non-null ambiguity_flag excludes that sample from the accepted scoring population, exactly as established for the development set.",
+  "replacement_rule": {
+    "source": "the remaining untouched reserve samples, in their already-frozen reserve order",
+    "hand_picking_forbidden": true,
+    "reserve_samples_already_consumed_by_development_set": [
+      "nh-reserve-001", "nh-reserve-002", "nh-reserve-003", "nh-reserve-004",
+      "nh-reserve-005", "nh-reserve-006", "nh-reserve-007", "nh-reserve-008",
+      "nh-reserve-009", "nh-reserve-010", "nh-reserve-011", "nh-reserve-012",
+      "nh-reserve-013", "nh-reserve-014", "nh-reserve-015", "nh-reserve-016",
+      "nh-reserve-017", "nh-reserve-018"
+    ],
+    "reserve_samples_remaining_count": 32,
+    "next_untouched_reserve_sample_id_in_frozen_order": "nh-reserve-019",
+    "verification_method": "Counted directly from docs/audit_artifacts/v0_2_alpha_dev_replacement_log.json (18 distinct reserve sample_ids consumed across round 1 + round 2), not assumed."
+  },
+  "sequencing_requirement": "Final Gold labels must be frozen BEFORE Candidate 3 is executed on the final set -- this task prepares the blind packet only and performs no adjudication and no Candidate 3 execution.",
+  "taxonomy_reference_note": "Uses the exact existing canonical alpha_taxonomy_v1.yaml core_thesis definitions verbatim, unmodified. No taxonomy wording change.",
+  "status": "POLICY_FROZEN"
+}

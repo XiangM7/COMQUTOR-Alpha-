@@ -1,0 +1,269 @@
+{
+  "schema_version": "mvp_functional_completeness_audit.v1",
+  "task": "JOHN MVP FUNCTIONAL COMPLETENESS AUDIT -- READ ONLY",
+  "branch": "comqutor-structure-layer",
+  "head_commit": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "audit_date": "2026-09-21",
+  "audit_type": "READ_ONLY_STATIC_AND_ARTIFACT_INSPECTION",
+  "no_provider_calls_made": true,
+  "no_code_changes_made": true,
+  "tracked_files_modified_by_this_audit": 0,
+  "pre_existing_tracked_diffs_unchanged": {
+    "files": [
+      "comqutor_alpha/structure_engine/structured_output_adapter.py",
+      "comqutor_alpha/structure_engine/week2_llm.py",
+      "tests/test_week2_llm_semantic_runtime_integration.py"
+    ],
+    "diffstat": "3 files changed, 117 insertions(+), 35 deletions(-)",
+    "same_as_section0_baseline": true
+  },
+  "authoritative_scope_source": {
+    "primary": "This task's own Section 1 text, per its explicit instruction: 'Do NOT derive MVP requirements from old internal backlog files if they conflict with John's wording.'",
+    "reason": "No separate repo document contains this task's exact wording or its distinctive terminology (e.g. 'Structure Feedback Lite' -- zero repo-wide hits). docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx was located and extracted (python-docx unavailable; manually unzipped OOXML) and used only as supporting context -- it references Alpha Memory and invalidation concepts consistent with this task's deferred-item framing but does not itself state the five required areas below.",
+    "supporting_documents_consulted": [
+      "docs/specs/COMQUTOR_Alpha_Development_Plan_v1.0.docx (extracted manually; supporting context only)"
+    ],
+    "five_required_areas": [
+      "A. Research page (jargon exposure, plain-English framing)",
+      "B. Evidence detail (claim -> evidence -> source traceability)",
+      "C. Structure Graph (10-Alpha taxonomy mapping, unforced, zero-edge representable)",
+      "D. Conflict Radar + invalidation (admitted vs candidate/suppressed, invalidation/follow-up visibility)",
+      "E. Run history + result export"
+    ]
+  },
+  "method_note": "Every status below is based on direct reading of the actual page/component source (frontend/src/pages/*.tsx, frontend/src/components/*.tsx) and backend export code (comqutor_alpha/api/artifact_export.py), not on file existence, internal JSON presence, or test-pass status alone, per this task's explicit method requirement.",
+  "completeness_matrix": [
+    {
+      "row": 1,
+      "capability": "Ticker research submission + readiness guard",
+      "status": "IMPLEMENTED",
+      "route": "/research",
+      "api": "GET /api/readiness, POST /api/research",
+      "evidence": "frontend/src/pages/ResearchPage.tsx: ServerCapabilityBanner + ResearchForm; live_semantic_pipeline===not_ready disables submission with a specific user-facing reason rather than allowing a doomed run.",
+      "tests": "ResearchPage.test.tsx (4 tests, ReplayAllPanel-absence focused; submission path covered indirectly via useResearchSubmission)",
+      "gap": "None",
+      "severity": "N/A"
+    },
+    {
+      "row": 2,
+      "capability": "Fresh Research live progress workflow",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/processing",
+      "api": "GET /api/research/{run_id}/status (polled)",
+      "evidence": "frontend/src/pages/ProcessingPage.tsx: real stage checklist, progress bar, ETA range, elapsed time, current-step message, auto-navigate on completion, partial-completion state, failed state with Retry/Refresh/Return, page reload restores purely from URL run_id. Not a blocking page with no state -- genuinely rich real-time UX.",
+      "tests": "ProcessingPage.test.tsx (12 tests), ProcessingPage.retry.test.tsx (5 tests)",
+      "gap": "None. Runtime itself (25-35 min) is not a completeness failure since background Fresh Research is explicitly permitted.",
+      "severity": "N/A"
+    },
+    {
+      "row": 3,
+      "capability": "Research results view + plain-English framing (jargon exposure)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/research",
+      "api": "GET /api/research/{run_id}",
+      "evidence": "ResearchPage.tsx and ResearchRunPage.tsx both carry a plain-English 'What makes COMQUTOR different' / 'Why this is not a typical AI stock summary' explainer panel. Throughout AlphaCard/ResearchRunPage, raw reason codes are translated to friendly labels (BLOCKED_REASON_LABELS, LIFECYCLE_STATUS_LABELS, UNCLASSIFIED_FINDING_REASON_LABELS) with the raw code preserved only inside a <details> 'Technical details' disclosure -- friendly-by-default, technical-on-demand.",
+      "tests": "ResearchRunPage.test.tsx (53 tests)",
+      "gap": "None material.",
+      "severity": "N/A"
+    },
+    {
+      "row": 4,
+      "capability": "Evidence detail: claim -> evidence text -> agent -> confidence -> claim_id",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/research (embedded, not a separate route)",
+      "api": "GET /api/research/{run_id}/agent-outputs",
+      "evidence": "ResearchRunPage.tsx: DirectionalFindingsPanel/FindingCard renders claim, evidence text, agent, confidence%, claim_id for every positive/negative finding, deterministically sorted, capped at 20/direction with More/Less. AlphaCard.tsx additionally shows a per-Alpha Evidence(<details>) list with match_score/relation/assertion_status/matched_keywords.",
+      "tests": "ResearchRunPage.test.tsx covers finding-card rendering, sorting, direction-filtering extensively.",
+      "gap": "No dedicated '/evidence' route exists -- Evidence is embedded in the Research results page and in Structure Graph's AlphaCard, not a separate page. This is not itself a defect (the workflow is reachable and usable), but it means Evidence is not independently deep-linkable outside a run's own pages.",
+      "severity": "LOW"
+    },
+    {
+      "row": 5,
+      "capability": "Unclassified findings transparency (claims retained but not classified)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/research (embedded)",
+      "api": "embedded in canonical research response + GET /api/research/{run_id}/artifacts/unclassified_findings.json",
+      "evidence": "ResearchRunPage.tsx UnclassifiedFindingsPanel: total count, reason-count breakdown across John's 5 canonical reasons plus an honest UNCLASSIFIED_REASON_UNRESOLVED escape hatch, top-20 list, and a real 'Download full audit' link when available.",
+      "tests": "Covered within ResearchRunPage.test.tsx suite (directional/neutral-findings tests).",
+      "gap": "None.",
+      "severity": "N/A"
+    },
+    {
+      "row": 6,
+      "capability": "External source independence verification (evidence -> distinct external publication, not just claim_id/agent)",
+      "status": "MISSING",
+      "route": "N/A",
+      "api": "N/A",
+      "evidence": "grep of frontend/src/api/types.ts finds every 'source' field is a structural graph-edge or Alpha-Memory-phi source/target identifier, never an external citation/publisher/URL field. Evidence text is free-form and may name a source inline (e.g. 'etf.com') as plain prose, never as a structured, distinguishable, clickable field.",
+      "tests": "None applicable -- no such field exists to test.",
+      "gap": "There is no structural way to tell whether two supporting claims cite the same external article or two independent ones -- only claim_id/agent/evidence_fact_group_id distinguish COMQUTOR's own internal claims and duplicate-paraphrase grouping (this part IS implemented, see row 4's merged-paraphrase detail in ConflictEvidenceSections). This is a genuine, already-disclosed limitation ('a claim_id is not external source verification') consistently stated throughout every prior Day 4K/5 artifact -- not newly discovered, but confirmed here at the code level rather than assumed.",
+      "severity": "MEDIUM"
+    },
+    {
+      "row": 7,
+      "capability": "Alpha Memory (cross-run recurrence, shadow-only)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/research (embedded)",
+      "api": "embedded in canonical research response",
+      "evidence": "ResearchRunPage.tsx AlphaMemoryPanel: per-Alpha recurrence summary, recurring phi structures with first/last-seen timestamps, explicit 'shadow only, does not alter activation' framing, honest 'no exact historical recurrence found' language (never 'failed'/'expired'/'invalidated').",
+      "tests": "Not found in the page-level test list reviewed; not independently verified this task.",
+      "gap": "Test coverage not confirmed for this panel specifically.",
+      "severity": "LOW"
+    },
+    {
+      "row": 8,
+      "capability": "Structure Graph: 10-Alpha taxonomy mapping, nodes/edges rendering",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/structure",
+      "api": "GET /api/research/{run_id}/graph, GET /api/research/{run_id}/conflicts",
+      "evidence": "StructureGraphPage.tsx: full node/edge graph view (StructureGraphView), schema/activation-formula-version display, per-alpha activation detail on node select. Run-mismatch integrity guard refuses to render a response whose embedded run_id disagrees with the requested one.",
+      "tests": "StructureGraphPage.test.tsx (10 tests) incl. run-mismatch and out-of-order-request guards.",
+      "gap": "None.",
+      "severity": "N/A"
+    },
+    {
+      "row": 9,
+      "capability": "Alpha-level partition (Active/Dominant/Regime/Candidate/Capped) + orthogonal Blocked view, no forced dominance",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/structure",
+      "api": "GET /api/research/{run_id}/graph",
+      "evidence": "StructureGraphPage.tsx bucketForAlpha() reads activation_level directly from backend, never recomputes; Dominant is its own exclusive bucket (no forced-dominance framing); Blocked is an independent, orthogonal overlay, not a 6th level.",
+      "tests": "StructureGraphPage.test.tsx explicitly tests capped_active routing and Blocked-count independence from bucket counts.",
+      "gap": "None.",
+      "severity": "N/A"
+    },
+    {
+      "row": 10,
+      "capability": "Zero-edge / sparse / no-dominant-Alpha honest empty states (no forced structure, no false causality)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/structure, /runs/:runId/conflicts",
+      "api": "GET /api/research/{run_id}/graph, /conflicts",
+      "evidence": "StructureGraphPage.tsx: 'No admissible structural relationships were extracted... no evidence-backed causal, supportive, or conflicting relationship... was admitted' when edges===0. ConflictRadarPage.tsx: 'No conflicts detected... This does not mean the position carries no risk' when main_conflict is null. Both are honest non-fabrication states, verified live for QQQ (no dominant Alpha) and SNDK (no main conflict) in the prior Day 4K/5 tasks.",
+      "tests": "Covered in both pages' test suites.",
+      "gap": "None.",
+      "severity": "N/A"
+    },
+    {
+      "row": 11,
+      "capability": "Per-Alpha invalidation conditions (taxonomy-level)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/structure",
+      "api": "GET /api/alpha-library",
+      "evidence": "AlphaCard.tsx renders an 'Invalidation conditions' section for every Alpha once the Alpha Library loads, explicitly labeled 'From this Alpha's definition, not this run's analysis' -- honest about being taxonomy-level, not per-run-computed. Empty-but-loaded state shows an honest fallback, never fabricated content.",
+      "tests": "StructureGraphPage.test.tsx: 'shows the honest fallback for an Alpha with no authoritative invalidation content, never a raw null/undefined'.",
+      "gap": "This is generic per-Alpha-type content, not a per-run/per-conclusion-specific follow-up condition -- see row 12 for the run/conflict-specific version, which is the more directly relevant surface for 'what would change THIS run's finding'.",
+      "severity": "LOW"
+    },
+    {
+      "row": 12,
+      "capability": "Conflict Radar: main conflict, all admitted conflicts, arbitration summary (admitted/suppressed/rejected counts), candidate/rejected pairs with per-pair gate-failure reason",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/conflicts",
+      "api": "GET /api/research/{run_id}/conflicts",
+      "evidence": "ConflictRadarPage.tsx: dedicated main-conflict panel, full admitted-conflicts list, arbitration-summary counts, and a 'Candidate and rejected pairs' section (CandidateConflictCard) explicitly listing every non-admitted taxonomy pair with its specific B2 gate-failure reason -- never hidden, never conflated with admitted conflicts.",
+      "tests": "ConflictRadarPage.test.tsx (9 tests) explicitly: 'keeps admitted and candidate conflicts strictly separated across every section'.",
+      "gap": "None.",
+      "severity": "N/A"
+    },
+    {
+      "row": 13,
+      "capability": "Evidence traceability per conflict side (bull/bear evidence, counter-evidence, missing-evidence, qualification gaps)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/conflicts (embedded per conflict card)",
+      "api": "GET /api/research/{run_id}/conflicts (evidence_ui block)",
+      "evidence": "ConflictEvidenceSections.tsx: Bull/Bear Evidence sections, Counter Evidence (against each side), Missing Evidence (with reason code + current/required/deficit), Qualification Gaps (activation-score shortfall, explicitly distinguished from an evidence gap). Duplicate-paraphrase claims are shown grouped under a 'merged paraphrase(s)' disclosure rather than listed as independent evidence.",
+      "tests": "Not enumerated in this session's test-name pass; component logic verified directly via source read.",
+      "gap": "Test coverage for this specific component not individually confirmed this session.",
+      "severity": "LOW"
+    },
+    {
+      "row": 14,
+      "capability": "Approved invalidation / follow-up condition registry, per conflict, per side (user-visible, with provenance)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/conflicts (embedded per conflict card)",
+      "api": "GET /api/research/{run_id}/conflicts (evidence_ui.invalidation_conditions)",
+      "evidence": "ConflictEvidenceSections.tsx InvalidationSection: 'What would invalidate {bull/bear alpha} -- {alpha_id}?' with a real conditions list and 'Source: ... Version: ...' provenance when approval_status==='approved'; an honest 'Invalidation conditions have not yet been product-approved for this Alpha' fallback otherwise. This is the direct, user-facing answer to 'where is invalidation/follow-up condition visible' -- it is NOT only an internal JSON field; it renders on the Conflict Radar page for every conflict/candidate card, both admitted and candidate.",
+      "tests": "Not enumerated in this session's test-name pass; component logic verified directly via source read.",
+      "gap": "Test coverage for this specific component not individually confirmed this session.",
+      "severity": "LOW"
+    },
+    {
+      "row": 15,
+      "capability": "Run history: find, distinguish, and reopen historical runs",
+      "status": "PARTIAL",
+      "route": "/research (embedded RecentRuns table)",
+      "api": "GET /api/research?limit=&cursor=&ticker=&status=",
+      "evidence": "ResearchPage.tsx RecentRuns fetches getResearchHistory({limit: 10}) only -- ticker/status/date badges shown, correctly routes completed/partial runs to /research and everything else to /processing (so an incomplete run is never mistaken for 'no structure'). The backend API itself supports cursor pagination and ticker/status filtering (frontend/src/api/client.ts getResearchHistory signature), but the UI never exposes cursor, ticker filter, status filter, or a 'load more'/'view all' control.",
+      "tests": "App.test.tsx and ResearchPage.test.tsx reference getResearchHistory/RecentRuns; a dedicated 'load more'/pagination interaction test was not found.",
+      "gap": "A run older than the 10 most recent has no discovery path in the UI at all unless the user already has its run_id URL (e.g. from a bookmark or the Day-5-style audit artifacts) -- pagination/search exist server-side but are not wired to any UI control. This is a real, usable workflow for recent activity, but not a complete run-history feature.",
+      "severity": "MEDIUM"
+    },
+    {
+      "row": 16,
+      "capability": "Result export (ticker/date/run-version/conclusion/evidence/Alpha-structure/conflict-invalidation/sources)",
+      "status": "PARTIAL",
+      "route": "/runs/:runId/research (one narrow download link)",
+      "api": "GET /api/research/{run_id}/artifacts/unclassified_findings.json",
+      "evidence": "The only 'download' control found anywhere in frontend/src (grep -rniE '\\bdownload\\b', excluding tests) is ResearchRunPage.tsx's 'Download full audit' link, scoped exclusively to unclassified_findings.json. Separately, comqutor_alpha/api/artifact_export.py builds a full per-run artifact set (evidence_facts.json, alpha_activations.json, conflicts.json, summary.json, artifact_manifest.json) and John's own 9-required-artifact contract -- but this is backend/audit-trail persistence (finalize_completed_run_artifacts, build_and_write_artifact_manifest), reached only via direct API/curl calls in this and prior audit sessions, never via any frontend button or link.",
+      "tests": "No frontend test found exercising a full-run export control (none exists to test).",
+      "gap": "There is no user-facing control that exports a single, complete summary of a run (ticker, date, run-version, conclusion, evidence, Alpha structure, conflict/invalidation, sources) as John's list requires. The one real download that exists covers only unclassified findings, which is a QA/audit artifact, not a result summary. The richer artifact_manifest/9-artifact set exists and is genuinely complete at the FILE level, but is not exposed as a product export workflow -- per this task's explicit instruction, this must be classified PARTIAL, never IMPLEMENTED, since the internal completeness does not by itself satisfy a user-facing requirement.",
+      "severity": "HIGH"
+    },
+    {
+      "row": 17,
+      "capability": "Persistence / version traceability across restart (user-facing: run_id, analysis_date visible and reopenable after a time gap)",
+      "status": "IMPLEMENTED",
+      "route": "/runs/:runId/research, /runs/:runId/structure, /runs/:runId/conflicts",
+      "api": "GET /api/research/{run_id}, /graph, /conflicts",
+      "evidence": "ResearchRunPage.tsx displays run_id (shortened, full value in <code>) and analysis_date for every run. SNDK's run e8e0f398-... (dated 2026-09-04) was independently re-verified live-servable across all 5 endpoints during the Day 5 task (2026-09-18), i.e. genuine persistence across a multi-week gap and at least one intervening restart, confirmed via direct HTTP calls rather than assumed.",
+      "tests": "ResearchRunPage.test.tsx covers run rendering broadly.",
+      "gap": "This is USER-FACING traceability (run_id/date visible in the UI) -- distinct from and confirmed independently of the INTERNAL AUDIT TRACEABILITY already established via artifact_manifest.json/sha256 hashes in prior Day 4K/5 work. Both exist; neither substitutes for the other.",
+      "severity": "N/A"
+    },
+    {
+      "row": 18,
+      "capability": "Formal Gold PASS / REVIEW_REQUIRED verdict visibility to product users",
+      "status": "MISSING",
+      "route": "N/A -- no such field is rendered anywhere in the product UI",
+      "api": "N/A -- this is an audit-only construct (docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml), never computed or served by the running application",
+      "evidence": "Direct reading of ResearchRunPage.tsx, StructureGraphPage.tsx, and ConflictRadarPage.tsx confirms no page displays an allow-list-based PASS/REVIEW_REQUIRED verdict, nor any concept of 'on John's allowed-conflict list' vs 'off-list'. The product surfaces raw, ticker-agnostic conflict admission (main_conflict, arbitration counts, evidence) -- the frozen-baseline allow-list adjudication applied throughout Day 4K/5 is an external QA/audit process layered on top of the product's real output, not a feature of the shipped product itself.",
+      "tests": "N/A.",
+      "gap": "This is not a product defect -- John's frozen allow-list was always meant as an internal acceptance-testing rule, never a specified end-user-facing feature (Section 1 of this task did not list a 'verdict badge' as a required area). Recorded here only to make the boundary between INTERNAL AUDIT TRACEABILITY and USER-FACING TRACEABILITY explicit and unambiguous, per this task's own instruction not to let the two be conflated.",
+      "severity": "LOW"
+    }
+  ],
+  "test_coverage_inventory": {
+    "note": "Counted from page-level *.test.tsx files by grepping it()/test() call sites; presence of tests is supporting evidence only, never sufficient by itself to mark a capability IMPLEMENTED (every IMPLEMENTED row above was independently verified against actual component source first).",
+    "ResearchPage.test.tsx": 4,
+    "ResearchRunPage.test.tsx": 53,
+    "StructureGraphPage.test.tsx": 10,
+    "ConflictRadarPage.test.tsx": 9,
+    "ProcessingPage.test.tsx": 12,
+    "ProcessingPage.retry.test.tsx": 5,
+    "OperatorPage.test.tsx": 7,
+    "total_page_level_tests": 100,
+    "components_read_directly_but_without_a_dedicated_test_file_confirmed_this_session": [
+      "AlphaMemoryPanel (ResearchRunPage.tsx)",
+      "ConflictEvidenceSections.tsx (InvalidationSection, CounterEvidenceSection, MissingEvidenceSection, QualificationGapsSection)"
+    ]
+  },
+  "five_area_determination": {
+    "A_research_page_jargon": "FULLY_USABLE",
+    "B_evidence_detail": "FULLY_USABLE",
+    "C_structure_graph": "FULLY_USABLE",
+    "D_conflict_radar_invalidation": "FULLY_USABLE",
+    "E_run_history_and_result_export": "NOT_FULLY_USABLE",
+    "e_breakdown": {
+      "run_history": "PARTIAL -- real and usable for the 10 most recent runs; no discovery path beyond that despite backend support existing",
+      "result_export": "PARTIAL -- one real download control exists but covers only unclassified findings, not a full run/evidence/structure/conflict/source export"
+    },
+    "non_averaging_rule_applied": "MVP_CORE_FUNCTIONS_COMPLETE requires ALL FIVE areas fully usable. Area E is not fully usable, so the overall determination is NO regardless of how strong areas A-D are. Strong Alpha validation results (82.67%/87.23%) and strong A-D implementation quality were explicitly NOT allowed to compensate for E, per this task's own instruction."
+  },
+  "final_determination": {
+    "MVP_CORE_FUNCTIONS_COMPLETE": false,
+    "MVP_CORE_FUNCTIONS_COMPLETE_reason": "Areas A-D (Research page, Evidence detail, Structure Graph, Conflict Radar+invalidation) are each fully usable, verified against actual component source. Area E (Run history + Result export) is only PARTIAL on both halves: run history has no discovery path beyond the 10 most recent runs, and result export has no user-facing workflow producing a complete run summary -- only a narrow unclassified-findings download exists.",
+    "MVP_DEMO_CRITICAL_FLOW_COMPLETE": true,
+    "MVP_DEMO_CRITICAL_FLOW_COMPLETE_reason": "The demo-critical flow (Research -> Structure Graph -> Evidence -> Conflict Radar, including the do-not-force/insufficiency demonstration) does not require run-history search beyond a known run or a result-export feature. This flow was independently verified live for NVDA/QQQ/SNDK in the Day 5 task (all 5 endpoints, HTTP 200, 9/9 artifact completeness) and is now independently re-confirmed at the source-code level in this session.",
+    "FINAL_CONCLUSION": "NOT_FUNCTIONALLY_COMPLETE"
+  }
+}

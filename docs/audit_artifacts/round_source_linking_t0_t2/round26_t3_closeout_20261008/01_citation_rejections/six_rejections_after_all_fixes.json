@@ -1,0 +1,506 @@
+{
+ "execution_id": "t3joint-20261008T170322Z-bd99811e",
+ "rejected_at_execution": [
+  "t3v3-002",
+  "t3v3-005",
+  "t3v3-015",
+  "t3v3-019",
+  "t3v3-029",
+  "t3v3-031"
+ ],
+ "items": [
+  {
+   "sample_id": "t3v3-002",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:10",
+   "attempt_id": "t3joint-20261008T170322Z-bd99811e:5",
+   "request_body_sha256": "f8c320f0a16a86560fb62b28eb14512ccd2061916fb4d341043614da3a046184",
+   "response_body_sha256": "ec334b00b5b4d44f278a44befc05c83e58555dc0bd7fa8e74732d442be0570dd",
+   "request_rebuilt_by_production_builder_equals_sent": true,
+   "model_reply": {
+    "status": "SUPPORTS",
+    "support_basis": "GROUNDED_INFERENCE",
+    "used_source_id": "src_582ac24bf4319648",
+    "used_location": "data_snapshot.all_line_items['Diluted EPS']['2026-06-30']; data_snapshot.all_line_items['Other Non Operating Income Expenses']['2026-06-30']",
+    "supporting_quote_or_data": "Diluted EPS 2026-06-30=1.38; Other Non Operating Income Expenses 2026-06-30=598000000.0",
+    "unsupported_remainder_materiality": "MATERIAL"
+   },
+   "request_candidates": [
+    {
+     "source_id": "src_582ac24bf4319648",
+     "source_type": "financial",
+     "excerpt_chars": 7739,
+     "excerpt_sha256": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "data_snapshot_keys": [
+      "all_line_items",
+      "comparison",
+      "freq",
+      "line_item",
+      "line_item_units",
+      "periods",
+      "statement_type",
+      "value"
+     ]
+    }
+   ],
+   "cited_source_in_candidates": true,
+   "production_checks_on_whole_citation": {
+    "multi_field_path_check": null,
+    "used_location_is_dotted_path_list": false,
+    "path_count": 2,
+    "quote_part_count": 2,
+    "whole_quote_literal_in_excerpt": false,
+    "whole_quote_as_data_value": false
+   },
+   "quote_parts": [
+    {
+     "part": "Diluted EPS 2026-06-30=1.38",
+     "literal_in_excerpt": false,
+     "literal_at_token_boundaries": false,
+     "excerpt_occurrences": 0
+    },
+    {
+     "part": "Other Non Operating Income Expenses 2026-06-30=598000000.0",
+     "literal_in_excerpt": false,
+     "literal_at_token_boundaries": false,
+     "excerpt_occurrences": 0
+    }
+   ],
+   "current_validator": {
+    "accepted": false,
+    "reason": "quote_or_data_not_found",
+    "effective_content_support_status": null
+   }
+  },
+  {
+   "sample_id": "t3v3-005",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:trader:trader_investment_plan:claim:1",
+   "attempt_id": "t3joint-20261008T170322Z-bd99811e:12",
+   "request_body_sha256": "603362b4b75608e44e8e059e675db52984fa0ecf3a863239a56632eb3824d776",
+   "response_body_sha256": "12256f15568485ca546cac531f1abb3a3f22b20cc36ccc06bffd8ca8abcebe15",
+   "request_rebuilt_by_production_builder_equals_sent": true,
+   "model_reply": {
+    "status": "SUPPORTS",
+    "support_basis": "DERIVED_CALCULATION",
+    "used_source_id": "src_7e133fa786f7aaa0",
+    "used_location": "data_snapshot.forward_pe; data_snapshot.forward_eps; data_snapshot.trailing_pe",
+    "supporting_quote_or_data": "Forward PE=41.668015; Forward EPS=15.72189; PE Ratio (TTM)=167.11734",
+    "unsupported_remainder_materiality": "MATERIAL"
+   },
+   "request_candidates": [
+    {
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_type": "financial",
+     "excerpt_chars": 676,
+     "excerpt_sha256": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "data_snapshot_keys": [
+      "beta",
+      "book_value_per_share",
+      "currency",
+      "current_ratio",
+      "debt_to_equity",
+      "dividend_yield",
+      "ebitda",
+      "field_units",
+      "fifty_day_average",
+      "fifty_two_week_high",
+      "fifty_two_week_low",
+      "forward_eps",
+      "forward_pe",
+      "free_cash_flow",
+      "gross_profit",
+      "industry",
+      "market_cap",
+      "name",
+      "net_income",
+      "operating_margin",
+      "peg_ratio",
+      "price_to_book",
+      "profit_margin",
+      "return_on_assets",
+      "return_on_equity",
+      "sector",
+      "total_revenue",
+      "trailing_eps",
+      "trailing_pe",
+      "two_hundred_day_average"
+     ]
+    },
+    {
+     "source_id": "src_582ac24bf4319648",
+     "source_type": "financial",
+     "excerpt_chars": 7739,
+     "excerpt_sha256": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "data_snapshot_keys": [
+      "all_line_items",
+      "comparison",
+      "freq",
+      "line_item",
+      "line_item_units",
+      "periods",
+      "statement_type",
+      "value"
+     ]
+    }
+   ],
+   "cited_source_in_candidates": true,
+   "production_checks_on_whole_citation": {
+    "multi_field_path_check": false,
+    "used_location_is_dotted_path_list": true,
+    "path_count": 3,
+    "quote_part_count": 3,
+    "whole_quote_literal_in_excerpt": false,
+    "whole_quote_as_data_value": false
+   },
+   "quote_parts": [
+    {
+     "part": "Forward PE=41.668015",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1,
+     "paired_path": "data_snapshot.forward_pe",
+     "path_resolves": true,
+     "resolved_value": 41.668015,
+     "part_value": "41.668015",
+     "value_equals_resolved": true,
+     "label_form_accepted_by_path_check": false
+    },
+    {
+     "part": "Forward EPS=15.72189",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1,
+     "paired_path": "data_snapshot.forward_eps",
+     "path_resolves": true,
+     "resolved_value": 15.72189,
+     "part_value": "15.72189",
+     "value_equals_resolved": true,
+     "label_form_accepted_by_path_check": false
+    },
+    {
+     "part": "PE Ratio (TTM)=167.11734",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1,
+     "paired_path": "data_snapshot.trailing_pe",
+     "path_resolves": true,
+     "resolved_value": 167.11734,
+     "part_value": "167.11734",
+     "value_equals_resolved": true,
+     "label_form_accepted_by_path_check": false
+    }
+   ],
+   "current_validator": {
+    "accepted": true,
+    "reason": null,
+    "effective_content_support_status": "CONDITIONAL"
+   }
+  },
+  {
+   "sample_id": "t3v3-015",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:17",
+   "attempt_id": "t3joint-20261008T170322Z-bd99811e:14",
+   "request_body_sha256": "0d1b138191b18d09d100849ac22e5929afa796d489e73c858462aafdfcb1a458",
+   "response_body_sha256": "3c24ea5d7f39c3e7a7b9c4fc24a0cd168cacc906b0b69621b01739285a20f435",
+   "request_rebuilt_by_production_builder_equals_sent": true,
+   "model_reply": {
+    "status": "CONDITIONAL",
+    "support_basis": "GROUNDED_INFERENCE",
+    "used_source_id": "src_7e133fa786f7aaa0",
+    "used_location": "data_snapshot.peg_ratio, data_snapshot.forward_eps, data_snapshot.trailing_eps; excerpt containing 'PEG Ratio=0.64' and 'EPS (TTM)=3.92 Forward EPS=15.72189'",
+    "supporting_quote_or_data": "PEG Ratio=0.64; EPS (TTM)=3.92; Forward EPS=15.72189",
+    "unsupported_remainder_materiality": "MATERIAL"
+   },
+   "request_candidates": [
+    {
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_type": "financial",
+     "excerpt_chars": 676,
+     "excerpt_sha256": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "data_snapshot_keys": [
+      "beta",
+      "book_value_per_share",
+      "currency",
+      "current_ratio",
+      "debt_to_equity",
+      "dividend_yield",
+      "ebitda",
+      "field_units",
+      "fifty_day_average",
+      "fifty_two_week_high",
+      "fifty_two_week_low",
+      "forward_eps",
+      "forward_pe",
+      "free_cash_flow",
+      "gross_profit",
+      "industry",
+      "market_cap",
+      "name",
+      "net_income",
+      "operating_margin",
+      "peg_ratio",
+      "price_to_book",
+      "profit_margin",
+      "return_on_assets",
+      "return_on_equity",
+      "sector",
+      "total_revenue",
+      "trailing_eps",
+      "trailing_pe",
+      "two_hundred_day_average"
+     ]
+    }
+   ],
+   "cited_source_in_candidates": true,
+   "production_checks_on_whole_citation": {
+    "multi_field_path_check": null,
+    "used_location_is_dotted_path_list": false,
+    "path_count": 2,
+    "quote_part_count": 3,
+    "whole_quote_literal_in_excerpt": false,
+    "whole_quote_as_data_value": false
+   },
+   "quote_parts": [
+    {
+     "part": "PEG Ratio=0.64",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    },
+    {
+     "part": "EPS (TTM)=3.92",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    },
+    {
+     "part": "Forward EPS=15.72189",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    }
+   ],
+   "current_validator": {
+    "accepted": true,
+    "reason": null,
+    "effective_content_support_status": "CONDITIONAL"
+   }
+  },
+  {
+   "sample_id": "t3v3-019",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:119",
+   "attempt_id": "t3joint-20261008T170322Z-bd99811e:10",
+   "request_body_sha256": "9e9a8479d66cee244225a31f8d44d9f1a32c5152438d82d40a5044c143a2bfe5",
+   "response_body_sha256": "100dbd46db32e8d2e1a02efedacd2946a04ef9251991591d0ba4fc88804d0c72",
+   "request_rebuilt_by_production_builder_equals_sent": true,
+   "model_reply": {
+    "status": "SUPPORTS",
+    "support_basis": "GROUNDED_INFERENCE",
+    "used_source_id": "src_388228ad9e12e09d",
+    "used_location": "data_snapshot.indicators.rsi; data_snapshot.indicators.close_200_sma; data_snapshot.ohlcv.Close",
+    "supporting_quote_or_data": "rsi=72.95; close_200_sma=379.12; Close=654.91",
+    "unsupported_remainder_materiality": "MATERIAL"
+   },
+   "request_candidates": [
+    {
+     "source_id": "src_388228ad9e12e09d",
+     "source_type": "market",
+     "excerpt_chars": 252,
+     "excerpt_sha256": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "data_snapshot_keys": [
+      "indicators",
+      "ohlcv",
+      "requested_analysis_date"
+     ]
+    }
+   ],
+   "cited_source_in_candidates": true,
+   "production_checks_on_whole_citation": {
+    "multi_field_path_check": false,
+    "used_location_is_dotted_path_list": true,
+    "path_count": 3,
+    "quote_part_count": 3,
+    "whole_quote_literal_in_excerpt": false,
+    "whole_quote_as_data_value": false
+   },
+   "quote_parts": [
+    {
+     "part": "rsi=72.95",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1,
+     "paired_path": "data_snapshot.indicators.rsi",
+     "path_resolves": true,
+     "resolved_value": "72.95",
+     "part_value": "72.95",
+     "value_equals_resolved": true,
+     "label_form_accepted_by_path_check": false
+    },
+    {
+     "part": "close_200_sma=379.12",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1,
+     "paired_path": "data_snapshot.indicators.close_200_sma",
+     "path_resolves": true,
+     "resolved_value": "379.12",
+     "part_value": "379.12",
+     "value_equals_resolved": true,
+     "label_form_accepted_by_path_check": false
+    },
+    {
+     "part": "Close=654.91",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1,
+     "paired_path": "data_snapshot.ohlcv.Close",
+     "path_resolves": true,
+     "resolved_value": "654.91",
+     "part_value": "654.91",
+     "value_equals_resolved": true,
+     "label_form_accepted_by_path_check": false
+    }
+   ],
+   "current_validator": {
+    "accepted": true,
+    "reason": null,
+    "effective_content_support_status": "CONDITIONAL"
+   }
+  },
+  {
+   "sample_id": "t3v3-029",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:70",
+   "attempt_id": "t3joint-20261008T170322Z-bd99811e:1",
+   "request_body_sha256": "e27b3af80c197de40538691da9abb414001c5e133d1825133ddbaee38e00a1d0",
+   "response_body_sha256": "92053f46a6b53664cccfd7bf7d7199ec75299bd53a9ffe270cb8a53370ec3669",
+   "request_rebuilt_by_production_builder_equals_sent": true,
+   "model_reply": {
+    "status": "SUPPORTS",
+    "support_basis": "DERIVED_CALCULATION",
+    "used_source_id": "src_d889dd1e36a5d55a",
+    "used_location": "data_snapshot.all_line_items['Cash Cash Equivalents And Short Term Investments']['2026-06-30'] and data_snapshot.all_line_items['Total Debt']['2026-06-30']",
+    "supporting_quote_or_data": "Cash Cash Equivalents And Short Term Investments: 2026-06-30=13111000000.0; Total Debt: 2026-06-30=4276000000.0",
+    "unsupported_remainder_materiality": "NONE"
+   },
+   "request_candidates": [
+    {
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_type": "financial",
+     "excerpt_chars": 12751,
+     "excerpt_sha256": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "data_snapshot_keys": [
+      "all_line_items",
+      "comparison",
+      "freq",
+      "line_item",
+      "line_item_units",
+      "periods",
+      "statement_type",
+      "value"
+     ]
+    }
+   ],
+   "cited_source_in_candidates": true,
+   "production_checks_on_whole_citation": {
+    "multi_field_path_check": null,
+    "used_location_is_dotted_path_list": false,
+    "path_count": 1,
+    "quote_part_count": 2,
+    "whole_quote_literal_in_excerpt": false,
+    "whole_quote_as_data_value": false
+   },
+   "quote_parts": [
+    {
+     "part": "Cash Cash Equivalents And Short Term Investments: 2026-06-30=13111000000.0",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    },
+    {
+     "part": "Total Debt: 2026-06-30=4276000000.0",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    }
+   ],
+   "current_validator": {
+    "accepted": true,
+    "reason": null,
+    "effective_content_support_status": "SUPPORTS"
+   }
+  },
+  {
+   "sample_id": "t3v3-031",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:73",
+   "attempt_id": "t3joint-20261008T170322Z-bd99811e:2",
+   "request_body_sha256": "113a0b725bf90179860c957b07cac0e35448e7f61e463f9d0e89b4967c5fc13d",
+   "response_body_sha256": "bd786d09e14fb596fa7b308fdbbe1d6c0a48c8701adbdba5b304df09c4e89b15",
+   "request_rebuilt_by_production_builder_equals_sent": true,
+   "model_reply": {
+    "status": "SUPPORTS",
+    "support_basis": "GROUNDED_INFERENCE",
+    "used_source_id": "src_d889dd1e36a5d55a",
+    "used_location": "data_snapshot.all_line_items.Working Capital; data_snapshot.all_line_items.Current Assets; data_snapshot.all_line_items.Current Liabilities",
+    "supporting_quote_or_data": "Working Capital: 2026-06-30=19441000000.0; 2025-06-30=14676000000.0; Current Assets: 2026-06-30=31522000000.0; Current Liabilities: 2026-06-30=12081000000.0",
+    "unsupported_remainder_materiality": "NONE"
+   },
+   "request_candidates": [
+    {
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_type": "financial",
+     "excerpt_chars": 12751,
+     "excerpt_sha256": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "data_snapshot_keys": [
+      "all_line_items",
+      "comparison",
+      "freq",
+      "line_item",
+      "line_item_units",
+      "periods",
+      "statement_type",
+      "value"
+     ]
+    }
+   ],
+   "cited_source_in_candidates": true,
+   "production_checks_on_whole_citation": {
+    "multi_field_path_check": null,
+    "used_location_is_dotted_path_list": false,
+    "path_count": 3,
+    "quote_part_count": 4,
+    "whole_quote_literal_in_excerpt": false,
+    "whole_quote_as_data_value": false
+   },
+   "quote_parts": [
+    {
+     "part": "Working Capital: 2026-06-30=19441000000.0",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    },
+    {
+     "part": "2025-06-30=14676000000.0",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    },
+    {
+     "part": "Current Assets: 2026-06-30=31522000000.0",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    },
+    {
+     "part": "Current Liabilities: 2026-06-30=12081000000.0",
+     "literal_in_excerpt": true,
+     "literal_at_token_boundaries": true,
+     "excerpt_occurrences": 1
+    }
+   ],
+   "current_validator": {
+    "accepted": true,
+    "reason": null,
+    "effective_content_support_status": "SUPPORTS"
+   }
+  }
+ ]
+}

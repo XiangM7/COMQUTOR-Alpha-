@@ -1,0 +1,109 @@
+{
+ "inventory": {
+  "run_dir": "docs/audit_artifacts/round_source_linking_t0_t2/round28_t4_launch_protection_20261008/02_timeout_preservation/final_code/cs_termination_probe/runs/r28-cs-probe-b5ce64b4",
+  "stage_artifacts_present": {
+   "raw_agent_outputs.json": true,
+   "structured_agent_outputs.json": false,
+   "alpha_matches.json": false,
+   "extracted_structures.json": false,
+   "evidence_stance_audit.json": false,
+   "structure_graph.json": false,
+   "artifact_manifest.json": false,
+   "llm_usage_report.json": false
+  },
+  "ledger": {
+   "records": 1,
+   "unparseable_lines": [],
+   "by_category": {
+    "completed": 1,
+    "failed": 0,
+    "not_sent": 0,
+    "served_from_cache": 0,
+    "hash_mismatch": 0
+   },
+   "by_task_and_category": {
+    "content_support_verification:completed": 1
+   }
+  },
+  "audit": {
+   "requests": 2,
+   "responses": 1,
+   "unparseable_request_lines": [],
+   "unparseable_response_lines": []
+  },
+  "completed": [
+   {
+    "task": "content_support_verification",
+    "call_id": "r28-cs-probe-b5ce64b4:semantic:0:4174e1e6d4d94395a5d908b1391c6574",
+    "claim_ids": [
+     "034a0a60-430e-41f8-8321-03a11389707a:trader:trader_investment_plan:claim:1"
+    ],
+    "input_sha256": "e0424051dc5fc6a262ae550c57786c63c210433db8a3ee0395897c42f0eff1ed",
+    "prompt_sha256": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+    "provider_status": "success",
+    "validation_status": "accepted",
+    "error_code": null,
+    "validated_output": {
+     "items": [
+      {
+       "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:trader:trader_investment_plan:claim:1",
+       "core_proposition": "probe",
+       "inference_assumptions": [],
+       "inference_facts": [],
+       "rationale": "probe",
+       "status": "SUPPORTS",
+       "support_basis": "DIRECT_FACT",
+       "supported_proposition": "Reasoning: The Research Manager's adjudication is explicit and well-evidenced: the bull proved the business is intact (revenue compounding 20% sequentially, 75% gross margins, forward P/E 14.7, PEG 0.48) while the bear proved the entry point is poor (stalling at 228–234 resistance on declining volume — 121.7M on 09-30 vs 298.9M on 08-27 — with a 2.217 beta into a hostile high-nominal-rate regime, deteriorating cash conversion, and crowded reflexive sentiment).",
+       "supporting_quote_or_data": "NVDA 2026-09-30 OHLCV Open=229",
+       "unsupported_remainder": "",
+       "unsupported_remainder_materiality": "NONE",
+       "used_location": "excerpt",
+       "used_source_id": "src_8e61838edf95c591"
+      }
+     ]
+    }
+   }
+  ],
+  "failed": [],
+  "not_sent": [],
+  "in_flight_unknown": [
+   {
+    "attempt_id": "r28-cs-probe-b5ce64b4:2",
+    "task": "content_support_verification",
+    "claim_ids": [
+     "034a0a60-430e-41f8-8321-03a11389707a:trader:trader_investment_plan:claim:3"
+    ],
+    "sent_at": "2026-10-09T00:46:31Z",
+    "body_sha256": "e71f6cdd08fcc0f2a450af9eb7209e7054742bc3bee022b0cc5c3c872193a5ef"
+   }
+  ],
+  "alpha_claims_total": 0,
+  "alpha_claims_never_reached": []
+ },
+ "zero_call_rebuild": {
+  "stage": "structured_adapter (content support)",
+  "rebuild_dir": "docs/audit_artifacts/round_source_linking_t0_t2/round28_t4_launch_protection_20261008/02_timeout_preservation/final_code/cs_termination_probe/rebuild/r28-cs-probe-b5ce64b4",
+  "cache_entries_seeded": 1,
+  "model_invocations": 0,
+  "records": 8,
+  "completed_claims_compared": [
+   {
+    "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:trader:trader_investment_plan:claim:1",
+    "ledger_status": "SUPPORTS",
+    "rebuilt_llm_status": "SUPPORTS",
+    "agrees": true
+   }
+  ],
+  "all_completed_claims_agree": true,
+  "other_records_with_an_llm_verdict": 0,
+  "other_records_fallback_reasons": {
+   "None": 5,
+   "budget_exhausted": 2
+  },
+  "rebuilt_file_sha256": "60d5b64f8d2a9fd0a88607db5c249d667ee56e155aa086767227fae77bdee96e",
+  "label": "PARTIAL zero-call rebuild; claims without a completed ledger verdict stay unverified"
+ },
+ "execution_profile_used_for_rebuild": "t3_verified_20261008",
+ "profile_source": "argument",
+ "original_run_dir_unchanged": true
+}

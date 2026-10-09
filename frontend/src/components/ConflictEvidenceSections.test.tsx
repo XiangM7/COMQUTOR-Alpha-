@@ -406,4 +406,80 @@ describe("CandidateConflictCard", () => {
     expect(screen.getByText("Candidate-pair bull evidence.")).toBeInTheDocument();
     expect(screen.getByText(/^Counter Evidence/)).toBeInTheDocument();
   });
+
+  describe("External source traceability (John MVP Final Gap Closure)", () => {
+    it("renders a genuine external source with a clickable URL for a bull-evidence item", () => {
+      render(
+        <ConflictEvidenceSections
+          evidenceUi={makeEvidenceUi({
+            bull_evidence: [
+              makeEvidenceItem({
+                evidence_text: "Traceable bull evidence.",
+                external_source: {
+                  source_id: "src_bull",
+                  source_type: "news",
+                  name: "Reuters",
+                  title: "A Genuine Bull Headline",
+                  url: "https://reuters.com/x",
+                  published_at: "2026-09-17T10:00:00",
+                  retrieved_at: null,
+                  external_record_id: null,
+                  locator: null,
+                  provider: "yfinance",
+                  metadata_status: "TRACEABLE",
+                },
+                external_source_status: "TRACEABLE",
+              }),
+            ],
+          })}
+          bullAlphaId="A301"
+          bearAlphaId="A304"
+        />
+      );
+      expect(screen.getByText("Reuters")).toBeInTheDocument();
+      const link = screen.getByRole("link", { name: /open source/i });
+      expect(link).toHaveAttribute("href", "https://reuters.com/x");
+    });
+
+    it("renders an honest unavailable state for an item with no external source, never a fabricated one", () => {
+      render(
+        <ConflictEvidenceSections
+          evidenceUi={makeEvidenceUi({
+            bull_evidence: [
+              makeEvidenceItem({
+                evidence_text: "No-source bull evidence.",
+                external_source: null,
+                external_source_status: "UNAVAILABLE",
+              }),
+            ],
+          })}
+          bullAlphaId="A301"
+          bearAlphaId="A304"
+        />
+      );
+      expect(screen.getAllByText(/external source metadata is not available/i).length).toBeGreaterThan(0);
+      expect(screen.queryByRole("link", { name: /open source/i })).not.toBeInTheDocument();
+    });
+
+    it("labels internal source_agent_output_ids as an internal reference, never as an external Source", () => {
+      render(
+        <ConflictEvidenceSections
+          evidenceUi={makeEvidenceUi({
+            bull_evidence: [
+              makeEvidenceItem({
+                evidence_text: "Bull evidence with an internal ref.",
+                source_agent_output_ids: ["run-1:news_agent:news_report"],
+                external_source: null,
+                external_source_status: "UNAVAILABLE",
+              }),
+            ],
+          })}
+          bullAlphaId="A301"
+          bearAlphaId="A304"
+        />
+      );
+      expect(screen.getAllByText(/Internal ref:/).length).toBeGreaterThan(0);
+      expect(screen.queryByText(/^Source: run-1/)).not.toBeInTheDocument();
+    });
+  });
 });

@@ -1,0 +1,197 @@
+{
+ "inventory": {
+  "run_dir": "docs/audit_artifacts/round_source_linking_t0_t2/round28_t4_launch_protection_20261008/02_timeout_preservation/final_code/job_timeout_probe/runs/e25ee1bf-4b55-41ce-aaa0-c8be88506179",
+  "stage_artifacts_present": {
+   "raw_agent_outputs.json": true,
+   "structured_agent_outputs.json": true,
+   "alpha_matches.json": false,
+   "extracted_structures.json": false,
+   "evidence_stance_audit.json": false,
+   "structure_graph.json": false,
+   "artifact_manifest.json": false,
+   "llm_usage_report.json": false
+  },
+  "ledger": {
+   "records": 6,
+   "unparseable_lines": [],
+   "by_category": {
+    "completed": 2,
+    "failed": 0,
+    "not_sent": 4,
+    "served_from_cache": 0,
+    "hash_mismatch": 0
+   },
+   "by_task_and_category": {
+    "alpha_classifier:completed": 2,
+    "alpha_classifier:not_sent": 4
+   }
+  },
+  "audit": {
+   "requests": 4,
+   "responses": 2,
+   "unparseable_request_lines": [],
+   "unparseable_response_lines": []
+  },
+  "completed": [
+   {
+    "task": "alpha_classifier",
+    "call_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:semantic:2:1bfb97795c8a42af8119a71da58761b5",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:3"
+    ],
+    "input_sha256": "1a14b8c726221fd652cc1c68efd93b239515bc413a68643ca538d07117103cdc",
+    "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "provider_status": "success",
+    "validation_status": "accepted",
+    "error_code": null,
+    "validated_output": {
+     "decision": "select",
+     "selected_alpha_id": "A304"
+    }
+   },
+   {
+    "task": "alpha_classifier",
+    "call_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:semantic:0:d675fa4487894b0683ddbecf90311cc3",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:1"
+    ],
+    "input_sha256": "391d42cc2ed4904e4148d4a8a7b3a3cf49440ff157830e569d5a3ba4f21b139c",
+    "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "provider_status": "success",
+    "validation_status": "accepted",
+    "error_code": null,
+    "validated_output": {
+     "decision": "none",
+     "selected_alpha_id": null
+    }
+   }
+  ],
+  "failed": [],
+  "not_sent": [
+   {
+    "task": "alpha_classifier",
+    "call_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:semantic:4:22a8c9ca784a49a5a321fbd3876a0a10",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:5"
+    ],
+    "input_sha256": "d5c7d282893f4477cefd2f3d5e9fa47d63254632a158228893996db695776a00",
+    "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "provider_status": "budget_exhausted",
+    "validation_status": "not_run",
+    "error_code": "WEEK2_LLM_CALL_BUDGET_EXHAUSTED",
+    "validated_output": null
+   },
+   {
+    "task": "alpha_classifier",
+    "call_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:semantic:6:d1e871cd2b654c39a55d3fedff1b9fca",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:7"
+    ],
+    "input_sha256": "a8b1cec2605cfc7c6f6fa126f664de1fd5ffa6a33b751aafe32479505c3f025c",
+    "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "provider_status": "budget_exhausted",
+    "validation_status": "not_run",
+    "error_code": "WEEK2_LLM_CALL_BUDGET_EXHAUSTED",
+    "validated_output": null
+   },
+   {
+    "task": "alpha_classifier",
+    "call_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:semantic:5:a28b38e038fc496c8990120c4aa96613",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:6"
+    ],
+    "input_sha256": "b26bf7a9627749d9aa938ea03a4275efdb39208e9ddd848449f8582cee6ff17b",
+    "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "provider_status": "budget_exhausted",
+    "validation_status": "not_run",
+    "error_code": "WEEK2_LLM_CALL_BUDGET_EXHAUSTED",
+    "validated_output": null
+   },
+   {
+    "task": "alpha_classifier",
+    "call_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:semantic:7:bece382838984b1db2196b10478d8676",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:8"
+    ],
+    "input_sha256": "1d0a48f0e1bfe6887734ca293921b9594cb4186560e47f03c9e1a7d4e1c8e032",
+    "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "provider_status": "budget_exhausted",
+    "validation_status": "not_run",
+    "error_code": "WEEK2_LLM_CALL_BUDGET_EXHAUSTED",
+    "validated_output": null
+   }
+  ],
+  "in_flight_unknown": [
+   {
+    "attempt_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:2",
+    "task": "alpha_classifier",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:2"
+    ],
+    "sent_at": "2026-10-09T00:45:49Z",
+    "body_sha256": "e2f50108942ab20d79453988e49e99ef3dfefe89e374b8f78a7f1b6d088450da"
+   },
+   {
+    "attempt_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:4",
+    "task": "alpha_classifier",
+    "claim_ids": [
+     "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:4"
+    ],
+    "sent_at": "2026-10-09T00:45:49Z",
+    "body_sha256": "5e20d718783b1b8d141997f090a7346a5d2533b74b771bc79142efcfc96c5714"
+   }
+  ],
+  "alpha_claims_total": 8,
+  "alpha_claims_never_reached": []
+ },
+ "zero_call_rebuild": {
+  "rebuild_dir": "docs/audit_artifacts/round_source_linking_t0_t2/round28_t4_launch_protection_20261008/02_timeout_preservation/final_code/job_timeout_probe/rebuild/e25ee1bf-4b55-41ce-aaa0-c8be88506179",
+  "cache_entries_seeded": 2,
+  "model_invocations": 0,
+  "matches": 8,
+  "completed_claims_compared": [
+   {
+    "claim_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:1",
+    "ledger_decision": {
+     "decision": "none",
+     "selected_alpha_id": null
+    },
+    "rebuilt_method": "llm",
+    "rebuilt_llm_selected_alpha_id": null,
+    "rebuilt_fallback_reason": null,
+    "agrees": true
+   },
+   {
+    "claim_id": "e25ee1bf-4b55-41ce-aaa0-c8be88506179:trader:trader_investment_plan:0:claim:3",
+    "ledger_decision": {
+     "decision": "select",
+     "selected_alpha_id": "A304"
+    },
+    "rebuilt_method": "llm",
+    "rebuilt_llm_selected_alpha_id": "A304",
+    "rebuilt_fallback_reason": null,
+    "agrees": true
+   }
+  ],
+  "all_completed_claims_agree": true,
+  "other_claims": {
+   "llm_unavailable|call_budget_exhausted": 6
+  },
+  "other_claims_never_valid_none": true,
+  "completion": {
+   "total_claims": 8,
+   "valid_select_count": 1,
+   "valid_none_count": 1,
+   "call_failure_count": 0,
+   "not_executed_count": 6,
+   "not_executed_configuration_count": 0,
+   "not_executed_fault_count": 6,
+   "complete": false
+  },
+  "rebuilt_file_sha256": "efeb01f5aabdc0a5ffe86c637521d4214b3a1a511f3a729605b7318058c9eac5",
+  "label": "PARTIAL zero-call rebuild; the scratch ledger records the cache hits and the refused misses"
+ },
+ "execution_profile_used_for_rebuild": "t3_verified_20261008",
+ "profile_source": "metadata.run_environment",
+ "original_run_dir_unchanged": true
+}

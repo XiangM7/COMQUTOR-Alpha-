@@ -1,0 +1,107 @@
+{
+  "service": "http://127.0.0.1:8000",
+  "method": "GET only",
+  "checks": {
+    "service_ready": {
+      "ok": true,
+      "ready": {
+        "status": "ready",
+        "database": "ready",
+        "job_manager": "ready",
+        "real_execution": "configured"
+      }
+    },
+    "recovery_run_response": {
+      "ok": true,
+      "lineage": {
+        "based_on_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+        "execution_type": "alpha_classification_recovery",
+        "recovery_lineage_artifact": "recovery_lineage.json"
+      },
+      "completion": {
+        "total_claims": 975,
+        "valid_select_count": 162,
+        "valid_none_count": 812,
+        "call_failure_count": 1,
+        "not_executed_count": 0,
+        "not_executed_configuration_count": 0,
+        "not_executed_fault_count": 0,
+        "complete": false
+      },
+      "summary": "Alpha classification is incomplete for this research run: 1 of 975 claims have no usable classification result (1 call failure(s), 0 not executed), so the absence of a dominant Alpha structure or admitted conflict cannot yet be read as 'none exists'."
+    },
+    "original_run_still_incomplete": {
+      "ok": true,
+      "completion": {
+        "total_claims": 975,
+        "valid_select_count": 0,
+        "valid_none_count": 2,
+        "call_failure_count": 973,
+        "not_executed_count": 0,
+        "not_executed_configuration_count": 0,
+        "not_executed_fault_count": 0,
+        "complete": false
+      },
+      "status": "completed"
+    },
+    "history_lists_both": {
+      "ok": true,
+      "recovery": "completed",
+      "original": "completed"
+    },
+    "status_route": {
+      "ok": true,
+      "status": "completed"
+    },
+    "agent_outputs_equal_apart_from_run_id": {
+      "ok": true,
+      "count": 500
+    },
+    "artifact_listing": {
+      "ok": true,
+      "artifacts": 17
+    },
+    "manifest_hashes_match_disk": {
+      "ok": true
+    },
+    "lineage_download": {
+      "ok": true,
+      "counts": {
+        "reused_original_valid_result": 2,
+        "recovered_real_classification": 954,
+        "attempted_failed_no_valid_result": 1,
+        "recovered_via_identical_input_cache": 18
+      }
+    },
+    "export_zip_byte_identical_to_files": {
+      "ok": true,
+      "members": 17,
+      "bytes": 878232,
+      "mismatch": []
+    },
+    "route_graph": {
+      "ok": true,
+      "http": 200
+    },
+    "route_conflicts": {
+      "ok": true,
+      "http": 200
+    },
+    "route_entity-exposures": {
+      "ok": true,
+      "http": 200
+    },
+    "route_evidence-stances": {
+      "ok": true,
+      "http": 200
+    },
+    "original_run_directory_unchanged": {
+      "ok": true,
+      "files": 29
+    },
+    "recovery_run_directory_unchanged": {
+      "ok": true,
+      "files": 29
+    }
+  }
+}

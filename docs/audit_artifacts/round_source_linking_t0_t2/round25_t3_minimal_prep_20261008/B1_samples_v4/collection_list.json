@@ -1,0 +1,65 @@
+{
+ "status": "PROPOSAL -- not fetched; needs the same authorization as the execution",
+ "binding": "collected material is saved under the new verification execution (URL, retrieval time, HTTP status, sha256), given to the reviewer as an addendum before review, and never written into the original runs; it is not presented as material those runs had",
+ "unfixable_by_collection": {
+  "t3v3-032": "states no checkable fact",
+  "t3v3-036": "states no checkable fact"
+ },
+ "not_proposed": {
+  "t3v3-033": "the Anthropic compute-expense figure (+190% Y/Y to $7.33B) the claim multiplies: the run saved no pointer to its original source, so finding it would be an open-ended web search; the sample stays PARTIAL (its other elements have saved headlines)"
+ },
+ "how": "t3_joint_sample_driver.py collect (stops at the first non-200 or unexpected shape; never exceeds the cap)",
+ "items": [
+  {
+   "id": "C0",
+   "object": "Polymarket Gamma public-search, query 'recession 2026' -- the endpoint the run's news agent itself used (tradingagents/dataflows/polymarket.py)",
+   "samples": [
+    "t3v3-037",
+    "t3v3-038",
+    "t3v3-039",
+    "t3v3-040"
+   ],
+   "source": "GET https://gamma-api.polymarket.com/public-search?q=recession 2026&limit_per_type=20",
+   "purpose": "find the three markets by their exact question and read each market's Yes token id",
+   "request_cap": 1,
+   "limits": "returns today's prices only; used solely to identify the markets"
+  },
+  {
+   "id": "C1",
+   "object": "daily Yes-price history of 'US recession by end of 2026?', 2026-09-24 .. 2026-10-06",
+   "samples": [
+    "t3v3-037",
+    "t3v3-039",
+    "t3v3-040"
+   ],
+   "source": "GET https://clob.polymarket.com/prices-history?market=<Yes token>&startTs=..&endTs=..&fidelity=1440",
+   "purpose": "the 8% level and its weekly change as of 2026-10-01/02 (034a0a60) and 2026-10-05 (1bad76a7)",
+   "request_cap": 1,
+   "limits": "the traded volume quoted in the claims is cumulative and cannot be recovered as of those dates"
+  },
+  {
+   "id": "C2",
+   "object": "daily Yes-price history of 'UK recession in 2026?', same window",
+   "samples": [
+    "t3v3-037"
+   ],
+   "source": "as C1",
+   "purpose": "the 7% level as of 2026-10-05",
+   "request_cap": 1,
+   "limits": "as C1"
+  },
+  {
+   "id": "C3",
+   "object": "daily Yes-price history of 'Japan recession in 2026?', same window",
+   "samples": [
+    "t3v3-037",
+    "t3v3-038"
+   ],
+   "source": "as C1",
+   "purpose": "the 4% level as of 2026-10-01 and 2026-10-05",
+   "request_cap": 1,
+   "limits": "the $4K volume cannot be recovered as of those dates"
+  }
+ ],
+ "request_cap_total": 4
+}

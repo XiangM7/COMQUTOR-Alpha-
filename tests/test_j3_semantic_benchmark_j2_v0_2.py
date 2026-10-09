@@ -441,19 +441,20 @@ class TestSectionCJ2V2Schema:
             load_j2_labels_v2(path)
         assert exc_info.value.reason_code == "LABEL_V2_REMOVE_WHILE_UNDECLARED_IS_ACTUALLY_CANONICAL"
 
-    def test_c26_msft_a102_a304_was_adjudicated_and_rejected_not_pending(self):
-        # Was product_decision_pending at the time this test was first
-        # written; formally adjudicated to REJECT_PAIR by PD-017
-        # (docs/specs/product_decisions_and_unknowns.md) -- see
+    def test_c26_msft_a102_a304_was_reopened_and_approved_conditional(self):
+        # Originally adjudicated to REJECT_PAIR by PD-017
+        # (docs/specs/product_decisions_and_unknowns.md); reopened and
+        # approved as a conditional pair by PD-017-REVISED under this
+        # round's explicit task instruction -- see
         # tests/test_msft_a102_a304_taxonomy_adjudication.py for the
-        # dedicated regression coverage of that decision.
+        # dedicated regression coverage of that reversal.
         v2 = load_j2_labels_v2()
         msft = ticker_label_v2(v2, "MSFT")
         pending_ids = {entry["pair_id"] for entry in msft["product_decision_pending"]}
         assert "A102__A304" not in pending_ids
-        assert "A102__A304" in msft["remove_while_undeclared"]
+        assert "A102__A304" not in msft["remove_while_undeclared"]
         assert "A102__A304" not in msft["required_conflicts"]
-        assert "A102__A304" not in msft["conditional_conflicts"]
+        assert "A102__A304" in msft["conditional_conflicts"]
         assert "A102__A304" not in msft["allowed_conflicts"]
 
     def test_c27_amd_a301_a304_is_allowed_not_auto_required(self):
@@ -463,12 +464,16 @@ class TestSectionCJ2V2Schema:
         assert "A301__A304" not in amd["required_conflicts"]
         assert "A301__A304" not in amd["conditional_conflicts"]
 
-    def test_c28_a201_a304_no_longer_executable_for_sndk_tsm_amd(self):
+    def test_c28_a201_a304_now_executable_as_conditional_for_sndk_tsm_amd(self):
+        # PD-017-REVISED also reopened A201__A304 as a conditionally
+        # evaluable pair (same taxonomy edit, same reciprocal weight as
+        # A102__A304 -- see alpha_taxonomy_v1.yaml's content_change_log).
         v2 = load_j2_labels_v2()
         for ticker in ("SNDK", "TSM", "AMD"):
             block = ticker_label_v2(v2, ticker)
-            assert "A201__A304" in block["remove_while_undeclared"], ticker
-            for category in ("required_conflicts", "conditional_conflicts", "allowed_conflicts"):
+            assert "A201__A304" not in block["remove_while_undeclared"], ticker
+            assert "A201__A304" in block["conditional_conflicts"], ticker
+            for category in ("required_conflicts", "allowed_conflicts"):
                 assert "A201__A304" not in block[category], f"{ticker}.{category}"
 
     def test_c28b_no_ticker_currently_has_a_required_conflict(self):
@@ -676,20 +681,36 @@ class TestSectionEInvariants:
         assert ADMITTED == "admitted"
         assert CANDIDATE == "candidate"
 
-    def test_e38_canonical_conflict_pairs_are_exactly_the_frozen_six(self):
-        # MVP-10 taxonomy's 6 frozen conflict pairs (canonical_pair_key's
-        # own alpha-sorted __-joined form, e.g. A601__A304 sorts as
-        # "A304__A601").
+    def test_e38_canonical_conflict_pairs_are_exactly_the_eight_declared_pairs(self):
+        # MVP-10 taxonomy's original 6 mandatory conflict pairs
+        # (canonical_pair_key's own alpha-sorted __-joined form, e.g.
+        # A601__A304 sorts as "A304__A601") plus the two pairs reopened and
+        # approved as conditional by PD-017-REVISED
+        # (docs/specs/product_decisions_and_unknowns.md): A102__A304 and
+        # A201__A304. alpha_loader.MANDATORY_CONFLICT_WEIGHTS still lists
+        # exactly the original 6 -- this is the full set of canonically
+        # DECLARED pairs, a superset of "mandatory".
         taxonomy = load_alpha_taxonomy()
         pairs = _canonical_conflict_pairs(taxonomy)
         assert pairs == frozenset(
-            {"A101__A304", "A301__A304", "A001__A501", "A003__A501", "A304__A601", "A501__A601"}
+            {
+                "A101__A304",
+                "A301__A304",
+                "A001__A501",
+                "A003__A501",
+                "A304__A601",
+                "A501__A601",
+                "A102__A304",
+                "A201__A304",
+            }
         )
 
-    def test_e39_msft_pending_pair_was_never_added_to_canonical_taxonomy(self):
+    def test_e39_msft_pending_pair_was_reopened_and_added_to_canonical_taxonomy(self):
+        # PD-017-REVISED reopened and approved A102__A304 as conditional;
+        # see tests/test_msft_a102_a304_taxonomy_adjudication.py.
         taxonomy = load_alpha_taxonomy()
         pairs = _canonical_conflict_pairs(taxonomy)
-        assert "A102__A304" not in pairs
+        assert "A102__A304" in pairs
 
     def test_e40_provider_calls_zero_on_real_replay(self, real_evaluated_nvda):
         assert real_evaluated_nvda.get("provider_calls") == 0
@@ -726,12 +747,21 @@ class TestSectionEInvariants:
         # both files (LLM semantic primary over the full canonical
         # taxonomy; see comqutor_alpha/structure_engine/alpha_mapper.py
         # and week2_llm.py's alpha_classifier v2 prompt) -- an intentional,
-        # in-scope, unrelated-to-J3/J2 change. The remaining three paths
-        # are untouched by that migration and stay covered here unchanged.
+        # in-scope, unrelated-to-J3/J2 change.
+        #
+        # alpha_taxonomy_v1.yaml removed from this list for the same reason
+        # (COMQUTOR Alpha next-round T2 task, 2026-09-26): PD-017-REVISED
+        # (docs/specs/product_decisions_and_unknowns.md) explicitly
+        # authorized adding A102__A304 and A201__A304 as reciprocal,
+        # conditionally-evaluable conflict_alphas entries -- an intentional,
+        # in-scope, unrelated-to-J3/J2 change, with its own dedicated
+        # regression coverage in test_conflict_detector.py and
+        # test_msft_a102_a304_taxonomy_adjudication.py. The remaining two
+        # paths are untouched by that change and stay covered here
+        # unchanged.
         frozen_paths = [
             "comqutor_alpha/conflict_engine/conflict_schema.py",
             "comqutor_alpha/conflict_engine/conflict_admissibility.py",
-            "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
         ]
         proc = subprocess.run(
             ["git", "status", "--porcelain", "--", *frozen_paths],

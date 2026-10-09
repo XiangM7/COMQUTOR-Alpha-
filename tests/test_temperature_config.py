@@ -78,3 +78,82 @@ class TestProviderKwargsTemperature:
 
     def test_empty_string_omitted(self):
         assert "temperature" not in self._kwargs_for("")
+
+
+@pytest.mark.unit
+class TestProviderKwargsMaxTokens:
+    """_get_provider_kwargs int-coerces and forwards max_tokens, or omits it.
+
+    Added 2026-09-30 (T3/T4 joint-verification execution-path task): the
+    Research Agent layer previously had no enforceable per-call output-token
+    cap at all -- this is the minimum necessary limit added for that gap,
+    mirroring the existing, already-tested temperature-forwarding pattern
+    directly above.
+    """
+
+    def _kwargs_for(self, max_tokens):
+        from tradingagents.graph.trading_graph import TradingAgentsGraph
+
+        graph = TradingAgentsGraph.__new__(TradingAgentsGraph)
+        graph.config = {"llm_provider": "openai", "max_tokens": max_tokens}
+        return TradingAgentsGraph._get_provider_kwargs(graph)
+
+    def test_int_passthrough(self):
+        assert self._kwargs_for(4000)["max_tokens"] == 4000
+
+    def test_string_coerced(self):
+        assert self._kwargs_for("4000")["max_tokens"] == 4000
+
+    def test_none_omitted(self):
+        assert "max_tokens" not in self._kwargs_for(None)
+
+    def test_empty_string_omitted(self):
+        assert "max_tokens" not in self._kwargs_for("")
+
+
+@pytest.mark.unit
+class TestMaxTokensReachesClient:
+    @pytest.mark.parametrize(("provider", "model"), [("openai", "gpt-5.5"), ("anthropic", "claude-sonnet-4-6")])
+    def test_max_tokens_reaches_client_when_set(self, provider, model):
+        llm = create_llm_client(
+            provider=provider, model=model, max_tokens=4000, api_key="placeholder"
+        ).get_llm()
+        assert llm.max_tokens == 4000
+
+    def test_max_tokens_omitted_leaves_provider_default(self):
+        llm = create_llm_client(provider="openai", model="gpt-5.5", api_key="placeholder").get_llm()
+        assert llm.max_tokens is None
+
+
+@pytest.mark.unit
+class TestProviderKwargsMaxRetries:
+    """Mirrors TestProviderKwargsMaxTokens for the sibling max_retries forward."""
+
+    def _kwargs_for(self, max_retries):
+        from tradingagents.graph.trading_graph import TradingAgentsGraph
+
+        graph = TradingAgentsGraph.__new__(TradingAgentsGraph)
+        graph.config = {"llm_provider": "openai", "max_retries": max_retries}
+        return TradingAgentsGraph._get_provider_kwargs(graph)
+
+    def test_int_passthrough(self):
+        assert self._kwargs_for(2)["max_retries"] == 2
+
+    def test_string_coerced(self):
+        assert self._kwargs_for("2")["max_retries"] == 2
+
+    def test_none_omitted(self):
+        assert "max_retries" not in self._kwargs_for(None)
+
+    def test_empty_string_omitted(self):
+        assert "max_retries" not in self._kwargs_for("")
+
+
+@pytest.mark.unit
+class TestMaxRetriesReachesClient:
+    @pytest.mark.parametrize(("provider", "model"), [("openai", "gpt-5.5"), ("anthropic", "claude-sonnet-4-6")])
+    def test_max_retries_reaches_client_when_set(self, provider, model):
+        llm = create_llm_client(
+            provider=provider, model=model, max_retries=5, api_key="placeholder"
+        ).get_llm()
+        assert llm.max_retries == 5

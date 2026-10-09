@@ -20,6 +20,10 @@ export interface UseRunPollingResult {
   status: RunStatusResult | null;
   error: ApiError | null;
   isPolling: boolean;
+  /** `Date.now()` when `status` last arrived, null before the first answer.
+   * Lets callers count real time since the last poll (for the ETA and the
+   * elapsed clock) without ever moving the progress percentage. */
+  receivedAt: number | null;
   /** Manually trigger an immediate re-fetch (e.g. a user-clicked Refresh
    * button). Safe to call at any time; it cancels and reschedules the
    * normal backoff timer around this one extra fetch. */
@@ -42,6 +46,7 @@ export function useRunPolling(runId: string | null | undefined): UseRunPollingRe
   const [status, setStatus] = useState<RunStatusResult | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [receivedAt, setReceivedAt] = useState<number | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,6 +71,7 @@ export function useRunPolling(runId: string | null | undefined): UseRunPollingRe
         .then((result) => {
           if (!mountedRef.current || controller.signal.aborted) return;
           setStatus(result);
+          setReceivedAt(Date.now());
           setError(null);
           const currentStatus = "status" in result ? result.status : undefined;
           if (!isTerminalStatus(currentStatus)) {
@@ -97,6 +103,7 @@ export function useRunPolling(runId: string | null | undefined): UseRunPollingRe
     mountedRef.current = true;
     pollCountRef.current = 0;
     setStatus(null);
+    setReceivedAt(null);
     setError(null);
     setIsPolling(false);
     clearTimer();
@@ -121,5 +128,5 @@ export function useRunPolling(runId: string | null | undefined): UseRunPollingRe
     runFetch(runId);
   }, [runId, runFetch, clearTimer]);
 
-  return { status, error, isPolling, refresh };
+  return { status, error, isPolling, receivedAt, refresh };
 }

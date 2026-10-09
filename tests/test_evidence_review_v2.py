@@ -286,7 +286,8 @@ _STEP8_FROZEN_HASHES = {
     "comqutor_alpha/graph_engine/alpha_level_classifier.py": "3cf25b42cbc91d8976978d89c45cbab45859accd37c6a8f8731ff42eabb1da85",
     "comqutor_alpha/graph_engine/evidence_source_role.py": "4835e4e2d83b8438bf23d1a9c35123072439d5f501146b77d8d038585d47ae99",
     "comqutor_alpha/graph_engine/alpha_display_normalizer.py": "f63cb9d63a157ab2d817d66d071b94f6b967809d871bc3bb067a2afa9d7ebeea",
-    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c031168c726cd424252cd9ee0491e55f335b5966694a326e0bcdfeeab1e7939c",
+    # T2 (2026-10-07): taxonomy content change (reciprocal A102/A201<->A304, content_version 1.1.0); see its content_change_log
+    "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "c6d523beaee4942c71756a3fddbb8213d4ba2f8653fded088d73031ca80f3bfa",
 }
 
 

@@ -48,6 +48,7 @@ __all__ = [
     "resolve_instrument_identity",
     "get_instrument_context_from_state",
     "get_language_instruction",
+    "get_citation_forwarding_instruction",
     "create_msg_delete",
 ]
 
@@ -68,6 +69,36 @@ def get_language_instruction() -> str:
     if lang.strip().lower() == "english":
         return ""
     return f" Write your entire response in {lang}."
+
+
+def get_citation_forwarding_instruction() -> str:
+    """Round 3 (2026-10-04), cross-agent reference passing: market_analyst/
+    news_analyst/fundamentals_analyst already ask the model to copy a tool
+    result's own "[source_id: ...] [fragment_id: ...]" marker verbatim next
+    to any exact figure it takes from that tool (see each analyst's own
+    system_message). That marker then sits INSIDE the plain-text report
+    string (market_report/sentiment_report/news_report/fundamentals_report/
+    trader_investment_plan/etc.) that every downstream consumer agent
+    (bull/bear researcher, research manager, trader, risk debators,
+    portfolio manager) receives verbatim in its own prompt -- but none of
+    those downstream prompts previously asked the model to carry a marker
+    forward into ITS OWN restatement, so a real LLM asked to write a
+    "compelling", "conversational" argument has no reason not to strip the
+    bracket-looking marker out while paraphrasing.
+
+    This is the SAME marker/instruction pattern, extended to every
+    consumer of already-marked report text -- never a new citation
+    mechanism, never a guarantee of real-model compliance (unmeasured,
+    like the analyst-level instruction's own documented caveat)."""
+    return (
+        " Any analyst report, research plan, or prior agent output you are given may contain "
+        "\"[source_id: ...] [fragment_id: ...]\" reference tags next to specific figures. When "
+        "you restate a SPECIFIC figure that carries one of these tags, copy that exact tag "
+        "verbatim next to your restatement. If your sentence combines several such figures, "
+        "include each one's own tag next to the figure it belongs to -- do not drop any but the "
+        "first. Never attach a tag to a figure, explanation, or recommendation that did not "
+        "itself carry one in the source text."
+    )
 
 
 def _clean_identity_value(value: Any) -> str | None:

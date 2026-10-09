@@ -1,0 +1,100 @@
+{
+  "schema_version": "alpha_final_reserve_replacement_packet.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "round": 3,
+  "purpose": "Blind adjudication packet for the 2 reserve samples drawn to replace the round-2 final-reserve replacements that were themselves excluded under the frozen adjudication rubric (non-null ambiguity_flag).",
+  "system_predictions_included": false,
+  "candidate3_output_included": false,
+  "note": "No COMQUTOR Alpha prediction, mapper score, plausible_alphas, system confidence, Provider result, or any Candidate 1/2/3 result is present anywhere in this document.",
+  "instructions_reference": "docs/audit_artifacts/v0_2_alpha_human_adjudication_rubric.md",
+  "policy_reference": "docs/audit_artifacts/v0_2_final_alpha_adjudication_policy.md",
+  "taxonomy_reference": [
+    {
+      "alpha_id": "A001",
+      "name_en": "Rate Cut Cycle",
+      "core_thesis": "Falling rates lower discount rates and support long-duration growth assets."
+    },
+    {
+      "alpha_id": "A003",
+      "name_en": "Liquidity Expansion",
+      "core_thesis": "Improving liquidity supports risk appetite and equity inflows."
+    },
+    {
+      "alpha_id": "A101",
+      "name_en": "AI Expansion",
+      "core_thesis": "AI training and adoption increase demand for accelerators and AI-related equities."
+    },
+    {
+      "alpha_id": "A102",
+      "name_en": "Inference Explosion",
+      "core_thesis": "Enterprise AI applications and AI agents increase inference compute demand."
+    },
+    {
+      "alpha_id": "A103",
+      "name_en": "AI Infrastructure",
+      "core_thesis": "AI buildout drives datacenter, power, cooling, networking, and server demand."
+    },
+    {
+      "alpha_id": "A201",
+      "name_en": "Semiconductor Supercycle",
+      "core_thesis": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand."
+    },
+    {
+      "alpha_id": "A301",
+      "name_en": "Revenue Expansion",
+      "core_thesis": "Strong demand raises revenue guidance, EPS revisions, and repricing potential."
+    },
+    {
+      "alpha_id": "A304",
+      "name_en": "Multiple Compression",
+      "core_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals."
+    },
+    {
+      "alpha_id": "A501",
+      "name_en": "Recession Risk",
+      "core_thesis": "Widening credit spreads and economic slowdown pressure earnings and risk appetite."
+    },
+    {
+      "alpha_id": "A601",
+      "name_en": "Narrative Momentum",
+      "core_thesis": "Investor attention and crowded narratives drive reflexive flows and momentum."
+    }
+  ],
+  "label_field_instructions": {
+    "expected_label": "One canonical alpha_id from taxonomy_reference above, or the string 'NONE'. Leave null until adjudicated.",
+    "confidence": "'low' | 'medium' | 'high'. Leave null until adjudicated.",
+    "ambiguity_flag": "null, or one of: BOTH_REASONABLE_AMBIGUOUS | INSUFFICIENT_CONTEXT | NOT_A_SUBSTANTIVE_CLAIM | DUPLICATE_OR_NEAR_DUPLICATE",
+    "adjudication_reason": "Short free-text justification, required even for NONE. Leave null until adjudicated."
+  },
+  "sample_count": 2,
+  "samples": [
+    {
+      "replacement_slot": 1,
+      "sample_id": "nh-reserve-043",
+      "ticker": "TSM",
+      "run_id": "032e43c5-c9ab-4baf-8b4b-3b01ba167db9",
+      "claim_id": "032e43c5-c9ab-4baf-8b4b-3b01ba167db9:market_agent:market_report:claim:73",
+      "agent": "market_agent",
+      "claim": "Short-term momentum is neutral-to-weak.",
+      "evidence": "Short-term momentum is neutral-to-weak.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 2,
+      "sample_id": "nh-reserve-044",
+      "ticker": "SNDK",
+      "run_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8",
+      "claim_id": "519c93f4-7fcd-4879-9ca9-dd65badc0fb8:research_manager:investment_plan:claim:20",
+      "agent": "research_manager",
+      "claim": "(3) Monitor the cyclicality signals closely — specifically any evidence of supply catching up (e.g., new memory capacity announcements, CXMT expansion) or a rollover in memory pricing, which would validate the bear's peak-cycle thesis and warrant trimming.",
+      "evidence": "(3) Monitor the cyclicality signals closely — specifically any evidence of supply catching up (e.g., new memory capacity announcements, CXMT expansion) or a rollover in memory pricing, which would validate the bear's peak-cycle thesis and warrant trimming.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    }
+  ]
+}

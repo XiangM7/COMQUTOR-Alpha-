@@ -19,6 +19,39 @@ logger = logging.getLogger(__name__)
 # enough to catch the year-old frames yfinance occasionally returns (#1021).
 MAX_OHLCV_STALE_DAYS = 10
 
+# Data-processing settings of the OHLCV window every technical indicator is computed from (T1 closeout, Round 22).
+# ``load_ohlcv`` below uses these very constants and the derived-inputs artifact records them, so the saved settings
+# cannot drift from the code that ran (tests/test_t1_closeout_capture_artifacts.py pins both directions).
+OHLCV_WINDOW_YEARS = 5
+OHLCV_DOWNLOAD_AUTO_ADJUST = True
+OHLCV_CLEANING_STEPS = (
+    "parse Date; drop rows whose Date cannot be parsed",
+    "coerce Open/High/Low/Close/Volume to numbers (unparseable values become missing)",
+    "drop rows with a missing Close",
+    "forward-fill, then back-fill, the remaining gaps in Open/High/Low/Close/Volume",
+)
+
+
+def ohlcv_processing_settings() -> dict:
+    """The settings the OHLCV window went through before indicators were computed, as a plain JSON-safe dict."""
+    return {
+        "provider_call": {
+            "library": "yfinance",
+            "function": "download",
+            "auto_adjust": OHLCV_DOWNLOAD_AUTO_ADJUST,
+            "multi_level_index": False,
+            "progress": False,
+            "window": f"{OHLCV_WINDOW_YEARS} years back from the fetch day to the day after it (end exclusive)",
+        },
+        "cache": (
+            "per-symbol CSV in data_cache_dir keyed by the window dates; a non-empty cached file is reused, so the "
+            "provider fetch day can be earlier than the run"
+        ),
+        "cleaning": list(OHLCV_CLEANING_STEPS),
+        "cutoff": "rows with Date <= the requested analysis date, sorted ascending by Date (re-applied by the verified snapshot)",
+        "stale_check": f"the latest row must be within {MAX_OHLCV_STALE_DAYS} calendar days of the requested date",
+    }
+
 
 def yf_retry(func, max_retries=3, base_delay=2.0):
     """Execute a yfinance call with exponential backoff on rate limits.
@@ -140,7 +173,7 @@ def load_ohlcv(symbol: str, curr_date: str) -> pd.DataFrame:
 
     # Cache uses a fixed window (5y to today) so one file per symbol.
     today_date = pd.Timestamp.today()
-    start_date = today_date - pd.DateOffset(years=5)
+    start_date = today_date - pd.DateOffset(years=OHLCV_WINDOW_YEARS)
     start_str = start_date.strftime("%Y-%m-%d")
     # yfinance ``end`` is EXCLUSIVE; request tomorrow so today's row is included
     # when curr_date is the current day (#986). Look-ahead is still prevented by
@@ -169,7 +202,7 @@ def load_ohlcv(symbol: str, curr_date: str) -> pd.DataFrame:
             end=end_str,
             multi_level_index=False,
             progress=False,
-            auto_adjust=True,
+            auto_adjust=OHLCV_DOWNLOAD_AUTO_ADJUST,
         ))
         downloaded = _ensure_date_column(downloaded.reset_index())
         # Only cache real data — never persist an empty frame.

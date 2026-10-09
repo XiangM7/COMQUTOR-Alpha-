@@ -1,0 +1,732 @@
+{
+  "schema_version": "t3_human_review_form.v2",
+  "note": "2026-09-30 follow-up: a REAL, ready-to-use blind-review template for the 25 real samples found against the 40-item quota (see t3_targeted_diagnostic_sample_2026-09-30.json for the full, honest per-category shortfall accounting). This form has NOT been filled in by any human reviewer -- no reviewer name/timestamp/verdict/conclusion is fabricated anywhere here, and none is entered on behalf of John or any specific reviewer. review_items below deliberately omit BOTH the historical gold label and the historical Candidate-3 prediction; hidden_system_answers is a SEPARATE section, keyed by sample_id, revealed to the reviewer only AFTER they record their own independent judgment for every item. UPDATE (2026-09-30, same-day follow-up): 15 more real samples added (prod-run-001..015, real production alpha_matches.json records for A001/A003/A102/A501, not Gold-set items) to reach the full 40-item quota. Still NOT filled in by any human reviewer -- your_judgment/your_rationale/reviewer_id/reviewed_at remain null for all 40 items, including these 15; hidden_system_answers still omits the system's own current_production_matched_alpha from every review_item shown to a reviewer.",
+  "instructions_for_reviewer": "For each item in review_items, read claim_text alone and record your own judgment: which single alpha_id (A001, A003, A101, A102, A103, A201, A301, A304, A501, A601) best matches this claim's own stated mechanism, or NONE if no listed alpha's thesis is substantively engaged. Do not consult hidden_system_answers until you have recorded a judgment for every item. Every item's development_exposure_status and source_material_completeness_status are shown (never hidden). CORRECTION (2026-09-30, third follow-up round): the prior version of this instruction incorrectly stated as a blanket fact that this form is 'never presented as a blind holdout on unseen data' -- that was true only for the original 25 gold-* items (already scored into a frozen historical result). It does NOT apply to the 15 prod-run-* items added in the second follow-up round, most of which (13 of 15) were verified NOT_PREVIOUSLY_USED anywhere in this repository's audit material and ARE therefore closer to unseen data for this specific classification task -- check each item's own development_exposure_status rather than relying on any blanket statement here. Separately, source_material_completeness_status describes only whether this repository's own material traces the claim back to a specific agent report (all 40: yes, verbatim) or to a further structured source_registry.json (none of the 40: no structured registry exists for any of their six underlying runs) -- it is NOT a claim that the claim's real-world factual content has been externally verified, and 'no source_registry.json found' must not be read as 'never had any real source' -- only that this repository's own T1 source-linking artifact does not exist for these (older) runs. CORRECTION (2026-10-05, fifth follow-up round): the 7-Alpha-ID list above (and the matching t3_reviewer_package_readme_2026-09-30.md text, and the import script's own _ALLOWED_JUDGMENT_VALUES) was wrong -- it was copied from requested_quota's own sampling-stratification keys (which control which CLAIMS were selected to stress specific boundary pairs, e.g. 'A304_boundary'/'A101_A103_differentiation') and mistaken for the full set of legal ANSWERS. The real, frozen candidate set is the full taxonomy the live classifier itself validates against (comqutor_alpha.structure_engine.alpha_mapper: allowed_ids = set(taxonomy), raising on anything outside it) -- confirmed to be all 10 top-level alpha_id entries in comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml: A001, A003, A101, A102, A103, A201, A301, A304, A501, A601. A reviewer's judgment must never be constrained to a narrower set than the classifier itself is allowed to answer with. No review_item/hidden_system_answers/prediction data was touched by this correction -- only this instruction text and the import script's own validation.",
+  "review_items": [
+    {
+      "sample_id": "gold-final-001",
+      "quota_category": "A304_boundary",
+      "claim_text": "Trading 71% above your long-term average is not a sign of strength for new buyers — it's a quantification of mean reversion risk.",
+      "ticker": "AMD",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "讨论的是价格偏离长期均值和技术性均值回归。没有估值倍数或基本面估值过高的机制，也没有叙事拥挤或注意力驱动，不能归入 A304 或 A601。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.848673+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-008",
+      "quota_category": "A304_boundary",
+      "claim_text": "The market isn't rewarding visibility; it's setting a trap.",
+      "ticker": "NVDA",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "“市场设陷阱”是笼统判断。没有说明需求、估值、利率、流动性或叙事资金流等具体机制。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849026+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-019",
+      "quota_category": "A304_boundary",
+      "claim_text": "The bull's PEG argument is mathematically flawed and should be dismissed outright.",
+      "ticker": "GOOGL",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "仅断言 PEG 论证在数学上有问题，没有说明实际估值过高、估值压缩风险或估值合理。反驳一种论证方法不等于形成 A304 的估值判断。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849033+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-030",
+      "quota_category": "A304_boundary",
+      "claim_text": "QQQ, as the highest-duration large-cap growth vehicle in the market, is the most exposed index product to this repricing.",
+      "ticker": "QQQ",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "UNABLE_TO_JUDGE",
+      "your_rationale": "“this repricing”缺少先行内容。高久期和暴露度本身无法说明此次重定价来自利率、估值还是盈利变化。需要补充原文上一句，不能凭 QQQ 背景推断 A001。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849038+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-041",
+      "quota_category": "A304_boundary",
+      "claim_text": "The Trefis headline asking \"Has Microsoft Stock Run Ahead Of Its AI Payoff?\" is not \"clickbait\"; it is the central question of this investment.",
+      "ticker": "MSFT",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "文本强调估值与 AI 回报问题值得讨论，但没有回答价格是否已跑超回报。为问题的合理性辩护不足以构成 A304 的当前估值结论。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849043+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-048",
+      "quota_category": "A304_boundary",
+      "claim_text": "On \"Forward EPS Assumes 95% Growth Continues\" The neutral analyst will argue that the forward EPS of $15.40 assumes 95% growth, which is \"too aggressive.\" Let me challenge that assumption with the actual trajectory.",
+      "ticker": "NVDA",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "95% 增长和“过于激进”属于被引用、准备反驳的观点。作者只说将用实际轨迹挑战它，尚未给出轨迹或自身盈利趋势结论。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849048+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-051",
+      "quota_category": "A304_boundary",
+      "claim_text": "Factor: Valuation; Bear View: 120x trailing P/E; Bull Counter: 30.4x forward P/E, PEG 1.03; Verdict: Fairly valued",
+      "ticker": "AMD",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A304",
+      "your_rationale": "明确比较历史与预期 P/E、PEG，并作出“合理估值”的结论。这是对高估值压缩风险的反向判断，仍属于 A304。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849052+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-052",
+      "quota_category": "A304_boundary",
+      "claim_text": "The question is not whether TSM is a great company; it is whether the current price offers a favorable risk-reward.",
+      "ticker": "TSM",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "只有公司质量与当前风险回报的提问，没有具体估值、需求、盈利或其他 Alpha 机制判断。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849056+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-057",
+      "quota_category": "A304_boundary",
+      "claim_text": "Zscaler fell 4% despite an earnings beat, as FY2027 growth guidance overshadowed results — raising \"whether even the strongest growth numbers can justify where these stocks are priced.\"",
+      "ticker": "QQQ",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A301",
+      "your_rationale": "已发生的股价下跌被明确归因于下一财年增长指引压过当期盈利超预期，最直接对应盈利预期变化引发重定价。末尾估值问题未形成明确的高估值结论，因此优先 A301 而非 A304。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849061+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-061",
+      "quota_category": "A304_boundary",
+      "claim_text": "Bear: \"The valuation is stretched at 23x forward earnings.\"",
+      "ticker": "GOOGL",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A304",
+      "your_rationale": "“23 倍预期盈利且估值偏高”明确表达当前高估值判断。“Bear”标明观点出处，不改变该命题对应 A304 的机制。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849065+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-072",
+      "quota_category": "A304_boundary",
+      "claim_text": "Rate environment: 89% probability of no Fed cuts in 2026, with 19-year-high yields — a headwind for high-multiple growth stocks.",
+      "ticker": "AMD",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A001",
+      "your_rationale": "不降息概率高和收益率高被明确描述为高估值成长股的逆风，涉及利率与长久期资产定价。这是 A001 的反向证据，不能因方向为负而改判 NONE。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849070+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-079",
+      "quota_category": "A304_boundary",
+      "claim_text": "Any slowdown in AI spending could trigger significant multiple compression.",
+      "ticker": "NVDA",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "只描述尚未发生的 AI 支出放缓可能造成倍数压缩。没有断言支出已经放缓或当前估值已经过高，不能把条件性后果当作当前 A304 结论。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849073+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-083",
+      "quota_category": "A304_boundary",
+      "claim_text": "On Valuation: \"Priced for Perfection\"",
+      "ticker": "NVDA",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A304",
+      "your_rationale": "在估值语境中，“priced for perfection”表达当前价格容错空间极低的估值判断，最贴近 A304。文字简短，足以判断机制，但不足以核实估值判断是否属实。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849077+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-085",
+      "quota_category": "A304_boundary",
+      "claim_text": "However, the bear's medium-term tactical case is equally compelling: a 72% probability of a rate hike and 93% odds of no cuts repricing long-duration growth at 29x PE, a broad crack in the software/media complex (Netflix -4%, Adobe -7%, UiPath -14%, Zscaler -4%), and deteriorating momentum with the MACD histogram negative since August 21.",
+      "ticker": "QQQ",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A001",
+      "your_rationale": "文本明确以加息和不降息概率解释长久期成长资产重定价，利率因果链比 29 倍 P/E 的下游估值描述更直接。A304 也有关联，但单选优先 A001，属于反向利率证据。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849083+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-097",
+      "quota_category": "A304_boundary",
+      "claim_text": "And the stock is trading at 8.3x book value—a premium that requires flawless execution.",
+      "ticker": "MSFT",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A304",
+      "your_rationale": "8.3 倍市净率被明确解释为需要完美执行的溢价，直接表达高估值与下行容错空间不足。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849086+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-099",
+      "quota_category": "A304_boundary",
+      "claim_text": "You are applying a backward-looking multiple to a forward-looking earnings explosion.",
+      "ticker": "QQQ",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A301",
+      "your_rationale": "作者明确断言前瞻盈利将爆发式增长，并据此反对使用历史倍数。实际断言最直接对应盈利扩张与重定价，优先 A301；没有明确断言当前估值过高。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849103+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-059",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "CoreWeave's CEO says they are \"struggling to keep up with demand for Nvidia chips.\" Every single one of these demand signals flows through TSM's foundry and CoWoS advanced packaging.",
+      "ticker": "TSM",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A103",
+      "your_rationale": "需求信号明确落到晶圆代工与 CoWoS 先进封装。按冻结规则，具体代工和封装能力对应 A103，优先于泛化 AI 需求的 A101。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849108+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-074",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "Nvidia just told the market its AI boom runs through fiscal 2028 with demand exceeding supply.",
+      "ticker": "TSM",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A101",
+      "your_rationale": "断言 AI 景气持续且需求超过供给，直接涉及 AI 扩张带来的芯片需求。未具体描述数据中心或其他设施建设，A101 是最直接选择。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849112+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-077",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "When hyperscalers get squeezed by investors to justify their AI capex spending, they do not stop spending.",
+      "ticker": "AMD",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A103",
+      "your_rationale": "核心命题是大型云厂商在投资者压力下仍继续 AI 资本开支，直接涉及 AI 建设投资持续性，优先 A103。A101 也合理，但未明确讨论训练、采用或加速器需求。缺少具体设施词并不构成排除 A103 的条件。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849116+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-084",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "Google Cloud & AI Infrastructure: The massive CapEx buildout ($44.92B in Q2 2026 alone) is directly monetizing through cloud services and AI inference demand.",
+      "ticker": "GOOGL",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A102",
+      "your_rationale": "资本开支的变现被明确归因于云服务与 AI 推理需求。相较建设投入这个背景，推理应用需求是更具体的机制，优先 A102。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849121+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-092",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "Yes, NAND storage demand from AI data centers is real and secular.",
+      "ticker": "SNDK",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A103",
+      "your_rationale": "明确断言 AI 数据中心带来真实、长期的 NAND 存储需求，直接涉及具体数据中心基础设施需求，优先 A103。未描述整个芯片周期的库存或价格反转，不能仅凭 NAND 选 A201。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849125+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-100",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "Factor: AI CapEx / GPU Demand; Signal: Bullish; Evidence: CoreWeave-HRT deal (Vera Rubin); Lambda $1B debt for Nvidia chips; demand outpacing supply; Implication for NVDA: Sustained demand & pricing power",
+      "ticker": "NVDA",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A101",
+      "your_rationale": "证据整体指向 AI 资本开支、GPU 需求超过供给以及持续需求与定价能力。未明确限定为推理应用或具体设施容量，泛化 AI 加速器需求的 A101 更直接。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849129+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-127",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "The hawkish Fed and rising yields are a real headwind, but the low recession probability supports continued AI capex.",
+      "ticker": "SNDK",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "A501",
+      "your_rationale": "转折后的主结论是低衰退概率支持资本开支持续，直接涉及衰退对需求的影响，是 A501 的反向证据。鹰派利率是次要逆风，AI 资本开支是受影响的结果。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849134+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-final-144",
+      "quota_category": "A101_A103_differentiation",
+      "claim_text": "Capital Expenditure Surge: Net PPE has grown dramatically from $184.6B (FY2024) to $338.9B (Q2 2026), underscoring the massive infrastructure buildout.",
+      "ticker": "GOOGL",
+      "development_exposure_status": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE -- part of the 150-sample Final Gold set already scored into the frozen 82.67% historical result; NOT a blind holdout for any future evaluation of the current production model.",
+      "your_judgment": "NONE",
+      "your_rationale": "虽然 PPE 增长被解释为设施建设，但文本没有说明这些设施属于 AI 或数据中心，也没有断言收入增长等其他机制。不能根据 GOOGL 的公司背景自行补成 A103。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849138+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "gold-dev-068",
+      "quota_category": "A102",
+      "claim_text": "The Gemini/Zocdoc healthcare booking partnership — cutting patient wait times from 31 days to 72 hours — is a tangible example of AI converting into real-world revenue.",
+      "ticker": "GOOGL",
+      "development_exposure_status": "DEVELOPMENT_SEEN -- part of the 100-sample Development Gold set, already used for Candidate-3 tuning/error analysis (docs/audit_artifacts/v0_2_candidate3_dev_error_analysis.json); explicitly NOT an unseen holdout.",
+      "your_judgment": "A301",
+      "your_rationale": "文本明确以现实应用说明 AI 正在转化为收入，最直接的已陈述结果是收入扩张。A102 的推理算力需求增长没有在此断言，优先 A301；收入事实本身仍需另行核验。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849142+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-001",
+      "quota_category": "A102",
+      "claim_text": "Competition: Custom silicon (ASICs) from hyperscalers and competitors (AMD, and others) could erode NVIDIA's dominant share in inference workloads over time.",
+      "ticker": "NVDA",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "NONE",
+      "your_rationale": "描述定制芯片未来可能侵蚀 NVIDIA 推理市场份额，属于公司竞争风险假设。没有断言当前份额下降，也没有断言整体推理算力需求增减，不能仅因“inference”选 A102。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849147+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-002",
+      "quota_category": "A102",
+      "claim_text": "AI Monetization (Copilot & AI Services): Microsoft's AI products (Microsoft 365 Copilot, GitHub Copilot, Azure AI services) are driving inference demand and enterprise adoption, supporting the re-acceleration in revenue growth.",
+      "ticker": "MSFT",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "A102",
+      "your_rationale": "企业 AI 产品采用明确推动推理需求，并支持收入再加速。推理需求是更具体的因果机制，优先 A102，而非其下游结果 A301。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849151+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-003",
+      "quota_category": "A102",
+      "claim_text": "The broader trend toward inference workloads and AI agents (GPT-6 Astra, enterprise AI) supports sustained compute demand across the ecosystem.",
+      "ticker": "AMD",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "A102",
+      "your_rationale": "直接断言推理工作负载与 AI agents 的发展支持持续计算需求，与 A102 定义高度对应。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849155+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-004",
+      "quota_category": "A501",
+      "claim_text": "Note the geopolitical tail-risk chatter: \"Reports of missile launches in the Strait of Hormuz\" (@MacroHard26) — consistent with the oil-driven supply-shock framing in the news.",
+      "ticker": "QQQ",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "NONE",
+      "your_rationale": "文本是地缘事件传闻与油价供给冲击背景，没有说明经济衰退、流动性、估值或叙事资金流机制。提到“chatter”不等于 A601。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849159+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-005",
+      "quota_category": "A501",
+      "claim_text": "\"US recession by end of 2026?\" — Yes 7% ($1.74M volume), +0.5pp w/w.",
+      "ticker": "QQQ",
+      "development_exposure_status": "PARTIALLY_EXPOSED -- this exact claim_id already appears in docs/audit_artifacts/v0_2_qqq_postfix_evidence_trigger_matrix.json, a formal-acceptance trigger-matrix artifact (not a labeled Gold/dev set, not a diagnostic-error-analysis sample). It has never been used as a human-labeled training/diagnostic example before this sample.",
+      "your_judgment": "A501",
+      "your_rationale": "明确给出年底前衰退概率及其变化，实质涉及 A501 的衰退风险。7% 的低概率偏向反对高衰退风险，不能把方向与类别混为一谈。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849163+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-006",
+      "quota_category": "A501",
+      "claim_text": "Recession Risk is Low.",
+      "ticker": "TSM",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "A501",
+      "your_rationale": "明确判断当前衰退风险低，属于对 A501 风险命题的反向证据。文字缺少论据影响可信度核验，不改变其机制分类。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849167+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-007",
+      "quota_category": "A501",
+      "claim_text": "Theme: Recession risk; Key Evidence: Only 8% probability of US recession by end-2026; Directional Implication for AMD: Positive (no demand collapse)",
+      "ticker": "AMD",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "A501",
+      "your_rationale": "低衰退概率被明确连接到不会发生需求崩塌，直接对应衰退影响需求的机制，是 A501 的反向证据。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849319+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-008",
+      "quota_category": "A001",
+      "claim_text": "Macro tailwind: Fed Governor Christopher Waller advocated leaving rates unchanged if inflation cools, and the S&P 500/Dow logged their best day in a month on \"calmer yields as rate hike bets wane.\" This is a supportive macro backdrop for high-multiple growth names.",
+      "ticker": "NVDA",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "A001",
+      "your_rationale": "收益率平稳和加息预期减弱被明确连接到高估值成长股的有利环境，涉及利率定价渠道。它不等于已确认降息周期，但机制分类仍为 A001。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849326+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-009",
+      "quota_category": "A001",
+      "claim_text": "Category: Rate Cuts 2026; Signal: 🔴 Dead; Evidence: \"No cuts in 2026\" at 93% ($8.25M vol); all cut-count contracts at 0%; QQQ Implication: Removes the 2024–25 duration tailwind",
+      "ticker": "QQQ",
+      "development_exposure_status": "PARTIALLY_EXPOSED -- this exact claim_id already appears in docs/audit_artifacts/v0_2_qqq_postfix_evidence_trigger_matrix.json, a formal-acceptance trigger-matrix artifact (not a labeled Gold/dev set, not a diagnostic-error-analysis sample). It has never been used as a human-labeled training/diagnostic example before this sample.",
+      "your_judgment": "A001",
+      "your_rationale": "不降息预期被明确解释为移除久期资产的利率顺风，直接反对 A001 的利率宽松机制。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849331+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-010",
+      "quota_category": "A001",
+      "claim_text": "Prediction markets price a 93% probability of NO Fed rate cuts in 2026 (up +4.8pp on the week).",
+      "ticker": "TSM",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "A001",
+      "your_rationale": "明确描述不降息概率高且上升，直接涉及 A001 的利率周期，是反向证据。分类不套用产品端仅接受正向宽松证据的资格门。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849335+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-011",
+      "quota_category": "A001",
+      "claim_text": "Rising rate-hike odds (September odds past 60% after a blowout jobs report) are being shrugged off by chip stocks, with retail commentary tying chip momentum to a potential 10-year yield pullback.",
+      "ticker": "AMD",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "A001",
+      "your_rationale": "加息概率上升和潜在长债收益率回落共同构成文本的利率机制。方向混合，不能凭芯片股或零售评论转选 AI 或叙事 Alpha。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849339+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-012",
+      "quota_category": "A003",
+      "claim_text": "Systemic index weight (8% of S&P 500) means NVDA benefits from any broad risk-on rally.",
+      "ticker": "NVDA",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "NONE",
+      "your_rationale": "指数权重与受益于风险偏好行情的笼统关系，没有明确说明流动性改善、叙事拥挤或注意力如何驱动资金流，不能选 A003 或 A601。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849344+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-013",
+      "quota_category": "A003",
+      "claim_text": "Long live endless liquidity\" (@walkingonair, sarcastic).",
+      "ticker": "MSFT",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "NONE",
+      "your_rationale": "这是带讽刺标注的流动性口号，没有明确断言流动性正在改善，也没有说明其如何推动风险偏好和资金流。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849348+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    },
+    {
+      "sample_id": "prod-run-014",
+      "quota_category": "A003",
+      "claim_text": "This is a major index-inclusion catalyst that typically drives passive inflows.",
+      "ticker": "SNDK",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "NONE",
+      "your_rationale": "指数纳入导致被动资金机械买入，不等于 A003 的宏观流动性改善驱动风险偏好。文本也没有叙事拥挤或注意力机制，不能改归 A601。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849352+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE_WITH_CAVEAT -- opens with an unresolved demonstrative pronoun whose antecedent is outside this extracted claim text; the sentence's own stated mechanism is still independently classifiable, but a reviewer may want the surrounding report context."
+    },
+    {
+      "sample_id": "prod-run-015",
+      "quota_category": "A003",
+      "claim_text": "The forced bid from passive funds is happening now, into the current price.",
+      "ticker": "SNDK",
+      "development_exposure_status": "NOT_PREVIOUSLY_USED -- verified via exact claim_id search across every file under docs/audit_artifacts/ (2026-09-30, this round); first appearance anywhere in this repository's audit material.",
+      "your_judgment": "NONE",
+      "your_rationale": "被动基金强制买盘是指数规则驱动的机械资金流，不构成宏观流动性扩张或叙事反身性机制，当前 taxonomy 中没有直接对应类别。",
+      "reviewer_id": null,
+      "reviewed_at": "2026-10-05T17:49:25.849356+00:00",
+      "source_material_completeness_status": "RAW_AGENT_REPORT_TEXT_ONLY",
+      "alpha_judgment_feasibility": "JUDGABLE_FROM_TEXT_ALONE -- the claim's own stated mechanism is self-contained enough to classify without external context."
+    }
+  ],
+  "hidden_system_answers": {
+    "gold-final-001": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-008": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-019": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-030": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-041": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-048": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-051": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-052": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-057": {
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-061": {
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-072": {
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "NONE",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-079": {
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-083": {
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-085": {
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-097": {
+      "historical_gold_label": "A304",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-099": {
+      "historical_gold_label": "A301",
+      "historical_candidate3_predicted_label": "A304",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-059": {
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-074": {
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A101",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-077": {
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-084": {
+      "historical_gold_label": "A103",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-092": {
+      "historical_gold_label": "A103",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-100": {
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "A101",
+      "historical_candidate3_correct": true
+    },
+    "gold-final-127": {
+      "historical_gold_label": "A101",
+      "historical_candidate3_predicted_label": "NONE",
+      "historical_candidate3_correct": false
+    },
+    "gold-final-144": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A103",
+      "historical_candidate3_correct": false
+    },
+    "gold-dev-068": {
+      "historical_gold_label": "NONE",
+      "historical_candidate3_predicted_label": "A102",
+      "historical_candidate3_correct": false
+    },
+    "prod-run-001": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A102",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-002": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A102",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-003": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A102",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-004": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A501",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-005": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A501",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-006": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A501",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-007": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A501",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-008": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A001",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-009": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A001",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-010": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A001",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-011": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A001",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-012": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A003",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-013": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A003",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-014": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A003",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    },
+    "prod-run-015": {
+      "historical_gold_label": "NOT_APPLICABLE_NOT_A_GOLD_SET_SAMPLE",
+      "current_production_matched_alpha": "A003",
+      "historical_candidate3_predicted_label": "NOT_APPLICABLE_NOT_EVALUATED_BY_CANDIDATE3"
+    }
+  },
+  "review_status": "COMPLETE",
+  "human_review_performed": true,
+  "sample_pool_status": "COMPLETE -- 40 of 40 requested items; see t3_targeted_diagnostic_sample_2026-09-30.json for full per-sample provenance and the same-day follow-up note explaining the 15 newly-added real-production samples."
+}

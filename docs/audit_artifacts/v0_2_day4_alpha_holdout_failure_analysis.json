@@ -1,0 +1,3461 @@
+{
+  "schema_version": "v0.2.day4_alpha_holdout_failure_analysis.v1",
+  "source": "item2_blind_holdout4 (independent, non-H5 set)",
+  "denominator": 200,
+  "errors_analyzed": 52,
+  "category_counts": {
+    "SYSTEM_FALSE_NEGATIVE_LLM_NONE": 26,
+    "SYSTEM_FALSE_POSITIVE_OVERMATCH": 10,
+    "CROSS_FAMILY_GROWTH_VS_RISK_CONFUSION": 4,
+    "OTHER_WRONG_ALPHA_SUBSTITUTION": 10,
+    "A101_A102_A103_BOUNDARY_CONFUSION": 2
+  },
+  "rows": [
+    {
+      "sample_id": "holdout4-008",
+      "ticker": "AMD",
+      "agent": "market_agent",
+      "input_claim": "The 50 SMA is rising steadily \u2014 from $428 in late June to $508.48 today \u2014 confirming a robust medium-term uptrend.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "A rising 50-day SMA confirming a medium-term uptrend is a momentum/technical signal most consistent with Narrative Momentum (A601), which captures reflexive price-driven flows, though the evidence is purely technical with no narrative context.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-013",
+      "ticker": "AMD",
+      "agent": "aggressive_risk_analyst",
+      "input_claim": "The real question is the magnitude of the beat and the guidance.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The focus on 'magnitude of the beat and the guidance' is directly about revenue/earnings guidance revisions and EPS surprise potential, which maps to the Revenue Expansion alpha thesis. The claim centers on whether forward guidance will drive repricing.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-015",
+      "ticker": "AMD",
+      "agent": "bear_researcher",
+      "input_claim": "The bull case rests on three pillars: confirmed demand, improving fundamentals, and a reasonable forward valuation.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The bull case explicitly rests on 'confirmed demand, improving fundamentals, and a reasonable forward valuation,' which aligns most closely with Revenue Expansion \u2014 strong demand raising fundamentals and supporting repricing potential.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.2162
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-021",
+      "ticker": "AMD",
+      "agent": "fundamental_agent",
+      "input_claim": "Year: 2021; Revenue: $23.60B; Gross Profit: $10.60B; Operating Income: $1.26B; Net Income: $1.32B; Diluted EPS: $0.84",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A301",
+      "reviewer_confidence": "high",
+      "reviewer_reason": "This is a raw historical financial data table for AMD with no causal thesis or forward-looking mechanism expressed. It does not map to any canonical Alpha.",
+      "system_score": 0.1873,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A301",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.1873
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-025",
+      "ticker": "AMD",
+      "agent": "sentiment_agent",
+      "input_claim": "Earnings miss / guidance disappointment risk given the lofty expectations.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "This is a generic risk warning about earnings miss relative to high expectations; it does not express a specific causal mechanism that maps cleanly to any canonical Alpha such as A304 (which requires rich valuation multiples as the driver, not expectation risk per se).",
+      "system_score": 0.08,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A501",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-030",
+      "ticker": "GOOGL",
+      "agent": "fundamental_agent",
+      "input_claim": "Investors should focus on normalized earnings ($32B/quarter) rather than headline figures.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "Focusing on normalized earnings of $32B/quarter suggests underlying earnings power is strong, which loosely aligns with the revenue/earnings expansion thesis, though the evidence is thin and could also be generic valuation commentary.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-033",
+      "ticker": "GOOGL",
+      "agent": "sentiment_agent",
+      "input_claim": "@ASM: \"GOOGL is the big story this week for sure...",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "The fragment indicates GOOGL is a focal point of investor attention this week, which loosely fits A601 (Narrative Momentum) around crowded attention, but the evidence is too truncated to classify with confidence.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-034",
+      "ticker": "GOOGL",
+      "agent": "bear_researcher",
+      "input_claim": "Strip that out, and the normalized EPS is closer to $14.74 (the forward EPS).",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "This is a mechanical EPS normalization calculation stripping out one-time items to arrive at a forward EPS figure; it is a valuation input but does not express a causal thesis matching any canonical Alpha well enough to justify a mapping.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-036",
+      "ticker": "GOOGL",
+      "agent": "bear_researcher",
+      "input_claim": "The long-term uptrend is intact.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "The statement that the long-term uptrend is intact is a momentum/technical observation most consistent with A601 (Narrative Momentum) and price momentum dynamics, though the evidence is too sparse for high confidence.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-037",
+      "ticker": "GOOGL",
+      "agent": "bull_researcher",
+      "input_claim": "A PEG ratio below 1.0",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "A PEG ratio below 1.0 signals that growth is underpriced relative to earnings, supporting the thesis that strong revenue/earnings growth justifies repricing upward, which aligns best with A301 (Revenue Expansion) and its EPS revision/repricing mechanism.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "CROSS_FAMILY_GROWTH_VS_RISK_CONFUSION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected an Alpha from the opposite growth/cycle-vs-risk family than the reviewer expected (e.g. a low-PEG/cheap-valuation observation read as A304 valuation-compression risk rather than A301 revenue-growth support). A genuine semantic judgment call by the LLM, not a deterministic taxonomy-keyword issue.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-040",
+      "ticker": "GOOGL",
+      "agent": "bull_researcher",
+      "input_claim": "That's the definition of scalable growth.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "The phrase 'scalable growth' references the ability to expand revenue without proportional cost increases, loosely fitting A301 (Revenue Expansion), but the evidence is too fragmentary to classify with confidence.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-041",
+      "ticker": "GOOGL",
+      "agent": "bull_researcher",
+      "input_claim": "Most companies can't generate $94B from a $900M investment.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A301",
+      "reviewer_confidence": "high",
+      "reviewer_reason": "The evidence is a generic statement about return on investment efficiency with no specific causal mechanism tied to any canonical alpha thesis; it is background color about capital allocation quality rather than a driver of any identifiable alpha.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A301",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-042",
+      "ticker": "GOOGL",
+      "agent": "fundamental_agent",
+      "input_claim": "The normalized earnings power ($14.74 forward EPS) is the more reliable valuation anchor.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence discusses a normalized EPS valuation anchor as a methodological preference, which is a generic valuation commentary rather than a thesis about multiple compression, revenue expansion, or any other canonical alpha mechanism.",
+      "system_score": 0.2162,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.2162
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-043",
+      "ticker": "GOOGL",
+      "agent": "fundamental_agent",
+      "input_claim": "Valuation Assessment: The PEG ratio of 0.93 suggests the stock is reasonably valued relative to its growth trajectory.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "A PEG ratio assessment suggesting reasonable valuation relative to growth is generic valuation commentary; it does not express a directional thesis about multiple compression or revenue expansion strongly enough to map cleanly to A304 or A301.",
+      "system_score": 0.2162,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.2162
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-050",
+      "ticker": "GOOGL",
+      "agent": "news_agent",
+      "input_claim": "Hidden asset value from equity stakes (SpaceX, Anthropic) providing a valuation cushion.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "Hidden asset value from equity stakes (SpaceX, Anthropic) providing a valuation cushion is a sum-of-the-parts valuation argument that does not map cleanly to any single canonical alpha's causal mechanism, though it touches on AI adjacency; it is too generic a valuation observation to force into A101 or A304.",
+      "system_score": 0.2162,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.2162
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-053",
+      "ticker": "MSFT",
+      "agent": "sentiment_agent",
+      "input_claim": "This is a clear institutional re-rating catalyst.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "An 'institutional re-rating catalyst' refers to a shift in investor perception and flows driving repricing, which aligns best with narrative momentum and reflexive institutional attention rather than a specific fundamental Alpha.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-054",
+      "ticker": "MSFT",
+      "agent": "aggressive_risk_analyst",
+      "input_claim": "Your \"risk-reward skewed to the downside\" thesis is based on a static snapshot of an overbought indicator, ignoring the dynamic reality of a fresh, powerful uptrend.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence explicitly references a 'fresh, powerful uptrend' and dismisses a static overbought reading, framing the thesis around momentum dynamics and narrative-driven price action rather than a fundamental causal mechanism.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A501",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-057",
+      "ticker": "MSFT",
+      "agent": "bear_researcher",
+      "input_claim": "The macro backdrop is hostile \u2014 89% probability of no rate cuts, surging 10-year yields, and rising oil prices.",
+      "input_evidence": null,
+      "expected_alpha": "A304",
+      "actual_alpha": "A001",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "Rising 10-year yields, no rate cuts, and rising oil prices constitute a hostile macro backdrop that increases discount rates and compresses multiples for long-duration assets like MSFT, fitting the multiple compression Alpha best.",
+      "system_score": 0.08,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "invalidation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-060",
+      "ticker": "MSFT",
+      "agent": "neutral_risk_analyst",
+      "input_claim": "The fundamentals justify full ownership, and the technical breakout is legitimate.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The reference to a 'technical breakout' being legitimate alongside fundamental justification frames the thesis around momentum confirmation and narrative-driven investor conviction, best fitting the narrative momentum Alpha.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-072",
+      "ticker": "MSFT",
+      "agent": "neutral_risk_analyst",
+      "input_claim": "Amazon went through exactly this dynamic from 2010 to 2014 with AWS, and the investors who cited FCF compression as a reason to avoid Amazon during that period were technically correct about the near-term number and catastrophically wrong about the investment.",
+      "input_evidence": null,
+      "expected_alpha": "A103",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "low",
+      "reviewer_reason": "The Amazon/AWS analogy is used to argue that near-term FCF compression from heavy infrastructure investment is justified by long-term returns, which maps most closely to the AI infrastructure buildout thesis for MSFT; however, the evidence is largely analogical and lacks a specific causal mechanism, keeping confidence low.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "CROSS_FAMILY_GROWTH_VS_RISK_CONFUSION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected an Alpha from the opposite growth/cycle-vs-risk family than the reviewer expected (e.g. a low-PEG/cheap-valuation observation read as A304 valuation-compression risk rather than A301 revenue-growth support). A genuine semantic judgment call by the LLM, not a deterministic taxonomy-keyword issue.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-077",
+      "ticker": "MU",
+      "agent": "bear_researcher",
+      "input_claim": "\"Buy a trillion-dollar AI company at 6x earnings!\" It sounds irresistible.",
+      "input_evidence": null,
+      "expected_alpha": "A304",
+      "actual_alpha": "A201",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The rhetorical framing of 'buy a trillion-dollar AI company at 6x earnings' as 'irresistible' suggests skepticism about valuation attractiveness, which aligns with the Multiple Compression alpha's concern that rich valuations or misleading valuation optics create downside risk.",
+      "system_score": 0.08,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.2673
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A201",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "CROSS_FAMILY_GROWTH_VS_RISK_CONFUSION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected an Alpha from the opposite growth/cycle-vs-risk family than the reviewer expected (e.g. a low-PEG/cheap-valuation observation read as A304 valuation-compression risk rather than A301 revenue-growth support). A genuine semantic judgment call by the LLM, not a deterministic taxonomy-keyword issue.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-082",
+      "ticker": "MU",
+      "agent": "fundamental_agent",
+      "input_claim": "Cash surged to $25.0B (from $9.6B at FY2025 end) \u2014 MU is generating and accumulating cash at an unprecedented rate.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": "A201",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence describes MU generating and accumulating cash at an unprecedented rate, which reflects strong revenue/earnings expansion driving exceptional cash flow \u2014 best mapped to Revenue Expansion (A301).",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A201",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-094",
+      "ticker": "MU",
+      "agent": "news_agent",
+      "input_claim": "Multiple outlets are now debating at what price MU becomes a \"buy\", suggesting the market is entering price-discovery mode.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence describes market-wide debate and price-discovery mode around MU, which reflects investor attention, narrative formation, and reflexive flows \u2014 the core mechanism of Narrative Momentum (A601). The 'multiple outlets debating' framing is about crowded attention driving price discovery rather than fundamentals.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-096",
+      "ticker": "MU",
+      "agent": "portfolio_manager",
+      "input_claim": "The conservative analyst's own acknowledgment that \"the fundamental case is genuinely compelling over a 12\u201324 month horizon\" concedes the thesis on the merits.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The acknowledgment of a 'genuinely compelling fundamental case over a 12\u201324 month horizon' speaks to strong demand, earnings, and revenue expansion potential, which best fits Revenue Expansion (A301) as the underlying thesis being conceded.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-098",
+      "ticker": "MU",
+      "agent": "research_manager",
+      "input_claim": "Intermediate: $1,150\u2013$1,250 on Big Tech capex confirmation + MACD crossover",
+      "input_evidence": null,
+      "expected_alpha": "A103",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "Big Tech capex confirmation as a price catalyst for MU points to AI infrastructure buildout driving demand, which maps to A103 (AI Infrastructure); however, the evidence is primarily a technical price target statement with limited substantive thesis, reducing confidence.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.2066
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-101",
+      "ticker": "NVDA",
+      "agent": "bear_researcher",
+      "input_claim": "Ticker: NVDA | Bear Triggers: Close below $189.47 lower Bollinger Band; earnings guidance below $280B FY2027 revenue trajectory; any acceleration in hyperscaler custom silicon commentary; 10-year yield spike above 5%; goodwill impairment disclosure Bear Analyst: # \ud83d\udd34 NVDA Bear Case \u2014 Final Closing Argument",
+      "input_evidence": null,
+      "expected_alpha": "A304",
+      "actual_alpha": "A101",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The bear triggers cited \u2014 Bollinger Band breach, revenue trajectory miss, yield spike, and custom silicon competition \u2014 collectively frame a downside risk thesis centered on rich valuation and multiple compression risk for NVDA. The combination of high-multiple vulnerability and macro rate sensitivity best fits A304 (Multiple Compression).",
+      "system_score": 0.0384,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A301",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0673
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0384
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "CROSS_FAMILY_GROWTH_VS_RISK_CONFUSION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected an Alpha from the opposite growth/cycle-vs-risk family than the reviewer expected (e.g. a low-PEG/cheap-valuation observation read as A304 valuation-compression risk rather than A301 revenue-growth support). A genuine semantic judgment call by the LLM, not a deterministic taxonomy-keyword issue.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-106",
+      "ticker": "NVDA",
+      "agent": "research_manager",
+      "input_claim": "Any acceleration in hyperscaler AI CapEx commentary",
+      "input_evidence": null,
+      "expected_alpha": "A103",
+      "actual_alpha": "A101",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "Hyperscaler AI CapEx acceleration directly reflects the AI infrastructure buildout thesis \u2014 increased datacenter and compute spending by large cloud providers \u2014 which is the core mechanism of A103 (AI Infrastructure).",
+      "system_score": 0.6346,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A301",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.225
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.6346
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.4315
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "A101_A102_A103_BOUNDARY_CONFUSION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected A101 (general AI expansion) where the reviewer expected A103 (AI infrastructure/capex) for hyperscaler-capex-commentary claims -- the same boundary family Day 3 found the alpha_classifier v3 prompt (commit c454245) explicitly targets with its own worked A101/A103 example. These specific H4 samples predate that prompt version (H4's own recorded HEAD still shows alpha_classifier v1).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-107",
+      "ticker": "NVDA",
+      "agent": "news_agent",
+      "input_claim": "Meta's AI spending metrics remain robust ahead of July 29 earnings (3 key metrics cited by analysts)",
+      "input_evidence": null,
+      "expected_alpha": "A103",
+      "actual_alpha": "A101",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "Meta's robust AI spending metrics ahead of earnings signal continued hyperscaler AI infrastructure investment, which is the demand-side driver of A103 (AI Infrastructure buildout driving datacenter and compute demand).",
+      "system_score": 0.1873,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.1873
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "A101_A102_A103_BOUNDARY_CONFUSION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected A101 (general AI expansion) where the reviewer expected A103 (AI infrastructure/capex) for hyperscaler-capex-commentary claims -- the same boundary family Day 3 found the alpha_classifier v3 prompt (commit c454245) explicitly targets with its own worked A101/A103 example. These specific H4 samples predate that prompt version (H4's own recorded HEAD still shows alpha_classifier v1).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-109",
+      "ticker": "NVDA",
+      "agent": "bear_researcher",
+      "input_claim": "The market has already priced in a strong quarter.",
+      "input_evidence": null,
+      "expected_alpha": "A304",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The assertion that the market has already priced in a strong quarter is a classic multiple compression setup \u2014 rich expectations embedded in the price create asymmetric downside risk, directly fitting A304.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-110",
+      "ticker": "NVDA",
+      "agent": "bull_researcher",
+      "input_claim": "This isn't a one-time spike; it's a sustained, compounding acceleration.",
+      "input_evidence": null,
+      "expected_alpha": "A101",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "Describing AI demand as a 'sustained, compounding acceleration' rather than a one-time spike aligns with the A101 thesis of ongoing AI training and adoption driving durable, expanding demand for AI-related equities and accelerators.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-112",
+      "ticker": "NVDA",
+      "agent": "bull_researcher",
+      "input_claim": "Aggressive Capital Returns: They bought back $19.31 billion of stock in Q1 FY27 alone.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A301",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence describes a capital return action (buyback) which is a corporate finance activity; none of the canonical Alphas address shareholder return programs or buybacks as a thesis mechanism.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A301",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-114",
+      "ticker": "NVDA",
+      "agent": "market_agent",
+      "input_claim": "Room for further upside before hitting overbought conditions",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The claim about room for upside before overbought conditions is a technical/momentum-based sentiment argument, most consistent with Narrative Momentum driving reflexive price flows rather than any fundamental Alpha thesis.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-116",
+      "ticker": "NVDA",
+      "agent": "bull_researcher",
+      "input_claim": "The bear's macro concerns (no rate cuts, \"Trumpflation,\" rising oil) are real headwinds \u2014 but they're market headwinds, not NVIDIA headwinds.",
+      "input_evidence": null,
+      "expected_alpha": "A001",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence explicitly discusses the absence of rate cuts and 'Trumpflation' as macro headwinds for high-multiple growth stocks, directly invoking the rate-cut cycle thesis (A001) as a market-level risk factor, even though it argues NVDA is insulated from it.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "invalidation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0384
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-119",
+      "ticker": "NVDA",
+      "agent": "market_agent",
+      "input_claim": "MACD is positive (3.66) and above its signal (1.64), with a positive histogram (2.02) \u2014 bullish momentum.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "MACD-based bullish momentum signals are technical indicators of price momentum and investor attention flows, most consistent with the Narrative Momentum Alpha's thesis of reflexive momentum-driven price action.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A601",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.2865
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-122",
+      "ticker": "NVDA",
+      "agent": "aggressive_risk_analyst",
+      "input_claim": "That is not \"priced for perfection\"; that is priced for a recession that the prediction markets say has only a 12% chance of happening.",
+      "input_evidence": null,
+      "expected_alpha": "A501",
+      "actual_alpha": "A304",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence explicitly references recession probability (12% per prediction markets) as the key pricing driver, directly invoking recession risk as the central economic thesis being debated.",
+      "system_score": 0.4923,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.4923
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A501",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0961
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-125",
+      "ticker": "NVDA",
+      "agent": "portfolio_manager",
+      "input_claim": "This is not a balanced \"Hold\"\u2014the core secular thesis is intact and the forward valuation is reasonable for the growth on offer.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence argues that the secular growth thesis is intact and forward valuation is reasonable for the growth on offer, which aligns with Revenue Expansion's thesis that strong demand supports EPS revisions and repricing potential.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0961
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-126",
+      "ticker": "QQQ",
+      "agent": "aggressive_risk_analyst",
+      "input_claim": "Let me address the cautious stances directly, because the data is telling us something far more compelling than \"wait and see.\" The conservative and neutral positions are anchored to lagging technical indicators and a fear of volatility that the market is actively rewarding right now.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence argues that cautious positions are anchored to lagging indicators while the market is actively rewarding momentum, invoking the idea that investor attention and narrative-driven flows are the dominant force \u2014 consistent with Narrative Momentum.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.028
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-131",
+      "ticker": "QQQ",
+      "agent": "conservative_risk_analyst",
+      "input_claim": "The risk/reward is not as skewed to the upside as the Aggressive Analyst claims.",
+      "input_evidence": null,
+      "expected_alpha": "A304",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "The claim challenges upside skew in risk/reward for QQQ, which aligns most closely with multiple compression or valuation-driven downside risk thesis. However, the evidence is tautological and lacks specific causal mechanism, making any mapping weak.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "candidate is only mentioned or appears in an unmapped context",
+          "relation": "mention",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-134",
+      "ticker": "QQQ",
+      "agent": "market_agent",
+      "input_claim": "Momentum indicators remain bearish but are showing early signs of stabilization.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A601",
+      "reviewer_confidence": "high",
+      "reviewer_reason": "This is a technical indicator observation about momentum stabilization with no underlying economic or fundamental thesis that maps to any canonical Alpha.",
+      "system_score": 0.2066,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A601",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.2066
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A501",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-142",
+      "ticker": "QQQ",
+      "agent": "news_agent",
+      "input_claim": "Amazon surged 12\u201315% after reporting AWS growth of 37% \u2014 the fastest growth in 18 quarters.",
+      "input_evidence": null,
+      "expected_alpha": "A102",
+      "actual_alpha": "A301",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "AWS growth of 37% (fastest in 18 quarters) reflects surging enterprise cloud/inference compute demand, which is the core thesis of the Inference Explosion Alpha \u2014 enterprises consuming AI-driven cloud services at accelerating rates.",
+      "system_score": 0.08,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A301",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-143",
+      "ticker": "QQQ",
+      "agent": "news_agent",
+      "input_claim": "Analysts rushed to raise price targets (as high as $400).",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": "A601",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "Analysts rushing to raise price targets reflects upward EPS/revenue revisions and repricing potential driven by strong demand, which is the Revenue Expansion Alpha thesis.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A601",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-147",
+      "ticker": "QQQ",
+      "agent": "sentiment_agent",
+      "input_claim": "Geopolitical escalation / war risk (bearish, fresh): The US/Israel/Iran energy-infrastructure campaign is the dominant new risk, driving oil up 5% and injecting weekend-war uncertainty into Monday's open.",
+      "input_evidence": null,
+      "expected_alpha": "A501",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "Geopolitical escalation driving oil prices up and injecting macro uncertainty into markets is most consistent with the Recession Risk Alpha, which covers macro shocks pressuring earnings and risk appetite, though it is an imperfect fit since the driver is geopolitical rather than credit/economic slowdown.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A501",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-148",
+      "ticker": "QQQ",
+      "agent": "sentiment_agent",
+      "input_claim": "Concentration risk inside diversified funds (neutral-to-cautionary): Multiple Trefis pieces (CRWD, RTX, IEFA) highlight hidden single-stock bets inside funds \u2014 a structural caution for QQQ holders given its heavy tech weighting.",
+      "input_evidence": null,
+      "expected_alpha": "A304",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "Concentration risk and structural caution about heavy tech weighting in QQQ is closest to Multiple Compression / valuation downside risk, though it is a loose fit; the evidence warns of hidden single-stock risk creating downside exposure rather than a pure valuation argument.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A501",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-155",
+      "ticker": "SNDK",
+      "agent": "news_agent",
+      "input_claim": "CXMT surged 466% on its debut, achieving a valuation north of $500 billion \u2014 briefly surpassing ICBC to become the most valuable company on mainland Chinese markets.",
+      "input_evidence": null,
+      "expected_alpha": "A201",
+      "actual_alpha": "A601",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "CXMT's massive IPO debut and valuation surge reflects a chip-cycle event involving a major new entrant in semiconductor markets, most closely fitting the Semiconductor Supercycle Alpha around competitive dynamics and market repricing in the chip sector.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A304",
+          "eligible": true,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.2162
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A601",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-168",
+      "ticker": "SNDK",
+      "agent": "conservative_risk_analyst",
+      "input_claim": "The forward P/E of 6.6 times is only compelling if the forward EPS of $212.60 is defensible.",
+      "input_evidence": null,
+      "expected_alpha": "A304",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence questions whether the forward EPS underpinning a low forward P/E is defensible, implying valuation risk if earnings estimates are not met \u2014 this aligns with the Multiple Compression Alpha's concern about valuation and downside risk from rich or questionable multiples.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "conditional",
+          "score": 0.052
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "conditional",
+          "score": 0.052
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "conditional",
+          "score": 0.052
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "conditional",
+          "score": 0.052
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "conditional",
+          "score": 0.052
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-170",
+      "ticker": "SNDK",
+      "agent": "fundamental_agent",
+      "input_claim": "Key Insight: The disparity between TTM P/E (48.3x) and Forward P/E (6.6x) is extraordinary and signals an analyst consensus that earnings are expected to surge dramatically in the next 12 months.",
+      "input_evidence": null,
+      "expected_alpha": "A201",
+      "actual_alpha": "A301",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The dramatic expected surge in earnings implied by the TTM vs. forward P/E disparity signals an anticipated cyclical earnings recovery, which aligns with the Semiconductor Supercycle Alpha's thesis of a chip-cycle upturn improving earnings and repricing potential for semiconductor companies.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A301",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-175",
+      "ticker": "SNDK",
+      "agent": "sentiment_agent",
+      "input_claim": "@FibonacciTrader identifies $1,290 as a technical support level and calls it a buying opportunity alongside other AI names.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence describes a social media influencer (@FibonacciTrader) calling a buying opportunity 'alongside other AI names,' which reflects narrative momentum and investor attention driving reflexive flows rather than a fundamental economic thesis. The framing around AI names and social media signals fits A601 best.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.2673
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": "technical market state is outside the MVP-10 taxonomy",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.08
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-177",
+      "ticker": "TSM",
+      "agent": "aggressive_risk_analyst",
+      "input_claim": "TSM\u2019s capacity is sold out through 2026, with NVIDIA, AMD, and Broadcom aggressively securing 3nm and 2nm wafers.",
+      "input_evidence": null,
+      "expected_alpha": "A101",
+      "actual_alpha": "A201",
+      "reviewer_confidence": "high",
+      "reviewer_reason": "TSM's capacity being sold out through 2026 with NVIDIA, AMD, and Broadcom securing advanced nodes directly reflects AI training and adoption driving accelerator demand, which is the core thesis of A101 (AI Expansion). The demand is explicitly tied to AI chip customers securing leading-edge wafer capacity.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.1584
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A201",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-184",
+      "ticker": "TSM",
+      "agent": "bull_researcher",
+      "input_claim": "You are paying a fair price for an exceptional asset.",
+      "input_evidence": null,
+      "expected_alpha": "A301",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "Paying a 'fair price for an exceptional asset' suggests valuation is reasonable relative to fundamentals, loosely fitting revenue expansion / repricing potential, but the evidence is too generic for a strong mapping.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-195",
+      "ticker": "TSM",
+      "agent": "neutral_risk_analyst",
+      "input_claim": "The Conservative Analyst is right that the technicals are unresolved and the macro backdrop is hawkish.",
+      "input_evidence": null,
+      "expected_alpha": "NONE",
+      "actual_alpha": "A001",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence is a meta-commentary on analyst positions referencing unresolved technicals and a hawkish macro backdrop, but does not express a specific causal thesis matching any single canonical Alpha well enough.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "SYSTEM_FALSE_POSITIVE_OVERMATCH",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM attributed a canonical Alpha to content the reviewer judged generic/background/non-substantive (e.g. a bare balance-sheet figure, a restated EPS number, a PEG-ratio observation) -- an LLM materiality-threshold miss, not a deterministic keyword overlap (deterministic scoring played no role in the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-199",
+      "ticker": "TSM",
+      "agent": "sentiment_agent",
+      "input_claim": "Of 30 most-recent messages, 10 are labeled Bullish (33%) and 0 are labeled Bearish (0%), with 20 unlabeled.",
+      "input_evidence": null,
+      "expected_alpha": "A601",
+      "actual_alpha": null,
+      "reviewer_confidence": "low",
+      "reviewer_reason": "The evidence describes sentiment distribution among analyst messages (bullish vs. bearish labeling), which loosely relates to Narrative Momentum's thesis about investor attention and crowded narratives, though the evidence is thin and generic.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.028
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.028
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier determined no canonical Alpha materially fits",
+      "error_category": "SYSTEM_FALSE_NEGATIVE_LLM_NONE",
+      "current_code_reproduces_deterministically": true,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM Alpha classifier judged the claim not to substantively/materially engage any canonical Alpha's thesis (decision=none), while the independent reviewer judged it as engaging a specific Alpha's mechanism. A calibration/threshold difference in the LLM's own judgment of materiality, not a deterministic code path (deterministic scoring is diagnostic-only in this pure-LLM-authority architecture and never supplies the final answer).",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    },
+    {
+      "sample_id": "holdout4-200",
+      "ticker": "TSM",
+      "agent": "sentiment_agent",
+      "input_claim": "Intel: TSM's advanced packaging development and Arizona investment are framed as reinforcing its dominance, though one headline argues Intel is a better 24-month bet.",
+      "input_evidence": null,
+      "expected_alpha": "A103",
+      "actual_alpha": "A601",
+      "reviewer_confidence": "medium",
+      "reviewer_reason": "The evidence frames TSM's advanced packaging and Arizona investment as reinforcing its dominance in AI infrastructure buildout, aligning with the AI Infrastructure Alpha's thesis about datacenter and semiconductor infrastructure demand.",
+      "system_score": 0.0,
+      "system_candidate_scores": [
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A001",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A003",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A101",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A102",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": false,
+          "alpha_id": "A103",
+          "eligible": false,
+          "rejection_reason": "AI alpha hard gate not satisfied: missing an alpha-specific anchor phrase with a locally co-occurring change predicate",
+          "relation": "activation",
+          "score": 0.0
+        },
+        {
+          "ai_gate_passed": null,
+          "alpha_id": "A601",
+          "eligible": false,
+          "rejection_reason": null,
+          "relation": "activation",
+          "score": 0.0
+        }
+      ],
+      "alpha_match_method": "llm",
+      "deterministic_top_alpha": null,
+      "deterministic_match_status": "no_match",
+      "system_reason": "llm semantic classifier selected from full canonical taxonomy",
+      "error_category": "OTHER_WRONG_ALPHA_SUBSTITUTION",
+      "current_code_reproduces_deterministically": false,
+      "addressable_by_deterministic_local_code": false,
+      "provider_llm_behavior_involved": true,
+      "root_cause": "The LLM selected a different, non-family-crossing canonical Alpha than the reviewer expected for the same claim -- a specific semantic disagreement not falling into the growth/risk or A101/102/103 boundary patterns above.",
+      "first_incorrect_stage": "LLM Alpha semantic classification (Provider-backed alpha_classifier task)"
+    }
+  ],
+  "conclusion": {
+    "all_52_errors_are_llm_method_driven": true,
+    "deterministic_addressable_count": 0,
+    "production_fix_applicable": false,
+    "reasoning": "100% of the 52 errors were produced via alpha_match_method='llm' (Provider-backed). This corpus's production architecture is explicitly Pure-LLM Alpha semantic authority: deterministic keyword/factor scoring is retained only as a diagnostic/counterfactual signal and is NEVER used as a semantic fallback or to override/supply the final answer (confirmed directly from item2_blind_holdout4_report.md's own architecture disclosure and from deterministic_top_alpha never differing usefully from the LLM decision in a way that would have produced the correct answer -- 0 of 52 cases show deterministic_top_alpha matching the reviewer's expected Alpha where the LLM did not). There is therefore no local/deterministic code path responsible for any of these 52 errors, and consequently no deterministic/local code change can address them, per this task's own permitted-change scope (ticker-specific hacks, sample-ID special cases, and Gold-rule changes are separately and independently forbidden regardless)."
+  }
+}

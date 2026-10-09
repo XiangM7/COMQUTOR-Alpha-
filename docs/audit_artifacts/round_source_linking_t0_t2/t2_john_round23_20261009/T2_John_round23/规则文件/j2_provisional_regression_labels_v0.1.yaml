@@ -1,0 +1,130 @@
+# J2 six-ticker provisional regression labels (task A4_REGRESSION_RUNNER
+# + J2_PROVISIONAL_LABELS). Authored/authorized by the user as a
+# provisional product judgment for the current development stage --
+# never John-approved, never formal gold, never final semantic accuracy.
+#
+# Read only by comqutor_alpha/regression/labels.py. Never referenced by
+# the Alpha Mapper, Activation, Exposure, Conflict Detector, or any
+# production API/UI response -- these labels exist solely for the A4
+# regression comparison, which is display/report-only.
+#
+# formal_product_owner_approval flips to "approved" (and evaluation_mode
+# to "authoritative") only once John or the user explicitly approves a
+# specific version of this file -- never automatically, never via an
+# environment variable.
+schema_version: regression_labels.v1
+label_version: j2.provisional.v0.1
+taxonomy_version: alpha_taxonomy_v1
+label_scope: ticker_general
+status: provisional_ai_predicted
+evaluation_mode: shadow
+evaluation_authority: provisional
+prepared_for: COMQUTOR Alpha A4
+approved_by: null
+approved_at: null
+formal_product_owner_approval: pending
+
+tickers:
+  NVDA:
+    expected_positive_alphas: [A101, A103, A201, A301]
+    expected_negative_alphas: [A304]
+    conditional_alphas: [A102, A601]
+    allowed_main_conflicts:
+      - A101__A304
+      - A301__A304
+    should_not_be_dominant_without_strong_evidence:
+      A102: inference-specific demand or revenue evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - COMQUTOR Alpha Development Plan v1.0
+      - John entity exposure seed v0.1
+      - provisional product inference
+
+  QQQ:
+    expected_positive_alphas: [A001, A003]
+    expected_negative_alphas: [A304, A501]
+    conditional_alphas: [A101, A601]
+    allowed_main_conflicts:
+      - A001__A501
+    should_not_be_dominant_without_strong_evidence:
+      A102: broad ETF-level inference demand evidence
+      A103: broad constituent infrastructure evidence
+      A201: broad semiconductor-cycle transmission evidence
+      A301: broad constituent revenue-expansion evidence
+    source_basis:
+      - COMQUTOR Alpha Development Plan v1.0
+      - John entity exposure seed v0.1
+      - provisional product inference
+
+  MSFT:
+    expected_positive_alphas: [A101, A102, A301]
+    expected_negative_alphas: [A304]
+    conditional_alphas: [A103, A601]
+    allowed_main_conflicts:
+      - A102__A304
+    should_not_be_dominant_without_strong_evidence:
+      A201: direct semiconductor-cycle evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - COMQUTOR Alpha Development Plan v1.0
+      - John entity exposure seed v0.1
+      - provisional product inference
+
+  SNDK:
+    expected_positive_alphas: [A201, A301]
+    expected_negative_alphas: [A304]
+    conditional_alphas: [A103, A601]
+    allowed_main_conflicts:
+      - A201__A304
+      - A301__A304
+    should_not_be_dominant_without_strong_evidence:
+      A101: company-specific AI demand transmission evidence
+      A102: company-specific inference demand evidence
+      A103: company-specific infrastructure demand evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - John entity exposure seed v0.1
+      - Alpha Taxonomy v1
+      - provisional product inference
+
+  TSM:
+    expected_positive_alphas: [A103, A201, A301]
+    expected_negative_alphas: [A304]
+    conditional_alphas: [A101, A601]
+    allowed_main_conflicts:
+      - A201__A304
+      - A301__A304
+    should_not_be_dominant_without_strong_evidence:
+      A102: inference-specific orders or revenue evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+      A601: strong multi-source narrative or flow evidence
+    source_basis:
+      - John entity exposure seed v0.1
+      - Alpha Taxonomy v1
+      - provisional product inference
+
+  AMD:
+    expected_positive_alphas: [A101, A201, A301]
+    expected_negative_alphas: [A304]
+    conditional_alphas: [A102, A103, A601]
+    allowed_main_conflicts:
+      - A101__A304
+      - A201__A304
+    should_not_be_dominant_without_strong_evidence:
+      A102: inference-specific product or revenue evidence
+      A103: direct infrastructure deployment evidence
+      A001: ticker-relevant rate-cycle evidence
+      A003: ticker-relevant liquidity evidence
+      A501: ticker-relevant recession or earnings-downturn evidence
+    source_basis:
+      - John entity exposure seed v0.1
+      - Alpha Taxonomy v1
+      - provisional product inference

@@ -1,4 +1,9 @@
 schema_version: alpha_taxonomy_v1
+# content_version: the version of this file's CONTENT (alphas, conflict_alphas, weights). It moves with every entry of content_change_log (bottom of
+# this file). It is NOT the structural/replay identity -- that stays `schema_version` above, on purpose (see the note above content_change_log).
+# The formal acceptance entry (comqutor_alpha/regression/acceptance_engine.py) refuses to run unless the label file's taxonomy_content_version
+# equals this value.
+content_version: "1.1.0"
 alphas:
   - alpha_id: A001
     name_en: Rate Cut Cycle
@@ -89,7 +94,9 @@ alphas:
     confirmation_signals: [cloud inference capacity expands, deployment activity rises]
     beneficiary_assets: [AI chips, cloud platforms, datacenter infrastructure]
     risk_assets: [CPU-only workloads]
-    conflict_alphas: []
+    conflict_alphas:
+      - alpha_id: A304
+        contradiction_weight: 0.75
     invalidation_conditions: [enterprise AI adoption slows, inference costs block deployment]
     agent_sources: [news_agent, fundamental_agent]
     relations:
@@ -130,7 +137,9 @@ alphas:
     confirmation_signals: [ASP stabilizes, capex recovers, backlog improves]
     beneficiary_assets: [semiconductor equities, equipment makers, NVDA]
     risk_assets: [semiconductor shorts]
-    conflict_alphas: []
+    conflict_alphas:
+      - alpha_id: A304
+        contradiction_weight: 0.75
     invalidation_conditions: [inventory glut returns, order cuts resume]
     agent_sources: [fundamental_agent, news_agent, technical_agent]
     relations:
@@ -174,6 +183,10 @@ alphas:
         contradiction_weight: 0.85
       - alpha_id: A601
         contradiction_weight: 0.80
+      - alpha_id: A102
+        contradiction_weight: 0.75
+      - alpha_id: A201
+        contradiction_weight: 0.75
     invalidation_conditions: [earnings growth exceeds valuation, rates fall sharply]
     agent_sources: [fundamental_agent, technical_agent, risk_agent]
     relations: []
@@ -219,3 +232,32 @@ alphas:
     invalidation_conditions: [narrative fatigue, flow reversal, positioning unwind]
     agent_sources: [sentiment_agent, news_agent, technical_agent]
     relations: []
+
+# content_change_log: append-only, human-readable record of taxonomy CONTENT
+# changes (which alphas/conflict_alphas/weights changed, when, why). This is
+# deliberately separate from `schema_version` above -- schema_version is a
+# structural/replay-binding identity string hardcoded by several consumers
+# (comqutor_alpha/exposure/rubric_contract.py EXPECTED_TAXONOMY_VERSION,
+# structure_engine/week2_llm.py, replay/semantic_binding.py,
+# replay/source_bundle.py) as "which taxonomy identity was this computed
+# against" -- bumping it for a two-line data change would require touching
+# all of those for a purely cosmetic rename with no functional effect (none
+# of them re-derive the tag from this file's own schema_version field). This
+# log is the authoritative, inspectable content-revision record instead;
+# `content_version` (top of file) is the version label of its latest entry.
+content_change_log:
+  - date: "2026-09-26"
+    version: "1.1.0"
+    previous_version: "1.0.0"
+    change: "Added RECIPROCAL conflict_alphas declarations (matching every other declared pair's own convention -- conflict_detector._enumerate_canonical_pairs requires both sides to declare the same weight or the pair is flagged MISSING_RECIPROCAL_DECLARATION/gets no usable weight): A102 -> A304 and A304 -> A102 (contradiction_weight 0.75 both sides), A201 -> A304 and A304 -> A201 (contradiction_weight 0.75 both sides). A102/A201 were previously empty ([]), meaning A102__A304 and A201__A304 were not evaluable as candidate conflict pairs at all."
+    reason: "已确认关系：接入为有条件可评估的冲突组合，解决 docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml 的 implementation_alignment_required 中记录的、MSFT(A102__A304)/SNDK/TSM/AMD(均含 A201__A304) 的 allowed_main_conflicts 与 taxonomy 实现不对齐的已知差距。"
+    governed_by_rule_family: conditional_only
+    effect: "Declaring these makes the pairs mechanically ELIGIBLE for the existing, unchanged, evidence-driven admissibility gate (comqutor_alpha/conflict_engine/conflict_admissibility.py: ALPHA_SCORE_THRESHOLD=50.0, MIN_SUPPORTING_EVIDENCE_PER_SIDE=2, MIN_TICKER_SPECIFIC_SUPPORT_PER_SIDE=1) -- it does NOT make either pair automatically admitted, dominant, or a main conflict. Being evaluable and being admitted remain two separate things, exactly as for every other declared pair."
+    weight_rationale: "0.75, below the three previously-established pairs on A304 (A101=0.90, A301=0.85, A601=0.80) -- A102/A201 relate to the same valuation-compression tension one causal layer removed from A101/A301's own direct demand thesis (per their own `relations` entries: A102 -> A103/A301 supportive; A201 -> A301 supportive), so a conservative, non-overstated weight was chosen rather than matching the primary pairs."
+    no_code_changes_required: "conflict_detector.py/conflict_admissibility.py/alpha_mapper.py/evidence_stance.py already read conflict_alphas generically per-alpha and canonicalize pairs from either declaring side -- this is a pure taxonomy data change, verified by re-running the existing conflict-engine test suite unchanged."
+  - date: "2026-10-07"
+    version: "1.1.0"
+    previous_version: "1.1.0"
+    change: "Introduced the content_version field itself (metadata only: no alpha, conflict_alphas or weight changed). The 1.0.0 -> 1.1.0 attribution of the 2026-09-26 entry above is retroactive, because that entry shipped before this field existed."
+    reason: "COMQUTOR Alpha next-round task sheet, T2 first item: \"更新版本、变更记录及测试\". schema_version is deliberately unchanged (see the note above content_change_log), so content_version is the version that moves."
+    governed_by_rule_family: none

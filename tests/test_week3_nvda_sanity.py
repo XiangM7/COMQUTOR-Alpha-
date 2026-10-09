@@ -57,26 +57,40 @@ def test_nvda_produces_a_valid_structure_graph_json(tmp_path):
 
 
 def test_relevant_nvda_alpha_ids_are_represented_when_evidence_exists(tmp_path):
+    # T1 gate-bypass fix (2026-09-29): require_verified_evidence_gate=True
+    # now makes the OFFICIAL activation pool (graph["activation"]) the
+    # VERIFIED-ONLY view unconditionally -- this fixture's claims are never
+    # source-linked/human-reviewed, so the official pool honestly shows
+    # zero evidence everywhere (see test_new_research_evidence_gate_
+    # production_wiring.py for that behavior's own dedicated coverage).
+    # This test is a Scorer coherence/differentiation sanity check, not an
+    # evidence-verification claim -- it reads the RAW v2 diagnostic view
+    # (activation_versions["v2"]), which the SAME unmodified scorer still
+    # computes and which is unaffected by the gate.
     _, graph, _ = _run_nvda_fixture(tmp_path)
+    raw_v2_alphas = graph["activation_versions"]["v2"]["alphas"]
 
-    alphas_by_id = {a["alpha_id"] for a in graph["activation"]["alphas"]}
+    alphas_by_id = {a["alpha_id"] for a in raw_v2_alphas}
     assert alphas_by_id == {
         "A001", "A003", "A101", "A102", "A103", "A201", "A301", "A304", "A501", "A601",
     }  # exactly the MVP-10, always emitted regardless of evidence
 
     evidenced_relevant = {
         a["alpha_id"]
-        for a in graph["activation"]["alphas"]
+        for a in raw_v2_alphas
         if a["alpha_id"] in RELEVANT_NVDA_ALPHA_IDS and a["evidence_count"] > 0
     }
     assert evidenced_relevant == RELEVANT_NVDA_ALPHA_IDS
 
 
 def test_relevant_nvda_alpha_scores_are_differentiated_not_uniform(tmp_path):
+    # See the comment in test_relevant_nvda_alpha_ids_are_represented_when_
+    # evidence_exists above -- same reason for reading the raw v2 view.
     _, graph, _ = _run_nvda_fixture(tmp_path)
+    raw_v2_alphas = graph["activation_versions"]["v2"]["alphas"]
 
     relevant_scores = [
-        a["activation_score"] for a in graph["activation"]["alphas"] if a["alpha_id"] in RELEVANT_NVDA_ALPHA_IDS
+        a["activation_score"] for a in raw_v2_alphas if a["alpha_id"] in RELEVANT_NVDA_ALPHA_IDS
     ]
     distinct_scores = set(relevant_scores)
 
@@ -117,9 +131,15 @@ def test_dominant_alphas_are_well_formed_when_present(tmp_path):
 
 
 def test_evidence_and_claim_provenance_are_preserved(tmp_path):
+    # See the comment in test_relevant_nvda_alpha_ids_are_represented_when_
+    # evidence_exists above -- claim/evidence provenance on the OFFICIAL
+    # (verified-only) pool is legitimately empty for this unreviewed
+    # fixture; the raw v2 view is where this scorer's own provenance
+    # threading is actually exercised.
     run_id, graph, repo = _run_nvda_fixture(tmp_path)
+    raw_v2_alphas = graph["activation_versions"]["v2"]["alphas"]
 
-    a101 = next(a for a in graph["activation"]["alphas"] if a["alpha_id"] == "A101")
+    a101 = next(a for a in raw_v2_alphas if a["alpha_id"] == "A101")
     assert a101["claim_ids"]
     assert a101["evidence"]
 
@@ -132,10 +152,13 @@ def test_evidence_and_claim_provenance_are_preserved(tmp_path):
 
 
 def test_a304_negative_evidence_is_not_discarded_despite_coexisting_positive_ai_evidence(tmp_path):
+    # See the comment in test_relevant_nvda_alpha_ids_are_represented_when_
+    # evidence_exists above -- same reason for reading the raw v2 view.
     _, graph, _ = _run_nvda_fixture(tmp_path)
+    raw_v2_alphas = graph["activation_versions"]["v2"]["alphas"]
 
-    a304 = next(a for a in graph["activation"]["alphas"] if a["alpha_id"] == "A304")
-    a101 = next(a for a in graph["activation"]["alphas"] if a["alpha_id"] == "A101")
+    a304 = next(a for a in raw_v2_alphas if a["alpha_id"] == "A304")
+    a101 = next(a for a in raw_v2_alphas if a["alpha_id"] == "A101")
 
     assert a101["evidence_count"] > 0  # positive AI evidence exists in this fixture
     assert a304["evidence_count"] > 0  # A304's own risk evidence still got through

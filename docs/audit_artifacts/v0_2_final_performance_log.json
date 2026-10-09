@@ -1,0 +1,47 @@
+{
+  "schema_version": "final_performance_log.v1",
+  "note": "All values below are verified against source artifacts (docs/audit_artifacts/v0_2_candidate3_fresh_e2e_{nvda,qqq}.json and outputs/runs/{run_id}/llm_semantic_manifest.json) this task, not reused blindly.",
+  "nvda_fresh": {
+    "run_id": "ded99ecd-a186-4a90-859e-0f1a0efa43db",
+    "wall_clock_seconds": 1923,
+    "wall_clock_display": "32m03s",
+    "upstream_calls": "12 TradingAgents agents (market/sentiment/news/fundamentals analysts, bull/bear researchers, research_manager, trader, aggressive/conservative/neutral risk analysts, portfolio_manager)",
+    "semantic_provider_calls_total": 819,
+    "alpha_classification_calls": 754,
+    "evidence_stance_calls": 34,
+    "structure_extractor_calls": 3,
+    "structured_adapter_calls": 10,
+    "retries": 18,
+    "timeouts": 0,
+    "token_usage_status": "NOT_AVAILABLE -- token_usage field present on every semantic-call record but every value (input/output/total) is null under this provider path",
+    "measured_api_cost": "NOT_AVAILABLE",
+    "estimated_api_cost": "NOT_MADE -- no reliable token counts exist to base even an estimate on",
+    "verified_against": "outputs/runs/ded99ecd-a186-4a90-859e-0f1a0efa43db/llm_semantic_manifest.json and llm_semantic_calls.jsonl"
+  },
+  "qqq_fresh": {
+    "run_id": "0d890564-2479-4361-94e8-25c48af3b9a8",
+    "wall_clock_seconds": 1721,
+    "wall_clock_display": "28m41s",
+    "upstream_calls": "12 TradingAgents agents",
+    "semantic_provider_calls_total": 812,
+    "alpha_classification_calls": 747,
+    "evidence_stance_calls": 23,
+    "structure_extractor_calls": 8,
+    "structured_adapter_calls": 10,
+    "retries": 24,
+    "timeouts": 0,
+    "token_usage_status": "NOT_AVAILABLE -- same as NVDA",
+    "measured_api_cost": "NOT_AVAILABLE",
+    "estimated_api_cost": "NOT_MADE",
+    "verified_against": "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/llm_semantic_manifest.json and llm_semantic_calls.jsonl"
+  },
+  "explicit_disclaimer": "QQQ's wall-clock time (1721s) is ~10.5% shorter than NVDA's (1923s). No inference was made, and none should be made, that this implies a proportional (or any) reduction in API cost -- cost remains NOT_AVAILABLE for both runs, independently, because no reliable token data exists for either.",
+  "final_alpha_validation_provider_accounting": {
+    "provider_calls": 150,
+    "successful": 150,
+    "retries": 0,
+    "timeouts": 0,
+    "note": "This is the Anthropic-backed ONE_SHOT_INDEPENDENT_FINAL_VALIDATION run (Day 4I) -- a different Provider path from the DeepSeek-backed Fresh E2E runs above. Kept separate, never combined.",
+    "artifact": "docs/audit_artifacts/v0_2_candidate3_final_validation_result.json"
+  }
+}

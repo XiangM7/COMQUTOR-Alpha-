@@ -51,6 +51,8 @@ function activationLevelText(structure: ConflictSideStructure): string {
 interface ConflictCardProps {
   conflict: AlphaConflict;
   isMain?: boolean;
+  /** When given, each evidence item offers "View basis" (the claim-level trace of this run). */
+  runId?: string;
 }
 
 /** Evidence Integrity Completion Sprint, Track C: per-side evidence-fact
@@ -181,7 +183,7 @@ function ConflictSideEvidence({
 
 /** Score bar + level band -- deterministic, accessible, no polar/radar
  * chart requirement. Level is always shown as text, never color alone. */
-export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
+export function ConflictCard({ conflict, isMain, runId }: ConflictCardProps) {
   const levelLabel = LEVEL_LABELS[conflict.conflict_level] ?? conflict.conflict_level;
   const scorePercent = Math.max(0, Math.min(100, conflict.conflict_score));
 
@@ -270,6 +272,7 @@ export function ConflictCard({ conflict, isMain }: ConflictCardProps) {
           evidenceUi={conflict.evidence_ui}
           bullAlphaId={conflict.bull_alpha_id}
           bearAlphaId={conflict.bear_alpha_id}
+          runId={runId}
         />
       ) : (
         <p className="conflict-evidence-ui-unavailable" role="note">

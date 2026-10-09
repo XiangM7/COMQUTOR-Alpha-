@@ -1,0 +1,2451 @@
+{
+ "rule": "Claims written by the final-decision agents: every portfolio_manager claim (final decision memo), the research_manager sections whose heading names the verdict / decision / recommendation, and every trader claim -- limited to claims that are analytical, carry a source link, or contain the Agent's own 'verified' wording.",
+ "claim_count": 57,
+ "status_counts": {
+  "source_support": {
+   "NOT_LINKED": 30,
+   "TECHNICAL_INCOMPLETE": 6,
+   "MODEL_JUDGED_INSUFFICIENT": 7,
+   "SOURCE_OPPOSES": 1,
+   "PARTIAL_SUPPORT": 10,
+   "BACKGROUND_ONLY": 3
+  },
+  "alpha_match": {
+   "MODEL_NONE": 49,
+   "MATCHED": 6,
+   "MAPPER_OVERRIDE": 2
+  },
+  "stance": {
+   "NOT_APPLICABLE": 51,
+   "RELATION_UNRESOLVED": 2,
+   "MODEL_JUDGED": 4
+  },
+  "scoring": {
+   "NOT_SCORED": 57
+  }
+ },
+ "groups": [
+  {
+   "group": "research_manager / My Verdict",
+   "rows": [
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:36",
+     "text": "The evidence is genuinely balanced on the business, but tilted toward caution on the setup.",
+     "agent": "research_manager",
+     "section": "My Verdict",
+     "claim_index": 35,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:38",
+     "text": "The bear is right that the current price at 230.77 embeds a perfect-outcome assumption that the cash flow statement has not yet confirmed, and that the technical setup (loss of 10-EMA, VWMA breach, 85% MACD histogram compression) offers asymmetric downside to the 50-SMA at 221.97.",
+     "agent": "research_manager",
+     "section": "My Verdict",
+     "claim_index": 37,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "TECHNICAL_INCOMPLETE",
+      "label": "Verification not completed (technical failure)",
+      "reason": "Verification did not complete: the model's cited quote or data could not be located in the saved source, so its answer was not accepted."
+     },
+     "alpha_match": {
+      "status_code": "MATCHED",
+      "label": "Matched to an Alpha by the model's selection",
+      "reason": "The classifier selected A304 (Multiple Compression) from the full taxonomy.",
+      "matched_alpha": "A304"
+     },
+     "stance": {
+      "status_code": "RELATION_UNRESOLVED",
+      "label": "Relation to the Alpha is not established",
+      "reason": "The model judged the stance as supports_alpha, but the relation used for scoring is still the text rule's result (the text rule classified the relation as 'mention'), which the model's stance does not update; the claim therefore does not count as supporting evidence.",
+      "evidence_stance": "supports_alpha",
+      "method": "llm",
+      "relation": "mention"
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "Linked to a source but not content-verified by a qualifying method (verification not completed).",
+      "alpha_id": "A304",
+      "weight_contribution": null,
+      "not_scored_code": "VERIFIED_GATE_NOT_REVIEWED"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:39",
+     "text": "This is not a Sell — the moat, margins, and balance sheet are too strong, and the near-term macro tail risks are genuinely being priced out.",
+     "agent": "research_manager",
+     "section": "My Verdict",
+     "claim_index": 38,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:40",
+     "text": "But it is also not a Buy at 230.77 with deteriorating cash conversion and a fading momentum setup.",
+     "agent": "research_manager",
+     "section": "My Verdict",
+     "claim_index": 39,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "TECHNICAL_INCOMPLETE",
+      "label": "Verification not completed (technical failure)",
+      "reason": "Verification did not complete: the model's cited quote or data could not be located in the saved source, so its answer was not accepted."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:research_manager:investment_plan:claim:41",
+     "text": "The correct stance is to maintain exposure but not add at current levels, and to treat the 50-SMA (221.97) as the level at which the risk/reward flips back in the bull's favor.",
+     "agent": "research_manager",
+     "section": "My Verdict",
+     "claim_index": 40,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "MODEL_JUDGED_INSUFFICIENT",
+      "label": "Model judged the saved material insufficient to decide",
+      "reason": "allowed_candidates contains only NVDA market/indicator data, including close_50_sma=221.97 and close=230.77. It confirms the 50-SMA value but does not state or otherwise warrant the normative recommendation to maintain exposure without adding, nor does it establish that 221.97 is the level where risk/reward flips back in the bull's favor. report_context is expressly context only and cannot supply evidence."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    }
+   ]
+  },
+  {
+   "group": "trader",
+   "rows": [
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:trader:trader_investment_plan:claim:1",
+     "text": "Reasoning: The Research Manager's verdict is well-supported: the business is dominant (75% gross margin, ROE 117.21%, $62.5B cash) so a Sell is unwarranted, but the setup is deteriorating — AR grew +54.9% QoQ vs revenue +17.9% QoQ, DSO expanded 14 days in one quarter, $26B was borrowed while FCF fell 56%, and momentum shows 85% MACD histogram compression with loss of the 10-EMA.",
+     "agent": "trader",
+     "section": null,
+     "claim_index": 0,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "TECHNICAL_INCOMPLETE",
+      "label": "Verification not completed (technical failure)",
+      "reason": "Verification did not complete: the model's cited quote or data could not be located in the saved source, so its answer was not accepted."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_368d04e64ccecd8c"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:trader:trader_investment_plan:claim:2",
+     "text": "At 230.77 the immediate risk/reward is balanced-to-negative (resistance at 242.97 vs support at 221.97), so I will not add.",
+     "agent": "trader",
+     "section": null,
+     "claim_index": 1,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "SOURCE_OPPOSES",
+      "label": "The source content opposes this claim",
+      "reason": "Using the claim's own levels, upside from 230.77 to 242.97 is 12.20 and downside from 230.77 to 221.97 is 8.80. That gives reward/risk about 1.39, or risk/reward about 0.72, meaning risk is smaller than reward rather than balanced-to-negative. The material therefore materially rebuts the claim's risk/reward characterization; the no-add conclusion is not supported by these figures."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:trader:trader_investment_plan:claim:3",
+     "text": "Maintain core exposure, trim into 240–243, and re-evaluate at the 50-SMA (221.97); a decisive close below the 200-SMA (201.84) is the thesis-break level.",
+     "agent": "trader",
+     "section": null,
+     "claim_index": 2,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "The market snapshot directly confirms the claim's stated 50-SMA (221.97) and 200-SMA (201.84), and its upper Bollinger band (242.97) falls within the claim's 240–243 trim zone. However, the source does not itself state the trading actions or that these indicator levels are resistance/support/thesis-break triggers; those conclusions follow only under the named technical-analysis and position assumptions. The claim is therefore conditionally supported rather than directly established."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:trader:trader_investment_plan:claim:5",
+     "text": "Position Sizing: Maintain existing core exposure; do not add at 230.77.",
+     "agent": "trader",
+     "section": null,
+     "claim_index": 4,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "MODEL_JUDGED_INSUFFICIENT",
+      "label": "Model judged the saved material insufficient to decide",
+      "reason": "allowed_candidates contains NVDA market data showing Close=230.77 and several technical indicators, but it does not state or entail any position-sizing recommendation, core-exposure instruction, or decision not to add at that price. The presence of the number 230.77 only identifies a price level; it does not bear on whether to maintain exposure or refrain from adding."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:trader:trader_investment_plan:claim:6",
+     "text": "Staged add only at 221.97 or below with confirmation.",
+     "agent": "trader",
+     "section": null,
+     "claim_index": 5,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "The material confirms the exact 221.97 threshold as NVDA's 50-SMA, so the level in the claim is grounded in the saved data. However, the material does not itself state a staged-add rule, that 221.97 is support, or that confirmation is required. Thus the plan is supported only conditionally, under the named technical/confirmation assumptions."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    }
+   ]
+  },
+  {
+   "group": "portfolio_manager / Synthesis of the Risk Debate",
+   "rows": [
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:4",
+     "text": "The fundamental engine is exceptional and uncontested: revenue nearly doubled YoY, 75% gross margins, ROE of 117.21%, and a forward P/E of 14.50 with a PEG of 0.29.",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 3,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "TECHNICAL_INCOMPLETE",
+      "label": "Verification not completed (technical failure)",
+      "reason": "Verification did not complete: the model's cited quote or data could not be located in the saved source, so its answer was not accepted."
+     },
+     "alpha_match": {
+      "status_code": "MATCHED",
+      "label": "Matched to an Alpha by the model's selection",
+      "reason": "The classifier selected A301 (Revenue Expansion) from the full taxonomy.",
+      "matched_alpha": "A301"
+     },
+     "stance": {
+      "status_code": "MODEL_JUDGED",
+      "label": "Stance judged by the model",
+      "reason": "The model judged the stance toward A301 as supports_alpha.",
+      "evidence_stance": "supports_alpha",
+      "method": "llm",
+      "relation": "activation"
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "Linked to a source but not content-verified by a qualifying method (verification not completed).",
+      "alpha_id": "A301",
+      "weight_contribution": null,
+      "not_scored_code": "VERIFIED_GATE_NOT_REVIEWED"
+     },
+     "linked_source_ids": [
+      "src_381d039ce7699c62"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:5",
+     "text": "The demand signal is corroborated: the aggressive analyst's point that a company selling $96B of GPUs a quarter to a handful of mega-cap buyers will mechanically consume working capital is arithmetically sound.",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 4,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "MODEL_JUDGED_INSUFFICIENT",
+      "label": "Model judged the saved material insufficient to decide",
+      "reason": "allowed_candidates contains only NVDA quarterly income-statement data, including total revenue of $96.221B for 2026-07-31. That confirms a revenue figure but does not bear on the claim's core propositions: that this was GPU-unit demand, that buyers were a handful of mega-cap customers, or that such sales mechanically consume working capital in an arithmetically sound way. Because the material does not warrant the claim's own object, mechanism, or conclusion, the claim is insufficiently supported."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_bce051a83ee448c8"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:6",
+     "text": "The earnings-quality flag is real and quantified: operating cash flow fell to $24,077M from $50,344M [fragmentid: srcda65a19945a1ad41:frag:0], free cash flow collapsed to $21,400M from $48,587M [fragmentid: srcda65a19945a1ad41:frag:0], and receivables grew +54.9% QoQ against revenue +17.9% QoQ.",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 5,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "TECHNICAL_INCOMPLETE",
+      "label": "Verification not completed (technical failure)",
+      "reason": "Verification did not complete: the model's cited quote or data could not be located in the saved source, so its answer was not accepted."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_da65a19945a1ad41"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:7",
+     "text": "The tactical setup is genuinely ambiguous: the MACD histogram collapsed from 1.37 on 2026-10-06 to 0.21 on 2026-10-09 [fragmentid: src7ef173aa57bbcf45:frag:0], price lost the 10-EMA at 231.96 [fragmentid: src7ef173aa57bbcf45:frag:0], and price slipped below the VWMA at 231.57 [fragmentid: src7ef173aa57bbcf45:frag:0].",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 6,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: The tactical setup is genuinely ambiguous; the MACD histogram collapsed from 1.37 on 2026-10-06; price slipped below the VWMA at 231.57."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:8",
+     "text": "The macro is hostile: a no-cut regime mechanically compresses the present value of long-duration growth cash flows, and NVDA is the archetypal long-duration asset with a 2.216 beta.",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 7,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: The macro is hostile: a no-cut regime mechanically compresses the present value of long-duration growth cash flows, and NVDA is the archetypal long-duration asset."
+     },
+     "alpha_match": {
+      "status_code": "MAPPER_OVERRIDE",
+      "label": "Model selected an Alpha, then a rule gate overrode it to no match",
+      "reason": "The model selected A001; the alpha_positive_requirement_override rule gate then set it to no match.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier selected an Alpha, but an Alpha-specific rule gate overrode the selection to no match.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MAPPER_GATE_OVERRIDE"
+     },
+     "linked_source_ids": [
+      "src_381d039ce7699c62"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:11",
+     "text": "Question: Is the forward P/E of 14.50 a floor?; Aggressive: Yes — priced for a mild disappointment; Conservative: No — it requires EPS to roughly double from $7.91 to $15.91; Who wins on evidence: Conservative — the cushion may not exist on a clean basis",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 10,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: The conclusions that the forward P/E of 14.50 is not a floor, that the aggressive 'priced for a mild disappointment' view is wrong, that the conservative wins on evidence, and that the cushion may not exist on a clean basis."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_381d039ce7699c62"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:12",
+     "text": "Question: Is the ATR compression a coiled spring?; Aggressive: Yes — resolves upward more often than not; Conservative: No — compression is directionally agnostic; Who wins on evidence: Conservative — the report says agnostic; the bullish skew was added",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 11,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:13",
+     "text": "Question: Is the sentiment split bullish?; Aggressive: Yes — fast money sells, slow money holds; Conservative: No — late-cycle inertia markers; Who wins on evidence: Neither — low confidence, reflexive condition",
+     "agent": "portfolio_manager",
+     "section": "Synthesis of the Risk Debate",
+     "claim_index": 12,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MATCHED",
+      "label": "Matched to an Alpha by the model's selection",
+      "reason": "The classifier selected A601 (Narrative Momentum) from the full taxonomy.",
+      "matched_alpha": "A601"
+     },
+     "stance": {
+      "status_code": "MODEL_JUDGED",
+      "label": "Stance judged by the model",
+      "reason": "The model judged the stance toward A601 as mentions_alpha.",
+      "evidence_stance": "mentions_alpha",
+      "method": "llm",
+      "relation": "activation"
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "No valid source link, so the verified-evidence gate keeps it out of the official score.",
+      "alpha_id": "A601",
+      "weight_contribution": null,
+      "not_scored_code": "VERIFIED_GATE_SOURCE_LINK_NOT_VALID"
+     },
+     "linked_source_ids": []
+    }
+   ]
+  },
+  {
+   "group": "portfolio_manager / The Decisive Analytical Points",
+   "rows": [
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:15",
+     "text": "The aggressive analyst's strongest argument is the receivables defense.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 14,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:16",
+     "text": "He is right that a company growing revenue 106% year-over-year from $46.7B to $96.2B in four quarters, onboarding hyperscaler customers at that velocity, will mechanically consume working capital.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 15,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: onboarding hyperscaler customers at that velocity, and that this will mechanically consume working capital"
+     },
+     "alpha_match": {
+      "status_code": "MATCHED",
+      "label": "Matched to an Alpha by the model's selection",
+      "reason": "The classifier selected A301 (Revenue Expansion) from the full taxonomy.",
+      "matched_alpha": "A301"
+     },
+     "stance": {
+      "status_code": "MODEL_JUDGED",
+      "label": "Stance judged by the model",
+      "reason": "The model judged the stance toward A301 as supports_alpha.",
+      "evidence_stance": "supports_alpha",
+      "method": "llm",
+      "relation": "activation"
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "Content verification did not resolve to supports/opposes (partial support, background only, or pending).",
+      "alpha_id": "A301",
+      "weight_contribution": null,
+      "not_scored_code": "VERIFIED_GATE_SUPPORT_STATUS_NOT_RESOLVED"
+     },
+     "linked_source_ids": [
+      "src_bce051a83ee448c8"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:17",
+     "text": "The report itself hedges that the receivables build is \"not necessarily bearish — rapid growth often consumes working capital.\" That is a genuine point, and the conservative analyst never fully rebuts it.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 16,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:18",
+     "text": "The conservative analyst's strongest argument — and it is the single most important point in the debate — is that the aggressive analyst's \"structural reality\" reading is an assertion dressed up as a syllogism.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 17,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:19",
+     "text": "The data says DSO expanded from roughly 45 to roughly 60 days in one quarter.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 18,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:21",
+     "text": "And the conservative connects it to the balance-sheet shift the aggressive analyst never addresses: the company borrowed $26B while FCF fell 56%.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 20,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:22",
+     "text": "That reframe — levering up to support the stock while cash conversion deteriorates — is decisive.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 21,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:24",
+     "text": "The report says compression phases are \"directionally agnostic\" and \"typically resolve into a decisive move.\" He added the bullish skew himself, and he did so while ignoring that the compression is happening alongside deteriorating momentum — price lost the 10-EMA at 231.96 [fragmentid: src7ef173aa57bbcf45:frag:0] and slipped below the VWMA at 231.57 [fragmentid: src7ef173aa57bbcf45:frag:0].",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 23,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "TECHNICAL_INCOMPLETE",
+      "label": "Verification not completed (technical failure)",
+      "reason": "Verification did not complete: the model's cited quote or data could not be located in the saved source, so its answer was not accepted."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:25",
+     "text": "A coiled spring with deteriorating momentum is not the same as a coiled spring with improving momentum.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 24,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:26",
+     "text": "The conservative analyst's weakest argument is the proposal to tighten the stop to the 50-SMA at 221.97.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 25,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "MODEL_JUDGED_INSUFFICIENT",
+      "label": "Model judged the saved material insufficient to decide",
+      "reason": "allowed_candidates contains only NVDA market data for 2026-10-09, including close_50_sma=221.97. It does not mention the conservative analyst, any stop proposal, the relative strength or weakness of arguments, or that this is the conservative analyst's weakest argument. The shared 50-SMA value alone does not warrant the claim's evaluative ranking proposition."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:27",
+     "text": "The neutral analyst is right to push back: the 50-SMA is the exact level the trader has identified as the staged add zone.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 26,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:28",
+     "text": "Putting a stop at the add zone creates a plan where a normal pullback knocks you out right before you are supposed to be adding.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 27,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:29",
+     "text": "That is self-defeating structure, not risk management.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 28,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:30",
+     "text": "The neutral analyst lands the decisive synthesis: the trader's HOLD is correct, but the plan needs a two-branch structure rather than a one-branch plan.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 29,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:31",
+     "text": "The aggressive analyst wants to lean into the coiled spring; the conservative analyst wants to pre-emptively de-risk.",
+     "agent": "portfolio_manager",
+     "section": "The Decisive Analytical Points",
+     "claim_index": 30,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    }
+   ]
+  },
+  {
+   "group": "portfolio_manager / The Decision",
+   "rows": [
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:34",
+     "text": "The fundamental thesis is intact, but the entry is not confirmed, and the risk factors the conservative analyst identified are real and unresolved.",
+     "agent": "portfolio_manager",
+     "section": "The Decision",
+     "claim_index": 33,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:35",
+     "text": "That combination does not justify Sell, Underweight, or Overweight — it justifies maintaining exposure with a disciplined, signal-gated plan.",
+     "agent": "portfolio_manager",
+     "section": "The Decision",
+     "claim_index": 34,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:36",
+     "text": "The aggressive analyst wants us to lean into the trend before the binary resolves; the conservative analyst wants us to pre-emptively de-risk.",
+     "agent": "portfolio_manager",
+     "section": "The Decision",
+     "claim_index": 35,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:39",
+     "text": "I am adopting the neutral analyst's refinements over both the aggressive and conservative framings, because they preserve full upside participation on the existing book while refusing to pay up for an unproven reversal.",
+     "agent": "portfolio_manager",
+     "section": "The Decision",
+     "claim_index": 38,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    }
+   ]
+  },
+  {
+   "group": "portfolio_manager / Final Transaction Proposal",
+   "rows": [
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:40",
+     "text": "Rating: Hold (with a constructive bias and a defined trigger to upgrade)",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 39,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:44",
+     "text": "Entry Price: 221.97 (the 50-SMA — the add-trigger zone, not a current entry)",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 43,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: It is the entry price/add-trigger zone, not a current entry."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:45",
+     "text": "Stop Loss: 201.84 (the 200-SMA — a decisive close below invalidates the structural thesis, not just the timing)",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 44,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: That 201.84 is the stop loss and that a decisive close below it invalidates the structural thesis, not just the timing."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:48",
+     "text": "Trim into 240–243 (upper Bollinger band at 242.97 [fragmentid: src7ef173aa57bbcf45:frag:0]) if the MACD histogram continues to compress — this is the bear's \"fade\" zone and the bull has not provided a catalyst to break through it before earnings.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 47,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "BACKGROUND_ONLY",
+      "label": "Source content is background only, not support",
+      "reason": "The material confirms only that NVDA's upper Bollinger band was 242.97 on 2026-10-09, which is the level cited in the claim's parenthetical. It does not establish the trim recommendation, a MACD histogram compression trend, the bear's fade-zone interpretation, or the absence of a bullish catalyst before earnings. The MACD histogram value is present as 0.21, but the material does not state that it is continuing to compress. Thus the material provides relevant context for the cited price level but does not support or oppose the core trade recommendation."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:49",
+     "text": "Upgrade trigger (→ Overweight): A pullback to the 50-SMA (221.97) that holds, accompanied by the MACD histogram stabilizing or re-expanding and evidence that receivables are converting.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 48,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: The upgrade trigger to Overweight itself, the condition that a pullback to the 50-SMA holds, the condition that the MACD histogram stabilizes or re-expands, and the condition that receivables are converting."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:50",
+     "text": "A dip alone is not sufficient — the bull's \"buy the dip\" advice is only valid if the cash-flow question resolves favorably.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 49,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:51",
+     "text": "Soft warning (→ reduce, not exit): A daily close below the 50-SMA at 221.97 on expanding volume.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 50,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "BACKGROUND_ONLY",
+      "label": "Source content is background only, not support",
+      "reason": "The only overlapping material is the market snapshot's 50-SMA level, which confirms 221.97. The material does not state that a close below that level on expanding volume is a soft warning to reduce rather than exit, nor does it provide multi-day volume context to establish expanding volume. Thus the source is relevant context for the level but neither supports nor opposes the claim's warning/action proposition."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:52",
+     "text": "This is the signal the medium-term trend is breaking; waiting for the 200-SMA means accepting another 9% of drawdown on an already-underwater position.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 51,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:53",
+     "text": "Hard risk line: A decisive close below the 200-SMA at 201.84 invalidates the primary uptrend the bull is relying on and confirms the bear's \"growth-curve repricing\" thesis.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 52,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "BACKGROUND_ONLY",
+      "label": "Source content is background only, not support",
+      "reason": "The allowed candidate confirms only the numeric 200-SMA level for NVDA on 2026-10-09, close_200_sma=201.84. It does not state or otherwise support that a decisive close below that level invalidates the primary uptrend or confirms the bear's growth-curve repricing thesis. The level is relevant context, but the candidate neither supports nor opposes the core causal/confirmatory proposition."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:55",
+     "text": "Cap total NVDA exposure at prior target weight given the 2.216 beta.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 54,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "MODEL_JUDGED_INSUFFICIENT",
+      "label": "Model judged the saved material insufficient to decide",
+      "reason": "allowed_candidates only contains NVIDIA financial fundamentals, including Beta=2.216, but it does not mention total NVDA exposure, any prior target weight, any recommendation to cap exposure, or any reasoning that the 2.216 beta should determine an exposure cap. The beta figure alone shares a number with the claim but does not warrant the claim's action, object, or direction."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_381d039ce7699c62"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:57",
+     "text": "If it normalizes back toward 45–50 days, the conservative analyst's core critique collapses and the bull case strengthens materially.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 56,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:58",
+     "text": "If receivables build again while OCF stays depressed, cut back to Hold-equivalent sizing immediately.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 57,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:59",
+     "text": "Composition of EPS — how much of the forward $15.91 estimate depends on non-operating investment gains.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 58,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "MODEL_JUDGED_INSUFFICIENT",
+      "label": "Model judged the saved material insufficient to decide",
+      "reason": "The only allowed candidate provides NVDA fundamentals including Forward EPS=15.9146 and operating/net income figures, but it contains no data on non-operating investment gains or on the composition of the forward EPS estimate. Therefore the material does not warrant any conclusion about how much of the $15.91 forward EPS depends on non-operating investment gains."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_381d039ce7699c62"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:60",
+     "text": "Debt trajectory — does the $26B of new borrowing keep climbing to fund buybacks?",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 59,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:61",
+     "text": "Macro — any shift in the no-cut probability would be a genuine re-rating catalyst in either direction.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 60,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MAPPER_OVERRIDE",
+      "label": "Model selected an Alpha, then a rule gate overrode it to no match",
+      "reason": "The model selected A001; the alpha_positive_requirement_override rule gate then set it to no match.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier selected an Alpha, but an Alpha-specific rule gate overrode the selection to no match.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MAPPER_GATE_OVERRIDE"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:62",
+     "text": "Why not the alternatives: Sell/Underweight is refuted by the revenue trajectory and the fully stacked bull structure.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 61,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MATCHED",
+      "label": "Matched to an Alpha by the model's selection",
+      "reason": "The classifier selected A301 (Revenue Expansion) from the full taxonomy.",
+      "matched_alpha": "A301"
+     },
+     "stance": {
+      "status_code": "RELATION_UNRESOLVED",
+      "label": "Relation to the Alpha is not established",
+      "reason": "The model judged the stance as supports_alpha, but the relation used for scoring is still the text rule's result (the text rule classified the relation as 'mention'), which the model's stance does not update; the claim therefore does not count as supporting evidence.",
+      "evidence_stance": "supports_alpha",
+      "method": "llm",
+      "relation": "mention"
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "No valid source link, so the verified-evidence gate keeps it out of the official score.",
+      "alpha_id": "A301",
+      "weight_contribution": null,
+      "not_scored_code": "VERIFIED_GATE_SOURCE_LINK_NOT_VALID"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:63",
+     "text": "Overweight is refuted by the unconfirmed tactical setup (loss of the 10-EMA at 231.96 [fragmentid: src7ef173aa57bbcf45:frag:0], VWMA breach at 231.57 [fragmentid: src7ef173aa57bbcf45:frag:0], 85% MACD histogram compression) and the conservative analyst's valid \"the cushion may not exist\" critique.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 62,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "PARTIAL_SUPPORT",
+      "label": "Partly supported: part of the claim is not backed by the source",
+      "reason": "Not backed by the source: VWMA breach at 231.57; 85% MACD histogram compression; the conservative analyst's valid 'the cushion may not exist' critique; and the overall conclusion that Overweight is refuted by these factors."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:64",
+     "text": "Full Buy at current levels is refuted by the asymmetry math — the cash-conversion binary is genuinely unresolved, and pre-positioning means paying for optionality you haven't earned.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 63,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MATCHED",
+      "label": "Matched to an Alpha by the model's selection",
+      "reason": "The classifier selected A304 (Multiple Compression) from the full taxonomy.",
+      "matched_alpha": "A304"
+     },
+     "stance": {
+      "status_code": "MODEL_JUDGED",
+      "label": "Stance judged by the model",
+      "reason": "The model judged the stance toward A304 as supports_alpha.",
+      "evidence_stance": "supports_alpha",
+      "method": "llm",
+      "relation": "activation"
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "No valid source link, so the verified-evidence gate keeps it out of the official score.",
+      "alpha_id": "A304",
+      "weight_contribution": null,
+      "not_scored_code": "VERIFIED_GATE_SOURCE_LINK_NOT_VALID"
+     },
+     "linked_source_ids": []
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:65",
+     "text": "Bottom line for the desk: Hold the core at target weight, respect the 221.97 line as a level to exit at rather than defend, trim into 240–243, and wait for the next print to resolve the cash-conversion binary before adding.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 64,
+     "claim_quality": "context_only",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "MODEL_JUDGED_INSUFFICIENT",
+      "label": "Model judged the saved material insufficient to decide",
+      "reason": "allowed_candidates contains only NVDA market/indicator data for 2026-10-09, including close_50_sma=221.97 and boll_ub=242.97. It does not state or imply the claim's actionable recommendation to hold at target weight, use 221.97 as an exit rather than defend, trim into 240–243, or wait for the next print/cash-conversion resolution before adding. Therefore the material lacks a reliable basis for this proposition."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": [
+      "src_7ef173aa57bbcf45"
+     ]
+    },
+    {
+     "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:66",
+     "text": "The aggressive analyst wins the demand argument; the conservative analyst wins the risk-management argument.",
+     "agent": "portfolio_manager",
+     "section": "Final Transaction Proposal",
+     "claim_index": 65,
+     "claim_quality": "analytical",
+     "agent_wording": {
+      "self_labeled_verified": false,
+      "matched_terms": [],
+      "note": null
+     },
+     "source_support": {
+      "status_code": "NOT_LINKED",
+      "label": "No source linked; not verified",
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified."
+     },
+     "alpha_match": {
+      "status_code": "MODEL_NONE",
+      "label": "The model judged that no Alpha materially fits",
+      "reason": "The classifier returned a valid answer that no canonical Alpha materially fits.",
+      "matched_alpha": null
+     },
+     "stance": {
+      "status_code": "NOT_APPLICABLE",
+      "label": "No Alpha matched, so there is no stance",
+      "reason": "The claim has no matched Alpha, so no stance toward an Alpha applies.",
+      "evidence_stance": null,
+      "method": null,
+      "relation": null
+     },
+     "scoring": {
+      "status_code": "NOT_SCORED",
+      "label": "Not counted in any official score",
+      "reason": "The classifier judged that no canonical Alpha materially fits this claim.",
+      "alpha_id": null,
+      "weight_contribution": null,
+      "not_scored_code": "MODEL_NONE"
+     },
+     "linked_source_ids": []
+    }
+   ]
+  }
+ ],
+ "agent_wording_verified_count": 0
+}

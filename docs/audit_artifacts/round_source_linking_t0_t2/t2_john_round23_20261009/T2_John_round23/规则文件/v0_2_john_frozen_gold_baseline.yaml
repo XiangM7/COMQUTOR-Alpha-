@@ -1,0 +1,137 @@
+# v0.2 John Frozen Gold Baseline
+#
+# authority = JOHN_WRITTEN_V0_2_BASELINE
+#
+# This file is the acceptance-authority freeze for Gold v0.2, produced
+# because John is unavailable and his latest written instructions are being
+# used as the highest acceptance authority per his own engineering decision.
+# This is not an invented rule change: every value below is copied verbatim
+# from John's explicit written baseline. It supersedes any inconsistent
+# repository configuration (comqutor_alpha/config/j2_provisional_regression_
+# labels_v0.1.yaml, _v0.2.yaml, and docs/audit_artifacts/
+# v0_2_gold_operational_contract.json) for acceptance purposes only.
+# Repository implementation/configuration is not changed by this file.
+#
+# Acceptance-authority hierarchy (highest first):
+#   1. John's latest written v0.2 baseline / instructions (this file)
+#   2. John's earlier explicit Gold Labels v0.2 definition
+#   3. Existing v0.2 operational-contract content where it implements those
+#      explicit instructions
+#   4. Existing v0.1/v0.2 repo label files, as implementation sources only
+
+authority: JOHN_WRITTEN_V0_2_BASELINE
+status: FROZEN_FOR_DAY2_IMPLEMENTATION_AND_VALIDATION
+schema_version: v0.2.john_frozen_gold_baseline.v1
+
+tiers:
+  formal_gold:
+    - NVDA
+    - QQQ
+    - SNDK
+  silver_diagnostic:
+    - MSFT
+    - TSM
+    - AMD
+
+# Official Gold v0.2 acceptance semantics (frozen by this decision as the
+# authoritative six families, regardless of current runtime wiring/naming).
+evidence_conditional_semantics:
+  - must_detect_if_evidence_present
+  - should_detect_if_supported
+  - conditional_only
+  - do_not_force
+  - allowed_main_conflicts
+  - forbidden_dominant_without_strong_evidence
+
+# These are ALLOWED structures when supported by evidence -- never mandatory
+# outputs. Absence of a listed conflict in an actual run is not automatically
+# a failure.
+allowed_main_conflicts:
+  NVDA:
+    - A101__A304
+    - A301__A304
+  QQQ:
+    - A001__A501
+    - A003__A501
+    - A304__A601
+  SNDK:
+    - A201__A304
+    - A301__A304
+  MSFT:
+    - A102__A304
+    - A101__A304
+    - A301__A304
+  TSM:
+    - A201__A304
+    - A301__A304
+    - A101__A304
+  AMD:
+    - A101__A304
+    - A201__A304
+    - A301__A304
+
+total_allowed_main_conflict_pairs: 16
+
+# Pairs above that the current repository taxonomy/config flags as
+# non-canonical (comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml has no
+# matching conflict_alphas declaration). John's written baseline controls
+# acceptance scope regardless -- these are NOT rejected. Production taxonomy
+# is not modified by this Day 1 task; alignment is deferred to Day 2+.
+implementation_alignment_required:
+  - ticker: MSFT
+    pair: A102__A304
+    reason: Not a canonical taxonomy pair under alpha_taxonomy_v1.yaml (A102 has no declared conflict_alphas); previously subject to PD-017 (REJECTED_BY_INDEPENDENT_LLM_ADJUDICATION). John's baseline controls acceptance scope; taxonomy alignment is deferred.
+  - ticker: SNDK
+    pair: A201__A304
+    reason: Not a canonical taxonomy pair under alpha_taxonomy_v1.yaml (A201 has no declared conflict_alphas). John's baseline controls acceptance scope; taxonomy alignment is deferred.
+  - ticker: TSM
+    pair: A201__A304
+    reason: Not a canonical taxonomy pair under alpha_taxonomy_v1.yaml (A201 has no declared conflict_alphas). John's baseline controls acceptance scope; taxonomy alignment is deferred.
+  - ticker: AMD
+    pair: A201__A304
+    reason: Not a canonical taxonomy pair under alpha_taxonomy_v1.yaml (A201 has no declared conflict_alphas). John's baseline controls acceptance scope; taxonomy alignment is deferred.
+  - ticker: QQQ
+    pair: A003__A501
+    reason: Canonical taxonomy pair, but absent from every current repo rule-source file (v0.1 label YAML, v0.2 label YAML, gold_operational_contract.json). Requires the pair to be added to whichever config file is designated the implementation source.
+  - ticker: QQQ
+    pair: A304__A601
+    reason: Canonical taxonomy pair, but absent from every current repo rule-source file. Requires the pair to be added to whichever config file is designated the implementation source.
+  - ticker: MSFT
+    pair: A101__A304
+    reason: Canonical taxonomy pair, but absent from every current repo rule-source file for MSFT. Requires the pair to be added.
+  - ticker: MSFT
+    pair: A301__A304
+    reason: Canonical taxonomy pair, but absent from every current repo rule-source file for MSFT. Requires the pair to be added.
+  - ticker: TSM
+    pair: A101__A304
+    reason: Canonical taxonomy pair; matches TSM's actual detected run conflict, but absent from every current repo rule-source file. Requires the pair to be added.
+  - ticker: AMD
+    pair: A301__A304
+    reason: Present in v0.2 label YAML (allowed_conflicts) and the documentation-only gold_operational_contract.json, but absent from v0.1's allowed_main_conflicts field -- the only field the real evaluator (comqutor_alpha/regression/evaluator.py::conflict_comparison) currently reads. Requires the implementation source to be reconciled so this field name/version carries the pair.
+  - family: forbidden_dominant_without_strong_evidence
+    reason: Implemented in runtime code under the different name should_not_be_dominant_without_strong_evidence (comqutor_alpha/regression/evaluator.py line 333; both v0.1 and v0.2 label YAMLs). Same concept, different literal name -- not an absence of the Gold rule, a naming/wiring gap.
+  - family: must_detect_if_evidence_present
+    reason: Documentation-only in docs/audit_artifacts/v0_2_gold_operational_contract.json; no runtime evaluator enforces an evidence-conditional "must detect" gate under this name today.
+  - family: should_detect_if_supported
+    reason: Documentation-only under this exact name; closest runtime analogue is the v0.1/v0.2 label files' conditional_alphas bucket (informational-miss only), a different code path.
+  - family: conditional_only
+    reason: Documentation-only under this exact name; closest runtime analogue is v0.1 conditional_alphas / v0.2 conditional_conflicts.
+  - family: do_not_force
+    reason: Documented as a cross-cutting constraint, not a standalone rule_type with its own entries or code enforcement anywhere in the repository today.
+
+implementation_alignment_required_count: 15
+
+# QQQ's current actual run output is preserved unmodified and is NOT part of
+# the allowed baseline above. It is listed here only for review tracking.
+qqq_current_output_review:
+  current_actual_main_conflict: A301__A304
+  in_frozen_allowed_baseline: false
+  action_taken: NONE -- output not modified, not added to baseline, not marked PASS
+  status: REVIEW_REQUIRED
+  reason: Later evidence review must determine whether rule expansion is justified. Not adjudicated in this Day 1 closeout.
+
+day1_final_status:
+  RULE_SCOPE_FROZEN: true
+  ACCEPTANCE_AUTHORITY_FROZEN: true
+  QQQ_CURRENT_CONFLICT: REVIEW_REQUIRED
+  READY_FOR_FULL_DAY2: true

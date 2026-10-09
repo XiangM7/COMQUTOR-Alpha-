@@ -210,8 +210,28 @@ describe("StructuralSnapshot", () => {
     expect(screen.getByText("Revenue Expansion")).toBeInTheDocument();
   });
 
-  it("shows the explicit no-dominant legitimate-result copy, not blank/None/a dash", async () => {
+  it("shows the explicit no-dominant legitimate-result copy, not blank/None/a dash, when nothing is active either", async () => {
+    // 2026-10-06 (round 12 audit fix): with zero active alphas (empty graph)
+    // AND zero dominant alphas, the detail text must say so honestly --
+    // previously this exact scenario (reproduced against a real run) showed
+    // "Several active forces are present," which directly contradicted the
+    // Active Structures panel showing none. Confirmed fixed: both panels
+    // now share the same fetched graph data.
     vi.spyOn(client, "getResearchGraph").mockResolvedValue(makeGraph("run-1", "QQQ", []));
+    renderSnapshot(makeResearch({ dominant_alphas: [] }));
+    await waitFor(() =>
+      expect(screen.getByText("No single structure currently dominates.")).toBeInTheDocument()
+    );
+    expect(screen.getByText("No active structure currently exists for this run.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Several active forces are present, but none has reached dominant status.")
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows 'several active forces' only when the graph genuinely has active alphas but none dominant", async () => {
+    vi.spyOn(client, "getResearchGraph").mockResolvedValue(
+      makeGraph("run-1", "QQQ", [makeAlpha({ alpha_id: "A101", alpha_name: "AI Expansion", status: "active" })])
+    );
     renderSnapshot(makeResearch({ dominant_alphas: [] }));
     await waitFor(() =>
       expect(screen.getByText("No single structure currently dominates.")).toBeInTheDocument()
@@ -279,6 +299,91 @@ describe("StructuralSnapshot", () => {
     renderSnapshot(makeResearch());
     await waitFor(() => expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument());
     expect(screen.queryByText("Loading structural detail…")).not.toBeInTheDocument();
+  });
+
+  describe("Alpha classification completion (round 14)", () => {
+    const INCOMPLETE = {
+      alpha_classification_status: "incomplete" as const,
+      alpha_classification_completion: {
+        total_claims: 975,
+        valid_select_count: 0,
+        valid_none_count: 2,
+        call_failure_count: 973,
+        not_executed_count: 0,
+        complete: false,
+      },
+    };
+
+    it("when incomplete, says so with the real counts and never asserts that nothing exists", async () => {
+      vi.spyOn(client, "getResearchGraph").mockResolvedValue(
+        makeGraph("run-1", "AMD", [makeAlpha({ alpha_id: "A001", status: "candidate" })])
+      );
+      renderSnapshot(makeResearch(INCOMPLETE));
+      await waitFor(() =>
+        expect(screen.getByRole("status")).toHaveTextContent(
+          "Alpha classification is incomplete for this run (973 of 975 claims have no usable classification result)"
+        )
+      );
+      expect(screen.getAllByText("Cannot be determined yet: Alpha classification is incomplete.")).toHaveLength(3);
+      // None of the three "legitimately empty" sentences may appear.
+      expect(screen.queryByText("No Alpha structure currently meets the active threshold.")).not.toBeInTheDocument();
+      expect(screen.queryByText("No single structure currently dominates.")).not.toBeInTheDocument();
+      expect(screen.queryByText(/No high-confidence structural conflict is currently admitted/)).not.toBeInTheDocument();
+    });
+
+    it("when complete with nothing active, keeps the honest legitimate-empty copy and shows no notice", async () => {
+      vi.spyOn(client, "getResearchGraph").mockResolvedValue(
+        makeGraph("run-1", "AMD", [makeAlpha({ alpha_id: "A001", status: "candidate" })])
+      );
+      renderSnapshot(makeResearch({ alpha_classification_status: "complete_no_active" }));
+      await waitFor(() =>
+        expect(screen.getByText("No Alpha structure currently meets the active threshold.")).toBeInTheDocument()
+      );
+      expect(screen.getByText("No single structure currently dominates.")).toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(screen.queryByText(/Cannot be determined yet/)).not.toBeInTheDocument();
+    });
+
+    it("when complete with active but no dominant, still says several forces are active", async () => {
+      vi.spyOn(client, "getResearchGraph").mockResolvedValue(
+        makeGraph("run-1", "AMD", [makeAlpha({ alpha_id: "A301", status: "active" })])
+      );
+      renderSnapshot(makeResearch({ alpha_classification_status: "complete_active_no_dominant" }));
+      await waitFor(() =>
+        expect(screen.getByText("Several active forces are present, but none has reached dominant status.")).toBeInTheDocument()
+      );
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("an absent status (older backend) behaves exactly as before: no notice, original copy", async () => {
+      vi.spyOn(client, "getResearchGraph").mockResolvedValue(
+        makeGraph("run-1", "AMD", [makeAlpha({ alpha_id: "A001", status: "candidate" })])
+      );
+      renderSnapshot(makeResearch());
+      await waitFor(() =>
+        expect(screen.getByText("No Alpha structure currently meets the active threshold.")).toBeInTheDocument()
+      );
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("incomplete never hides a positive finding: a present dominant alpha and conflict still render", async () => {
+      vi.spyOn(client, "getResearchGraph").mockResolvedValue(
+        makeGraph("run-1", "AMD", [makeAlpha({ alpha_id: "A101", status: "dominant" })])
+      );
+      renderSnapshot(
+        makeResearch({
+          ...INCOMPLETE,
+          dominant_alphas: [
+            { alpha_id: "A101", alpha_name: "AI Expansion" } as CanonicalResearchResponse["dominant_alphas"][number],
+          ],
+          main_conflict: makeConflict(),
+        })
+      );
+      await waitFor(() => expect(screen.getByRole("status")).toBeInTheDocument());
+      expect(screen.getAllByText("AI Expansion").length).toBeGreaterThan(0);
+      expect(screen.getByText(/A301 — Revenue Expansion/)).toBeInTheDocument();
+      expect(screen.queryByText("Cannot be determined yet: Alpha classification is incomplete.")).not.toBeInTheDocument();
+    });
   });
 
   it("never renders raw internal level vocabulary (regime_level, candidate) anywhere in the summary", async () => {

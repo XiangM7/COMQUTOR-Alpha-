@@ -1,0 +1,214 @@
+--- docs/audit_artifacts/round_source_linking_t0_t2/round18_evidence_requalification_20261007/pre_change_snapshot/comqutor_alpha_source_provenance.py	2026-10-07 10:26:02
++++ comqutor_alpha/source_provenance.py	2026-10-07 10:27:43
+@@ -679,7 +679,136 @@
+ # officially verified support until its disclosure timing is genuinely
+ # known, however the review itself resolved.
+ ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN = "DISCLOSURE_TIME_UNKNOWN"
++
++# ---------------------------------------------------------------------------
++# Round 18 (2026-10-07): "available before the evidence cutoff" as a SECOND,
++# honestly-named time basis next to ``published_at``.
++#
++# What the time gate protects against is look-ahead: a source that was not
++# yet obtainable at the analysis's evidence cutoff must not support a
++# judgment made as of that cutoff. ``published_at`` proves that directly for
++# a dated source. A fiscal-statement snapshot has no disclosure date (the
++# provider exposes only each column's PERIOD END), and that stays UNKNOWN:
++# ``published_at`` is never backfilled, a period end or a capture time is
++# never written into it, and a period end earlier than the cutoff proves
++# nothing about when the figure became known.
++#
++# What a live capture CAN prove is narrower and different: this exact,
++# content-hashed snapshot had already been obtained by ``available_by`` --
++# so it was available no later than that instant. That is recorded in a
++# separate, versioned ``availability`` block on the registry entry, which
++# this module re-validates at consumption time (it never trusts the flag):
++#   * the source is a live-captured financial data snapshot (provider and
++#     data_snapshot present) -- not a news item, not an undated macro value;
++#   * ``content_hash`` is the sha256 of the saved excerpt (binding intact);
++#   * ``available_by`` equals the source's own ``retrieved_at`` -- the
++#     registry-write time, an UPPER BOUND on the capture moment (the exact
++#     tool-call time is not recorded for these sources);
++#   * ``available_by`` is not later than the block's ``evidence_cutoff_at``
++#     (which comes from ``resolve_evidence_cutoff_at``: the run's own
++#     same-day fetched moments, else the bare analysis date as midnight --
++#     so a snapshot fetched on a later day than an earlier analysis date is
++#     AFTER the cutoff and is refused).
++# Anything missing or inconsistent stays DISCLOSURE_TIME_UNKNOWN.
++# ---------------------------------------------------------------------------
++SOURCE_AVAILABILITY_VERSION = "source_availability.v1"
++AVAILABILITY_BASIS_REGISTRY_WRITE_UPPER_BOUND = "REGISTRY_WRITE_TIME_UPPER_BOUND"
++_AVAILABILITY_BASES = frozenset({AVAILABILITY_BASIS_REGISTRY_WRITE_UPPER_BOUND})
++_AVAILABILITY_SOURCE_TYPES = frozenset({"financial"})
++AVAILABILITY_ANNOTATION_REGISTRY_WRITE = "REGISTRY_WRITE"
++AVAILABILITY_ANNOTATION_DERIVED_FROM_SAVED_REGISTRY = "DERIVED_FROM_SAVED_REGISTRY"
++
++
++def _is_live_data_snapshot(source: Mapping[str, Any]) -> bool:
++    snapshot = source.get("data_snapshot")
++    return bool(
++        source.get("source_type") in _AVAILABILITY_SOURCE_TYPES
++        and (source.get("provider") or "").strip()
++        and isinstance(snapshot, Mapping)
++        and snapshot
++    )
++
++
++def evaluate_source_availability(source: Mapping[str, Any]) -> dict[str, Any]:
++    """Re-validates ``source["availability"]`` from the source's own fields.
++    Never trusts a stored boolean. ``reason_code`` is None only when the
++    snapshot is proven available no later than the evidence cutoff."""
++
++    def refuse(code: str, detail: str) -> dict[str, Any]:
++        return {"available_before_cutoff": False, "reason_code": code, "detail": detail}
++
++    block = source.get("availability")
++    if not isinstance(block, Mapping):
++        return refuse(ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN, "no availability record")
++    if block.get("version") != SOURCE_AVAILABILITY_VERSION or block.get("basis") not in _AVAILABILITY_BASES:
++        return refuse(ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN, "unknown availability version or basis")
++    if not _is_live_data_snapshot(source):
++        return refuse(ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN, "not a live-captured financial data snapshot")
++    excerpt = source.get("excerpt")
++    if not excerpt or not source.get("content_hash") or hashlib.sha256(str(excerpt).encode("utf-8")).hexdigest() != source.get("content_hash"):
++        return refuse(ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN, "content hash does not match the saved snapshot")
++    retrieved = _parse_iso_like(source.get("retrieved_at"))
++    available_by = _parse_iso_like(block.get("available_by"))
++    cutoff = _parse_iso_like(block.get("evidence_cutoff_at"))
++    if retrieved is None or available_by is None or cutoff is None:
++        return refuse(ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN, "retrieved_at / available_by / evidence_cutoff_at missing or unparseable")
++    if available_by != retrieved:
++        return refuse(ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN, "available_by is not this source's own retrieved_at")
++    if available_by > cutoff:
++        return refuse(ELIGIBILITY_REASON_AVAILABILITY_AFTER_CUTOFF, "snapshot obtained after the evidence cutoff")
++    return {
++        "available_before_cutoff": True,
++        "reason_code": None,
++        "detail": None,
++        "basis": block.get("basis"),
++        "available_by": block.get("available_by"),
++        "evidence_cutoff_at": block.get("evidence_cutoff_at"),
++        "cutoff_basis": block.get("cutoff_basis"),
++    }
++
+ 
++def annotate_sources_availability(
++    sources: list[dict[str, Any]] | None, analysis_date: Any, *, mode: str
++) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
++    """Returns (copies of ``sources`` with an ``availability`` block added to
++    each undated live data snapshot, a per-source summary). Pure and
++    deterministic: nothing but the sources' own saved fields and the run's
++    ORIGINAL ``analysis_date`` is read -- never the current time -- so
++    re-running it months later yields the same cutoff. ``published_at`` and
++    every other field are left exactly as saved."""
++    import copy
++
++    sources = list(sources or [])
++    cutoff, cutoff_basis = resolve_evidence_cutoff_at(analysis_date, sources)
++    annotated: list[dict[str, Any]] = []
++    summary: list[dict[str, Any]] = []
++    for source in sources:
++        copied = copy.deepcopy(source) if isinstance(source, Mapping) else source
++        if isinstance(copied, dict) and not copied.get("published_at") and _is_live_data_snapshot(copied):
++            copied["availability"] = {
++                "version": SOURCE_AVAILABILITY_VERSION,
++                "basis": AVAILABILITY_BASIS_REGISTRY_WRITE_UPPER_BOUND,
++                "available_by": copied.get("retrieved_at"),
++                "evidence_cutoff_at": cutoff,
++                "cutoff_basis": cutoff_basis,
++                "published_at_status": "UNKNOWN_NOT_BACKFILLED",
++                "annotation_mode": mode,
++            }
++            summary.append({"source_id": copied.get("source_id"), **evaluate_source_availability(copied)})
++        annotated.append(copied)
++    return annotated, summary
++
++# Round 18 (2026-10-07): two more explicit reasons, so a failure is never
++# folded into a vaguer neighbouring code.
++#  * REVIEW_SOURCE_NOT_LINKED_TO_CLAIM: a review names (``linked_source_id``)
++#    a source that is not one of THIS claim's own linked sources at all.
++#  * AVAILABILITY_NOT_BEFORE_EVIDENCE_CUTOFF: the source's availability
++#    record is well-formed but says the snapshot was obtained AFTER the
++#    run's evidence cutoff (a later retrieval can never support an earlier
++#    judgment).
++ELIGIBILITY_REASON_REVIEW_SOURCE_NOT_LINKED = "REVIEW_SOURCE_NOT_LINKED_TO_CLAIM"
++ELIGIBILITY_REASON_AVAILABILITY_AFTER_CUTOFF = "AVAILABILITY_NOT_BEFORE_EVIDENCE_CUTOFF"
++
+ # A resolved, positive-or-negative verdict is required before this gate will
+ # even consider a review -- BACKGROUND/CITATION_ONLY/CONDITIONAL/
+ # PENDING_REVIEW are real, legitimate content-support classifications, but
+@@ -775,14 +904,35 @@
+     if str(review.get("claim_id") or "") != str(record.get("claim_id") or ""):
+         return {"eligible": False, "reason_code": ELIGIBILITY_REASON_REVIEW_CLAIM_MISMATCH}
+ 
+-    resolved = resolve_fragment_by_id(record["linked_source_id"], sources or []) or resolve_source_by_id(
+-        record["linked_source_id"], sources or []
+-    )
++    # Round 18: a review binds the source the verifier actually USED
++    # (``review["linked_source_id"]`` and that source's hash -- see
++    # content_support_llm._apply_result). For a claim that cites several
++    # sources that is not necessarily the record's primary link, so the
++    # binding (and the time check) must be resolved against the REVIEW'S
++    # source, which must itself be one of this claim's linked sources.
++    # Reviews without their own source id (and every single-source claim)
++    # resolve exactly as before.
++    def _resolve(source_id: Any) -> dict[str, Any] | None:
++        return resolve_fragment_by_id(source_id, sources or []) or resolve_source_by_id(source_id, sources or [])
++
++    resolved = _resolve(record["linked_source_id"])
++    review_source_id = review.get("linked_source_id")
++    if review_source_id and review_source_id != record["linked_source_id"]:
++        review_source = _resolve(review_source_id)
++        allowed_ids = {record["linked_source_id"], *(record.get("linked_source_ids") or ())}
++        allowed = {
++            candidate.get("source_id") for candidate in map(_resolve, allowed_ids) if candidate is not None
++        }
++        if review_source is None or review_source.get("source_id") not in allowed:
++            return {"eligible": False, "reason_code": ELIGIBILITY_REASON_REVIEW_SOURCE_NOT_LINKED}
++        resolved = review_source
+     if resolved is None or not resolved.get("content_hash"):
+         return {"eligible": False, "reason_code": ELIGIBILITY_REASON_SOURCE_NOT_RESOLVABLE}
+ 
+     if not resolved.get("published_at"):
+-        return {"eligible": False, "reason_code": ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN}
++        availability = evaluate_source_availability(resolved)
++        if not availability["available_before_cutoff"]:
++            return {"eligible": False, "reason_code": availability["reason_code"]}
+ 
+     if str(review.get("content_hash") or "") != str(resolved.get("content_hash") or ""):
+         return {"eligible": False, "reason_code": ELIGIBILITY_REASON_CONTENT_VERSION_CHANGED_SINCE_REVIEW}
+@@ -893,7 +1043,7 @@
+         return {"category": DIAGNOSTIC_ELIGIBLE, "detail_code": detail_code}
+     if detail_code == ELIGIBILITY_REASON_SOURCE_OPPOSES_CLAIM:
+         return {"category": DIAGNOSTIC_SOURCE_OPPOSES_CLAIM, "detail_code": detail_code}
+-    if detail_code == ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN:
++    if detail_code in (ELIGIBILITY_REASON_DISCLOSURE_TIME_UNKNOWN, ELIGIBILITY_REASON_AVAILABILITY_AFTER_CUTOFF):
+         return {"category": DIAGNOSTIC_DISCLOSURE_TIME_UNKNOWN, "detail_code": detail_code}
+     if detail_code in (
+         ELIGIBILITY_REASON_NOT_REVIEWED,
+@@ -958,6 +1108,10 @@
+     "calculation_method",
+     "calculation_version",
+     "calculation_params",
++    # Round 18: the versioned "available before the evidence cutoff" record
++    # of an undated live data snapshot (see evaluate_source_availability).
++    # Additive: only present on a source that carries one.
++    "availability",
+ )
+ 
+ # A title/excerpt this short is not a reliable enough anchor for a substring
+@@ -1749,6 +1903,14 @@
+     "SOURCE_LINK_UNKNOWN_ID",
+     "SOURCE_LINK_CONTENT_UNAVAILABLE",
+     "SOURCE_LINK_TIME_INVALID",
++    "SOURCE_AVAILABILITY_VERSION",
++    "AVAILABILITY_BASIS_REGISTRY_WRITE_UPPER_BOUND",
++    "AVAILABILITY_ANNOTATION_REGISTRY_WRITE",
++    "AVAILABILITY_ANNOTATION_DERIVED_FROM_SAVED_REGISTRY",
++    "ELIGIBILITY_REASON_REVIEW_SOURCE_NOT_LINKED",
++    "ELIGIBILITY_REASON_AVAILABILITY_AFTER_CUTOFF",
++    "evaluate_source_availability",
++    "annotate_sources_availability",
+     "SOURCE_LINK_NOT_PROVIDED",
+     "VALID_SOURCE_LINK_STATUSES",
+     "SUPPORT_SUPPORTS",

@@ -1,0 +1,843 @@
+{
+  "schema_version": "v0.2.day4_frozen_regression.phaseA.v1",
+  "metric_family": "DAY4_FROZEN_VALIDATION",
+  "distinct_from": "HISTORICAL_ANALYSIS (docs/audit_artifacts/v0_2_evidence_failure_analysis.json / v0_2_evidence_error_statistics.json, unchanged)",
+  "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+  "method_note": "Per this task's explicit preference for deterministic/local replay over Provider calls, Phase A used ONLY the deterministic (non-LLM) code paths: map_claim_to_alpha() with no llm_gateway (Architecture Replay's own zero-Provider contract) for Alpha Match samples, and classify_evidence_stance() (the always-local evidence_stance.py shadow layer) for Polarity samples. This does NOT reproduce or test the LLM-backed alpha_classifier/evidence_stance_classifier path that Day 3 identified as the actual historically-responsible mechanism (prompt rewrite in commit c454245) -- that would require a Provider call. This is reported honestly as a scope limit, not disguised as full confirmation.",
+  "tally": {
+    "total_samples": 43,
+    "distinct_samples": 38,
+    "currently_correct": 1,
+    "unchanged_still_wrong": 0,
+    "changed_still_wrong": 42,
+    "critical_reversals_in_this_replay": "NOT_APPLICABLE -- the critical-reversal gate is defined over the ORIGINAL human-reviewed labels (frozen, unchanged: 0 accepted / 1 raw pre-exclusion, see v0_2_evidence_error_statistics.json); this deterministic replay does not re-run human review and therefore cannot itself produce a new critical-reversal count",
+    "result_classification": "INCOMPLETE_REPLAY_PATH_NOT_VALID_AS_FULL_PIPELINE_ACCURACY",
+    "classification_reason": "This replay used only the deterministic (no-LLM) map_claim_to_alpha/classify_evidence_stance paths, omitting the LLM-assisted semantic matching the real production pipeline actually uses for these claims. 1/43 is NOT a measurement of system accuracy -- it measures only the deterministic fallback path in isolation. Preserved as a diagnostic (confirms the fallback path alone is insufficient for this corpus), not deleted, not used as an accuracy claim anywhere in Day 4 reporting."
+  },
+  "rows": [
+    {
+      "sample_id": "holdout5-001",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A101",
+      "expected_output": "A103",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "C",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-003",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A101",
+      "expected_output": "A103",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "C",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-004",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "A304",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-005",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "NONE",
+      "expected_output": "A601",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-008",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A101",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-016",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "A301",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "positive",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-017",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "NONE",
+      "expected_output": "A304",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "positive",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-033",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-035",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A301",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-043",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-056",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A301",
+      "expected_output": "A501",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "negative",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-057",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A102",
+      "expected_output": "A101",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "positive",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "C",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-059",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A301",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-063",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A304",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "negative",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-071",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A304",
+      "expected_output": "A103",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-081",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-083",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A301",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-086",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "A301",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-102",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "A301",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-103",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A101",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-104",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "positive",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-143",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "negative",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-146",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A304",
+      "expected_output": "A101",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-151",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "A304",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-154",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A301",
+      "expected_output": "A304",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-158",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "A304",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-162",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-163",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-164",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A102",
+      "expected_output": "A101",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "C",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-167",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "A301",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-171",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A601",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "unknown",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-174",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "A304",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "A",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-177",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A201",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "negative",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-185",
+      "historical_error_framework": "ALPHA_MATCH",
+      "historical_output": "A304",
+      "expected_output": "NONE",
+      "current_output": null,
+      "current_output_full": {
+        "matched_alpha": null,
+        "score": 0.0,
+        "direction_used": "neutral",
+        "alpha_match_method": "llm_unavailable"
+      },
+      "category": "OTHER",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only map_claim_to_alpha (no llm_gateway, matches Architecture Replay's own zero-Provider contract) -- NOT the LLM path that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-003",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "mentions_alpha",
+      "expected_output": "supports_alpha",
+      "current_output": "neutral_background",
+      "current_output_full": {
+        "evidence_stance": "neutral_background",
+        "reason_codes": [
+          "CONTEXT_ONLY"
+        ],
+        "direction_used": "unknown",
+        "quality_used": "context_only"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-016",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "mentions_alpha",
+      "expected_output": "supports_alpha",
+      "current_output": "neutral_background",
+      "current_output_full": {
+        "evidence_stance": "neutral_background",
+        "reason_codes": [
+          "GENERIC_BACKGROUND"
+        ],
+        "direction_used": "positive",
+        "quality_used": "analytical"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-017",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "opposes_alpha",
+      "expected_output": "mentions_alpha",
+      "current_output": "neutral_background",
+      "current_output_full": {
+        "evidence_stance": "neutral_background",
+        "reason_codes": [
+          "GENERIC_BACKGROUND"
+        ],
+        "direction_used": "positive",
+        "quality_used": "analytical"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-040",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "opposes_alpha",
+      "expected_output": "mentions_alpha",
+      "current_output": "neutral_background",
+      "current_output_full": {
+        "evidence_stance": "neutral_background",
+        "reason_codes": [
+          "CONTEXT_ONLY"
+        ],
+        "direction_used": "neutral",
+        "quality_used": "context_only"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-057",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "mentions_alpha",
+      "expected_output": "supports_alpha",
+      "current_output": "supports_alpha",
+      "current_output_full": {
+        "evidence_stance": "supports_alpha",
+        "reason_codes": [
+          "OPPORTUNITY_ALPHA_ACTIVATION"
+        ],
+        "direction_used": "positive",
+        "quality_used": "analytical"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_CORRECT",
+      "regression_status": "IMPROVED",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-070",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "mentions_alpha",
+      "expected_output": "supports_alpha",
+      "current_output": "neutral_background",
+      "current_output_full": {
+        "evidence_stance": "neutral_background",
+        "reason_codes": [
+          "GENERIC_BACKGROUND"
+        ],
+        "direction_used": "positive",
+        "quality_used": "analytical"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-154",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "opposes_alpha",
+      "expected_output": "mentions_alpha",
+      "current_output": "neutral_background",
+      "current_output_full": {
+        "evidence_stance": "neutral_background",
+        "reason_codes": [
+          "GENERIC_BACKGROUND"
+        ],
+        "direction_used": "unknown",
+        "quality_used": "analytical"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-196",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "opposes_alpha",
+      "expected_output": "mentions_alpha",
+      "current_output": "neutral_background",
+      "current_output_full": {
+        "evidence_stance": "neutral_background",
+        "reason_codes": [
+          "CONTEXT_ONLY"
+        ],
+        "direction_used": "neutral",
+        "quality_used": "context_only"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    },
+    {
+      "sample_id": "holdout5-198",
+      "historical_error_framework": "POLARITY",
+      "historical_output": "opposes_alpha",
+      "expected_output": "mentions_alpha",
+      "current_output": "supports_alpha",
+      "current_output_full": {
+        "evidence_stance": "supports_alpha",
+        "reason_codes": [
+          "CONDITIONAL_SUPPORT"
+        ],
+        "direction_used": "unknown",
+        "quality_used": "analytical"
+      },
+      "category": "B",
+      "current_correctness": "CURRENTLY_WRONG_DIFFERENT",
+      "regression_status": "CHANGED_STILL_WRONG",
+      "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+      "method": "deterministic-only classify_evidence_stance (evidence_stance.py; never calls Provider) -- NOT the LLM path (evidence_stance_llm.py) that produced the historical decision"
+    }
+  ],
+  "phase_B_msft_a102": {
+    "rule_id": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+    "validation_type": "FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE",
+    "method": "comqutor_alpha.replay.pipeline.run_structure_replay against the frozen MSFT source run (43472ace-...), zero Provider/TradingAgents calls (verified: llm_provider_calls=0, market_data_provider_calls=0, tradingagents_calls=0, provider_zero=True)",
+    "replay_run_id": "replay-20260916T205410Z-6b80a5c8",
+    "replay_output_dir": "outputs/replays/replay-20260916T205410Z-6b80a5c8",
+    "source_raw_unchanged": true,
+    "stage_results": {
+      "direction_inference": "CONFIRMED FIXED in the real pipeline run: both previously-unknown-direction claims (bull_researcher claim:18, bear_researcher claim:34) now resolve direction=positive.",
+      "claim_quality": "CONFIRMED FIXED: both claims now resolve claim_quality=analytical (previously context_only).",
+      "evidence_stance_and_activation": "NOT CONCLUSIVELY CONFIRMABLE via this tool: in this same zero-Provider replay, activation collapses to score=0.0/candidate for EVERY alpha on EVERY ticker (verified across all six frozen tickers, not MSFT-specific) -- e.g. A304, historically MSFT's best-evidenced alpha (39 real evidence groups in the original run), also shows 0 evidence-fact groups and score=0.0 in this replay. This is a universal characteristic of the zero-Provider Architecture Replay tool against this LLM-semantic-dependent pipeline, not a residual defect introduced or left by the Day 3 fix."
+    },
+    "result": "FAIL",
+    "first_remaining_incorrect_stage": "Activation Scoring / Alpha Mapping -- specifically, its dependence on LLM-assisted semantic matching and stance classification, which no zero-Provider validation tool available today can supply. This is a validation-TOOLING limitation, independently confirmed to affect all six tickers equally, not a residual code defect in the Day 3 fix (which is independently confirmed correct at the direction and claim-quality stages using this exact real pipeline run).",
+    "confirmation_still_required": "A Provider-backed recomputation of the MSFT frozen input (Fresh E2E or a targeted Provider-backed re-classification) is the only way to confirm whether A102 now reaches active. Not performed today (Phase B is FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE, not FRESH_RUN)."
+  },
+  "phase_C_rule_evidence_readjudication": {
+    "validation_type": "OLD_RESULT_REEVALUATED_UNDER_NEW_RULES + FROZEN_INPUT_RECOMPUTED_WITH_NEW_CODE (mixed: frozen authority unchanged, code re-inspected)",
+    "method": "Re-ran the exact Day 2 rule-evidence-output audit script, unchanged, against the same frozen persisted evidence/output data for all six tickers (25 rule rows) -- this data is not affected by the Day 3 code change (which only touches a currently-unused-by-these-artifacts deterministic fallback), so re-adjudication under current code + frozen Day 1 authority reproduces the identical Day 2 tally.",
+    "tally": {
+      "PASS": 21,
+      "FAIL": 1,
+      "NOT_TRIGGERED": 0,
+      "INSUFFICIENT_EVIDENCE": 0,
+      "NOT_EVALUATED": 0,
+      "NOT_APPLICABLE": 0,
+      "REVIEW_REQUIRED": 3,
+      "IMPLEMENTATION_ALIGNMENT_REQUIRED": 0
+    },
+    "unchanged_from_day2": true,
+    "note": "The single FAIL (MSFT-A102-DIRECT-INFERENCE-TRIGGER) is NOT counted as PASS despite the Day 3 fix, because the underlying persisted evidence/output for this rule was captured before the fix existed and the fix's downstream effect on activation cannot yet be confirmed (see Phase B). No rule with a missing/unconfirmed implementation is counted PASS."
+  }
+}

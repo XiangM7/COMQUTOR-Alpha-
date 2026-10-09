@@ -1,0 +1,4409 @@
+{
+ "schema_version": "t3_joint_sample_v4_manifest.v1",
+ "derived_from": "joint_sample_v3_manifest.json",
+ "quota": {
+  "A304_boundary": 16,
+  "A101_A103": 8,
+  "A001": 4,
+  "A003": 4,
+  "A102": 4,
+  "A501": 4
+ },
+ "summary": {
+  "by_material_status": {
+   "COMPLETE": 27,
+   "PARTIAL": 7,
+   "NO_FACTUAL_ELEMENT": 2,
+   "NO_MATERIAL": 4
+  },
+  "by_action": {
+   "keep": 25,
+   "replacement": 3,
+   "complete": 5,
+   "gap": 2,
+   "partial": 1,
+   "collect": 4
+  },
+  "by_cell_and_status": {
+   "A304_boundary": {
+    "COMPLETE": 13,
+    "PARTIAL": 3
+   },
+   "A101_A103": {
+    "PARTIAL": 2,
+    "COMPLETE": 6
+   },
+   "A001": {
+    "PARTIAL": 1,
+    "COMPLETE": 3
+   },
+   "A003": {
+    "COMPLETE": 3,
+    "NO_FACTUAL_ELEMENT": 1
+   },
+   "A102": {
+    "PARTIAL": 1,
+    "COMPLETE": 2,
+    "NO_FACTUAL_ELEMENT": 1
+   },
+   "A501": {
+    "NO_MATERIAL": 4
+   }
+  }
+ },
+ "rule": "Round 25 part B, item 1: complete the material conditions of the frozen 40-item joint sample (v3 -> v4) without fetching anything.\n\nFor every sample the claim's factual elements are listed by hand (SPEC below) and each element is tied to material the SAME run saved at run time\n-- registered data rows / fields (source_registry.json), saved news titles (source_registry.json) or the run's saved daily market rows\n(market_data_snapshot.json). Agent text never counts as material. This script RESOLVES every reference against the saved files (it fails if a\nfield, period or title does not exist) and writes the values it found; the element analysis itself is engineering judgment and is labelled so.\n\nElement status:  LOCATED  the figure / fact is stated in the material\n                 DERIVED  computable from located rows (the derivation is written down)\n                 RELATED  material bears on the element but does not state or reproduce it (the reviewer judges how far it supports it)\n                 NOT_SAVED  no material for it was saved by the run (prediction-market odds, article bodies, social posts, ...)\nSample material status:  COMPLETE (no NOT_SAVED element) / PARTIAL / NO_MATERIAL (every element NOT_SAVED) / NO_FACTUAL_ELEMENT\n\nThe 15 v3 samples without saved source content were handled in the user's order: (1) complete from saved material; (2) otherwise replace by the\nfirst candidate of the same cell, in the frozen hash order (salt \"t3v3|\"), whose material is COMPLETE and which is not a duplicate; (3) otherwise\nlist it for collection (or as an exact gap when the claim states no checkable fact). No prediction exists yet; nothing was chosen by looking at\na model answer.\n\n    python build_samples_v4.py --out-dir <new dir>\n",
+ "samples": [
+  {
+   "sample_id": "t3v3-001",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "portfolio_manager",
+   "report_section": "Synthesis of the Risk Debate",
+   "claim_text": "Where the conservative analyst overreaches: He is right on valuation, right on rate transmission, right on earnings quality — but he commits a category error by sizing the residual against the 52-week low of $188.22.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "His own concession that clean EPS is $1.12 versus reported $1.38 is the tell: at 161x trailing earnings, the market capitalizes the headline, and the headline was partly non-operating.",
+     "His covered-call-into-FOMC idea is the one genuinely useful tactic he offered — but it is a hedge, not a reason to hold full size into a binary event with a live 20% hike tail."
+    ],
+    "after": [
+     "That is capitulation pricing, not risk management.",
+     "A company with $8.8B net cash and $8.4B trailing FCF is not a solvency risk; it is a multiple-de-rating risk."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:12",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": "portfolio_manager / Synthesis of the Risk Debate",
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 12
+   },
+   "selection": "full chain; key conclusion; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "52-week low of $188.22",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "fifty_two_week_low",
+     "value": 188.22,
+     "unit": "USD"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-002",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "portfolio_manager",
+   "report_section": "Synthesis of the Risk Debate",
+   "claim_text": "His own concession that clean EPS is $1.12 versus reported $1.38 is the tell: at 161x trailing earnings, the market capitalizes the headline, and the headline was partly non-operating.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The conservative analyst's three scenarios (multiple already paid for the front-running; a hawkish rate path compressing a 2.45-beta long-duration multiple; a headline beat flattered by a $483M non-operating investment gain) require no demand collapse.",
+     "The aggressive analyst's response was to restate his thesis louder."
+    ],
+    "after": [
+     "His covered-call-into-FOMC idea is the one genuinely useful tactic he offered — but it is a hedge, not a reason to hold full size into a binary event with a live 20% hike tail.",
+     "Where the conservative analyst overreaches: He is right on valuation, right on rate transmission, right on earnings quality — but he commits a category error by sizing the residual against the 52-week low of $188.22."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:10",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": "portfolio_manager / Synthesis of the Risk Debate",
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_582ac24bf4319648",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 1
+   },
+   "selection": "full chain; key conclusion; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "reported $1.38",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": "quarterly diluted EPS"
+    },
+    {
+     "text": "clean EPS is $1.12",
+     "status": "RELATED",
+     "material_refs": [
+      "src_582ac24bf4319648",
+      "src_582ac24bf4319648",
+      "src_582ac24bf4319648"
+     ],
+     "note": "1.12 is not stated; it depends on which items are treated as non-operating"
+    },
+    {
+     "text": "161x trailing earnings",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": "a different saved source than the claim's link"
+    },
+    {
+     "text": "the headline was partly non-operating",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Diluted EPS",
+     "values": {
+      "2026-06-30": 1.38
+     },
+     "unit": "UNKNOWN_CURRENCY_per_share",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Net Income",
+     "values": {
+      "2026-06-30": 2297000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Other Non Operating Income Expenses",
+     "values": {
+      "2026-06-30": 598000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Diluted Average Shares",
+     "values": {
+      "2026-06-30": 1659000000.0
+     },
+     "unit": "shares",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "trailing_pe",
+     "value": 161.08163,
+     "unit": "ratio"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-003",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "trader",
+   "report_section": null,
+   "claim_text": "Reasoning: The bear case wins on the three factors that matter for this entry point: FCF collapsed 39% sequentially to $1,558,000,000 as of 2026-06-30 from $2,566,000,000 as of 2026-03-31 [fragmentid: src4045667791b919f9:frag:0] while receivables grew +20.6% QoQ faster than +12.5% revenue growth; the macro setup offers no scenario with both strong demand and falling rates, a direct multiple headwind for a 2.45-beta long-duration asset; and the bull's PEG of 0.64 is circular, built on the very forward EPS estimate in question.",
+   "evidence_text": null,
+   "context": {
+    "before": [],
+    "after": [
+     "At 37% above the 200-day average and 161x TTM P/E, the asymmetry is decisively negative — the bull needs everything to go right, the bear needs one thing to go wrong.",
+     "I stop short of a full exit because the AI/data-center inflection is real and the $8.8B net-cash balance sheet is a genuine floor, so this is a trim into strength, not a liquidation."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:trader:trader_investment_plan:claim:1",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": "trader",
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_4045667791b919f9",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 3
+   },
+   "selection": "full chain; key conclusion; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "FCF collapsed 39% sequentially to $1,558,000,000 from $2,566,000,000",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_4045667791b919f9"
+     ],
+     "note": "1558/2566-1 = -39.3%"
+    },
+    {
+     "text": "receivables grew +20.6% QoQ",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": "7281/6035-1 = +20.6%"
+    },
+    {
+     "text": "+12.5% revenue growth",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": "11536/10253-1 = +12.5%"
+    },
+    {
+     "text": "the macro setup offers no scenario with both strong demand and falling rates",
+     "status": "RELATED",
+     "material_refs": [
+      "src_a36554814b0dc85c",
+      "src_0d3e38ccb1b90ff9"
+     ],
+     "note": "only headlines on Fed rate-hike expectations were saved"
+    },
+    {
+     "text": "a 2.45-beta asset",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    },
+    {
+     "text": "the bull's PEG of 0.64 ... built on the forward EPS estimate",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949",
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_4045667791b919f9",
+     "source_title": "AMD cash flow Free Cash Flow snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "1c9591478f6247f78b9b6206c3067e27906947e0c5bdf339d1ea815ae558a649",
+     "statement": "cash flow",
+     "field": "Free Cash Flow",
+     "values": {
+      "2026-06-30": 1558000000.0,
+      "2026-03-31": 2566000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Receivables",
+     "values": {
+      "2026-06-30": 7281000000.0,
+      "2026-03-31": 6035000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2026-06-30": 11536000000.0,
+      "2026-03-31": 10253000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_a36554814b0dc85c",
+     "source_name": "InvestorsHub",
+     "title": "Gold Edges Higher as Weak US Jobs Data Reduces Fed Rate-Hike Expectations",
+     "url": "https://finance.yahoo.com/markets/commodities/articles/gold-edges-higher-weak-us-092910822.html",
+     "published_at": "2026-10-05T02:29:10",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_0d3e38ccb1b90ff9",
+     "source_name": "Quartz",
+     "title": "Gold prices rise after weak September jobs report dims Fed rate hike",
+     "url": "https://finance.yahoo.com/markets/commodities/articles/gold-prices-rise-weak-september-120920954.html",
+     "published_at": "2026-10-05T05:09:20",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "beta",
+     "value": 2.454,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "peg_ratio",
+     "value": 0.64,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "forward_eps",
+     "value": 15.63089,
+     "unit": "USD_per_share"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-004",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "portfolio_manager",
+   "report_section": "Synthesis of the Risk Debate",
+   "claim_text": "The conservative analyst's three scenarios (multiple already paid for the front-running; a hawkish rate path compressing a 2.45-beta long-duration multiple; a headline beat flattered by a $483M non-operating investment gain) require no demand collapse.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Nobody is arguing AMD is a bad company.",
+     "Where the aggressive analyst overreaches: His central challenge — \"name one scenario where record revenue plus 53.8% margins plus $8.8B net cash produces a negative outcome not already priced in\" — was answered three times and he never rebutted it."
+    ],
+    "after": [
+     "The aggressive analyst's response was to restate his thesis louder.",
+     "His own concession that clean EPS is $1.12 versus reported $1.38 is the tell: at 161x trailing earnings, the market capitalizes the headline, and the headline was partly non-operating."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:portfolio_manager:final_trade_decision:claim:8",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": "portfolio_manager / Synthesis of the Risk Debate",
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 13
+   },
+   "selection": "full chain; key conclusion; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "a 2.45-beta long-duration multiple",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    },
+    {
+     "text": "a $483M non-operating investment gain",
+     "status": "RELATED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": "the saved row shows 598M; no 483M item was saved"
+    },
+    {
+     "text": "a hawkish rate path",
+     "status": "RELATED",
+     "material_refs": [
+      "src_a36554814b0dc85c",
+      "src_0d3e38ccb1b90ff9"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "beta",
+     "value": 2.454,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Other Non Operating Income Expenses",
+     "values": {
+      "2026-06-30": 598000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_a36554814b0dc85c",
+     "source_name": "InvestorsHub",
+     "title": "Gold Edges Higher as Weak US Jobs Data Reduces Fed Rate-Hike Expectations",
+     "url": "https://finance.yahoo.com/markets/commodities/articles/gold-edges-higher-weak-us-092910822.html",
+     "published_at": "2026-10-05T02:29:10",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_0d3e38ccb1b90ff9",
+     "source_name": "Quartz",
+     "title": "Gold prices rise after weak September jobs report dims Fed rate hike",
+     "url": "https://finance.yahoo.com/markets/commodities/articles/gold-prices-rise-weak-september-120920954.html",
+     "published_at": "2026-10-05T05:09:20",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-005",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "trader",
+   "report_section": null,
+   "claim_text": "Reasoning: The Research Manager's verdict is Underweight: the bear won the two decisive exchanges (the forward P/E of 41.67x rests on an EPS estimate of $15.72 [fragmentid: src7e133fa786f7aaa0:frag:0] that requires a 3x acceleration from the current $1.38 quarterly / $5.52 annualized run-rate [fragmentid: src582ac24bf4319648:frag:0], and net cash does not immunize a 167x trailing multiple from duration-driven compression with the 10-year at a 24-year high).",
+   "evidence_text": null,
+   "context": {
+    "before": [],
+    "after": [
+     "Technicals confirm the warning — MACD histogram contracting from 15.05 to 3.91 [fragmentid: src388228ad9e12e09d:frag:0], price 73% above the 200 SMA [fragmentid: src388228ad9e12e09d:frag:0], and a new high on only 16,782,886 shares [fragmentid: src388228ad9e12e09d:frag:0] versus 44.5M on the September breakout — while receivables grew +20.6% QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] against +12.5% revenue growth.",
+     "At $654.91 the asymmetry is unfavorable: 5.5% upside to the 691.33 upper band [fragmentid: src388228ad9e12e09d:frag:0] versus 5.5% downside to the 10 EMA at 618.52 and 21% to the 50 SMA at 518.93 [fragmentid: src388228ad9e12e09d:frag:0], with a hot-skewed October 15 CPI and 45% implied odds of AI-chip export licensing legislation as live tail risks."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:trader:trader_investment_plan:claim:1",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": "trader",
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_7e133fa786f7aaa0",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 24
+   },
+   "selection": "full chain; key conclusion; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "forward P/E of 41.67x",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    },
+    {
+     "text": "an EPS estimate of $15.72",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    },
+    {
+     "text": "the current $1.38 quarterly / $5.52 annualized run-rate",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": "1.38 x 4 = 5.52"
+    },
+    {
+     "text": "a 167x trailing multiple",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    },
+    {
+     "text": "net cash",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a",
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": "13111 - 4276 = 8835 (M)"
+    },
+    {
+     "text": "the 10-year at a 24-year high",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_a213d06f42bbdca9"
+     ],
+     "note": "2002 -> 2026"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "forward_pe",
+     "value": 41.668015,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "forward_eps",
+     "value": 15.72189,
+     "unit": "USD_per_share"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Diluted EPS",
+     "values": {
+      "2026-06-30": 1.38
+     },
+     "unit": "UNKNOWN_CURRENCY_per_share",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "trailing_pe",
+     "value": 167.11734,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Cash Cash Equivalents And Short Term Investments",
+     "values": {
+      "2026-06-30": 13111000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Total Debt",
+     "values": {
+      "2026-06-30": 4276000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_a213d06f42bbdca9",
+     "source_name": "Yahoo Finance",
+     "title": "10-Year Treasury yield touches highest level since 2002: AlphaCheck",
+     "url": "https://finance.yahoo.com/markets/article/10-year-treasury-yield-touches-highest-level-since-2002-alphacheck-135255038.html",
+     "published_at": "2026-10-01T06:59:46",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-006",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "portfolio_manager",
+   "report_section": "Synthesis of the Risk Debate",
+   "claim_text": "His second overreach is the PEG defense — he calls 0.64 \"priced for a ramp that the last four quarters of data actually support,\" but the last four quarters support a trailing inflection, not a forward EPS of $15.72 [fragmentid: src7e133fa786f7aaa0:frag:0] against a current quarterly run-rate of $1.38 [fragmentid: src582ac24bf4319648:frag:0].",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Where the aggressive analyst overreaches: His central move is to relabel the trader's trim as \"more aggressive than it looks.\" That is rhetoric, not analysis.",
+     "Selling into strength is prudent, not aggressive, and claiming the trader's caution as his own does not survive scrutiny."
+    ],
+    "after": [
+     "That is roughly a three-fold acceleration that has not appeared in any reported quarter.",
+     "He is underwriting consensus, not the company."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:10",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": "portfolio_manager / Synthesis of the Risk Debate",
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_7e133fa786f7aaa0",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/john_spot_check_sample.csv"
+    ],
+    "data_files_count": 39
+   },
+   "selection": "full chain; key conclusion; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "PEG 0.64",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    },
+    {
+     "text": "a forward EPS of $15.72",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    },
+    {
+     "text": "a current quarterly run-rate of $1.38",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": ""
+    },
+    {
+     "text": "the last four quarters support a trailing inflection",
+     "status": "RELATED",
+     "material_refs": [
+      "src_582ac24bf4319648",
+      "src_582ac24bf4319648"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "peg_ratio",
+     "value": 0.64,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "forward_eps",
+     "value": 15.72189,
+     "unit": "USD_per_share"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Diluted EPS",
+     "values": {
+      "2026-06-30": 1.38
+     },
+     "unit": "UNKNOWN_CURRENCY_per_share",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2026-06-30": 11536000000.0,
+      "2026-03-31": 10253000000.0,
+      "2025-12-31": 10270000000.0,
+      "2025-09-30": 9246000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Diluted EPS",
+     "values": {
+      "2026-06-30": 1.38,
+      "2026-03-31": 0.84,
+      "2025-12-31": 0.92,
+      "2025-09-30": 0.75
+     },
+     "unit": "UNKNOWN_CURRENCY_per_share",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-007",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "conservative_risk_analyst",
+   "report_section": null,
+   "claim_text": "If anything, I'd argue for the upper end of that range, and I'd want the residual sized against the 52-week low of $188.22, not the 50-day average, because that's the actual downside reference in a genuine de-rating.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The trader's proposal — reduce by one-third to one-half, sell into rallies, size the residual so a 25-30% drawdown is survivable given a 2.45 beta — is not aggressive.",
+     "It's the minimum prudent response to a position that is 37% above its 200-day average with a 161x trailing multiple and deteriorating near-term cash conversion."
+    ],
+    "after": [
+     "And to the aggressive analyst's closing point — that waiting for \"two consecutive quarters of clean, cash-backed execution\" means missing a 40% move — I'd say this: our job is not to capture every dollar of upside.",
+     "Our job is to protect the firm's capital and compound it reliably."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:48",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 12
+   },
+   "selection": "full chain; A304 text cue 'refute'; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "52-week low of $188.22",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    },
+    {
+     "text": "the 50-day average",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "fifty_two_week_low",
+     "value": 188.22,
+     "unit": "USD"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "fifty_day_average",
+     "value": 513.5342,
+     "unit": "USD"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-008",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "research_manager",
+   "report_section": null,
+   "claim_text": "Third, valuation rigor: the bull's PEG of 0.64 is circular — it's built on the very sell-side forward EPS estimate that is in question, and if the 4x ramp from TTM $3.92 to $15.63 comes in at 3x, the multiple de-rates violently.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Second, macro asymmetry: the bull's \"low recession risk means demand is fine\" argument is self-defeating — low recession risk is precisely why the Fed doesn't cut.",
+     "There is no current-data scenario where AMD gets both strong demand AND falling rates, and for a long-duration, high-beta (2.45) asset a rising discount rate is a direct multiple headwind."
+    ],
+    "after": [
+     "The bull's balance-sheet defense is a solvency floor, not a valuation ceiling — a category error.",
+     "The decisive factor is asymmetry: the bull's thesis requires the ramp delivered, rates cooperative, no share loss, and no macro shock; the bear's thesis requires only one thing to go wrong."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:research_manager:investment_plan:claim:8",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [
+     "A304"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 14
+   },
+   "selection": "full chain; A304 text cue 'conditional'; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "PEG of 0.64",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    },
+    {
+     "text": "the 4x ramp from TTM $3.92 to $15.63",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_5bd8a947130d1949",
+      "src_5bd8a947130d1949"
+     ],
+     "note": "15.63/3.92 = 3.99"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "peg_ratio",
+     "value": 0.64,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "trailing_eps",
+     "value": 3.92,
+     "unit": "USD_per_share"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "forward_eps",
+     "value": 15.63089,
+     "unit": "USD_per_share"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-009",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "neutral_risk_analyst",
+   "report_section": null,
+   "claim_text": "He says the prediction markets are pricing 96% odds of no Fed rate cuts in 2026 and 76% odds of another hike, the 10-year is at a 24-year high, AMD's beta is 2.454, and therefore long-duration semiconductor multiples compress.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Let me be precise: a half trim plus a hard stop at 615 plus four re-entry conditions is not \"the trader's trim, but deeper.\" It is a different strategy with a different risk profile, and it deserves to be named as such.",
+     "Now the conservative analyst's macro argument, which is his strongest card."
+    ],
+    "after": [
+     "I agree with the arithmetic.",
+     "I do not agree with the conclusion he draws from it, and here is why."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:28",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_7e133fa786f7aaa0",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 25
+   },
+   "selection": "full chain; A304 text cue 'citation'; hash order",
+   "action": "keep",
+   "material_status": "PARTIAL",
+   "elements": [
+    {
+     "text": "96% odds of no Fed rate cuts in 2026",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    },
+    {
+     "text": "76% odds of another hike",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    },
+    {
+     "text": "the 10-year is at a 24-year high",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_a213d06f42bbdca9"
+     ],
+     "note": ""
+    },
+    {
+     "text": "AMD's beta is 2.454",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_a213d06f42bbdca9",
+     "source_name": "Yahoo Finance",
+     "title": "10-Year Treasury yield touches highest level since 2002: AlphaCheck",
+     "url": "https://finance.yahoo.com/markets/article/10-year-treasury-yield-touches-highest-level-since-2002-alphacheck-135255038.html",
+     "published_at": "2026-10-01T06:59:46",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "beta",
+     "value": 2.454,
+     "unit": "ratio"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-010",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "fundamental_agent",
+   "report_section": "1. Company Profile & Market Snapshot",
+   "claim_text": "Metric: Forward P/E; Value: 40.40",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Metric: Market Cap; Value: $1,030,810,042,368 (≈$1.03T) [fragmentid: src5bd8a947130d1949:frag:0]",
+     "Metric: P/E (TTM); Value: 161.08 [fragmentid: src5bd8a947130d1949:frag:0]"
+    ],
+    "after": [
+     "Metric: PEG Ratio; Value: 0.64",
+     "Metric: Price / Book; Value: 15.33"
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:7",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 4
+   },
+   "selection": "full chain; A304 text cue 'data'; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Forward P/E 40.40",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "forward_pe",
+     "value": 40.39693,
+     "unit": "ratio"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-011",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "conservative_risk_analyst",
+   "report_section": null,
+   "claim_text": "You say the PEG of 0.64 means we're \"buying growth at a discount.\" But that PEG is computed off the very forward estimate that has to be delivered.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "It's a valuation that has already paid for the front-running.",
+     "The forward P/E of 40.4x and forward EPS of $15.63 versus TTM EPS of $3.92 imply a roughly 4x earnings ramp."
+    ],
+    "after": [
+     "If the ramp comes in at 70% — your own number — the forward P/E isn't 40x, it's closer to 58x, and the PEG isn't 0.64, it's closer to 0.9.",
+     "Still not catastrophic, but the margin of safety you're claiming evaporates."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:24",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 12
+   },
+   "selection": "full chain; A304 text cue 'refute'; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "PEG of 0.64 ... computed off the forward estimate",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949",
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "peg_ratio",
+     "value": 0.64,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "forward_eps",
+     "value": 15.63089,
+     "unit": "USD_per_share"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-012",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "neutral_risk_analyst",
+   "report_section": null,
+   "claim_text": "He says the forward P/E of 41.67 with a PEG of 0.64 is \"priced for a ramp that the last four quarters of data actually support.\" That is the single weakest link in his entire argument, and he states it as if it were self-evident.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Revenue went from $7,685M to $11,536M year-over-year [fragmentid: src582ac24bf4319648:frag:0], gross margin reset from 39.8% to 53.8% [fragmentid: src582ac24bf4319648:frag:0], and operating income swung from negative $134M to positive $1,990M [fragmentid: src582ac24bf4319648:frag:0].",
+     "But here is where the aggressive case gets sloppy."
+    ],
+    "after": [
+     "The last four quarters of data support a trailing inflection.",
+     "They do not support a forward EPS of $15.72 [fragmentid: src7e133fa786f7aaa0:frag:0] against a current quarterly run-rate of $1.38 [fragmentid: src582ac24bf4319648:frag:0]."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:11",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_7e133fa786f7aaa0",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "full chain; A304 text cue 'conditional'; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "forward P/E of 41.67 with a PEG of 0.64",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0",
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    },
+    {
+     "text": "the last four quarters of data",
+     "status": "RELATED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "forward_pe",
+     "value": 41.668015,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "peg_ratio",
+     "value": 0.64,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2026-06-30": 11536000000.0,
+      "2026-03-31": 10253000000.0,
+      "2025-12-31": 10270000000.0,
+      "2025-09-30": 9246000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-013",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "research_manager",
+   "report_section": "4. Actionable Investment Plan for the Trader",
+   "claim_text": "At $654.91, with a 24-year-high yield backdrop, a forward estimate requiring a 3x acceleration from the current run-rate, stretched technicals on fading volume, and a live policy tail risk, the stock argument governs.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Bottom line for the desk: The bull has the better business argument.",
+     "The bear has the better stock argument."
+    ],
+    "after": [
+     "Trim into strength, hold a core, and let the 10 EMA and the October 15 CPI tell you which branch of the distribution you're in."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:89",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_388228ad9e12e09d",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [
+     "A304"
+    ],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 25
+   },
+   "selection": "full chain; A304 text cue 'citation'; hash order",
+   "action": "keep",
+   "material_status": "PARTIAL",
+   "elements": [
+    {
+     "text": "At $654.91",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_388228ad9e12e09d"
+     ],
+     "note": ""
+    },
+    {
+     "text": "a 24-year-high yield backdrop",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_a213d06f42bbdca9"
+     ],
+     "note": ""
+    },
+    {
+     "text": "a forward estimate requiring a 3x acceleration from the current run-rate",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0",
+      "src_582ac24bf4319648"
+     ],
+     "note": "15.72 / (1.38 x 4) = 2.85"
+    },
+    {
+     "text": "stretched technicals on fading volume",
+     "status": "RELATED",
+     "material_refs": [
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d",
+      "market_data_snapshot.json"
+     ],
+     "note": ""
+    },
+    {
+     "text": "a live policy tail risk",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "AI-chip export licensing odds (prediction market) not saved"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "Close",
+     "value": "654.91",
+     "unit": null
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_a213d06f42bbdca9",
+     "source_name": "Yahoo Finance",
+     "title": "10-Year Treasury yield touches highest level since 2002: AlphaCheck",
+     "url": "https://finance.yahoo.com/markets/article/10-year-treasury-yield-touches-highest-level-since-2002-alphacheck-135255038.html",
+     "published_at": "2026-10-01T06:59:46",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "forward_eps",
+     "value": 15.72189,
+     "unit": "USD_per_share"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Diluted EPS",
+     "values": {
+      "2026-06-30": 1.38
+     },
+     "unit": "UNKNOWN_CURRENCY_per_share",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "rsi",
+     "value": "72.95",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "close_200_sma",
+     "value": "379.12",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "Volume",
+     "value": "16782886",
+     "unit": null
+    },
+    {
+     "type": "market_rows",
+     "artifact": "market_data_snapshot.json",
+     "provider": "yfinance",
+     "retrieved_at": "2026-10-06T19:26:27Z",
+     "rows": [
+      {
+       "date": "2026-09-21",
+       "close": 615.52001953125,
+       "volume": 44494300
+      },
+      {
+       "date": "2026-09-22",
+       "close": 623.77001953125,
+       "volume": 28282800
+      },
+      {
+       "date": "2026-10-01",
+       "close": 615.72998046875,
+       "volume": 17134500
+      },
+      {
+       "date": "2026-10-02",
+       "close": 633.9099731445312,
+       "volume": 19865300
+      },
+      {
+       "date": "2026-10-05",
+       "close": 631.75,
+       "volume": 13690000
+      },
+      {
+       "date": "2026-10-06",
+       "close": 653.7315063476562,
+       "volume": 19029582
+      }
+     ]
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-014",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "fundamental_agent",
+   "report_section": "5. Synthesis: Fundamental View for Traders",
+   "claim_text": "Traders should treat the forward EPS of $15.72 as the key hurdle — evidence of continued sequential revenue growth and gross-margin defense above 53% is required to justify the multiple.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The fundamental trajectory is strongly improving — revenue, margins, and operating income are all inflecting upward, and the balance sheet is pristine.",
+     "The risk is entirely in the price and the forward expectation: the market has already capitalized a 4x EPS ramp."
+    ],
+    "after": [
+     "Watch items for the next print: (a) whether capex stays elevated (bullish demand signal) or is cut (caution), (b) receivables/inventory normalization, (c) gross margin holding ≥53%, (d) FCF recovery as capex normalizes.",
+     "Given the combination of a genuine fundamental inflection and a very rich valuation with high beta, the risk/reward is balanced-to-constructive but highly event-dependent — position sizing and volatility management are critical."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:110",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_7e133fa786f7aaa0",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [
+     "A301"
+    ],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 27
+   },
+   "selection": "full chain; A304 text cue 'data'; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "the forward EPS of $15.72",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    },
+    {
+     "text": "gross-margin defense above 53%",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_582ac24bf4319648",
+      "src_582ac24bf4319648"
+     ],
+     "note": "6203/11536 = 53.8%"
+    },
+    {
+     "text": "continued sequential revenue growth",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "forward_eps",
+     "value": 15.72189,
+     "unit": "USD_per_share"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Gross Profit",
+     "values": {
+      "2026-06-30": 6203000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2026-06-30": 11536000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2026-06-30": 11536000000.0,
+      "2026-03-31": 10253000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-015",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "conservative_risk_analyst",
+   "report_section": null,
+   "claim_text": "When you underwrite a position on a PEG of 0.64, you are not underwriting the company — you are underwriting the analyst consensus.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The aggressive analyst calls the PEG of 0.64 \"attractive.\" I call it a ratio whose denominator is an estimate, not a result.",
+     "A PEG ratio is only as good as the growth number you feed it, and that growth number is the single most optimistic input in the entire model."
+    ],
+    "after": [
+     "Those are not the same thing, and the second one has a habit of getting revised.",
+     "He also says I will want to \"sell the whole thing\" and calls that \"cowardice dressed up as risk management.\" Let me be precise about what I actually advocate, because he is arguing against a straw man."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:17",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_7e133fa786f7aaa0",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "full chain; A304 text cue 'refute'; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "a PEG of 0.64",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "peg_ratio",
+     "value": 0.64,
+     "unit": "ratio"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-016",
+   "cell": "A304_boundary",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "bull_researcher",
+   "report_section": "4. The Macro Bear Case Is Internally Contradictory",
+   "claim_text": "If AMD can rally to $654.91 with 96% odds of no cuts priced in, imagine what happens if the October 15 CPI comes in cool — the bear's own report notes the cooler 3.4% bucket sits at just 4%, meaning any downside surprise to inflation is a massive asymmetric upside catalyst.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The bear's core macro claim is that \"the Rate Cut Cycle tailwind is priced out for 2026\" (96% no-cuts, 76% odds of a hike).",
+     "That's the definition of a stock that doesn't need rate cuts to work."
+    ],
+    "after": [
+     "The bear is treating \"no cuts\" as a ceiling.",
+     "I'm treating it as already-priced-in downside with free optionality on any dovish surprise."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:55",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_388228ad9e12e09d",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 25
+   },
+   "selection": "full chain; A304 text cue 'conditional'; hash order",
+   "action": "keep",
+   "material_status": "PARTIAL",
+   "elements": [
+    {
+     "text": "AMD can rally to $654.91",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_388228ad9e12e09d"
+     ],
+     "note": ""
+    },
+    {
+     "text": "96% odds of no cuts priced in",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    },
+    {
+     "text": "the October 15 CPI",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "release date not in any saved source"
+    },
+    {
+     "text": "the cooler 3.4% bucket sits at just 4%",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "Close",
+     "value": "654.91",
+     "unit": null
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-017",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "trader",
+   "report_section": null,
+   "claim_text": "At $654.91 the asymmetry is unfavorable: 5.5% upside to the 691.33 upper band [fragmentid: src388228ad9e12e09d:frag:0] versus 5.5% downside to the 10 EMA at 618.52 and 21% to the 50 SMA at 518.93 [fragmentid: src388228ad9e12e09d:frag:0], with a hot-skewed October 15 CPI and 45% implied odds of AI-chip export licensing legislation as live tail risks.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Reasoning: The Research Manager's verdict is Underweight: the bear won the two decisive exchanges (the forward P/E of 41.67x rests on an EPS estimate of $15.72 [fragmentid: src7e133fa786f7aaa0:frag:0] that requires a 3x acceleration from the current $1.38 quarterly / $5.52 annualized run-rate [fragmentid: src582ac24bf4319648:frag:0], and net cash does not immunize a 167x trailing multiple from duration-driven compression with the 10-year at a 24-year high).",
+     "Technicals confirm the warning — MACD histogram contracting from 15.05 to 3.91 [fragmentid: src388228ad9e12e09d:frag:0], price 73% above the 200 SMA [fragmentid: src388228ad9e12e09d:frag:0], and a new high on only 16,782,886 shares [fragmentid: src388228ad9e12e09d:frag:0] versus 44.5M on the September breakout — while receivables grew +20.6% QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] against +12.5% revenue growth."
+    ],
+    "after": [
+     "I therefore act on the plan's trim directive as a Sell of roughly one-third of the position into strength, retaining a core long given the genuine fundamental inflection and intact trend.",
+     "Position Sizing: Trim 1/3 of existing long exposure into strength toward 691.33; retain a core position."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:trader:trader_investment_plan:claim:3",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": "trader",
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_388228ad9e12e09d",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "full chain; key conclusion; hash order",
+   "action": "keep",
+   "material_status": "PARTIAL",
+   "elements": [
+    {
+     "text": "At $654.91",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_388228ad9e12e09d"
+     ],
+     "note": ""
+    },
+    {
+     "text": "the 691.33 upper band / the 10 EMA at 618.52 / the 50 SMA at 518.93",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d"
+     ],
+     "note": ""
+    },
+    {
+     "text": "5.5% upside ... 5.5% downside ... 21%",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d"
+     ],
+     "note": "691.33/654.91-1 = 5.6%; 618.52/654.91-1 = -5.6%; 518.93/654.91-1 = -20.8%"
+    },
+    {
+     "text": "a hot-skewed October 15 CPI",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "not in any saved source"
+    },
+    {
+     "text": "45% implied odds of AI-chip export licensing legislation",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "Close",
+     "value": "654.91",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "boll_ub",
+     "value": "691.33",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "close_10_ema",
+     "value": "618.52",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "close_50_sma",
+     "value": "518.93",
+     "unit": null
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-018",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "bull_researcher",
+   "report_section": "4. The Working-Capital \"Yellow Flag\" Is a Growth Signal in Disguise",
+   "claim_text": "Work-in-process rose to $5,265M from $4,167M — consistent with ramping advanced-node AI products.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Inventory build of +5.3% QoQ is now slower than revenue growth of +12.5%.",
+     "That means demand is absorbing supply — the opposite of a glut."
+    ],
+    "after": [
+     "You build WIP before you ship revenue.",
+     "This is a leading indicator of the forward ramp, not a warning sign."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:bull_researcher:investment_debate_state.bull_history:claim:34",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_d889dd1e36a5d55a",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [
+     "A101"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 3
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Work-in-process rose to $5,265M from $4,167M",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": "year-ago comparison"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Work In Process",
+     "values": {
+      "2026-06-30": 5265000000.0,
+      "2025-06-30": 4167000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-019",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "bear_researcher",
+   "report_section": "8. The Bear Thesis in One Paragraph",
+   "claim_text": "The macro backdrop is hostile (24-year-high yields, 96% odds of no cuts, 76% odds of a hike, hot inflation leaning), the technicals are stretched (73% above the 200 SMA, RSI 72.95, contracting MACD histogram, fading volume), the working-capital build is a two-edged sword, and there's a live 45% policy tail risk on AI-chip export licensing.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "AMD is a genuinely good business trading at a genuinely dangerous price.",
+     "The bull's case rests on a forward EPS estimate ($15.72) that requires a 3x acceleration from the current annualized run-rate — an estimate that is itself the biggest risk in the thesis."
+    ],
+    "after": [
+     "The bull is answering the wrong questions — solvency instead of multiple compression, backward-looking growth instead of forward-looking valuation.",
+     "The business argument and the stock argument are not the same thing, and at $654.91, the stock argument is losing."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:119",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_388228ad9e12e09d",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "PARTIAL",
+   "elements": [
+    {
+     "text": "24-year-high yields",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_a213d06f42bbdca9"
+     ],
+     "note": ""
+    },
+    {
+     "text": "96% odds of no cuts, 76% odds of a hike",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    },
+    {
+     "text": "hot inflation leaning",
+     "status": "RELATED",
+     "material_refs": [
+      "src_c34c040e23bfdc61",
+      "src_8b53d16c45771ed9",
+      "src_d21e4147133b09d8"
+     ],
+     "note": "one saved headline reports a cooler-than-expected read"
+    },
+    {
+     "text": "73% above the 200 SMA, RSI 72.95",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d",
+      "src_388228ad9e12e09d"
+     ],
+     "note": "654.91/379.12-1 = 72.7%"
+    },
+    {
+     "text": "contracting MACD histogram, fading volume",
+     "status": "RELATED",
+     "material_refs": [
+      "src_388228ad9e12e09d",
+      "market_data_snapshot.json"
+     ],
+     "note": "the snapshot holds one MACD-histogram value; a trend needs recomputation from the daily rows"
+    },
+    {
+     "text": "the working-capital build",
+     "status": "RELATED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a",
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": ""
+    },
+    {
+     "text": "a live 45% policy tail risk on AI-chip export licensing",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_a213d06f42bbdca9",
+     "source_name": "Yahoo Finance",
+     "title": "10-Year Treasury yield touches highest level since 2002: AlphaCheck",
+     "url": "https://finance.yahoo.com/markets/article/10-year-treasury-yield-touches-highest-level-since-2002-alphacheck-135255038.html",
+     "published_at": "2026-10-01T06:59:46",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_c34c040e23bfdc61",
+     "source_name": "Yahoo Finance",
+     "title": "The Iran war is driving inflation higher — and it's not just because of oil",
+     "url": "https://finance.yahoo.com/markets/article/the-iran-war-is-driving-inflation-higher--and-its-not-just-because-of-oil-100000797.html",
+     "published_at": "2026-10-02T03:00:00",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_8b53d16c45771ed9",
+     "source_name": "Yahoo Finance",
+     "title": "Chorus of Fed officials warn inflation is still too high, signaling more work to do on interest rates",
+     "url": "https://finance.yahoo.com/economy/policy/article/chorus-of-fed-officials-warn-inflation-is-still-too-high-signaling-more-work-to-do-on-interest-rates-151947919.html",
+     "published_at": "2026-10-01T08:19:47",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_d21e4147133b09d8",
+     "source_name": "Yahoo Finance",
+     "title": "Tech leads stocks higher after cooler-than-expected inflation read: AlphaCheck",
+     "url": "https://finance.yahoo.com/markets/article/tech-leads-stocks-higher-after-cooler-than-expected-inflation-read-alphacheck-134126988.html",
+     "published_at": "2026-09-30T06:41:26",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "Close",
+     "value": "654.91",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "close_200_sma",
+     "value": "379.12",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "rsi",
+     "value": "72.95",
+     "unit": null
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_388228ad9e12e09d",
+     "source_title": "AMD verified market snapshot 2026-10-06",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T00:00:00",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "2a008c7a15d2d8327bb8a720b86af43b39a0ebf0663096a55cc2e56c0c88c088",
+     "field": "macdh",
+     "value": "3.91",
+     "unit": null
+    },
+    {
+     "type": "market_rows",
+     "artifact": "market_data_snapshot.json",
+     "provider": "yfinance",
+     "retrieved_at": "2026-10-06T19:26:27Z",
+     "rows": [
+      {
+       "date": "2026-09-21",
+       "close": 615.52001953125,
+       "volume": 44494300
+      },
+      {
+       "date": "2026-09-22",
+       "close": 623.77001953125,
+       "volume": 28282800
+      },
+      {
+       "date": "2026-10-01",
+       "close": 615.72998046875,
+       "volume": 17134500
+      },
+      {
+       "date": "2026-10-02",
+       "close": 633.9099731445312,
+       "volume": 19865300
+      },
+      {
+       "date": "2026-10-05",
+       "close": 631.75,
+       "volume": 13690000
+      },
+      {
+       "date": "2026-10-06",
+       "close": 653.7315063476562,
+       "volume": 19029582
+      }
+     ]
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Working Capital",
+     "values": {
+      "2026-06-30": 19441000000.0,
+      "2026-03-31": 18122000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Receivables",
+     "values": {
+      "2026-06-30": 7281000000.0,
+      "2026-03-31": 6035000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-020",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "fundamental_agent",
+   "report_section": "2. Income Statement Analysis (Quarterly)",
+   "claim_text": "R&D is scaling aggressively — $2,528M in Q2'26, up 33.5% YoY — signaling continued heavy investment in AI/accelerator roadmaps.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Operating income swung from –$134M (Q2'25) to +$1,990M (Q2'26).",
+     "Operating margin in Q2'26 = 17.25%."
+    ],
+    "after": [
+     "SG&A also up 41% YoY.",
+     "EPS trajectory: $0.54 → $0.75 → $0.92 → $0.84 → $1.38."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:40",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_582ac24bf4319648",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [
+     "A101"
+    ],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 25
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "R&D $2,528M in Q2'26",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": ""
+    },
+    {
+     "text": "up 33.5% YoY",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_582ac24bf4319648"
+     ],
+     "note": "2528/1894-1 = +33.5%"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Research And Development",
+     "values": {
+      "2026-06-30": 2528000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Research And Development",
+     "values": {
+      "2026-06-30": 2528000000.0,
+      "2025-06-30": 1894000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-021",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "fundamental_agent",
+   "report_section": "The bear case / risk factors (evidence-based)",
+   "claim_text": "Beta of 2.45 — this is a high-volatility instrument that will amplify any broad semiconductor or AI-theme",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "If this is a permanent step-up, FCF margins compress even as revenue grows.",
+     "Net dilution: buybacks ($207M) < SBC ($503M); diluted share count is rising."
+    ],
+    "after": []
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:119",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 14
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Beta of 2.45",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "beta",
+     "value": 2.454,
+     "unit": "ratio"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-022R",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "news_agent",
+   "report_section": "5. Actionable Insights for Traders",
+   "claim_text": "Records are being set by a handful of AI/chip leaders while consumer discretionary is being \"pummeled\" by rates.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Monitor AI-chip export licensing (45% implied) as a discrete AMD tail risk.",
+     "Low volume, so treat as directional only, but a legislative outcome here would be a direct revenue-channel event for AMD's China exposure."
+    ],
+    "after": [
+     "Narrow leadership + rising yields + a bearish \"bad omen\" chart circulating on X = elevated drawdown risk in a momentum unwind.",
+     "Data gap is itself a signal for process: the AMD news channel returned nothing across multiple ticker formats and date windows."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:91",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "replacement of t3v3-022: first COMPLETE, non-duplicate candidate at hash position 21",
+   "action": "replacement",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Records are being set by a handful of AI/chip leaders",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_344d88acaf74bc29",
+      "src_2f806ac2cc4fb09b"
+     ],
+     "note": "'a handful' is the claim's own characterisation"
+    },
+    {
+     "text": "consumer discretionary is being 'pummeled' by rates",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_921d7c6267af1cdc"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_344d88acaf74bc29",
+     "source_name": "Yahoo Finance",
+     "title": "Stock market today: Nasdaq, Nvidia post record highs as tech strength outshines bond weakness",
+     "url": "https://finance.yahoo.com/markets/live/stock-market-today-dow-sp-500-nasdaq-rise-as-tech-rallies-investors-shrug-off-bond-market-caution-081220790.html",
+     "published_at": "2026-10-05T13:01:30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_2f806ac2cc4fb09b",
+     "source_name": "Yahoo Finance",
+     "title": "Stock market today: S&P 500, Nasdaq touch all-time highs as stocks power higher, bond yields retreat",
+     "url": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-october-6-dow-sp-500-nasdaq-080526166.html",
+     "published_at": "2026-10-06T09:39:15",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_921d7c6267af1cdc",
+     "source_name": "Yahoo Finance",
+     "title": "Higher rates are pummeling consumer discretionary stocks — here's the damage: Chart of the Day",
+     "url": "https://finance.yahoo.com/markets/article/higher-rates-are-pummeling-consumer-discretionary-stocks--heres-the-damage-chart-of-the-day-161008955.html",
+     "published_at": "2026-10-05T09:10:08",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-023",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "fundamental_agent",
+   "report_section": "The bull case (evidence-based)",
+   "claim_text": "Gross margin expansion to 53.8% from 39.8% a year ago signals a favorable mix shift toward higher-value data center/AI silicon — the core of the AMD investment thesis.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Jun-26 revenue of $11,536M is a record, +50% YoY, and the QoQ step-up of +12.5% broke the flat Mar-26 print.",
+     "This is the strongest single data point in the dataset."
+    ],
+    "after": [
+     "Net cash balance sheet ($8.8B net cash) with $13.1B of liquid assets provides ample firepower for R&D, capex, and M&A without balance-sheet stress.",
+     "Forward EPS of $15.63 vs TTM $3.92 implies the sell-side expects a 4x earnings ramp; the PEG of 0.64 says the stock is not expensive if that ramp is delivered."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:105",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [
+     "A101"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 3
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "complete",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Gross margin ... 53.8%",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_582ac24bf4319648",
+      "src_582ac24bf4319648"
+     ],
+     "note": "6203/11536 = 53.8%"
+    },
+    {
+     "text": "from 39.8% a year ago",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_582ac24bf4319648",
+      "src_582ac24bf4319648"
+     ],
+     "note": "3059/7685 = 39.8%"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Gross Profit",
+     "values": {
+      "2026-06-30": 6203000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2026-06-30": 11536000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Gross Profit",
+     "values": {
+      "2025-06-30": 3059000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2025-06-30": 7685000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-024R",
+   "cell": "A101_A103",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "fundamental_agent",
+   "report_section": "FCF quality assessment",
+   "claim_text": "AMD is building out capacity/labs, consistent with an AI-driven expansion cycle.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Capex tripled QoQ to $808M (from $389M) — a deliberate investment step-up.",
+     "Net PPE rose to $3,439M from $2,723M, and construction-in-progress jumped to $1,148M from $646M."
+    ],
+    "after": [
+     "Working capital was a $730M drag in Q2 versus a $456M source in Q1 — driven by the $1,246M receivables build, partially offset by the $2,274M payables increase.",
+     "Trailing four-quarter FCF: $1,558M + $2,566M + $2,378M + $1,901M = $8,403M, closely matching the reported TTM FCF of $8,841M."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:95",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [
+     "A101"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 3
+   },
+   "selection": "replacement of t3v3-024: first COMPLETE, non-duplicate candidate at hash position 29",
+   "action": "replacement",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "AMD is building out capacity/labs",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_4045667791b919f9",
+      "src_d889dd1e36a5d55a",
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": "capex -808 vs -389; net PPE 3439 vs 2723; construction in progress 1148 vs 646 (M)"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_4045667791b919f9",
+     "source_title": "AMD cash flow Free Cash Flow snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "1c9591478f6247f78b9b6206c3067e27906947e0c5bdf339d1ea815ae558a649",
+     "statement": "cash flow",
+     "field": "Capital Expenditure",
+     "values": {
+      "2026-06-30": -808000000.0,
+      "2026-03-31": -389000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Net PPE",
+     "values": {
+      "2026-06-30": 3439000000.0,
+      "2026-03-31": 2723000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Construction In Progress",
+     "values": {
+      "2026-06-30": 1148000000.0,
+      "2026-03-31": 646000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-025",
+   "cell": "A001",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "aggressive_risk_analyst",
+   "report_section": null,
+   "claim_text": "But I'd argue the smarter aggressive play is to hold the full position, sell covered calls into the October FOMC vol spike to monetize the event risk, and add on any pullback toward the 50-day average of $513.53.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The asymmetry the trader describes as \"decisively negative\" is actually decisively positive for anyone with a 12-to-24-month horizon.",
+     "The trader's decision to reduce by one-third to one-half is defensible risk management given the beta and the valuation stretch."
+    ],
+    "after": [
+     "The AI infrastructure buildout is not a trade — it's a decade.",
+     "AMD is the only merchant-silicon challenger with the balance sheet, the margin trajectory, and the product roadmap to capture it."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:42",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "TIME_INVALID",
+   "linked_source_id_in_run": "src_5bd8a947130d1949",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 14
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "PARTIAL",
+   "elements": [
+    {
+     "text": "the October FOMC vol spike",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "no options / event data saved"
+    },
+    {
+     "text": "the 50-day average of $513.53",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "fifty_day_average",
+     "value": 513.5342,
+     "unit": "USD"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-026",
+   "cell": "A001",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "conservative_risk_analyst",
+   "report_section": null,
+   "claim_text": "At 161x trailing earnings, 37% above the 200-day, with receivables outrunning revenue and a hawkish Fed, the asymmetry favors the seller.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The $8.8B net cash position is genuinely a floor.",
+     "But a real secular story and a strong balance sheet do not make any price a good price."
+    ],
+    "after": [
+     "I support the trader's decision to trim, and I'd push toward the larger end of the reduction range."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:conservative_risk_analyst:risk_debate_state.conservative_history:claim:59",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 1
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "complete",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "At 161x trailing earnings",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_5bd8a947130d1949"
+     ],
+     "note": ""
+    },
+    {
+     "text": "37% above the 200-day",
+     "status": "RELATED",
+     "material_refs": [
+      "src_5bd8a947130d1949",
+      "src_5bd8a947130d1949",
+      "market_data_snapshot.json"
+     ],
+     "note": "the 50-day average is 37.0% above the 200-day; the latest close is about 69% above it"
+    },
+    {
+     "text": "receivables outrunning revenue",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a",
+      "src_582ac24bf4319648"
+     ],
+     "note": "+20.6% vs +12.5% QoQ"
+    },
+    {
+     "text": "a hawkish Fed",
+     "status": "RELATED",
+     "material_refs": [
+      "src_a36554814b0dc85c",
+      "src_0d3e38ccb1b90ff9"
+     ],
+     "note": "the saved headlines report rate-hike expectations being reduced"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "trailing_pe",
+     "value": 161.08163,
+     "unit": "ratio"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "fifty_day_average",
+     "value": 513.5342,
+     "unit": "USD"
+    },
+    {
+     "type": "data_field",
+     "source_id": "src_5bd8a947130d1949",
+     "source_title": "AMD fundamentals snapshot 2026-10-05 10:34:46",
+     "provider": "yfinance",
+     "published_at": "2026-10-05T10:34:46.683873",
+     "observation_date": "2026-10-05",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b57536c2e47f254acda82743e997a4e4f000917f38af29a8d15c3b665e340abd",
+     "field": "two_hundred_day_average",
+     "value": 374.7236,
+     "unit": "USD"
+    },
+    {
+     "type": "market_rows",
+     "artifact": "market_data_snapshot.json",
+     "provider": "yfinance",
+     "retrieved_at": "2026-10-05T17:47:25Z",
+     "rows": [
+      {
+       "date": "2026-10-02",
+       "close": 633.9099731445312
+      },
+      {
+       "date": "2026-10-05",
+       "close": 631.2050170898438
+      }
+     ]
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Receivables",
+     "values": {
+      "2026-06-30": 7281000000.0,
+      "2026-03-31": 6035000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_582ac24bf4319648",
+     "source_title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+     "statement": "income statement",
+     "field": "Total Revenue",
+     "values": {
+      "2026-06-30": 11536000000.0,
+      "2026-03-31": 10253000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_a36554814b0dc85c",
+     "source_name": "InvestorsHub",
+     "title": "Gold Edges Higher as Weak US Jobs Data Reduces Fed Rate-Hike Expectations",
+     "url": "https://finance.yahoo.com/markets/commodities/articles/gold-edges-higher-weak-us-092910822.html",
+     "published_at": "2026-10-05T02:29:10",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_0d3e38ccb1b90ff9",
+     "source_name": "Quartz",
+     "title": "Gold prices rise after weak September jobs report dims Fed rate hike",
+     "url": "https://finance.yahoo.com/markets/commodities/articles/gold-prices-rise-weak-september-120920954.html",
+     "published_at": "2026-10-05T05:09:20",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-027R",
+   "cell": "A001",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "news_agent",
+   "report_section": "3.2 Labor Market — Softening",
+   "claim_text": "\"Gold Edges Higher as Weak US Jobs Data Reduces Fed Rate-Hike Expectations\" (InvestorsHub) — [fragmentid: not provided]",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "For AMD — a high-multiple, long-duration semiconductor name — this is a discount-rate headwind and a valuation-risk amplifier.",
+     "\"Gold prices rise after weak September jobs report dims Fed rate hike\" (Quartz) — [fragmentid: not provided]"
+    ],
+    "after": [
+     "Note the tension: soft labor data reduced hike expectations in the gold market narrative, yet the Fed-decision market still shows a 20% hike probability and 78% hold.",
+     "This cross-signal divergence suggests genuine two-sided uncertainty — a regime that historically produces elevated equity volatility, particularly in rate-sensitive growth sectors."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:news_agent:news_report:claim:23",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 1
+   },
+   "selection": "replacement of t3v3-027: first COMPLETE, non-duplicate candidate at hash position 16",
+   "action": "replacement",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "'Gold Edges Higher as Weak US Jobs Data Reduces Fed Rate-Hike Expectations' (InvestorsHub)",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_a36554814b0dc85c"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_a36554814b0dc85c",
+     "source_name": "InvestorsHub",
+     "title": "Gold Edges Higher as Weak US Jobs Data Reduces Fed Rate-Hike Expectations",
+     "url": "https://finance.yahoo.com/markets/commodities/articles/gold-edges-higher-weak-us-092910822.html",
+     "published_at": "2026-10-05T02:29:10",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-028",
+   "cell": "A001",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "news_agent",
+   "report_section": "1. Executive Summary",
+   "claim_text": "Global market news (Yahoo Finance, 2026-09-22 → 2026-10-06) — a clear regime: rates rising sharply, inflation sticky-to-hot, Fed officials hawkish, yet equities at all-time highs led by tech/chips.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The single most important finding of this research cycle is a data-availability failure on the AMD-specific news channel: every getnews call for AMD (and for AMD.US, NVDA, semiconductors) returned \"No news found.\" I therefore have zero company-specific AMD headlines to work with, and I will not fabricate them.",
+     "Likewise, all FRED macro indicator calls returned DATAUNAVAILABLE (missing FREDAPIKEY), so I have no hard macro prints — no CPI, no fed funds rate, no 10-year yield level — and I will not invent numbers."
+    ],
+    "after": [
+     "Live prediction markets (Polymarket) — which quantify that regime with real money: 96% implied probability of NO Fed rate cuts in 2026, 76% implied probability of another Fed rate HIKE in 2026, and only 7% recession odds.",
+     "The macro backdrop is therefore the mirror image of the \"Rate Cut Cycle\" narrative that typically powers long-duration semiconductor multiples."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:5",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "complete",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Global market news (Yahoo Finance, 2026-09-22 -> 2026-10-06)",
+     "status": "RELATED",
+     "material_refs": [
+      "src_86b41d2459c3f6ca"
+     ],
+     "note": "the saved Yahoo Finance headlines are dated 2026-09-28 .. 2026-10-06"
+    },
+    {
+     "text": "rates rising sharply",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_86b41d2459c3f6ca",
+      "src_2b9c6f4f9e87b926",
+      "src_c6c89691a2e8dd18",
+      "src_a213d06f42bbdca9"
+     ],
+     "note": ""
+    },
+    {
+     "text": "inflation sticky-to-hot",
+     "status": "RELATED",
+     "material_refs": [
+      "src_c34c040e23bfdc61",
+      "src_d21e4147133b09d8"
+     ],
+     "note": "one saved headline reports a cooler-than-expected read"
+    },
+    {
+     "text": "Fed officials hawkish",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_8b53d16c45771ed9"
+     ],
+     "note": ""
+    },
+    {
+     "text": "equities at all-time highs led by tech/chips",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_2f806ac2cc4fb09b",
+      "src_344d88acaf74bc29",
+      "src_2938152ab26ed51a"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_86b41d2459c3f6ca",
+     "source_name": "Yahoo Finance",
+     "title": "Stock market today: Dow, S&P 500, Nasdaq fall as Treasury yields continue to climb",
+     "url": "https://finance.yahoo.com/markets/live/stock-market-today-monday-september-28-dow-sp-500-nasdaq-080420627.html",
+     "published_at": "2026-09-28T13:04:45",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_2b9c6f4f9e87b926",
+     "source_name": "Yahoo Finance",
+     "title": "30-year Treasury climbs to highest level since 2002",
+     "url": "https://finance.yahoo.com/markets/article/30-year-treasury-climbs-to-highest-level-since-2002-132103385.html",
+     "published_at": "2026-09-29T08:49:04",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_c6c89691a2e8dd18",
+     "source_name": "Yahoo Finance",
+     "title": "10-year Treasury yield posts biggest monthly gain since 2022: Chart of the Day",
+     "url": "https://finance.yahoo.com/markets/article/10-year-treasury-yield-posts-biggest-monthly-gain-since-2022-chart-of-the-day-120201162.html",
+     "published_at": "2026-10-01T06:34:03",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_a213d06f42bbdca9",
+     "source_name": "Yahoo Finance",
+     "title": "10-Year Treasury yield touches highest level since 2002: AlphaCheck",
+     "url": "https://finance.yahoo.com/markets/article/10-year-treasury-yield-touches-highest-level-since-2002-alphacheck-135255038.html",
+     "published_at": "2026-10-01T06:59:46",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_c34c040e23bfdc61",
+     "source_name": "Yahoo Finance",
+     "title": "The Iran war is driving inflation higher — and it's not just because of oil",
+     "url": "https://finance.yahoo.com/markets/article/the-iran-war-is-driving-inflation-higher--and-its-not-just-because-of-oil-100000797.html",
+     "published_at": "2026-10-02T03:00:00",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_d21e4147133b09d8",
+     "source_name": "Yahoo Finance",
+     "title": "Tech leads stocks higher after cooler-than-expected inflation read: AlphaCheck",
+     "url": "https://finance.yahoo.com/markets/article/tech-leads-stocks-higher-after-cooler-than-expected-inflation-read-alphacheck-134126988.html",
+     "published_at": "2026-09-30T06:41:26",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_8b53d16c45771ed9",
+     "source_name": "Yahoo Finance",
+     "title": "Chorus of Fed officials warn inflation is still too high, signaling more work to do on interest rates",
+     "url": "https://finance.yahoo.com/economy/policy/article/chorus-of-fed-officials-warn-inflation-is-still-too-high-signaling-more-work-to-do-on-interest-rates-151947919.html",
+     "published_at": "2026-10-01T08:19:47",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_2f806ac2cc4fb09b",
+     "source_name": "Yahoo Finance",
+     "title": "Stock market today: S&P 500, Nasdaq touch all-time highs as stocks power higher, bond yields retreat",
+     "url": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-october-6-dow-sp-500-nasdaq-080526166.html",
+     "published_at": "2026-10-06T09:39:15",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_344d88acaf74bc29",
+     "source_name": "Yahoo Finance",
+     "title": "Stock market today: Nasdaq, Nvidia post record highs as tech strength outshines bond weakness",
+     "url": "https://finance.yahoo.com/markets/live/stock-market-today-dow-sp-500-nasdaq-rise-as-tech-rallies-investors-shrug-off-bond-market-caution-081220790.html",
+     "published_at": "2026-10-05T13:01:30",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_2938152ab26ed51a",
+     "source_name": "Yahoo Finance",
+     "title": "Stock market today: Dow, S&P 500, Nasdaq stage comeback as Treasury yields fall, chip stocks gain",
+     "url": "https://finance.yahoo.com/markets/live/stock-market-today-thursday-oct-1-dow-sp-500-nasdaq-080602402.html",
+     "published_at": "2026-10-01T13:07:35",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-029",
+   "cell": "A003",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "fundamental_agent",
+   "report_section": "Balance sheet strengths",
+   "claim_text": "Liquidity is excellent: $13.1B cash + short-term investments against only $4.28B total debt = net cash position of $8.8B.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Line Item: Working Capital; 2026-06-30: $19,441M; 2026-03-31: $18,122M; 2025-12-31: $17,492M; 2025-09-30: $15,300M; 2025-06-30: $14,676M",
+     "Verified: Total Assets rose to $84,464,000,000 as of 2026-06-30, from $79,642,000,000 as of 2026-03-31 (sequential QoQ) [fragmentid: srcd889dd1e36a5d55a:frag:0]."
+    ],
+    "after": [
+     "The reported \"Debt to Equity: 6.361\" in the fundamentals snapshot is a gross/lease-inclusive artifact and materially overstates leverage; on a net-debt basis AMD is net-cash.",
+     "Equity is compounding: Stockholders' equity grew from $59,665M to $67,224M over four quarters (+12.7%), driven by retained earnings growth ($3,945M → $5,909M) despite buybacks."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:70",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_d889dd1e36a5d55a",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 1
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "$13.1B cash + short-term investments",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": ""
+    },
+    {
+     "text": "$4.28B total debt",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": ""
+    },
+    {
+     "text": "net cash position of $8.8B",
+     "status": "DERIVED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a",
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": "13111 - 4276 = 8835 (M)"
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Cash Cash Equivalents And Short Term Investments",
+     "values": {
+      "2026-06-30": 13111000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    },
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Total Debt",
+     "values": {
+      "2026-06-30": 4276000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-030",
+   "cell": "A003",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "fundamental_agent",
+   "report_section": "3. Balance Sheet Analysis (Quarterly)",
+   "claim_text": "Current ratio 2.609 — strong liquidity.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "This funded part of the working-capital build and is a cash-flow tailwind in the quarter.",
+     "Capex ramp: Net PPE rose to $3,439M from $2,723M, with construction-in-progress jumping to $1,148M from $646M — a clear signal of capacity/infrastructure investment."
+    ],
+    "after": [
+     "Metric ($M): Operating Cash Flow; 2026-06-30: 2,366; 2026-03-31: 2,955; 2025-12-31: 2,600; 2025-09-30: 2,159; 2025-06-30: 2,011",
+     "Metric ($M): Capital Expenditure; 2026-06-30: (808); 2026-03-31: (389); 2025-12-31: (222); 2025-09-30: (258); 2025-06-30: (282)"
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:74",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_7e133fa786f7aaa0",
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Current ratio 2.609",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_7e133fa786f7aaa0"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_field",
+     "source_id": "src_7e133fa786f7aaa0",
+     "source_title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+     "provider": "yfinance",
+     "published_at": "2026-10-06T10:37:04.790990",
+     "observation_date": "2026-10-06",
+     "retrieved_at": "2026-10-06T17:39:31Z",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "field": "current_ratio",
+     "value": 2.609,
+     "unit": "ratio"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-031",
+   "cell": "A003",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "fundamental_agent",
+   "report_section": "Balance sheet strengths",
+   "claim_text": "Working capital expanded to $19,441M from $14,676M a year ago — a strong liquidity buffer.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "The reported \"Debt to Equity: 6.361\" in the fundamentals snapshot is a gross/lease-inclusive artifact and materially overstates leverage; on a net-debt basis AMD is net-cash.",
+     "Equity is compounding: Stockholders' equity grew from $59,665M to $67,224M over four quarters (+12.7%), driven by retained earnings growth ($3,945M → $5,909M) despite buybacks."
+    ],
+    "after": [
+     "Inventory build: $6,677M → $8,468M (+26.8% YoY).",
+     "Inventory is growing faster than the trailing revenue base in some periods, though the Jun-26 QoQ build (+5.3%) is now slower than revenue growth (+12.5%) — a healthy sign that demand is absorbing supply."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:fundamental_agent:fundamentals_report:claim:73",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "VALID",
+   "linked_source_id_in_run": "src_d889dd1e36a5d55a",
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 1
+   },
+   "selection": "full chain; hash order",
+   "action": "keep",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Working capital expanded to $19,441M from $14,676M a year ago",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_d889dd1e36a5d55a"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "data_rows",
+     "source_id": "src_d889dd1e36a5d55a",
+     "source_title": "AMD balance sheet Total Assets snapshot 2026-06-30 (quarterly)",
+     "provider": "yfinance",
+     "published_at": null,
+     "observation_date": "2026-06-30",
+     "retrieved_at": "2026-10-05T17:36:24Z",
+     "content_hash": "b803acd4d889ec2c9e4784c617fd811395a4c071f0bfe954fbfa12e7121ed946",
+     "statement": "balance sheet",
+     "field": "Working Capital",
+     "values": {
+      "2026-06-30": 19441000000.0,
+      "2025-06-30": 14676000000.0
+     },
+     "unit": "UNKNOWN_CURRENCY",
+     "freq": "quarterly"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-032",
+   "cell": "A003",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "agent": "aggressive_risk_analyst",
+   "report_section": null,
+   "claim_text": "That's the aggressive play — you take liquidity when it's offered, not when it's demanded.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "You want to \"wait for a pullback to add\"?",
+     "The pullback is already being telegraphed, and the trader is front-running it by trimming into strength rather than waiting to sell into weakness."
+    ],
+    "after": [
+     "Now let me make the affirmative case for why the trader's sell is the high-reward move, not the cautious one.",
+     "The asymmetry at 654.91 is genuinely bad, and I want to be precise about it."
+    ]
+   },
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:28",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "dependency-20261007T220450Z-33128621",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": []
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/claims_975_list.csv"
+    ],
+    "data_files_count": 23
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "gap",
+   "material_status": "NO_FACTUAL_ELEMENT",
+   "elements": [
+    {
+     "text": "(rhetorical: 'you take liquidity when it's offered')",
+     "status": null,
+     "material_refs": [],
+     "note": "no checkable factual element; the only other A003 text-only candidate rests on prediction-market data"
+    }
+   ],
+   "material": [],
+   "time_basis": {
+    "analysis_date": "2026-10-06",
+    "run_started_at": "2026-10-06T17:39:31Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-033",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "analysis_date": "2026-10-02",
+   "agent": "bull_researcher",
+   "report_section": "2. The Demand Side Isn't Just Intact — It Just Got Independently Verified",
+   "claim_text": "Multiply that across the entire AI-native cohort, add sovereign deployments, add enterprise inference — and the demand runway is not a hyperscaler-only story.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "And note the Anthropic datapoint from the sentiment report: compute and infrastructure expense up 190% Y/Y to $7.33B.",
+     "That's a loss-making AI lab spending nearly $7.3B annually on compute."
+    ],
+    "after": [
+     "I'm not going to pretend the macro backdrop is friendly.",
+     "Markets price 97% \"no Fed cuts in 2026\""
+    ]
+   },
+   "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+   "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:41",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "034a0a60-430e-41f8-8321-03a11389707a",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package/06_review_form_blank.csv",
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package_v2/06_review_form_blank.csv"
+    ],
+    "data_files_count": 20
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "partial",
+   "material_status": "PARTIAL",
+   "elements": [
+    {
+     "text": "Multiply that (Anthropic compute and infrastructure expense +190% Y/Y to $7.33B, from the context)",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "cited from the sentiment report; the original source was not saved"
+    },
+    {
+     "text": "add sovereign deployments",
+     "status": "RELATED",
+     "material_refs": [
+      "src_e055413056226d0c"
+     ],
+     "note": ""
+    },
+    {
+     "text": "add enterprise inference",
+     "status": "RELATED",
+     "material_refs": [
+      "src_b06e70e9b96f69dc"
+     ],
+     "note": ""
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_e055413056226d0c",
+     "source_name": "GuruFocus.com",
+     "title": "IBM Stocks Gain as Sovereign AI Agents Go Live in India",
+     "url": "https://finance.yahoo.com/markets/stocks/articles/ibm-stocks-gain-sovereign-ai-172700785.html",
+     "published_at": "2026-09-30T10:27:00",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_b06e70e9b96f69dc",
+     "source_name": "PR Newswire",
+     "title": "IBM Introduces Self-Hosted Deployment for IBM Bob to Help Enterprises Advance AI Sovereignty and Governance",
+     "url": "https://finance.yahoo.com/technology/ai/articles/ibm-introduces-self-hosted-deployment-040100875.html",
+     "published_at": "2026-09-30T21:01:00",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-02",
+    "run_started_at": "2026-10-02T00:55:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-034",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "analysis_date": "2026-10-02",
+   "agent": "bull_researcher",
+   "report_section": "2. The Demand Side Isn't Just Intact — It Just Got Independently Verified",
+   "claim_text": "Its bookings are a direct leading indicator of enterprise AI deployment — the exact inference and agent workload layer that consumes NVDA accelerators.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "> \"Accenture Soars 23% as Record Bookings Dispel AI Demand Fears; Infosys Jumps 8%, IBM Climbs 5%\"",
+     "Accenture is the world's largest IT services firm."
+    ],
+    "after": [
+     "When Accenture posts record bookings and the market reprices it +23% in a single session, that is the market saying: \"AI monetization is real, and it's broadening beyond hyperscaler training capex.\"",
+     "The bear wants you to focus on the \"$636 billion hyperscaler ROIC\" argument from an r/stocks post."
+    ]
+   },
+   "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+   "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:33",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "034a0a60-430e-41f8-8321-03a11389707a",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package/06_review_form_blank.csv",
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package_v2/06_review_form_blank.csv"
+    ],
+    "data_files_count": 15
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "complete",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Its (Accenture's) bookings",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_e9c1b0802ec94021",
+      "src_a2678074875af649"
+     ],
+     "note": "the claim's relation to NVDA demand is its own inference"
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_e9c1b0802ec94021",
+     "source_name": "24/7 Wall St.",
+     "title": "Accenture Soars 23% as Record Bookings Dispel AI Demand Fears; Infosys Jumps 8%, IBM Climbs 5%",
+     "url": "https://finance.yahoo.com/markets/stocks/articles/accenture-soars-23-record-bookings-141118466.html",
+     "published_at": "2026-10-01T07:11:18",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_a2678074875af649",
+     "source_name": "Barrons.com",
+     "title": "Accenture Stock Is Having Its Best Day Ever. AI Isn’t the Threat Everyone Thought.",
+     "url": "https://finance.yahoo.com/m/04891e51-9028-320c-a3b9-5b0bf03975b0/accenture-stock-is-having-its.html",
+     "published_at": "2026-10-01T11:38:00",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-02",
+    "run_started_at": "2026-10-02T00:55:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-035",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "analysis_date": "2026-10-02",
+   "agent": "portfolio_manager",
+   "report_section": "The Decisive Analytical Points",
+   "claim_text": "Accenture's record bookings, IBM's sovereign AI agents, and self-hosted enterprise deployment scaling represent a genuine shift from hyperscaler training capex into the inference and enterprise layer — the exact vector that makes NVDA's revenue base more durable, not less.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Question: Is the DeepSeek–Huawei datapoint decisive?; Aggressive: (Ignored); Conservative: Implied decisive bear point; Who wins on evidence: Neither — it is a slow-burn China-specific competitive risk, not a near-term catalyst",
+     "The aggressive analyst's strongest argument is the demand broadening."
+    ],
+    "after": [
+     "The neutral analyst correctly reinforced this: enterprise AI services bookings are a leading indicator of compute consumption, and you don't get record AI services bookings without downstream accelerator demand.",
+     "That validates the \"G\" in the PEG."
+    ]
+   },
+   "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+   "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:19",
+   "claim_quality_in_run": "context_only",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "034a0a60-430e-41f8-8321-03a11389707a",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package/06_review_form_blank.csv",
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package_v2/06_review_form_blank.csv"
+    ],
+    "data_files_count": 20
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "complete",
+   "material_status": "COMPLETE",
+   "elements": [
+    {
+     "text": "Accenture's record bookings",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_e9c1b0802ec94021"
+     ],
+     "note": ""
+    },
+    {
+     "text": "IBM's sovereign AI agents",
+     "status": "LOCATED",
+     "material_refs": [
+      "src_e055413056226d0c"
+     ],
+     "note": ""
+    },
+    {
+     "text": "self-hosted enterprise deployment scaling",
+     "status": "RELATED",
+     "material_refs": [
+      "src_b06e70e9b96f69dc",
+      "src_299527b4eccbd2fd"
+     ],
+     "note": "the headlines announce the deployment option; 'scaling' is not stated"
+    }
+   ],
+   "material": [
+    {
+     "type": "news_title",
+     "source_id": "src_e9c1b0802ec94021",
+     "source_name": "24/7 Wall St.",
+     "title": "Accenture Soars 23% as Record Bookings Dispel AI Demand Fears; Infosys Jumps 8%, IBM Climbs 5%",
+     "url": "https://finance.yahoo.com/markets/stocks/articles/accenture-soars-23-record-bookings-141118466.html",
+     "published_at": "2026-10-01T07:11:18",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_e055413056226d0c",
+     "source_name": "GuruFocus.com",
+     "title": "IBM Stocks Gain as Sovereign AI Agents Go Live in India",
+     "url": "https://finance.yahoo.com/markets/stocks/articles/ibm-stocks-gain-sovereign-ai-172700785.html",
+     "published_at": "2026-09-30T10:27:00",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_b06e70e9b96f69dc",
+     "source_name": "PR Newswire",
+     "title": "IBM Introduces Self-Hosted Deployment for IBM Bob to Help Enterprises Advance AI Sovereignty and Governance",
+     "url": "https://finance.yahoo.com/technology/ai/articles/ibm-introduces-self-hosted-deployment-040100875.html",
+     "published_at": "2026-09-30T21:01:00",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    },
+    {
+     "type": "news_title",
+     "source_id": "src_299527b4eccbd2fd",
+     "source_name": "24/7 Wall St.",
+     "title": "IBM Jumps 5% as Bob Coding Agent Gains Self-Hosted Deployment; Salesforce Rises 3%, Palantir Inches Higher",
+     "url": "https://finance.yahoo.com/markets/stocks/articles/ibm-jumps-5-bob-coding-132343511.html",
+     "published_at": "2026-10-01T06:23:43",
+     "retrieved_at": "2026-10-02T00:55:24Z",
+     "provider": "yfinance"
+    }
+   ],
+   "time_basis": {
+    "analysis_date": "2026-10-02",
+    "run_started_at": "2026-10-02T00:55:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-036",
+   "cell": "A102",
+   "ticker": "NVDA",
+   "analysis_date": "2026-10-02",
+   "agent": "news_agent",
+   "report_section": "5. Actionable Insights for NVDA",
+   "claim_text": "The enterprise/inference demand vector is the most underappreciated positive.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Hyperscaler and enterprise AI budgets are far more likely to be cut in a recession than in an overheating economy.",
+     "The market is telling you the demand-destruction scenario is off the table for 2026."
+    ],
+    "after": [
+     "Accenture, IBM sovereign AI agents in India, and self-hosted enterprise AI deployment all point to inference and enterprise AI broadening beyond hyperscaler training capex — a more durable and diversified demand base for NVDA.",
+     "Treat the \"US government stake in NVIDIA\" market (13%) as noise, but note the policy regime."
+    ]
+   },
+   "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+   "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:85",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "034a0a60-430e-41f8-8321-03a11389707a",
+    "conflict_raw_pool_alphas": [
+     "A102"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package/06_review_form_blank.csv",
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package_v2/06_review_form_blank.csv"
+    ],
+    "data_files_count": 25
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "gap",
+   "material_status": "NO_FACTUAL_ELEMENT",
+   "elements": [
+    {
+     "text": "(evaluative: 'the most underappreciated positive')",
+     "status": null,
+     "material_refs": [],
+     "note": "no checkable factual element; same-cell candidates are duplicates of t3v3-034/035 or rest on unsaved social posts"
+    }
+   ],
+   "material": [],
+   "time_basis": {
+    "analysis_date": "2026-10-02",
+    "run_started_at": "2026-10-02T00:55:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-037",
+   "cell": "A501",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "news_agent",
+   "report_section": "6. Key Points Summary Table",
+   "claim_text": "Category: Recession risk; Signal: Low & falling; Evidence: US 8% (−1.0pp); UK 7%; Japan 4%; Implication for AMD: Supports semi demand; removes easing case",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Category: Labor market; Signal: Softening; Evidence: Weak Sept jobs report (Quartz, InvestorsHub); Implication for AMD: Mixed: supports demand, but cuts priced out",
+     "Category: Inflation; Signal: Sticky; Evidence: Oct-1 PCE release; UK 3.5–3.9% @56%, Japan 2.0–2.4% @78%; Implication for AMD: Limits Fed easing; pressures valuations"
+    ],
+    "after": [
+     "Category: Fiscal/political; Signal: Divided govt priced; Evidence: 92% Dem-House + shutdown combo; Implication for AMD: Possible delay to chip incentive flows",
+     "Category: Sentiment; Signal: Fragility flagged; Evidence: Gundlach \"hollow tree\" warning; Implication for AMD: Valuation-risk caution on high-multiple semis"
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:news_agent:news_report:claim:65",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [
+     "A501"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 3
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "collect",
+   "material_status": "NO_MATERIAL",
+   "elements": [
+    {
+     "text": "Recession risk: US 8% (-1.0pp); UK 7%; Japan 4%",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    }
+   ],
+   "material": [],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-038",
+   "cell": "A501",
+   "ticker": "NVDA",
+   "analysis_date": "2026-10-02",
+   "agent": "news_agent",
+   "report_section": "4.3 Recession risk: receding",
+   "claim_text": "Market: Japan recession in 2026; Implied Probability: 4% Yes; Volume: $4K; 1-Week Move: —",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Market: US recession by end of 2026; Implied Probability: 8% Yes; Volume: $2.24M; 1-Week Move: -2.0pp",
+     "Market: UK recession in 2026; Implied Probability: 8% Yes; Volume: $15K; 1-Week Move: -5.0pp"
+    ],
+    "after": [
+     "Read: At 8% and falling 2pp on the week, recession risk is a diminishing concern.",
+     "This is a genuine positive for NVDA: it removes the demand-destruction tail that would most severely damage AI capex budgets."
+    ]
+   },
+   "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+   "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:64",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "034a0a60-430e-41f8-8321-03a11389707a",
+    "conflict_raw_pool_alphas": [],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package/06_review_form_blank.csv",
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package_v2/06_review_form_blank.csv"
+    ],
+    "data_files_count": 14
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "collect",
+   "material_status": "NO_MATERIAL",
+   "elements": [
+    {
+     "text": "Japan recession in 2026: 4% Yes; Volume $4K",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    }
+   ],
+   "material": [],
+   "time_basis": {
+    "analysis_date": "2026-10-02",
+    "run_started_at": "2026-10-02T00:55:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-039",
+   "cell": "A501",
+   "ticker": "NVDA",
+   "analysis_date": "2026-10-02",
+   "agent": "news_agent",
+   "report_section": "4.3 Recession risk: receding",
+   "claim_text": "Read: At 8% and falling 2pp on the week, recession risk is a diminishing concern.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "Market: UK recession in 2026; Implied Probability: 8% Yes; Volume: $15K; 1-Week Move: -5.0pp",
+     "Market: Japan recession in 2026; Implied Probability: 4% Yes; Volume: $4K; 1-Week Move: —"
+    ],
+    "after": [
+     "This is a genuine positive for NVDA: it removes the demand-destruction tail that would most severely damage AI capex budgets.",
+     "The macro risk to NVDA is now a rates/valuation risk, not a demand-collapse risk."
+    ]
+   },
+   "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+   "claim_id": "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:65",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "034a0a60-430e-41f8-8321-03a11389707a",
+    "conflict_raw_pool_alphas": [
+     "A501"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package/06_review_form_blank.csv",
+     "docs/audit_artifacts/round_source_linking_t0_t2/nvda_fresh_run_joint_review_package_v2/06_review_form_blank.csv"
+    ],
+    "data_files_count": 26
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "collect",
+   "material_status": "NO_MATERIAL",
+   "elements": [
+    {
+     "text": "At 8% and falling 2pp on the week",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    }
+   ],
+   "material": [],
+   "time_basis": {
+    "analysis_date": "2026-10-02",
+    "run_started_at": "2026-10-02T00:55:24Z"
+   }
+  },
+  {
+   "sample_id": "t3v3-040",
+   "cell": "A501",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "agent": "aggressive_risk_analyst",
+   "report_section": null,
+   "claim_text": "You can't, because the bear case requires a demand collapse, and recession odds are 8% and falling.",
+   "evidence_text": null,
+   "context": {
+    "before": [
+     "If the AI/data-center inflection is real, and the fundamentals say it is, then every dip is a gift, not a warning.",
+     "Here's my challenge to both of you: name me one scenario where AMD's revenue re-acceleration to $11,536,000,000 as of 2026-06-30 from $10,253,000,000 as of 2026-03-31 [fragmentid: src582ac24bf4319648:frag:0] — a record print, +50% YoY — combined with 53.8% gross margins and $8.8B net cash, produces a negative outcome that isn't already priced into a 161x multiple."
+    ],
+    "after": [
+     "The asymmetry the trader describes as \"decisively negative\" is actually decisively positive for anyone with a 12-to-24-month horizon.",
+     "The trader's decision to reduce by one-third to one-half is defensible risk management given the beta and the valuation stretch."
+    ]
+   },
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "claim_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:39",
+   "claim_quality_in_run": "analytical",
+   "key_conclusion_group": null,
+   "source_link_status_in_run": "NOT_PROVIDED",
+   "linked_source_id_in_run": null,
+   "real_use_in_saved_run": {
+    "execution": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+    "conflict_raw_pool_alphas": [
+     "A501"
+    ],
+    "official_alpha_pool_alphas": "not recorded for this run (no evidence_trace.json)"
+   },
+   "prior_mentions_in_docs": {
+    "reports": [],
+    "data_files_count": 3
+   },
+   "selection": "PARTIAL chain (no saved source content); hash order; filled only after content-linked candidates ran out",
+   "action": "collect",
+   "material_status": "NO_MATERIAL",
+   "elements": [
+    {
+     "text": "recession odds are 8% and falling",
+     "status": "NOT_SAVED",
+     "material_refs": [],
+     "note": "prediction-market data not saved"
+    }
+   ],
+   "material": [],
+   "time_basis": {
+    "analysis_date": "2026-10-05",
+    "run_started_at": "2026-10-05T17:36:24Z"
+   }
+  }
+ ],
+ "note": "MANIFEST: contains run usage, links and the element analysis -- never give this file to the reviewer"
+}

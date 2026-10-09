@@ -202,7 +202,12 @@ def test_retry_replace_semantics(postgres_context):
         conflict_payload=conflict,
     )
     assert len(repo.get_alpha_activations(run_id)) == 7
-    assert len(repo.get_alpha_conflicts(run_id)) == 6
+    # 8, not the original MVP-10 6: PD-017-REVISED (alpha_taxonomy_v1.yaml's
+    # own content_change_log) added two new reciprocal conflict_alphas
+    # declarations (A102<->A304, A201<->A304), already authorized and
+    # already shipped -- detect_alpha_conflicts (called unmodified by
+    # _week4_payloads) now enumerates all 8 declared pairs.
+    assert len(repo.get_alpha_conflicts(run_id)) == 8
     assert repo.get_alpha_activations(run_id)[2]["activation_score"] == 70
 
 
@@ -255,3 +260,78 @@ def test_transaction_rollback_preserves_prior_state(postgres_context):
 
     assert repo.get_alpha_activations(run_id) == activations_before
     assert repo.get_alpha_conflicts(run_id) == conflicts_before
+
+
+def test_full_path_reconnect_readback_and_export_consistency_with_independent_reevaluation(postgres_context):
+    """T2 follow-up, item 2's own required verification: persist -> close
+    the WRITING engine -> a brand-new engine reconnects -> read back via
+    the real get_week4_conflict_result -> feed into the real
+    extract_conflicts_export -- confirms evidence_qualification (source/
+    eligibility-adjacent audit data), formula_version, and main_conflict
+    all survive a genuine reconnect and the real export path. A SEPARATE
+    "re-evaluation" execution_id, built from a mutated (score=70) payload,
+    is persisted and read back independently -- proving the original run's
+    own persisted result is never touched by the second execution's own
+    write, and vice versa."""
+    from comqutor_alpha.api.artifact_export import extract_conflicts_export
+
+    original_run_id = _run_id(postgres_context, "reconnect_original")
+    reeval_run_id = _run_id(postgres_context, "reconnect_reeval")
+
+    write_engine = build_engine(os.environ["COMQUTOR_TEST_DATABASE_URL"])
+    write_repo = GraphPersistenceRepository(write_engine)
+    original_activation, original_conflict = _week4_payloads(original_run_id, "NVDA", score=90)
+    write_repo.persist_week4_results(
+        run_id=original_run_id, ticker="NVDA",
+        activation_payload=original_activation, conflict_payload=original_conflict,
+    )
+    # The independent "re-evaluation execution" -- a genuinely different
+    # run_id/execution_id, a genuinely different score, never overwriting
+    # the original run's own row (persist_week4_results deletes/inserts
+    # scoped strictly by its own run_id).
+    reeval_activation, reeval_conflict = _week4_payloads(reeval_run_id, "NVDA", score=70)
+    write_repo.persist_week4_results(
+        run_id=reeval_run_id, ticker="NVDA",
+        activation_payload=reeval_activation, conflict_payload=reeval_conflict,
+    )
+    write_engine.dispose()
+
+    # A GENUINE reconnect: a brand-new engine/repository, never the one
+    # used to write.
+    read_engine = build_engine(os.environ["COMQUTOR_TEST_DATABASE_URL"])
+    read_repo = GraphPersistenceRepository(read_engine)
+
+    original_readback = read_repo.get_week4_conflict_result(original_run_id)
+    reeval_readback = read_repo.get_week4_conflict_result(reeval_run_id)
+
+    # Independence: each execution's own read-back matches ONLY its own
+    # original in-memory payload, never the other's.
+    assert original_readback == original_conflict
+    assert reeval_readback == reeval_conflict
+    assert original_readback != reeval_readback
+    assert original_readback["main_conflict"]["conflict_score"] != reeval_readback["main_conflict"]["conflict_score"]
+
+    for run_id, readback in ((original_run_id, original_readback), (reeval_run_id, reeval_readback)):
+        # Rule/formula version identity, explicit and present.
+        assert readback["formula_version"]
+        assert readback["activation_formula_version"]
+        # main_conflict consistency: the SAME object as conflicts[0].
+        assert readback["main_conflict"] == readback["conflicts"][0]
+        # evidence_qualification (source/eligibility-adjacent audit data,
+        # the exact field this fix closes) survives the real reconnect.
+        main = readback["main_conflict"]
+        assert "evidence_qualification" in main
+        assert main["evidence_qualification"]["policy_version"]
+        assert isinstance(main["evidence_qualification"]["bull_qualification_reason_counts"], dict)
+        assert isinstance(main["evidence_qualification"]["bear_qualification_reason_counts"], dict)
+
+        # The real Export entrypoint, fed this reconnected read-back,
+        # preserves the SAME fields verbatim -- API and Export never
+        # silently diverge for the same real persisted claim.
+        export = extract_conflicts_export(readback, run_id=run_id, ticker="NVDA")
+        assert export["formula_version"] == readback["formula_version"]
+        assert export["activation_formula_version"] == readback["activation_formula_version"]
+        assert export["main_conflict"] == readback["main_conflict"]
+        assert export["main_conflict"]["evidence_qualification"] == main["evidence_qualification"]
+
+    read_engine.dispose()

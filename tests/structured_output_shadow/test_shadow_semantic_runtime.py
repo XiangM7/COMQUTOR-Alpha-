@@ -49,6 +49,12 @@ def test_structured_claim_shadow_is_additive_to_semantic_tasks():
         # alpha_classifier, registered here for the first time -- additive,
         # no existing task removed or changed.
         "alpha_classifier_batch",
+        # 2026-10-08 (T3 closeout, Round 26): content_support_verification
+        # registered in contracts.SEMANTIC_TASKS (registry completion: its
+        # calls had failed to start a semantic record) -- additive, no
+        # existing task removed or changed. This expectation was not updated
+        # at the time (T4 round 32 correction).
+        "content_support_verification",
     } == SEMANTIC_TASKS
 
 

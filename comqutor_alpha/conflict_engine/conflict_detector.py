@@ -28,6 +28,7 @@ docs/week4_spec_freeze_audit.md and this task both explicitly forbid
 
 from __future__ import annotations
 
+import contextlib
 import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -88,6 +89,7 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     _candidate_for_match,
     _is_ticker_specific,
 )
+from comqutor_alpha.graph_engine.claim_data_grounding import grounded_points
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     EvidenceFactCandidate,
     evidence_fact_group_id,
@@ -98,6 +100,15 @@ from comqutor_alpha.graph_engine.evidence_source_role import (
     qualify_evidence_group,
 )
 from comqutor_alpha.graph_engine.graph_schema import ACTIVATION_FORMULA_VERSION
+from comqutor_alpha.graph_engine.verified_evidence_gate import (
+    ACTIVATION_V2_VERIFIED_FORMULA_VERSION,
+    EVIDENCE_GATE_SOURCES_UNAVAILABLE,
+    EVIDENCE_GATE_STRUCTURED_RECORDS_UNAVAILABLE,
+    EVIDENCE_GATE_VERSION,
+    EvidenceGateInputError,
+    evaluate_conflict_admissibility_verified,
+    requires_source_resolution,
+)
 from comqutor_alpha.structure_engine.claim_quality import (
     CONSUMER_CONFLICT,
     is_claim_eligible,
@@ -118,7 +129,7 @@ SUPPORTS_ALPHA = "supports_alpha"
 # contradiction_weight x evidence_strength -- is identical for both and is
 # never changed by the activation version.
 SUPPORTED_ACTIVATION_FORMULA_VERSIONS = frozenset(
-    {ACTIVATION_FORMULA_VERSION, ACTIVATION_V2_FORMULA_VERSION}
+    {ACTIVATION_FORMULA_VERSION, ACTIVATION_V2_FORMULA_VERSION, ACTIVATION_V2_VERIFIED_FORMULA_VERSION}
 )
 
 # ---------------------------------------------------------------------------
@@ -592,6 +603,10 @@ def _gather_qualifying_evidence(
                         "evidence_stance": (
                             (_candidate_for_match(record, alpha_id) or {}).get("evidence_stance")
                         ),
+                        # T1 closure (claim_data_points.v1): saved observations this claim states / relies on
+                        # (empty unless the run opted in) -- only ever handed to the shared Evidence Fact Index.
+                        "data_stated": grounded_points(record, "stated"),
+                        "data_inputs": grounded_points(record, "inputs"),
                     }
                 )
 
@@ -660,6 +675,17 @@ def _group_qualifying_claims_into_facts(
             factors=tuple(c.get("factors") or ()),
             assertion_status=str(c.get("assertion_status") or "unknown"),
             semantic_polarity=str(c.get("semantic_polarity") or "unknown"),
+            # T1 source-linking chain: only a VALIDATED link (source_
+            # link_status == "VALID") is ever used as a merge signal here --
+            # a candidate/unvalidated proposal must never inflate or deflate
+            # the independent-evidence count.
+            linked_source_id=(
+                str(c["linked_source_id"])
+                if c.get("source_link_status") == "VALID" and c.get("linked_source_id")
+                else None
+            ),
+            data_stated=tuple(c.get("data_stated") or ()),
+            data_inputs=tuple(c.get("data_inputs") or ()),
         )
         for c in qualifying_claims
     ]
@@ -821,6 +847,9 @@ def _evaluate_candidate(
     duplicate_counts: Mapping[str, int],
     run_id: str = "",
     ticker: str = "",
+    structured_records: Sequence[Mapping[str, Any]] | None = None,
+    sources: list[dict[str, Any]] | None = None,
+    activations_by_id_diagnostic_raw: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
     """Evaluate exactly one canonical candidate pair.
 
@@ -1065,17 +1094,73 @@ def _evaluate_candidate(
     group_into_facts = lambda claims: _group_qualifying_claims_into_facts(  # noqa: E731
         claims, run_id=run_id, ticker=ticker
     )
-    admissibility = evaluate_conflict_admissibility(
+    # T1 verified-support eligibility gate (escalated 2026-09-28 from
+    # "additive diagnostic" to "official result"): ``admissibility_raw`` is
+    # ALWAYS computed against the raw, unfiltered evidence pool -- exactly
+    # today's original formula/thresholds, byte-identical. When the caller
+    # supplies ``structured_records`` (this run's own source_link_status/
+    # linked_source_id/content_support_review per claim), the OFFICIAL
+    # ``admissibility`` -- the one that decides ADMITTED/conflicts/
+    # main_conflict below -- is instead the GATE-FILTERED result
+    # (``evaluate_conflict_admissibility_verified``, the SAME real, frozen
+    # B2 function, restricted to genuinely HUMAN_REVIEWED-verified
+    # evidence). ``bull_fields.score``/``bear_fields.score`` already come
+    # from ``activations_by_id``, which the caller's own pipeline is
+    # expected to have already made verified-primary when it supports the
+    # gate (see graph_engine.pipeline.score_and_assemble_structure_graph)
+    # -- no separate "verified activation" parameter is needed here. The
+    # raw computation survives ONLY as a diagnostic field, never consulted
+    # for the official outcome once a verified view exists. Every
+    # pre-existing caller that omits ``structured_records`` gets EXACTLY
+    # today's original behavior: the raw pool IS the official result, no
+    # diagnostic field added.
+    # The diagnostic (raw) score prefers the TRUE raw v2 activation entry
+    # (``activations_by_id_diagnostic_raw``, this run's own
+    # activation_versions["v2"]) when the caller supplied one, so the
+    # diagnostic comparison is genuinely like-for-like end to end (raw
+    # score AND raw evidence pool) -- never mixing an already-verified
+    # score with a raw evidence pool. Falls back to bull_fields/bear_fields
+    # (the official ones) only when no separate raw view was supplied --
+    # exactly today's original single-pool behavior when no verified
+    # escalation exists at all.
+    diagnostic_bull_score = bull_fields.score
+    diagnostic_bear_score = bear_fields.score
+    if activations_by_id_diagnostic_raw is not None:
+        diagnostic_bull_entry = activations_by_id_diagnostic_raw.get(bull_id)
+        diagnostic_bear_entry = activations_by_id_diagnostic_raw.get(bear_id)
+        if diagnostic_bull_entry is not None and diagnostic_bear_entry is not None:
+            diagnostic_bull_score = _extract_activation_fields(diagnostic_bull_entry, bull_id).score
+            diagnostic_bear_score = _extract_activation_fields(diagnostic_bear_entry, bear_id).score
+    admissibility_raw = evaluate_conflict_admissibility(
         bull_alpha_id=bull_id,
         bear_alpha_id=bear_id,
-        bull_score=bull_fields.score,
-        bear_score=bear_fields.score,
+        bull_score=diagnostic_bull_score,
+        bear_score=diagnostic_bear_score,
         bull_qualifying_claims=bull_qualifying,
         bear_qualifying_claims=bear_qualifying,
         alpha_matches=alpha_matches,
         ticker=ticker,
         group_into_facts=group_into_facts,
     )
+    if structured_records is not None:
+        admissibility = evaluate_conflict_admissibility_verified(
+            bull_alpha_id=bull_id,
+            bear_alpha_id=bear_id,
+            bull_score=bull_fields.score,
+            bear_score=bear_fields.score,
+            bull_qualifying_claims=bull_qualifying,
+            bear_qualifying_claims=bear_qualifying,
+            alpha_matches=alpha_matches,
+            ticker=ticker,
+            group_into_facts=group_into_facts,
+            structured_records=structured_records,
+            sources=sources,
+        )
+        conflict["admissibility_diagnostic_unverified"] = admissibility_raw.to_dict()
+        conflict["evidence_gate_version"] = EVIDENCE_GATE_VERSION
+        conflict["evidence_gate_applied"] = True
+    else:
+        admissibility = admissibility_raw
     conflict["admissibility"] = admissibility.to_dict()
 
     # John's B5 Conflict Radar Evidence UI gate (task
@@ -1115,6 +1200,10 @@ def _evaluate_candidate(
         audit_item["bear_alpha_id"] = bear_id
         audit_item["admissibility"] = admissibility.to_dict()
         audit_item["evidence_ui"] = evidence_ui
+        if "admissibility_diagnostic_unverified" in conflict:
+            audit_item["admissibility_diagnostic_unverified"] = conflict["admissibility_diagnostic_unverified"]
+            audit_item["evidence_gate_version"] = conflict["evidence_gate_version"]
+            audit_item["evidence_gate_applied"] = conflict["evidence_gate_applied"]
         return audit_item, None
 
     audit_item = _audit_item(alpha_a, alpha_b, "admitted", [], evidence_audit)
@@ -1122,6 +1211,10 @@ def _evaluate_candidate(
     audit_item["bear_alpha_id"] = bear_id
     audit_item["admissibility"] = admissibility.to_dict()
     audit_item["evidence_ui"] = evidence_ui
+    if "admissibility_diagnostic_unverified" in conflict:
+        audit_item["admissibility_diagnostic_unverified"] = conflict["admissibility_diagnostic_unverified"]
+        audit_item["evidence_gate_version"] = conflict["evidence_gate_version"]
+        audit_item["evidence_gate_applied"] = conflict["evidence_gate_applied"]
     return audit_item, conflict
 
 
@@ -1248,6 +1341,10 @@ def detect_alpha_conflicts(
     activation_payload: Mapping[str, Any],
     alpha_matches: Sequence[Mapping[str, Any]],
     taxonomy: Mapping[str, Any] | None = None,
+    structured_records: Sequence[Mapping[str, Any]] | None = None,
+    sources: list[dict[str, Any]] | None = None,
+    activation_payload_diagnostic_raw: Mapping[str, Any] | None = None,
+    require_verified_evidence_gate: bool = False,
 ) -> dict[str, Any]:
     """Deterministically evaluate every taxonomy-declared conflict pair for one run.
 
@@ -1260,6 +1357,63 @@ def detect_alpha_conflicts(
     unresolvable bull/bear role -- is reported gracefully as a
     ``suppressed``/``rejected`` candidate in the returned dict, never an
     exception.
+
+    ``structured_records``/``sources`` (T1 verified-support eligibility
+    gate; escalated 2026-09-28 from "additive diagnostic" to "official
+    result"): OPTIONAL. When a real caller supplies this run's own
+    persisted structured records (source_link_status/linked_source_id/
+    content_support_review) and source registry, each candidate pair's
+    OFFICIAL ``admissibility`` -- the one that determines ADMITTED status,
+    ``conflicts``, and ``main_conflict`` -- is computed via
+    ``comqutor_alpha.graph_engine.verified_evidence_gate.
+    evaluate_conflict_admissibility_verified`` (the SAME, unmodified,
+    frozen B2 gate, restricted to claims whose source link is genuinely
+    HUMAN_REVIEWED-verified) rather than the raw, unfiltered evidence pool.
+    The raw computation survives as a DIAGNOSTIC-ONLY
+    ``admissibility_diagnostic_unverified`` field -- never consulted for
+    ADMITTED/conflicts/main_conflict once a verified view exists.
+    ``activation_payload`` itself is expected to already be this run's
+    OFFICIAL activation view (verified-primary when the caller's own
+    pipeline supports the gate -- see ``graph_engine.pipeline.
+    score_and_assemble_structure_graph``), so ``bull_score``/``bear_score``
+    here are already correctly sourced without any separate "verified
+    activation" parameter. Omitting ``structured_records``/``sources`` (as
+    every pre-existing caller, and every historical run, does) computes
+    EXACTLY today's original behavior -- the raw pool IS the official
+    result, no gate applied, no diagnostic field added.
+
+    ``activation_payload_diagnostic_raw`` (OPTIONAL): this run's own raw,
+    UNFILTERED v2 activation view (``activation_versions["v2"]``), used
+    ONLY to score ``admissibility_diagnostic_unverified`` on a genuinely
+    like-for-like basis (raw score AND raw evidence pool -- "what would the
+    pre-gate pipeline have concluded end to end"). Never consulted for the
+    OFFICIAL ``admissibility``. Its absence still computes the diagnostic
+    field (when ``structured_records`` is supplied) using the OFFICIAL
+    score -- a real, honest fallback, never a crash -- it only means the
+    diagnostic comparison is evidence-pool-only rather than fully
+    like-for-like.
+
+    ``require_verified_evidence_gate`` (2026-09-28 closing fix, extended
+    2026-09-29 to the normal new-research production entrypoint): OPTIONAL,
+    default ``False``. An ordinary read-only/historical caller leaves this
+    ``False`` -- unchanged legacy behavior: the gate is applied
+    opportunistically when ``structured_records``/``sources`` happen to be
+    available, and silently skipped (raw pool is official) otherwise. A
+    caller that REQUIRES the gate (today: both
+    ``routes_research.run_research_request``'s normal new-research
+    production path and ``routes_research.trigger_content_support_
+    reevaluation``) sets this ``True``. ``structured_records is None``
+    (this run's own structured records themselves missing/corrupted)
+    always raises :class:`~comqutor_alpha.graph_engine.verified_evidence_
+    gate.EvidenceGateInputError`. ``sources is None`` raises the SAME error
+    ONLY when ``structured_records`` actually contains at least one claim
+    needing source resolution (see ``verified_evidence_gate.requires_
+    source_resolution``) -- a run with no source-linked claims at all never
+    needed ``sources``, so its absence is immaterial, never a failure. This
+    must be set to the SAME value (and the SAME ``structured_records``/
+    ``sources``) passed to the paired ``graph_engine.pipeline.score_and_
+    assemble_structure_graph`` call for this run, so Activation and
+    conflict admissibility never diverge (one gated, the other not).
     """
     if not isinstance(run_id, str) or not run_id.strip():
         raise ConflictInputError("SCHEMA_INVALID")
@@ -1267,11 +1421,20 @@ def detect_alpha_conflicts(
         raise ConflictInputError("SCHEMA_INVALID")
     if not isinstance(alpha_matches, Sequence) or isinstance(alpha_matches, (str, bytes)):
         raise ConflictInputError("SCHEMA_INVALID")
+    if require_verified_evidence_gate:
+        if structured_records is None:
+            raise EvidenceGateInputError(EVIDENCE_GATE_STRUCTURED_RECORDS_UNAVAILABLE)
+        if sources is None and requires_source_resolution(structured_records):
+            raise EvidenceGateInputError(EVIDENCE_GATE_SOURCES_UNAVAILABLE)
 
     if taxonomy is None:
         taxonomy = load_alpha_taxonomy()
     declared_pairs = _enumerate_canonical_pairs(taxonomy)
     activations_by_id = _index_activations(activation_payload, set(taxonomy))
+    activations_by_id_diagnostic_raw = None
+    if activation_payload_diagnostic_raw is not None:
+        with contextlib.suppress(ConflictInputError):
+            activations_by_id_diagnostic_raw = _index_activations(activation_payload_diagnostic_raw, set(taxonomy))
     canonical_matches, duplicate_counts = _canonicalize_alpha_matches(alpha_matches)
 
     mismatch_reason = _embedded_identity_mismatch(
@@ -1311,6 +1474,9 @@ def detect_alpha_conflicts(
             duplicate_counts=duplicate_counts,
             run_id=run_id,
             ticker=ticker,
+            structured_records=structured_records,
+            sources=sources,
+            activations_by_id_diagnostic_raw=activations_by_id_diagnostic_raw,
         )
         candidate_evaluations.append(audit_item)
         if conflict is not None:
@@ -1371,14 +1537,24 @@ def evaluate_conflict_pair(
     taxonomy: Mapping[str, Any] | None = None,
     run_id: str = "",
     ticker: str = "",
+    structured_records: Sequence[Mapping[str, Any]] | None = None,
+    sources: list[dict[str, Any]] | None = None,
+    activation_payload_diagnostic_raw: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Optional single-pair evaluation helper.
+    """Optional single-pair evaluation helper -- NOT part of any real API
+    route, page, or official-result flow (verified 2026-09-28: grepping
+    this entire repository outside ``tests/`` finds zero callers of this
+    function; every real production path goes through
+    ``detect_alpha_conflicts`` instead, via ``conflict_engine.pipeline.
+    run_week4_conflict_pipeline``). It exists only for a caller (today,
+    only this module's own test suite) that wants to evaluate exactly one
+    candidate pair without needing the full eight-pair enumeration.
 
-    Evaluates exactly one candidate pair without needing the full six-pair
-    enumeration. If the pair is not taxonomy-declared at all, returns a
-    ``rejected`` audit item with ``PAIR_NOT_DECLARED`` -- the one situation
-    that reason code exists for, since ``detect_alpha_conflicts`` itself
-    never evaluates an undeclared pair in the first place.
+    Evaluates exactly one candidate pair. If the pair is not
+    taxonomy-declared at all, returns a ``rejected`` audit item with
+    ``PAIR_NOT_DECLARED`` -- the one situation that reason code exists for,
+    since ``detect_alpha_conflicts`` itself never evaluates an undeclared
+    pair in the first place.
 
     ``run_id``/``ticker`` default to ``""`` -- exactly ``_evaluate_candidate``'s
     own existing defaults -- so any pre-existing caller that omits them sees
@@ -1387,6 +1563,16 @@ def evaluate_conflict_pair(
     never be satisfied without a real ticker. Callers that need a
     B2-admitted result back from this helper must supply the real ticker,
     exactly as ``detect_alpha_conflicts`` itself always requires one.
+
+    ``structured_records``/``sources``/``activation_payload_diagnostic_raw``
+    (2026-09-28, added defensively -- never assume a "secondary" function
+    poses no bypass risk merely for being secondary): accepted for exact
+    parity with ``detect_alpha_conflicts``, so that IF this helper is ever
+    wired into a real path in the future, it already enforces the SAME
+    verified-support eligibility gate on the official result rather than
+    silently reintroducing the raw-pool bypass this round closed elsewhere.
+    Omitting them (every current caller) computes exactly the pre-gate
+    behavior this helper has always had.
     """
     if taxonomy is None:
         taxonomy = load_alpha_taxonomy()
@@ -1394,6 +1580,10 @@ def evaluate_conflict_pair(
         (pair.alpha_a, pair.alpha_b): pair for pair in _enumerate_canonical_pairs(taxonomy)
     }
     activations_by_id = _index_activations(activation_payload, set(taxonomy))
+    activations_by_id_diagnostic_raw = None
+    if activation_payload_diagnostic_raw is not None:
+        with contextlib.suppress(ConflictInputError):
+            activations_by_id_diagnostic_raw = _index_activations(activation_payload_diagnostic_raw, set(taxonomy))
     canonical_matches, duplicate_counts = _canonicalize_alpha_matches(alpha_matches)
     alpha_a, alpha_b = canonical_pair_key(alpha_id_1, alpha_id_2)
 
@@ -1418,6 +1608,9 @@ def evaluate_conflict_pair(
         duplicate_counts=duplicate_counts,
         run_id=run_id,
         ticker=ticker,
+        structured_records=structured_records,
+        sources=sources,
+        activations_by_id_diagnostic_raw=activations_by_id_diagnostic_raw,
     )
     if conflict is not None:
         return {**audit_item, "conflict": _finalize_conflict(conflict)}

@@ -1,0 +1,368 @@
+{
+  "schema_version": "final_delivery_package.v1",
+  "authority": "docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml (JOHN_WRITTEN_V0_2_BASELINE)",
+  "package_type": "UNIFIED_DELIVERY_PACKAGE_INDEX_AND_SYNTHESIS",
+  "note": "This package is an index/concise synthesis over preserved evidence. It does not rewrite, recompute, or supersede any underlying audit artifact -- every factual claim below cites the exact artifact path that supports it.",
+  "section_1_frozen_rules_and_change_record": {
+    "authoritative_baseline_artifact": "docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml",
+    "tiers": {
+      "formal_gold": [
+        "NVDA",
+        "QQQ",
+        "SNDK"
+      ],
+      "silver_diagnostic": [
+        "MSFT",
+        "TSM",
+        "AMD"
+      ]
+    },
+    "evidence_conditional_semantics": [
+      "must_detect_if_evidence_present",
+      "should_detect_if_supported",
+      "conditional_only",
+      "do_not_force",
+      "allowed_main_conflicts",
+      "forbidden_dominant_without_strong_evidence"
+    ],
+    "allowed_main_conflicts_frozen_baseline": {
+      "NVDA": [
+        "A101__A304",
+        "A301__A304"
+      ],
+      "QQQ": [
+        "A001__A501",
+        "A003__A501",
+        "A304__A601"
+      ],
+      "SNDK": [
+        "A201__A304",
+        "A301__A304"
+      ],
+      "MSFT": [
+        "A102__A304",
+        "A101__A304",
+        "A301__A304"
+      ],
+      "TSM": [
+        "A201__A304",
+        "A301__A304",
+        "A101__A304"
+      ],
+      "AMD": [
+        "A101__A304",
+        "A201__A304",
+        "A301__A304"
+      ]
+    },
+    "total_allowed_main_conflict_pairs": 16,
+    "interpretation_rules": [
+      "Allowed means permitted when evidence supports it -- never mandatory.",
+      "Absence of a listed conflict in an actual run is not automatically a failure.",
+      "There is no universal fixed number of active Alphas or conflicts.",
+      "Conditional Alpha rules (should_detect_if_supported, conditional_only) remain conditional -- an informational miss, not a failure.",
+      "forbidden_dominant_without_strong_evidence remains enforced.",
+      "do_not_force remains enforced -- the system must never force a dominant Alpha into a conflict role it doesn't evidentially earn."
+    ],
+    "baseline_not_modified_this_task": true,
+    "nvda_a304_a601_disclosure": "The Day 4K fresh NVDA run's admitted main conflict (A304__A601) is NOT added to NVDA's frozen allowed list. It is recorded as REVIEW_REQUIRED evidence in Section 2 below, not a baseline change.",
+    "change_record_chronology": [
+      {
+        "stage": "Day 1",
+        "event": "Formal rule baseline frozen",
+        "artifact": "docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml"
+      },
+      {
+        "stage": "Day 2",
+        "event": "Rule-to-evidence-output audit produced (25 rule rows, 21 PASS/1 FAIL/3 REVIEW_REQUIRED)",
+        "artifact": "docs/audit_artifacts/v0_2_rule_evidence_output_audit.json"
+      },
+      {
+        "stage": "Day 2 (early acceptance snapshot, superseded)",
+        "event": "An early acceptance table showed QQQ Formal Gold = FAIL (QQQ-A001-RATE-CUT-CYCLE conditional-force violation) -- this snapshot predates the Day 3 fix and the entire Candidate 1/2/3 remediation saga and is retained only as historical chronology, not current truth.",
+        "artifact": "docs/audit_artifacts/v0_2_final_acceptance_table.md"
+      },
+      {
+        "stage": "Day 3",
+        "event": "structured_output_adapter.py fix (POSITIVE_WORDS += 'toll booth') -- resolved a direction-inference gap; 1-line, isolated, no Alpha ID added",
+        "artifact": "docs/audit_artifacts/v0_2_day3_review_resolution.md"
+      },
+      {
+        "stage": "Day 4B",
+        "event": "Candidate 1 designed, Provider-validated against Holdout #4 (200 samples), REJECTED_NET_REGRESSION (69.50% vs 74.00% baseline)",
+        "artifact": "docs/audit_artifacts/v0_2_day4b_provider_validation_result.json"
+      },
+      {
+        "stage": "Day 4C",
+        "event": "Candidate 1 surgically reverted; Candidate 2 designed and development-tested (72.50%, NOT_ACCEPTED_NO_INDEPENDENT_VALIDATION)",
+        "artifact": "docs/audit_artifacts/v0_2_alpha_prompt_candidate2.json"
+      },
+      {
+        "stage": "Day 4D",
+        "event": "Candidate 2 surgically reverted to baseline v3; full labeled-Alpha-data inventory established no untouched independent holdout remained",
+        "artifact": "docs/audit_artifacts/v0_2_labeled_alpha_data_inventory.json"
+      },
+      {
+        "stage": "Day 4E",
+        "event": "New 300-sample blind holdout constructed from untouched raw evidence (100 dev / 150 sealed final / 50 reserve), deterministic seeded split, zero leakage",
+        "artifact": "docs/audit_artifacts/v0_2_new_alpha_holdout_split.json"
+      },
+      {
+        "stage": "Day 4F",
+        "event": "100-sample Development Gold independently adjudicated and frozen (external LLM adjudication, blind, reserve-replacement chain fully resolved)",
+        "artifact": "docs/audit_artifacts/v0_2_alpha_dev_gold_v1.json"
+      },
+      {
+        "stage": "Day 4G",
+        "event": "Candidate 3 designed (one conditional semantic-sufficiency guardrail) and development-tested: baseline 64.00% -> Candidate 3 81.00% on the 100-sample Development Gold; frozen for final validation",
+        "artifact": "docs/audit_artifacts/v0_2_candidate3_freeze_manifest.json"
+      },
+      {
+        "stage": "Day 4H",
+        "event": "150-sample Final Independent Gold independently adjudicated and frozen (external LLM adjudication, blind, 3-round reserve-replacement chain fully resolved)",
+        "artifact": "docs/audit_artifacts/v0_2_alpha_final_gold_v1.json"
+      },
+      {
+        "stage": "Day 4I",
+        "event": "ONE-SHOT independent final Alpha validation: Candidate 3 vs 150-sample Final Gold = 124/150 = 82.67% (>= 80% target)",
+        "artifact": "docs/audit_artifacts/v0_2_candidate3_final_validation_result.json"
+      },
+      {
+        "stage": "Day 4J",
+        "event": "Independent polarity gate provenance audit: Holdout #2 (123/141=87.23%) determined ELIGIBLE_INDEPENDENT_FINAL_EVIDENCE for polarity specifically",
+        "artifact": "docs/audit_artifacts/v0_2_independent_polarity_gate_audit.json"
+      },
+      {
+        "stage": "Day 4K",
+        "event": "Latest-version Fresh E2E: NVDA (REVIEW_REQUIRED, A304__A601) and QQQ (PASS, A003__A501)",
+        "artifact": "docs/audit_artifacts/v0_2_candidate3_fresh_e2e_summary.json"
+      }
+    ]
+  },
+  "section_2_final_acceptance_table": {
+    "reused_audit": "docs/audit_artifacts/v0_2_rule_evidence_output_audit.json",
+    "rows": [
+      {
+        "ticker": "NVDA",
+        "tier": "FORMAL_GOLD",
+        "applicable_frozen_rules_checked": [
+          "must_detect_if_evidence_present",
+          "should_detect_if_supported",
+          "allowed_main_conflicts",
+          "forbidden_dominant_without_strong_evidence",
+          "do_not_force"
+        ],
+        "evidence_state": "Rich, multi-agent, ticker-specific evidence for A301 (18 groups/3 agents) and A304 (23 groups/5 agents).",
+        "dominant_alpha_state": "A301 (Revenue Expansion, +74.21), A304 (Multiple Compression, -71.73) both dominant with strong evidence.",
+        "main_conflict_state": "Admitted: A304__A601 (canonical taxonomy pair, contradiction_weight 0.80) -- NOT on NVDA's own allowed list [A101__A304, A301__A304]. A301__A304 (an allowed pair) was suppressed on its own merits (NO_BULL_TICKER_SPECIFIC_SUPPORT), not forced.",
+        "status": "REVIEW_REQUIRED",
+        "reason": "Latest Fresh run's admitted conflict is genuinely evidence-supported and canonical but outside NVDA's predeclared allow-list. Reported honestly per explicit instruction not to force PASS. Historical Formal Gold record from a prior, different frozen run remains PASS and is unchanged.",
+        "source_artifact": "docs/audit_artifacts/v0_2_candidate3_fresh_e2e_nvda.json"
+      },
+      {
+        "ticker": "QQQ",
+        "tier": "FORMAL_GOLD",
+        "applicable_frozen_rules_checked": [
+          "allowed_main_conflicts",
+          "forbidden_dominant_without_strong_evidence",
+          "do_not_force"
+        ],
+        "evidence_state": "Genuine ETF-level evidence for A003 (fund-flow data, 'QQQ inflows totaled nearly $1B') and macro evidence for A501 (recession-risk/credit-spread).",
+        "dominant_alpha_state": "None reached dominant level this run (legitimate, never required). Active: A003, A304, A501, A601.",
+        "main_conflict_state": "Admitted, selected as main: A003__A501 -- ON QQQ's allowed list [A001__A501, A003__A501, A304__A601]. The historically-cited off-list A301__A304 did NOT reproduce this run (suppressed on its own merits).",
+        "status": "PASS",
+        "reason": "Latest Fresh run's main conflict matches an allowed pair with genuine evidence on both sides. Does not retroactively resolve or override QQQ's separate, standing, carried historical Formal Gold REVIEW_REQUIRED status from an earlier frozen-input run with a different (off-list) conflict -- that record and its unadopted RULE_CHANGE_RECOMMENDATION remain unchanged.",
+        "source_artifact": "docs/audit_artifacts/v0_2_candidate3_fresh_e2e_qqq.json"
+      },
+      {
+        "ticker": "SNDK",
+        "tier": "FORMAL_GOLD",
+        "applicable_frozen_rules_checked": [
+          "must_detect_if_evidence_present",
+          "allowed_main_conflicts",
+          "forbidden_dominant_without_strong_evidence"
+        ],
+        "evidence_state": "Rich evidence for A201 (Semiconductor Supercycle, 42 groups/9 agents) -- e.g. 'Motley Fool frames both Micron and SanDisk as beneficiaries of a surge in memory demand with no sign of it slowing down.'",
+        "dominant_alpha_state": "A201 dominant (+84.22). Active: A601, A304.",
+        "main_conflict_state": "No main conflict admitted (main_conflict=null). All 6 canonical candidate pairs arbitrated: 3 rejected (DIRECTION_ROLE_UNRESOLVED / MISSING_LEFT_EVIDENCE), 3 suppressed (insufficient ticker-specific support on one or both sides). A201__A304 (an allowed pair) was never even a candidate because A201 has no declared conflict_alphas in the current taxonomy (a pre-existing, already-disclosed implementation-alignment gap, not created by this task).",
+        "status": "PASS",
+        "reason": "A legitimate no-main-conflict state, per John's own explicit rule that absence of a listed conflict is not automatically a failure. The product did not manufacture a conflict where the evidence did not support one.",
+        "source_artifact": "run e8e0f398-7b26-4462-8135-a1410ea5b335, verified live via /api/research/{run_id}/conflicts this task"
+      },
+      {
+        "ticker": "MSFT",
+        "tier": "SILVER_DIAGNOSTIC",
+        "applicable_frozen_rules_checked": [
+          "should_detect_if_supported",
+          "conditional_only"
+        ],
+        "evidence_state": "MSFT-A102-DIRECT-INFERENCE-TRIGGER: reproducible true miss traced to a direction-inference gap (fixed by the Day 3 POSITIVE_WORDS addition for future runs); MSFT-CAPEX-BURDEN-CONDITIONAL: REVIEW_REQUIRED, traces to the activation formula's local_structure_support component, not missing evidence.",
+        "dominant_alpha_state": "Not re-verified this task (Silver, non-blocking, no fresh run performed for MSFT in Day 5).",
+        "main_conflict_state": "Not re-verified this task.",
+        "status": "UNRESOLVED_DIAGNOSTIC (non-blocking)",
+        "reason": "Silver Diagnostic tier is explicitly non-blocking for release. Findings are reported honestly as unresolved/diagnostic per existing Day 2/3 audits, not silently closed.",
+        "source_artifact": "docs/audit_artifacts/v0_2_day3_review_resolution.md"
+      },
+      {
+        "ticker": "TSM",
+        "tier": "SILVER_DIAGNOSTIC",
+        "applicable_frozen_rules_checked": [
+          "allowed_main_conflicts"
+        ],
+        "evidence_state": "Per Day 2 rule-evidence-output audit.",
+        "dominant_alpha_state": "Per Day 2 rule-evidence-output audit.",
+        "main_conflict_state": "Per Day 2 rule-evidence-output audit (PASS at that time).",
+        "status": "PASS (as of Day 2 audit; not re-verified this task)",
+        "reason": "Silver Diagnostic, non-blocking; not part of Day 5's required Fresh-run scope (NVDA/QQQ/SNDK only).",
+        "source_artifact": "docs/audit_artifacts/v0_2_rule_evidence_output_audit.json"
+      },
+      {
+        "ticker": "AMD",
+        "tier": "SILVER_DIAGNOSTIC",
+        "applicable_frozen_rules_checked": [
+          "allowed_main_conflicts"
+        ],
+        "evidence_state": "Per Day 2 rule-evidence-output audit.",
+        "dominant_alpha_state": "Per Day 2 rule-evidence-output audit.",
+        "main_conflict_state": "Per Day 2 rule-evidence-output audit (PASS at that time).",
+        "status": "PASS (as of Day 2 audit; not re-verified this task)",
+        "reason": "Silver Diagnostic, non-blocking; not part of Day 5's required Fresh-run scope.",
+        "source_artifact": "docs/audit_artifacts/v0_2_rule_evidence_output_audit.json"
+      }
+    ]
+  },
+  "section_3_error_stats_and_validation": {
+    "denominators_never_combined": true,
+    "development_candidate3": {
+      "accuracy": 0.81,
+      "denominator": 100,
+      "artifact": "docs/audit_artifacts/v0_2_candidate3_dev_result.json",
+      "note": "DEVELOPMENT_METRIC_ONLY -- historical context, not an acceptance gate."
+    },
+    "independent_final_alpha": {
+      "correct": 124,
+      "denominator": 150,
+      "accuracy": 0.8267,
+      "target": 0.8,
+      "target_met": true,
+      "artifact": "docs/audit_artifacts/v0_2_candidate3_final_validation_result.json"
+    },
+    "independent_polarity": {
+      "correct": 123,
+      "denominator": 141,
+      "accuracy": 0.8723,
+      "target": 0.8,
+      "target_met": true,
+      "artifact": "docs/audit_artifacts/item2_blind_holdout2_summary.json"
+    },
+    "final_alpha_error_diagnostics": {
+      "total_errors": 26,
+      "false_positives": 18,
+      "false_negatives": 4,
+      "wrong_alpha_substitutions": 4,
+      "dominant_category": "valuation/A304 boundary = 11/26 (10 valuation_boundary + 1 valuation_boundary_multi_signal)",
+      "a103_over_a101_tie_break_errors": "2 of 4 wrong-alpha substitutions (gold-final-059, gold-final-077) traced directly to Candidate 3's own new A103-over-A101 tie-break rule overcorrecting",
+      "bare_sentiment_percentage_to_a601_recurrence": "gold-final-116 ('StockTwits ratio is 77% bullish') -- the same pattern that produced the one new regression in the Day 4G development run (gold-dev-045)",
+      "artifact": "docs/audit_artifacts/v0_2_candidate3_final_error_audit.json"
+    },
+    "diagnostic_submetrics_are_not_new_thresholds": "Category/error-type breakdowns above are descriptive diagnostics only -- they do not create new acceptance thresholds and were not used to modify Candidate 3 (which remains permanently frozen for this validation cycle)."
+  },
+  "section_4_run_inventory": [
+    {
+      "run_type": "FROZEN_REGRESSION",
+      "dataset": "6-ticker regression (NVDA/QQQ/SNDK/MSFT/TSM/AMD)",
+      "run_ids": "per-ticker, see artifact",
+      "head": "pre-Day-4 commits",
+      "result_state": "21 PASS / 1 FAIL / 3 REVIEW_REQUIRED (25 rule rows)",
+      "artifact_paths": [
+        "docs/audit_artifacts/v0_2_rule_evidence_output_audit.json"
+      ]
+    },
+    {
+      "run_type": "INDEPENDENT_VALIDATION",
+      "dataset": "Development Gold (100 samples, Candidate 3)",
+      "run_id": "N/A -- Provider-backed dev evaluation, not a TradingAgents run",
+      "head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+      "prompt_hash": "week2.alpha_classifier.v6 (d53b2d75...)",
+      "result_state": "81/100 = 81.00%, DEVELOPMENT_METRIC_ONLY",
+      "artifact_paths": [
+        "docs/audit_artifacts/v0_2_candidate3_dev_result.json"
+      ]
+    },
+    {
+      "run_type": "INDEPENDENT_VALIDATION",
+      "dataset": "Final Independent Gold (150 samples, Candidate 3) -- ONE_SHOT_INDEPENDENT_FINAL_VALIDATION",
+      "run_id": "N/A -- Provider-backed final evaluation, not a TradingAgents run",
+      "head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+      "prompt_hash": "week2.alpha_classifier.v6 (d53b2d75...)",
+      "gold_sha256": "a3c402ce391cfba1bd49d3d84a352e222e2775118f24b9ebf2a003183e2392de",
+      "result_state": "124/150 = 82.67%, target met",
+      "artifact_paths": [
+        "docs/audit_artifacts/v0_2_candidate3_final_validation_result.json",
+        "docs/audit_artifacts/v0_2_candidate3_final_predictions.json"
+      ]
+    },
+    {
+      "run_type": "INDEPENDENT_VALIDATION",
+      "dataset": "Holdout #2 polarity (141 samples, evidence_stance_classifier v3)",
+      "run_id": "N/A -- frozen historical evaluation",
+      "result_state": "123/141 = 87.23%, target met, ELIGIBLE_INDEPENDENT_FINAL_EVIDENCE per Day 4J provenance re-audit",
+      "artifact_paths": [
+        "docs/audit_artifacts/item2_blind_holdout2_summary.json",
+        "docs/audit_artifacts/v0_2_independent_polarity_gate_audit.json"
+      ]
+    },
+    {
+      "run_type": "FRESH_E2E",
+      "dataset": "NVDA",
+      "run_id": "ded99ecd-a186-4a90-859e-0f1a0efa43db",
+      "head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+      "prompt_hash": "week2.alpha_classifier.v6 confirmed in run manifest",
+      "input_identity": "Fresh upstream data, analysis_date 2026-09-17 (not a frozen snapshot)",
+      "result_state": "completed, 1923s, REVIEW_REQUIRED (A304__A601)",
+      "artifact_paths": [
+        "docs/audit_artifacts/v0_2_candidate3_fresh_e2e_nvda.json",
+        "outputs/runs/ded99ecd-a186-4a90-859e-0f1a0efa43db/"
+      ]
+    },
+    {
+      "run_type": "FRESH_E2E",
+      "dataset": "QQQ",
+      "run_id": "0d890564-2479-4361-94e8-25c48af3b9a8",
+      "head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+      "prompt_hash": "week2.alpha_classifier.v6 confirmed in run manifest",
+      "input_identity": "Fresh upstream data, analysis_date 2026-09-17",
+      "result_state": "completed, 1721s, PASS (A003__A501)",
+      "artifact_paths": [
+        "docs/audit_artifacts/v0_2_candidate3_fresh_e2e_qqq.json",
+        "outputs/runs/0d890564-2479-4361-94e8-25c48af3b9a8/"
+      ]
+    },
+    {
+      "run_type": "PERSISTED_DEMO",
+      "dataset": "SNDK (reused for Demo -- NOT a Fresh run this task)",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "input_identity": "Persisted run, analysis_date 2026-09-04",
+      "result_state": "completed, dominant A201, no main conflict admitted (legitimate)",
+      "artifact_paths": [
+        "outputs/runs/e8e0f398-7b26-4462-8135-a1410ea5b335/",
+        "verified live via /api/research this task"
+      ],
+      "explicit_label": "This is a PERSISTED/reused historical run selected for Demo purposes -- it is NEVER referred to as 'Fresh' anywhere in this package."
+    }
+  ],
+  "section_5_demo_walkthrough_reference": {
+    "script": "docs/audit_artifacts/v0_2_demo_walkthrough_script.md",
+    "checklist_json": "docs/audit_artifacts/v0_2_demo_walkthrough_checklist.json",
+    "checklist_md": "docs/audit_artifacts/v0_2_demo_walkthrough_checklist.md",
+    "performance_log": "docs/audit_artifacts/v0_2_final_performance_log.json",
+    "note": "Full detail in the dedicated demo/performance artifacts referenced above -- summarized only here."
+  },
+  "final_gate_status_snapshot": {
+    "FINAL_ALPHA_TARGET_MET": "YES (82.67%)",
+    "POLARITY_TARGET_MET": "YES (87.23%)",
+    "candidate3_classifier_hash": "d53b2d7511f4c4a8089db746d09e4c79cb38f22597dac6459920ca3deac1171d",
+    "candidate3_batch_hash": "a03c8f673ffd387a866bc8dd585c4c96cf5464b80a50cb6e4c3fc5f894f68379",
+    "candidate3_permanently_frozen_for_this_cycle": true
+  }
+}

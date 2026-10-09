@@ -120,6 +120,26 @@ def test_invalid_bool_raises(monkeypatch, bad):
     importlib.reload(default_config_module)
 
 
+def test_max_tokens_and_max_recur_limit_overrides(monkeypatch):
+    """Added 2026-09-30 (T3/T4 joint-verification execution-path task): the
+    minimum necessary request-shape limits for the Research Agent layer,
+    which had none of either kind before this round."""
+    dc = _reload_with_env(
+        monkeypatch,
+        TRADINGAGENTS_MAX_TOKENS="4000",
+        TRADINGAGENTS_MAX_RECUR_LIMIT="40",
+    )
+    assert dc.DEFAULT_CONFIG["max_tokens"] == "4000"  # coerced later, at _get_provider_kwargs, like temperature
+    assert dc.DEFAULT_CONFIG["max_recur_limit"] == 40
+    assert isinstance(dc.DEFAULT_CONFIG["max_recur_limit"], int)
+
+
+def test_max_tokens_defaults_to_none_and_max_recur_limit_defaults_to_100(monkeypatch):
+    dc = _reload_with_env(monkeypatch)
+    assert dc.DEFAULT_CONFIG["max_tokens"] is None
+    assert dc.DEFAULT_CONFIG["max_recur_limit"] == 100
+
+
 def test_unknown_env_var_is_ignored(monkeypatch):
     """Env vars outside _ENV_OVERRIDES must not bleed into DEFAULT_CONFIG."""
     dc = _reload_with_env(

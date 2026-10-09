@@ -47,8 +47,16 @@ def _run_qqq_fixture(tmp_path):
     return response["run_id"], graph, repo
 
 
-def _alpha(graph, alpha_id):
-    return next(a for a in graph["activation"]["alphas"] if a["alpha_id"] == alpha_id)
+def _alpha(graph, alpha_id, *, view="activation"):
+    # T1 gate-bypass fix (2026-09-29): view="v2" reads the RAW v2 diagnostic
+    # pool (activation_versions["v2"]) -- the SAME unmodified scorer's own
+    # output, unaffected by the (now unconditional) verified-evidence gate.
+    # This fixture's claims are never source-linked/human-reviewed, so the
+    # default view="activation" (the OFFICIAL, verified-only pool) honestly
+    # shows zero evidence everywhere; tests checking the Scorer's own
+    # evidence-based differentiation/provenance correctness use view="v2".
+    alphas = graph["activation_versions"]["v2"]["alphas"] if view == "v2" else graph["activation"]["alphas"]
+    return next(a for a in alphas if a["alpha_id"] == alpha_id)
 
 
 def test_qqq_graph_is_valid_and_ticker_correct(tmp_path):
@@ -60,10 +68,12 @@ def test_qqq_graph_is_valid_and_ticker_correct(tmp_path):
 
 
 def test_a001_a003_a501_all_receive_nonzero_evidence_based_activation(tmp_path):
+    # T1 gate-bypass fix (2026-09-29): reads the raw v2 diagnostic view --
+    # see _alpha's own docstring comment above.
     _, graph, _ = _run_qqq_fixture(tmp_path)
 
     for alpha_id in ("A001", "A003", "A501"):
-        alpha = _alpha(graph, alpha_id)
+        alpha = _alpha(graph, alpha_id, view="v2")
         assert alpha["evidence_count"] > 0, f"{alpha_id} should have committed evidence in this fixture"
         assert alpha["activation_score"] > 0
 
@@ -71,9 +81,9 @@ def test_a001_a003_a501_all_receive_nonzero_evidence_based_activation(tmp_path):
 def test_scores_are_differentiated_by_evidence_and_agent_agreement(tmp_path):
     _, graph, _ = _run_qqq_fixture(tmp_path)
 
-    a001 = _alpha(graph, "A001")
-    a003 = _alpha(graph, "A003")
-    a501 = _alpha(graph, "A501")
+    a001 = _alpha(graph, "A001", view="v2")
+    a003 = _alpha(graph, "A003", view="v2")
+    a501 = _alpha(graph, "A501", view="v2")
 
     # A001/A003 each get 3-agent corroboration in this fixture; A501 gets 1.
     assert a001["distinct_supporting_agents"] > a501["distinct_supporting_agents"]
@@ -85,23 +95,23 @@ def test_direction_is_preserved_per_alpha_type(tmp_path):
     _, graph, _ = _run_qqq_fixture(tmp_path)
 
     # A001/A003 are opportunity alphas being activated -> bullish/positive.
-    assert _alpha(graph, "A001")["direction"] == "positive"
-    assert _alpha(graph, "A003")["direction"] == "positive"
+    assert _alpha(graph, "A001", view="v2")["direction"] == "positive"
+    assert _alpha(graph, "A003", view="v2")["direction"] == "positive"
     # A501 is a risk alpha being activated -> legitimately bearish/negative.
-    assert _alpha(graph, "A501")["direction"] == "negative"
+    assert _alpha(graph, "A501", view="v2")["direction"] == "negative"
 
 
 def test_graph_provenance_is_complete(tmp_path):
     run_id, graph, repo = _run_qqq_fixture(tmp_path)
 
     for alpha_id in ("A001", "A003", "A501"):
-        alpha = _alpha(graph, alpha_id)
+        alpha = _alpha(graph, alpha_id, view="v2")
         assert alpha["claim_ids"]
         assert alpha["evidence"]
 
     persisted_claim_ids = {row["claim_id"] for row in repo.get_alpha_matches(run_id)}
     for alpha_id in ("A001", "A003", "A501"):
-        assert set(_alpha(graph, alpha_id)["claim_ids"]).issubset(persisted_claim_ids)
+        assert set(_alpha(graph, alpha_id, view="v2")["claim_ids"]).issubset(persisted_claim_ids)
 
 
 def test_no_pairwise_conflict_score_or_main_conflict_is_emitted(tmp_path):

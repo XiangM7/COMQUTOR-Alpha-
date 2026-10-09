@@ -1,0 +1,754 @@
+{
+  "schema_version": "week2.extracted_structures.v2",
+  "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+  "ticker": "NVDA",
+  "nodes": [
+    {
+      "id": "ai_capex",
+      "label": "AI CapEx",
+      "canonical_factor": "AI CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:13",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:66",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:82",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:80",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:70",
+        "canrel_a030b94f659615a8",
+        "canrel_3984ff6eb3142ad9"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:13",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:66",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:82",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:80",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:70"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "\"Just sold last NVDA, GOOGL and MSFT\" argues \"the economics never made sense at these GPU prices… if hyperscalers want their historical 30% ROIC, they actually need $636 billion a [year]\" — an explicit valuation/ROIC-sustainability challenge to the AI capex thesis.",
+        "This is the most important positive datapoint for NVDA in the window, because it validates enterprise AI/inference spending rather than merely hyperscaler capex.",
+        "This is a genuine positive for NVDA: it removes the demand-destruction tail that would most severely damage AI capex budgets.",
+        "Recession risk at 8% and falling is a structural tailwind for AI capex durability.",
+        "Hyperscaler capex guidance maintained or raised — directly rebuts the bear's ROIC-driven cut scenario.",
+        "Hyperscaler capex guidance — any single top-5 customer cutting 10%+ would be a red flag.",
+        "the economics never made sense at these GPU prices",
+        "an explicit valuation/ROIC-sustainability challenge to the AI capex thesis"
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "ai_demand",
+      "label": "AI Demand",
+      "canonical_factor": "AI Demand",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:95",
+        "canrel_fefc4cfe90a145de",
+        "canrel_9e5b627b76fd99a5"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:95",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:41",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:19"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "Accenture's record bookings are the cleanest available proxy that AI demand is broadening beyond hyperscalers into the enterprise — the exact demand mix that supports NVDA's data-center revenue runway.",
+        "Category: AI demand; Signal: Bullish / confirmed; Evidence: Accenture +23% on record bookings \"dispel AI demand fears\"; Infosys +8%, IBM +5%; Implication for NVDA: Validates enterprise AI/inference demand",
+        "Multiply that across the entire AI-native cohort, add sovereign deployments, add enterprise inference — and the demand runway is not a hyperscaler-only story.",
+        "Accenture's record bookings, IBM's sovereign AI agents, and self-hosted enterprise deployment scaling represent a genuine shift from hyperscaler training capex into the inference and enterprise layer"
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "ai_infrastructure",
+      "label": "AI Infrastructure",
+      "canonical_factor": "AI Infrastructure",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:30",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:86",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:96",
+        "034a0a60-430e-41f8-8321-03a11389707a:fundamental_agent:fundamentals_report:claim:108",
+        "034a0a60-430e-41f8-8321-03a11389707a:bear_researcher:investment_debate_state.bear_history:claim:106",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:14"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:30",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:86",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:96",
+        "034a0a60-430e-41f8-8321-03a11389707a:fundamental_agent:fundamentals_report:claim:108",
+        "034a0a60-430e-41f8-8321-03a11389707a:bear_researcher:investment_debate_state.bear_history:claim:106",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:14"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:fundamental_agent:fundamentals_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:bear_researcher:investment_debate_state.bear_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "\"IBM Stocks Gain as Sovereign AI Agents Go Live in India\" (GuruFocus.com) and \"IBM Introduces Self-Hosted Deployment for IBM Bob to Help Enterprises Advance AI Sovereignty and Governance\" (PR Newswire) — sovereign/enterprise AI deployment is scaling, which is a compute-demand positive for accelerators.",
+        "Accenture, IBM sovereign AI agents in India, and self-hosted enterprise AI deployment all point to inference and enterprise AI broadening beyond hyperscaler training capex — a more durable and diversified demand base for NVDA.",
+        "Category: Enterprise AI; Signal: Bullish; Evidence: IBM sovereign AI agents live in India; self-hosted IBM Bob deployment; Implication for NVDA: Broadens demand beyond hyperscalers",
+        "Capex is accelerating: $2,677M in Jul-26 vs $1,895M a year ago (+41% Y/Y), consistent with building out owned AI infrastructure and capacity.",
+        "If hyperscalers can't earn their cost of capital on AI infrastructure, they cut.",
+        "Accenture's record bookings, IBM's sovereign AI agents going live in India, self-hosted enterprise deployment scaling — that is a real broadening of the demand base beyond hyperscaler training capex into the inference and enterprise layer."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "gpu_demand",
+      "label": "GPU Demand",
+      "canonical_factor": "GPU Demand",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:30",
+        "canrel_a030b94f659615a8",
+        "canrel_fefc4cfe90a145de"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:30",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:41"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "\"IBM Stocks Gain as Sovereign AI Agents Go Live in India\" (GuruFocus.com) and \"IBM Introduces Self-Hosted Deployment for IBM Bob to Help Enterprises Advance AI Sovereignty and Governance\" (PR Newswire) — sovereign/enterprise AI deployment is scaling, which is a compute-demand positive for accelerators.",
+        "the economics never made sense at these GPU prices",
+        "Multiply that across the entire AI-native cohort, add sovereign deployments, add enterprise inference — and the demand runway is not a hyperscaler-only story."
+      ],
+      "score": 0.65
+    },
+    {
+      "id": "inference_demand",
+      "label": "Inference Demand",
+      "canonical_factor": "Inference Demand",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:35",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:55",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:58",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:13",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:30",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:83",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:85",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:86",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:95",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:96",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:85",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:14",
+        "canrel_e822f4869ed68a59",
+        "canrel_582f532a358f16cc",
+        "canrel_4baf5e994de478ee"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:35",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:55",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:58",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:13",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:30",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:83",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:85",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:86",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:95",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:96",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:85",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:14",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:17",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:20"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "Offsetting this, one post is a genuine product event: \"NVIDIA Launches Open Agent Safety Platform to Secure Agents\" — OpenShell software plus a Sentry reference system design letting companies set enforceable limits on what AI agents can access, with controls operating outside the agents themselves.",
+        "Enterprise AI agents as the next demand layer (single post, event-backed): NVDA's OpenShell/Sentry agent-safety platform, plus the Anthropic IPO filing showing compute/infrastructure expense up 190% YoY — evidence the agent/inference buildout is real and expensive.",
+        "NVDA's OpenShell / Sentry agent-safety platform launch — a concrete product expansion into the enterprise AI-agent security layer.",
+        "This is the most important positive datapoint for NVDA in the window, because it validates enterprise AI/inference spending rather than merely hyperscaler capex.",
+        "\"IBM Stocks Gain as Sovereign AI Agents Go Live in India\" (GuruFocus.com) and \"IBM Introduces Self-Hosted Deployment for IBM Bob to Help Enterprises Advance AI Sovereignty and Governance\" (PR Newswire) — sovereign/enterprise AI deployment is scaling, which is a compute-demand positive for accelerators.",
+        "Hyperscaler and enterprise AI budgets are far more likely to be cut in a recession than in an overheating economy.",
+        "The enterprise/inference demand vector is the most underappreciated positive.",
+        "Accenture, IBM sovereign AI agents in India, and self-hosted enterprise AI deployment all point to inference and enterprise AI broadening beyond hyperscaler training capex — a more durable and diversified demand base for NVDA.",
+        "Category: AI demand; Signal: Bullish / confirmed; Evidence: Accenture +23% on record bookings \"dispel AI demand fears\"; Infosys +8%, IBM +5%; Implication for NVDA: Validates enterprise AI/inference demand",
+        "Category: Enterprise AI; Signal: Bullish; Evidence: IBM sovereign AI agents live in India; self-hosted IBM Bob deployment; Implication for NVDA: Broadens demand beyond hyperscalers",
+        "The OpenShell/Sentry agent-safety platform is a genuine product launch into the enterprise AI-agent security layer — a software layer that increases switching costs and deepens the CUDA ecosystem lock-in.",
+        "Accenture's record bookings, IBM's sovereign AI agents going live in India, self-hosted enterprise deployment scaling — that is a real broadening of the demand base beyond hyperscaler training capex into the inference and enterprise layer.",
+        "Revenue is still compounding ~20% sequentially, margins are expanding, and the forward multiple is objectively undemanding.",
+        "Enterprise AI services bookings are a leading indicator of compute consumption.",
+        "enterprise AI services bookings are a leading indicator of compute consumption, and you don't get record AI services bookings without downstream accelerator demand"
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "nvda_revenue_growth",
+      "label": "NVDA Revenue Growth",
+      "canonical_factor": "Revenue Growth",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:fundamental_agent:fundamentals_report:claim:41",
+        "canrel_e822f4869ed68a59",
+        "canrel_a997f8fb05c01769",
+        "canrel_582f532a358f16cc",
+        "canrel_4baf5e994de478ee",
+        "canrel_36fdab15b3f252c6",
+        "canrel_9e5b627b76fd99a5"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:fundamental_agent:fundamentals_report:claim:41",
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history:claim:76",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:17",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:20",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:13",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:19"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:fundamental_agent:fundamentals_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "Accenture's record bookings are the cleanest available proxy that AI demand is broadening beyond hyperscalers into the enterprise — the exact demand mix that supports NVDA's data-center revenue runway.",
+        "Sequential revenue growth: Q/Q growth of +17.9% (Jul-26 vs Apr-26), +19.8% (Apr-26 vs Jan-26), +19.5% (Jan-26 vs Oct-25), +21.9% (Oct-25 vs Jul-25).",
+        "Revenue is still compounding ~20% sequentially, margins are expanding, and the forward multiple is objectively undemanding.",
+        "NVDA can grow revenue 20% sequentially and still de-rate if the 10-year keeps climbing.",
+        "Enterprise AI services bookings are a leading indicator of compute consumption.",
+        "enterprise AI services bookings are a leading indicator of compute consumption, and you don't get record AI services bookings without downstream accelerator demand",
+        "the demand trajectory is confirmed; the multiple is not",
+        "Accenture's record bookings, IBM's sovereign AI agents, and self-hosted enterprise deployment scaling represent a genuine shift from hyperscaler training capex into the inference and enterprise layer"
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "rate_cut_cycle",
+      "label": "Rate Cut Cycle",
+      "canonical_factor": "Rate Cut Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:34",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:53",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:80",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:97",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:49",
+        "034a0a60-430e-41f8-8321-03a11389707a:bear_researcher:investment_debate_state.bear_history:claim:64",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:20",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:16",
+        "canrel_aaca9d0ceb0ffead",
+        "canrel_5be293e27080aacd",
+        "canrel_91ff78837e80505d",
+        "canrel_e0c773d0a155627b"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:34",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:53",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:80",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:97",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:49",
+        "034a0a60-430e-41f8-8321-03a11389707a:bear_researcher:investment_debate_state.bear_history:claim:64",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:20",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:16",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:50",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:26"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:bear_researcher:investment_debate_state.bear_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "\"Stock market today: Dow, S&P 500, Nasdaq stage comeback as Treasury yields fall, chip stocks gain\" (Yahoo Finance) — chip stocks led a broad index recovery on a yields-fall day.",
+        "For NVDA, this means no rate-cut tailwind in 2026, removing a key support that high-multiple growth names have historically relied on.",
+        "The tape proved the linkage this week: \"Nasdaq stage comeback as Treasury yields fall, chip stocks gain.\" With the 10Y at its highest since 2002 and coming off its biggest monthly gain since 2022, any sustained decline in long yields is the highest-probability near-term catalyst for NVDA upside.",
+        "Category: Chip tape; Signal: Bullish (rate-sensitive); Evidence: \"Nasdaq stage comeback as Treasury yields fall, chip stocks gain\"; Implication for NVDA: NVDA rallies when yields fall",
+        "> \"Stock market today: Dow, S&P 500, Nasdaq stage comeback as Treasury yields fall, chip stocks gain\"",
+        "The bull's own macro report concedes the tape proved this: \"Nasdaq stage comeback as Treasury yields fall, chip stocks gain.\" That's the linkage — and it cuts against him.",
+        "The bear correctly identifies that NVDA's beta of 2.217 makes it one of the most rate-sensitive large-caps in the market, and the bull's own cited headline — \"Nasdaq stage comeback as Treasury yields fall, chip stocks gain\" — proves the linkage cuts against the bull, not for him.",
+        "Fine — but the tape proved the linkage cuts both ways: \"Nasdaq stage comeback as Treasury yields fall, chip stocks gain.\" That's not a reason to sell.",
+        "The bear correctly identifies that NVDA's beta of 2.217 makes it one of the most rate-sensitive large-caps in the market",
+        "you are citing a macro regime as if it's new information, when it's the reason the multiple is compressed and the PEG is 0.48",
+        "When the discount rate is still in motion, a compressed multiple isn't a floor — it's a moving target.",
+        "When the discount rate is still moving, a compressed multiple is a moving target."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "recession_risk",
+      "label": "Recession Risk",
+      "canonical_factor": "Recession Risk",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:65",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:82",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:102",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:108",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:50",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:52",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:102",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:111",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:21",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:51",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:52",
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history:claim:71"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:65",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:82",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:102",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:108",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:50",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:52",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:102",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:111",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:21",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:51",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:52",
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history:claim:71"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "evidence": [
+        "Read: At 8% and falling 2pp on the week, recession risk is a diminishing concern.",
+        "Recession risk at 8% and falling is a structural tailwind for AI capex durability.",
+        "Category: Recession risk; Signal: Bullish; Evidence: 8% by end-2026, -2.0pp on week; Implication for NVDA: Demand-destruction tail removed",
+        "Recession risk is receding (8%, -2pp), which protects the demand side.",
+        "> \"Recession risk at 8% and falling 2pp on the week.\"",
+        "Recession risk is 8% and falling.",
+        "Bear Claim: \"Macro is hostile — no cuts, overheating\"; Bull Rebuttal: Recession risk 8% and falling; overheating = strong nominal demand; rate constraint is mean-reverting",
+        "Recession risk at 8% and falling — the demand-destruction tail is off the table",
+        "The bull's \"recession risk is 8% and falling\" point is genuinely strong and the bear did not rebut it.",
+        "The bear did not refute the forward P/E of 14.7 or the 8% recession risk — he dismissed them as forecast-dependent and rate-sensitive.",
+        "And you are ignoring that recession risk is at 8% and falling 2pp on the week — the demand-destruction tail that would actually break the thesis is being priced out, not in.",
+        "The aggressive analyst says recession risk at 8% and falling removes the demand-destruction tail."
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "valuation_risk",
+      "label": "Valuation Risk",
+      "canonical_factor": "Valuation Risk",
+      "node_type": "factor",
+      "source_records": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:67",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:99",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:73",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:101",
+        "canrel_3984ff6eb3142ad9",
+        "canrel_aaca9d0ceb0ffead",
+        "canrel_5be293e27080aacd",
+        "canrel_a997f8fb05c01769",
+        "canrel_91ff78837e80505d",
+        "canrel_e0c773d0a155627b",
+        "canrel_36fdab15b3f252c6"
+      ],
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:67",
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:99",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:73",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:101",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:33",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:20",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:50",
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history:claim:76",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:26",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:13"
+      ],
+      "source_agent_output_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report",
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "The macro risk to NVDA is now a rates/valuation risk, not a demand-collapse risk.",
+        "Category: Fed policy; Signal: Bearish; Evidence: 97% \"no cuts in 2026\" ($8.7M vol); 76% \"another hike\"; 59% \"2 hikes\"; Implication for NVDA: No easing tailwind; multiple compression risk",
+        "When a company grows revenue 106% Y/Y and trades at 14.7x forward earnings, the bear's \"valuation risk\" argument isn't a valuation argument at all.",
+        "Bear Claim: \"Valuation risk / priced for perfection\"; Bull Rebuttal: Forward P/E 14.7, PEG 0.48 — objectively cheap relative to growth",
+        "an explicit valuation/ROIC-sustainability challenge to the AI capex thesis",
+        "The bear correctly identifies that NVDA's beta of 2.217 makes it one of the most rate-sensitive large-caps in the market",
+        "you are citing a macro regime as if it's new information, when it's the reason the multiple is compressed and the PEG is 0.48",
+        "NVDA can grow revenue 20% sequentially and still de-rate if the 10-year keeps climbing.",
+        "When the discount rate is still in motion, a compressed multiple isn't a floor — it's a moving target.",
+        "When the discount rate is still moving, a compressed multiple is a moving target.",
+        "the demand trajectory is confirmed; the multiple is not"
+      ],
+      "score": 0.75
+    }
+  ],
+  "edges": [
+    {
+      "source": "ai_capex",
+      "target": "gpu_demand",
+      "source_label": "AI CapEx",
+      "target_label": "GPU Demand",
+      "edge_type": "causal",
+      "confidence": 0.35,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI CapEx drives GPU Demand.",
+      "source_record_id": "canrel_a030b94f659615a8",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:33"
+      ],
+      "relation_id": "canrel_a030b94f659615a8",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report",
+      "evidence": "the economics never made sense at these GPU prices",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_demand",
+      "target": "gpu_demand",
+      "source_label": "AI Demand",
+      "target_label": "GPU Demand",
+      "edge_type": "causal",
+      "confidence": 0.65,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Demand drives GPU Demand.",
+      "source_record_id": "canrel_fefc4cfe90a145de",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history:claim:41"
+      ],
+      "relation_id": "canrel_fefc4cfe90a145de",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "Multiply that across the entire AI-native cohort, add sovereign deployments, add enterprise inference — and the demand runway is not a hyperscaler-only story.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_5be293e27080aacd",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:50"
+      ],
+      "relation_id": "canrel_5be293e27080aacd",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "you are citing a macro regime as if it's new information, when it's the reason the multiple is compressed and the PEG is 0.48",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_91ff78837e80505d",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:9"
+      ],
+      "relation_id": "canrel_91ff78837e80505d",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "When the discount rate is still in motion, a compressed multiple isn't a floor — it's a moving target.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.75,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_aaca9d0ceb0ffead",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan:claim:20"
+      ],
+      "relation_id": "canrel_aaca9d0ceb0ffead",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+      "evidence": "The bear correctly identifies that NVDA's beta of 2.217 makes it one of the most rate-sensitive large-caps in the market",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_e0c773d0a155627b",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:26"
+      ],
+      "relation_id": "canrel_e0c773d0a155627b",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision",
+      "evidence": "When the discount rate is still moving, a compressed multiple is a moving target.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "ai_capex",
+      "source_label": "Valuation Risk",
+      "target_label": "AI CapEx",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with AI CapEx.",
+      "source_record_id": "canrel_3984ff6eb3142ad9",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report:claim:33"
+      ],
+      "relation_id": "canrel_3984ff6eb3142ad9",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:sentiment_agent:sentiment_report",
+      "evidence": "an explicit valuation/ROIC-sustainability challenge to the AI capex thesis",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.65,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_36fdab15b3f252c6",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:13"
+      ],
+      "relation_id": "canrel_36fdab15b3f252c6",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision",
+      "evidence": "the demand trajectory is confirmed; the multiple is not",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.65,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_a997f8fb05c01769",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history:claim:76"
+      ],
+      "relation_id": "canrel_a997f8fb05c01769",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "NVDA can grow revenue 20% sequentially and still de-rate if the 10-year keeps climbing.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_demand",
+      "target": "nvda_revenue_growth",
+      "source_label": "AI Demand",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.68,
+      "rule_name": "forward_transitive_supportive",
+      "reason": "The claim states an asserted active supportive relation.",
+      "assertion_status": "asserted",
+      "source_claim": "Accenture's record bookings are the cleanest available proxy that AI demand is broadening beyond hyperscalers into the enterprise — the exact demand mix that supports NVDA's data-center revenue runway.",
+      "source_record_id": "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:33",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report:claim:33"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:news_agent:news_report",
+      "evidence": "Accenture's record bookings are the cleanest available proxy that AI demand is broadening beyond hyperscalers into the enterprise — the exact demand mix that supports NVDA's data-center revenue runway.",
+      "extraction_method": "deterministic_rules"
+    },
+    {
+      "source": "ai_demand",
+      "target": "nvda_revenue_growth",
+      "source_label": "AI Demand",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.65,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Demand supports Revenue Growth.",
+      "source_record_id": "canrel_9e5b627b76fd99a5",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:19"
+      ],
+      "relation_id": "canrel_9e5b627b76fd99a5",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision",
+      "evidence": "Accenture's record bookings, IBM's sovereign AI agents, and self-hosted enterprise deployment scaling represent a genuine shift from hyperscaler training capex into the inference and enterprise layer",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "inference_demand",
+      "target": "nvda_revenue_growth",
+      "source_label": "Inference Demand",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Inference Demand supports Revenue Growth.",
+      "source_record_id": "canrel_4baf5e994de478ee",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision:claim:20"
+      ],
+      "relation_id": "canrel_4baf5e994de478ee",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:portfolio_manager:final_trade_decision",
+      "evidence": "enterprise AI services bookings are a leading indicator of compute consumption, and you don't get record AI services bookings without downstream accelerator demand",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "inference_demand",
+      "target": "nvda_revenue_growth",
+      "source_label": "Inference Demand",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.65,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Inference Demand supports Revenue Growth.",
+      "source_record_id": "canrel_582f532a358f16cc",
+      "source_claim_ids": [
+        "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history:claim:17"
+      ],
+      "relation_id": "canrel_582f532a358f16cc",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "Enterprise AI services bookings are a leading indicator of compute consumption.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "inference_demand",
+      "target": "nvda_revenue_growth",
+      "source_label": "Inference Demand",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Inference Demand supports Revenue Growth.",
+      "source_record_id": "canrel_e822f4869ed68a59",
+      "source_claim_ids": [],
+      "relation_id": "canrel_e822f4869ed68a59",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "034a0a60-430e-41f8-8321-03a11389707a:research_manager:investment_plan",
+      "evidence": "Revenue is still compounding ~20% sequentially, margins are expanding, and the forward multiple is objectively undemanding.",
+      "extraction_method": "tradingagents_canonical_output"
+    }
+  ],
+  "metadata": {
+    "node_count": 9,
+    "edge_count": 14,
+    "extractor": "llm_with_deterministic_validation_and_fallback",
+    "extractor_version": "week2.structure_extractor.v2",
+    "llm_enabled": true,
+    "llm_edge_count": 0,
+    "deterministic_edge_count": 1,
+    "canonical_relation_edge_count": 13
+  }
+}

@@ -6,6 +6,7 @@ import type {
   LocalStructureSupportComponent,
 } from "../api/types";
 import { formatActivationLevelForDisplay } from "../utils/activationLevelDisplay";
+import { EvidenceBasisToggle } from "./EvidenceTraceDetail";
 
 // John's B3 gated seed lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES):
 // the frontend never recomputes or infers this status -- it only ever
@@ -97,6 +98,10 @@ interface AlphaCardProps {
    * B5 Conflict Radar invalidation registry (ConflictEvidenceSections'
    * "approved"/"not_defined" entries) -- never labelled "approved" here. */
   invalidationConditions?: string[];
+  /** The run this card belongs to. When given, every evidence item gets a "View basis" control that opens the
+   * claim's evidence trace (saved source material, where the claim sits in it, verification status, and what it
+   * contributed to the score) -- fetched only when opened. Without it the card renders exactly as before. */
+  runId?: string;
 }
 
 /** Alpha activation summary card. Status is conveyed with text + an icon +
@@ -115,6 +120,7 @@ export function AlphaCard({
   activation,
   isDominant,
   invalidationConditions,
+  runId,
 }: AlphaCardProps) {
   // QA Closure v0.1.2 Item 4 (Alpha Level Display Alignment): the single
   // display-facing level, read directly from the backend -- never
@@ -587,6 +593,7 @@ export function AlphaCard({
                 <p className="alpha-card-evidence-claim-id">
                   <code>{item.claim_id}</code>
                 </p>
+                {runId ? <EvidenceBasisToggle runId={runId} claimId={item.claim_id} /> : null}
               </li>
             ))}
           </ul>

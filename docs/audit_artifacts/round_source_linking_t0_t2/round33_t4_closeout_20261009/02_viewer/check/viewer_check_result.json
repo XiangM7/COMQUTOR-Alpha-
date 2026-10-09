@@ -1,0 +1,108 @@
+{
+ "checked_at": "2026-10-09T22:02:06.061Z",
+ "base": "http://127.0.0.1:5179",
+ "api": "http://127.0.0.1:8005",
+ "run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+ "browser": "system Google Chrome (playwright-core), headless",
+ "ready": {
+  "status": "ready",
+  "real_execution": "disabled",
+  "database_backend": {
+   "dialect": "postgresql",
+   "database": "comqutor_alpha_t4_r32_demo_test",
+   "reason": null
+  },
+  "week2_semantic_enabled": false,
+  "code_identity": {
+   "status": "known",
+   "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+   "uncommitted_changes": true,
+   "tracked_diff_sha256": "6cdd51e345929a1936845a416dd8a38c6f00ea3d0293afa03282d002dc96857c",
+   "untracked_runtime_source_sha256": "10ee75185ae8032bc9bdf304152a87c1d22db08120cdd546d31925277e21f0f6",
+   "computed_at": "2026-10-09T21:59:32.085346+00:00"
+  }
+ },
+ "api_detail": {
+  "status": "completed",
+  "stage_disclosure_present": true
+ },
+ "steps": [
+  {
+   "name": "1_history_reopen",
+   "ok": true,
+   "url": "http://127.0.0.1:5179/runs/12591384-0b26-470d-a99d-a49c00be440b/research",
+   "value": {
+    "disclosure_text": "Processing completeness\nClaim enrichment: 9 of 9 batches did not use a model result (1 not sent (input over the local size limit), 1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 7 timed out); for those claims entities, factors, direction, confidence and cited source come from deterministic extraction, not from a model judgment (a direction of 'unknown' there means 'not judged', not a model answer).\nContent support verification: 185 of 241 requested verifications produced an accepted model result (5 not sent (input over the local size limit), 3 reply not accepted (malformed_response), 48 reply not accepted (quote_or_data_not_found)); the others stay pending review -- a technical failure or a request that was never sent is not a judgment that the claim is unsupported.\nStructure extraction: 2 of 2 model calls contributed no edge (1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 1 returned a valid empty result, deterministic processing used instead); extracted edges by source: model 0, deterministic grammar 0, TradingAgents canonical relations 16.\nSub-step\tResult\tCalls\nClaim enrichment\tno model result used (deterministic fallback)\t9\nContent support verification\tdegraded: some calls fell back\t241\nAlpha classification\tmodel result used for every call\t951\nEvidence stance\tmodel result used for every call\t17\nModel structure extraction\tno model result used (deterministic fallback)\t2\nStructure Graph construction\tbuilt\t—"
+   }
+  },
+  {
+   "name": "2_history_reopen_again",
+   "ok": true,
+   "url": "http://127.0.0.1:5179/runs/12591384-0b26-470d-a99d-a49c00be440b/research",
+   "value": {
+    "disclosure_text": "Processing completeness\nClaim enrichment: 9 of 9 batches did not use a model result (1 not sent (input over the local size limit), 1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 7 timed out); for those claims entities, factors, direction, confidence and cited source come from deterministic extraction, not from a model judgment (a direction of 'unknown' there means 'not judged', not a model answer).\nContent support verification: 185 of 241 requested verifications produced an accepted model result (5 not sent (input over the local size limit), 3 reply not accepted (malformed_response), 48 reply not accepted (quote_or_data_not_found)); the others stay pending review -- a technical failure or a request that was never sent is not a judgment that the claim is unsupported.\nStructure extraction: 2 of 2 model calls contributed no edge (1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 1 returned a valid empty result, deterministic processing used instead); extracted edges by source: model 0, deterministic grammar 0, TradingAgents canonical relations 16.\nSub-step\tResult\tCalls\nClaim enrichment\tno model result used (deterministic fallback)\t9\nContent support verification\tdegraded: some calls fell back\t241\nAlpha classification\tmodel result used for every call\t951\nEvidence stance\tmodel result used for every call\t17\nModel structure extraction\tno model result used (deterministic fallback)\t2\nStructure Graph construction\tbuilt\t—"
+   }
+  },
+  {
+   "name": "3_full_page_reload",
+   "ok": true,
+   "url": "http://127.0.0.1:5179/runs/12591384-0b26-470d-a99d-a49c00be440b/research",
+   "value": {
+    "disclosure_text": "Processing completeness\nClaim enrichment: 9 of 9 batches did not use a model result (1 not sent (input over the local size limit), 1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 7 timed out); for those claims entities, factors, direction, confidence and cited source come from deterministic extraction, not from a model judgment (a direction of 'unknown' there means 'not judged', not a model answer).\nContent support verification: 185 of 241 requested verifications produced an accepted model result (5 not sent (input over the local size limit), 3 reply not accepted (malformed_response), 48 reply not accepted (quote_or_data_not_found)); the others stay pending review -- a technical failure or a request that was never sent is not a judgment that the claim is unsupported.\nStructure extraction: 2 of 2 model calls contributed no edge (1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 1 returned a valid empty result, deterministic processing used instead); extracted edges by source: model 0, deterministic grammar 0, TradingAgents canonical relations 16.\nSub-step\tResult\tCalls\nClaim enrichment\tno model result used (deterministic fallback)\t9\nContent support verification\tdegraded: some calls fell back\t241\nAlpha classification\tmodel result used for every call\t951\nEvidence stance\tmodel result used for every call\t17\nModel structure extraction\tno model result used (deterministic fallback)\t2\nStructure Graph construction\tbuilt\t—"
+   }
+  },
+  {
+   "name": "4_export",
+   "ok": true,
+   "url": "http://127.0.0.1:5179/runs/12591384-0b26-470d-a99d-a49c00be440b/research",
+   "value": {
+    "file": "12591384-0b26-470d-a99d-a49c00be440b_research_export.zip"
+   }
+  }
+ ],
+ "export_file": "exports/12591384-0b26-470d-a99d-a49c00be440b_research_export.zip",
+ "export_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+ "safety": {
+  "blocked_requests": [],
+  "non_get_api_requests_blocked": 0,
+  "start_research_clicked": false,
+  "api_gets": [
+   "/ready",
+   "/ready",
+   "/api/research?limit=10",
+   "/api/research?limit=10",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/status",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/status",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/agent-outputs",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/graph",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/graph",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/evidence-trace?scope=key",
+   "/ready",
+   "/ready",
+   "/ready",
+   "/ready",
+   "/api/research?limit=10",
+   "/api/research?limit=10",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/status",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/status",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/agent-outputs",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/graph",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/evidence-trace?scope=key",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/graph",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/evidence-trace?scope=key",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/status",
+   "/ready",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/status",
+   "/ready",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/agent-outputs",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/graph",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/evidence-trace?scope=key",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/graph",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/evidence-trace?scope=key",
+   "/api/research/12591384-0b26-470d-a99d-a49c00be440b/export"
+  ]
+ }
+}

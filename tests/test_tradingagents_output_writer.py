@@ -243,3 +243,64 @@ def test_to_string_handles_common_values_and_circular_reference():
     assert _to_string({"text": "英伟达"}) == '{"text": "英伟达"}'
     assert "needs-default-string" in _to_string({"obj": NeedsDefaultString()})
     assert _to_string(circular) == "[[...]]"
+
+
+# ---------------------------------------------------------------------------
+# John MVP Final Gap Closure -- Structured External Source Traceability:
+# save_comqutor_run_outputs(captured_sources=...) persistence.
+# ---------------------------------------------------------------------------
+
+
+def test_captured_sources_are_persisted_as_source_registry(tmp_path):
+    captured = [
+        {
+            "source_type": "news",
+            "name": "Barron's",
+            "title": "A Genuine Real Article Headline For Testing",
+            "url": "https://barrons.com/x",
+            "published_at": "2026-09-17T10:00:00",
+            "provider": "yfinance",
+        }
+    ]
+    run_dir = save_comqutor_run_outputs(
+        _final_state(), "NVDA", output_root=tmp_path, captured_sources=captured
+    )
+    registry_path = Path(run_dir) / "source_registry.json"
+    assert registry_path.exists()
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    assert registry["source_count"] == 1
+    assert registry["sources"][0]["name"] == "Barron's"
+    assert registry["sources"][0]["metadata_status"] == "TRACEABLE"
+    assert registry["ticker"] == "NVDA"
+
+
+def test_no_captured_sources_writes_no_registry_file(tmp_path):
+    run_dir = save_comqutor_run_outputs(_final_state(), "NVDA", output_root=tmp_path, captured_sources=None)
+    assert not (Path(run_dir) / "source_registry.json").exists()
+
+
+def test_empty_captured_sources_list_writes_no_registry_file(tmp_path):
+    run_dir = save_comqutor_run_outputs(_final_state(), "NVDA", output_root=tmp_path, captured_sources=[])
+    assert not (Path(run_dir) / "source_registry.json").exists()
+
+
+def test_malformed_captured_sources_never_crashes_the_run_save(tmp_path):
+    # A defensive, best-effort artifact -- garbage input degrades to no
+    # registry file, never to a failed run save.
+    run_dir = save_comqutor_run_outputs(
+        _final_state(), "NVDA", output_root=tmp_path, captured_sources=["not-a-dict", None, 42]
+    )
+    metadata, raw = _load_run(run_dir)
+    assert metadata["ticker"] == "NVDA"
+    assert not (Path(run_dir) / "source_registry.json").exists()
+
+
+def test_captured_sources_never_added_to_raw_agent_outputs_or_metadata(tmp_path):
+    # Additive, separate artifact only -- never folded into the existing,
+    # already-frozen metadata.json/raw_agent_outputs.json shapes.
+    captured = [{"source_type": "news", "name": "X", "title": "A Real Enough Headline For This", "url": "https://x"}]
+    run_dir = save_comqutor_run_outputs(_final_state(), "NVDA", output_root=tmp_path, captured_sources=captured)
+    metadata, raw = _load_run(run_dir)
+    assert "captured_sources" not in metadata
+    assert "source_registry" not in metadata
+    assert "captured_sources" not in raw

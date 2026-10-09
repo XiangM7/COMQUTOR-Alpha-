@@ -38,8 +38,34 @@ def test_current_semantic_components_match_approved_phase1_master_baseline():
     # v0_1_3_provider_final_orphan_reliability_audit.md). alpha_mapper.py,
     # structured_output_adapter.py, and structure_extractor.py are untouched
     # by this fix; their hashes are unchanged.
+    #
+    # structured_output_adapter.py hash updated for the separately-authorized
+    # T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-26,
+    # re-pinned 2026-09-28 for the Part One/Two follow-up): adapt_run_outputs
+    # now loads this run's own source_registry.json/metadata.json and
+    # threads sources/evidence_cutoff through to a new _annotate_source_link
+    # step (comqutor_alpha.source_provenance.match_evidence_to_source_
+    # candidates + validate_source_reference); the 2026-09-28 follow-up
+    # additionally threads a real Agent-input/output citation contract
+    # through _llm_batch_enrichment/_validate_llm_batch_enrichment (a new
+    # candidate_sources request field + cited_source_id response field,
+    # scope-checked against exactly what THIS batch's own request offered,
+    # never the whole run registry) -- see tests/test_t1_source_linking_
+    # pipeline.py's TestAgentInputCarriesRealSourceIds for the dedicated
+    # coverage of that change. This re-pin is honestly labeled as "the
+    # baseline was updated to match this authorized code change" only -- it
+    # is NOT, by itself, evidence that the change's behavior is correct or
+    # that any human has reviewed/approved it; that is what the dedicated
+    # test suites above are for. week2_llm.py, alpha_mapper.py, and
+    # structure_extractor.py are untouched by this change; their own hashes
+    # below are NOT updated by this entry (week2_llm.py/alpha_mapper.py's
+    # current mismatch is separately-tracked, pre-existing drift from the
+    # Alpha Mapper Authority Migration, unrelated to and predating this
+    # round's own work -- not fixed here; reproduced directly via
+    # map_claim_to_alpha(record, taxonomy, llm_gateway=None) returning
+    # "unavailable" for ANY claim, independent of this round's changes).
     expected = {
-        "comqutor_alpha/structure_engine/structured_output_adapter.py": "6bb63ac110a36411bfc88847fde82a8b74d48344589dae54f507d402a0235d6f",
+        "comqutor_alpha/structure_engine/structured_output_adapter.py": "9e6995707bfa8ce4975eb58f5bb4b4fa6100a2bdbf8b50b5b4ad97c200215a3c",
         "comqutor_alpha/structure_engine/week2_llm.py": "5c9106a3e51c63ffbff957c2dee6778442cc503fb00eccba049f35e7669569b1",
         "comqutor_alpha/structure_engine/alpha_mapper.py": "506a228eb10e0b77b2058c9eaa327ae0ec44ba36b1515e5e6400187ffe65a6fd",
         "comqutor_alpha/structure_engine/structure_extractor.py": "5254cdf157c7d5ed88a7b06db34a9f0e3104259dde4fe5c52ecd922710fec416",

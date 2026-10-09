@@ -267,6 +267,21 @@ agent_outputs = sa.Table(
     sa.Column("assertion_status", sa.String(24), nullable=True),
     sa.Column("semantic_polarity", sa.String(24), nullable=True),
     sa.Column("extraction_method", sa.String(64), nullable=True),
+    # T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-28):
+    # additive, all-nullable -- an existing row/reader that predates this
+    # migration sees NULL, never a fabricated value (see
+    # comqutor_alpha.structure_engine.structured_output_adapter's own
+    # _annotate_source_link, which writes these same names into the file-
+    # based structured_agent_outputs.json path). content_support_review is
+    # the one nested-object field (comqutor_alpha.source_provenance.
+    # build_content_support_review's own small, fixed shape) -- _json_type()
+    # exactly like every other JSON-shaped column in this table.
+    sa.Column("source_link_status", sa.String(24), nullable=True),
+    sa.Column("linked_source_id", sa.String(64), nullable=True),
+    sa.Column("source_link_method", sa.String(32), nullable=True),
+    sa.Column("content_support_status", sa.String(24), nullable=True),
+    sa.Column("content_support_method", sa.String(64), nullable=True),
+    sa.Column("content_support_review", _json_type(), nullable=True),
     sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
     sa.UniqueConstraint("run_id", "claim_id", name="uq_agent_outputs_run_claim"),
     sa.CheckConstraint(
@@ -337,4 +352,38 @@ MIGRATIONS: tuple[tuple[str, tuple[sa.Table, ...]], ...] = (
     ("0004_create_agent_outputs", (agent_outputs,)),
     ("0005_create_research_run_progress", (research_run_progress,)),
     ("0006_create_entity_alpha_exposures", (entity_alpha_exposures,)),
+)
+
+# Explicit, versioned ADDITIVE-COLUMN migration path (see migrations.py's
+# apply_column_migrations for the runner) -- distinct from MIGRATIONS above,
+# which only ever creates whole new tables (table.create(checkfirst=True) is
+# a no-op against an already-existing table, so it can never add a column to
+# one). Each entry is (version_id, table, columns_to_add): every listed
+# column must already be nullable on ``table``'s own definition above (a
+# genuinely additive, non-breaking change against any pre-existing row).
+# Tracked in the SAME schema_migrations table, under its own version id, so
+# re-running is a safe no-op exactly like MIGRATIONS.
+#
+# 0007 (COMQUTOR Alpha T1 next-round task, 2026-09-28): the six new
+# source-linking columns on agent_outputs (see that table's own comment for
+# the reasoning). POSTGRES_VERIFICATION_COMPLETE: run and passing against
+# the real, isolated COMQUTOR_TEST_DATABASE_URL (never a production
+# database) -- see tests/test_agent_outputs_postgres_integration.py::
+# test_source_linking_migration_0007_was_applied and its two sibling tests
+# (round-trip read/write, pre-migration-row NULL compatibility). Re-run with:
+#   set -a; source .env; set +a
+#   .venv/bin/python -m pytest tests/test_agent_outputs_postgres_integration.py -m integration -v
+COLUMN_MIGRATIONS: tuple[tuple[str, sa.Table, tuple[sa.Column, ...]], ...] = (
+    (
+        "0007_add_agent_outputs_source_linking_columns",
+        agent_outputs,
+        (
+            agent_outputs.c.source_link_status,
+            agent_outputs.c.linked_source_id,
+            agent_outputs.c.source_link_method,
+            agent_outputs.c.content_support_status,
+            agent_outputs.c.content_support_method,
+            agent_outputs.c.content_support_review,
+        ),
+    ),
 )

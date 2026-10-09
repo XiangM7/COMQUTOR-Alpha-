@@ -1,0 +1,45 @@
+{
+  "schema_version": "v0.2.day4_independent_validation.v1",
+  "metric_family": "DAY4_INDEPENDENT_VALIDATION",
+  "independent_set_available": true,
+  "independence_verification": {
+    "method": "Direct claim_id-level set comparison against item2_blind_holdout5_frozen.csv (the set used to derive Day 2/3 failure analysis and fixes) -- not a rename or relabel.",
+    "holdout4_vs_holdout5_claim_id_overlap": 0,
+    "holdout2_vs_holdout5_sample_id_overlap": 0,
+    "holdout4_frozen_csv_sha256_verified": "20100402208b97ef0b0a2cbd6010e1bd6132031283acc84fda53437df3e17639",
+    "holdout4_frozen_csv_sha256_matches_own_report": true
+  },
+  "alpha_match_source": {
+    "source": "item2_blind_holdout4 (200 samples, 25/ticker x 8 tickers, most rigorous/most recent independent set: explicit historical-exclusion of old-50/H1/H2/H3, sampling verified NOT dependent on current/historical Alpha Mapper output per its own report)",
+    "caveat_age": "This official metric reflects the alpha_classifier prompt as it stood at H4's own stated HEAD (8ecf6bfdf7fd8203e223b220be8ca244da92d1f1), which is confirmed (by direct git show) to still carry prompt_version=week2.alpha_classifier.v1 -- i.e. BEFORE the v3 rewrite in commit c454245 that Day 3 identified. This number does not reflect the current prompt any more than the Day 2/3 samples did.",
+    "numerator": 148,
+    "denominator": 200,
+    "exclusions": 0,
+    "accuracy": 0.74,
+    "accuracy_percent": 74.0,
+    "target": 0.8,
+    "target_met": false,
+    "unavailable_count": 0,
+    "unavailable_counted_as_incorrect": true
+  },
+  "polarity_source": {
+    "source": "item2_blind_holdout2 (141 samples) -- the only other independent set with BOTH alpha and polarity review; older than H4, carries its own disclosed caveats (see below)",
+    "caveats": [
+      "duplicate_count=39 rows flagged as duplicates by H2's own methodology",
+      "alpha_mapper_stale_historical_data_count=14 rows flagged stale by H2's own methodology",
+      "Predates commit c454245 (evidence_stance_classifier prompt rewrite) -- same age caveat as the Alpha source."
+    ],
+    "numerator": 123,
+    "denominator": 141,
+    "exclusions": 0,
+    "accuracy": 0.8723404255319149,
+    "accuracy_percent": 87.23,
+    "target": 0.8,
+    "target_met": true,
+    "critical_support_opposition_reversal_count": 0,
+    "critical_support_opposition_reversal_sample_ids": []
+  },
+  "note_on_not_re_deriving": "These are the sets' own already-computed, frozen, human-reviewed official metrics -- not re-run today. No denominator or exclusion was altered to reach John's targets. A fresh local-deterministic-only re-derivation (matching Phase A's method) was not performed for these sets in this pass; Phase A already demonstrates that such a re-derivation would test only the always-weak deterministic fallback, not the actual current LLM-backed capability these targets are meant to measure.",
+  "alpha_and_polarity_from_different_sample_sets": true,
+  "why_different_sets": "No single independent (non-H5) frozen set in the repository carries both Alpha and Polarity human review at H4's size/rigor; H4 is Alpha-only, H2 is the only other independent set with both dimensions."
+}

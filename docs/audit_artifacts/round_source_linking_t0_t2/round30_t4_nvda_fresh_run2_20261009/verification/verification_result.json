@@ -1,0 +1,120 @@
+{
+ "response": {
+  "status": "completed",
+  "structure_graph_status": "ready",
+  "conflict_status": "ready",
+  "alpha_classification_status": "complete_active_no_dominant",
+  "provider_stop": null
+ },
+ "completion": {
+  "total_claims": 951,
+  "valid_select_count": 164,
+  "valid_none_count": 787,
+  "call_failure_count": 0,
+  "not_executed_count": 0,
+  "not_executed_configuration_count": 0,
+  "not_executed_fault_count": 0,
+  "complete": true
+ },
+ "dominant": [],
+ "main_conflict": null,
+ "summary": "No dominant Alpha structure or admitted conflict was identified for this research run.",
+ "alpha_fallback": {
+  "llm|None": 951
+ },
+ "selected_alphas": {
+  "A601": 60,
+  "A304": 35,
+  "A301": 25,
+  "A501": 17,
+  "A201": 10,
+  "A103": 8,
+  "A101": 5,
+  "A001": 3,
+  "A102": 1
+ },
+ "usage": {
+  "research_agent": {
+   "actual_http_requests": 19,
+   "retries": 0,
+   "not_sent": 0,
+   "outcomes": {
+    "success": 19,
+    "failure": 0,
+    "timeout": 0,
+    "unknown": 0
+   },
+   "requests_missing_usage": 0,
+   "usd": [
+    0.063587,
+    0.127174
+   ]
+  },
+  "week2_semantic": {
+   "actual_http_requests": 1204,
+   "retries": 0,
+   "not_sent": 6,
+   "outcomes": {
+    "success": 1197,
+    "failure": 0,
+    "timeout": 7,
+    "unknown": 0
+   },
+   "requests_missing_usage": 7,
+   "usd": [
+    1.736566,
+    3.473185
+   ]
+  },
+  "all": {
+   "actual_http_requests": 1223,
+   "retries": 0,
+   "not_sent": 6,
+   "outcomes": {
+    "success": 1216,
+    "failure": 0,
+    "timeout": 7,
+    "unknown": 0
+   },
+   "requests_missing_usage": 7,
+   "usd": [
+    1.800153,
+    3.600359
+   ]
+  }
+ },
+ "not_sent_reasons": {
+  "WEEK2_LLM_INPUT_TOO_LARGE": 6
+ },
+ "cap_accounting": {
+  "cap_limits": "Week 2 gateway budget reservations (one taken immediately before every attempt), not HTTP requests",
+  "cap": 1800,
+  "gateway_budget_reservations": 1204,
+  "http_requests_forwarded_per_wire_audit": 1204,
+  "ledger_attempts": 1204,
+  "note": "a reservation refused at the transport (provider stop, audit failure) is not an HTTP request; the wire audit row is written immediately before a request is forwarded"
+ },
+ "provider_stop_file": false,
+ "manifest": "pass",
+ "formal_acceptance": "needs_review",
+ "db": {
+  "status": "completed",
+  "execution_mode": "real",
+  "error_code": "None",
+  "created_at": "2026-10-09 14:43:53.352457+00:00",
+  "completed_at": "2026-10-09 17:00:08.215368+00:00",
+  "agent_outputs": 951,
+  "alpha_matches": 951,
+  "structure_graphs": 1,
+  "alpha_activations": 10,
+  "alpha_conflicts": 8,
+  "active_runs": 0
+ },
+ "export": {
+  "sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+  "entries": 20,
+  "byte_mismatch": []
+ },
+ "status_endpoint": "completed",
+ "history": "completed"
+}

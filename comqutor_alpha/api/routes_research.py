@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import contextlib
+import copy
 import hashlib
+import io
+import json
 import logging
 import os
 import subprocess
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -17,10 +21,14 @@ from comqutor_alpha.adapters.tradingagents_output_writer import (
 )
 from comqutor_alpha.api.agent_output_reader import get_agent_outputs_response
 from comqutor_alpha.api.artifact_export import (
+    MANIFEST_ARTIFACT_FILENAME,
     build_and_write_artifact_manifest,
     extract_evidence_facts_export,
     finalize_completed_run_artifacts,
 )
+from comqutor_alpha.api.evidence_trace import get_evidence_trace_response
+from comqutor_alpha.api.formal_acceptance_artifact import write_formal_acceptance_artifact
+from comqutor_alpha.api.stage_disclosure import build_stage_disclosure
 from comqutor_alpha.api.unclassified_findings import (
     ARTIFACT_FILENAME as UNCLASSIFIED_FINDINGS_ARTIFACT_FILENAME,
     DEFAULT_DISPLAY_LIMIT as UNCLASSIFIED_FINDINGS_DISPLAY_LIMIT,
@@ -46,6 +54,10 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
 from comqutor_alpha.graph_engine.alpha_level_classifier import (
     REASON_LOW_ENTITY_EXPOSURE,
 )
+from comqutor_alpha.graph_engine.claim_data_grounding import (
+    FACT_DEPENDENCY_CONTRACT,
+    annotate_matches_with_data_points,
+)
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     ALPHA_ACTIVATION_EVIDENCE_V1,
     select_supporting_alpha_claims,
@@ -62,6 +74,10 @@ from comqutor_alpha.graph_engine.graph_schema import (
 from comqutor_alpha.graph_engine.pipeline import (
     build_structure_graph_stage,
     score_and_assemble_structure_graph,
+)
+from comqutor_alpha.graph_engine.verified_evidence_gate import (
+    EVIDENCE_GATE_SOURCES_UNAVAILABLE,
+    EvidenceGateInputError,
 )
 from comqutor_alpha.llm_runtime.cache import InMemoryLLMResponseCache
 from comqutor_alpha.llm_runtime.session import SemanticRuntimeSession
@@ -83,6 +99,21 @@ from comqutor_alpha.research_lifecycle import (
     encode_run_history_cursor,
     submit_research_request,  # noqa: F401 -- re-exported; POST route now uses research_jobs.enqueue_research_request
 )
+from comqutor_alpha.run_provider_stop import (
+    STOP_STATUS_CODES,
+    RunProviderStopped,
+    load_provider_stop_artifact,
+    persist_run_provider_stop,
+    provider_status_code,
+    release_run_provider_stop,
+    run_provider_stop,
+)
+from comqutor_alpha.source_provenance import (
+    VALID_CONTENT_SUPPORT_STATUSES,
+    apply_content_support_review,
+    public_source_fields,
+    resolve_external_source_for_claim,
+)
 from comqutor_alpha.storage.db.repository import (
     GraphPersistenceError,
     build_repository_from_env,
@@ -92,12 +123,17 @@ from comqutor_alpha.storage.file_store import (
     append_jsonl_record,
     load_json_record,
     load_json_record_if_exists,
+    read_jsonl_records,
     run_dir_for,
     save_json_record,
     validate_artifact_filename,
     validate_run_id_for_path,
 )
-from comqutor_alpha.structure_engine.alpha_mapper import save_alpha_matches
+from comqutor_alpha.structure_engine.alpha_mapper import (
+    _NEVER_SENT_FALLBACK_REASONS,
+    compute_alpha_classification_completion,
+    save_alpha_matches,
+)
 from comqutor_alpha.structure_engine.evidence_stance import (
     CLASSIFIER_VERSION as EVIDENCE_STANCE_VERSION,
 )
@@ -202,6 +238,17 @@ _EXPECTED_CLIENT_ERROR_CODES = frozenset(
 # Map known exceptions to standardized error responses.
 def _map_exception_to_error(payload, exc):
     message = str(exc)
+    refusal_status = provider_status_code(exc)
+    if isinstance(exc, RunProviderStopped) or refusal_status in STOP_STATUS_CODES:
+        # 2026-10-08 (T4 round 28): a provider refusal (HTTP 401/403/429) stopped the run's model requests; the
+        # partial outputs and provider_stop.json are kept in the run directory.
+        status_code = exc.trigger.get("status_code") if isinstance(exc, RunProviderStopped) else refusal_status
+        return _error_response(
+            payload,
+            "PROVIDER_REFUSED_RUN_STOPPED",
+            f"The model provider refused a request (HTTP {status_code}); the run's further model requests were "
+            "stopped and its partial outputs were kept.",
+        )
     if isinstance(exc, GraphPersistenceError) and exc.reason_code == "AGENT_OUTPUTS_DB_WRITE_FAILED":
         return _error_response(
             payload,
@@ -319,6 +366,10 @@ def _create_offline_run(payload, output_root):
             "final_report": False,
         },
     }
+    # T4 (2026-10-08): saved agent outputs re-run through the current pipeline = a frozen-input recompute.
+    from comqutor_alpha.run_environment import EXECUTION_TYPE_FROZEN_INPUT_RECOMPUTE, run_environment_or_unavailable
+
+    metadata["run_environment"] = run_environment_or_unavailable(EXECUTION_TYPE_FROZEN_INPUT_RECOMPUTE, output_root)
     raw_payload = {
         "schema_version": OUTPUT_VERSION,
         "run_id": run_id,
@@ -343,7 +394,40 @@ def _count_structured_outputs(structured_payload):
 # response (W4.3). Exact wording is a frozen contract -- see
 # docs/w4_3_gate_contract.md section 3. Never generates a trade
 # recommendation (Buy/Sell/Hold, position sizing, price target).
-def _build_research_summary(conflict_status, main_conflict, dominant_alphas):
+def _alpha_classification_fault_unresolved(completion):
+    """Claims left without a usable classification result because a real
+    attempt failed or a send was refused by a local fault. A classifier that
+    was deliberately disabled/unconfigured is NOT counted here -- that is a
+    configuration state (offline/test runs), whose established summary
+    messages other behavior depends on."""
+    return int(completion.get("call_failure_count") or 0) + int(completion.get("not_executed_fault_count") or 0)
+
+
+def _alpha_classification_incomplete_summary(completion):
+    """2026-10-06 (round 14, section 6): the summary sentence for a run whose
+    Alpha classification did not complete because of failures. Never lets an
+    empty dominant/conflict result read as 'nothing exists' while claims are
+    still unclassified."""
+    total = int(completion.get("total_claims") or 0)
+    failed = int(completion.get("call_failure_count") or 0)
+    not_run = int(completion.get("not_executed_count") or 0)
+    unresolved = failed + not_run
+    return (
+        f"Alpha classification is incomplete for this research run: {unresolved} of {total} "
+        f"claims have no usable classification result ({failed} call failure(s), {not_run} not executed), "
+        "so the absence of a dominant Alpha structure or admitted conflict "
+        "cannot yet be read as 'none exists'."
+    )
+
+
+def _build_research_summary(
+    conflict_status,
+    main_conflict,
+    dominant_alphas,
+    evidence_gate_applied=False,
+    has_verified_evidence=True,
+    alpha_classification_completion=None,
+):
     if conflict_status != "ready":
         return "Conflict analysis is not ready for this research run."
     if main_conflict is not None:
@@ -352,6 +436,28 @@ def _build_research_summary(conflict_status, main_conflict, dominant_alphas):
         return (
             "Dominant Alpha structures were identified, but no "
             "taxonomy-declared conflict was admitted for this research run."
+        )
+    # Nothing positive was found. Only now does classification completeness
+    # matter: with unresolved claims, "found nothing" is not a finding.
+    # Optional keyword -- every existing caller that omits it is unchanged.
+    if (
+        isinstance(alpha_classification_completion, dict)
+        and int(alpha_classification_completion.get("total_claims") or 0) > 0
+        and _alpha_classification_fault_unresolved(alpha_classification_completion) > 0
+    ):
+        return _alpha_classification_incomplete_summary(alpha_classification_completion)
+    # 2026-09-29 gate-bypass closing fix: an empty dominant_alphas/
+    # main_conflict under the verified-evidence gate with literally ZERO
+    # verified evidence anywhere is a data-availability state, not a
+    # genuine "the market has no conflict" finding -- reported explicitly
+    # as such, never silently identical to the ordinary "evaluated real
+    # evidence and found nothing" message below.
+    if evidence_gate_applied and not has_verified_evidence:
+        return (
+            "Verified evidence is currently insufficient to reach an official "
+            "conclusion for this research run -- unreviewed or unlinked "
+            "claims may still exist as research text or pending-review "
+            "candidates, but none yet counts as verified support."
         )
     return (
         "No dominant Alpha structure or admitted conflict was identified "
@@ -368,6 +474,15 @@ def _load_week4_response_fields(run_id, output_root, graph_repository):
     dominant_alphas = []
     main_conflict = None
     conflict_status = "not_ready"
+    # 2026-09-29 gate-bypass closing fix: when the verified-evidence gate
+    # applied to this run, an empty dominant_alphas/main_conflict is
+    # ambiguous on its own -- "genuinely evaluated real evidence and found
+    # nothing dominant/conflicting" reads very differently from "there is
+    # currently no VERIFIED evidence to evaluate at all" (never a claim
+    # that the market itself has no conflict). has_verified_evidence
+    # distinguishes the two so the summary below can say so explicitly.
+    evidence_gate_applied = False
+    has_verified_evidence = True
     try:
         repository = graph_repository or build_repository_from_env(output_root)
         graph_row = repository.get_graph(run_id)
@@ -375,6 +490,16 @@ def _load_week4_response_fields(run_id, output_root, graph_repository):
             graph_json = graph_row.get("graph_json")
             if isinstance(graph_json, dict) and isinstance(graph_json.get("dominant_alphas"), list):
                 dominant_alphas = graph_json["dominant_alphas"]
+            if isinstance(graph_json, dict) and graph_json.get("evidence_gate_applied") is True:
+                evidence_gate_applied = True
+                official_alphas = (graph_json.get("activation") or {}).get("alphas")
+                has_verified_evidence = bool(
+                    isinstance(official_alphas, list)
+                    and any(
+                        isinstance(a, dict) and (a.get("evidence_count") or 0) > 0
+                        for a in official_alphas
+                    )
+                )
         conflict_result = repository.get_week4_conflict_result(run_id)
         if conflict_result is not None:
             conflict_status = "ready"
@@ -389,7 +514,7 @@ def _load_week4_response_fields(run_id, output_root, graph_repository):
             run_id,
             type(exc).__name__,
         )
-    return dominant_alphas, main_conflict, conflict_status
+    return dominant_alphas, main_conflict, conflict_status, evidence_gate_applied, has_verified_evidence
 
 
 _UNSAFE_DATA_SANITY_DETAIL_MARKERS = (
@@ -490,6 +615,21 @@ def _public_data_sanity_fields(run_id, output_root):
     }
 
 
+def _legacy_records_without_classification_method(alpha_matches_payload):
+    """Alpha match records with no ``alpha_match_method`` and no never-sent
+    fallback reason: the deterministic-era schema, which
+    ``compute_alpha_classification_completion`` places in its call-failure
+    bucket although no classification request was ever made for them."""
+    matches = alpha_matches_payload.get("matches") if isinstance(alpha_matches_payload, dict) else None
+    return sum(
+        1
+        for match in (matches if isinstance(matches, list) else [])
+        if isinstance(match, dict)
+        and match.get("alpha_match_method") is None
+        and match.get("alpha_match_fallback_reason") not in _NEVER_SENT_FALLBACK_REASONS
+    )
+
+
 # Build a research response payload summarizing the run status and artifacts.
 def build_research_response(run_id, output_root="outputs/runs", *, graph_repository=None):
     run_dir = run_dir_for(run_id, output_root)
@@ -542,6 +682,15 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     complete = all(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
     has_any = any(artifacts[name] for name in REQUIRED_COMPLETION_ARTIFACTS)
 
+    # 2026-10-06 (round 14, section 6): read-only, from alpha_matches.json's
+    # own already-persisted fields -- never a second classification pass.
+    alpha_matches_for_completion = load_json_record_if_exists(
+        run_id, "alpha_matches.json", output_root=output_root
+    )
+    alpha_classification_completion = compute_alpha_classification_completion(
+        alpha_matches_for_completion
+    )
+
     week3_status = load_json_record_if_exists(
         run_id, WEEK3_PIPELINE_STATUS_ARTIFACT_FILENAME, output_root=output_root
     )
@@ -551,10 +700,10 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     # truth) only when Week 3 actually succeeded -- a Week 3 failure means
     # Week 4 was never even attempted (see _run_week3_graph_pipeline), so
     # there is nothing to query and conflict_status stays "not_ready".
-    dominant_alphas, main_conflict, conflict_status = (
+    dominant_alphas, main_conflict, conflict_status, evidence_gate_applied, has_verified_evidence = (
         _load_week4_response_fields(run_id, output_root, graph_repository)
         if structure_graph_ready
-        else ([], None, "not_ready")
+        else ([], None, "not_ready", False, True)
     )
 
     # Sprint 1 (Run Identity Integrity and Complete Artifact Export),
@@ -600,12 +749,36 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     # result. A Week 4 run that legitimately found zero admitted conflicts
     # is NOT a Week 4 failure -- conflict_status is "ready" either way, so
     # it never blocks "completed" on its own.
+    # T4 (2026-10-08): a run whose Alpha classification had real call
+    # failures (provider error / timeout / truncation) or requests refused
+    # before sending for a fault (call budget exhausted, audit unavailable,
+    # input too large) stopped short of its own pipeline and is "partial",
+    # never "completed" (the 10-02 NVDA run left 400 claims unsent at its
+    # budget, the 10-06 AMD run had 973 failed calls, and both were recorded
+    # completed). A classifier that is merely disabled/unconfigured is not a
+    # fault and does not change the status. Neither is a record written
+    # before the classifier recorded alpha_match_method at all (deterministic-
+    # era schema): no LLM request was ever made for it, although the
+    # completion summary counts it in its call-failure bucket.
+    classification_fault_free = (
+        alpha_classification_completion["call_failure_count"]
+        - _legacy_records_without_classification_method(alpha_matches_for_completion)
+        == 0
+        and alpha_classification_completion["not_executed_fault_count"] == 0
+    )
+    # 2026-10-08 (T4 round 28): a run whose model requests were stopped by a
+    # provider refusal (HTTP 401/403/429, provider_stop.json) is never
+    # "completed", whichever stage the refusal hit.
+    provider_stop_record = load_provider_stop_artifact(run_dir)
+    provider_stop_free = not (provider_stop_record or {}).get("stopped")
     if (
         complete
         and structure_graph_ready
         and conflict_status == "ready"
         and ticker_consistency_ok
         and artifact_completeness_ok
+        and classification_fault_free
+        and provider_stop_free
     ):
         status = "completed"
     elif complete or has_any:
@@ -613,7 +786,14 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
     else:
         status = "failed"
 
-    summary = _build_research_summary(conflict_status, main_conflict, dominant_alphas)
+    summary = _build_research_summary(
+        conflict_status,
+        main_conflict,
+        dominant_alphas,
+        evidence_gate_applied,
+        has_verified_evidence,
+        alpha_classification_completion=alpha_classification_completion,
+    )
     exposure_payload = load_json_record_if_exists(
         run_id, "entity_alpha_exposures.json", output_root=output_root
     )
@@ -658,7 +838,26 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         unclassified_findings_status = "unavailable"
         unclassified_findings_download_available = False
 
-    return {
+    # 2026-10-06 (round 14, section 6): the single, shared 4-state judgment
+    # every reader (this API response, any run-summary consumer, any page)
+    # should use instead of separately re-deriving "is there really no
+    # Alpha here" from raw counts. Combines alpha_classification_completion
+    # (claim-level: did every real classification attempt actually run and
+    # succeed) with dominant_alphas (already computed above from the
+    # persisted Structure Graph, never recomputed here) -- never conflates
+    # "classification incomplete" with "classification complete, genuinely
+    # no active Alpha", which is exactly the distinction the real AMD
+    # c904d4cc run's own 973/975 call-failure defect made invisible.
+    if not alpha_classification_completion["complete"]:
+        alpha_classification_display_status = "incomplete"
+    elif dominant_alphas:
+        alpha_classification_display_status = "complete_has_dominant"
+    elif alpha_classification_completion["valid_select_count"] > 0:
+        alpha_classification_display_status = "complete_active_no_dominant"
+    else:
+        alpha_classification_display_status = "complete_no_active"
+
+    response = {
         "run_id": run_id,
         "ticker": ticker,
         "status": status,
@@ -678,7 +877,23 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         "dominant_alphas": dominant_alphas,
         "main_conflict": main_conflict,
         "conflict_status": conflict_status,
+        # 2026-10-06 (round 14, section 6): additive. alpha_classification_
+        # completion is the raw claim-level counts (never re-derived
+        # elsewhere); alpha_classification_status is the shared 4-state
+        # judgment ("incomplete" / "complete_no_active" /
+        # "complete_active_no_dominant" / "complete_has_dominant") combining
+        # it with dominant_alphas above.
+        "alpha_classification_completion": alpha_classification_completion,
+        "provider_stop": (
+            {key: provider_stop_record.get(key) for key in ("stopped", "trigger", "refused_before_send_total")}
+            if provider_stop_record
+            else None
+        ),
+        "alpha_classification_status": alpha_classification_display_status,
         "summary": summary,
+        # 2026-10-09 (T4 round 32): which model-assisted sub-steps were degraded or fell back, read from the run's own
+        # semantic ledger and stage artifacts (comqutor_alpha.api.stage_disclosure). Additive; status is unchanged.
+        "stage_disclosure": build_stage_disclosure(run_dir),
         "entity_alpha_exposures": exposure_records,
         "entity_alpha_exposure_status": (
             "ready" if entity_exposure_path.exists() else "unavailable"
@@ -715,6 +930,55 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
         "unclassified_findings_status": unclassified_findings_status,
         "unclassified_findings_download_available": unclassified_findings_download_available,
     }
+    # Round 15 (2026-10-06): a derived alpha-classification recovery execution
+    # names the run it is based on. The key exists ONLY for such a run, so every
+    # other run's response keeps exactly the shape it had.
+    if metadata.get("execution_type") == "alpha_classification_recovery" and metadata.get("based_on_run_id"):
+        response["lineage"] = {
+            "based_on_run_id": metadata.get("based_on_run_id"),
+            "execution_type": metadata.get("execution_type"),
+            "recovery_lineage_artifact": "recovery_lineage.json"
+            if (run_dir / "recovery_lineage.json").exists()
+            else None,
+        }
+    elif metadata.get("execution_type") == "alpha_evidence_requalification" and metadata.get("based_on_run_id"):
+        # Round 18: an evidence-eligibility re-qualification execution (zero model calls): direct parent,
+        # original research run, and what it changed -- separate from classification / direction completeness.
+        requalification = load_json_record_if_exists(
+            run_id, "evidence_eligibility_requalification.json", output_root=output_root
+        )
+        response["lineage"] = {
+            "based_on_run_id": metadata.get("based_on_run_id"),
+            "root_research_run_id": metadata.get("root_research_run_id"),
+            "execution_type": metadata.get("execution_type"),
+            "lineage_artifact": "requalification_lineage.json" if (run_dir / "requalification_lineage.json").exists() else None,
+            "requalification_summary": requalification.get("summary") if isinstance(requalification, dict) else None,
+        }
+    elif metadata.get("execution_type") == "alpha_fact_dependency" and metadata.get("based_on_run_id"):
+        # T1 closure: an offline recompute (zero model / search / fetch calls) of a saved run under the
+        # fact-dependency contract -- same claims, citations and inputs; only the independent-fact count differs.
+        response["lineage"] = {
+            "based_on_run_id": metadata.get("based_on_run_id"),
+            "root_research_run_id": metadata.get("root_research_run_id"),
+            "execution_type": metadata.get("execution_type"),
+            "lineage_artifact": "dependency_lineage.json" if (run_dir / "dependency_lineage.json").exists() else None,
+            "fact_dependency_contract": metadata.get("fact_dependency_contract"),
+        }
+    elif metadata.get("execution_type") == "alpha_direction_evaluation" and metadata.get("based_on_run_id"):
+        # Round 17: a direction-evaluation execution reports its direct parent, the original research run, and
+        # its OWN direction completeness -- a third axis, separate from classification completeness above and
+        # from the program-level "completed" status.
+        direction_results = load_json_record_if_exists(
+            run_id, "evidence_stance_direction_results.json", output_root=output_root
+        )
+        response["lineage"] = {
+            "based_on_run_id": metadata.get("based_on_run_id"),
+            "root_research_run_id": metadata.get("root_research_run_id"),
+            "execution_type": metadata.get("execution_type"),
+            "lineage_artifact": "direction_lineage.json" if (run_dir / "direction_lineage.json").exists() else None,
+            "direction_completion": direction_results.get("completion") if isinstance(direction_results, dict) else None,
+        }
+    return response
 
 # Run a research request with the given payload, optionally using a custom runner.
 def _log_pipeline_error(
@@ -2679,7 +2943,9 @@ def write_run_audit_artifact(
     return payload
 
 
-def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_reporter=None):
+def _run_week3_graph_pipeline(
+    run_dir, *, graph_repository=None, progress_reporter=None, require_verified_evidence_gate=False
+):
     """Build, persist (file + DB), and score the Week 3 Structure Graph.
 
     Only runs after Week 1-2 artifacts exist; any failure at any step is
@@ -2687,6 +2953,23 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
     a Week 3 failure must never take down or alter the Week 1-2 response.
     Progress stages are reported strictly *after* their real step succeeds,
     so a Graph/Conflict failure can never show a fabricated 100%.
+
+    ``require_verified_evidence_gate`` (2026-09-28 closing fix): OPTIONAL,
+    default ``False`` -- an ordinary research run leaves this unset, so a
+    missing/unresolvable ``sources``/``structured_records`` input degrades
+    gracefully (no verified view, raw pool stays official) exactly as
+    before. A caller that REQUIRES the gate (today: only
+    ``trigger_content_support_reevaluation``) sets this ``True``; if the
+    gate's own input cannot be resolved, ``score_and_assemble_structure_
+    graph``/``run_week4_conflict_pipeline`` raise
+    :class:`~comqutor_alpha.graph_engine.verified_evidence_gate.
+    EvidenceGateInputError` instead of silently falling back -- caught here
+    like any other stage failure (this function still never propagates),
+    but logged under the distinct ``evidence_gate_required_input_unavailable``
+    stage so a caller checking ``week3_pipeline_status.json`` afterward can
+    tell an input-gate failure apart from an ordinary bug. The SAME value is
+    passed to both the Activation call and the Week 4 conflict call below,
+    so the two never diverge (one gated, the other not).
     """
     run_dir = Path(run_dir).expanduser().resolve()
     run_id = validate_run_id_for_path(run_dir.name)
@@ -2700,18 +2983,54 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
         metadata = load_json_record_if_exists(run_id, "metadata.json", output_root=output_root)
         run_timestamp = metadata.get("analysis_date") or metadata.get("created_at")
         # Structured records feed Activation v2's semantic dedupe
-        # (duplicate_group_id) and ticker-specificity (entities). Optional:
-        # a missing artifact degrades to the scorer's own text-based
-        # fallbacks, never a failure.
+        # (duplicate_group_id) and ticker-specificity (entities), AND (T1
+        # closing fix, 2026-09-29) are this run's own evidence-gate input.
+        # A caller that leaves require_verified_evidence_gate=False (the
+        # opportunistic default) sees no behavioral difference either way
+        # (score_alpha_activations_v2's own "structured_records or ()"
+        # idiom treats None and [] identically) -- but the distinction
+        # matters for a REQUIRED caller: structured_records genuinely
+        # unresolvable (file missing, or present but malformed -- no
+        # "records" list at all) is kept as None (an EvidenceGateInputError
+        # when required), never silently coerced into "[]" (which instead
+        # means "resolved, genuinely zero claims" -- a real, non-error
+        # distinction the gate is explicitly required to preserve).
         structured_payload = load_json_record_if_exists(
             run_id, "structured_agent_outputs.json", output_root=output_root
         )
-        structured_records = structured_payload.get("records")
-        if not isinstance(structured_records, list):
-            structured_records = []
+        raw_structured_records = (
+            structured_payload.get("records") if isinstance(structured_payload, dict) else None
+        )
+        structured_records = raw_structured_records if isinstance(raw_structured_records, list) else None
+        # T1 verified-support eligibility gate (2026-09-28): this run's own
+        # source registry, feeding score_and_assemble_structure_graph's
+        # OPTIONAL "v2_verified" activation view. Same "missing artifact
+        # degrades gracefully, never a failure" contract as
+        # structured_records above -- a run with no source_registry.json
+        # (historical run, or a run with no genuine sources captured)
+        # simply gets no "v2_verified" view at all, never a fabricated one.
+        sources = None
+        with contextlib.suppress(Exception):
+            registry = load_json_record_if_exists(run_id, "source_registry.json", output_root=output_root)
+            if isinstance(registry, dict) and isinstance(registry.get("sources"), list):
+                sources = registry["sources"]
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_inputs")
         return
+
+    # T1 closure (claim_data_points.v1): opt-in per run through metadata.json (absent -> legacy grouping,
+    # byte-identical). Stamps, in memory only, the saved observations each matched claim states / relies on so the
+    # one shared Evidence Fact Index can treat a derived expression of the SAME observations as the same
+    # evidence. Fails closed like every other stage: a run that declared the contract never silently falls back.
+    fact_dependency_annotated = None
+    if isinstance(metadata, dict) and metadata.get("fact_dependency_contract") == FACT_DEPENDENCY_CONTRACT:
+        try:
+            fact_dependency_annotated = annotate_matches_with_data_points(
+                alpha_matches_payload, structured_records, sources
+            )
+        except Exception:
+            _log_week3_pipeline_error(run_id, output_root, "fact_dependency_annotation")
+            return
 
     try:
         graph = build_structure_graph_stage(alpha_matches_payload, extracted_structures_payload)
@@ -2727,10 +3046,20 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
             extracted_structures_payload,
             run_timestamp=run_timestamp,
             structured_records=structured_records,
+            sources=sources,
+            require_verified_evidence_gate=require_verified_evidence_gate,
         )
+    except EvidenceGateInputError:
+        _log_week3_pipeline_error(run_id, output_root, "evidence_gate_required_input_unavailable")
+        return
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "activation_scoring")
         return
+    if fact_dependency_annotated is not None:
+        graph_payload["fact_dependency_contract"] = {
+            "contract": FACT_DEPENDENCY_CONTRACT,
+            "claims_with_grounded_observations": fact_dependency_annotated,
+        }
     _report_progress_stage(progress_reporter, "activation_scoring")
 
     try:
@@ -2799,6 +3128,9 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
                 alpha_matches_payload=alpha_matches_payload,
                 repository=repository,
                 output_root=output_root,
+                structured_records=structured_records,
+                sources=sources,
+                require_verified_evidence_gate=require_verified_evidence_gate,
             )
         )
     if week4_succeeded:
@@ -2858,10 +3190,477 @@ def _run_week3_graph_pipeline(run_dir, *, graph_repository=None, progress_report
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "run_audit_write")
 
+    # T4 (2026-10-08): one usage/cost report over both LLM layers (research
+    # agents + Week 2) from the run's own call logs, before the manifest so it
+    # is manifested and exported. Best-effort: never affects the run outcome.
+    try:
+        from comqutor_alpha.llm.run_usage_report import write_run_usage_report
+
+        write_run_usage_report(run_dir_for(run_id, output_root))
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "llm_usage_report")
+
     # Written last so it can honestly report on run_audit.json's own
     # presence too.
+    manifest = None
     with contextlib.suppress(Exception):
-        build_and_write_artifact_manifest(run_id=run_id, ticker=str(ticker or ""), output_root=output_root)
+        manifest = build_and_write_artifact_manifest(run_id=run_id, ticker=str(ticker or ""), output_root=output_root)
+
+    # T2 (2026-10-04): the formal acceptance entry point (taxonomy/rule-
+    # version-pinned, six rule families) now actually runs for every real
+    # completed run, not only test files and offline scripts -- additive,
+    # best-effort, never affects "completed" gating above (that remains
+    # driven solely by artifact_completeness/ticker_consistency, unchanged).
+    write_formal_acceptance_artifact(
+        run_id=run_id,
+        ticker=str(ticker or ""),
+        output_root=output_root,
+        graph_payload=graph_payload,
+        conflict_payload=conflict_result,
+        alpha_matches_payload=alpha_matches_payload,
+        artifact_completeness=(manifest or {}).get("artifact_completeness"),
+    )
+
+
+_REVIEW_ERROR_HTTP_STATUS = {
+    "INVALID_RUN_ID": 400,
+    "INVALID_CLAIM_ID": 400,
+    "REVIEWER_REQUIRED": 400,
+    "RATIONALE_REQUIRED": 400,
+    "INVALID_CONTENT_SUPPORT_STATUS": 400,
+    "AGENT_OUTPUTS_NOT_READY": 404,
+    "AGENT_OUTPUTS_CORRUPTED": 409,
+    "CLAIM_NOT_FOUND": 404,
+    "CLAIM_NOT_ELIGIBLE_FOR_REVIEW": 409,
+}
+
+CONTENT_SUPPORT_REVIEWS_ARTIFACT_FILENAME = "content_support_reviews.jsonl"
+REEVALUATION_EXECUTIONS_ARTIFACT_FILENAME = "reevaluation_executions.jsonl"
+
+
+def _new_review_execution_id() -> str:
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    return f"review-{stamp}-{uuid4().hex[:8]}"
+
+
+def _latest_reviews_by_claim_id(reviews: list) -> dict:
+    """The LAST (by append order -- reviews.jsonl is append-only, never
+    rewritten) review entry per claim_id -- a claim reviewed twice takes
+    its most recent verdict, but every earlier submission stays readable
+    in the log itself, never overwritten or deleted."""
+    latest: dict[str, dict] = {}
+    for review in reviews:
+        if isinstance(review, dict) and review.get("claim_id"):
+            latest[review["claim_id"]] = review
+    return latest
+
+
+def _apply_review_log_to_structured_payload(structured_payload, reviews, sources):
+    """Pure function: returns a NEW structured payload with the latest
+    review (per claim_id) from ``reviews`` applied via the real, unmodified
+    ``apply_content_support_review`` -- never mutates
+    ``structured_payload``. A claim with no review entry in the log is
+    copied through completely unchanged. This is what makes a
+    re-evaluation execution's own input DERIVED and REPRODUCIBLE from
+    (original structured_agent_outputs.json + the review log at a given
+    point) rather than a stateful in-place edit."""
+    latest_by_claim = _latest_reviews_by_claim_id(reviews)
+    records = [dict(r) if isinstance(r, dict) else r for r in structured_payload.get("records", [])]
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            continue
+        review = latest_by_claim.get(record.get("claim_id"))
+        if review is None:
+            continue
+        records[index] = apply_content_support_review(
+            record,
+            status=review["status"],
+            reviewer=review["reviewer"],
+            rationale=review["rationale"],
+            reviewed_at=review["reviewed_at"],
+            sources=sources,
+        )
+    result = dict(structured_payload)
+    result["records"] = records
+    return result
+
+
+def _rebase_run_id_for_reevaluation_execution(
+    *, structured_payload, alpha_matches_payload, extracted_structures_payload, execution_id
+):
+    """Returns deep-enough copies of the three payloads with every field
+    that identifies THIS ARTIFACT'S OWN run identity rewritten from the
+    original run's id to ``execution_id`` -- top-level ``run_id`` on all
+    three, plus each ``structured_payload["records"][*]["run_id"]`` and
+    ``alpha_matches_payload["matches"][*]["run_id"]`` (``extracted_
+    structures_payload`` carries no per-item run_id -- only its own
+    top-level field). Mirrors Architecture Replay's own established
+    identity-rebase pattern (``comqutor_alpha.replay.pipeline.
+    _rebase_structured_payload_for_replay``) for the same reason: every
+    downstream consumer (B3 Entity Exposure persistence, conflict_
+    detector's own ``_embedded_identity_mismatch`` guard) fails closed on a
+    genuine identity mismatch between a directory's name and the run_id its
+    own artifacts claim -- correctly so, since this execution's own
+    directory really is a distinct identity from the source run, even
+    though its evidence content is intentionally carried over unchanged.
+    Never mutates the inputs; never touches any other field (claim_id,
+    evidence, ticker, matched_alpha, etc.)."""
+    structured = copy.deepcopy(structured_payload)
+    structured["run_id"] = execution_id
+    for record in structured.get("records") or []:
+        if isinstance(record, dict) and "run_id" in record:
+            record["run_id"] = execution_id
+
+    alpha_matches = copy.deepcopy(alpha_matches_payload)
+    alpha_matches["run_id"] = execution_id
+    for match in alpha_matches.get("matches") or []:
+        if isinstance(match, dict) and "run_id" in match:
+            match["run_id"] = execution_id
+
+    extracted_structures = copy.deepcopy(extracted_structures_payload)
+    extracted_structures["run_id"] = execution_id
+
+    return structured, alpha_matches, extracted_structures
+
+
+def trigger_content_support_reevaluation(
+    run_id,
+    *,
+    output_root="outputs/runs",
+    graph_repository=None,
+) -> dict:
+    """Creates a NEW, independent execution -- never overwrites the
+    original run. Copies the original run's own ``alpha_matches.json``/
+    ``extracted_structures.json``/``source_registry.json`` verbatim (this
+    execution's OWN files, not a live reference -- the original run's own
+    files are only ever read here, never opened for writing), rebuilds
+    ``structured_agent_outputs.json`` by replaying the FULL accumulated
+    review log (``content_support_reviews.jsonl``) onto the original run's
+    OWN, untouched ``structured_agent_outputs.json``, then runs the SAME
+    real ``_run_week3_graph_pipeline`` production orchestration against
+    this new execution directory -- persisting activation/conflicts under
+    the NEW execution_id's own DB rows, never the original run_id's.
+
+    Returns ``{"status": "ok", "execution_id":..., "based_on_run_id":
+    run_id, ...}`` on success, or ``{"status": "failed", "error_code":...}``
+    (never raises) -- a failure here NEVER touches the original run's own
+    files or DB rows, which were only ever read, never opened for writing.
+    """
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return {"status": "failed", "error_code": "INVALID_RUN_ID", "run_id": str(run_id) if run_id is not None else None}
+
+    try:
+        metadata = load_json_record(safe_run_id, "metadata.json", output_root=output_root)
+        structured_payload = load_json_record(safe_run_id, "structured_agent_outputs.json", output_root=output_root)
+        alpha_matches_payload = load_json_record(safe_run_id, "alpha_matches.json", output_root=output_root)
+        extracted_structures_payload = load_json_record(
+            safe_run_id, "extracted_structures.json", output_root=output_root
+        )
+    except Exception:
+        return {"status": "failed", "error_code": "AGENT_OUTPUTS_NOT_READY", "run_id": safe_run_id}
+
+    # T1 verified-support eligibility gate (2026-09-28 closing fix): a
+    # re-evaluation execution REQUIRES the gate (see the
+    # require_verified_evidence_gate=True call below), so -- unlike
+    # _run_week3_graph_pipeline's own opportunistic loading, which is fine
+    # defaulting a missing registry to "no verified view" -- a missing/
+    # corrupted/malformed registry here must be told apart from a
+    # genuinely-resolved-but-EMPTY sources list. ``registry`` stays ``None``
+    # for "unresolvable" (file absent, unreadable, or not a non-empty dict);
+    # a review could only ever have been submitted for a claim with an
+    # already-VALID source link, so an unresolvable registry at
+    # re-evaluation time is anomalous, not a normal "no sources" case.
+    registry = None
+    with contextlib.suppress(Exception):
+        loaded_registry = load_json_record_if_exists(safe_run_id, "source_registry.json", output_root=output_root)
+        if isinstance(loaded_registry, dict) and loaded_registry:
+            registry = loaded_registry
+    sources = (
+        registry.get("sources")
+        if isinstance(registry, dict) and isinstance(registry.get("sources"), list)
+        else None
+    )
+    if sources is None:
+        return {
+            "status": "failed",
+            "error_code": EVIDENCE_GATE_SOURCES_UNAVAILABLE,
+            "run_id": safe_run_id,
+        }
+
+    reviews = read_jsonl_records(safe_run_id, CONTENT_SUPPORT_REVIEWS_ARTIFACT_FILENAME, output_root=output_root)
+    try:
+        reviewed_structured_payload = _apply_review_log_to_structured_payload(structured_payload, reviews, sources)
+    except Exception:
+        # A resolved (possibly genuinely empty) `sources` that no longer
+        # contains a claim's already-reviewed linked source is a real input
+        # inconsistency (the source vanished from the registry between
+        # review submission and this re-evaluation) -- apply_content_
+        # support_review correctly refuses to bind the review in that case.
+        # Surfaced here as an explicit, stable failure rather than letting
+        # it escape this function's own "never raises" contract.
+        return {
+            "status": "failed",
+            "error_code": "REEVALUATION_REVIEW_REPLAY_FAILED",
+            "run_id": safe_run_id,
+        }
+
+    execution_id = _new_review_execution_id()
+    rebased_structured, rebased_alpha_matches, rebased_extracted_structures = (
+        _rebase_run_id_for_reevaluation_execution(
+            structured_payload=reviewed_structured_payload,
+            alpha_matches_payload=alpha_matches_payload,
+            extracted_structures_payload=extracted_structures_payload,
+            execution_id=execution_id,
+        )
+    )
+    execution_metadata = {
+        **metadata,
+        "run_id": execution_id,
+        # Explicit, traceable lineage (2026-09-28 history-protection fix):
+        # this execution's own identity, the ORIGINAL run it derives from,
+        # and the exact input/review versions it was built from -- a future
+        # re-evaluation of the SAME run_id creates ANOTHER new execution_id,
+        # it never overwrites this one or the original.
+        "based_on_run_id": safe_run_id,
+        "execution_type": "content_support_review_reevaluation",
+        "input_structured_agent_outputs_sha256": hashlib.sha256(
+            json.dumps(structured_payload, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest(),
+        "review_log_entry_count_at_trigger": len(reviews),
+        "triggered_at": _utc_timestamp(),
+    }
+    save_json_record(execution_id, "metadata.json", execution_metadata, output_root=output_root)
+    save_json_record(execution_id, "alpha_matches.json", rebased_alpha_matches, output_root=output_root)
+    save_json_record(execution_id, "extracted_structures.json", rebased_extracted_structures, output_root=output_root)
+    save_json_record(execution_id, "structured_agent_outputs.json", rebased_structured, output_root=output_root)
+    if isinstance(registry, dict) and registry:
+        rebased_registry = dict(registry)
+        if "run_id" in rebased_registry:
+            rebased_registry["run_id"] = execution_id
+        save_json_record(execution_id, "source_registry.json", rebased_registry, output_root=output_root)
+
+    execution_run_dir = run_dir_for(execution_id, output_root)
+    try:
+        _run_week3_graph_pipeline(
+            execution_run_dir,
+            graph_repository=graph_repository,
+            require_verified_evidence_gate=True,
+        )
+    except Exception:
+        return {
+            "status": "failed",
+            "error_code": "REEVALUATION_EXECUTION_FAILED",
+            "run_id": safe_run_id,
+            "execution_id": execution_id,
+        }
+
+    # _run_week3_graph_pipeline never propagates its own internal failures
+    # (see its docstring) -- including an EvidenceGateInputError raised when
+    # require_verified_evidence_gate=True but this execution's own sources/
+    # structured_records could not be resolved. The absence of an exception
+    # above therefore does NOT by itself prove the gate actually applied, so
+    # this reads back the execution's own week3_pipeline_status.json (the
+    # same artifact readiness polling already relies on) rather than
+    # reporting "status": "ok" on a silent no-op.
+    execution_status = load_json_record_if_exists(
+        execution_id, WEEK3_PIPELINE_STATUS_ARTIFACT_FILENAME, output_root=output_root
+    )
+    if execution_status.get("outcome") != "success":
+        error_code = (
+            EVIDENCE_GATE_SOURCES_UNAVAILABLE
+            if execution_status.get("stage") == "evidence_gate_required_input_unavailable"
+            else "REEVALUATION_EXECUTION_FAILED"
+        )
+        return {
+            "status": "failed",
+            "error_code": error_code,
+            "run_id": safe_run_id,
+            "execution_id": execution_id,
+        }
+
+    with contextlib.suppress(Exception):
+        append_jsonl_record(
+            safe_run_id,
+            REEVALUATION_EXECUTIONS_ARTIFACT_FILENAME,
+            {
+                "execution_id": execution_id,
+                "triggered_at": execution_metadata["triggered_at"],
+                "review_log_entry_count": len(reviews),
+            },
+            output_root=output_root,
+        )
+
+    return {
+        "status": "ok",
+        "run_id": safe_run_id,
+        "execution_id": execution_id,
+        "based_on_run_id": safe_run_id,
+        "review_log_entry_count": len(reviews),
+    }
+
+
+def list_content_support_reviews(run_id, *, claim_id=None, output_root="outputs/runs") -> dict:
+    """Read-only: the FULL append-only review log for ``run_id`` (or just
+    ``claim_id``'s own entries, in submission order, when given). An empty
+    list (never an error) for a run with no review ever submitted."""
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return {"status": "failed", "error_code": "INVALID_RUN_ID", "run_id": str(run_id) if run_id is not None else None}
+    reviews = read_jsonl_records(safe_run_id, CONTENT_SUPPORT_REVIEWS_ARTIFACT_FILENAME, output_root=output_root)
+    if claim_id is not None:
+        reviews = [r for r in reviews if isinstance(r, dict) and r.get("claim_id") == claim_id]
+    return {"status": "ok", "run_id": safe_run_id, "reviews": reviews, "count": len(reviews)}
+
+
+def list_reevaluation_executions(run_id, *, output_root="outputs/runs") -> dict:
+    """Read-only: every re-evaluation execution ever triggered for
+    ``run_id``, oldest first -- each ``execution_id`` is a normal, complete
+    sibling run directory/DB row set, readable through every existing GET
+    route exactly like any other run_id (``/api/research/{execution_id}``,
+    ``.../graph``, ``.../conflicts``, ``.../agent-outputs``, ``.../export``).
+    An empty list (never an error) for a run with no re-evaluation ever
+    triggered."""
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return {"status": "failed", "error_code": "INVALID_RUN_ID", "run_id": str(run_id) if run_id is not None else None}
+    executions = read_jsonl_records(safe_run_id, REEVALUATION_EXECUTIONS_ARTIFACT_FILENAME, output_root=output_root)
+    return {"status": "ok", "run_id": safe_run_id, "executions": executions, "count": len(executions)}
+
+
+def submit_content_support_review(
+    run_id,
+    claim_id,
+    *,
+    status: str,
+    reviewer: str,
+    rationale: str,
+    output_root="outputs/runs",
+    graph_repository=None,
+    trigger_reevaluation: bool = True,
+):
+    """Minimal viable human content-support review entrypoint (T1 verified-
+    support eligibility gate; history-protection fix, 2026-09-28). The ONE
+    real production path that can ever write a ``HUMAN_REVIEWED`` review
+    for a real run -- ``apply_content_support_review`` (the real,
+    unmodified production function; never reimplemented here) refuses an
+    empty reviewer/rationale, so this function can never fabricate a
+    review on its own.
+
+    Binds the review to the claim's own already-persisted ``claim_id``/
+    ``linked_source_id`` and the linked source's CURRENT ``content_hash``
+    (read fresh from ``source_registry.json`` on every call) -- a claim
+    with no ``SOURCE_LINK_VALID`` reference to review against at all is
+    refused with ``CLAIM_NOT_ELIGIBLE_FOR_REVIEW``, never silently
+    accepted. ``apply_content_support_review`` is called here ONLY to
+    validate the review is real/applicable and to compute the resulting
+    ``content_support_review`` dict returned to the caller -- the review is
+    then appended, as its OWN independent, traceable record, to
+    ``content_support_reviews.jsonl`` (an APPEND-ONLY log; see
+    ``comqutor_alpha.storage.file_store.append_jsonl_record``). The
+    original run's own ``structured_agent_outputs.json`` is NEVER opened
+    for writing here -- history-protection fix, 2026-09-28: an earlier
+    version of this function wrote the review back into that file in place
+    and then re-ran the original pipeline over it, which could overwrite
+    the original run's own persisted result. It no longer does either.
+
+    ``trigger_reevaluation=True`` (default) calls
+    ``trigger_content_support_reevaluation``, which creates a NEW,
+    independent execution_id (linked to this run_id, this input version,
+    and this review-log version) rather than recomputing in place -- see
+    that function's own docstring. The review itself is durably appended
+    to the log regardless of whether re-evaluation succeeds; a
+    re-evaluation failure never loses or corrupts the review, the
+    original run's own artifacts, or any earlier execution.
+    """
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return {"status": "failed", "error_code": "INVALID_RUN_ID", "run_id": str(run_id) if run_id is not None else None}
+
+    if not isinstance(claim_id, str) or not claim_id.strip():
+        return {"status": "failed", "error_code": "INVALID_CLAIM_ID", "run_id": safe_run_id}
+    if not isinstance(reviewer, str) or not reviewer.strip():
+        return {"status": "failed", "error_code": "REVIEWER_REQUIRED", "run_id": safe_run_id}
+    if not isinstance(rationale, str) or not rationale.strip():
+        return {"status": "failed", "error_code": "RATIONALE_REQUIRED", "run_id": safe_run_id}
+    if status not in VALID_CONTENT_SUPPORT_STATUSES:
+        return {"status": "failed", "error_code": "INVALID_CONTENT_SUPPORT_STATUS", "run_id": safe_run_id}
+
+    try:
+        structured_payload = load_json_record(safe_run_id, "structured_agent_outputs.json", output_root=output_root)
+        records = structured_payload.get("records")
+        if not isinstance(records, list):
+            raise ValueError("records not a list")
+    except Exception:
+        return {"status": "failed", "error_code": "AGENT_OUTPUTS_NOT_READY", "run_id": safe_run_id}
+
+    target_record = next(
+        (r for r in records if isinstance(r, dict) and r.get("claim_id") == claim_id), None
+    )
+    if target_record is None:
+        return {"status": "failed", "error_code": "CLAIM_NOT_FOUND", "run_id": safe_run_id, "claim_id": claim_id}
+
+    sources = []
+    with contextlib.suppress(Exception):
+        registry = load_json_record_if_exists(safe_run_id, "source_registry.json", output_root=output_root)
+        if isinstance(registry, dict) and isinstance(registry.get("sources"), list):
+            sources = registry["sources"]
+
+    reviewed_at = _utc_timestamp()
+    try:
+        # Read-only use: validates eligibility and computes the resulting
+        # content_support_review dict -- the RETURNED record is never
+        # persisted back over structured_agent_outputs.json (see docstring
+        # above); only its own ``content_support_review`` sub-dict is kept,
+        # to append into the independent review log below.
+        validated_record = apply_content_support_review(
+            target_record,
+            status=status,
+            reviewer=reviewer,
+            rationale=rationale,
+            reviewed_at=reviewed_at,
+            sources=sources,
+        )
+    except ValueError:
+        # Never surfaces apply_content_support_review's own raw message --
+        # a stable reason_code only, matching every other API error path
+        # in this module.
+        return {
+            "status": "failed", "error_code": "CLAIM_NOT_ELIGIBLE_FOR_REVIEW", "run_id": safe_run_id, "claim_id": claim_id,
+        }
+
+    review_record = dict(validated_record["content_support_review"])
+    review_record["review_id"] = uuid4().hex
+    append_jsonl_record(safe_run_id, CONTENT_SUPPORT_REVIEWS_ARTIFACT_FILENAME, review_record, output_root=output_root)
+
+    reevaluation = None
+    if trigger_reevaluation:
+        reevaluation = trigger_content_support_reevaluation(
+            safe_run_id, output_root=output_root, graph_repository=graph_repository
+        )
+
+    return {
+        "status": "ok",
+        "run_id": safe_run_id,
+        "claim_id": claim_id,
+        "content_support_status": validated_record["content_support_status"],
+        "content_support_review": review_record,
+        "reevaluation": reevaluation,
+    }
+
+
+def attach_run_provider_stop(week2_llm_gateway, run_id, run_dir):
+    """2026-10-08 (T4 round 28): give this run's Week 2 gateway the run's provider-refusal stop -- the same object the
+    run's research-agent layer used (keyed by run_id) -- so a 401/403/429 on either layer stops both; its record is
+    written into the run directory. Only the research pipeline does this; released when the request ends."""
+    if isinstance(week2_llm_gateway, Week2LLMGateway) and week2_llm_gateway.provider_stop is None:
+        week2_llm_gateway.provider_stop = run_provider_stop(run_id)
+        week2_llm_gateway.provider_stop.attach_artifact_dir(run_dir)
+    return week2_llm_gateway
 
 
 def run_research_request(
@@ -2925,6 +3724,7 @@ def run_research_request(
         )
         if week2_llm_gateway is None:
             week2_llm_gateway = build_server_week2_llm_gateway(run_id, run_dir.parent)
+        attach_run_provider_stop(week2_llm_gateway, run_id, run_dir)
         if isinstance(week2_llm_gateway, Week2LLMGateway):
             semantic_runtime = week2_llm_gateway.semantic_runtime
             if semantic_runtime is None and week2_llm_enabled():
@@ -2971,6 +3771,20 @@ def run_research_request(
             structured_adapter_shadow_executor=structured_adapter_shadow_executor,
             structured_adapter_shadow_cache=structured_adapter_shadow_cache,
         )
+        # 2026-10-08 (T4 round 28): Week 1-2 is the last stage that sends model
+        # requests -- the final provider_stop.json (refusals, in-flight answers)
+        # is written now, before the Week 3 artifact manifest lists its hash.
+        persist_run_provider_stop(run_id)
+        if isinstance(week2_llm_gateway, Week2LLMGateway):
+            # the cap counts reservations, not HTTP requests: kept so the usage report can show both
+            try:
+                from comqutor_alpha.llm.run_usage_report import write_week2_gateway_budget
+
+                write_week2_gateway_budget(
+                    run_dir, max_calls=week2_llm_gateway.max_calls, reservations=week2_llm_gateway.call_count
+                )
+            except Exception as exc:
+                logger.warning("week2 gateway budget record write failed (run_id=%s, exc_type=%s)", run_id, type(exc).__name__)
         # Data Sanity Cross-Check v1: an independent sidecar stage, run after
         # structured claims exist (so reported-price cross-checks have
         # something to check) and before Graph/Activation (so a Data Sanity
@@ -2985,8 +3799,19 @@ def run_research_request(
         # Week 3 graph build/score/persist is a side effect of a successful
         # POST; its own status is reported only via GET .../graph so the
         # frozen Week 1-2 response contract above never changes shape.
+        # require_verified_evidence_gate=True (2026-09-29 closing fix): a
+        # normal new research execution now REQUIRES the same verified-
+        # support eligibility gate re-evaluation already requires -- an
+        # unreviewed (or non-source-linked-input-unresolvable) claim can
+        # never silently count as officially verified support just because
+        # this is a brand-new run. A run with genuinely no source-linked
+        # claims at all (every non-news chain) is unaffected -- see
+        # score_and_assemble_structure_graph's own docstring.
         _run_week3_graph_pipeline(
-            run_dir, graph_repository=graph_repository, progress_reporter=progress_reporter
+            run_dir,
+            graph_repository=graph_repository,
+            progress_reporter=progress_reporter,
+            require_verified_evidence_gate=True,
         )
         response = build_research_response(
             run_id, output_root=output_root, graph_repository=graph_repository
@@ -3024,6 +3849,8 @@ def run_research_request(
             )
         return error_response
     finally:
+        # 2026-10-08 (T4 round 28): the run's provider-refusal stop lives exactly as long as this request
+        release_run_provider_stop(payload.get("run_id") if isinstance(payload, dict) else None)
         if semantic_runtime is not None:
             try:
                 semantic_runtime.finalize_manifest(complete=semantic_session_complete)
@@ -3300,6 +4127,71 @@ def get_run_artifact_file(run_id, artifact_name, output_root="outputs/runs"):
     return 200, content_type, raw_bytes, None
 
 
+def get_run_export_bundle(run_id, output_root="outputs/runs"):
+    """Builds a ZIP bundle of one run's already-persisted, already-complete
+    artifact set for user-facing download (John MVP Gap Closure, Gap B:
+    Result Export). Every byte comes straight from files
+    ``finalize_completed_run_artifacts``/``build_and_write_artifact_manifest``
+    already wrote to disk -- this never recomputes Activation, Conflict,
+    or Evidence, and never calls a Provider. Requires a real
+    ``artifact_manifest.json`` to exist (written only once a run's
+    finalizer has actually run), so an in-progress/queued/failed run
+    cleanly reports ``EXPORT_NOT_READY`` rather than a partial/fabricated
+    bundle.
+
+    Returns ``(http_status_code, content_type_or_None, raw_bytes_or_None,
+    filename_or_None, error_body_or_None)``.
+    """
+    try:
+        safe_run_id = validate_run_id_for_path(run_id)
+    except ValueError:
+        return 400, None, None, None, {"error_code": "INVALID_REQUEST", "run_id": str(run_id)}
+
+    run_dir = run_dir_for(safe_run_id, output_root)
+    if not run_dir.exists():
+        return 404, None, None, None, {"error_code": "RUN_NOT_FOUND", "run_id": safe_run_id}
+
+    manifest = load_json_record_if_exists(safe_run_id, MANIFEST_ARTIFACT_FILENAME, output_root=output_root)
+    if not manifest:
+        return 409, None, None, None, {"error_code": "EXPORT_NOT_READY", "run_id": safe_run_id}
+
+    metadata = load_json_record_if_exists(safe_run_id, "metadata.json", output_root=output_root)
+    ticker = (isinstance(metadata, dict) and metadata.get("ticker")) or manifest.get("ticker") or "RUN"
+
+    entries = manifest.get("artifacts") or []
+    included: list[str] = []
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for entry in entries:
+            if not isinstance(entry, dict) or not entry.get("exists") or entry.get("status") != "valid":
+                continue
+            filename = entry.get("artifact_name")
+            if not filename or filename in included:
+                continue
+            path = run_dir / filename
+            if not path.exists():
+                continue
+            try:
+                zf.write(path, arcname=filename)
+                included.append(filename)
+            except OSError:
+                continue
+        # The manifest documents the bundle's own completeness/provenance --
+        # include it even though it is not itself listed among its own
+        # `artifacts` entries.
+        manifest_path = run_dir / MANIFEST_ARTIFACT_FILENAME
+        if MANIFEST_ARTIFACT_FILENAME not in included and manifest_path.exists():
+            zf.write(manifest_path, arcname=MANIFEST_ARTIFACT_FILENAME)
+            included.append(MANIFEST_ARTIFACT_FILENAME)
+
+    if not included:
+        return 404, None, None, None, {"error_code": "EXPORT_EMPTY", "run_id": safe_run_id}
+
+    safe_ticker = "".join(ch for ch in str(ticker) if ch.isalnum()) or "RUN"
+    filename = f"{safe_ticker}_{safe_run_id[:8]}_research_export.zip"
+    return 200, "application/zip", buffer.getvalue(), filename, None
+
+
 _GRAPH_ERROR_MESSAGES = {
     "INVALID_RUN_ID": "Invalid run_id.",
     "RUN_NOT_FOUND": "Run not found.",
@@ -3482,6 +4374,9 @@ def get_persisted_conflicts(run_id, output_root="outputs/runs", *, graph_reposit
     with contextlib.suppress(Exception):
         _attach_conflict_evidence(result, repository, safe_run_id)
 
+    with contextlib.suppress(Exception):
+        _attach_external_sources_to_conflicts(result, output_root, safe_run_id)
+
     # Equal to the W4.2 deterministic reconstruction, with additive fields
     # only (status="ok" plus the bull_evidence/bear_evidence lists above) --
     # every other key/value comes straight from `result`, unmodified.
@@ -3559,6 +4454,56 @@ def _attach_conflict_evidence(result, repository, run_id):
         conflict["bear_evidence"] = _conflict_side_evidence(
             bear_structure, match_rows_by_claim, conflict.get("bear_alpha_id")
         )
+
+
+# John MVP Final Gap Closure -- Structured External Source Traceability:
+# evidence_ui item groups that carry real claim/evidence prose to match
+# against this run's source_registry.json. missing_evidence/
+# qualification_gaps carry no claim text (they are gap descriptors, not
+# evidence), and invalidation_conditions is Alpha-taxonomy content, not
+# external-source content -- neither is touched here.
+_EVIDENCE_UI_TEXT_GROUPS = ("bull_evidence", "bear_evidence", "counter_evidence")
+
+
+def _attach_external_sources_to_conflicts(result, output_root, run_id):
+    """Purely additive, read-time-only annotation of each conflict's
+    already-persisted ``evidence_ui`` item groups -- never recomputes
+    admissibility/conflict_score/evidence_ui itself, never touches
+    conflict_engine. A run with no source_registry.json (historical run, or
+    a run with no genuine sources captured) leaves every item's
+    external_source_status as the honest UNAVAILABLE default."""
+    sources = []
+    with contextlib.suppress(Exception):
+        registry = load_json_record_if_exists(run_id, "source_registry.json", output_root=output_root)
+        if isinstance(registry, dict) and isinstance(registry.get("sources"), list):
+            sources = registry["sources"]
+
+    conflicts = result.get("conflicts")
+    conflicts = conflicts if isinstance(conflicts, list) else []
+    main_conflict = result.get("main_conflict")
+    targets = list(conflicts)
+    if isinstance(main_conflict, dict):
+        targets.append(main_conflict)
+    candidate_evaluations = result.get("arbitration", {}).get("candidate_evaluations")
+    if isinstance(candidate_evaluations, list):
+        targets.extend(item for item in candidate_evaluations if isinstance(item, dict))
+
+    for conflict in targets:
+        evidence_ui = conflict.get("evidence_ui") if isinstance(conflict, dict) else None
+        if not isinstance(evidence_ui, dict):
+            continue
+        for group_name in _EVIDENCE_UI_TEXT_GROUPS:
+            items = evidence_ui.get(group_name)
+            if not isinstance(items, list):
+                continue
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                match, status = resolve_external_source_for_claim(
+                    claim=None, evidence=item.get("evidence_text"), sources=sources
+                )
+                item["external_source"] = public_source_fields(match) if match else None
+                item["external_source_status"] = status
 
 
 def _isoformat(value):
@@ -3997,6 +4942,22 @@ try:
 
         return Response(content=raw_bytes, media_type=content_type, status_code=200)
 
+    @router.get("/api/research/{run_id}/export")
+    def get_research_export_route(run_id: str, http_request: Request):
+        status_code, content_type, raw_bytes, filename, error_body = get_run_export_bundle(
+            run_id, _request_output_root(http_request)
+        )
+        if status_code != 200:
+            return JSONResponse(content=error_body, status_code=status_code)
+        from starlette.responses import Response
+
+        return Response(
+            content=raw_bytes,
+            media_type=content_type,
+            status_code=200,
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
     @router.get("/api/research/{run_id}/agent-outputs")
     def get_research_agent_outputs_route(run_id: str, http_request: Request):
         # Pass the app's output_root through unchanged -- including when it
@@ -4006,9 +4967,51 @@ try:
         # which all resolve the same output_root consistently.
         return get_agent_outputs_response(run_id, _request_output_root(http_request))
 
+    @router.get("/api/research/{run_id}/evidence-trace")
+    def get_research_evidence_trace_route(
+        run_id: str, http_request: Request, claim_id: str | None = None, scope: str | None = None
+    ):
+        # T1 closure: read-only join of the run's own saved artifacts (source material -> claim -> Alpha match ->
+        # stance -> scoring). ``claim_id`` -> one full trace, ``scope=key`` -> the final-decision claims' statuses,
+        # neither -> the whole exported artifact. Never a model call, network call or write.
+        return get_evidence_trace_response(run_id, _request_output_root(http_request), claim_id=claim_id, scope=scope)
+
     @router.get("/api/research/{run_id}/status")
     def get_research_status_route(run_id: str, http_request: Request):
         return get_research_run_status(run_id, _request_output_root(http_request))
+
+    class ContentSupportReviewRequest(BaseModel):
+        status: str
+        reviewer: str
+        rationale: str
+        # A UI can opt out of the (default) synchronous re-evaluation for a
+        # slow run and poll the existing GET routes afterward instead --
+        # never a way to skip persisting the review itself.
+        trigger_reevaluation: bool = True
+
+    @router.post("/api/research/{run_id}/claims/{claim_id}/review")
+    def post_content_support_review_route(
+        run_id: str, claim_id: str, request: ContentSupportReviewRequest, http_request: Request
+    ):
+        result = submit_content_support_review(
+            run_id,
+            claim_id,
+            status=request.status,
+            reviewer=request.reviewer,
+            rationale=request.rationale,
+            output_root=_request_output_root(http_request),
+            trigger_reevaluation=request.trigger_reevaluation,
+        )
+        status_code = 200 if result.get("status") == "ok" else _REVIEW_ERROR_HTTP_STATUS.get(result.get("error_code"), 500)
+        return JSONResponse(content=result, status_code=status_code)
+
+    @router.get("/api/research/{run_id}/content-support-reviews")
+    def get_content_support_reviews_route(run_id: str, http_request: Request, claim_id: str | None = None):
+        return list_content_support_reviews(run_id, claim_id=claim_id, output_root=_request_output_root(http_request))
+
+    @router.get("/api/research/{run_id}/reevaluations")
+    def get_reevaluation_executions_route(run_id: str, http_request: Request):
+        return list_reevaluation_executions(run_id, output_root=_request_output_root(http_request))
 
     # Registered as a distinct exact path ("/api/research", no trailing
     # segment) -- FastAPI/Starlette route matching is template-exact, so

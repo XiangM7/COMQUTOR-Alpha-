@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 from copy import deepcopy
 from typing import Any
 
@@ -14,6 +15,8 @@ from comqutor_alpha.structure_engine.structured_output_shadow_schema import (
     build_shadow_bundle,
     sha256_text,
 )
+
+import comqutor_alpha.data_sanity.pipeline as data_sanity_pipeline
 
 
 class FakeSemanticInvoker:
@@ -231,3 +234,84 @@ def v4_proposal(
 ) -> dict[str, Any]:
     return {"claims": claims or [], "abstentions": abstentions or []}
 
+
+# ---------------------------------------------------------------------------
+# Network-leak fix (COMQUTOR Alpha next-round task, 2026-09-26): every test
+# under this package that calls comqutor_alpha.api.routes_research.
+# run_research_request (test_live_shadow_integration.py) unconditionally
+# also runs the Data Sanity Cross-Check sidecar stage
+# (comqutor_alpha.data_sanity.pipeline.run_data_sanity_stage --
+# comqutor_alpha/api/routes_research.py's own
+# ``with contextlib.suppress(Exception): run_data_sanity_stage(run_id,
+# output_root)`` call site). When COMQUTOR_DATA_SANITY_ENABLED leaks in from
+# a developer's local .env (tests/conftest.py's own load_dotenv side
+# effect), that stage's own _run_data_sanity_stage_inner genuinely
+# constructs a real YFinanceMarketDataProvider and calls get_history_rows --
+# a real HTTPS request to Yahoo Finance (reproduced: a live TCP connection
+# to *.ycpi.vip.deb.yahoo.com:https, whose failure/success is then silently
+# swallowed by run_data_sanity_stage's own by-design blanket exception
+# handling, so the test still passed either way).
+#
+# Two independent layers below, so a regression here is impossible to miss:
+#
+#   1. A fixed, deterministic fake provider is injected at the actual
+#      external-fetch boundary
+#      (comqutor_alpha.data_sanity.pipeline.YFinanceMarketDataProvider) --
+#      so even if Data Sanity is genuinely enabled for a test in this
+#      package (today it never should be: tests/conftest.py's
+#      _isolate_database_env now also strips COMQUTOR_DATA_SANITY_ENABLED),
+#      the pipeline exercises its real, already-tested empty-history code
+#      path instead of touching a socket.
+#   2. An executable network block: any real outbound socket.socket.connect
+#      /connect_ex attempted during a test in this package is recorded and
+#      raises immediately, and the fixture's own teardown asserts zero
+#      attempts were recorded -- so an unexpected outbound connection (Data
+#      Sanity, an LLM Provider call, or anything else) fails that test
+#      immediately and loudly, never silently degrades to "unavailable" and
+#      passes anyway.
+# ---------------------------------------------------------------------------
+
+
+class _FixedEmptyMarketDataProvider:
+    """Deterministic stand-in for
+    comqutor_alpha.data_sanity.yfinance_provider.YFinanceMarketDataProvider
+    -- same public contract (get_history_rows/provider_version), zero
+    imports of yfinance, zero network. Returns an empty row list, the same
+    legitimate "provider had nothing for this window" outcome
+    run_checks/normalize_history_frames already handle (see
+    tests/test_data_sanity_yfinance_provider.py)."""
+
+    provider_name = "yfinance-test-fixture"
+
+    def __init__(self, timeout_seconds: int = 15) -> None:
+        self.timeout_seconds = timeout_seconds
+
+    def provider_version(self) -> str:
+        return "test-fixture-no-network"
+
+    def get_history_rows(self, ticker: str, start_date: dt.date, end_exclusive: dt.date) -> list[dict]:
+        return []
+
+
+@pytest.fixture(autouse=True)
+def _fixed_market_data_provider(monkeypatch):
+    monkeypatch.setattr(
+        data_sanity_pipeline, "YFinanceMarketDataProvider", _FixedEmptyMarketDataProvider
+    )
+
+
+# 2026-09-26 follow-up: the connect-blocking logic itself is now factored
+# out into tests/_network_guard.py (shared with this round's new
+# tests/test_source_linking_pipeline.py -- "network block must cover every
+# test package actually exercised this round, not only this one") --
+# OutboundNetworkBlockedError is re-exported here unchanged so existing
+# references to this module's own name keep working.
+from tests._network_guard import (  # noqa: E402
+    OutboundNetworkBlockedError,
+    network_guard,
+)
+
+
+@pytest.fixture(autouse=True)
+def _block_real_network(network_guard):
+    yield network_guard

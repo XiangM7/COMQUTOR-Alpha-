@@ -1,0 +1,16 @@
+{
+  "schema_version": "t3_prompt_v7_verification_samples.v1",
+  "status": "VERIFICATION_SUBSET_PHASE_1_SMOKE_PLUS_CONTROL",
+  "note": "NOT the frozen 40-sample T3 pool (see t3_targeted_diagnostic_sample_2026-09-30.json for that). This is a 1-sample subset of it, reused verbatim (same sample_id/claim_id/claim_text/ticker as the real historical record), for the alpha_classifier v7 limited real-verification plan. This single real call doubles as the wiring/smoke check -- no separate throwaway call is made.",
+  "samples": [
+    {
+      "sample_id": "gold-final-051",
+      "claim_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1:bull_researcher:investment_debate_state.bull_history:claim:98",
+      "claim_text": "Factor: Valuation; Bear View: 120x trailing P/E; Bull Counter: 30.4x forward P/E, PEG 1.03; Verdict: Fairly valued",
+      "evidence_text": "Factor: Valuation; Bear View: 120x trailing P/E; Bull Counter: 30.4x forward P/E, PEG 1.03; Verdict: Fairly valued",
+      "ticker": "AMD",
+      "run_id": null,
+      "quota_category": "A304_boundary"
+    }
+  ]
+}

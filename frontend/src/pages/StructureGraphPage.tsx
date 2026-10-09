@@ -12,18 +12,7 @@ import { useAlphaLibrary } from "../hooks/useAlphaLibrary";
 import { formatActivationLevelForDisplay } from "../utils/activationLevelDisplay";
 import { StructureGraphView } from "../graph/StructureGraphView";
 import type { SelectableGraphNode } from "../graph/graphTypes";
-
-// John's Alpha-level UI partition (John Item 8, Alpha-Level Display
-// Normalization). Display level and blocked status are two orthogonal
-// dimensions: the primary bucket below is derived ONLY from the
-// authoritative display level (activation_level, falling back to
-// qualified_level/status for a historical payload) and is never
-// overridden by is_blocked. A blocked Alpha keeps its own display level
-// (e.g. a capped_active Alpha blocked from "dominant" stays in "Capped
-// active alphas") and is additionally, independently surfaced in the
-// orthogonal Blocked view below (see `blockedAlphas`) -- it may
-// legitimately appear in both places at once.
-export type AlphaLevelBucket = "active" | "capped_active" | "dominant" | "regime_level" | "candidate";
+import { ALPHA_LEVEL_BUCKETS, bucketForAlpha, type AlphaLevelBucket } from "../utils/alphaLevelBucketing";
 
 // Mirrors AlphaCard's/ConflictCard's own BLOCKED_REASON_LABELS verbatim --
 // the same John-approved canonical reason vocabulary, kept as a small local
@@ -35,32 +24,6 @@ const BLOCKED_REASON_LABELS: Record<string, string> = {
   LOW_ENTITY_EXPOSURE: "Entity Exposure below required threshold",
   NO_TICKER_SPECIFIC_EVIDENCE: "No ticker-specific evidence",
 };
-
-export const ALPHA_LEVEL_BUCKETS: { key: AlphaLevelBucket; title: string }[] = [
-  { key: "active", title: "Active alphas" },
-  { key: "capped_active", title: "Capped active alphas" },
-  { key: "dominant", title: "Dominant alphas" },
-  { key: "regime_level", title: "Regime-level alphas" },
-  { key: "candidate", title: "Candidate alphas" },
-];
-
-/** Exported (Product Demo Hardening Phase 2B) so StructuralSnapshot can
- * reuse this exact, already-production bucketing logic for the main
- * Research page's compact Active Structures list -- never a second,
- * independently-invented definition of "meaningfully active." */
-export function bucketForAlpha(alpha: AlphaActivation): AlphaLevelBucket {
-  // activation_level is the backend's own presentation-only display field
-  // (alpha_level_classifier.CAPPED_ACTIVE et al.) -- read directly, never
-  // recomputed here from score/is_blocked/blocked_from. qualified_level,
-  // then `status`, are the fallback for a historical payload that
-  // predates activation_level entirely.
-  const level = alpha.activation_level ?? alpha.qualified_level ?? alpha.status;
-  if (level === "capped_active") return "capped_active";
-  if (level === "regime_level") return "regime_level";
-  if (level === "dominant") return "dominant";
-  if (level === "active") return "active";
-  return "candidate";
-}
 
 function useGraphAndConflicts(runId: string | undefined) {
   const [graph, setGraph] = useState<StructureGraphResult | null>(null);
@@ -399,6 +362,7 @@ export function StructureGraphPage() {
                   activation={selectedNodeActivation}
                   isDominant={selectedNode.isDominant}
                   invalidationConditions={invalidationConditionsByAlpha.get(selectedNodeActivation.alpha_id)}
+                  runId={runId}
                 />
               ) : (
                 <EmptyState
@@ -477,6 +441,7 @@ export function StructureGraphPage() {
                     activation={alpha}
                     isDominant={key === "dominant"}
                     invalidationConditions={invalidationConditionsByAlpha.get(alpha.alpha_id)}
+                    runId={runId}
                   />
                 ))}
               </div>

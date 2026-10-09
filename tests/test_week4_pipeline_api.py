@@ -121,9 +121,15 @@ def test_pipeline_happy_path_completes_week1_through_4(tmp_path):
     # diagnostic on this exact fixture's A101/A304 pair.
     assert response["main_conflict"] is None
 
+    # T1 gate-bypass fix (2026-09-29): this fixture's claims are never
+    # source-linked/human-reviewed, so the official (verified) pool has
+    # zero evidence everywhere -- the summary explicitly names this a
+    # data-availability state, never a silent "no conflict" claim.
     assert response["summary"] == (
-        "No dominant Alpha structure or admitted conflict was identified "
-        "for this research run."
+        "Verified evidence is currently insufficient to reach an official "
+        "conclusion for this research run -- unreviewed or unlinked claims "
+        "may still exist as research text or pending-review candidates, but "
+        "none yet counts as verified support."
     )
     for forbidden in ("Buy", "Sell", "Hold", "position", "price target"):
         assert forbidden.lower() not in response["summary"].lower()
@@ -142,11 +148,13 @@ def test_pipeline_happy_path_completes_week1_through_4(tmp_path):
     }
 
     # W4.1 detector was reachable exactly through the taxonomy-declared
-    # six-pair enumeration -- persisted activation snapshot matches Week 3.
+    # eight-pair enumeration (6 original mandatory pairs + A102__A304 +
+    # A201__A304 per PD-017-REVISED, docs/specs/product_decisions_and_
+    # unknowns.md) -- persisted activation snapshot matches Week 3.
     activation_rows = repo.get_alpha_activations(run_id)
     assert len(activation_rows) == 10
     conflict_rows = repo.get_alpha_conflicts(run_id)
-    assert len(conflict_rows) == 6  # six taxonomy-declared candidate pairs
+    assert len(conflict_rows) == 8  # eight taxonomy-declared candidate pairs
 
 
 # ---------------------------------------------------------------------------
@@ -166,9 +174,10 @@ def test_zero_admitted_conflict_is_still_ready_not_not_ready(tmp_path):
     conflict_result = repo.get_week4_conflict_result(run_id)
     assert conflict_result is not None
     assert conflict_result["conflicts"] == []
-    # All six taxonomy-declared candidates were still evaluated and persisted.
-    assert conflict_result["arbitration"]["declared_pair_count"] == 6
-    assert len(repo.get_alpha_conflicts(run_id)) == 6
+    # All eight taxonomy-declared candidates (PD-017-REVISED) were still
+    # evaluated and persisted.
+    assert conflict_result["arbitration"]["declared_pair_count"] == 8
+    assert len(repo.get_alpha_conflicts(run_id)) == 8
 
     if response["dominant_alphas"]:
         assert response["summary"] == (
@@ -176,9 +185,14 @@ def test_zero_admitted_conflict_is_still_ready_not_not_ready(tmp_path):
             "taxonomy-declared conflict was admitted for this research run."
         )
     else:
+        # T1 gate-bypass fix (2026-09-29): zero raw agent outputs means
+        # zero claims and zero verified evidence anywhere -- the summary
+        # explicitly names this a data-availability state.
         assert response["summary"] == (
-            "No dominant Alpha structure or admitted conflict was identified "
-            "for this research run."
+            "Verified evidence is currently insufficient to reach an official "
+            "conclusion for this research run -- unreviewed or unlinked claims "
+            "may still exist as research text or pending-review candidates, but "
+            "none yet counts as verified support."
         )
 
 
@@ -406,9 +420,11 @@ def test_conflicts_api_survives_deleted_local_run_directory(tmp_path):
     # main_conflict is correctly null -- the DB reconstruction still
     # demonstrably survived the deleted run directory, proven by the
     # non-empty candidate_evaluations below (a broken/empty reconstruction
-    # would return an empty list, not six real per-pair diagnostics).
+    # would return an empty list, not eight real per-pair diagnostics --
+    # 6 original mandatory pairs + A102__A304 + A201__A304 per
+    # PD-017-REVISED).
     assert result["main_conflict"] is None
-    assert len(result["arbitration"]["candidate_evaluations"]) == 6
+    assert len(result["arbitration"]["candidate_evaluations"]) == 8
 
 
 def test_conflicts_api_default_resolution_creates_no_sqlite_file_or_migration(tmp_path, monkeypatch):
@@ -476,7 +492,7 @@ def test_week4_pipeline_replace_is_idempotent_across_retries(tmp_path):
 
     result = repo.get_week4_conflict_result("w4_retry_idempotent")
     assert result is not None
-    assert len(repo.get_alpha_conflicts("w4_retry_idempotent")) == 6  # no duplicate rows
+    assert len(repo.get_alpha_conflicts("w4_retry_idempotent")) == 8  # no duplicate rows (8 declared pairs)
 
     response = build_research_response("w4_retry_idempotent", output_root=tmp_path, graph_repository=repo)
     assert response["conflict_status"] == "ready"
@@ -547,9 +563,10 @@ def _assert_b5_reconstructs_cleanly(conflicts):
     assert conflicts["status"] == "ok"
     assert conflicts.get("error_code") is None
     assert conflicts.get("message") is None
-    # All six taxonomy-declared pairs are always evaluated, whether or not
-    # any one of them clears B2 admissibility for this fixture.
-    assert len(conflicts["arbitration"]["candidate_evaluations"]) == 6
+    # All eight taxonomy-declared pairs (PD-017-REVISED) are always
+    # evaluated, whether or not any one of them clears B2 admissibility
+    # for this fixture.
+    assert len(conflicts["arbitration"]["candidate_evaluations"]) == 8
 
 
 def test_a3_b4_b5_fields_survive_real_orchestration_persistence_and_api_round_trip(tmp_path):

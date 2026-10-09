@@ -1,0 +1,159 @@
+{
+  "schema_version": "t2_exact_semantic_replay_comparison_demonstration.v1",
+  "note": "None of the six official historical tickers are exact_replay_ready (each has a real, nonzero fallback_count from its own original live run -- see this script's own module docstring); this demonstration therefore uses a separate, genuinely complete, provider-zero offline-double-based run, built with the SAME construction tests/replay/conftest.py::eligible_live_source already uses. The mechanism (run_exact_semantic_replay) is identical to what would run against a real historical ticker once one becomes exact_replay_ready.",
+  "source_run_id": "exact-replay-demonstration-source",
+  "replay_id": "exact-replay-demonstration",
+  "status": "completed",
+  "semantic_source": "saved_validated_artifacts",
+  "provider_zero": true,
+  "provider_calls": 0,
+  "tradingagents_calls": 0,
+  "market_data_calls": 0,
+  "database_writes": 0,
+  "semantic_artifacts_byte_identical": true,
+  "source_run_unchanged": true,
+  "binding_audit": {
+    "schema_version": "comqutor.semantic_binding_audit.v1",
+    "source_run_id": "exact-replay-demonstration-source",
+    "ticker": "NVDA",
+    "total_semantic_records": 4,
+    "records_by_task": {
+      "alpha_classifier": 1,
+      "alpha_classifier_batch": 0,
+      "evidence_stance_classifier": 1,
+      "structure_extractor": 1,
+      "structured_adapter": 1
+    },
+    "accepted_records": 4,
+    "uniquely_bound_records": 4,
+    "bound_call_ids": [
+      "exact-replay-demonstration-source:semantic:0:176a67ea735d4036bc97ac969d337536",
+      "exact-replay-demonstration-source:semantic:1:ed521ebd31ce4731981339c7cd86a3f0",
+      "exact-replay-demonstration-source:semantic:2:be0e3e28b9824ef7ac13daecd9fac055",
+      "exact-replay-demonstration-source:semantic:3:ff5100f81c0540a1bcee0dd680f519fa"
+    ],
+    "bindings": [
+      {
+        "call_id": "exact-replay-demonstration-source:semantic:0:176a67ea735d4036bc97ac969d337536",
+        "task": "structured_adapter",
+        "artifact_decision_keys": [
+          "structured:exact-replay-demonstration-source:news_agent:offline_raw_agent_outputs:0:claim:1"
+        ],
+        "binding_basis": {
+          "run_id": true,
+          "task": true,
+          "input_sha256": true,
+          "prompt_version": true,
+          "prompt_sha256": true,
+          "input_schema_version": true,
+          "output_schema_version": true,
+          "taxonomy_version": true,
+          "task_specific_stable_identity": true
+        }
+      },
+      {
+        "call_id": "exact-replay-demonstration-source:semantic:1:ed521ebd31ce4731981339c7cd86a3f0",
+        "task": "alpha_classifier",
+        "artifact_decision_keys": [
+          "alpha:exact-replay-demonstration-source:news_agent:offline_raw_agent_outputs:0:claim:1"
+        ],
+        "binding_basis": {
+          "run_id": true,
+          "task": true,
+          "input_sha256": true,
+          "prompt_version": true,
+          "prompt_sha256": true,
+          "input_schema_version": true,
+          "output_schema_version": true,
+          "taxonomy_version": true,
+          "task_specific_stable_identity": true
+        }
+      },
+      {
+        "call_id": "exact-replay-demonstration-source:semantic:2:be0e3e28b9824ef7ac13daecd9fac055",
+        "task": "evidence_stance_classifier",
+        "artifact_decision_keys": [
+          "evidence_stance:exact-replay-demonstration-source:news_agent:offline_raw_agent_outputs:0:claim:1:A003",
+          "evidence_stance:exact-replay-demonstration-source:news_agent:offline_raw_agent_outputs:0:claim:1:A101",
+          "evidence_stance:exact-replay-demonstration-source:news_agent:offline_raw_agent_outputs:0:claim:1:A304"
+        ],
+        "binding_basis": {
+          "run_id": true,
+          "task": true,
+          "input_sha256": true,
+          "prompt_version": true,
+          "prompt_sha256": true,
+          "input_schema_version": true,
+          "output_schema_version": true,
+          "taxonomy_version": true,
+          "task_specific_stable_identity": true
+        }
+      },
+      {
+        "call_id": "exact-replay-demonstration-source:semantic:3:ff5100f81c0540a1bcee0dd680f519fa",
+        "task": "structure_extractor",
+        "artifact_decision_keys": [
+          "structure:exact-replay-demonstration-source:news_agent:offline_raw_agent_outputs:0:claim:1"
+        ],
+        "binding_basis": {
+          "run_id": true,
+          "task": true,
+          "input_sha256": true,
+          "prompt_version": true,
+          "prompt_sha256": true,
+          "input_schema_version": true,
+          "output_schema_version": true,
+          "taxonomy_version": true,
+          "task_specific_stable_identity": true
+        }
+      }
+    ],
+    "orphan_records": [],
+    "missing_bindings": [],
+    "ambiguous_bindings": [],
+    "input_hash_mismatches": [],
+    "output_hash_mismatches": [],
+    "artifact_decision_mismatches": [],
+    "version_mismatches": [],
+    "unsupported_tasks": [],
+    "final_status": "PASS"
+  },
+  "comparison": {
+    "schema_version": "comqutor.exact_replay_comparison.v1",
+    "source_run_id": "exact-replay-demonstration-source",
+    "replay_id": "exact-replay-demonstration",
+    "replay_mode": "EXACT_SEMANTIC_REPLAY",
+    "semantic_inputs_reused_exactly": true,
+    "identity_normalization": {
+      "source_semantic_owner": "exact-replay-demonstration-source",
+      "downstream_execution_owner": "exact-replay-demonstration",
+      "run_identity_mapped_to_explicit_placeholder": true,
+      "derived_evidence_fact_group_ids_mapped_by_exact_member_claim_ids": true
+    },
+    "comparisons": {
+      "graph": {
+        "source_normalized_sha256": "c8e29bffb831fd646712c48b20b2764f3067bcccbe7cb50f12143410ecad6256",
+        "replay_normalized_sha256": "c8e29bffb831fd646712c48b20b2764f3067bcccbe7cb50f12143410ecad6256",
+        "semantically_equivalent": true
+      },
+      "activation": {
+        "source_normalized_sha256": "9cd858c56f02b7f3fa24c32179dcfca1e86dee20d92db355333a2508b81d0571",
+        "replay_normalized_sha256": "9cd858c56f02b7f3fa24c32179dcfca1e86dee20d92db355333a2508b81d0571",
+        "semantically_equivalent": true
+      },
+      "exposure": {
+        "source_normalized_sha256": "ad44e99b271ffa2f47167103b848808d63688714b2a5a07c4f06155df33c2d2a",
+        "replay_normalized_sha256": "ad44e99b271ffa2f47167103b848808d63688714b2a5a07c4f06155df33c2d2a",
+        "semantically_equivalent": true
+      },
+      "conflict": {
+        "source_normalized_sha256": "151a48375ce86332132a0e5e9f1e71e05e01d0225cfa3d0f9516948e980c3908",
+        "replay_normalized_sha256": "151a48375ce86332132a0e5e9f1e71e05e01d0225cfa3d0f9516948e980c3908",
+        "semantically_equivalent": true
+      }
+    },
+    "deterministic_downstream_equivalent": true,
+    "deterministic_engine_delta": false,
+    "final_status": "PASS"
+  }
+}

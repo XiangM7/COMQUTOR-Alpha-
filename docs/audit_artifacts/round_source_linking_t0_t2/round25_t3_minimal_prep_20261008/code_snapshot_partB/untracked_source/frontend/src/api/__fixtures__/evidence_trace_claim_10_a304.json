@@ -1,0 +1,247 @@
+{
+ "run_id": "t1_closure_fixture_run",
+ "ticker": "AMD",
+ "status": "ok",
+ "schema_version": "evidence_trace.v1",
+ "item": {
+  "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:10",
+  "claim": {
+   "text": "His second overreach is the PEG defense — he calls 0.64 \"priced for a ramp that the last four quarters of data actually support,\" but the last four quarters support a trailing inflection, not a forward EPS of $15.72 [fragmentid: src7e133fa786f7aaa0:frag:0] against a current quarterly run-rate of $1.38 [fragmentid: src582ac24bf4319648:frag:0].",
+   "evidence_text": null,
+   "agent": "portfolio_manager",
+   "claim_quality": "analytical",
+   "direction": "neutral",
+   "confidence": 0.85,
+   "report_location": {
+    "agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision",
+    "section": "Synthesis of the Risk Debate",
+    "claim_index": 9,
+    "char_offset": null,
+    "paragraph": null
+   },
+   "agent_wording": {
+    "self_labeled_verified": false,
+    "matched_terms": [],
+    "note": null
+   },
+   "key_conclusion_group": "portfolio_manager / Synthesis of the Risk Debate"
+  },
+  "sources": [
+   {
+    "source_id": "src_7e133fa786f7aaa0",
+    "role": "cited",
+    "resolved": true,
+    "source_type": "financial",
+    "title": "AMD fundamentals snapshot 2026-10-06 10:37:04",
+    "name": "Yahoo Finance",
+    "provider": "yfinance",
+    "instrument": "AMD",
+    "url": null,
+    "observation_date": "2026-10-06",
+    "published_at": "2026-10-06T10:37:04.790990",
+    "retrieved_at": "2026-10-06T17:39:31Z",
+    "unit": null,
+    "fragment_id": "src_7e133fa786f7aaa0:frag:0",
+    "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+    "time_basis": {
+     "basis": "PUBLISHED_AT",
+     "value": "2026-10-06T10:37:04.790990"
+    },
+    "excerpt": {
+     "text": "AMD fundamentals as retrieved on 2026-10-06 10:37:04 Name=Advanced Micro Devices, Inc. Sector=Technology Industry=Semiconductors Market Cap=1069434339328.0 PE Ratio (TTM)=167.11734 Forward PE=41.668015 PEG Ratio=0.64 Price to Book=15.903958 EPS (TTM)=3.92 Forward EPS=15.72189 Dividend Yield=0.0 Beta=2.454 52 Week High=658.52 52 Week Low=188.22 50 Day Average=515.7302 200 Day Average=376.8365 Revenue (TTM)=41305001984.0 Gross Profit=23017000960.0 EBITDA=9562000384.0 Net Income=6469000192.0 Profit Margin=0.15577 Operating Margin=0.1725 Return on Equity=0.10196 Return on Assets=0.05128 Debt to Equity=6.361 Current Ratio=2.609 Book Value=41.191 Free Cash Flow=8841499648.0",
+     "length": 676,
+     "truncated": false
+    },
+    "has_saved_content": true,
+    "material_rows": [
+     {
+      "label": "peg_ratio",
+      "kind": "scalar_field",
+      "unit": "ratio",
+      "cells": [
+       {
+        "period": "2026-10-06",
+        "value": 0.64,
+        "used": true,
+        "token": "0.64"
+       }
+      ]
+     },
+     {
+      "label": "forward_eps",
+      "kind": "scalar_field",
+      "unit": "USD_per_share",
+      "cells": [
+       {
+        "period": "2026-10-06",
+        "value": 15.72189,
+        "used": true,
+        "token": "$15.72"
+       }
+      ]
+     }
+    ],
+    "derived_inputs": null
+   },
+   {
+    "source_id": "src_582ac24bf4319648",
+    "role": "verified_basis",
+    "resolved": true,
+    "source_type": "financial",
+    "title": "AMD income statement Total Revenue snapshot 2026-06-30 (quarterly)",
+    "name": "Yahoo Finance",
+    "provider": "yfinance",
+    "instrument": "AMD",
+    "url": null,
+    "observation_date": "2026-06-30",
+    "published_at": null,
+    "retrieved_at": "2026-10-06T17:39:31Z",
+    "unit": "UNKNOWN_CURRENCY",
+    "fragment_id": "src_582ac24bf4319648:frag:0",
+    "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9",
+    "time_basis": {
+     "basis": "REGISTRY_WRITE_TIME_UPPER_BOUND",
+     "value": "2026-10-06T17:39:31Z",
+     "note": "capture time is an upper bound (the registry write time), not the per-call fetch time"
+    },
+    "excerpt": {
+     "text": "AMD income statement (quarterly) Total Revenue: 2026-06-30=11536000000.0; 2026-03-31=10253000000.0; 2025-12-31=10270000000.0; 2025-09-30=9246000000.0; 2025-06-30=7685000000.0 | AMD income statement (quarterly) Tax Effect Of Unusual Items: 2026-06-30=0.0; 2026-03-31=0.0; 2025-12-31=0.0; 2025-09-30=0.0; 2025-06-30=0.0 | AMD income statement (quarterly) Tax Rate For Calcs: 2026-06-30=0.098; 2026-03-31=0.148; 2025-12-31=0.219383; 2025-09-30=0.115; 2025-06-30=0.21 | AMD income statement (quarterly) Normalized EBITDA: 2026-06-30=3353000000.0; 2026-03-31=2398000000.0; 2025-12-31=2861000000.0; 2025-09-30=2106000000.0; 2025-06-30=721000000.0 | AMD income statement (quarterly) Net Income From Continui",
+     "length": 7739,
+     "truncated": true
+    },
+    "has_saved_content": true,
+    "material_rows": [],
+    "derived_inputs": null
+   }
+  ],
+  "source_support": {
+   "status_code": "VERIFIED_SUPPORT",
+   "label": "Verified: the saved source content supports this claim",
+   "reason": "The materials confirm PEG ratio 0.64, forward EPS 15.72189, and quarterly diluted EPS of 1.38 with prior quarters showing an upward trailing trend from 0.54 to 1.38. From those stated figures, the forward EPS is far above the current quarterly run-rate—annualizing 1.38 gives 5.52, so 15.72 would require roughly 2.85x that run-rate—which supports the claim that the last four quarters show a trailing inflection rather than the stated forward EPS. The evaluative 'overreach' label follows from this supported gap and does not add a separate unsupported factual assertion.",
+   "link": {
+    "status": "VALID",
+    "method": "ORIGINAL_AGENT_MARKER_CITED"
+   },
+   "content_support": {
+    "status": "SUPPORTS",
+    "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+    "task_version": "content_support.llm.v2.1",
+    "llm_status": "SUPPORTS",
+    "support_basis": "GROUNDED_INFERENCE",
+    "core_proposition": "The last four reported quarters support a trailing earnings inflection rather than the stated forward EPS of $15.72 when compared with the current quarterly EPS run-rate of $1.38.",
+    "used_source_id": "src_582ac24bf4319648",
+    "used_location": "data_snapshot.all_line_items.Diluted EPS",
+    "supporting_quote_or_data": "AMD income statement (quarterly) Diluted EPS: 2026-06-30=1.38; 2026-03-31=0.84; 2025-12-31=0.92; 2025-09-30=0.75; 2025-06-30=0.54",
+    "rationale": "The materials confirm PEG ratio 0.64, forward EPS 15.72189, and quarterly diluted EPS of 1.38 with prior quarters showing an upward trailing trend from 0.54 to 1.38. From those stated figures, the forward EPS is far above the current quarterly run-rate—annualizing 1.38 gives 5.52, so 15.72 would require roughly 2.85x that run-rate—which supports the claim that the last four quarters show a trailing inflection rather than the stated forward EPS. The evaluative 'overreach' label follows from this supported gap and does not add a separate unsupported factual assertion.",
+    "unsupported_remainder": null,
+    "unsupported_materiality": "NONE",
+    "fallback_reason": null
+   },
+   "eligibility": {
+    "eligible": true,
+    "reason_code": "ELIGIBLE",
+    "time_basis": {
+     "basis": "REGISTRY_WRITE_TIME_UPPER_BOUND",
+     "value": "2026-10-06T17:39:31Z",
+     "note": "capture time is an upper bound (the registry write time), not the per-call fetch time"
+    }
+   }
+  },
+  "alpha_match": {
+   "status_code": "MATCHED",
+   "label": "Matched to an Alpha by the model's selection",
+   "reason": "The classifier selected A304 (Multiple Compression) from the full taxonomy.",
+   "match_status": "matched",
+   "matched_alpha": "A304",
+   "llm_selected_alpha_id": "A304",
+   "alpha_match_method": "llm",
+   "mapper_override": null
+  },
+  "stance": {
+   "status_code": "RELATION_UNRESOLVED",
+   "label": "Relation to the Alpha is not established",
+   "reason": "Relation to A304 is not established: the text rule classified the relation as 'mention' (a word-pattern rule, e.g. the word 'not'). No model stance judgment was obtained to resolve it, so this is unresolved rather than 'does not support'.",
+   "evidence_stance": "mentions_alpha",
+   "method": "deterministic",
+   "version": "evidence_stance.deterministic.v1",
+   "stance_fallback_reason": null,
+   "relation": "mention",
+   "assertion_status": "negated",
+   "semantic_polarity": "mention",
+   "relation_basis": "text rule (claim_semantics)",
+   "target_alpha_id": "A304"
+  },
+  "scoring": {
+   "status_code": "NOT_SCORED",
+   "label": "Not counted in any official score",
+   "reason": "Verified, but the text rule classified its relation to the Alpha as non-supporting (mention or negation) and no model stance judgment was obtained to resolve it.",
+   "in_official_pool": false,
+   "alpha_id": "A304",
+   "weight_contribution": null,
+   "match_score_lexical": 0.0,
+   "not_scored_code": "RELATION_NOT_SUPPORTING"
+  },
+  "calculation": {
+   "data_points": [
+    {
+     "observation_key": "src_7e133fa786f7aaa0|2026-10-06|0.64",
+     "source_id": "src_7e133fa786f7aaa0",
+     "label": "peg_ratio",
+     "aliases": [],
+     "period": "2026-10-06",
+     "value": 0.64,
+     "unit": "ratio",
+     "token": "0.64",
+     "kind": "scalar_field",
+     "fragment_id": "src_7e133fa786f7aaa0:frag:0",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "role": "stated"
+    },
+    {
+     "observation_key": "src_7e133fa786f7aaa0|2026-10-06|15.72189",
+     "source_id": "src_7e133fa786f7aaa0",
+     "label": "forward_eps",
+     "aliases": [],
+     "period": "2026-10-06",
+     "value": 15.72189,
+     "unit": "USD_per_share",
+     "token": "$15.72",
+     "kind": "scalar_field",
+     "fragment_id": "src_7e133fa786f7aaa0:frag:0",
+     "content_hash": "73dc193a616824585781a43862fe98d2ea847246d375b74b2d1461bc9a70a55f",
+     "role": "stated"
+    }
+   ],
+   "derived_calculations": [],
+   "ambiguous_tokens": [],
+   "unreproduced_percent_tokens": [],
+   "numbers_not_found_in_saved_data": [
+    "$1.38"
+   ],
+   "scope_note": null
+  },
+  "dependency": {
+   "contract": "claim_data_points.v1",
+   "same_evidence_fact_members": [],
+   "depends_on": null,
+   "depended_by": [],
+   "shares_inputs_with": [],
+   "note": null
+  },
+  "conflict_adoption": {
+   "entries": [],
+   "note": null
+  },
+  "run_basis": {
+   "link_fields_saved": true,
+   "note": null
+  },
+  "summary": {
+   "source_support": "VERIFIED_SUPPORT",
+   "alpha_match": "MATCHED",
+   "stance": "RELATION_UNRESOLVED",
+   "scoring": "NOT_SCORED"
+  },
+  "note": "Source support, Alpha match, stance and scoring are separate checks; passing one does not imply the others."
+ }
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": "alpha_final_gold_freeze_manifest.v1",
+  "status": "FINAL_GOLD_FROZEN",
+  "final_gold_path": "docs/audit_artifacts/v0_2_alpha_final_gold_v1.json",
+  "final_gold_sha256": "a3c402ce391cfba1bd49d3d84a352e222e2775118f24b9ebf2a003183e2392de",
+  "sample_count": 150,
+  "label_distribution": {
+    "NONE": 116,
+    "A301": 9,
+    "A304": 8,
+    "A101": 6,
+    "A601": 5,
+    "A201": 4,
+    "A103": 2,
+    "A001": 0,
+    "A003": 0,
+    "A102": 0,
+    "A501": 0
+  },
+  "confidence_distribution": {
+    "high": 120,
+    "medium": 30,
+    "low": 0
+  },
+  "adjudicator_mode": "INDEPENDENT_EXTERNAL_LLM_ADJUDICATION",
+  "system_predictions_seen_during_gold_adjudication": false,
+  "candidate3_outputs_seen_during_gold_adjudication": false,
+  "used_for_tuning": false,
+  "replacement_lineage": {
+    "original_reserve_pool": 50,
+    "development_replacements_consumed": 18,
+    "final_round1_draw_consumed": 20,
+    "final_round2_draw_consumed": 4,
+    "final_round3_draw_consumed": 2,
+    "total_reserve_consumed": 44,
+    "untouched_reserve_remaining": 6,
+    "first_pass_accepted": 130,
+    "round1_accepted": 16,
+    "round2_accepted": 2,
+    "round3_accepted": 2,
+    "total_accepted": 150,
+    "unresolved_slots": 0,
+    "replacement_log_reference": "docs/audit_artifacts/v0_2_alpha_final_replacement_log.json",
+    "replacement_log_status": "FINAL_REPLACEMENT_CHAIN_FULLY_RESOLVED"
+  },
+  "original_final_membership_manifest_hash_sha256": "a7c84445247f0ce0fdf187e6e73d62c04eb82e64557c40a98704a49bcd4bf70c",
+  "candidate3_classifier_hash_sha256": "d53b2d7511f4c4a8089db746d09e4c79cb38f22597dac6459920ca3deac1171d",
+  "candidate3_batch_hash_sha256": "a03c8f673ffd387a866bc8dd585c4c96cf5464b80a50cb6e4c3fc5f894f68379",
+  "candidate3_final_evaluations": 0,
+  "provider_final_evaluations": 0,
+  "head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "branch": "comqutor-structure-layer",
+  "worktree_status_short_tracked_only": [
+    "M comqutor_alpha/structure_engine/structured_output_adapter.py",
+    " M comqutor_alpha/structure_engine/week2_llm.py",
+    " M tests/test_week2_llm_semantic_runtime_integration.py"
+  ],
+  "immutability_note": "This Gold file must not be modified after this hash was computed. Any future correction requires a new version, never an edit in place. Candidate 3 must not be modified. The next, separate task performs the one-shot final independent validation.",
+  "ready_for_one_shot_final_validation": true
+}

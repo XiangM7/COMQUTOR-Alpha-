@@ -1,0 +1,1100 @@
+{
+  "schema_version": "comqutor.frozen_input_conflict_recompute.v1",
+  "execution_id": "t2-frozen-input-recompute-20261007",
+  "execution_type": "FROZEN_INPUT_RECOMPUTE",
+  "generated_at": "2026-10-08T02:16:59Z",
+  "provider_calls": 0,
+  "model_calls": 0,
+  "note": "Only the deterministic conflict detector is re-run, on each saved run's own saved alpha_activations.json and alpha_matches.json, under the current taxonomy. Nothing is written into the run directories. The runs predate source linking, so the verified-evidence gate is off, exactly as when their conflicts.json was written: this says what the evidence-driven admissibility gate does with the new pairs on real saved inputs, not whether that evidence is verified.",
+  "newly_evaluable_pairs": [
+    "A102__A304",
+    "A201__A304"
+  ],
+  "tickers": {
+    "NVDA": {
+      "ticker": "NVDA",
+      "run_id": "ded99ecd-a186-4a90-859e-0f1a0efa43db",
+      "status": "RECOMPUTED",
+      "execution_type": "FROZEN_INPUT_RECOMPUTE",
+      "provider_calls": 0,
+      "model_calls": 0,
+      "analysis_date": "2026-09-17",
+      "inputs": [
+        "alpha_activations.json",
+        "alpha_matches.json"
+      ],
+      "require_verified_evidence_gate": false,
+      "saved": {
+        "admitted": [
+          "A304__A601"
+        ],
+        "main_conflict": "A304__A601"
+      },
+      "recomputed": {
+        "admitted": [
+          "A304__A601"
+        ],
+        "main_conflict": "A304__A601"
+      },
+      "changed": {
+        "admitted_added": [],
+        "admitted_removed": [],
+        "main_conflict_changed": false
+      },
+      "pairs": {
+        "A001__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A003__A501": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "BEAR_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BEAR_SUPPORTING_EVIDENCE"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 1,
+            "bull_score": 36.7069,
+            "bear_score": 29.1384
+          }
+        },
+        "A101__A304": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 4,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 48.5501,
+            "bear_score": 71.7302
+          }
+        },
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 2,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 36.2508,
+            "bear_score": 71.7302
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 6,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 31.8193,
+            "bear_score": 71.7302
+          }
+        },
+        "A301__A304": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 14,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 74.214,
+            "bear_score": 71.7302
+          }
+        },
+        "A304__A601": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 20,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 69.6629,
+            "bear_score": 71.7302
+          }
+        },
+        "A501__A601": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BEAR_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BEAR_SUPPORTING_EVIDENCE"
+            ],
+            "bull_supporting_evidence_count": 20,
+            "bear_supporting_evidence_count": 1,
+            "bull_score": 69.6629,
+            "bear_score": 29.1384
+          }
+        }
+      },
+      "newly_evaluable_pairs": {
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 2,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 36.2508,
+            "bear_score": 71.7302
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 6,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 31.8193,
+            "bear_score": 71.7302
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "run_id": "0d890564-2479-4361-94e8-25c48af3b9a8",
+      "status": "RECOMPUTED",
+      "execution_type": "FROZEN_INPUT_RECOMPUTE",
+      "provider_calls": 0,
+      "model_calls": 0,
+      "analysis_date": "2026-09-17",
+      "inputs": [
+        "alpha_activations.json",
+        "alpha_matches.json"
+      ],
+      "require_verified_evidence_gate": false,
+      "saved": {
+        "admitted": [
+          "A003__A501",
+          "A304__A601",
+          "A501__A601"
+        ],
+        "main_conflict": "A003__A501"
+      },
+      "recomputed": {
+        "admitted": [
+          "A003__A501",
+          "A304__A601",
+          "A501__A601"
+        ],
+        "main_conflict": "A003__A501"
+      },
+      "changed": {
+        "admitted_added": [],
+        "admitted_removed": [],
+        "main_conflict_changed": false
+      },
+      "pairs": {
+        "A001__A501": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 2,
+            "bull_score": 43.9798,
+            "bear_score": 54.9367
+          }
+        },
+        "A003__A501": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 7,
+            "bear_supporting_evidence_count": 2,
+            "bull_score": 63.9159,
+            "bear_score": 54.9367
+          }
+        },
+        "A101__A304": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 3,
+            "bear_supporting_evidence_count": 10,
+            "bull_score": 44.837,
+            "bear_score": 62.9705
+          }
+        },
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 10,
+            "bull_score": 35.7243,
+            "bear_score": 62.9705
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 2,
+            "bear_supporting_evidence_count": 10,
+            "bull_score": 49.6909,
+            "bear_score": 62.9705
+          }
+        },
+        "A301__A304": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 10,
+            "bull_score": 31.695,
+            "bear_score": 62.9705
+          }
+        },
+        "A304__A601": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 13,
+            "bear_supporting_evidence_count": 10,
+            "bull_score": 54.3161,
+            "bear_score": 62.9705
+          }
+        },
+        "A501__A601": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 13,
+            "bear_supporting_evidence_count": 2,
+            "bull_score": 54.3161,
+            "bear_score": 54.9367
+          }
+        }
+      },
+      "newly_evaluable_pairs": {
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 10,
+            "bull_score": 35.7243,
+            "bear_score": 62.9705
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 2,
+            "bear_supporting_evidence_count": 10,
+            "bull_score": 49.6909,
+            "bear_score": 62.9705
+          }
+        }
+      }
+    },
+    "SNDK": {
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "status": "RECOMPUTED",
+      "execution_type": "FROZEN_INPUT_RECOMPUTE",
+      "provider_calls": 0,
+      "model_calls": 0,
+      "analysis_date": "2026-09-04",
+      "inputs": [
+        "alpha_activations.json",
+        "alpha_matches.json"
+      ],
+      "require_verified_evidence_gate": false,
+      "saved": {
+        "admitted": [],
+        "main_conflict": null
+      },
+      "recomputed": {
+        "admitted": [],
+        "main_conflict": null
+      },
+      "changed": {
+        "admitted_added": [],
+        "admitted_removed": [],
+        "main_conflict_changed": false
+      },
+      "pairs": {
+        "A001__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A003__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A101__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "NO_BEAR_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 15,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 84.22,
+            "bear_score": 53.7399
+          }
+        },
+        "A301__A304": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT",
+              "NO_BEAR_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 3,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 36.9042,
+            "bear_score": 53.7399
+          }
+        },
+        "A304__A601": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "NO_BEAR_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 11,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 60.6606,
+            "bear_score": 53.7399
+          }
+        },
+        "A501__A601": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BEAR_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BEAR_SUPPORTING_EVIDENCE",
+              "NO_BEAR_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 11,
+            "bear_supporting_evidence_count": 0,
+            "bull_score": 60.6606,
+            "bear_score": 30.6504
+          }
+        }
+      },
+      "newly_evaluable_pairs": {
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "NO_BEAR_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 15,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 84.22,
+            "bear_score": 53.7399
+          }
+        }
+      }
+    },
+    "MSFT": {
+      "ticker": "MSFT",
+      "run_id": "64568bfb-fe0c-453c-9872-831a8dc339a0",
+      "status": "RECOMPUTED",
+      "execution_type": "FROZEN_INPUT_RECOMPUTE",
+      "provider_calls": 0,
+      "model_calls": 0,
+      "analysis_date": "2026-09-10",
+      "inputs": [
+        "alpha_activations.json",
+        "alpha_matches.json"
+      ],
+      "require_verified_evidence_gate": false,
+      "saved": {
+        "admitted": [
+          "A301__A304",
+          "A304__A601"
+        ],
+        "main_conflict": "A301__A304"
+      },
+      "recomputed": {
+        "admitted": [
+          "A301__A304",
+          "A304__A601"
+        ],
+        "main_conflict": "A301__A304"
+      },
+      "changed": {
+        "admitted_added": [],
+        "admitted_removed": [],
+        "main_conflict_changed": false
+      },
+      "pairs": {
+        "A001__A501": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "NO_BEAR_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 2,
+            "bear_supporting_evidence_count": 3,
+            "bull_score": 45.6985,
+            "bear_score": 53.4225
+          }
+        },
+        "A003__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A101__A304": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 21,
+            "bull_score": 37.0165,
+            "bear_score": 71.1556
+          }
+        },
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 21,
+            "bull_score": 41.9468,
+            "bear_score": 71.1556
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A301__A304": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 17,
+            "bear_supporting_evidence_count": 21,
+            "bull_score": 70.0,
+            "bear_score": 71.1556
+          }
+        },
+        "A304__A601": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 17,
+            "bear_supporting_evidence_count": 21,
+            "bull_score": 66.5385,
+            "bear_score": 71.1556
+          }
+        },
+        "A501__A601": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "NO_BEAR_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 17,
+            "bear_supporting_evidence_count": 3,
+            "bull_score": 66.5385,
+            "bear_score": 53.4225
+          }
+        }
+      },
+      "newly_evaluable_pairs": {
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD",
+              "INSUFFICIENT_BULL_SUPPORTING_EVIDENCE",
+              "NO_BULL_TICKER_SPECIFIC_SUPPORT"
+            ],
+            "bull_supporting_evidence_count": 1,
+            "bear_supporting_evidence_count": 21,
+            "bull_score": 41.9468,
+            "bear_score": 71.1556
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        }
+      }
+    },
+    "TSM": {
+      "ticker": "TSM",
+      "run_id": "fc09821e-c7cf-40a7-bd76-c98172e16992",
+      "status": "RECOMPUTED",
+      "execution_type": "FROZEN_INPUT_RECOMPUTE",
+      "provider_calls": 0,
+      "model_calls": 0,
+      "analysis_date": "2026-09-09",
+      "inputs": [
+        "alpha_activations.json",
+        "alpha_matches.json"
+      ],
+      "require_verified_evidence_gate": false,
+      "saved": {
+        "admitted": [
+          "A101__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "main_conflict": "A101__A304"
+      },
+      "recomputed": {
+        "admitted": [
+          "A101__A304",
+          "A201__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "main_conflict": "A101__A304"
+      },
+      "changed": {
+        "admitted_added": [
+          "A201__A304"
+        ],
+        "admitted_removed": [],
+        "main_conflict_changed": false
+      },
+      "pairs": {
+        "A001__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A003__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A101__A304": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 20,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 70.0,
+            "bear_score": 64.9288
+          }
+        },
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 12,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 61.5376,
+            "bear_score": 64.9288
+          }
+        },
+        "A301__A304": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 7,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 51.6447,
+            "bear_score": 64.9288
+          }
+        },
+        "A304__A601": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 6,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 60.962,
+            "bear_score": 64.9288
+          }
+        },
+        "A501__A601": {
+          "saved_status": "candidate",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BEAR_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 6,
+            "bear_supporting_evidence_count": 3,
+            "bull_score": 60.962,
+            "bear_score": 32.0636
+          }
+        }
+      },
+      "newly_evaluable_pairs": {
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 12,
+            "bear_supporting_evidence_count": 7,
+            "bull_score": 61.5376,
+            "bear_score": 64.9288
+          }
+        }
+      }
+    },
+    "AMD": {
+      "ticker": "AMD",
+      "run_id": "d5b60b8a-66b8-44c1-9f55-ee345e58c48d",
+      "status": "RECOMPUTED",
+      "execution_type": "FROZEN_INPUT_RECOMPUTE",
+      "provider_calls": 0,
+      "model_calls": 0,
+      "analysis_date": "2026-09-21",
+      "inputs": [
+        "alpha_activations.json",
+        "alpha_matches.json"
+      ],
+      "require_verified_evidence_gate": false,
+      "saved": {
+        "admitted": [
+          "A101__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "main_conflict": "A301__A304"
+      },
+      "recomputed": {
+        "admitted": [
+          "A101__A304",
+          "A201__A304",
+          "A301__A304",
+          "A304__A601"
+        ],
+        "main_conflict": "A301__A304"
+      },
+      "changed": {
+        "admitted_added": [
+          "A201__A304"
+        ],
+        "admitted_removed": [],
+        "main_conflict_changed": false
+      },
+      "pairs": {
+        "A001__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A003__A501": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        },
+        "A101__A304": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 5,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 58.5954,
+            "bear_score": 81.5323
+          }
+        },
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 7,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 48.0399,
+            "bear_score": 81.5323
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 13,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 62.5918,
+            "bear_score": 81.5323
+          }
+        },
+        "A301__A304": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 15,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 65.2271,
+            "bear_score": 81.5323
+          }
+        },
+        "A304__A601": {
+          "saved_status": "admitted",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 18,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 62.9258,
+            "bear_score": 81.5323
+          }
+        },
+        "A501__A601": {
+          "saved_status": "not_reached",
+          "recomputed_status": "not_reached",
+          "recomputed": {
+            "status": null,
+            "outcome": "rejected",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": null,
+            "bear_supporting_evidence_count": null,
+            "bull_score": null,
+            "bear_score": null
+          }
+        }
+      },
+      "newly_evaluable_pairs": {
+        "A102__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "candidate",
+          "recomputed": {
+            "status": "candidate",
+            "outcome": "suppressed",
+            "reason_codes": [
+              "BULL_SCORE_BELOW_THRESHOLD"
+            ],
+            "bull_supporting_evidence_count": 7,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 48.0399,
+            "bear_score": 81.5323
+          }
+        },
+        "A201__A304": {
+          "saved_status": "not_reached",
+          "recomputed_status": "admitted",
+          "recomputed": {
+            "status": "admitted",
+            "outcome": "admitted",
+            "reason_codes": [],
+            "bull_supporting_evidence_count": 13,
+            "bear_supporting_evidence_count": 17,
+            "bull_score": 62.5918,
+            "bear_score": 81.5323
+          }
+        }
+      }
+    }
+  }
+}

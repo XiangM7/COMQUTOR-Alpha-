@@ -1,0 +1,1109 @@
+{
+ "schema_version": "t3_round25_exposure_and_label_ledger.v1",
+ "old_sample_file": "docs/audit_artifacts/round_source_linking_t0_t2/t3_targeted_diagnostic_sample_2026-09-30.json",
+ "exposure_counts": {
+  "USED_FOR_FIX": 21,
+  "UNCONFIRMABLE": 2,
+  "PREDICTED_OR_ANALYZED": 17
+ },
+ "exposure_by_quota": {
+  "A001": {
+   "USED_FOR_FIX": 1,
+   "PREDICTED_OR_ANALYZED": 3
+  },
+  "A003": {
+   "PREDICTED_OR_ANALYZED": 1,
+   "USED_FOR_FIX": 3
+  },
+  "A101_A103_differentiation": {
+   "USED_FOR_FIX": 5,
+   "PREDICTED_OR_ANALYZED": 3
+  },
+  "A102": {
+   "USED_FOR_FIX": 2,
+   "PREDICTED_OR_ANALYZED": 2
+  },
+  "A304_boundary": {
+   "USED_FOR_FIX": 10,
+   "UNCONFIRMABLE": 2,
+   "PREDICTED_OR_ANALYZED": 4
+  },
+  "A501": {
+   "PREDICTED_OR_ANALYZED": 4
+  }
+ },
+ "label_identity": {
+  "file": "docs/audit_artifacts/round_source_linking_t0_t2/t3_human_review_worksheet_COMPLETED_20261005.csv",
+  "how_it_arrived": "uploaded into this working session as a CSV document on 2026-10-05 (~17:41Z) with no accompanying text, then written to the file above and imported (37 rows, then 3 more after the legal-label-set fix)",
+  "reviewer_id_filled": 0,
+  "rows": 40,
+  "form_claims": {
+   "review_status": "COMPLETE",
+   "human_review_performed": true
+  },
+  "john_approved_recorded": false,
+  "authorization_record": "none found",
+  "blindness": "the worksheet hid system answers; whether the person labeling had seen the 2026-10-01/02 model outputs, the ChatGPT comparison or the v7 adjudication (all saved before 2026-10-05) is not recorded",
+  "agreement_with_chatgpt_ai_review_labels": "36/40 identical labels; rationales are worded differently (0/40 identical text)",
+  "status": "HUMAN_LABELS_IDENTITY_UNRECORDED -- not proven non-human, but not shown to meet John's reference standard (John or a designated reviewer, blind); no approval written back"
+ },
+ "historical_gold_vs_2026_10_05_label_disagreements": [
+  {
+   "sample_id": "gold-final-030",
+   "historical_gold_label": "NONE",
+   "label_2026_10_05": "UNABLE_TO_JUDGE",
+   "exposure_category": "USED_FOR_FIX"
+  },
+  {
+   "sample_id": "gold-final-051",
+   "historical_gold_label": "NONE",
+   "label_2026_10_05": "A304",
+   "exposure_category": "USED_FOR_FIX"
+  },
+  {
+   "sample_id": "gold-final-057",
+   "historical_gold_label": "A304",
+   "label_2026_10_05": "A301",
+   "exposure_category": "PREDICTED_OR_ANALYZED"
+  },
+  {
+   "sample_id": "gold-final-072",
+   "historical_gold_label": "A304",
+   "label_2026_10_05": "A001",
+   "exposure_category": "UNCONFIRMABLE"
+  },
+  {
+   "sample_id": "gold-final-079",
+   "historical_gold_label": "A304",
+   "label_2026_10_05": "NONE",
+   "exposure_category": "USED_FOR_FIX"
+  },
+  {
+   "sample_id": "gold-final-085",
+   "historical_gold_label": "A304",
+   "label_2026_10_05": "A001",
+   "exposure_category": "USED_FOR_FIX"
+  },
+  {
+   "sample_id": "gold-final-059",
+   "historical_gold_label": "A101",
+   "label_2026_10_05": "A103",
+   "exposure_category": "USED_FOR_FIX"
+  },
+  {
+   "sample_id": "gold-final-077",
+   "historical_gold_label": "A101",
+   "label_2026_10_05": "A103",
+   "exposure_category": "USED_FOR_FIX"
+  },
+  {
+   "sample_id": "gold-final-084",
+   "historical_gold_label": "A103",
+   "label_2026_10_05": "A102",
+   "exposure_category": "PREDICTED_OR_ANALYZED"
+  },
+  {
+   "sample_id": "gold-final-127",
+   "historical_gold_label": "A101",
+   "label_2026_10_05": "A501",
+   "exposure_category": "USED_FOR_FIX"
+  },
+  {
+   "sample_id": "gold-dev-068",
+   "historical_gold_label": "NONE",
+   "label_2026_10_05": "A301",
+   "exposure_category": "USED_FOR_FIX"
+  }
+ ],
+ "samples": [
+  {
+   "sample_id": "gold-final-001",
+   "quota_category": "A304_boundary",
+   "ticker": "AMD",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.848673+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-008",
+   "quota_category": "A304_boundary",
+   "ticker": "NVDA",
+   "exposure_category": "UNCONFIRMABLE",
+   "exposure_reasons": [
+    "quoted in an error analysis written before the v7 prompt change, but not named by it"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849026+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-019",
+   "quota_category": "A304_boundary",
+   "ticker": "GOOGL",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849033+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-030",
+   "quota_category": "A304_boundary",
+   "ticker": "QQQ",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "UNABLE_TO_JUDGE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849038+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-041",
+   "quota_category": "A304_boundary",
+   "ticker": "MSFT",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849043+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-048",
+   "quota_category": "A304_boundary",
+   "ticker": "NVDA",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849048+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-051",
+   "quota_category": "A304_boundary",
+   "ticker": "AMD",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A304",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849052+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "A304"
+  },
+  {
+   "sample_id": "gold-final-052",
+   "quota_category": "A304_boundary",
+   "ticker": "TSM",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849056+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-057",
+   "quota_category": "A304_boundary",
+   "ticker": "QQQ",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A301",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849061+00:00",
+   "historical_gold_label": "A304",
+   "chatgpt_ai_review_label": "A304"
+  },
+  {
+   "sample_id": "gold-final-061",
+   "quota_category": "A304_boundary",
+   "ticker": "GOOGL",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A304",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849065+00:00",
+   "historical_gold_label": "A304",
+   "chatgpt_ai_review_label": "A304"
+  },
+  {
+   "sample_id": "gold-final-072",
+   "quota_category": "A304_boundary",
+   "ticker": "AMD",
+   "exposure_category": "UNCONFIRMABLE",
+   "exposure_reasons": [
+    "quoted in an error analysis written before the v7 prompt change, but not named by it"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A001",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849070+00:00",
+   "historical_gold_label": "A304",
+   "chatgpt_ai_review_label": "A001"
+  },
+  {
+   "sample_id": "gold-final-079",
+   "quota_category": "A304_boundary",
+   "ticker": "NVDA",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849073+00:00",
+   "historical_gold_label": "A304",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-final-083",
+   "quota_category": "A304_boundary",
+   "ticker": "NVDA",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A304",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849077+00:00",
+   "historical_gold_label": "A304",
+   "chatgpt_ai_review_label": "A304"
+  },
+  {
+   "sample_id": "gold-final-085",
+   "quota_category": "A304_boundary",
+   "ticker": "QQQ",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A001",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849083+00:00",
+   "historical_gold_label": "A304",
+   "chatgpt_ai_review_label": "A001"
+  },
+  {
+   "sample_id": "gold-final-097",
+   "quota_category": "A304_boundary",
+   "ticker": "MSFT",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A304",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849086+00:00",
+   "historical_gold_label": "A304",
+   "chatgpt_ai_review_label": "A304"
+  },
+  {
+   "sample_id": "gold-final-099",
+   "quota_category": "A304_boundary",
+   "ticker": "QQQ",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A301",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849103+00:00",
+   "historical_gold_label": "A301",
+   "chatgpt_ai_review_label": "A301"
+  },
+  {
+   "sample_id": "gold-final-059",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "TSM",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A103",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849108+00:00",
+   "historical_gold_label": "A101",
+   "chatgpt_ai_review_label": "A103"
+  },
+  {
+   "sample_id": "gold-final-074",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "TSM",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A101",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849112+00:00",
+   "historical_gold_label": "A101",
+   "chatgpt_ai_review_label": "A101"
+  },
+  {
+   "sample_id": "gold-final-077",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "AMD",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A103",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849116+00:00",
+   "historical_gold_label": "A101",
+   "chatgpt_ai_review_label": "A101"
+  },
+  {
+   "sample_id": "gold-final-084",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "GOOGL",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A102",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849121+00:00",
+   "historical_gold_label": "A103",
+   "chatgpt_ai_review_label": "A103"
+  },
+  {
+   "sample_id": "gold-final-092",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "SNDK",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A103",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849125+00:00",
+   "historical_gold_label": "A103",
+   "chatgpt_ai_review_label": "A103"
+  },
+  {
+   "sample_id": "gold-final-100",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "NVDA",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A101",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849129+00:00",
+   "historical_gold_label": "A101",
+   "chatgpt_ai_review_label": "A101"
+  },
+  {
+   "sample_id": "gold-final-127",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "SNDK",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": true,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A501",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849134+00:00",
+   "historical_gold_label": "A101",
+   "chatgpt_ai_review_label": "A501"
+  },
+  {
+   "sample_id": "gold-final-144",
+   "quota_category": "A101_A103_differentiation",
+   "ticker": "GOOGL",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "ALREADY_USED_FOR_FROZEN_FINAL_VALIDATION_SCORE",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849138+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "gold-dev-068",
+   "quota_category": "A102",
+   "ticker": "GOOGL",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "Development Gold set, used for Candidate-3 tuning / error analysis"
+   ],
+   "facts": {
+    "historical_set": "DEVELOPMENT_SEEN",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A301",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849142+00:00",
+   "historical_gold_label": "NONE",
+   "chatgpt_ai_review_label": "A301"
+  },
+  {
+   "sample_id": "prod-run-001",
+   "quota_category": "A102",
+   "ticker": "NVDA",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849147+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "prod-run-002",
+   "quota_category": "A102",
+   "ticker": "MSFT",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A102",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849151+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A102"
+  },
+  {
+   "sample_id": "prod-run-003",
+   "quota_category": "A102",
+   "ticker": "AMD",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A102",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849155+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A102"
+  },
+  {
+   "sample_id": "prod-run-004",
+   "quota_category": "A501",
+   "ticker": "QQQ",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849159+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "prod-run-005",
+   "quota_category": "A501",
+   "ticker": "QQQ",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "PARTIALLY_EXPOSED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A501",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849163+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A501"
+  },
+  {
+   "sample_id": "prod-run-006",
+   "quota_category": "A501",
+   "ticker": "TSM",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A501",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849167+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A501"
+  },
+  {
+   "sample_id": "prod-run-007",
+   "quota_category": "A501",
+   "ticker": "AMD",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A501",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849319+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A501"
+  },
+  {
+   "sample_id": "prod-run-008",
+   "quota_category": "A001",
+   "ticker": "NVDA",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/claim_semantics.py"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/claim_semantics.py"
+    ],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A001",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849326+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A001"
+  },
+  {
+   "sample_id": "prod-run-009",
+   "quota_category": "A001",
+   "ticker": "QQQ",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "PARTIALLY_EXPOSED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A001",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849331+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A001"
+  },
+  {
+   "sample_id": "prod-run-010",
+   "quota_category": "A001",
+   "ticker": "TSM",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A001",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849335+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A001"
+  },
+  {
+   "sample_id": "prod-run-011",
+   "quota_category": "A001",
+   "ticker": "AMD",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "A001",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849339+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "A001"
+  },
+  {
+   "sample_id": "prod-run-012",
+   "quota_category": "A003",
+   "ticker": "NVDA",
+   "exposure_category": "PREDICTED_OR_ANALYZED",
+   "exposure_reasons": [
+    "predicted by v6, AI-reviewed, labeled and scored; no record of use in a prompt or code change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": false,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849344+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "prod-run-013",
+   "quota_category": "A003",
+   "ticker": "MSFT",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": false,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849348+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "prod-run-014",
+   "quota_category": "A003",
+   "ticker": "SNDK",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849352+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "NONE"
+  },
+  {
+   "sample_id": "prod-run-015",
+   "quota_category": "A003",
+   "ticker": "SNDK",
+   "exposure_category": "USED_FOR_FIX",
+   "exposure_reasons": [
+    "named as a target in comqutor_alpha/structure_engine/week2_llm.py",
+    "run in the v7 development verification that accepted the prompt change"
+   ],
+   "facts": {
+    "historical_set": "NOT_PREVIOUSLY_USED",
+    "named_in_production_code_comments": [
+     "comqutor_alpha/structure_engine/week2_llm.py"
+    ],
+    "run_in_v7_development_verification": true,
+    "adjudicated_in_v7_prompt_document": true,
+    "quoted_in_root_cause_analysis_2026_09_29": false,
+    "predicted_by_v6_run": true,
+    "reviewed_by_chatgpt_ai_review": true,
+    "labeled_2026_10_05": true
+   },
+   "label_2026_10_05": "NONE",
+   "label_reviewer_id": null,
+   "label_reviewed_at_in_form": "2026-10-05T17:49:25.849356+00:00",
+   "historical_gold_label": null,
+   "chatgpt_ai_review_label": "NONE"
+  }
+ ]
+}

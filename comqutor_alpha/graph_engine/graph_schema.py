@@ -162,23 +162,37 @@ def _validate_v2_graph_shape(graph_json: Mapping[str, object]) -> None:
     v2_block = activation_versions.get("v2")  # type: ignore[union-attr]
     _validate_activation_block_shape(v1_block, GRAPH_SCHEMA_INVALID)
     _validate_activation_block_shape(v2_block, GRAPH_SCHEMA_INVALID)
+    # Any additional named activation view (e.g. "v2_verified", T1 verified-
+    # support eligibility gate, 2026-09-28) is optional -- a historical
+    # graph or a run with no source-linking data simply lacks it -- but
+    # when present it must be shape-valid like every other named view.
+    for key, block in activation_versions.items():  # type: ignore[union-attr]
+        if key in ("v1", "v2"):
+            continue
+        _validate_activation_block_shape(block, GRAPH_SCHEMA_INVALID)
 
     primary_activation_version = graph_json.get("primary_activation_version")
     _require(
         isinstance(primary_activation_version, str) and bool(primary_activation_version),
         GRAPH_SCHEMA_INVALID,
     )
-    # The declared primary must actually match the v2 block it claims to
-    # summarize -- a mismatch here means the payload's own cross-references
-    # disagree, which is data corruption, not merely an unknown version.
-    _require(
-        primary_activation_version == v2_block.get("formula_version"),  # type: ignore[union-attr]
-        GRAPH_SCHEMA_PRIMARY_MISMATCH,
-    )
+    # The declared primary must actually match ONE of the named views it
+    # claims to summarize -- not hardcoded to "v2" specifically, so a run
+    # whose official result comes from a differently-versioned view (e.g.
+    # "v2_verified", once its own formula_version is genuinely the
+    # declared primary) is a legitimate match, never a forced mismatch.
+    # Still fails closed: some named view's formula_version MUST equal the
+    # declared primary, or this is data corruption, never a silent guess.
+    primary_block = None
+    for block in activation_versions.values():  # type: ignore[union-attr]
+        if isinstance(block, Mapping) and block.get("formula_version") == primary_activation_version:
+            primary_block = block
+            break
+    _require(primary_block is not None, GRAPH_SCHEMA_PRIMARY_MISMATCH)
     # The top-level "activation" field (the primary payload callers read) is
-    # required to be exactly the v2 block it is primary for -- not merely an
+    # required to be exactly the block it is primary for -- not merely an
     # independently-consistent payload that happens to agree on paper.
-    _require(activation == v2_block, GRAPH_SCHEMA_PRIMARY_MISMATCH)
+    _require(activation == primary_block, GRAPH_SCHEMA_PRIMARY_MISMATCH)
 
 
 def validate_structure_graph_contract(graph_json: object) -> None:

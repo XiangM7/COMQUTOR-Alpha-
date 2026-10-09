@@ -1,0 +1,269 @@
+--- /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/round3_pre_fix_snapshot_20261004/source_provenance.py	2026-10-04 16:47:16
++++ comqutor_alpha/source_provenance.py	2026-10-04 17:04:29
+@@ -864,6 +864,217 @@
+                 candidates.append(fragment_id)
+                 break
+     return candidates
++
++
++# Round 3 (2026-10-04), no-marker candidate linking: "全体子串匹配" above
++# requires the WHOLE excerpt (or WHOLE claim) to be a substring of the
++# other -- it cannot handle a claim that reformats a single captured
++# NUMBER (thousands separators, M/million/B/billion/K/thousand scale
++# suffixes, or rounds to fewer display digits than the raw stored value)
++# while wrapping it in ordinary prose. This is a SEPARATE, additive
++# mechanism -- it never replaces or loosens the whole-excerpt matcher
++# above, and it only ever matches a SPECIFIC, already-saved NUMERIC field,
++# never free text. See match_evidence_to_source_candidates_normalized's
++# own docstring for the exact scope and the ambiguity-preservation
++# contract (COMQUTOR Alpha 下一轮开发任务单 section 5: 受约束的数字格式差异,
++# 从不无约束模糊匹配, 多个同样合理候选必须保留歧义).
++_SCALE_SUFFIX_MULTIPLIERS: dict[str, float] = {
++    "k": 1e3, "thousand": 1e3,
++    "m": 1e6, "mm": 1e6, "million": 1e6,
++    "b": 1e9, "bn": 1e9, "billion": 1e9,
++    "t": 1e12, "trillion": 1e12,
++}
++_SCALED_NUMBER_PATTERN = re.compile(
++    r"(?<![\w.])(?P<num>\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+)"
++    r"\s?(?P<suffix>thousand|million|billion|trillion|mm|bn|[kmbt])?\b",
++    re.IGNORECASE,
++)
++# A number with no scale suffix and 3 or fewer digits (e.g. "14", "200")
++# is too common/unspecific to serve as a confident linking signal on its
++# own -- it would false-positive-match almost any source with ANY nearby
++# count. Only a number carrying a scale suffix, a decimal point, or at
++# least 4 integer digits is specific enough to be used here.
++_MIN_UNSCALED_INTEGER_DIGITS = 4
++
++
++def _extract_scaled_numeric_tokens(text: str) -> list[dict[str, Any]]:
++    tokens: list[dict[str, Any]] = []
++    for match in _SCALED_NUMBER_PATTERN.finditer(text or ""):
++        raw_num = match.group("num").replace(",", "")
++        suffix = (match.group("suffix") or "").lower()
++        try:
++            value = float(raw_num)
++        except ValueError:
++            continue
++        scale = _SCALE_SUFFIX_MULTIPLIERS.get(suffix, 1.0)
++        decimal_places = len(raw_num.split(".", 1)[1]) if "." in raw_num else 0
++        has_decimal = "." in raw_num
++        integer_digits = len(raw_num.split(".", 1)[0])
++        if scale == 1.0 and not has_decimal and integer_digits < _MIN_UNSCALED_INTEGER_DIGITS:
++            continue
++        tokens.append({"value": value, "scale": scale, "decimal_places": decimal_places, "raw": match.group(0)})
++    return tokens
++
++
++def iter_source_numeric_leaves(value: Any, path: tuple[str, ...] = ()) -> list[tuple[tuple[str, ...], float]]:
++    """Walks a source's own already-saved ``data_snapshot`` (or any nested
++    dict/list within it -- e.g. Round 2's ``all_line_items``/``periods``)
++    and yields every leaf that is genuinely numeric, including a numeric
++    STRING (several real captured snapshots -- e.g. the market OHLCV
++    excerpt's own ``data_snapshot["ohlcv"]``, store values as strings).
++    Never a text field, never inferred -- only a value the acquisition
++    layer itself already wrote."""
++    leaves: list[tuple[tuple[str, ...], float]] = []
++    if isinstance(value, Mapping):
++        for key, sub_value in value.items():
++            leaves.extend(iter_source_numeric_leaves(sub_value, path + (str(key),)))
++    elif isinstance(value, (list, tuple)):
++        for index, sub_value in enumerate(value):
++            leaves.extend(iter_source_numeric_leaves(sub_value, path + (str(index),)))
++    elif isinstance(value, bool):
++        pass
++    elif isinstance(value, (int, float)):
++        leaves.append((path, float(value)))
++    elif isinstance(value, str):
++        try:
++            leaves.append((path, float(value.replace(",", ""))))
++        except ValueError:
++            pass
++    return leaves
++
++
++def _scaled_value_matches(raw_value: float, token: dict[str, Any]) -> bool:
++    """A claim token like ``121.7M`` is a ROUNDED display of a raw stored
++    value (e.g. ``121732200``) -- not bit-exact equal to it. This compares
++    after scaling the RAW value down by the claim's own stated scale and
++    rounding to the claim's own stated decimal precision ("数值与展示精度"),
++    never the other way around (the raw stored value is never rounded
++    UP/invented to match a claim)."""
++    scaled = raw_value / token["scale"]
++    return round(scaled, token["decimal_places"]) == token["value"]
++
++
++_DATE_LIKE_TOKEN_PATTERN = re.compile(
++    r"\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[/-]\d{1,2}\b"
++)
++
++
++def match_evidence_to_source_candidates_normalized(
++    evidence: str | None,
++    claim: str | None,
++    sources: list[dict[str, Any]] | None,
++    *,
++    instrument: str | None = None,
++) -> dict[str, Any]:
++    """Round 3 (2026-10-04) addition, additive and separate from
++    :func:`match_evidence_to_source_candidates` (never replaces it; tried
++    only when the whole-excerpt matcher above found nothing). Locates a
++    SPECIFIC already-saved numeric field whose value -- after honoring
++    thousands separators, an M/million/B/billion/K/thousand scale suffix,
++    and display-precision rounding -- equals a number genuinely present in
++    the claim/evidence text, by walking each candidate source's own
++    ``data_snapshot`` (never its excerpt prose).
++
++    Scope, deliberately bounded (see John 下一轮开发任务单 section 5): this
++    is NUMBER-FORMAT normalization only -- thousands separators, scale
++    suffixes, percent/precision differences. It is never unconstrained
++    fuzzy text matching, never a metric-name/alias resolver, and a bare
++    low-specificity number (3 digits or fewer, no decimal, no scale
++    suffix -- see ``_MIN_UNSCALED_INTEGER_DIGITS``) is never used as a
++    matching signal on its own.
++
++    Object/time guard: when ``instrument`` is given and a candidate
++    source's own ``instrument`` field is a DIFFERENT real value, that
++    source is skipped for this claim -- a claim's own run-ticker context
++    is never used to override a source's own, more specific recorded
++    identity. When the claim text contains an explicit calendar date/day
++    token that differs from the source's own ``observation_date``, that
++    source is also skipped -- a single-day snapshot never backs a claim
++    about a different day's figure merely because some other number
++    happens to coincide.
++
++    Ambiguity is preserved, never silently resolved: when the SAME
++    matching number is genuinely present in TWO OR MORE DISTINCT sources'
++    (different ``source_id``) data, this returns no candidate for that
++    number at all -- ``ambiguous_source_ids`` names every source involved,
++    for transparency, but none of them is guessed as "the" answer.
++
++    Returns ``{"candidates": [fragment_id, ...], "matched_fields":
++    {fragment_id: [dotted_field_path, ...]}, "ambiguous_numbers":
++    [{"raw": matched_text, "source_ids": [...]}]}``. Every returned
++    ``fragment_id`` still has to separately pass
++    :func:`validate_source_reference`, exactly like the whole-excerpt
++    matcher's candidates -- this function only ever proposes, never
++    validates."""
++    result: dict[str, Any] = {"candidates": [], "matched_fields": {}, "ambiguous_numbers": []}
++    haystacks = [t for t in (evidence, claim) if isinstance(t, str) and t.strip()]
++    if not haystacks or not sources:
++        return result
++
++    tokens: list[dict[str, Any]] = []
++    for haystack in haystacks:
++        tokens.extend(_extract_scaled_numeric_tokens(haystack))
++    if not tokens:
++        return result
++
++    claim_date_tokens = set()
++    for haystack in haystacks:
++        claim_date_tokens.update(m.group(0) for m in _DATE_LIKE_TOKEN_PATTERN.finditer(haystack))
++
++    eligible_sources = []
++    for source in sources:
++        if not isinstance(source, dict):
++            continue
++        fragment_id = source.get("fragment_id")
++        if not fragment_id:
++            continue
++        source_instrument = source.get("instrument")
++        if instrument and source_instrument and str(source_instrument) != str(instrument):
++            continue
++        observation_date = source.get("observation_date")
++        if observation_date and claim_date_tokens:
++            # A short-form token ("09-30") is the SAME calendar day as the
++            # source's full "2026-09-30" when one is a substring of the
++            # other -- never only exact string equality. A claim naming
++            # BOTH the matching day and a different day (e.g. contrasting
++            # today's figure against a prior day's) still gets to use this
++            # source -- only a claim naming EXCLUSIVELY other days skips it.
++            any_matching_day = any(
++                tok == observation_date or tok in observation_date or observation_date in tok
++                for tok in claim_date_tokens
++            )
++            if not any_matching_day:
++                continue
++        snapshot = source.get("data_snapshot")
++        if not isinstance(snapshot, (Mapping, list)):
++            continue
++        eligible_sources.append((source.get("source_id"), fragment_id, iter_source_numeric_leaves(snapshot)))
++
++    seen_raw_tokens: set[str] = set()
++    for token in tokens:
++        if token["raw"] in seen_raw_tokens:
++            continue
++        seen_raw_tokens.add(token["raw"])
++        matches_by_source: dict[str, tuple[str, list[tuple[str, ...]]]] = {}
++        for source_id, fragment_id, leaves in eligible_sources:
++            matched_paths = [path for path, raw_value in leaves if _scaled_value_matches(raw_value, token)]
++            if matched_paths:
++                matches_by_source[source_id] = (fragment_id, matched_paths)
++        if len(matches_by_source) > 1:
++            result["ambiguous_numbers"].append(
++                {"raw": token["raw"], "source_ids": sorted(matches_by_source.keys())}
++            )
++            continue
++        if len(matches_by_source) == 1:
++            ((fragment_id, matched_paths),) = matches_by_source.values()
++            if fragment_id not in result["candidates"]:
++                result["candidates"].append(fragment_id)
++            result["matched_fields"].setdefault(fragment_id, [])
++            for path in matched_paths:
++                label = ".".join(path)
++                if label not in result["matched_fields"][fragment_id]:
++                    result["matched_fields"][fragment_id].append(label)
++    return result
+ 
+ 
+ # The label tolerates a missing underscore ("fragment_id" or "fragmentid")
+@@ -928,6 +1139,38 @@
+         if isinstance(fragment_id, str) and _without_underscores(fragment_id) == candidate:
+             return fragment_id
+     return None
++
++
++def extract_all_source_markers_from_text(
++    text: str | None, sources: list[dict[str, Any]] | None
++) -> list[str]:
++    """Round 3 (2026-10-04), multi-reference support: like
++    :func:`extract_source_marker_from_text`, but returns EVERY distinct,
++    resolvable ``[fragment_id: ...]`` marker found in ``text`` (in order of
++    first appearance), not only the first. A claim combining several
++    cited figures in one sentence (each carrying its own marker, per
++    :func:`tradingagents.agents.utils.agent_utils.
++    get_citation_forwarding_instruction`'s own instruction to keep every
++    figure's own tag) must not lose every reference but the first --
++    see ``get_citation_forwarding_instruction``'s explicit "do not drop
++    any but the first" instruction, which this function's existence makes
++    actually honorable downstream. An unresolvable marker (not a real,
++    registered fragment_id in THIS run) is simply skipped, exactly like
++    the single-marker function's own contract -- never a fabricated id."""
++    if not text:
++        return []
++    found: list[str] = []
++    for match in _SOURCE_REFERENCE_MARKER_PATTERN.finditer(text):
++        candidate = _without_underscores(match.group(1))
++        for source in sources or ():
++            if not isinstance(source, dict):
++                continue
++            fragment_id = source.get("fragment_id")
++            if isinstance(fragment_id, str) and _without_underscores(fragment_id) == candidate:
++                if fragment_id not in found:
++                    found.append(fragment_id)
++                break
++    return found
+ 
+ 
+ def _parse_iso_like(value: Any) -> dt.datetime | None:
+@@ -1035,6 +1278,9 @@
+ 
+ 
+ __all__ = [
++    "iter_source_numeric_leaves",
++    "match_evidence_to_source_candidates_normalized",
++    "extract_all_source_markers_from_text",
+     "SOURCE_REGISTRY_SCHEMA_VERSION",
+     "STATUS_TRACEABLE",
+     "STATUS_PARTIAL",

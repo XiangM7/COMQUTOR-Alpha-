@@ -1,0 +1,2497 @@
+{
+ "run_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8",
+ "validator_required_fields": [
+  "cited_source_id",
+  "claim",
+  "confidence",
+  "direction",
+  "entities",
+  "evidence",
+  "factors",
+  "segment_id",
+  "source_section"
+ ],
+ "frozen_instruction_fields": [
+  "segment_id",
+  "claim",
+  "evidence",
+  "source_section",
+  "entities",
+  "factors",
+  "direction",
+  "confidence"
+ ],
+ "send_status_counts": {
+  "sent_timeout_no_reply": 2,
+  "sent_reply_received_in_time": 5,
+  "not_sent_local_refusal": 2
+ },
+ "calls": [
+  {
+   "call_sequence": 0,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:0:23db7a6150ef40b7ba631f6a2ec9ff95",
+   "attempt_ids": [
+    "fa642639-8d93-4f9a-9de1-2c4d789eade8:1"
+   ],
+   "agent": "sentiment_agent",
+   "segments": 64,
+   "candidate_sources_offered": 0,
+   "input_chars": 30886,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:03:51.500584+00:00",
+   "completed_at": "2026-10-09T01:05:19.920823+00:00",
+   "latency_ms": 88418,
+   "saved": {
+    "provider_status": "timeout",
+    "error_code": "WEEK2_LLM_TIMEOUT",
+    "validation_status": "not_run",
+    "fallback_reason": "WEEK2_LLM_TIMEOUT"
+   },
+   "wire_audit_request_row": true,
+   "wire_audit_request_at": "2026-10-09T01:03:51Z",
+   "wire_audit_reply_row": false,
+   "wire_audit_reply_at": null,
+   "wire_audit_reply_status": null,
+   "send_status": "sent_timeout_no_reply"
+  },
+  {
+   "call_sequence": 1,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:1:43f45316f2074379b5e2673b088dec6e",
+   "attempt_ids": [
+    "fa642639-8d93-4f9a-9de1-2c4d789eade8:2"
+   ],
+   "agent": "market_agent",
+   "segments": 64,
+   "candidate_sources_offered": 1,
+   "input_chars": 25136,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:03:51.520611+00:00",
+   "completed_at": "2026-10-09T01:05:19.933483+00:00",
+   "latency_ms": 88411,
+   "saved": {
+    "provider_status": "success",
+    "error_code": null,
+    "validation_status": "rejected",
+    "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED"
+   },
+   "wire_audit_request_row": true,
+   "wire_audit_request_at": "2026-10-09T01:03:51Z",
+   "wire_audit_reply_row": true,
+   "wire_audit_reply_at": "2026-10-09T01:04:35Z",
+   "wire_audit_reply_status": 200,
+   "send_status": "sent_reply_received_in_time",
+   "production_path": {
+    "enrichment_returned": false,
+    "transport_arrivals": 1,
+    "budget_reservations": 1,
+    "request_rebuilt_by_production_equals_saved": false,
+    "request_body_equals_saved_wire_body": false,
+    "ledger_record": {
+     "provider_status": "success",
+     "error_code": null,
+     "validation_status": "rejected",
+     "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED",
+     "fallback_used": true
+    }
+   },
+   "reply": {
+    "finish_reason": "stop",
+    "items": 64,
+    "item_field_sets": [
+     {
+      "fields": [
+       "claim",
+       "confidence",
+       "direction",
+       "entities",
+       "evidence",
+       "factors",
+       "segment_id",
+       "source_section"
+      ],
+      "items": 64,
+      "missing_vs_validator": [
+       "cited_source_id"
+      ],
+      "extra_vs_validator": []
+     }
+    ],
+    "any_item_mentions_cited_source_id": false
+   },
+   "production_validator_on_saved_reply": {
+    "accepted": false,
+    "message": "enrichment item fields do not match the strict schema"
+   },
+   "diagnostic_control": {
+    "what": "the saved reply with one added key per item, cited_source_id = null (no citation); not a fix, never written into a run",
+    "whole_batch": {
+     "accepted": true,
+     "message": null
+    },
+    "items_accepted_as_saved": 0,
+    "items_accepted_with_null_citation": 64,
+    "remaining_failures_with_null_citation": {},
+    "per_item": [
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:0",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:1",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:2",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:3",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:4",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:5",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:6",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:7",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:8",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:9",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:10",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:11",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:12",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:13",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:14",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:15",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:16",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:17",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:18",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:19",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:20",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:21",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:22",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:23",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:24",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:25",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:26",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:27",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:28",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:29",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:30",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:31",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:32",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:33",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:34",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:35",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:36",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:37",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:38",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:39",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:40",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:41",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:42",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:43",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:44",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:45",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:46",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:47",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:48",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:49",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:50",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:51",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:52",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:53",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:54",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:55",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:56",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:57",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:58",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:59",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:60",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:61",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:62",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:63",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     }
+    ]
+   }
+  },
+  {
+   "call_sequence": 2,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:2:84284964d7eb4de9b677f7be914a1f6a",
+   "attempt_ids": [
+    "fa642639-8d93-4f9a-9de1-2c4d789eade8:3"
+   ],
+   "agent": "news_agent",
+   "segments": 64,
+   "candidate_sources_offered": 0,
+   "input_chars": 26816,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:03:51.530703+00:00",
+   "completed_at": "2026-10-09T01:05:19.940620+00:00",
+   "latency_ms": 88408,
+   "saved": {
+    "provider_status": "timeout",
+    "error_code": "WEEK2_LLM_TIMEOUT",
+    "validation_status": "not_run",
+    "fallback_reason": "WEEK2_LLM_TIMEOUT"
+   },
+   "wire_audit_request_row": true,
+   "wire_audit_request_at": "2026-10-09T01:03:51Z",
+   "wire_audit_reply_row": false,
+   "wire_audit_reply_at": null,
+   "wire_audit_reply_status": null,
+   "send_status": "sent_timeout_no_reply"
+  },
+  {
+   "call_sequence": 3,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:3:0e03430d107f42f1aae20de0cc4fb1a0",
+   "attempt_ids": [],
+   "agent": "fundamental_agent",
+   "segments": 64,
+   "candidate_sources_offered": 4,
+   "input_chars": 61723,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:03:51.777163+00:00",
+   "completed_at": "2026-10-09T01:05:19.946230+00:00",
+   "latency_ms": 88167,
+   "saved": {
+    "provider_status": "not_called",
+    "error_code": "WEEK2_LLM_INPUT_TOO_LARGE",
+    "validation_status": "not_run",
+    "fallback_reason": "WEEK2_LLM_INPUT_TOO_LARGE"
+   },
+   "wire_audit_request_row": false,
+   "wire_audit_request_at": null,
+   "wire_audit_reply_row": false,
+   "wire_audit_reply_at": null,
+   "wire_audit_reply_status": null,
+   "send_status": "not_sent_local_refusal",
+   "production_path": {
+    "enrichment_returned": false,
+    "transport_arrivals": 0,
+    "budget_reservations": 0,
+    "request_rebuilt_by_production_equals_saved": null,
+    "request_body_equals_saved_wire_body": null,
+    "ledger_record": {
+     "provider_status": "not_called",
+     "error_code": "WEEK2_LLM_INPUT_TOO_LARGE",
+     "validation_status": "not_run",
+     "fallback_reason": "WEEK2_LLM_INPUT_TOO_LARGE",
+     "fallback_used": true
+    }
+   }
+  },
+  {
+   "call_sequence": 4,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:4:e72c05795b8a4fc797cd2b66c3756770",
+   "attempt_ids": [],
+   "agent": "fundamental_agent",
+   "segments": 64,
+   "candidate_sources_offered": 4,
+   "input_chars": 60882,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:03:52.443644+00:00",
+   "completed_at": "2026-10-09T01:05:19.958001+00:00",
+   "latency_ms": 87512,
+   "saved": {
+    "provider_status": "not_called",
+    "error_code": "WEEK2_LLM_INPUT_TOO_LARGE",
+    "validation_status": "not_run",
+    "fallback_reason": "WEEK2_LLM_INPUT_TOO_LARGE"
+   },
+   "wire_audit_request_row": false,
+   "wire_audit_request_at": null,
+   "wire_audit_reply_row": false,
+   "wire_audit_reply_at": null,
+   "wire_audit_reply_status": null,
+   "send_status": "not_sent_local_refusal",
+   "production_path": {
+    "enrichment_returned": false,
+    "transport_arrivals": 0,
+    "budget_reservations": 0,
+    "request_rebuilt_by_production_equals_saved": null,
+    "request_body_equals_saved_wire_body": null,
+    "ledger_record": {
+     "provider_status": "not_called",
+     "error_code": "WEEK2_LLM_INPUT_TOO_LARGE",
+     "validation_status": "not_run",
+     "fallback_reason": "WEEK2_LLM_INPUT_TOO_LARGE",
+     "fallback_used": true
+    }
+   }
+  },
+  {
+   "call_sequence": 5,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:5:059c8ef6ae1243f29690d2d80c5a0fea",
+   "attempt_ids": [
+    "fa642639-8d93-4f9a-9de1-2c4d789eade8:4"
+   ],
+   "agent": "fundamental_agent",
+   "segments": 34,
+   "candidate_sources_offered": 4,
+   "input_chars": 47832,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:03:52.968245+00:00",
+   "completed_at": "2026-10-09T01:05:19.970644+00:00",
+   "latency_ms": 87000,
+   "saved": {
+    "provider_status": "success",
+    "error_code": null,
+    "validation_status": "rejected",
+    "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED"
+   },
+   "wire_audit_request_row": true,
+   "wire_audit_request_at": "2026-10-09T01:03:52Z",
+   "wire_audit_reply_row": true,
+   "wire_audit_reply_at": "2026-10-09T01:04:28Z",
+   "wire_audit_reply_status": 200,
+   "send_status": "sent_reply_received_in_time",
+   "production_path": {
+    "enrichment_returned": false,
+    "transport_arrivals": 1,
+    "budget_reservations": 1,
+    "request_rebuilt_by_production_equals_saved": true,
+    "request_body_equals_saved_wire_body": true,
+    "ledger_record": {
+     "provider_status": "success",
+     "error_code": null,
+     "validation_status": "rejected",
+     "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED",
+     "fallback_used": true
+    }
+   },
+   "reply": {
+    "finish_reason": "stop",
+    "items": 34,
+    "item_field_sets": [
+     {
+      "fields": [
+       "claim",
+       "confidence",
+       "direction",
+       "entities",
+       "evidence",
+       "factors",
+       "segment_id",
+       "source_section"
+      ],
+      "items": 34,
+      "missing_vs_validator": [
+       "cited_source_id"
+      ],
+      "extra_vs_validator": []
+     }
+    ],
+    "any_item_mentions_cited_source_id": false
+   },
+   "production_validator_on_saved_reply": {
+    "accepted": false,
+    "message": "enrichment item fields do not match the strict schema"
+   },
+   "diagnostic_control": {
+    "what": "the saved reply with one added key per item, cited_source_id = null (no citation); not a fix, never written into a run",
+    "whole_batch": {
+     "accepted": true,
+     "message": null
+    },
+    "items_accepted_as_saved": 0,
+    "items_accepted_with_null_citation": 34,
+    "remaining_failures_with_null_citation": {},
+    "per_item": [
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:128",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:129",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:130",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:131",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:132",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:133",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:134",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:135",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:136",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:137",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:138",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:139",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:140",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:141",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:142",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:143",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:144",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:145",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:146",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:147",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:148",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:149",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:150",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:151",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:152",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:153",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:154",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:155",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:156",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:157",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:158",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:159",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:160",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:segment:161",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     }
+    ]
+   }
+  },
+  {
+   "call_sequence": 6,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:6:040b1e4529be4490b692956f838406b4",
+   "attempt_ids": [
+    "fa642639-8d93-4f9a-9de1-2c4d789eade8:5"
+   ],
+   "agent": "market_agent",
+   "segments": 25,
+   "candidate_sources_offered": 1,
+   "input_chars": 10453,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:04:35.774956+00:00",
+   "completed_at": "2026-10-09T01:05:19.979288+00:00",
+   "latency_ms": 44203,
+   "saved": {
+    "provider_status": "success",
+    "error_code": null,
+    "validation_status": "rejected",
+    "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED"
+   },
+   "wire_audit_request_row": true,
+   "wire_audit_request_at": "2026-10-09T01:04:35Z",
+   "wire_audit_reply_row": true,
+   "wire_audit_reply_at": "2026-10-09T01:05:10Z",
+   "wire_audit_reply_status": 200,
+   "send_status": "sent_reply_received_in_time",
+   "production_path": {
+    "enrichment_returned": false,
+    "transport_arrivals": 1,
+    "budget_reservations": 1,
+    "request_rebuilt_by_production_equals_saved": true,
+    "request_body_equals_saved_wire_body": true,
+    "ledger_record": {
+     "provider_status": "success",
+     "error_code": null,
+     "validation_status": "rejected",
+     "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED",
+     "fallback_used": true
+    }
+   },
+   "reply": {
+    "finish_reason": "stop",
+    "items": 25,
+    "item_field_sets": [
+     {
+      "fields": [
+       "claim",
+       "confidence",
+       "direction",
+       "entities",
+       "evidence",
+       "factors",
+       "segment_id",
+       "source_section"
+      ],
+      "items": 25,
+      "missing_vs_validator": [
+       "cited_source_id"
+      ],
+      "extra_vs_validator": []
+     }
+    ],
+    "any_item_mentions_cited_source_id": false
+   },
+   "production_validator_on_saved_reply": {
+    "accepted": false,
+    "message": "enrichment item fields do not match the strict schema"
+   },
+   "diagnostic_control": {
+    "what": "the saved reply with one added key per item, cited_source_id = null (no citation); not a fix, never written into a run",
+    "whole_batch": {
+     "accepted": true,
+     "message": null
+    },
+    "items_accepted_as_saved": 0,
+    "items_accepted_with_null_citation": 25,
+    "remaining_failures_with_null_citation": {},
+    "per_item": [
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:64",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:65",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:66",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:67",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:68",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:69",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:70",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:71",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:72",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:73",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:74",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:75",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:76",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:77",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:78",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:79",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:80",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:81",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:82",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:83",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:84",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:85",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:86",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:87",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:market_agent:market_report:segment:88",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     }
+    ]
+   }
+  },
+  {
+   "call_sequence": 7,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:7:f7a90fb53b784f1588328f463063de09",
+   "attempt_ids": [
+    "fa642639-8d93-4f9a-9de1-2c4d789eade8:6"
+   ],
+   "agent": "sentiment_agent",
+   "segments": 11,
+   "candidate_sources_offered": 0,
+   "input_chars": 6261,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:04:36.930905+00:00",
+   "completed_at": "2026-10-09T01:05:19.982671+00:00",
+   "latency_ms": 43051,
+   "saved": {
+    "provider_status": "success",
+    "error_code": null,
+    "validation_status": "rejected",
+    "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED"
+   },
+   "wire_audit_request_row": true,
+   "wire_audit_request_at": "2026-10-09T01:04:36Z",
+   "wire_audit_reply_row": true,
+   "wire_audit_reply_at": "2026-10-09T01:05:07Z",
+   "wire_audit_reply_status": 200,
+   "send_status": "sent_reply_received_in_time",
+   "production_path": {
+    "enrichment_returned": false,
+    "transport_arrivals": 1,
+    "budget_reservations": 1,
+    "request_rebuilt_by_production_equals_saved": true,
+    "request_body_equals_saved_wire_body": true,
+    "ledger_record": {
+     "provider_status": "success",
+     "error_code": null,
+     "validation_status": "rejected",
+     "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED",
+     "fallback_used": true
+    }
+   },
+   "reply": {
+    "finish_reason": "stop",
+    "items": 11,
+    "item_field_sets": [
+     {
+      "fields": [
+       "claim",
+       "confidence",
+       "direction",
+       "entities",
+       "evidence",
+       "factors",
+       "segment_id",
+       "source_section"
+      ],
+      "items": 11,
+      "missing_vs_validator": [
+       "cited_source_id"
+      ],
+      "extra_vs_validator": []
+     }
+    ],
+    "any_item_mentions_cited_source_id": false
+   },
+   "production_validator_on_saved_reply": {
+    "accepted": false,
+    "message": "enrichment item fields do not match the strict schema"
+   },
+   "diagnostic_control": {
+    "what": "the saved reply with one added key per item, cited_source_id = null (no citation); not a fix, never written into a run",
+    "whole_batch": {
+     "accepted": false,
+     "message": "invalid direction"
+    },
+    "items_accepted_as_saved": 0,
+    "items_accepted_with_null_citation": 9,
+    "remaining_failures_with_null_citation": {
+     "invalid direction": 2
+    },
+    "per_item": [
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:64",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:65",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:66",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:67",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:68",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:69",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": false,
+       "message": "invalid direction"
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:70",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": false,
+       "message": "invalid direction"
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:71",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:72",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:73",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:segment:74",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     }
+    ]
+   }
+  },
+  {
+   "call_sequence": 8,
+   "call_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:semantic:8:48172bca67ad41929ea39b1bf673572d",
+   "attempt_ids": [
+    "fa642639-8d93-4f9a-9de1-2c4d789eade8:7"
+   ],
+   "agent": "news_agent",
+   "segments": 41,
+   "candidate_sources_offered": 0,
+   "input_chars": 18405,
+   "input_limit_chars": 60000,
+   "started_at": "2026-10-09T01:04:36.989038+00:00",
+   "completed_at": "2026-10-09T01:05:19.984656+00:00",
+   "latency_ms": 42995,
+   "saved": {
+    "provider_status": "success",
+    "error_code": null,
+    "validation_status": "rejected",
+    "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED"
+   },
+   "wire_audit_request_row": true,
+   "wire_audit_request_at": "2026-10-09T01:04:36Z",
+   "wire_audit_reply_row": true,
+   "wire_audit_reply_at": "2026-10-09T01:05:19Z",
+   "wire_audit_reply_status": 200,
+   "send_status": "sent_reply_received_in_time",
+   "production_path": {
+    "enrichment_returned": false,
+    "transport_arrivals": 1,
+    "budget_reservations": 1,
+    "request_rebuilt_by_production_equals_saved": true,
+    "request_body_equals_saved_wire_body": true,
+    "ledger_record": {
+     "provider_status": "success",
+     "error_code": null,
+     "validation_status": "rejected",
+     "fallback_reason": "WEEK2_LLM_VALIDATION_FAILED",
+     "fallback_used": true
+    }
+   },
+   "reply": {
+    "finish_reason": "stop",
+    "items": 41,
+    "item_field_sets": [
+     {
+      "fields": [
+       "claim",
+       "confidence",
+       "direction",
+       "entities",
+       "evidence",
+       "factors",
+       "segment_id",
+       "source_section"
+      ],
+      "items": 41,
+      "missing_vs_validator": [
+       "cited_source_id"
+      ],
+      "extra_vs_validator": []
+     }
+    ],
+    "any_item_mentions_cited_source_id": false
+   },
+   "production_validator_on_saved_reply": {
+    "accepted": false,
+    "message": "enrichment item fields do not match the strict schema"
+   },
+   "diagnostic_control": {
+    "what": "the saved reply with one added key per item, cited_source_id = null (no citation); not a fix, never written into a run",
+    "whole_batch": {
+     "accepted": false,
+     "message": "invalid direction"
+    },
+    "items_accepted_as_saved": 0,
+    "items_accepted_with_null_citation": 39,
+    "remaining_failures_with_null_citation": {
+     "invalid direction": 2
+    },
+    "per_item": [
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:64",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:65",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:66",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:67",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:68",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:69",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:70",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:71",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:72",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:73",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:74",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:75",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:76",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:77",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:78",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:79",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:80",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": false,
+       "message": "invalid direction"
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:81",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:82",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:83",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:84",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:85",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:86",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:87",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:88",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:89",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:90",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:91",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:92",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:93",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:94",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": false,
+       "message": "invalid direction"
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:95",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:96",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:97",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:98",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:99",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:100",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:101",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:102",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:103",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     },
+     {
+      "segment_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:segment:104",
+      "as_saved": {
+       "accepted": false,
+       "message": "enrichment item fields do not match the strict schema"
+      },
+      "control_with_null_citation": {
+       "accepted": true,
+       "message": null
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

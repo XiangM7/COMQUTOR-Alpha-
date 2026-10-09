@@ -24,6 +24,9 @@
 schema_version: regression_labels.v2
 label_version: j2.provisional.v0.2
 taxonomy_version: alpha_taxonomy_v1
+# The taxonomy CONTENT version this file was written against (alpha_taxonomy_v1.yaml: content_version). The formal acceptance entry
+# (acceptance_engine.effective_rules) reports a configuration error when the two differ.
+taxonomy_content_version: "1.1.0"
 label_scope: ticker_general
 status: provisional_ai_predicted
 evaluation_mode: shadow
@@ -94,7 +97,15 @@ tickers:
       - A001__A501
     product_decision_pending: []
     remove_while_undeclared: []
-    allowed_conflicts: []
+    # A003__A501 and A304__A601 are two of John's three QQQ allowed_main_conflicts
+    # (docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml, authority
+    # JOHN_WRITTEN_V0_2_BASELINE) that no repo rule file carried. Filed as
+    # allowed_conflicts, the equivalent of John's allowed_main_conflicts family:
+    # legal structures, never mandatory, absence never a failure. See
+    # content_change_log at the end of this file.
+    allowed_conflicts:
+      - A003__A501
+      - A304__A601
     should_not_be_dominant_without_strong_evidence:
       A102: broad ETF-level inference demand evidence
       A103: broad constituent infrastructure evidence
@@ -113,18 +124,27 @@ tickers:
       conditional_alphas: [A103, A601]
     run_bound_expectations: null
     required_conflicts: []
-    conditional_conflicts: []
-    product_decision_pending: []
     # A102__A304 was formally adjudicated (PD-017,
     # docs/specs/product_decisions_and_unknowns.md) as
-    # REJECTED_BY_INDEPENDENT_LLM_ADJUDICATION, not a Product Owner /
-    # John-approved decision. It is not a canonical taxonomy conflict pair
-    # (A102's conflict_alphas is [] in alpha_taxonomy_v1.yaml) and is never
-    # added to production taxonomy -- tracked here only as a rejected,
-    # non-executable product expectation, distinct from the still-open
-    # product_decision_pending it carried before PD-017.
-    remove_while_undeclared: [A102__A304]
-    allowed_conflicts: []
+    # REJECTED_BY_INDEPENDENT_LLM_ADJUDICATION. That decision was
+    # subsequently reopened and reversed (PD-017-REVISED, same file):
+    # A102__A304 is now a canonical taxonomy conflict pair (A102's
+    # conflict_alphas in alpha_taxonomy_v1.yaml now declares A304,
+    # reciprocally, contradiction_weight 0.75) and moves here to
+    # conditional_conflicts -- evaluable, per the conditional_only rule
+    # family (evaluable does not mean automatically admitted or required;
+    # the existing evidence-driven B2 admissibility gate still applies
+    # unchanged).
+    conditional_conflicts: [A102__A304]
+    product_decision_pending: []
+    remove_while_undeclared: []
+    # A101__A304 and A301__A304 are two of John's three MSFT allowed_main_conflicts
+    # (v0_2_john_frozen_gold_baseline.yaml) that no repo rule file carried for
+    # MSFT; filed as allowed_conflicts like the other additions (see
+    # content_change_log at the end of this file).
+    allowed_conflicts:
+      - A101__A304
+      - A301__A304
     should_not_be_dominant_without_strong_evidence:
       A201: direct semiconductor-cycle evidence
       A001: ticker-relevant rate-cycle evidence
@@ -144,16 +164,19 @@ tickers:
       conditional_alphas: [A103, A601]
     run_bound_expectations: null
     required_conflicts: []
+    # A201__A304 is now a canonical taxonomy conflict pair (A201's
+    # conflict_alphas in alpha_taxonomy_v1.yaml now declares A304,
+    # reciprocally, contradiction_weight 0.75) -- moved from
+    # remove_while_undeclared to conditional_conflicts, per the
+    # conditional_only rule family (evaluable does not mean automatically
+    # admitted or required; the existing evidence-driven B2 admissibility
+    # gate still applies unchanged). See PD-017-REVISED,
+    # docs/specs/product_decisions_and_unknowns.md.
     conditional_conflicts:
       - A301__A304
-    product_decision_pending: []
-    # A201__A304 is not a canonical taxonomy conflict pair -- removed from
-    # the executable regression-expectation set. This never deletes any
-    # production/historical data; it only stops A4 from treating an
-    # undeclared pair as something it could ever admit or reach candidate
-    # status for.
-    remove_while_undeclared:
       - A201__A304
+    product_decision_pending: []
+    remove_while_undeclared: []
     allowed_conflicts: []
     should_not_be_dominant_without_strong_evidence:
       A101: company-specific AI demand transmission evidence
@@ -175,12 +198,19 @@ tickers:
       conditional_alphas: [A101, A601]
     run_bound_expectations: null
     required_conflicts: []
+    # A201__A304 now canonical -- see PD-017-REVISED,
+    # docs/specs/product_decisions_and_unknowns.md.
     conditional_conflicts:
       - A301__A304
-    product_decision_pending: []
-    remove_while_undeclared:
       - A201__A304
-    allowed_conflicts: []
+    product_decision_pending: []
+    remove_while_undeclared: []
+    # A101__A304 is one of John's three TSM allowed_main_conflicts
+    # (v0_2_john_frozen_gold_baseline.yaml) that no repo rule file carried; it
+    # is also TSM's own detected main conflict. Filed as allowed_conflicts (see
+    # content_change_log at the end of this file).
+    allowed_conflicts:
+      - A101__A304
     should_not_be_dominant_without_strong_evidence:
       A102: inference-specific orders or revenue evidence
       A001: ticker-relevant rate-cycle evidence
@@ -200,11 +230,13 @@ tickers:
       conditional_alphas: [A102, A103, A601]
     run_bound_expectations: null
     required_conflicts: []
+    # A201__A304 now canonical -- see PD-017-REVISED,
+    # docs/specs/product_decisions_and_unknowns.md.
     conditional_conflicts:
       - A101__A304
-    product_decision_pending: []
-    remove_while_undeclared:
       - A201__A304
+    product_decision_pending: []
+    remove_while_undeclared: []
     # A301__A304 is a real, canonical taxonomy pair -- permitted to appear
     # as an admitted/candidate conflict and reported when it does, but
     # never auto-promoted to required_conflicts without a complete,
@@ -222,3 +254,14 @@ tickers:
       - Alpha Taxonomy v1
       - provisional product inference
       - j2_provisional_regression_labels_v0.1.yaml
+
+# content_change_log: append-only record of CONTENT changes to this label file. The file's sha256 is its machine identity; label_version stays
+# j2.provisional.v0.2 because several consumers key on that string.
+content_change_log:
+  - date: "2026-09-26"
+    change: "A102__A304 and A201__A304 moved out of remove_while_undeclared / product_decision_pending into conditional_conflicts after the taxonomy declared them reciprocally (taxonomy content_version 1.1.0)."
+    reason: "PD-017-REVISED (docs/specs/product_decisions_and_unknowns.md); COMQUTOR Alpha next-round task sheet, T2 first item."
+  - date: "2026-10-07"
+    change: "Added taxonomy_content_version (1.1.0) so the formal acceptance entry can verify label/taxonomy compatibility. Added the five John-baseline pairs this file did not carry to allowed_conflicts: QQQ A003__A501 and A304__A601, MSFT A101__A304 and A301__A304, TSM A101__A304."
+    reason: "docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml (authority JOHN_WRITTEN_V0_2_BASELINE) lists all 16 ticker-pair allowed_main_conflicts, and its implementation_alignment_required section records these five as missing from every repo rule file. John files them under allowed_main_conflicts; the equivalent field here is allowed_conflicts (legal structures, never mandatory; absence is never a failure and raises no review). The ten pairs already carried under conditional_conflicts were left untouched (task sheet: existing equivalent fields may stay)."
+    effect: "Admitted QQQ A003__A501 / A304__A601, MSFT A301__A304 and TSM A101__A304 are no longer reported as undeclared admitted conflicts. OPEN QUESTION FOR JOHN: whether all 16 pairs should be allowed_conflicts instead of ten being conditional_conflicts. It changes results: conditional pairs feed should_detect_if_supported (soft-miss review), so moving them would turn SNDK from needs_review to pass."

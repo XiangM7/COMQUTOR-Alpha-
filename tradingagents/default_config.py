@@ -24,6 +24,14 @@ _ENV_OVERRIDES = {
     "TRADINGAGENTS_GOOGLE_THINKING_LEVEL":   "google_thinking_level",
     "TRADINGAGENTS_OPENAI_REASONING_EFFORT": "openai_reasoning_effort",
     "TRADINGAGENTS_ANTHROPIC_EFFORT":        "anthropic_effort",
+    # Per-call output-token cap, per-call retry cap, and LangGraph recursion
+    # (super-step) limit -- added 2026-09-30 (T3/T4 joint-verification
+    # execution-path task) as the minimum necessary, environment-settable
+    # request-shape limits for the Research Agent layer, which previously
+    # had none of any of these three.
+    "TRADINGAGENTS_MAX_TOKENS":           "max_tokens",
+    "TRADINGAGENTS_MAX_RETRIES":          "max_retries",
+    "TRADINGAGENTS_MAX_RECUR_LIMIT":      "max_recur_limit",
 }
 
 
@@ -95,6 +103,17 @@ DEFAULT_CONFIG = _apply_env_overrides({
     # variation on models that honor it; reasoning models largely ignore it
     # and no setting makes LLM output bit-identical across runs (see README).
     "temperature": None,
+    # Per-call output-token cap forwarded to every provider client that
+    # supports it (currently AnthropicClient/OpenAIClient's own
+    # _PASSTHROUGH_KWARGS) when set. None leaves each provider at its own
+    # default (previously the ONLY behavior -- there was no enforceable
+    # per-call output limit for this layer at all before 2026-09-30).
+    "max_tokens": None,
+    # Per-call retry cap forwarded the same way as max_tokens above. None
+    # leaves each provider client at its own (usually LangChain-default)
+    # retry behavior -- previously the ONLY behavior, since nothing in this
+    # config-forwarding path ever set it.
+    "max_retries": None,
     # Checkpoint/resume: when True, LangGraph saves state after each node
     # so a crashed run can resume from the last successful step.
     "checkpoint_enabled": False,

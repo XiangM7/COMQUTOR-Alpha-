@@ -1,0 +1,1051 @@
+{
+  "schema_version": "comqutor.formal_acceptance_artifact.v2",
+  "run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+  "ticker": "NVDA",
+  "label_v1_version": "j2.provisional.v0.1",
+  "label_v2_version": "j2.provisional.v0.2",
+  "formal_status": "needs_review",
+  "effective_rules": {
+    "schema_version": "acceptance_engine.v2",
+    "gold_contract": {
+      "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+      "sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+      "schema_version": "gold_operational_contract.v0.2",
+      "gold_version": "v0.2",
+      "freeze_status": "FROZEN_GOLD_V0_2",
+      "freeze_timestamp": "2026-09-10T21:04:41+00:00",
+      "total_rule_count": 19,
+      "authority_field_in_file": {
+        "approval_authority": "John",
+        "approval_status": "APPROVED",
+        "model": "EVIDENCE_CONDITIONAL",
+        "supersedes": "The previous model in which every ticker had a fixed mandatory Alpha set -- Gold v0.2 does not recreate fixed expected-Alpha lists; every rule is evidence-gated.",
+        "taxonomy_authority_sources": [
+          "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (canonical Alpha definitions, conflict_alphas, relations)",
+          "docs/specs/product_decisions_and_unknowns.md PD-017 (Development Plan v1.0 Section 4's six mandatory conflict pairs, cross-confirming the taxonomy's own conflict_alphas)",
+          "docs/specs/product_decisions_and_unknowns.md PD-011/012/013/014 (Alpha mapping cardinality, score semantics, threshold, no-match behavior -- reused conceptually for evidence-condition language, not re-derived)"
+        ]
+      },
+      "authority_note": "the file's authority.approval_status is a field the Step-1 instruction supplied as a template; it is not cited as evidence. Each executed rule cites the John decision it implements (rules_in_effect[].authority_basis).",
+      "integrity": {
+        "expected_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+        "expected_from": "docs/audit_artifacts/v0_2_gold_freeze_manifest.json",
+        "freeze_manifest_sha256": "081e66b405ac039f9fe64c2689e346c6f91de1448d6405e449e49ce74e8e0540",
+        "matches": true
+      },
+      "markdown_companion": {
+        "path": "docs/audit_artifacts/v0_2_gold_operational_contract.md",
+        "sha256_now": "efc7a82b33e6f4c5aea5fa9c14d6c62ce97245534ff2b17b568074762d989eca",
+        "sha256_frozen": "8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04",
+        "matches_frozen": false,
+        "read_by_executor": false,
+        "note": "rewritten on John's instruction of 2026-09-15 (final submission cleanup: a short John-facing definition of the six semantics); the rule records live in the JSON, which is byte-identical to the frozen file"
+      },
+      "trigger_matrix": {
+        "path": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+        "sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+        "expected_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+        "matches_expected": true,
+        "written_against_contract_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+        "bound_runs": {
+          "AMD": "949f685a-3945-4fd0-b7b9-362b37c90721",
+          "MSFT": "43472ace-454f-4c69-892c-adca91c25be7",
+          "NVDA": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+          "QQQ": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+          "SNDK": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+          "TSM": "dfc7ceb3-3584-4514-bd84-6c371aab3e95"
+        },
+        "determination_method": "the evidence of each bound run was read once, by hand, from that run's structured_agent_outputs.json; there is no approved executable method that determines the trigger for any other run",
+        "executable_method_for_other_runs": null
+      },
+      "detection_authority": {
+        "source": "run_audit.json -> activation_summary.per_alpha[alpha_id].level, read as regression_report_v3._detected_alphas does",
+        "detected_levels": [
+          "active",
+          "dominant",
+          "regime_level"
+        ],
+        "not_detected_levels": [
+          "candidate",
+          "capped_active",
+          "blocked",
+          "unavailable"
+        ]
+      },
+      "rules_in_effect": [
+        {
+          "rule_id": "NVDA-A101-AI-GROWTH",
+          "ticker": "NVDA",
+          "family": "must_detect_if_evidence_present",
+          "hit_type": "ALPHA_HIT",
+          "acceptable_alphas": [
+            "A101"
+          ],
+          "allowed_main_conflicts": [],
+          "blocking": true,
+          "executor": "gold_contract_rules.evaluate_alpha_rule",
+          "trigger_source": "frozen evidence trigger matrix, for run 57d7b4c4-dbb9-4134-b962-ee2a873941cc only; any other run -> NOT_EVALUABLE",
+          "authority_basis": [
+            "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: 'A101: must_detect_if_evidence_present'; section 2: NVDA is Formal Gold, blocking = true",
+            "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 8.A (mapping, condition, 'do NOT force A101 when such evidence is absent')",
+            "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+          ]
+        },
+        {
+          "rule_id": "NVDA-A304-VALUATION-RISK",
+          "ticker": "NVDA",
+          "family": "must_detect_if_evidence_present",
+          "hit_type": "ALPHA_HIT",
+          "acceptable_alphas": [
+            "A304"
+          ],
+          "allowed_main_conflicts": [],
+          "blocking": true,
+          "executor": "gold_contract_rules.evaluate_alpha_rule",
+          "trigger_source": "frozen evidence trigger matrix, for run 57d7b4c4-dbb9-4134-b962-ee2a873941cc only; any other run -> NOT_EVALUABLE",
+          "authority_basis": [
+            "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: 'A304: must_detect_if_evidence_present'; section 2: NVDA is Formal Gold, blocking = true",
+            "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 8.C",
+            "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+          ]
+        },
+        {
+          "rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+          "ticker": "NVDA",
+          "family": "conditional_only",
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "acceptable_alphas": [
+            "A101",
+            "A301",
+            "A304"
+          ],
+          "allowed_main_conflicts": [
+            "A101__A304",
+            "A301__A304"
+          ],
+          "blocking": true,
+          "executor": "gold_contract_rules.evaluate_composite_rule",
+          "trigger_source": "frozen evidence trigger matrix, for run 57d7b4c4-dbb9-4134-b962-ee2a873941cc only; any other run -> NOT_EVALUABLE",
+          "authority_basis": [
+            "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: composite allowed pairs A101__A304 and A301__A304 'only when both relevant evidence sides are present; do not force a conflict if only one side is supported'",
+            "Frozen-gold vs frozen-trigger comparison protocol (Step 4), 2026-09-10T21:52:47Z, section 13: any allowed evidence-supported conflict admitted -> PASS; none admitted -> REVIEW with adjudication; outside the allowed family -> FAIL or REVIEW",
+            "v0_2_john_frozen_gold_baseline.yaml (authority JOHN_WRITTEN_V0_2_BASELINE): allowed_main_conflicts NVDA = A101__A304, A301__A304"
+          ]
+        },
+        {
+          "rule_id": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+          "ticker": "MSFT",
+          "family": "must_detect_if_evidence_present",
+          "hit_type": "ALPHA_HIT",
+          "acceptable_alphas": [
+            "A102"
+          ],
+          "allowed_main_conflicts": [],
+          "blocking": false,
+          "executor": "gold_contract_rules.evaluate_alpha_rule",
+          "trigger_source": "frozen evidence trigger matrix, for run 43472ace-454f-4c69-892c-adca91c25be7 only; any other run -> NOT_EVALUABLE",
+          "authority_basis": [
+            "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 1.G (final decision): DIRECT_INFERENCE_TRIGGER -> must_detect_if_evidence_present -> A102; section 2: MSFT is Silver, blocking = false",
+            "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 11.B (the 'must/should' wording that decision G resolved)",
+            "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+          ]
+        },
+        {
+          "rule_id": "AMD-AI-GROWTH-VS-VALUATION",
+          "ticker": "AMD",
+          "family": "conditional_only",
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "acceptable_alphas": [
+            "A101",
+            "A201",
+            "A301",
+            "A304"
+          ],
+          "allowed_main_conflicts": [
+            "A101__A304",
+            "A301__A304"
+          ],
+          "blocking": false,
+          "executor": "gold_contract_rules.evaluate_composite_rule",
+          "trigger_source": "frozen evidence trigger matrix, for run 949f685a-3945-4fd0-b7b9-362b37c90721 only; any other run -> NOT_EVALUABLE",
+          "authority_basis": [
+            "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 13 (composite; 'do not force either pair'; Silver, non-blocking)",
+            "Frozen-gold vs frozen-trigger comparison protocol (Step 4), 2026-09-10T21:52:47Z, sections 13 and 20",
+            "v0_2_john_frozen_gold_baseline.yaml (authority JOHN_WRITTEN_V0_2_BASELINE): allowed_main_conflicts AMD = A101__A304, A201__A304, A301__A304 (the baseline controls; the contract lists only A101__A304 and A301__A304)"
+          ]
+        }
+      ],
+      "rules_not_in_effect": [
+        {
+          "rule_id": "NVDA-A301-FUNDAMENTAL-GROWTH",
+          "ticker": "NVDA",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "hit_type": "ALPHA_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "NVDA-SUPPORTING-STRUCTURES",
+          "ticker": "NVDA",
+          "rule_type": "should_detect_if_supported",
+          "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+          "blocking": false,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "QQQ-A001-RATE-CUT-CYCLE",
+          "ticker": "QQQ",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "hit_type": "ALPHA_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "QQQ-A003-LIQUIDITY-EXPANSION",
+          "ticker": "QQQ",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "hit_type": "ALPHA_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "QQQ-A304-VALUATION-RISK",
+          "ticker": "QQQ",
+          "rule_type": "conditional_only",
+          "hit_type": "ALPHA_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "QQQ-A501-RECESSION-RISK",
+          "ticker": "QQQ",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "hit_type": "ALPHA_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "QQQ-A601-NARRATIVE-MOMENTUM",
+          "ticker": "QQQ",
+          "rule_type": "should_detect_if_supported",
+          "hit_type": "ALPHA_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "QQQ-ETF-CONTEXT-CONTROL",
+          "ticker": "QQQ",
+          "rule_type": "forbidden_dominant_without_strong_evidence",
+          "hit_type": "NEGATIVE_CONTROL_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "SNDK-A201-SEMICONDUCTOR-CYCLE",
+          "ticker": "SNDK",
+          "rule_type": [
+            "should_detect_if_supported",
+            "conditional_only"
+          ],
+          "hit_type": "ALPHA_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "SNDK-ANTI-OVER-AI-CONTROL",
+          "ticker": "SNDK",
+          "rule_type": "forbidden_dominant_without_strong_evidence",
+          "hit_type": "NEGATIVE_CONTROL_HIT",
+          "blocking": true,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "MSFT-A101-ENTERPRISE-AI-CONDITIONAL",
+          "ticker": "MSFT",
+          "rule_type": "conditional_only",
+          "hit_type": "ALPHA_HIT",
+          "blocking": false,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "MSFT-A102-INDIRECT-INFERENCE-SUPPORT",
+          "ticker": "MSFT",
+          "rule_type": "should_detect_if_supported",
+          "hit_type": "ALPHA_HIT",
+          "blocking": false,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "MSFT-CAPEX-BURDEN-CONDITIONAL",
+          "ticker": "MSFT",
+          "rule_type": "conditional_only",
+          "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+          "blocking": false,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        },
+        {
+          "rule_id": "TSM-AI-TO-FOUNDRY-TRANSMISSION",
+          "ticker": "TSM",
+          "rule_type": "conditional_only",
+          "hit_type": "COMPOSITE_STRUCTURE_HIT",
+          "blocking": false,
+          "reason_code": "NOT_EXECUTED_THIS_ROUND",
+          "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+        }
+      ]
+    },
+    "taxonomy": {
+      "path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+      "sha256": "c6d523beaee4942c71756a3fddbb8213d4ba2f8653fded088d73031ca80f3bfa",
+      "declared_alpha_count": 10,
+      "schema_version": "alpha_taxonomy_v1",
+      "content_version": "1.1.0",
+      "canonical_conflict_pairs": [
+        "A001__A501",
+        "A003__A501",
+        "A101__A304",
+        "A102__A304",
+        "A201__A304",
+        "A301__A304",
+        "A304__A601",
+        "A501__A601"
+      ]
+    },
+    "label_v2": {
+      "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+      "sha256": "667262aaa15a94a5c660488493f7386a4e6ec6b8c02f1293927d887bf7920ba6",
+      "label_version": "j2.provisional.v0.2",
+      "evaluation_mode": "shadow",
+      "status": "provisional_ai_predicted",
+      "evaluation_authority": "provisional",
+      "formal_product_owner_approval": "pending",
+      "approved_by": null,
+      "taxonomy_version": "alpha_taxonomy_v1",
+      "taxonomy_content_version": "1.1.0"
+    },
+    "label_v1": {
+      "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+      "sha256": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1",
+      "label_version": "j2.provisional.v0.1",
+      "used_for": "forbidden_dominant_without_strong_evidence (should_not_be_dominant_without_strong_evidence)"
+    },
+    "ticker_rule_keys": {
+      "allowed_conflicts": "allowed_main_conflicts",
+      "conditional_conflicts": "conditional_only + should_detect_if_supported",
+      "product_decision_pending": "context: pair kept out of every verdict (never pass/fail)",
+      "remove_while_undeclared": "context: pair no longer an executable expectation",
+      "required_conflicts": "must_detect_if_evidence_present",
+      "run_bound_expectations": "unapproved run-bound historical observation: not an executable rule; reported unchanged, decides no verdict",
+      "should_not_be_dominant_without_strong_evidence": "forbidden_dominant_without_strong_evidence",
+      "source_basis": "provenance text",
+      "structural_expectations": "context: informational (a missing structural Alpha never fails a run)"
+    },
+    "non_executable_declarations": {
+      "run_bound_expectations": {
+        "NVDA": {
+          "classification": "unapproved_historical_observation",
+          "executable": false,
+          "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+          "analysis_date": "2026-08-11",
+          "observed_historical_main_conflict": "A301__A304",
+          "approval": "none: the label file is provisional / shadow / approval pending and states that no formal approval exists for this run",
+          "consumed_by": [
+            "evaluation_contract.apply_v2_contract: passed through unchanged into v2_contract_result (report only)"
+          ],
+          "effect_on_formal_status": "none"
+        }
+      }
+    },
+    "rule_status": {
+      "legend": {
+        "aligned_execution": "executed as John's text or an approved record defines it (a contract scope is evaluable only on the run the frozen matrix is bound to; elsewhere it is reported not_evaluable)",
+        "diagnostic_only": "executed and reported with its source, but decides no formal status (no approval basis)",
+        "not_in_effect": "defined by the frozen contract but not executed by this entry; nothing is implied about it"
+      },
+      "families": {
+        "must_detect_if_evidence_present": [
+          {
+            "scope": "alpha_layer_contract",
+            "status": "aligned_execution",
+            "rules": [
+              "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+              "NVDA-A101-AI-GROWTH",
+              "NVDA-A304-VALUATION-RISK"
+            ],
+            "limits": "the trigger is established only for the run the frozen matrix is bound to; for every other run the rule is not_evaluable"
+          },
+          {
+            "scope": "conflict_pair_label",
+            "status": "aligned_execution",
+            "config_source": "required_conflicts",
+            "declared_required_pairs": 0,
+            "limits": "only a record that satisfies every B2 condition and is still not admitted is a miss; no ticker declares a required pair today"
+          }
+        ],
+        "should_detect_if_supported": [
+          {
+            "scope": "alpha_layer_contract",
+            "status": "not_in_effect",
+            "rules": [
+              "MSFT-A102-INDIRECT-INFERENCE-SUPPORT",
+              "NVDA-A301-FUNDAMENTAL-GROWTH",
+              "NVDA-SUPPORTING-STRUCTURES",
+              "QQQ-A001-RATE-CUT-CYCLE",
+              "QQQ-A003-LIQUIDITY-EXPANSION",
+              "QQQ-A501-RECESSION-RISK",
+              "QQQ-A601-NARRATIVE-MOMENTUM",
+              "SNDK-A201-SEMICONDUCTOR-CYCLE"
+            ]
+          },
+          {
+            "scope": "conflict_pair_label",
+            "status": "diagnostic_only",
+            "config_source": "conditional_conflicts",
+            "reason": "no approval basis: the contract defines should_detect for Alphas; the baseline lists these pairs as allowed, never mandatory"
+          }
+        ],
+        "conditional_only": [
+          {
+            "scope": "conflict_structure_contract",
+            "status": "aligned_execution",
+            "rules": [
+              "AMD-AI-GROWTH-VS-VALUATION",
+              "NVDA-GROWTH-VS-VALUATION-CONFLICT"
+            ],
+            "logic": "any ONE allowed pair admitted satisfies the composite",
+            "limits": "the trigger is established only for the run the frozen matrix is bound to; for every other run the rule is not_evaluable"
+          },
+          {
+            "scope": "conflict_pair_label",
+            "status": "aligned_execution",
+            "config_source": "conditional_conflicts",
+            "reading": "informational mismatch only"
+          },
+          {
+            "scope": "alpha_layer_contract",
+            "status": "not_in_effect",
+            "rules": [
+              "MSFT-A101-ENTERPRISE-AI-CONDITIONAL",
+              "MSFT-CAPEX-BURDEN-CONDITIONAL",
+              "NVDA-A301-FUNDAMENTAL-GROWTH",
+              "QQQ-A001-RATE-CUT-CYCLE",
+              "QQQ-A003-LIQUIDITY-EXPANSION",
+              "QQQ-A304-VALUATION-RISK",
+              "QQQ-A501-RECESSION-RISK",
+              "SNDK-A201-SEMICONDUCTOR-CYCLE",
+              "TSM-AI-TO-FOUNDRY-TRANSMISSION"
+            ]
+          }
+        ],
+        "do_not_force": [
+          {
+            "scope": "conflict_invariant",
+            "status": "aligned_execution",
+            "reading": "every admitted conflict has a B2-admitted arbitration record"
+          },
+          {
+            "scope": "alpha_layer_contract",
+            "status": "not_in_effect",
+            "rules": [],
+            "reading": "the contract defines it as a cross-cutting constraint, not a standalone rule"
+          }
+        ],
+        "allowed_main_conflicts": [
+          {
+            "scope": "conflict_pair_label",
+            "status": "aligned_execution",
+            "declared_pairs": 16,
+            "reading": "legal structures, never mandatory outputs: a pair's absence raises no review and no failure; an admitted pair declared nowhere is routed to review"
+          }
+        ],
+        "forbidden_dominant_without_strong_evidence": [
+          {
+            "scope": "label_dominance_guard",
+            "status": "aligned_execution",
+            "config_source": "label v0.1 should_not_be_dominant_without_strong_evidence",
+            "limits": "its guarded Alphas are the label's own, not the scope of the contract's two negative-control rules"
+          },
+          {
+            "scope": "alpha_layer_contract",
+            "status": "not_in_effect",
+            "rules": [
+              "QQQ-ETF-CONTEXT-CONTROL",
+              "SNDK-ANTI-OVER-AI-CONTROL"
+            ]
+          }
+        ]
+      }
+    },
+    "rule_families": {
+      "must_detect_if_evidence_present": {
+        "config_source": "v0_2_gold_operational_contract.json: ALPHA_HIT rules MSFT-A102-DIRECT-INFERENCE-TRIGGER, NVDA-A101-AI-GROWTH, NVDA-A304-VALUATION-RISK (Alpha layer, John's frozen Gold v0.2 contract); j2_provisional_regression_labels_v0.2.yaml: required_conflicts (conflict-pair layer)",
+        "applicable_target": "Alpha, per contract rule and ticker (Alpha layer); declared conflict pair, per ticker (pair layer)",
+        "execution_function": "gold_contract_rules.evaluate_alpha_rule (Alpha layer); acceptance_engine.evaluate_must_detect_if_evidence_present (pair layer)",
+        "trigger_condition": "Alpha layer: the frozen evidence-trigger matrix says PRESENT for the rule AND the evaluated run is the run the matrix is bound to (for any other run the trigger is NOT_EVALUABLE: no approved executable method determines it and a historical state is never carried over). Pair layer: the pair is in the ticker's required_conflicts",
+        "evidence_requirement": "Alpha layer: the Alpha's level in run_audit.json (activation_summary.per_alpha) is active, dominant or regime_level. Pair layer: B2's own recorded result -- admitted is a pass; evaluated and rejected for a recorded reason is NOT a miss; a record with no rejection reason that is still not admitted is a miss; no usable record is 'not evaluated', never 'no evidence'",
+        "verdict_result": [
+          "pass",
+          "fail",
+          "not_applicable",
+          "not_triggered",
+          "needs_review",
+          "not_evaluable"
+        ]
+      },
+      "should_detect_if_supported": {
+        "config_source": "j2_provisional_regression_labels_v0.2.yaml: conditional_conflicts (conflict-pair reading, DIAGNOSTIC ONLY). The contract defines this family for Alphas (its should_detect rules are not executed by this entry)",
+        "applicable_target": "declared conflict pair, per ticker",
+        "execution_function": "acceptance_engine.evaluate_should_detect_if_supported (diagnostic)",
+        "trigger_condition": "pair is in the ticker's conditional_conflicts AND at least one stance-confirmed supporting claim is recorded on each side AND stance_source is llm_semantic or mixed (evaluator.stance_source) -- offline runs with deterministic-baseline-only stance cannot reliably judge 'supported' and are marked pending_review instead",
+        "evidence_requirement": "descriptive only: >= 1 supporting claim per side (an implementation constant with no approval) AND LLM-semantic stance resolution actually ran for this replay",
+        "decides_formal_status": false,
+        "authority": "implementation_only_unapproved: John's contract defines should_detect for Alphas; his baseline lists these pairs as allowed, never mandatory",
+        "verdict_result": [
+          "pass",
+          "needs_review",
+          "pending_review",
+          "not_applicable",
+          "not_evaluable"
+        ]
+      },
+      "conditional_only": {
+        "config_source": "v0_2_gold_operational_contract.json: COMPOSITE_STRUCTURE_HIT rules AMD-AI-GROWTH-VS-VALUATION, NVDA-GROWTH-VS-VALUATION-CONFLICT (John's frozen contract); j2_provisional_regression_labels_v0.2.yaml: conditional_conflicts (informational reading)",
+        "applicable_target": "composite growth-vs-valuation structure, per contract rule and ticker; declared conflict pair, per ticker",
+        "execution_function": "gold_contract_rules.evaluate_composite_rule (composites: ANY ONE allowed pair admitted satisfies the rule); evaluation_contract.apply_v2_contract (conditional_conflict_results)",
+        "trigger_condition": "composites: the frozen trigger is PRESENT for the bound run (otherwise NOT_EVALUABLE). Pairs: the pair is in the ticker's conditional_conflicts",
+        "evidence_requirement": "composites: PRESENT and no allowed pair admitted -> REVIEW with adjudication (never an immediate error) unless an allowed pair's own B2 record lists no rejection reason yet is not admitted (a deterministic violation -> FAIL); ABSENT -> not triggered. Pairs: none required to trigger; a miss is always informational, never a fail",
+        "verdict_result": [
+          "pass",
+          "needs_review",
+          "not_triggered",
+          "informational_mismatch",
+          "not_evaluable"
+        ]
+      },
+      "do_not_force": {
+        "config_source": "conflicts.json: conflicts[] cross-checked against arbitration.candidate_evaluations[].admissibility",
+        "applicable_target": "every admitted conflict, per ticker (a run-wide invariant, not a per-pair rule)",
+        "execution_function": "acceptance_engine.evaluate_do_not_force_invariant",
+        "trigger_condition": "always evaluated when the ticker is evaluable",
+        "evidence_requirement": "every pair in evaluate_ticker's admitted_conflicts must have a matching arbitration.candidate_evaluations entry whose own admissibility.status is 'admitted' -- proves B2's evidence gate was not bypassed, never a second judgment call",
+        "verdict_result": [
+          "invariant_held",
+          "invariant_violated",
+          "not_evaluable"
+        ]
+      },
+      "allowed_main_conflicts": {
+        "config_source": "j2_provisional_regression_labels_v0.2.yaml: allowed_conflicts",
+        "applicable_target": "declared conflict pair, per ticker",
+        "execution_function": "evaluation_contract.apply_v2_contract (allowed_conflict_results)",
+        "trigger_condition": "pair is in the ticker's allowed_conflicts",
+        "evidence_requirement": "none -- legal structures, never mandatory outputs; absence is never a failure",
+        "verdict_result": [
+          "observed_admitted",
+          "observed_candidate",
+          "not_observed",
+          "not_evaluable"
+        ]
+      },
+      "forbidden_dominant_without_strong_evidence": {
+        "config_source": "j2_provisional_regression_labels_v0.1.yaml: should_not_be_dominant_without_strong_evidence (the v0.1 runtime field; the v0.2 file carries an identical copy and effective_rules() refuses the execution if the two differ)",
+        "applicable_target": "Alpha, per ticker",
+        "execution_function": "evaluator.dominance_guard_flags",
+        "trigger_condition": "Alpha is listed in the ticker's should_not_be_dominant_without_strong_evidence AND reached dominant/regime_level status",
+        "evidence_requirement": "none to trigger the flag itself -- flags for human review (the evidence counts are reported next to the flag), never auto-fails",
+        "verdict_result": [
+          "review_required",
+          "not_triggered",
+          "not_evaluable"
+        ]
+      }
+    },
+    "ticker_rules": {
+      "ticker": "NVDA",
+      "must_detect_if_evidence_present": {
+        "source_field": "required_conflicts",
+        "pairs": []
+      },
+      "should_detect_if_supported": {
+        "source_field": "conditional_conflicts",
+        "pairs": [
+          "A101__A304",
+          "A301__A304"
+        ]
+      },
+      "conditional_only": {
+        "source_field": "conditional_conflicts",
+        "pairs": [
+          "A101__A304",
+          "A301__A304"
+        ]
+      },
+      "allowed_main_conflicts": {
+        "source_field": "allowed_conflicts",
+        "pairs": []
+      },
+      "do_not_force": {
+        "scope": "every admitted conflict of the run (an invariant; nothing is declared per ticker)"
+      },
+      "forbidden_dominant_without_strong_evidence": {
+        "source_field": "should_not_be_dominant_without_strong_evidence",
+        "guarded_alphas": {
+          "A001": "ticker-relevant rate-cycle evidence",
+          "A003": "ticker-relevant liquidity evidence",
+          "A102": "inference-specific demand or revenue evidence",
+          "A501": "ticker-relevant recession or earnings-downturn evidence"
+        }
+      },
+      "context_only": {
+        "product_decision_pending": [],
+        "remove_while_undeclared": []
+      }
+    }
+  },
+  "rule_family_results": {
+    "must_detect_if_evidence_present": [],
+    "should_detect_if_supported": [
+      {
+        "pair": "A101__A304",
+        "scope": "conflict_pair",
+        "authority": "implementation_only_unapproved",
+        "decides_formal_status": false,
+        "evidence_present": false,
+        "stance_source": "mixed",
+        "admissibility_status": null,
+        "b2_reason_codes": [
+          "DIRECTION_ROLE_UNRESOLVED"
+        ],
+        "verdict": "not_applicable",
+        "detail": "evidence below the diagnostic bar (>= 1 supporting claim per side) -- the diagnostic does not trigger"
+      },
+      {
+        "pair": "A301__A304",
+        "scope": "conflict_pair",
+        "authority": "implementation_only_unapproved",
+        "decides_formal_status": false,
+        "evidence_present": false,
+        "stance_source": "mixed",
+        "admissibility_status": null,
+        "b2_reason_codes": [
+          "DIRECTION_ROLE_UNRESOLVED"
+        ],
+        "verdict": "not_applicable",
+        "detail": "evidence below the diagnostic bar (>= 1 supporting claim per side) -- the diagnostic does not trigger"
+      }
+    ],
+    "conditional_only": [
+      {
+        "pair": "A101__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      },
+      {
+        "pair": "A301__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      }
+    ],
+    "do_not_force": {
+      "verdict": "invariant_held",
+      "violations": [],
+      "detail": "every conflicts.json-admitted pair has a matching B2-admitted arbitration entry"
+    },
+    "allowed_main_conflicts": [],
+    "forbidden_dominant_without_strong_evidence": []
+  },
+  "contract_rule_results": [
+    {
+      "rule_id": "NVDA-A101-AI-GROWTH",
+      "ticker": "NVDA",
+      "tier": "FORMAL_GOLD",
+      "hit_type": "ALPHA_HIT",
+      "family": "must_detect_if_evidence_present",
+      "blocking": true,
+      "evidence_condition": "Current NVDA-specific evidence (ticker-specific, qualified, Primary/Secondary-role-aware, deduplicated fact groups) materially describes AI training / AI compute / GPU accelerator demand growth relevant to NVDA's role as an AI accelerator supplier.",
+      "required_behavior": "If the evidence condition is present, the system must detect A101 at an official detected level (active, dominant, or regime_level).",
+      "authority_basis": [
+        "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: 'A101: must_detect_if_evidence_present'; section 2: NVDA is Formal Gold, blocking = true",
+        "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 8.A (mapping, condition, 'do NOT force A101 when such evidence is absent')",
+        "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+      ],
+      "alpha_recognition": [
+        {
+          "alpha_id": "A101",
+          "identification_state": "IDENTIFIED",
+          "claims_total": 951,
+          "claims_matched_to_this_alpha": 5,
+          "claims_no_match": 787,
+          "claims_classification_unavailable": 0,
+          "activation_level": "watch",
+          "activation_score": 45.0108,
+          "level_is_official_detected_level": false,
+          "level_source": "run_audit.json:activation_summary.per_alpha",
+          "qualification_codes": [],
+          "unique_evidence_fact_count": 2,
+          "distinct_supporting_agents": 2,
+          "ticker_specific_evidence_count": 1
+        }
+      ],
+      "requirement": {
+        "acceptable_alphas": [
+          "A101"
+        ],
+        "required_levels": [
+          "active",
+          "dominant",
+          "regime_level"
+        ],
+        "satisfied": false,
+        "satisfied_by": null,
+        "reading": "A101: identified (5 claims classified to it) but its level is watch, below the required level"
+      },
+      "evidence_trigger": {
+        "evaluated_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+        "matrix_run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+        "source": null,
+        "strength": null,
+        "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+        "reading": "the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it",
+        "state": "NOT_EVALUABLE"
+      },
+      "verdict": "not_evaluable",
+      "john_result": "NOT_EVALUABLE",
+      "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+      "detail": "evidence trigger not established: the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it",
+      "blocks_release": false,
+      "unresolved_blocking": true
+    },
+    {
+      "rule_id": "NVDA-A304-VALUATION-RISK",
+      "ticker": "NVDA",
+      "tier": "FORMAL_GOLD",
+      "hit_type": "ALPHA_HIT",
+      "family": "must_detect_if_evidence_present",
+      "blocking": true,
+      "evidence_condition": "Current NVDA-specific evidence materially supports valuation compression, rich valuation, or multiple downside risk.",
+      "required_behavior": "If the evidence condition is present, the system must detect A304 at an official detected level.",
+      "authority_basis": [
+        "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: 'A304: must_detect_if_evidence_present'; section 2: NVDA is Formal Gold, blocking = true",
+        "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 8.C",
+        "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+      ],
+      "alpha_recognition": [
+        {
+          "alpha_id": "A304",
+          "identification_state": "IDENTIFIED",
+          "claims_total": 951,
+          "claims_matched_to_this_alpha": 35,
+          "claims_no_match": 787,
+          "claims_classification_unavailable": 0,
+          "activation_level": "active",
+          "activation_score": 51.2691,
+          "level_is_official_detected_level": true,
+          "level_source": "run_audit.json:activation_summary.per_alpha",
+          "qualification_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_fact_count": 7,
+          "distinct_supporting_agents": 4,
+          "ticker_specific_evidence_count": 1
+        }
+      ],
+      "requirement": {
+        "acceptable_alphas": [
+          "A304"
+        ],
+        "required_levels": [
+          "active",
+          "dominant",
+          "regime_level"
+        ],
+        "satisfied": true,
+        "satisfied_by": "A304",
+        "reading": "an acceptable Alpha is at an official detected level"
+      },
+      "evidence_trigger": {
+        "evaluated_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+        "matrix_run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+        "source": null,
+        "strength": null,
+        "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+        "reading": "the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it",
+        "state": "NOT_EVALUABLE"
+      },
+      "verdict": "not_evaluable",
+      "john_result": "NOT_EVALUABLE",
+      "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+      "detail": "evidence trigger not established: the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it",
+      "blocks_release": false,
+      "unresolved_blocking": true
+    },
+    {
+      "rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+      "ticker": "NVDA",
+      "tier": "FORMAL_GOLD",
+      "hit_type": "COMPOSITE_STRUCTURE_HIT",
+      "family": "conditional_only",
+      "blocking": true,
+      "evidence_condition": "Both a supported growth side (A101 and/or A301 reaching a qualified/detected level) and a supported valuation-risk side (A304 reaching a qualified/detected level) are present in the same run.",
+      "required_behavior": "When both sides coexist, an admissible growth-vs-valuation conflict (one of the allowed pairs) should be surfaced via the existing, unmodified conflict admissibility (B2) authority -- this rule does not itself define or alter B2's admission logic.",
+      "authority_basis": [
+        "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: composite allowed pairs A101__A304 and A301__A304 'only when both relevant evidence sides are present; do not force a conflict if only one side is supported'",
+        "Frozen-gold vs frozen-trigger comparison protocol (Step 4), 2026-09-10T21:52:47Z, section 13: any allowed evidence-supported conflict admitted -> PASS; none admitted -> REVIEW with adjudication; outside the allowed family -> FAIL or REVIEW",
+        "v0_2_john_frozen_gold_baseline.yaml (authority JOHN_WRITTEN_V0_2_BASELINE): allowed_main_conflicts NVDA = A101__A304, A301__A304"
+      ],
+      "component_alphas": [
+        {
+          "alpha_id": "A101",
+          "identification_state": "IDENTIFIED",
+          "claims_total": 951,
+          "claims_matched_to_this_alpha": 5,
+          "claims_no_match": 787,
+          "claims_classification_unavailable": 0,
+          "activation_level": "watch",
+          "activation_score": 45.0108,
+          "level_is_official_detected_level": false,
+          "level_source": "run_audit.json:activation_summary.per_alpha",
+          "qualification_codes": [],
+          "unique_evidence_fact_count": 2,
+          "distinct_supporting_agents": 2,
+          "ticker_specific_evidence_count": 1
+        },
+        {
+          "alpha_id": "A301",
+          "identification_state": "IDENTIFIED",
+          "claims_total": 951,
+          "claims_matched_to_this_alpha": 25,
+          "claims_no_match": 787,
+          "claims_classification_unavailable": 0,
+          "activation_level": "active",
+          "activation_score": 57.3874,
+          "level_is_official_detected_level": true,
+          "level_source": "run_audit.json:activation_summary.per_alpha",
+          "qualification_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_fact_count": 10,
+          "distinct_supporting_agents": 3,
+          "ticker_specific_evidence_count": 2
+        },
+        {
+          "alpha_id": "A304",
+          "identification_state": "IDENTIFIED",
+          "claims_total": 951,
+          "claims_matched_to_this_alpha": 35,
+          "claims_no_match": 787,
+          "claims_classification_unavailable": 0,
+          "activation_level": "active",
+          "activation_score": 51.2691,
+          "level_is_official_detected_level": true,
+          "level_source": "run_audit.json:activation_summary.per_alpha",
+          "qualification_codes": [
+            "NO_LOCAL_STRUCTURE_SUPPORT"
+          ],
+          "unique_evidence_fact_count": 7,
+          "distinct_supporting_agents": 4,
+          "ticker_specific_evidence_count": 1
+        }
+      ],
+      "allowed_pairs_in_contract": [
+        "A101__A304",
+        "A301__A304"
+      ],
+      "allowed_family": [
+        "A101__A304",
+        "A301__A304"
+      ],
+      "admitted_conflicts": [],
+      "admitted_in_allowed_family": [],
+      "admitted_outside_allowed_family": [],
+      "family_pair_records": {
+        "A101__A304": {
+          "state": "not_evaluated_before_b2",
+          "b2_status": null,
+          "b2_reason_codes": [],
+          "entry_reason_codes": [
+            "DIRECTION_ROLE_UNRESOLVED"
+          ]
+        },
+        "A301__A304": {
+          "state": "not_evaluated_before_b2",
+          "b2_status": null,
+          "b2_reason_codes": [],
+          "entry_reason_codes": [
+            "DIRECTION_ROLE_UNRESOLVED"
+          ]
+        }
+      },
+      "main_conflict": null,
+      "requirement": {
+        "logic": "any ONE allowed pair admitted satisfies the composite; no allowed pair is individually required",
+        "satisfied": null
+      },
+      "evidence_trigger": {
+        "evaluated_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+        "matrix_run_id": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+        "source": null,
+        "strength": null,
+        "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+        "reading": "the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it",
+        "state": "NOT_EVALUABLE"
+      },
+      "verdict": "not_evaluable",
+      "john_result": "NOT_EVALUABLE",
+      "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+      "detail": "evidence trigger not established: the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it",
+      "blocks_release": false,
+      "unresolved_blocking": true
+    }
+  ],
+  "release": {
+    "scope": "the contract rules this entry executes for the ticker; not a release certification; label-based findings carry no contract severity",
+    "contract_rules_executed": 3,
+    "contract_rules_not_executed": [
+      "NVDA-A301-FUNDAMENTAL-GROWTH",
+      "NVDA-SUPPORTING-STRUCTURES"
+    ],
+    "blocks_release": false,
+    "blocking_failures": [],
+    "blocking_unresolved": [
+      "NVDA-A101-AI-GROWTH",
+      "NVDA-A304-VALUATION-RISK",
+      "NVDA-GROWTH-VS-VALUATION-CONFLICT"
+    ],
+    "non_blocking_findings": [],
+    "release_status": "unresolved"
+  },
+  "diagnostic_findings": [],
+  "undeclared_admitted_conflicts": [],
+  "failure_reasons": [],
+  "review_reasons": [
+    {
+      "family": "must_detect_if_evidence_present",
+      "rule_id": "NVDA-A101-AI-GROWTH",
+      "alpha_id": "A101",
+      "verdict": "not_evaluable",
+      "blocking": true,
+      "blocks_release": false,
+      "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+      "detail": "evidence trigger not established: the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it"
+    },
+    {
+      "family": "must_detect_if_evidence_present",
+      "rule_id": "NVDA-A304-VALUATION-RISK",
+      "alpha_id": "A304",
+      "verdict": "not_evaluable",
+      "blocking": true,
+      "blocks_release": false,
+      "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+      "detail": "evidence trigger not established: the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it"
+    },
+    {
+      "family": "conditional_only",
+      "rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+      "alpha_id": null,
+      "verdict": "not_evaluable",
+      "blocking": true,
+      "blocks_release": false,
+      "reason_code": "RUN_NOT_BOUND_TO_FROZEN_TRIGGER_MATRIX",
+      "detail": "evidence trigger not established: the frozen trigger matrix is bound to NVDA run 57d7b4c4-dbb9-4134-b962-ee2a873941cc; this is run 12591384-0b26-470d-a99d-a49c00be440b. No approved, executable evidence-determination method exists for another run, and the historical trigger state is not carried over to it"
+    }
+  ],
+  "coverage": {
+    "declared_conflict_pairs": 2,
+    "declared_pairs_with_evidence": 0,
+    "admitted_conflicts_checked_by_do_not_force": 0,
+    "dominance_guards_declared": 4,
+    "dominance_guards_triggered": 0,
+    "contract_rules_executed": 3,
+    "contract_rules_with_a_verdict": 0,
+    "contract_rules_not_evaluable": 3,
+    "contract_rules_not_executed_for_ticker": [
+      "NVDA-A301-FUNDAMENTAL-GROWTH",
+      "NVDA-SUPPORTING-STRUCTURES"
+    ],
+    "pass_is_vacuous": false,
+    "pass_scope_note": null,
+    "reading": null
+  },
+  "v2_contract_result": {
+    "ticker": "NVDA",
+    "evaluation_status": "evaluated",
+    "ticker_status": "pass",
+    "artifact_completeness": "pass",
+    "required_conflict_results": [],
+    "conditional_conflict_results": [
+      {
+        "pair": "A101__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      },
+      {
+        "pair": "A301__A304",
+        "observed_status": "not_reached",
+        "result": "informational_mismatch"
+      }
+    ],
+    "allowed_conflict_results": [],
+    "product_decision_pending_results": [],
+    "removed_while_undeclared_pairs": [],
+    "structural_expectation_results": {
+      "positive_alphas_detected": [],
+      "positive_alphas_not_detected": [
+        "A101",
+        "A103",
+        "A201",
+        "A301"
+      ],
+      "negative_alphas_detected": [],
+      "negative_alphas_not_detected": [
+        "A304"
+      ],
+      "note": "informational only -- a structural Alpha's absence in any one run never fails that run"
+    },
+    "run_bound_expectations": {
+      "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "analysis_date": "2026-08-11",
+      "taxonomy_version": "alpha_taxonomy_v1",
+      "b1_stance_source": "deterministic_baseline",
+      "b1_stance_version": "evidence_stance.deterministic.v1",
+      "artifact_completeness_required": "pass",
+      "observed_historical_main_conflict": "A301__A304",
+      "note": "The observed main conflict match is a single-run historical observation, not a claim that this run's full Alpha label set matches structural_expectations -- see A4's real replay result (missing_expected: A103, A201; unexpected: A001)."
+    }
+  },
+  "v2_contract_note": "v2_contract_result is the unconditional v0.2 contract view (report only). The verdict follows the rule families and the contract rules above: a required pair B2 rejected for a recorded reason, or with no usable record, is never a fail there.",
+  "run_bound_observation": {
+    "classification": "unapproved_historical_observation",
+    "executable": false,
+    "reference_run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+    "evaluated_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+    "evaluated_run_is_the_reference_run": false,
+    "observed_historical_main_conflict": "A301__A304",
+    "effect_on_formal_status": "none"
+  }
+}

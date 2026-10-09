@@ -1,0 +1,62 @@
+{
+ "recipient": "John",
+ "written_at": "2026-10-09T22:19:00.865512+00:00",
+ "round32_zip": {
+  "file": "T4_final_round32_20261009.zip",
+  "sha256": "2597f909dfff74b0af08fb5d15b36e5cdca40d8382d398b91680742dae4f51cf",
+  "modified": false
+ },
+ "edited_documents": [
+  {
+   "round32_path": "05_stage_disclosure/结构抽取与降级披露.md",
+   "original_sha256": "35d89ea88278f493ae373f9a457684c3b93334a6550bf6d8b06c2f2fd209e3ef",
+   "changes": [
+    {
+     "removed_or_replaced": "**发现的工程缺陷（未修，列为决定项）**：\n- 适配器校验器 `_validate_llm_batch_enrichment` 要求每条回复必须恰好有 9 个字段，其中包括 `cited_source_id`。\n- 但冻结的任务说明（prompt `week2.claim_batch_enrichment.v1`，sha256 `c6822099…`）只要求 8 个字段，**从未要求 `cited_source_id`**。线路审计中发出的请求原文也没有这个字段名。\n- 因此严格按 prompt 作答的回复必然被拒：\n  - attempt 8 的 30 条和晚到的 attempt 2 的 64 条，每条都是 8 个字段，校验失败点都是 `enrichment item fields do not match the strict schema`；\n  - 第一次 Fresh 的 5 个返回也都是这样被拒的。\n- 换句话说，**只要这个不一致存在，适配器富集永远走回退**。\n- 本轮没有修，原因：\n  - 修复（让校验器接受没有 `cited_source_id` 的回复，或改 prompt）会改变 Alpha 分类的输入。Alpha 分类请求里带有 factors 和 direction。\n  - 第二次 Fresh 保存的 Alpha 回复对应的是确定性回退的输入；修复后同一批 claim 的请求正文会变，无法用已保存的真实回复离线复现，必须用新的真实调用才能观察。\n  - 这会改变研究结果，不属于\"不改研究答案的工程修复\"；改 prompt 本轮也被禁止。\n  - 决定项和所需验证见主报告\"需要负责人决定的事项\"。\n",
+     "now": "**发现的工程缺陷 D1（未修复）**：\n- 适配器校验器 `_validate_llm_batch_enrichment` 要求每条回复必须恰好有 9 个字段，其中包括 `cited_source_id`。\n- 但冻结的任务说明（prompt `week2.claim_batch_enrichment.v1`，sha256 `c6822099…`）只要求 8 个字段，**从未要求 `cited_source_id`**。线路审计中发出的请求原文也没有这个字段名。\n- attempt 8 的 30 条和晚到的 attempt 2 的 64 条，每条都是 8 个字段，校验失败点都是 `enrichment item fields do not match the strict schema`。\n- 离线定位、能证明与不能证明的范围、修复为什么超出当前边界，见 `round33/01_d1/D1_离线定位.md`。该文更正了本段原有的两处说法：\n  - “严格按 prompt 作答的回复必然被拒，适配器富集永远走回退”只对严格 8 字段的回复成立；\n  - “第一次 Fresh 的 5 个返回也都是这样被拒的”只说明第一失败点，其中 2 批即使补了字段也会因 direction 不合法被拒。\n",
+     "reason": "John 版：去掉“列为决定项”“需要负责人决定”的对内措辞和不再适用的验证建议；指向本版 D1 定位，并标出被更正的两处说法。事实（字段、prompt、失败点）保留"
+    }
+   ],
+   "new_sha256": "17a025247275b3c33e64edcd64ec34d98da50eaf02025e1f00b2a58cda597798"
+  },
+  {
+   "round32_path": "01_regressions/回归失败分析.md",
+   "original_sha256": "28a4f6d921ad6ba88d27982868b3e43a8ba4cb476bece872f6343b1f167bbf0f",
+   "changes": [
+    {
+     "removed_or_replaced": "- 登记本身有 Round 26 的记录。Round 26 是负责人授权的 T3 收尾轮。\n",
+     "now": "- 登记本身有 Round 26（T3 收尾轮）的记录。\n",
+     "reason": "John 版：去掉内部授权措辞；登记的出处（Round 26 记录）保留"
+    },
+    {
+     "removed_or_replaced": "**不需要负责人决定的事项**：没有改任何冻结哈希；",
+     "now": "**冻结哈希**：没有改任何冻结哈希；",
+     "reason": "John 版：去掉对内的决定措辞；事实不变"
+    }
+   ],
+   "new_sha256": "284dac1b064172bc96e83c1835f081a863141ac7504a607ce7e4b2a3ecc8887a"
+  }
+ ],
+ "superseded_not_copied": [
+  {
+   "round32_path": "00_T4最终交付报告.md",
+   "original_sha256": "1b590bed61061d78c9cb25e939d6e7b7bd62b74ef912c8545138175d21430202",
+   "reason": "Round 32 main report (addressed to the project owner and John); superseded by this version's John-only report, which carries its content"
+  },
+  {
+   "round32_path": "README.md",
+   "original_sha256": "49eac7573f390a926084f1e5253a78799bc717edbf090e3d66921014644bd88c",
+   "reason": "Round 32 package README; superseded by this version's README"
+  },
+  {
+   "round32_path": "report_figures.json",
+   "original_sha256": "dea503bab0b6488c45bf86c03e38eff1b0c8f2223b9a2f0a8f4fdf4b92b5b4bc",
+   "reason": "Round 32 figure ledger tied to the Round 32 report; its 61 figures (ids, values, citations) are carried into this version's report_figures.json"
+  }
+ ],
+ "kept_verbatim_on_purpose": [
+  "07_demo/视频场景索引.md: states that Xiang Mao started both Fresh runs on the web page -- the operator's identity is a fact, kept",
+  "references/T4_delivery_round31_20261009.zip: the Round 31 package, nested byte-identical (its main report's '6 个请求输入超限，且被标成 malformed_response' is corrected in this version's report, section 8)"
+ ],
+ "note": "Every other file in round32/ is byte-identical to the Round 32 ZIP (round32/manifest.json is that package's own manifest)."
+}

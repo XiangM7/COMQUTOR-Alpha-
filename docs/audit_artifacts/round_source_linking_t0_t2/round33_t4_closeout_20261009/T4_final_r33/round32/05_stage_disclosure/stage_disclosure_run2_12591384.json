@@ -1,0 +1,104 @@
+{
+ "run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+ "computed_by": "final code (read-time, from the saved ledger; the run directory is not modified)",
+ "schema_version": "comqutor.stage_disclosure.v1",
+ "source": "llm_semantic_calls.jsonl and the run's saved stage artifacts (read-only; nothing recomputed)",
+ "llm_record_count": 0,
+ "stages": [
+  {
+   "stage": "claim_enrichment",
+   "task": "structured_adapter",
+   "status": "model_not_used",
+   "calls": 9,
+   "http_requests": 8,
+   "outcomes": {
+    "not_sent_input_too_large": 1,
+    "reply_not_accepted:WEEK2_LLM_VALIDATION_FAILED": 1,
+    "timeout": 7
+   },
+   "segments_in_calls": 481,
+   "segments_with_model_result_used": 0,
+   "record_extraction_methods": {
+    "deterministic_splitter": 951
+   },
+   "fields_from_model": [],
+   "fields_from_deterministic_processing": [
+    "entities",
+    "factors",
+    "direction",
+    "confidence",
+    "cited_source_id"
+   ]
+  },
+  {
+   "stage": "content_support_verification",
+   "task": "content_support_verification",
+   "status": "degraded",
+   "calls": 241,
+   "claims_in_calls": 241,
+   "http_requests": 236,
+   "outcomes": {
+    "not_sent_input_too_large": 5,
+    "reply_not_accepted:malformed_response": 3,
+    "reply_not_accepted:quote_or_data_not_found": 48,
+    "used": 185
+   }
+  },
+  {
+   "stage": "alpha_classification",
+   "task": "alpha_classifier",
+   "status": "model_complete",
+   "calls": 951,
+   "http_requests": 941,
+   "outcomes": {
+    "used": 941,
+    "used_from_cache": 10
+   }
+  },
+  {
+   "stage": "evidence_stance",
+   "task": "evidence_stance_classifier",
+   "status": "model_complete",
+   "calls": 17,
+   "items_in_calls": 164,
+   "http_requests": 17,
+   "outcomes": {
+    "used": 17
+   }
+  },
+  {
+   "stage": "structure_extraction",
+   "task": "structure_extractor",
+   "status": "model_not_used",
+   "calls": 2,
+   "http_requests": 2,
+   "outcomes": {
+    "reply_not_accepted:WEEK2_LLM_VALIDATION_FAILED": 1,
+    "valid_empty_result_not_used": 1
+   },
+   "extracted_edges_by_source": {
+    "model_structure_extraction": 0,
+    "deterministic_grammar": 0,
+    "tradingagents_canonical_relations": 16
+   }
+  },
+  {
+   "stage": "structure_graph",
+   "task": null,
+   "status": "built",
+   "nodes": 11,
+   "edges": 6,
+   "note": "Graph construction finishing is separate from model structure extraction succeeding; see structure_extraction."
+  }
+ ],
+ "degraded_stages": [
+  "claim_enrichment",
+  "content_support_verification",
+  "structure_extraction"
+ ],
+ "notes": [
+  "Claim enrichment: 9 of 9 batches did not use a model result (1 not sent (input over the local size limit), 1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 7 timed out); for those claims entities, factors, direction, confidence and cited source come from deterministic extraction, not from a model judgment (a direction of 'unknown' there means 'not judged', not a model answer).",
+  "Content support verification: 185 of 241 requested verifications produced an accepted model result (5 not sent (input over the local size limit), 3 reply not accepted (malformed_response), 48 reply not accepted (quote_or_data_not_found)); the others stay pending review -- a technical failure or a request that was never sent is not a judgment that the claim is unsupported.",
+  "Structure extraction: 2 of 2 model calls contributed no edge (1 reply not accepted (WEEK2_LLM_VALIDATION_FAILED), 1 returned a valid empty result, deterministic processing used instead); extracted edges by source: model 0, deterministic grammar 0, TradingAgents canonical relations 16."
+ ]
+}

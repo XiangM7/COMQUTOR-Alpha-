@@ -1,0 +1,351 @@
+{
+  "schema_version": "alpha_final_reserve_replacement_packet.v1",
+  "dataset_version": "new_alpha_holdout.v1",
+  "purpose": "Blind adjudication packet for the 20 reserve samples drawn to replace final-independent-set samples excluded under the frozen adjudication rubric (non-null ambiguity_flag). No system output of any kind is present.",
+  "system_predictions_included": false,
+  "candidate3_output_included": false,
+  "note": "No COMQUTOR Alpha prediction, mapper score, plausible_alphas, system confidence, Provider result, or any Candidate 1/2/3 result is present anywhere in this document. Fields mirror the final adjudication packet's own schema exactly.",
+  "instructions_reference": "docs/audit_artifacts/v0_2_alpha_human_adjudication_rubric.md",
+  "policy_reference": "docs/audit_artifacts/v0_2_final_alpha_adjudication_policy.md",
+  "taxonomy_reference": [
+    {
+      "alpha_id": "A001",
+      "name_en": "Rate Cut Cycle",
+      "core_thesis": "Falling rates lower discount rates and support long-duration growth assets."
+    },
+    {
+      "alpha_id": "A003",
+      "name_en": "Liquidity Expansion",
+      "core_thesis": "Improving liquidity supports risk appetite and equity inflows."
+    },
+    {
+      "alpha_id": "A101",
+      "name_en": "AI Expansion",
+      "core_thesis": "AI training and adoption increase demand for accelerators and AI-related equities."
+    },
+    {
+      "alpha_id": "A102",
+      "name_en": "Inference Explosion",
+      "core_thesis": "Enterprise AI applications and AI agents increase inference compute demand."
+    },
+    {
+      "alpha_id": "A103",
+      "name_en": "AI Infrastructure",
+      "core_thesis": "AI buildout drives datacenter, power, cooling, networking, and server demand."
+    },
+    {
+      "alpha_id": "A201",
+      "name_en": "Semiconductor Supercycle",
+      "core_thesis": "A chip-cycle upturn improves inventory, pricing, capex, and semiconductor demand."
+    },
+    {
+      "alpha_id": "A301",
+      "name_en": "Revenue Expansion",
+      "core_thesis": "Strong demand raises revenue guidance, EPS revisions, and repricing potential."
+    },
+    {
+      "alpha_id": "A304",
+      "name_en": "Multiple Compression",
+      "core_thesis": "Rich valuation and high multiples create downside risk despite strong fundamentals."
+    },
+    {
+      "alpha_id": "A501",
+      "name_en": "Recession Risk",
+      "core_thesis": "Widening credit spreads and economic slowdown pressure earnings and risk appetite."
+    },
+    {
+      "alpha_id": "A601",
+      "name_en": "Narrative Momentum",
+      "core_thesis": "Investor attention and crowded narratives drive reflexive flows and momentum."
+    }
+  ],
+  "label_field_instructions": {
+    "expected_label": "One canonical alpha_id from taxonomy_reference above, or the string 'NONE'. Leave null until adjudicated.",
+    "confidence": "'low' | 'medium' | 'high'. Leave null until adjudicated.",
+    "ambiguity_flag": "null, or one of: BOTH_REASONABLE_AMBIGUOUS | INSUFFICIENT_CONTEXT | NOT_A_SUBSTANTIVE_CLAIM | DUPLICATE_OR_NEAR_DUPLICATE",
+    "adjudication_reason": "Short free-text justification, required even for NONE. Leave null until adjudicated."
+  },
+  "sample_count": 20,
+  "samples": [
+    {
+      "replacement_slot": 1,
+      "sample_id": "nh-reserve-019",
+      "ticker": "NVDA",
+      "run_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2",
+      "claim_id": "5ffe121a-68fd-473b-82b5-c9465332d8a2:market_agent:market_report:claim:7",
+      "agent": "market_agent",
+      "claim": "The stock closed at $225.15, having staged a powerful recovery from a late-July low of $190.01 (July 29) to a fresh multi-week high.",
+      "evidence": "The stock closed at $225.15, having staged a powerful recovery from a late-July low of $190.01 (July 29) to a fresh multi-week high.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 2,
+      "sample_id": "nh-reserve-020",
+      "ticker": "SNDK",
+      "run_id": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+      "claim_id": "e8e0f398-7b26-4462-8135-a1410ea5b335:conservative_risk_analyst:risk_debate_state.conservative_history:claim:52",
+      "agent": "conservative_risk_analyst",
+      "claim": "When rates rise, the discount rate rises, and the multiple compresses.",
+      "evidence": "When rates rise, the discount rate rises, and the multiple compresses.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 3,
+      "sample_id": "nh-reserve-021",
+      "ticker": "NVDA",
+      "run_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665",
+      "claim_id": "e3eb3909-3744-4a02-9b32-b225cf6ef665:fundamental_agent:fundamentals_report:claim:102",
+      "agent": "fundamental_agent",
+      "claim": "Cyclicality: The semiconductor industry is historically cyclical; inventory build ($25.8B) bears watching.",
+      "evidence": "Cyclicality: The semiconductor industry is historically cyclical; inventory build ($25.8B) bears watching.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 4,
+      "sample_id": "nh-reserve-022",
+      "ticker": "SNDK",
+      "run_id": "8d21c047-fc0a-4d94-957d-3787f353a544",
+      "claim_id": "8d21c047-fc0a-4d94-957d-3787f353a544:sentiment_agent:sentiment_report:claim:52",
+      "agent": "sentiment_agent",
+      "claim": "High-volatility trading vehicle — $100+ intraday swings, options activity at various strikes ($1,400–$1,800 range), and WSB boom/bust stories establish SNDK as a primary speculative battleground stock.",
+      "evidence": "High-volatility trading vehicle — $100+ intraday swings, options activity at various strikes ($1,400–$1,800 range), and WSB boom/bust stories establish SNDK as a primary speculative battleground stock.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 5,
+      "sample_id": "nh-reserve-023",
+      "ticker": "MSFT",
+      "run_id": "c715460c-5fa3-43d8-9949-97fb6b33e8ec",
+      "claim_id": "c715460c-5fa3-43d8-9949-97fb6b33e8ec:news_agent:news_report:claim:8",
+      "agent": "news_agent",
+      "claim": "The dominant market narrative this week is the Nvidia earnings blowout — a $442 billion one-day market-cap gain (the second-largest single-day gain in stock history, trailing only Microsoft's own $450 billion July jump).",
+      "evidence": "The dominant market narrative this week is the Nvidia earnings blowout — a $442 billion one-day market-cap gain (the second-largest single-day gain in stock history, trailing only Microsoft's own $450 billion July jump).",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 6,
+      "sample_id": "nh-reserve-024",
+      "ticker": "AMD",
+      "run_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1",
+      "claim_id": "4d8385ef-dff0-4574-b6e7-73fec1eaa5e1:bear_researcher:investment_debate_state.bear_history:claim:57",
+      "agent": "bear_researcher",
+      "claim": "That's a direct headwind for high-multiple growth stocks.",
+      "evidence": "That's a direct headwind for high-multiple growth stocks.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 7,
+      "sample_id": "nh-reserve-025",
+      "ticker": "TSM",
+      "run_id": "fc09821e-c7cf-40a7-bd76-c98172e16992",
+      "claim_id": "fc09821e-c7cf-40a7-bd76-c98172e16992:bull_researcher:investment_debate_state.bull_history:claim:37",
+      "agent": "bull_researcher",
+      "claim": "The advanced packaging moat is even stronger.",
+      "evidence": "The advanced packaging moat is even stronger.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 8,
+      "sample_id": "nh-reserve-026",
+      "ticker": "MSFT",
+      "run_id": "_step5a_coverage_msft",
+      "claim_id": "ce6b9628-b23f-4933-9fde-2568b315adf7:bear_researcher:investment_debate_state.bear_history:claim:54",
+      "agent": "bear_researcher",
+      "claim": "The bull points to the \"imminent golden cross\" and the stock trading above all key moving averages as bullish signals.",
+      "evidence": "The bull points to the \"imminent golden cross\" and the stock trading above all key moving averages as bullish signals.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 9,
+      "sample_id": "nh-reserve-027",
+      "ticker": "QQQ",
+      "run_id": "a4dae9c5-0443-48ac-a313-10151922b923",
+      "claim_id": "a4dae9c5-0443-48ac-a313-10151922b923:research_manager:investment_plan:claim:68",
+      "agent": "research_manager",
+      "claim": "Issue: AI demand direction; Winner: Bull (direction) / Bear (evidentiary quality); Weight: Medium",
+      "evidence": "Issue: AI demand direction; Winner: Bull (direction) / Bear (evidentiary quality); Weight: Medium",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 10,
+      "sample_id": "nh-reserve-028",
+      "ticker": "TSM",
+      "run_id": "0a44ec41-c181-488d-94b8-00a333e85ddb",
+      "claim_id": "0a44ec41-c181-488d-94b8-00a333e85ddb:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:13",
+      "agent": "aggressive_risk_analyst",
+      "claim": "The asymmetry is still massively in our favor.",
+      "evidence": "The asymmetry is still massively in our favor.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 11,
+      "sample_id": "nh-reserve-029",
+      "ticker": "QQQ",
+      "run_id": "57244747-7237-4cb6-a01c-cb8dd95d122f",
+      "claim_id": "57244747-7237-4cb6-a01c-cb8dd95d122f:sentiment_agent:sentiment_report:claim:101",
+      "agent": "sentiment_agent",
+      "claim": "Traders should weigh this sentiment signal alongside fundamentals and technicals rather than treat it as a directional price call.",
+      "evidence": "Traders should weigh this sentiment signal alongside fundamentals and technicals rather than treat it as a directional price call.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 12,
+      "sample_id": "nh-reserve-030",
+      "ticker": "MU",
+      "run_id": "0ba23540-0623-4d05-a670-098fbbfec1d1",
+      "claim_id": "0ba23540-0623-4d05-a670-098fbbfec1d1:fundamental_agent:fundamentals_report:claim:34",
+      "agent": "fundamental_agent",
+      "claim": "Construction-in-Progress ballooned from $4.9B to $10.9B, indicating massive new fab capacity coming online.",
+      "evidence": "Construction-in-Progress ballooned from $4.9B to $10.9B, indicating massive new fab capacity coming online.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 13,
+      "sample_id": "nh-reserve-031",
+      "ticker": "NVDA",
+      "run_id": "4ca7dafa-6ac1-4d94-add0-f6f93b1af150",
+      "claim_id": "4ca7dafa-6ac1-4d94-add0-f6f93b1af150:research_manager:investment_plan:claim:33",
+      "agent": "research_manager",
+      "claim": "The FCF generation is extraordinary and durable.",
+      "evidence": "The FCF generation is extraordinary and durable.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 14,
+      "sample_id": "nh-reserve-032",
+      "ticker": "MSFT",
+      "run_id": "61f3e019-63a8-4c56-b763-057208d5efae",
+      "claim_id": "61f3e019-63a8-4c56-b763-057208d5efae:conservative_risk_analyst:risk_debate_state.conservative_history:claim:16",
+      "agent": "conservative_risk_analyst",
+      "claim": "Free cash flow is what actually funds dividends, buybacks, and the real return to shareholders.",
+      "evidence": "Free cash flow is what actually funds dividends, buybacks, and the real return to shareholders.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 15,
+      "sample_id": "nh-reserve-033",
+      "ticker": "QQQ",
+      "run_id": "a4dae9c5-0443-48ac-a313-10151922b923",
+      "claim_id": "a4dae9c5-0443-48ac-a313-10151922b923:conservative_risk_analyst:risk_debate_state.conservative_history:claim:17",
+      "agent": "conservative_risk_analyst",
+      "claim": "And here's what the aggressive analyst conveniently omits: the RSI is at 44.13.",
+      "evidence": "And here's what the aggressive analyst conveniently omits: the RSI is at 44.13.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 16,
+      "sample_id": "nh-reserve-034",
+      "ticker": "GOOGL",
+      "run_id": "fadaa93c-8cd5-40df-a1bb-53ac4ccd1fb3",
+      "claim_id": "fadaa93c-8cd5-40df-a1bb-53ac4ccd1fb3:bull_researcher:investment_debate_state.bull_history:claim:28",
+      "agent": "bull_researcher",
+      "claim": "But more importantly, let's talk about distribution.",
+      "evidence": "But more importantly, let's talk about distribution.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 17,
+      "sample_id": "nh-reserve-035",
+      "ticker": "MSFT",
+      "run_id": "0cb43bae-1a4d-4003-bb29-55d420498842",
+      "claim_id": "0cb43bae-1a4d-4003-bb29-55d420498842:bull_researcher:investment_debate_state.bull_history:claim:38",
+      "agent": "bull_researcher",
+      "claim": "Microsoft is on the right side of this trade.",
+      "evidence": "Microsoft is on the right side of this trade.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 18,
+      "sample_id": "nh-reserve-036",
+      "ticker": "GOOGL",
+      "run_id": "299bb6af-5217-422e-bd47-1b3b07c57192",
+      "claim_id": "299bb6af-5217-422e-bd47-1b3b07c57192:fundamental_agent:fundamentals_report:claim:64",
+      "agent": "fundamental_agent",
+      "claim": "Capital Expenditure Surge: Net PPE has grown dramatically from $184.6B (FY2024) to $338.9B (Q2 2026), underscoring the massive infrastructure buildout.",
+      "evidence": "Capital Expenditure Surge: Net PPE has grown dramatically from $184.6B (FY2024) to $338.9B (Q2 2026), underscoring the massive infrastructure buildout.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 19,
+      "sample_id": "nh-reserve-037",
+      "ticker": "NVDA",
+      "run_id": "948be419-b542-4096-a536-ff567ef459c2",
+      "claim_id": "948be419-b542-4096-a536-ff567ef459c2:news_agent:news_report:claim:36",
+      "agent": "news_agent",
+      "claim": "This suggests inflation is seen as contained but sticky enough to keep the Fed on hold.",
+      "evidence": "This suggests inflation is seen as contained but sticky enough to keep the Fed on hold.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    },
+    {
+      "replacement_slot": 20,
+      "sample_id": "nh-reserve-038",
+      "ticker": "QQQ",
+      "run_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+      "claim_id": "f88c8956-cb62-48aa-9951-89f8e8a95f83:conservative_risk_analyst:risk_debate_state.conservative_history:claim:31",
+      "agent": "conservative_risk_analyst",
+      "claim": "The \"balanced\" approach is not balanced at all; it is a default to inaction that leaves the firm's assets vulnerable.",
+      "evidence": "The \"balanced\" approach is not balanced at all; it is a default to inaction that leaves the firm's assets vulnerable.",
+      "expected_label": null,
+      "confidence": null,
+      "ambiguity_flag": null,
+      "adjudication_reason": null
+    }
+  ]
+}

@@ -789,6 +789,18 @@ def prepare_research_submission(
         # carry either of these fields (see routes_research.ResearchRequest).
         execution_payload["allow_real_tradingagents_run"] = True
         execution_payload["config"] = real_config
+        # Real, enforced Research Agent request-count budget (2026-09-30,
+        # fifth follow-up round) -- server-process env vars only, exactly
+        # like every other real-run control on this payload; unset means no
+        # wrapping happens at all (see
+        # comqutor_alpha.runners.request_budget/tradingagents_runner.py's
+        # own opt-in default).
+        max_actual_requests = os.environ.get("COMQUTOR_RESEARCH_AGENT_MAX_ACTUAL_REQUESTS")
+        if max_actual_requests:
+            execution_payload["research_agent_max_actual_requests"] = int(max_actual_requests)
+        max_retries = os.environ.get("COMQUTOR_RESEARCH_AGENT_MAX_RETRIES")
+        if max_retries:
+            execution_payload["research_agent_max_retries"] = int(max_retries)
 
     return {
         "claim": claim,

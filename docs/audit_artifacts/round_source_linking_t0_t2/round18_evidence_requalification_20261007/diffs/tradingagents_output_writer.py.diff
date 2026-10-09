@@ -1,0 +1,22 @@
+--- docs/audit_artifacts/round_source_linking_t0_t2/round18_evidence_requalification_20261007/pre_change_snapshot/comqutor_alpha_adapters_tradingagents_output_writer.py	2026-10-07 10:26:02
++++ comqutor_alpha/adapters/tradingagents_output_writer.py	2026-10-07 10:27:43
+@@ -376,6 +376,19 @@
+                 retrieved_at=created_at,
+                 captured_records=captured_sources,
+             )
++            # Round 18: an undated live financial data snapshot (published_at
++            # deliberately left unknown) gets a versioned, self-validating
++            # "available before the evidence cutoff" record, so the time gate
++            # can tell "captured live before the cutoff" from "no time basis
++            # at all". published_at itself is never touched.
++            from comqutor_alpha.source_provenance import (
++                AVAILABILITY_ANNOTATION_REGISTRY_WRITE,
++                annotate_sources_availability,
++            )
++
++            registry["sources"], _availability_summary = annotate_sources_availability(
++                registry.get("sources"), analysis_date, mode=AVAILABILITY_ANNOTATION_REGISTRY_WRITE
++            )
+             if registry["source_count"] > 0:
+                 save_json_record(run_id, "source_registry.json", registry, output_root=output_root)
+         except Exception:

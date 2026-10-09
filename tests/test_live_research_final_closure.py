@@ -249,3 +249,74 @@ def test_provider_style_failure_uses_consistent_terminal_helper(tmp_path):
     assert result["run_status"] == "failed"
     assert repo.get_research_run_record(claim["run_id"])["status"] == "failed"
     assert repo.get_research_progress(claim["run_id"])["current_stage"] == "failed"
+
+
+def test_real_submission_forwards_research_agent_budget_env_vars_to_execution_payload(monkeypatch):
+    """2026-09-30 (fifth follow-up round): COMQUTOR_RESEARCH_AGENT_MAX_ACTUAL_REQUESTS/
+    MAX_RETRIES are server-process-only controls (never from the client
+    payload, matching every other real-run control here) that must reach
+    execution_payload so run_streaming_tradingagents_research actually
+    enforces the real request-count guard."""
+    from comqutor_alpha import server_execution
+
+    repo = _repo()
+    monkeypatch.setenv("COMQUTOR_RESEARCH_AGENT_MAX_ACTUAL_REQUESTS", "50")
+    monkeypatch.setenv("COMQUTOR_RESEARCH_AGENT_MAX_RETRIES", "1")
+    monkeypatch.setattr(
+        server_execution,
+        "build_server_execution_context",
+        lambda: {
+            "enabled": True,
+            "config": {"llm_provider": "openai", "deep_think_llm": "gpt-5.5", "quick_think_llm": "gpt-5.4-mini"},
+            "execution_identity": SERVER_IDENTITY,
+            "profile_id": SERVER_IDENTITY["profile_id"],
+            "error": None,
+        },
+    )
+    monkeypatch.setattr(
+        server_execution, "build_live_semantic_readiness", lambda: {"ready": True, "error": None, "message": None}
+    )
+
+    prepared = prepare_research_submission(
+        {"ticker": "NVDA", "analysis_date": "2026-09-30", "selected_analysts": PUBLIC_ANALYSTS},
+        graph_repository=repo,
+        server_execution_identity=None,
+    )
+
+    assert prepared["execution_payload"]["allow_real_tradingagents_run"] is True
+    assert prepared["execution_payload"]["research_agent_max_actual_requests"] == 50
+    assert prepared["execution_payload"]["research_agent_max_retries"] == 1
+
+
+def test_real_submission_omits_research_agent_budget_when_env_vars_unset(monkeypatch):
+    """Default, unset case: zero behavior change for every existing real
+    submission that never sets these two env vars."""
+    from comqutor_alpha import server_execution
+
+    repo = _repo()
+    monkeypatch.delenv("COMQUTOR_RESEARCH_AGENT_MAX_ACTUAL_REQUESTS", raising=False)
+    monkeypatch.delenv("COMQUTOR_RESEARCH_AGENT_MAX_RETRIES", raising=False)
+    monkeypatch.setattr(
+        server_execution,
+        "build_server_execution_context",
+        lambda: {
+            "enabled": True,
+            "config": {"llm_provider": "openai", "deep_think_llm": "gpt-5.5", "quick_think_llm": "gpt-5.4-mini"},
+            "execution_identity": SERVER_IDENTITY,
+            "profile_id": SERVER_IDENTITY["profile_id"],
+            "error": None,
+        },
+    )
+    monkeypatch.setattr(
+        server_execution, "build_live_semantic_readiness", lambda: {"ready": True, "error": None, "message": None}
+    )
+
+    prepared = prepare_research_submission(
+        {"ticker": "NVDA", "analysis_date": "2026-09-30", "selected_analysts": PUBLIC_ANALYSTS},
+        graph_repository=repo,
+        server_execution_identity=None,
+    )
+
+    assert prepared["execution_payload"]["allow_real_tradingagents_run"] is True
+    assert "research_agent_max_actual_requests" not in prepared["execution_payload"]
+    assert "research_agent_max_retries" not in prepared["execution_payload"]

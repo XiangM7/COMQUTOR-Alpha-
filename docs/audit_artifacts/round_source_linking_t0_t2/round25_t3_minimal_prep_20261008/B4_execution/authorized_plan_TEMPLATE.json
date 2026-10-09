@@ -1,0 +1,95 @@
+{
+ "authorized": false,
+ "authorized_by": "",
+ "authorization_reference": "",
+ "execution_id": "t3joint-<UTC timestamp>-<8 hex>",
+ "out_dir": "outputs/t3_joint_evaluations",
+ "manifest": "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/B1_samples_v4/joint_sample_v4_manifest.json",
+ "manifest_sha256": "94e36106b89b7223c5a3eb6cf5d56353309f72ebb5a829a0d33c2d2b9c4a19e0",
+ "review_form": "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/B1_samples_v4/review_form_v4.json",
+ "review_form_sha256": "6842817f90dd3c4fba1c5adc84301cea2ac971a613d20e51959f54edd756ff42",
+ "frozen_requests": "docs/audit_artifacts/round_source_linking_t0_t2/round25_t3_minimal_prep_20261008/B4_execution/frozen_requests.json",
+ "frozen_requests_sha256": "727a6778ddbb8c3a137ccef193e49645c983d3f654a03450dcaf3351927fe0b8",
+ "code_identity": {
+  "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "tracked_diff_sha256": "ed8ea188c22a85d2524a9603528544e9b51358bfab2259da0abc4b9819a384c3",
+  "untracked_runtime_source_files": 22,
+  "untracked_runtime_source_sha256": "cbedbcfc86b2d5a1ed5b78a774852617e2243990fe800b6889b5aa102bfe0f65",
+  "driver_files_sha256": {
+   "t3_joint_sample_driver.py": "ab67368aeb36edc798b8998add57afcd85be2134b49d951cca410684fa89f71d",
+   "t3_diagnostic_evaluation_driver.py": "4918b32c4c3f12ef6271217e673420aa287ba0d38c3e5f30a8e10704fee98286"
+  }
+ },
+ "prompt_identity_sha256": {
+  "content_support_verification": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+  "alpha_classifier": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+  "evidence_stance_classifier": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2"
+ },
+ "config": {
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "base_url": "https://api.deepseek.com",
+  "api_key_env": "DEEPSEEK_API_KEY",
+  "timeout_seconds": {
+   "content_support_verification": 120.0,
+   "alpha_classifier": 45.0,
+   "evidence_stance_classifier": 120.0
+  },
+  "max_tokens": {
+   "content_support_verification": null,
+   "alpha_classifier": null,
+   "evidence_stance_classifier": null
+  },
+  "max_requests": {
+   "content_support_verification": 17,
+   "alpha_classifier": 40,
+   "evidence_stance_classifier": 13
+  },
+  "application_retries": 0,
+  "sdk_retries": 0,
+  "alpha_classifier_concurrency": 4,
+  "stance_concurrency": 4,
+  "content_support_batch_size": 1,
+  "alpha_classifier_path": "single (one claim per request; use_batched_classifier=False, the production default)",
+  "stance_batch_size": 10,
+  "cache": "none -- no semantic response cache is attached (NullLLMResponseCache)",
+  "unsent_parameters": "temperature, top_p, thinking, reasoning_effort, response_format: not sent -> provider defaults",
+  "stop_on_http_status": [
+   400,
+   401,
+   403,
+   404,
+   422,
+   429
+  ]
+ },
+ "collection": {
+  "authorized": false,
+  "request_cap": 4,
+  "targets": {
+   "US recession by end of 2026": [
+    "t3v3-037",
+    "t3v3-039",
+    "t3v3-040"
+   ],
+   "UK recession in 2026": [
+    "t3v3-037"
+   ],
+   "Japan recession in 2026": [
+    "t3v3-037",
+    "t3v3-038"
+   ]
+  },
+  "endpoints": [
+   "https://gamma-api.polymarket.com/public-search",
+   "https://clob.polymarket.com/prices-history"
+  ],
+  "window_utc": [
+   "2026-09-24",
+   "2026-10-07"
+  ],
+  "out_dir": "<out_dir>/<execution_id>-materials",
+  "note": "run by `collect` only when this flag is true; separate from predict"
+ },
+ "note": "UNSIGNED TEMPLATE -- predict refuses it until authorized=true and authorized_by is filled; its sha256 must be passed as --plan-sha256"
+}

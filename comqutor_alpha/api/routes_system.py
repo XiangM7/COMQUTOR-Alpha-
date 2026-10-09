@@ -147,6 +147,39 @@ def _active_profile_fields() -> dict[str, Any] | None:
     }
 
 
+def _instance_identity_fields(output_root: str | None) -> dict[str, Any]:
+    """T4 (2026-10-08): which database (backend + name only, never the DSN or
+    a credential), which Week 2 execution profile and which code this
+    instance runs, so an operator can see they are on the intended
+    instance. Every field degrades to ``None``/unknown instead of failing
+    readiness."""
+    from comqutor_alpha.run_environment import database_backend, process_code_identity
+
+    database = database_backend(output_root)
+    try:
+        from comqutor_alpha.structure_engine.week2_llm import resolve_server_week2_settings
+
+        settings = resolve_server_week2_settings()
+        week2 = {
+            "enabled": settings["enabled"],
+            "execution_profile": settings["profile"].name if settings["profile"] is not None else None,
+            "profile_error": settings["profile_error"],
+            "model": settings["model_name"] or None,
+            "max_calls": settings["max_calls"],
+            "request_response_audit": settings["request_response_audit"],
+        }
+    except Exception:
+        week2 = None
+    identity = process_code_identity()
+    return {
+        "database_backend": {"dialect": database.get("dialect"), "database": database.get("database"),
+                             "reason": database.get("reason")},
+        "week2_semantic": week2,
+        "code_identity": {key: identity.get(key) for key in ("status", "git_head", "uncommitted_changes", "tracked_diff_sha256",
+                                                             "untracked_runtime_source_sha256", "computed_at")},
+    }
+
+
 def readiness_response(*, job_manager: Any, output_root: str | None = None) -> tuple[dict[str, Any], bool]:
     """Returns ``(body, overall_ready)``. Overall readiness requires the
     database (migrated through 0005) *and* job manager to both be usable; a
@@ -183,6 +216,7 @@ def readiness_response(*, job_manager: Any, output_root: str | None = None) -> t
         # hardcoded provider label. None only if the profile itself fails
         # to build (see real_execution_reason for why).
         "profile": _active_profile_fields(),
+        **_instance_identity_fields(output_root),
     }
     return body, overall_ready
 

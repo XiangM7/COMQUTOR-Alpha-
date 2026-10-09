@@ -136,7 +136,7 @@ export function ConflictRadarPage() {
             : null}
         </p>
         {conflicts.main_conflict ? (
-          <ConflictCard conflict={conflicts.main_conflict} isMain />
+          <ConflictCard conflict={conflicts.main_conflict} isMain runId={runId} />
         ) : (
           <EmptyState
             title="No conflicts detected"
@@ -151,7 +151,7 @@ export function ConflictRadarPage() {
           <ul className="conflict-list">
             {conflicts.conflicts.map((conflict) => (
               <li key={conflict.conflict_id}>
-                <ConflictCard conflict={conflict} isMain={conflict.conflict_id === conflicts.main_conflict?.conflict_id} />
+                <ConflictCard conflict={conflict} isMain={conflict.conflict_id === conflicts.main_conflict?.conflict_id} runId={runId} />
               </li>
             ))}
           </ul>
@@ -212,7 +212,7 @@ export function ConflictRadarPage() {
               .filter((item) => item.outcome !== "admitted")
               .map((item) => (
                 <li key={`${item.alpha_a}__${item.alpha_b}`}>
-                  <CandidateConflictCard evaluation={item} />
+                  <CandidateConflictCard evaluation={item} runId={runId} />
                 </li>
               ))}
           </ul>

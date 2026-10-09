@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable, Iterable, Mapping
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, TypeVar
@@ -385,11 +386,44 @@ _GATEWAY_ERROR_CODE_TO_FALLBACK_REASON: dict[str, str] = {
     "WEEK2_LLM_INVALID_JSON": "invalid_output",
     "WEEK2_LLM_VALIDATION_FAILED": "invalid_output",
     "WEEK2_LLM_INPUT_TOO_LARGE": "input_too_large",
+    # 2026-10-01 (v7 limited real-verification round): a response whose own
+    # finish_reason is confirmed "length" -- real truncation against the
+    # configured output cap, never retried under the same configuration
+    # (see Week2LLMGateway.invoke_json_with_trace) -- gets its own distinct
+    # reason, never folded into the generic "invalid_output" bucket. This
+    # must never map to "none": truncation is not the model declining to
+    # classify, and must not be read or reported as if it were.
+    "WEEK2_LLM_OUTPUT_TRUNCATED": "output_truncated",
+    # 2026-10-06 (round 14): the Gateway refused to send because its own
+    # request/response audit could not be persisted (a LOCAL infrastructure
+    # failure, nothing reached the Provider). Previously fell through to the
+    # generic "invalid_output" default, which reads as "the model replied
+    # malformed" -- a different failure class entirely. Still an
+    # UNAVAILABLE-only reason, never NONE; mirrors content_support_llm's own
+    # FALLBACK_AUDIT_WRITE_FAILED precedent.
+    "WEEK2_LLM_AUDIT_WRITE_FAILED": "audit_unavailable",
+    # 2026-10-08 (T4 round 28): never sent because an earlier request of the
+    # run got HTTP 401/403/429 and the run was stopped -- not sent, never NONE
+    # (comqutor_alpha.run_provider_stop.STOP_ERROR_CODE).
+    "WEEK2_LLM_RUN_STOPPED_AFTER_PROVIDER_REFUSAL": "provider_stopped",
 }
 
 
 def _gateway_error_to_fallback_reason(error_code: str | None) -> str:
     return _GATEWAY_ERROR_CODE_TO_FALLBACK_REASON.get(error_code or "", "invalid_output")
+
+
+def _gateway_accepts_claim_ids(llm_gateway: Any) -> bool:
+    """True when ``llm_gateway.invoke_json_with_trace`` explicitly declares a
+    ``claim_ids`` parameter (or any ``**kwargs`` that would carry it)."""
+    method = getattr(llm_gateway, "invoke_json_with_trace", None)
+    if method is None:
+        return False
+    try:
+        parameters = inspect.signature(method).parameters
+    except (TypeError, ValueError):
+        return False
+    return "claim_ids" in parameters or any(p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values())
 
 
 def _classify_alpha_with_llm(
@@ -445,10 +479,27 @@ def _classify_alpha_with_llm(
                     validate_response,
                 )
             else:
+                claim_id = record.get("claim_id")
+                # 2026-10-06 (round 14): explicit, out-of-band claim identity
+                # for the Gateway's own request/response audit and
+                # semantic-call records -- never added to `request` above, so
+                # the model's own prompt and the semantic cache key (derived
+                # from `request`) are both unchanged. Passed ONLY to a gateway
+                # whose invoke_json_with_trace declares it (the real Gateway;
+                # the adapter's transparent proxy): a gateway-like object with
+                # the older 3-argument signature keeps working untouched.
+                # Detected by signature, never by catching the TypeError --
+                # that would be swallowed below as a fake "provider_error".
+                trace_kwargs = (
+                    {"claim_ids": (str(claim_id),)}
+                    if claim_id and _gateway_accepts_claim_ids(llm_gateway)
+                    else {}
+                )
                 invocation = llm_gateway.invoke_json_with_trace(
                     "alpha_classifier",
                     request,
                     validate_response,
+                    **trace_kwargs,
                 )
                 if invocation.validation_accepted:
                     llm_gateway.finalize_semantic_invocation(invocation, accepted=True)
@@ -955,6 +1006,18 @@ def map_claim_to_alpha(
         # classifier). False (never fabricated) whenever the gate did not
         # apply, including for every Alpha without a registered classifier.
         "alpha_positive_requirement_override": alpha_positive_requirement_override,
+        # Additive diagnostic (2026-10-01, AI-review comparison round): the
+        # classifier's OWN raw selection, captured from ``llm_outcome``
+        # (never mutated by the two overrides above) -- distinct from
+        # ``matched_alpha``, which reflects the FINAL post-veto state. When
+        # neither override fires these are identical; when a veto overrides
+        # a valid LLM selection back to no_match, this field is the only
+        # place that still records what the classifier actually chose.
+        # None whenever the classifier did not select anything (outcome
+        # "none" or "unavailable") -- never fabricated.
+        "llm_selected_alpha_id": (
+            llm_outcome["alpha_id"] if llm_outcome["outcome"] == "selected" else None
+        ),
         # Pure-LLM Alpha semantic authority: which semantic authority
         # produced `matched_alpha` -- always "llm" for a genuine LLM
         # decision, whether it selected an Alpha (match_status="matched") or
@@ -1056,6 +1119,25 @@ def map_structured_records(
         getattr(llm_gateway, "invoke_json_with_trace", None)
     )
     batching_active = use_batched_classifier and gateway_supports_trace
+    # 2026-10-06 (round 11 -> round 13): round 11 found a real defect here --
+    # Week2LLMGateway's request/response audit mode tracked at most one
+    # pending attempt via a single, Gateway-wide slot, and this function's
+    # own concurrency (default 4, DEFAULT_ALPHA_CLASSIFIER_CONCURRENCY)
+    # dispatched onto that SAME shared gateway at once, causing 973 of 975
+    # real classification attempts in a real run (c904d4cc) to fail with
+    # WEEK2_LLM_AUDIT_CONCURRENT_ATTEMPT, silently converted to
+    # "provider_error" by _classify_alpha_with_llm's own except clause.
+    # Round 11's own fix forced concurrency=1 whenever audit was on -- a
+    # deliberately labeled temporary compatibility shim, not a real fix.
+    # Round 13 replaced the Gateway's own single-slot design with real,
+    # independent per-attempt identity (contextvars.ContextVar, explicitly
+    # propagated across call_with_timeout's nested executor boundary -- see
+    # week2_llm.py's own _current_audit_attempt docstring), so concurrent
+    # audited dispatch is now genuinely safe. The forced-serial override is
+    # therefore REMOVED here: ``concurrency`` keeps its real, original
+    # meaning (the caller's own explicit value, or
+    # resolve_alpha_classifier_concurrency()'s env-var-driven default) in
+    # every case, audit-enabled or not.
     concurrency_active = (not batching_active) and gateway_supports_trace and int(concurrency) > 1
 
     llm_outcome_by_claim_id: dict[str, dict[str, Any]] = {}
@@ -1177,3 +1259,90 @@ def save_alpha_matches(
     )
     save_json_record(run_id, "alpha_matches.json", payload, output_root=output_root)
     return payload
+
+
+# Never sent because the classifier was deliberately off / unconfigured: a
+# configuration state, not a fault.
+_NEVER_SENT_BY_CONFIGURATION = frozenset({"disabled", "unavailable"})
+# Never sent because something went wrong locally (the Gateway's own audit
+# was unavailable, the call budget was already spent, the input was too big).
+_NEVER_SENT_BY_FAULT = frozenset({"audit_unavailable", "call_budget_exhausted", "input_too_large", "provider_stopped"})
+_NEVER_SENT_FALLBACK_REASONS = _NEVER_SENT_BY_CONFIGURATION | _NEVER_SENT_BY_FAULT
+
+
+def compute_alpha_classification_completion(alpha_matches_payload: Mapping[str, Any] | None) -> dict[str, Any]:
+    """2026-10-06 (round 14, section 6): read-only summary of how COMPLETE
+    the real Alpha classification pass for a run actually is -- the exact
+    distinction this round's own AMD c904d4cc investigation needed and
+    lacked a single, shared answer for: a genuinely-decided valid NONE is
+    not the same as a claim whose real classification attempt failed
+    (provider_error/timeout/budget_exhausted), and neither is the same as a
+    claim the classifier was never run against at all (disabled/
+    unavailable). Collapsing these three into one "no Alpha" bucket is
+    exactly what made the 973/975 real c904d4cc failures invisible without
+    a deep audit.
+
+    Reads ONLY the already-persisted alpha_match_method/alpha_match_
+    fallback_reason/matched_alpha fields exactly as alpha_matches.json
+    already has them -- never re-runs or re-derives classification, never
+    mutates the payload. Callers that also have this run's own
+    dominant_alphas (a separate, downstream Structure Graph artifact this
+    function has no access to) combine the two to reach the full 4-state
+    judgment the API/summary/page all need to share; see
+    routes_research.py's own build_research_response for that combination.
+    """
+    matches = (
+        alpha_matches_payload.get("matches")
+        if isinstance(alpha_matches_payload, Mapping)
+        else None
+    )
+    matches = matches if isinstance(matches, list) else []
+
+    valid_select_count = 0
+    valid_none_count = 0
+    call_failure_count = 0
+    not_executed_configuration_count = 0
+    not_executed_fault_count = 0
+    for match in matches:
+        if not isinstance(match, Mapping):
+            continue
+        method = match.get("alpha_match_method")
+        fallback_reason = match.get("alpha_match_fallback_reason")
+        if method == "llm" and fallback_reason is None:
+            if match.get("matched_alpha"):
+                valid_select_count += 1
+            else:
+                valid_none_count += 1
+        elif fallback_reason in _NEVER_SENT_FALLBACK_REASONS:
+            # No request ever reached the Provider for this claim (the
+            # classifier was off/unconfigured, the call budget was already
+            # spent, the input was too large to send, or the Gateway
+            # refused because its own audit was unavailable) -- distinct
+            # from a real attempt that failed.
+            if fallback_reason in _NEVER_SENT_BY_CONFIGURATION:
+                not_executed_configuration_count += 1
+            else:
+                not_executed_fault_count += 1
+        else:
+            # Every other fallback_reason (provider_error, provider_timeout,
+            # provider_rate_limited, an invalid/truncated response, ...)
+            # reflects a REAL attempt that did not produce a usable result
+            # -- a genuine call failure, never folded into "not executed"
+            # or silently treated as a valid NONE.
+            call_failure_count += 1
+
+    total_claims = len(matches)
+    not_executed_count = not_executed_configuration_count + not_executed_fault_count
+    complete = total_claims > 0 and call_failure_count == 0 and not_executed_count == 0
+    return {
+        "total_claims": total_claims,
+        "valid_select_count": valid_select_count,
+        "valid_none_count": valid_none_count,
+        "call_failure_count": call_failure_count,
+        "not_executed_count": not_executed_count,
+        # Split of not_executed_count (always sums to it): a deliberately
+        # disabled/unconfigured classifier is not a fault; a refused send is.
+        "not_executed_configuration_count": not_executed_configuration_count,
+        "not_executed_fault_count": not_executed_fault_count,
+        "complete": complete,
+    }

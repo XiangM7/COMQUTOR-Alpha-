@@ -1,0 +1,2113 @@
+{
+ "schema_version": "release_manifest.v2",
+ "generated_at_utc": "2026-10-08T00:43:21+00:00",
+ "task": "COMQUTOR Alpha next-round task sheet -- T0 delivery identity, T1 closeout (Round 22)",
+ "supersedes": {
+  "path": "docs/audit_artifacts/round_source_linking_t0_t2/release_manifest.json",
+  "sha256": "96c7d6716b7a2515fe6e4a6bb5c7150a622d8bf54f8066dc123226c8c1718128",
+  "note": "kept unchanged: it records the 2026-10-01 baseline and none of the later runs"
+ },
+ "git": {
+  "branch": "comqutor-source-linking-t0-t2",
+  "head_sha": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "head_subject": "test v0.2",
+  "commits_made_for_this_delivery": 0,
+  "pushed": false,
+  "working_tree_has_uncommitted_changes": true,
+  "uncommitted_tracked_files": 126,
+  "untracked_source_files": 131,
+  "warning": "HEAD alone does not identify the executed code: the tree carries a large uncommitted difference. The snapshots below are the code identity."
+ },
+ "code_snapshots": {
+  "S0_before_round22": {
+   "dir": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S0_before_round22",
+   "head_json": {
+    "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S0_before_round22/HEAD.json",
+    "bytes": 695,
+    "sha256": "2f153b895c3e15ead686d4d8d752edc712c43ade0f713be0ff69939205349af9"
+   },
+   "tracked_diff_vs_HEAD": {
+    "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S0_before_round22/tracked_diff_vs_HEAD.patch",
+    "bytes": 1008187,
+    "sha256": "af7713f116ee79cc3d3a40c49f4e4f62d14b9dcf1a6b5e7fd1e8f20d7d12b36a"
+   },
+   "file_hashes": {
+    "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S0_before_round22/file_hashes.json",
+    "bytes": 45815,
+    "sha256": "4e64706de4e8e245cfe9569bc305f190892c8f003322a5b1e7b0d0e074b4b36b"
+   },
+   "untracked_source_files": 123,
+   "meaning": "the working tree immediately BEFORE Round 22 changed anything: the code of dependency-20261007T220450Z-33128621"
+  },
+  "S1_final": {
+   "dir": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S1_final",
+   "head_json": {
+    "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S1_final/HEAD.json",
+    "bytes": 686,
+    "sha256": "6fa111a40681af2f48da160290110856b4c17affccd470c75fc1dc9683e25868"
+   },
+   "tracked_diff_vs_HEAD": {
+    "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S1_final/tracked_diff_vs_HEAD.patch",
+    "bytes": 1028989,
+    "sha256": "a342c462807ca9540a4cf7d20102e62924816ac24190e0b29deb257bdeaa8e05"
+   },
+   "file_hashes": {
+    "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S1_final/file_hashes.json",
+    "bytes": 48125,
+    "sha256": "91a4d15d671207dfc6743a040f608bf9984bca2b0e5979dfd515781aced08d3b"
+   },
+   "untracked_source_files": 131,
+   "meaning": "the working tree at delivery"
+  },
+  "round22_changes": {
+   "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/round22_changes.patch",
+   "bytes": 455353,
+   "sha256": "32b9a5bc8756c5df15269cd1f04c88c08a245042d13163b906b2cd6068670d29"
+  },
+  "how_to_rebuild": "git archive HEAD (paths in file_hashes.json) + git apply tracked_diff_vs_HEAD.patch + copy untracked_source/ ; verify with verify_snapshot.py"
+ },
+ "rules": {
+  "rule_files": {
+   "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": {
+    "snapshot_copy": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S1_final/rule_files/comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+    "sha256": "18a0dc6b5de7bbae3541272fbd66fa1172e62eed172fd86e97a72e1a40d90972",
+    "bytes": 13117
+   },
+   "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml": {
+    "snapshot_copy": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S1_final/rule_files/comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+    "sha256": "6037e2616b06b8089e5322aa69630e553042bf8d7541be484c5d45bc9bef090c",
+    "bytes": 10035
+   },
+   "docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml": {
+    "snapshot_copy": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S1_final/rule_files/docs/audit_artifacts/v0_2_john_frozen_gold_baseline.yaml",
+    "sha256": "b8165911b78aa46fa4993a6b209d47e2b66e152547a618e2587facd97eb79a9c",
+    "bytes": 6919
+   }
+  },
+  "versions_recorded_in_the_final_execution": {
+   "activation_formula_version": "activation.v2.evidence_local_structure.verified_gate.v1",
+   "primary_activation_version": "activation.v2.evidence_local_structure.verified_gate.v1",
+   "conflict_formula_version": "week4.conflict_score.mvp_v1",
+   "conflict_source_schema": "week4.alpha_conflicts.v1",
+   "fact_dependency_contract": "claim_data_points.v1",
+   "evidence_trace_schema": "evidence_trace.v1"
+  },
+  "note": "frozen / hash-pinned production files equal HEAD byte for byte (see ../round21_t1_minimal_closure_20261007/final_scope_proofs.json)"
+ },
+ "prompts": {
+  "files": {
+   "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/alpha_classifier__week2.alpha_classifier.v7.txt": {
+    "sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "task": "alpha_classifier",
+    "prompt_version": "week2.alpha_classifier.v7"
+   },
+   "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/alpha_classifier_batch__week2.alpha_classifier_batch.v4.txt": {
+    "sha256": "f217bdbeb5a68f80f1447a1178f97b2a4c314d90f445cf92b356b164c33ebc2e",
+    "task": "alpha_classifier_batch",
+    "prompt_version": "week2.alpha_classifier_batch.v4"
+   },
+   "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structured_adapter__week2.claim_batch_enrichment.v1.txt": {
+    "sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+    "task": "structured_adapter",
+    "prompt_version": "week2.claim_batch_enrichment.v1"
+   },
+   "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/content_support_verification__content_support.llm.v2.1.txt": {
+    "sha256": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+    "task": "content_support_verification",
+    "prompt_version": "content_support.llm.v2.1"
+   },
+   "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/evidence_stance_classifier__evidence_stance.llm_classifier.v3.txt": {
+    "sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+    "task": "evidence_stance_classifier",
+    "prompt_version": "evidence_stance.llm_classifier.v3"
+   },
+   "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structure_extractor__week2.structure_extractor.v1.txt": {
+    "sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+    "task": "structure_extractor",
+    "prompt_version": "week2.structure_extractor.v1"
+   }
+  },
+  "note": "prompt text of every Week2 semantic task in the delivered code; a run's recorded prompt_sha256 equal to one of these hashes means the run used exactly that text. content_support.llm.v2.1 calls of the AMD runs carry the version string in their saved results but NO per-call prompt hash (their calls are not in the semantic ledger), so that prompt is not bound to those calls"
+ },
+ "environment": {
+  "python": "3.13.5",
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "dependencies": {
+   "fastapi": "0.139.0",
+   "sqlalchemy": "2.0.51",
+   "pydantic": "2.13.4",
+   "pandas": "3.0.3",
+   "numpy": "2.5.1",
+   "stockstats": "0.6.8",
+   "yfinance": "1.5.1",
+   "langgraph": "1.2.9",
+   "psycopg": "3.3.4",
+   "uvicorn": "0.51.0",
+   "pytest": "9.1.1"
+  },
+  "database": {
+   "recorded_for": "the dependency-* executions and the read-only viewer",
+   "kind": "PostgreSQL (isolated database whose name ends in _test)",
+   "name": "comqutor_alpha_test",
+   "connection_string": "NOT_RECORDED (credentials are never written to a manifest)",
+   "other_runs": "NOT_RECORDED per run unless the run's own files say so"
+  }
+ },
+ "execution_type_legend": {
+  "FRESH_RUN": "Fresh Run: data fetched and the research agents run",
+  "FROZEN_INPUT_RECOMPUTE": "frozen-input recompute: no new market data; a model may be called again",
+  "RESULT_REEVALUATION": "result re-evaluation: the research result is unchanged; only evaluation / grouping / scoring is recomputed (zero model calls)"
+ },
+ "runs": {
+  "d5b60b8a-66b8-44c1-9f55-ee345e58c48d": {
+   "run_id": "d5b60b8a-66b8-44c1-9f55-ee345e58c48d",
+   "role": "original_research_run",
+   "execution_type": "FRESH_RUN",
+   "note": "the run of John's original 34 conflict-evidence items (evidence cutoff 2026-09-21); it predates source linking",
+   "ticker": "AMD",
+   "analysis_date": "2026-09-21",
+   "evidence_cutoff": "2026-09-21",
+   "created_at": "2026-09-21T20:22:27Z",
+   "parent_run_id": null,
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/metadata.json",
+      "original": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/metadata.json",
+      "sha256": "adf616b0222771b4747c07d60f4e48ba204688fbe47bd1f762b56ce92d634781"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/artifact_manifest.json",
+      "original": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/artifact_manifest.json",
+      "sha256": "86a1ab3b0013ade2af9c7f6630306cd23cebeb272f267e0bbb7fccd2b104382e"
+     },
+     "llm_semantic_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/llm_semantic_manifest.json",
+      "original": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/llm_semantic_manifest.json",
+      "sha256": "f155e765130cc8598547edda48538046b3b5760e5bca71b876a0df2d08a53440"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "semantic_steps": {
+     "manifest": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/llm_semantic_manifest.json",
+     "calls_file": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/llm_semantic_calls.jsonl",
+     "provider_call_count": 781,
+     "record_count": 747,
+     "tasks": {
+      "alpha_classifier": 699,
+      "evidence_stance_classifier": 37,
+      "structure_extractor": 2,
+      "structured_adapter": 9
+     },
+     "distinct_task_prompt_model": [
+      {
+       "task": "alpha_classifier",
+       "prompt_version": "week2.alpha_classifier.v6",
+       "prompt_sha256": "bb2dbdf0f3fc9a43291233494c2f355275b4fe6fddc71cd63fd1377f9ba109d9",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 699,
+       "prompt_content_in_delivery": "NOT_IN_DELIVERY (hash only: no prompt text with this sha256 exists in the delivered code)"
+      },
+      {
+       "task": "evidence_stance_classifier",
+       "prompt_version": "evidence_stance.llm_classifier.v3",
+       "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 37,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/evidence_stance_classifier__evidence_stance.llm_classifier.v3.txt"
+      },
+      {
+       "task": "structure_extractor",
+       "prompt_version": "week2.structure_extractor.v1",
+       "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 2,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structure_extractor__week2.structure_extractor.v1.txt"
+      },
+      {
+       "task": "structured_adapter",
+       "prompt_version": "week2.claim_batch_enrichment.v1",
+       "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 9,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structured_adapter__week2.claim_batch_enrichment.v1.txt"
+      }
+     ]
+    }
+   },
+   "lineage": null,
+   "logs": [
+    {
+     "path": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/llm_semantic_calls.jsonl",
+     "bytes": 2898919,
+     "sha256": "827a135516feb25eb96fd4e958b12b5477c29900f9ffe1cee1a70320c30cfb15"
+    },
+    {
+     "path": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/error_logs/week2_llm_errors.jsonl",
+     "bytes": 8746,
+     "sha256": "0e2a377c89643f0ec097a85e74b19cc294fffdbbe8ae897825393f5950247040"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/d5b60b8a-66b8-44c1-9f55-ee345e58c48d.json",
+     "bytes": 2430,
+     "sha256": "55fdabdbce7aa634b6c6d8417cc8b67ee866de39a7e1a4e13c4e587d0552d6bc"
+    }
+   ],
+   "directory": {
+    "file_count": 24,
+    "directory_digest_sha256": "9298b7a6c3780c96c20d0980f3785833b3d780668f03eb042b6f819ae5d63027",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/d5b60b8a-66b8-44c1-9f55-ee345e58c48d.json",
+    "content_location": "outputs/runs/d5b60b8a-66b8-44c1-9f55-ee345e58c48d/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "034a0a60-430e-41f8-8321-03a11389707a": {
+   "run_id": "034a0a60-430e-41f8-8321-03a11389707a",
+   "role": "original_research_run",
+   "execution_type": "FRESH_RUN",
+   "note": "NVDA; first real run after source capture was added",
+   "ticker": "NVDA",
+   "analysis_date": "2026-10-02",
+   "evidence_cutoff": "2026-10-02",
+   "created_at": "2026-10-02T00:55:24Z",
+   "parent_run_id": null,
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/034a0a60-430e-41f8-8321-03a11389707a/metadata.json",
+      "original": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/metadata.json",
+      "sha256": "399d4b35b9c6f2e747e558f765b2ff01944920b49857c9c2429c683bc6a72774"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/034a0a60-430e-41f8-8321-03a11389707a/artifact_manifest.json",
+      "original": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/artifact_manifest.json",
+      "sha256": "02fef5bf86d805202ab349508cdc34f41e54d6abdbab29291a0269c148a12b26"
+     },
+     "llm_semantic_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/034a0a60-430e-41f8-8321-03a11389707a/llm_semantic_manifest.json",
+      "original": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/llm_semantic_manifest.json",
+      "sha256": "e84662eea7d99031fe1c6fcc9ebefe63efcc97b6730322337ef026bda9c97ea7"
+     },
+     "tradingagents_llm_usage_summary.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/034a0a60-430e-41f8-8321-03a11389707a/tradingagents_llm_usage_summary.json",
+      "original": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/tradingagents_llm_usage_summary.json",
+      "sha256": "f324e782f52e8d84c88b369ec6e11f91cd0403ecf35e0f95cdbe639f5e6ec9d8"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "semantic_steps": {
+     "manifest": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/llm_semantic_manifest.json",
+     "calls_file": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/llm_semantic_calls.jsonl",
+     "provider_call_count": 448,
+     "record_count": 838,
+     "tasks": {
+      "alpha_classifier": 800,
+      "evidence_stance_classifier": 14,
+      "structure_extractor": 16,
+      "structured_adapter": 8
+     },
+     "distinct_task_prompt_model": [
+      {
+       "task": "alpha_classifier",
+       "prompt_version": "week2.alpha_classifier.v7",
+       "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 800,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/alpha_classifier__week2.alpha_classifier.v7.txt"
+      },
+      {
+       "task": "evidence_stance_classifier",
+       "prompt_version": "evidence_stance.llm_classifier.v3",
+       "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 14,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/evidence_stance_classifier__evidence_stance.llm_classifier.v3.txt"
+      },
+      {
+       "task": "structure_extractor",
+       "prompt_version": "week2.structure_extractor.v1",
+       "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 16,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structure_extractor__week2.structure_extractor.v1.txt"
+      },
+      {
+       "task": "structured_adapter",
+       "prompt_version": "week2.claim_batch_enrichment.v1",
+       "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 8,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structured_adapter__week2.claim_batch_enrichment.v1.txt"
+      }
+     ]
+    }
+   },
+   "lineage": null,
+   "logs": [
+    {
+     "path": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/llm_semantic_calls.jsonl",
+     "bytes": 3437288,
+     "sha256": "6def9f0a84c4eca5d8c68d95254557865dff0336317685e171b636a32b88f12d"
+    },
+    {
+     "path": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/tradingagents_llm_calls.jsonl",
+     "bytes": 11232,
+     "sha256": "6880d620242ea6c35f9b0f4a697002f6baba9d112bbb755dadde45773c2e7b52"
+    },
+    {
+     "path": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/error_logs/week2_llm_errors.jsonl",
+     "bytes": 8099,
+     "sha256": "2bbd58046c4b51e9e3b41003613b2915041d083dc37e062992e4cfc03eefdcfa"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/034a0a60-430e-41f8-8321-03a11389707a.json",
+     "bytes": 2643,
+     "sha256": "1bf2d367bc4af79c1d7138a72a40d3280976ece1047dc53bd178704711f539f2"
+    }
+   ],
+   "directory": {
+    "file_count": 26,
+    "directory_digest_sha256": "8610c6d44bf4ab1341ddc62d12bfe083e7ddc022517acf5ccd844b7b4ed89a46",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/034a0a60-430e-41f8-8321-03a11389707a.json",
+    "content_location": "outputs/runs/034a0a60-430e-41f8-8321-03a11389707a/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105": {
+   "run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "role": "original_research_run",
+   "execution_type": "FRESH_RUN",
+   "note": "AMD 2026-10-05",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "evidence_cutoff": "2026-10-05",
+   "created_at": "2026-10-05T17:36:24Z",
+   "parent_run_id": null,
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/metadata.json",
+      "original": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/metadata.json",
+      "sha256": "eef173af99fb45a4932d1e4fa372b2706b612f99ef64bf06512fef5b1e42b395"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/artifact_manifest.json",
+      "original": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/artifact_manifest.json",
+      "sha256": "6b65c483122fc1501de92d7c3350b5a6c9193b73bd51acd373dafece18bed864"
+     },
+     "llm_semantic_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/llm_semantic_manifest.json",
+      "original": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/llm_semantic_manifest.json",
+      "sha256": "77076959d16fc0df74f2947d8a32d355d19d4eb9485de933f1832fe6f263916f"
+     },
+     "tradingagents_llm_usage_summary.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/tradingagents_llm_usage_summary.json",
+      "original": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/tradingagents_llm_usage_summary.json",
+      "sha256": "fb0ee46512330b90891b18975ea8e03ef47262c24cfb488f99117481fb4aa2b5"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "semantic_steps": {
+     "manifest": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/llm_semantic_manifest.json",
+     "calls_file": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/llm_semantic_calls.jsonl",
+     "provider_call_count": 450,
+     "record_count": 555,
+     "tasks": {
+      "alpha_classifier": 536,
+      "evidence_stance_classifier": 12,
+      "structure_extractor": 3,
+      "structured_adapter": 4
+     },
+     "distinct_task_prompt_model": [
+      {
+       "task": "alpha_classifier",
+       "prompt_version": "week2.alpha_classifier.v7",
+       "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 536,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/alpha_classifier__week2.alpha_classifier.v7.txt"
+      },
+      {
+       "task": "evidence_stance_classifier",
+       "prompt_version": "evidence_stance.llm_classifier.v3",
+       "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 12,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/evidence_stance_classifier__evidence_stance.llm_classifier.v3.txt"
+      },
+      {
+       "task": "structure_extractor",
+       "prompt_version": "week2.structure_extractor.v1",
+       "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 3,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structure_extractor__week2.structure_extractor.v1.txt"
+      },
+      {
+       "task": "structured_adapter",
+       "prompt_version": "week2.claim_batch_enrichment.v1",
+       "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 4,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structured_adapter__week2.claim_batch_enrichment.v1.txt"
+      }
+     ]
+    }
+   },
+   "lineage": null,
+   "logs": [
+    {
+     "path": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/llm_semantic_calls.jsonl",
+     "bytes": 2540792,
+     "sha256": "44b25cf1a0ab5e83ab451d71e102371eb69d02b24832249230c70dca92f70d15"
+    },
+    {
+     "path": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/tradingagents_llm_calls.jsonl",
+     "bytes": 9927,
+     "sha256": "0cd42b3bcded50bc0f16bba5c3d2b7b83fcfb46e7a85dfa61f6561aa173d10e7"
+    },
+    {
+     "path": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/error_logs/week2_llm_errors.jsonl",
+     "bytes": 1762,
+     "sha256": "53b7cf3ece0625f3645e69f1cec68aa83b92c864058c1d777322e17485753b22"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105.json",
+     "bytes": 2739,
+     "sha256": "129cc6d7e41449d6b56c3c0e9d6d5be1248d207a51f0f60da3a6354e09487c33"
+    }
+   ],
+   "directory": {
+    "file_count": 27,
+    "directory_digest_sha256": "5650894670b13f047fe546b5fbfd16d9f7589ac6c534be98f9ee9d83d4bdf800",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105.json",
+    "content_location": "outputs/runs/1bad76a7-72ac-4c8b-8189-2e5c0f1a6105/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "automated-eligibility-reeval-20261005T190101Z-d9b7fdba": {
+   "run_id": "automated-eligibility-reeval-20261005T190101Z-d9b7fdba",
+   "role": "derived_execution",
+   "execution_type": "RESULT_REEVALUATION",
+   "parent": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "evidence_cutoff": "2026-10-05",
+   "created_at": "2026-10-05T17:36:24Z",
+   "parent_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/automated-eligibility-reeval-20261005T190101Z-d9b7fdba/metadata.json",
+      "original": "outputs/runs/automated-eligibility-reeval-20261005T190101Z-d9b7fdba/metadata.json",
+      "sha256": "ae28e13d102300176657c00d21b9c547fcad9b5daefe5274e21d507cae2add42"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/automated-eligibility-reeval-20261005T190101Z-d9b7fdba/artifact_manifest.json",
+      "original": "outputs/runs/automated-eligibility-reeval-20261005T190101Z-d9b7fdba/artifact_manifest.json",
+      "sha256": "62f490f081c15c7f3eb4a9ef1be6c95d234c9f675a08deb64115ec6b8866f617"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": "NO_SEMANTIC_LEDGER_IN_THIS_EXECUTION (a model call would have written llm_semantic_calls.jsonl; the lineage does not state a count)",
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": null,
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/automated-eligibility-reeval-20261005T190101Z-d9b7fdba.json",
+     "bytes": 1718,
+     "sha256": "254d4b0473097c368ca71bc98f7edb637c796294be01b56dd9917fe994d68157"
+    }
+   ],
+   "directory": {
+    "file_count": 17,
+    "directory_digest_sha256": "e28b7519f73b00072b77332b2c0a2637134b33a715f1e46af494b3cf010d108e",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/automated-eligibility-reeval-20261005T190101Z-d9b7fdba.json",
+    "content_location": "outputs/runs/automated-eligibility-reeval-20261005T190101Z-d9b7fdba/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "review-20261006T001859Z-ec6000de": {
+   "run_id": "review-20261006T001859Z-ec6000de",
+   "role": "derived_execution",
+   "execution_type": "FROZEN_INPUT_RECOMPUTE",
+   "parent": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "evidence_cutoff": "2026-10-05",
+   "created_at": "2026-10-05T17:36:24Z",
+   "parent_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T001859Z-ec6000de/metadata.json",
+      "original": "outputs/runs/review-20261006T001859Z-ec6000de/metadata.json",
+      "sha256": "0e965fdc1d4a6071eeea7e34e7ced852b5aa9d139f93f085f6ce57d00db1c9a2"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T001859Z-ec6000de/artifact_manifest.json",
+      "original": "outputs/runs/review-20261006T001859Z-ec6000de/artifact_manifest.json",
+      "sha256": "982e28c3c2e50881a0fced346ccb9fe8d717d3911904e1fa4dcf8832d1cac1b0"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": "NO_SEMANTIC_LEDGER_IN_THIS_EXECUTION (a model call would have written llm_semantic_calls.jsonl; the lineage does not state a count)",
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": null,
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T001859Z-ec6000de.json",
+     "bytes": 1696,
+     "sha256": "0b56b884859545ca7bb8182ec08cf7dff2dea193cbd203637399469b20dda2ea"
+    }
+   ],
+   "directory": {
+    "file_count": 17,
+    "directory_digest_sha256": "b19f71066b77ebd5376f8fe34b5834a76f63bb9c3ea946bb4320054cb35f5f6b",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T001859Z-ec6000de.json",
+    "content_location": "outputs/runs/review-20261006T001859Z-ec6000de/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "review-20261006T001911Z-14407742": {
+   "run_id": "review-20261006T001911Z-14407742",
+   "role": "derived_execution",
+   "execution_type": "FROZEN_INPUT_RECOMPUTE",
+   "parent": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "evidence_cutoff": "2026-10-05",
+   "created_at": "2026-10-05T17:36:24Z",
+   "parent_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T001911Z-14407742/metadata.json",
+      "original": "outputs/runs/review-20261006T001911Z-14407742/metadata.json",
+      "sha256": "ad708f011fbb0717ad4732ffcd6dd057096ef9dcd6ec9a55e667e2235568515f"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T001911Z-14407742/artifact_manifest.json",
+      "original": "outputs/runs/review-20261006T001911Z-14407742/artifact_manifest.json",
+      "sha256": "b1e3710d3870bda257b75bc0fa6daee84c6bd31828cd3aefb9748b0f0ca4564f"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": "NO_SEMANTIC_LEDGER_IN_THIS_EXECUTION (a model call would have written llm_semantic_calls.jsonl; the lineage does not state a count)",
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": null,
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T001911Z-14407742.json",
+     "bytes": 1696,
+     "sha256": "6cf0c66d7df45845fc3f540eb990a3ea122ab93900818a6c041186997252b9eb"
+    }
+   ],
+   "directory": {
+    "file_count": 17,
+    "directory_digest_sha256": "64a8cfab5bad8d716de748f83fb8f4b91d5ea1a361f54c3dce501233c941f07a",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T001911Z-14407742.json",
+    "content_location": "outputs/runs/review-20261006T001911Z-14407742/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "review-20261006T035219Z-884106de": {
+   "run_id": "review-20261006T035219Z-884106de",
+   "role": "derived_execution",
+   "execution_type": "FROZEN_INPUT_RECOMPUTE",
+   "parent": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "evidence_cutoff": "2026-10-05",
+   "created_at": "2026-10-05T17:36:24Z",
+   "parent_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T035219Z-884106de/metadata.json",
+      "original": "outputs/runs/review-20261006T035219Z-884106de/metadata.json",
+      "sha256": "7c28d3b1363bcee1a0ea28450325006c1a78913ddb5b5c4faa890577c7a80fec"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T035219Z-884106de/artifact_manifest.json",
+      "original": "outputs/runs/review-20261006T035219Z-884106de/artifact_manifest.json",
+      "sha256": "aaac0b4d35ba2d914ad85d1a0b1aae35ba42c22356a95b6c0316dd58153229a4"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": "NO_SEMANTIC_LEDGER_IN_THIS_EXECUTION (a model call would have written llm_semantic_calls.jsonl; the lineage does not state a count)",
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": null,
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T035219Z-884106de.json",
+     "bytes": 1696,
+     "sha256": "ba3feb940f579c3a1cc4a9ff566a0170d1be437201d1b5ee8d9b66df8481cb78"
+    }
+   ],
+   "directory": {
+    "file_count": 17,
+    "directory_digest_sha256": "2e7f6bba59f8a9f9dc2b3a78cd01cafff2745b3914c7fd2cff2d7fa601270bf5",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T035219Z-884106de.json",
+    "content_location": "outputs/runs/review-20261006T035219Z-884106de/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "review-20261006T035335Z-3d569e97": {
+   "run_id": "review-20261006T035335Z-3d569e97",
+   "role": "derived_execution",
+   "execution_type": "FROZEN_INPUT_RECOMPUTE",
+   "parent": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-05",
+   "evidence_cutoff": "2026-10-05",
+   "created_at": "2026-10-05T17:36:24Z",
+   "parent_run_id": "1bad76a7-72ac-4c8b-8189-2e5c0f1a6105",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T035335Z-3d569e97/metadata.json",
+      "original": "outputs/runs/review-20261006T035335Z-3d569e97/metadata.json",
+      "sha256": "90dc18e640b41ffc0fb282c352ac42bae68d2083161316f1c02cd6ebff0f31c4"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/review-20261006T035335Z-3d569e97/artifact_manifest.json",
+      "original": "outputs/runs/review-20261006T035335Z-3d569e97/artifact_manifest.json",
+      "sha256": "0de50f6159d06756e79b366e672f821efd1b806d20e64d586c7c2793d64d56e9"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": "NO_SEMANTIC_LEDGER_IN_THIS_EXECUTION (a model call would have written llm_semantic_calls.jsonl; the lineage does not state a count)",
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": null,
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T035335Z-3d569e97.json",
+     "bytes": 1696,
+     "sha256": "ba42d260a791545e8693c0240a63949b9390eb5e6799444b5ba0ed34f004253b"
+    }
+   ],
+   "directory": {
+    "file_count": 17,
+    "directory_digest_sha256": "c0a36240b47dde71da5de5fc4b233e05aa991be2441707de0b2a444866eb6e4b",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/review-20261006T035335Z-3d569e97.json",
+    "content_location": "outputs/runs/review-20261006T035335Z-3d569e97/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "91d7c420-6197-46c3-93f9-bd42792c1ff7": {
+   "run_id": "91d7c420-6197-46c3-93f9-bd42792c1ff7",
+   "role": "original_research_run",
+   "execution_type": "FRESH_RUN",
+   "note": "AMD 2026-10-06 (an earlier attempt of the same day)",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "evidence_cutoff": "2026-10-06",
+   "created_at": "2026-10-06T05:30:04Z",
+   "parent_run_id": null,
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/91d7c420-6197-46c3-93f9-bd42792c1ff7/metadata.json",
+      "original": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/metadata.json",
+      "sha256": "af1c53e12a9660ef0cc88cb74a2c9dea499af03bb2d8c3fa935b7c8b774d3ac4"
+     },
+     "llm_semantic_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/91d7c420-6197-46c3-93f9-bd42792c1ff7/llm_semantic_manifest.json",
+      "original": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/llm_semantic_manifest.json",
+      "sha256": "8599721f89d37f54b2ec5921b93deabd5ef6f8d2d5ca7b046eedaee582d86b15"
+     },
+     "tradingagents_llm_usage_summary.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/91d7c420-6197-46c3-93f9-bd42792c1ff7/tradingagents_llm_usage_summary.json",
+      "original": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/tradingagents_llm_usage_summary.json",
+      "sha256": "4ffb1012262eb4a17c1853f1eaef447c5a7536085b2538ca09a2e5ce42329a7f"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "semantic_steps": {
+     "manifest": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/llm_semantic_manifest.json",
+     "calls_file": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/llm_semantic_calls.jsonl",
+     "provider_call_count": 0,
+     "record_count": 0,
+     "tasks": {
+      "alpha_classifier": 0,
+      "structure_extractor": 0,
+      "structured_adapter": 0
+     },
+     "distinct_task_prompt_model": []
+    }
+   },
+   "lineage": null,
+   "logs": [
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/llm_semantic_calls.jsonl",
+     "bytes": 0,
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/tradingagents_llm_calls.jsonl",
+     "bytes": 11258,
+     "sha256": "b3bc806c50bdfb2d60734248a0d907890b33c58684548ca7eeba980f1f7140e2"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/error_logs/week2_llm_errors.jsonl",
+     "bytes": 526,
+     "sha256": "ef622a46cef086a17b2680b0a62a521b4d57ca2b8f0b9f9471d0f085cec5a950"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/error_logs/week2_llm_provider_request_audit.jsonl",
+     "bytes": 87957,
+     "sha256": "8b079a833a52f3281373bb4d5655ce4155cd4504281baf0b4bf9eb816ea35899"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/error_logs/week2_llm_provider_response_audit.jsonl",
+     "bytes": 58819,
+     "sha256": "08cdcc8851e32f5c5f6685cece61c02bb08aa6bb030e4fc0a6a01cb27cc17bd6"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/error_logs/week2_pipeline_errors.jsonl",
+     "bytes": 176,
+     "sha256": "5b03eba6a2ec3be143c9994d090d08d8b67dc96820a8326770e898319654bfeb"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/error_logs/week3_pipeline_errors.jsonl",
+     "bytes": 171,
+     "sha256": "10e0f88f3c321dbd0507e2eddb26ad4cf7666a7cf7dcc66951151d19b36d7ac2"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01.json",
+     "bytes": 926,
+     "sha256": "7ff9d84363397e60d6532366bb19d5248f72d298c199a75a6540a21e8b26046b"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/91d7c420-6197-46c3-93f9-bd42792c1ff7.json",
+     "bytes": 1763,
+     "sha256": "fa3f689c7b93260183cfc840aade56a74f8654869c7ea9cdc9c6fddcdbf97a07"
+    }
+   ],
+   "directory": {
+    "file_count": 16,
+    "directory_digest_sha256": "a9a44886a3f19a8ec14e252f6872bfa4a20a7687c8a9230b786a7970410da8e5",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/91d7c420-6197-46c3-93f9-bd42792c1ff7.json",
+    "content_location": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01": {
+   "run_id": "91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01",
+   "role": "derived_execution",
+   "execution_type": "RESULT_REEVALUATION",
+   "parent": "91d7c420-6197-46c3-93f9-bd42792c1ff7",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "evidence_cutoff": "2026-10-06",
+   "created_at": "2026-10-06T05:30:04Z",
+   "parent_run_id": "91d7c420-6197-46c3-93f9-bd42792c1ff7",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01/metadata.json",
+      "original": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01/metadata.json",
+      "sha256": "af1c53e12a9660ef0cc88cb74a2c9dea499af03bb2d8c3fa935b7c8b774d3ac4"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": null,
+   "logs": [
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01/llm_semantic_calls.jsonl",
+     "bytes": 293254,
+     "sha256": "6bc548745f932094b222c896c5968f42ad0981ca8687dfd6bd2dc6044fbe9f77"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01/error_logs/week2_llm_errors.jsonl",
+     "bytes": 35396,
+     "sha256": "a4824a8e7ab1716d8c9e3effe9921f0c882e014d2b44f845d51916dfa885ddf8"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01/error_logs/week2_llm_provider_request_audit.jsonl",
+     "bytes": 317508,
+     "sha256": "ebd6704ad57961204540d2401e1dde9de06d490e7c3a17a2d079ebe2f9f167ca"
+    },
+    {
+     "path": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01/error_logs/week2_llm_provider_response_audit.jsonl",
+     "bytes": 277354,
+     "sha256": "5c47043794de0e027e23af4ee1315ac58d02b28f507b04164ac70d29fc46ec44"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01.json",
+     "bytes": 926,
+     "sha256": "7ff9d84363397e60d6532366bb19d5248f72d298c199a75a6540a21e8b26046b"
+    }
+   ],
+   "directory": {
+    "file_count": 8,
+    "directory_digest_sha256": "e6705de5066f7347e841097e4419ce0183eac44b34c4bcb4e6ffb94432d2e932",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01.json",
+    "content_location": "outputs/runs/91d7c420-6197-46c3-93f9-bd42792c1ff7-postproc-01/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "c904d4cc-dc09-495c-aec5-b056979948e1": {
+   "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "role": "original_research_run",
+   "execution_type": "FRESH_RUN",
+   "note": "AMD 2026-10-06: the run the T1 chain of Rounds 16-22 is built on",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "evidence_cutoff": "2026-10-06",
+   "created_at": "2026-10-06T17:39:31Z",
+   "parent_run_id": null,
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/c904d4cc-dc09-495c-aec5-b056979948e1/metadata.json",
+      "original": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/metadata.json",
+      "sha256": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/c904d4cc-dc09-495c-aec5-b056979948e1/artifact_manifest.json",
+      "original": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/artifact_manifest.json",
+      "sha256": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a"
+     },
+     "llm_semantic_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/c904d4cc-dc09-495c-aec5-b056979948e1/llm_semantic_manifest.json",
+      "original": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/llm_semantic_manifest.json",
+      "sha256": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6"
+     },
+     "tradingagents_llm_usage_summary.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/c904d4cc-dc09-495c-aec5-b056979948e1/tradingagents_llm_usage_summary.json",
+      "original": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/tradingagents_llm_usage_summary.json",
+      "sha256": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "semantic_steps": {
+     "manifest": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/llm_semantic_manifest.json",
+     "calls_file": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/llm_semantic_calls.jsonl",
+     "provider_call_count": 12,
+     "record_count": 12,
+     "tasks": {
+      "alpha_classifier": 2,
+      "structure_extractor": 3,
+      "structured_adapter": 7
+     },
+     "distinct_task_prompt_model": [
+      {
+       "task": "alpha_classifier",
+       "prompt_version": "week2.alpha_classifier.v7",
+       "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 2,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/alpha_classifier__week2.alpha_classifier.v7.txt"
+      },
+      {
+       "task": "structure_extractor",
+       "prompt_version": "week2.structure_extractor.v1",
+       "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 3,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structure_extractor__week2.structure_extractor.v1.txt"
+      },
+      {
+       "task": "structured_adapter",
+       "prompt_version": "week2.claim_batch_enrichment.v1",
+       "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 7,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/structured_adapter__week2.claim_batch_enrichment.v1.txt"
+      }
+     ]
+    }
+   },
+   "lineage": null,
+   "logs": [
+    {
+     "path": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/llm_semantic_calls.jsonl",
+     "bytes": 244866,
+     "sha256": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a"
+    },
+    {
+     "path": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/tradingagents_llm_calls.jsonl",
+     "bytes": 13909,
+     "sha256": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3"
+    },
+    {
+     "path": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/error_logs/week2_llm_errors.jsonl",
+     "bytes": 59071,
+     "sha256": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a"
+    },
+    {
+     "path": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/error_logs/week2_llm_provider_request_audit.jsonl",
+     "bytes": 273540,
+     "sha256": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a"
+    },
+    {
+     "path": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/error_logs/week2_llm_provider_response_audit.jsonl",
+     "bytes": 135288,
+     "sha256": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round12_alpha_classifier_audit_fix_20261006/dry_run_scope_c904d4cc-dc09-495c-aec5-b056979948e1-recovery-01.json",
+     "bytes": 94753,
+     "sha256": "f948fcebe3a2e677ae7e78841565f7d0890f6b94f66c3fb465c7dabc63510b36"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/recovery_dry_run_report_c904d4cc-dc09-495c-aec5-b056979948e1-recovery-01.json",
+     "bytes": 198381,
+     "sha256": "4203905432217bfeb6f58195827aacbe5ebf6ca30aef3c96233cbfb9234e9b8c"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/c904d4cc-dc09-495c-aec5-b056979948e1.json",
+     "bytes": 2986,
+     "sha256": "c6ab050b03ac0cfe0ebfa7982975717bc2ecba25af0d2dfa3ee3cf37f9609d48"
+    }
+   ],
+   "directory": {
+    "file_count": 29,
+    "directory_digest_sha256": "befc66e9698757aecb3508c7e15b0c5cbb406faba90b723882be0e3f91291ec9",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/c904d4cc-dc09-495c-aec5-b056979948e1.json",
+    "content_location": "outputs/runs/c904d4cc-dc09-495c-aec5-b056979948e1/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "recovery-20261007T053635Z-26d6cd1a": {
+   "run_id": "recovery-20261007T053635Z-26d6cd1a",
+   "role": "derived_execution",
+   "execution_type": "FROZEN_INPUT_RECOMPUTE",
+   "parent": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "note": "973 alpha_classifier requests on the frozen inputs (real model calls); everything else reused",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "evidence_cutoff": "2026-10-06",
+   "created_at": "2026-10-07T05:57:28Z",
+   "parent_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/recovery-20261007T053635Z-26d6cd1a/metadata.json",
+      "original": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/metadata.json",
+      "sha256": "e780f87ac58c9baa4909970112b6af4c873cda20bfb75a98f75107330ed32148"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/recovery-20261007T053635Z-26d6cd1a/artifact_manifest.json",
+      "original": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/artifact_manifest.json",
+      "sha256": "405a26f794f640cc490564833fbf97c30f84e43c37dccd0e2dda507b2432f9cb"
+     },
+     "llm_semantic_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/recovery-20261007T053635Z-26d6cd1a/llm_semantic_manifest.json",
+      "original": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/llm_semantic_manifest.json",
+      "sha256": "ac1195a579b78c933cbb2a3b5542b65bd53ab4d048096d76491a56fdfeb034ea"
+     },
+     "recovery_lineage.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/recovery-20261007T053635Z-26d6cd1a/recovery_lineage.json",
+      "original": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/recovery_lineage.json",
+      "sha256": "17b1c7781631c616b702a8a6f9edd1f551f50ae8d7a6a99a757a04d1798d5d16"
+     }
+    },
+    "inputs_hashed_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "semantic_steps": {
+     "manifest": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/llm_semantic_manifest.json",
+     "calls_file": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/llm_semantic_calls.jsonl",
+     "provider_call_count": 955,
+     "record_count": 973,
+     "tasks": {
+      "alpha_classifier": 973,
+      "structure_extractor": 0,
+      "structured_adapter": 0
+     },
+     "distinct_task_prompt_model": [
+      {
+       "task": "alpha_classifier",
+       "prompt_version": "week2.alpha_classifier.v7",
+       "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 973,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/alpha_classifier__week2.alpha_classifier.v7.txt"
+      }
+     ]
+    }
+   },
+   "lineage": {
+    "execution_type": "alpha_classification_recovery",
+    "based_on_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+    "created_at": "2026-10-07T05:57:28Z",
+    "claim_count": 975,
+    "classification_source_counts": {
+     "reused_original_valid_result": 2,
+     "recovered_real_classification": 954,
+     "attempted_failed_no_valid_result": 1,
+     "recovered_via_identical_input_cache": 18
+    },
+    "recovery": {
+     "checkpoint_origin": "real"
+    },
+    "file": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/recovery_lineage.json",
+    "lineage_chain": null,
+    "root_run_file_hashes_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "logs": [
+    {
+     "path": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/llm_semantic_calls.jsonl",
+     "bytes": 4461692,
+     "sha256": "233599a44fad13159e7d565b8fb58f38e4e3f1137df8290baddc43072075f969"
+    },
+    {
+     "path": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/recovery_match_records.jsonl",
+     "bytes": 6801644,
+     "sha256": "49abcade8780787a0b54cc698d843ec3f928e404f0066a06b38b880951832490"
+    },
+    {
+     "path": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/error_logs/week2_llm_errors.jsonl",
+     "bytes": 164,
+     "sha256": "b3ae905479a5bfbc9b65cc844610eed88948dbc496136296dae5d7d600fc5a10"
+    },
+    {
+     "path": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/error_logs/week2_llm_provider_request_audit.jsonl",
+     "bytes": 10596060,
+     "sha256": "2fea46ae2c385bbc222bb8382b740c8fdb7fb8554da5e1af084b9de7a49b1921"
+    },
+    {
+     "path": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/error_logs/week2_llm_provider_response_audit.jsonl",
+     "bytes": 4470564,
+     "sha256": "d700822e6fe1563b795f696823632c6cb69668e2912ab36130f950dc00ba4b45"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round15_recovery_prep_20261006/recovery_execution_report_recovery-20261007T053635Z-26d6cd1a.json",
+     "bytes": 98189,
+     "sha256": "cc622f6bacfa24b96f3ed30731db7a38fd3641a3425a45ad690e10592b0746a8"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round16_real_recovery_20261006/recovery_execution_report_recovery-20261007T053635Z-26d6cd1a.json",
+     "bytes": 98189,
+     "sha256": "cc622f6bacfa24b96f3ed30731db7a38fd3641a3425a45ad690e10592b0746a8"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/recovery-20261007T053635Z-26d6cd1a.json",
+     "bytes": 2942,
+     "sha256": "da62377aa43cc017392a96617c9984103f954e5b38d399d8e7339d731f4bdac9"
+    }
+   ],
+   "directory": {
+    "file_count": 29,
+    "directory_digest_sha256": "28b343cb3e6e8a7f0b394cac7ee0617e746c6da4e123e539b1520e2971998f49",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/recovery-20261007T053635Z-26d6cd1a.json",
+    "content_location": "outputs/runs/recovery-20261007T053635Z-26d6cd1a/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "direction-20261007T065826Z-d311b8e2": {
+   "run_id": "direction-20261007T065826Z-d311b8e2",
+   "role": "execution_attempt_without_derived_run",
+   "execution_type": "FROZEN_INPUT_RECOMPUTE",
+   "parent": "recovery-20261007T053635Z-26d6cd1a",
+   "note": "stopped by the frozen protocol after the first batch timed out; produced no model direction result and no derived run",
+   "ticker": null,
+   "analysis_date": null,
+   "evidence_cutoff": null,
+   "created_at": null,
+   "parent_run_id": "recovery-20261007T053635Z-26d6cd1a",
+   "input": {
+    "identity_files": {
+     "llm_semantic_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/direction-20261007T065826Z-d311b8e2/llm_semantic_manifest.json",
+      "original": "outputs/runs/direction-20261007T065826Z-d311b8e2/llm_semantic_manifest.json",
+      "sha256": "6c443cd72b2384ef194818e29913180621aece3514fa2999324d5200aa9b1337"
+     },
+     "checkpoint_direction.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/direction-20261007T065826Z-d311b8e2/checkpoint_direction.json",
+      "original": "outputs/runs/direction-20261007T065826Z-d311b8e2/checkpoint_direction.json",
+      "sha256": "70fc4fa2e37fee42e23a2f94feed6803e7dc361ddcf75f02bc72fd1f89965d92"
+     },
+     "direction_results_when_stopped.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/direction-20261007T065826Z-d311b8e2/direction_results_when_stopped.json",
+      "original": "outputs/runs/direction-20261007T065826Z-d311b8e2/direction_results_when_stopped.json",
+      "sha256": "743c1ef3729dd22669c1f16ba6843ec58859667ffd66998dfad930679fbf384a"
+     }
+    },
+    "inputs_hashed_at_derivation": "NOT_APPLICABLE (original run)"
+   },
+   "model": {
+    "research_agents": "NOT_RECORDED",
+    "semantic_steps": {
+     "manifest": "outputs/runs/direction-20261007T065826Z-d311b8e2/llm_semantic_manifest.json",
+     "calls_file": "outputs/runs/direction-20261007T065826Z-d311b8e2/llm_semantic_calls.jsonl",
+     "provider_call_count": 1,
+     "record_count": 1,
+     "tasks": {
+      "alpha_classifier": 0,
+      "evidence_stance_classifier": 1,
+      "structure_extractor": 0,
+      "structured_adapter": 0
+     },
+     "distinct_task_prompt_model": [
+      {
+       "task": "evidence_stance_classifier",
+       "prompt_version": "evidence_stance.llm_classifier.v3",
+       "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+       "provider": "deepseek",
+       "model": "deepseek-v4-flash",
+       "records": 1,
+       "prompt_content_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/prompt_texts/evidence_stance_classifier__evidence_stance.llm_classifier.v3.txt"
+      }
+     ]
+    }
+   },
+   "lineage": null,
+   "logs": [
+    {
+     "path": "outputs/runs/direction-20261007T065826Z-d311b8e2/llm_semantic_calls.jsonl",
+     "bytes": 11379,
+     "sha256": "acf350f2f26e53bfc1cae835d29ad7c41f2d98c7a040cb90b41387377bef3618"
+    },
+    {
+     "path": "outputs/runs/direction-20261007T065826Z-d311b8e2/error_logs/week2_llm_errors.jsonl",
+     "bytes": 175,
+     "sha256": "cae8d89455bf2c6b83a37c937866827fd83614cd65f528351af7b42da1ac9d4f"
+    },
+    {
+     "path": "outputs/runs/direction-20261007T065826Z-d311b8e2/error_logs/week2_llm_provider_request_audit.jsonl",
+     "bytes": 17583,
+     "sha256": "4cc2be701c04f93e6abeb99112c460f050ed672712b9a5a0ca5160b253082b4c"
+    }
+   ],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round17_direction_evaluation_20261007/direction_execution_report_direction-20261007T065826Z-d311b8e2.json",
+     "bytes": 2916,
+     "sha256": "bb186ac28ab94b617f521d480f1b589c6eb9a6d9b6f7b68edb7395be7f19860a"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/direction-20261007T065826Z-d311b8e2.json",
+     "bytes": 721,
+     "sha256": "5fb867bd160b84ab81e45b742569369e94a5ee86958a3dba6eb19f31c53a1484"
+    }
+   ],
+   "directory": {
+    "file_count": 6,
+    "directory_digest_sha256": "437b54d482738f6a9e36369f1ab9262c4bef79998e51926448c231a6a686ef15",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/direction-20261007T065826Z-d311b8e2.json",
+    "content_location": "outputs/runs/direction-20261007T065826Z-d311b8e2/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "requal-20261007T174744Z-664040d6": {
+   "run_id": "requal-20261007T174744Z-664040d6",
+   "role": "derived_execution",
+   "execution_type": "RESULT_REEVALUATION",
+   "parent": "recovery-20261007T053635Z-26d6cd1a",
+   "note": "zero model calls",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "evidence_cutoff": "2026-10-06",
+   "created_at": "2026-10-07T17:47:46Z",
+   "parent_run_id": "recovery-20261007T053635Z-26d6cd1a",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/requal-20261007T174744Z-664040d6/metadata.json",
+      "original": "outputs/runs/requal-20261007T174744Z-664040d6/metadata.json",
+      "sha256": "f1ef042a8941e48769bc54cc456800c5e1c68414e5a2e43ed53079d5131eaf77"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/requal-20261007T174744Z-664040d6/artifact_manifest.json",
+      "original": "outputs/runs/requal-20261007T174744Z-664040d6/artifact_manifest.json",
+      "sha256": "e991af801a52c968a7311dca3b0c369ea93e10e437023030b92fd43e507b3fa7"
+     },
+     "requalification_lineage.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/requal-20261007T174744Z-664040d6/requalification_lineage.json",
+      "original": "outputs/runs/requal-20261007T174744Z-664040d6/requalification_lineage.json",
+      "sha256": "67f11c6610a905242a077d01ea778bc24d60c2e3fd6416f5f5787c94cdd49874"
+     }
+    },
+    "inputs_hashed_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": "NO_SEMANTIC_LEDGER_IN_THIS_EXECUTION (a model call would have written llm_semantic_calls.jsonl; the lineage does not state a count)",
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": {
+    "execution_type": "alpha_evidence_requalification",
+    "based_on_run_id": "recovery-20261007T053635Z-26d6cd1a",
+    "root_research_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+    "created_at": "2026-10-07T17:47:46Z",
+    "claim_count": 975,
+    "classification_source_counts": {
+     "unchanged_from_parent": 951,
+     "eligibility_requalified": 24
+    },
+    "recovery": {
+     "checkpoint_origin": "real",
+     "note": "alpha_matches / structured records reused verbatim; only a copy of the registry is annotated"
+    },
+    "file": "outputs/runs/requal-20261007T174744Z-664040d6/requalification_lineage.json",
+    "lineage_chain": [
+     {
+      "run_id": "requal-20261007T174744Z-664040d6",
+      "role": "this_execution"
+     },
+     {
+      "run_id": "recovery-20261007T053635Z-26d6cd1a",
+      "role": "direct_parent"
+     },
+     {
+      "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+      "role": "original_research_run"
+     }
+    ],
+    "root_run_file_hashes_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round18_evidence_requalification_20261007/requalification_execution_report_requal-20261007T174744Z-664040d6.json",
+     "bytes": 2638,
+     "sha256": "31d7e0df62a1500c581118a53d005b01e67b62465d5ddd8127f3151e016e54c2"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/requal-20261007T174744Z-664040d6.json",
+     "bytes": 2198,
+     "sha256": "08c7cfe99f67b242ae3ec79c93b10edb672fa83940ee76e363f918fc0772a53c"
+    }
+   ],
+   "directory": {
+    "file_count": 22,
+    "directory_digest_sha256": "a7fcc1013abbe9b47cc647c770efeeff93778a9bc06fa22fbbb11f6bfa625b00",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/requal-20261007T174744Z-664040d6.json",
+    "content_location": "outputs/runs/requal-20261007T174744Z-664040d6/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "dependency-20261007T213234Z-3be0399d": {
+   "run_id": "dependency-20261007T213234Z-3be0399d",
+   "role": "derived_execution",
+   "execution_type": "RESULT_REEVALUATION",
+   "parent": "requal-20261007T174744Z-664040d6",
+   "note": "interim (superseded, kept); zero model calls",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "evidence_cutoff": "2026-10-06",
+   "created_at": "2026-10-07T21:32:37Z",
+   "parent_run_id": "requal-20261007T174744Z-664040d6",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/dependency-20261007T213234Z-3be0399d/metadata.json",
+      "original": "outputs/runs/dependency-20261007T213234Z-3be0399d/metadata.json",
+      "sha256": "58416f9649ee83de9b1709419e7b6ba263f2b68e5466a74a726dedbfcb211803"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/dependency-20261007T213234Z-3be0399d/artifact_manifest.json",
+      "original": "outputs/runs/dependency-20261007T213234Z-3be0399d/artifact_manifest.json",
+      "sha256": "5cf109bc04d4d16768ecc01fd00b971a1253eae6bd78488b1510ba51469c0742"
+     },
+     "dependency_lineage.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/dependency-20261007T213234Z-3be0399d/dependency_lineage.json",
+      "original": "outputs/runs/dependency-20261007T213234Z-3be0399d/dependency_lineage.json",
+      "sha256": "da3419fd2703171b1638979d2767d2a7126fb5638d81495ff6e39dbf269d204d"
+     }
+    },
+    "inputs_hashed_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": {
+     "recorded": 0,
+     "searches": 0,
+     "data_fetches": 0,
+     "recorded_in": "outputs/runs/dependency-20261007T213234Z-3be0399d/dependency_lineage.json"
+    },
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": {
+    "execution_type": "alpha_fact_dependency",
+    "based_on_run_id": "requal-20261007T174744Z-664040d6",
+    "root_research_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+    "created_at": "2026-10-07T21:32:37Z",
+    "purpose": "T1 minimal closure: derived expressions of the same saved observations count as one independent evidence fact; claims, citations and scores' inputs are unchanged",
+    "model_calls": 0,
+    "searches": 0,
+    "data_fetches": 0,
+    "claim_count": 975,
+    "classification_source_counts": {
+     "unchanged_from_base": 975
+    },
+    "recovery": {
+     "checkpoint_origin": "real",
+     "note": "alpha_matches / structured records / source registry reused verbatim from the parent; only the run-level fact_dependency_contract marker is added"
+    },
+    "file": "outputs/runs/dependency-20261007T213234Z-3be0399d/dependency_lineage.json",
+    "lineage_chain": [
+     {
+      "run_id": "dependency-20261007T213234Z-3be0399d",
+      "role": "this_execution"
+     },
+     {
+      "run_id": "requal-20261007T174744Z-664040d6",
+      "role": "direct_parent"
+     },
+     {
+      "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+      "role": "original_research_run"
+     }
+    ],
+    "root_run_file_hashes_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round21_t1_minimal_closure_20261007/interim_execution_dependency-20261007T213234Z-3be0399d/dependency_execution_report_dependency-20261007T213234Z-3be0399d.json",
+     "bytes": 2312,
+     "sha256": "4aba4e13d6b1a134f190dc1f2524e9e0f1faacc9b29cf7ab56f21478464c559e"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/dependency-20261007T213234Z-3be0399d.json",
+     "bytes": 2175,
+     "sha256": "9a54b9ac8c111213b5c86902049482794024fb7d84e3637825738acbd73505dd"
+    }
+   ],
+   "directory": {
+    "file_count": 22,
+    "directory_digest_sha256": "39b66fc0ccf8a385c37b24f28300a5409aef17389a96024e0d9b794c22c1dee9",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/dependency-20261007T213234Z-3be0399d.json",
+    "content_location": "outputs/runs/dependency-20261007T213234Z-3be0399d/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "UNKNOWN_NO_SNAPSHOT_AT_EXECUTION",
+    "note": "No snapshot of the working tree was taken when this execution ran, and HEAD alone (7a9aefa) does not identify code in a tree carrying uncommitted changes. Nothing is inferred from today's tree. Earlier rounds kept HASH lists only for some states (see hash_records_from_earlier_rounds); those lists carry no content and are not treated as code identity.",
+    "hash_records_from_earlier_rounds": [
+     "docs/audit_artifacts/round_source_linking_t0_t2/round14_recovery_closure_20261006/protected_files_hashes_before.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/direction_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/original_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/recovery_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/requalification_run_hashes_before_round19.json",
+     "docs/audit_artifacts/round_source_linking_t0_t2/round19_consumption_and_acceptance_20261007/production_tree_hashes_before_round19.json"
+    ]
+   }
+  },
+  "dependency-20261007T220450Z-33128621": {
+   "run_id": "dependency-20261007T220450Z-33128621",
+   "role": "derived_execution",
+   "execution_type": "RESULT_REEVALUATION",
+   "parent": "requal-20261007T174744Z-664040d6",
+   "note": "final; zero model calls; code identity = snapshot S0 (see code_identity)",
+   "ticker": "AMD",
+   "analysis_date": "2026-10-06",
+   "evidence_cutoff": "2026-10-06",
+   "created_at": "2026-10-07T22:04:53Z",
+   "parent_run_id": "requal-20261007T174744Z-664040d6",
+   "input": {
+    "identity_files": {
+     "metadata.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/dependency-20261007T220450Z-33128621/metadata.json",
+      "original": "outputs/runs/dependency-20261007T220450Z-33128621/metadata.json",
+      "sha256": "c864185e9eed2f788946595db54d5bb1c7a67cbef87ce129b28dfb34cdd2df3c"
+     },
+     "artifact_manifest.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/dependency-20261007T220450Z-33128621/artifact_manifest.json",
+      "original": "outputs/runs/dependency-20261007T220450Z-33128621/artifact_manifest.json",
+      "sha256": "671aaec879934dad390567bb3b2125929375eb98064e23eb0790683374f36609"
+     },
+     "dependency_lineage.json": {
+      "copy_in_delivery": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_identity_files/dependency-20261007T220450Z-33128621/dependency_lineage.json",
+      "original": "outputs/runs/dependency-20261007T220450Z-33128621/dependency_lineage.json",
+      "sha256": "f087cb0f14f04fcfa582d7c1bb2529d38e5c94a24c02b69499445460e34262d8"
+     }
+    },
+    "inputs_hashed_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "model": {
+    "research_agents": "INHERITED_FROM_ROOT_RUN (no research agent ran in this execution; its metadata.json is the root run's, copied verbatim)",
+    "inherited_metadata": {
+     "provider": "deepseek",
+     "quick_model": "deepseek-v4-flash",
+     "deep_model": "deepseek-v4-flash",
+     "recorded_in": "metadata.json"
+    },
+    "model_calls": {
+     "recorded": 0,
+     "searches": 0,
+     "data_fetches": 0,
+     "recorded_in": "outputs/runs/dependency-20261007T220450Z-33128621/dependency_lineage.json"
+    },
+    "semantic_steps": "NOT_RECORDED (no llm_semantic_manifest.json / llm_semantic_calls.jsonl in this run directory)"
+   },
+   "lineage": {
+    "execution_type": "alpha_fact_dependency",
+    "based_on_run_id": "requal-20261007T174744Z-664040d6",
+    "root_research_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+    "created_at": "2026-10-07T22:04:53Z",
+    "purpose": "T1 minimal closure: derived expressions of the same saved observations count as one independent evidence fact; claims, citations and scores' inputs are unchanged",
+    "model_calls": 0,
+    "searches": 0,
+    "data_fetches": 0,
+    "claim_count": 975,
+    "classification_source_counts": {
+     "unchanged_from_base": 975
+    },
+    "recovery": {
+     "checkpoint_origin": "real",
+     "note": "alpha_matches / structured records / source registry reused verbatim from the parent; only the run-level fact_dependency_contract marker is added"
+    },
+    "file": "outputs/runs/dependency-20261007T220450Z-33128621/dependency_lineage.json",
+    "lineage_chain": [
+     {
+      "run_id": "dependency-20261007T220450Z-33128621",
+      "role": "this_execution"
+     },
+     {
+      "run_id": "requal-20261007T174744Z-664040d6",
+      "role": "direct_parent"
+     },
+     {
+      "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+      "role": "original_research_run"
+     }
+    ],
+    "root_run_file_hashes_at_derivation": {
+     "alpha_activations.json": "cd102fe7e845cc8a7942620a7471cb77da503c7c8349cc61aa6c9fabeeeff154",
+     "alpha_matches.json": "cf13bca611c6f055e680697c21d1013932d71430babe0498f8ad421663ad7e87",
+     "artifact_manifest.json": "352de95bd9e4b4b5e44bfcd12049405bf50cc9db3d91f851ae88b1acc8fedc0a",
+     "conflicts.json": "e98c20a644414d61429d783e7c58773bc7ffbda5281e8c5d2fd88eaa5dcf986f",
+     "data_sanity.json": "458a9782b9940f46ce07fd1f5cc08f3fec9fa76384f54fecfa7ba0f3896ba477",
+     "entity_alpha_exposures.json": "b12664a4fd01247d3f8d8bf6bff4c837bf3d529feddae40b0bb269b52446adfc",
+     "error_logs/week2_llm_errors.jsonl": "f3efcd13771f564b31fe9d1e3b102fc4a5700fa250f26120d797ed17ca3cb15a",
+     "error_logs/week2_llm_provider_request_audit.jsonl": "0cb12143ec6acaf26573e4de3fd05c383a98f9268898de91edca85e88fb5f33a",
+     "error_logs/week2_llm_provider_response_audit.jsonl": "1eaef275270badaf3a77322e8852085d735f81e0865f8eb867c949cd420af4b5",
+     "evidence_facts.json": "48a3980744d00860098cbff2a2c02bb844311a403030545a0b79995e7781ffac",
+     "evidence_stance_audit.json": "8409bdc8a3778a584b825ab90b9b88f0aefbffb35e870905730aaea37b9c2eae",
+     "extracted_structures.json": "1be2af4963775547f12b897e5b38542ad5abf6961278e2dbf3f5ce57638625bf",
+     "formal_acceptance.json": "17b5e597c4989f53996aff2c4b3ce97dd8d244b71e28817b82f0219d54aebf74",
+     "llm_semantic_calls.jsonl": "9af0a55d712c96f445c94096b3a09fa9599253b75c179e0a4b33325e6924fc1a",
+     "llm_semantic_manifest.json": "7f78a4f1af2b44ceacb18a2ac255739d9f12aa394e06952255b167ae1934f9e6",
+     "market_data_snapshot.json": "071a751de47e45ada8af865f2f66d71f95b7fd1c832b9bee5e5c714ebf9bb770",
+     "metadata.json": "e43b4cae8324015d6bf8ff18b393e1cddf67fbe2ffff89be3f261117c541e4e2",
+     "raw_agent_outputs.json": "8ae0cedb1479724ac721a901693721f821e186e2ae41ee6d24694e54b5613399",
+     "run_audit.json": "902d41cc98e454027e632357432fb71b6bd3ed2b97c055693cb735d9253664b9",
+     "source_registry.json": "3c98de5ac569a536ce6e1d4a25cd75aca0702b7e60ba4fd531629f7f24c3c589",
+     "structure_graph.json": "2cad3236fbced1bc25f073f6626f8b0b73bbf6bb67b429fd072587ae99ac7758",
+     "structured_adapter_authority_routing.json": "ed79db7015f1c1b68bc55fb855e9f7d656a377799497ac65ade3d82ccd11f101",
+     "structured_agent_outputs.json": "dbec9de64039ad82397fd60cf626b747b58ba0c2c02fbeb105acba204486f110",
+     "summary.json": "f1e5e26009e81dbac98acace4d059aa390aba54024b5714cd2c49b4231f5f89b",
+     "tradingagents_comqutor_vocabulary_snapshot.json": "ae0548971468ad57db8510db24e52c609fff1353e6b72c5604ff8860a1004a73",
+     "tradingagents_llm_calls.jsonl": "11934b6e531689ce7e323a74b6a194cce6344c76be3de28049eaa9b39c15fff3",
+     "tradingagents_llm_usage_summary.json": "94ae5c8cc899d5000f007d8eec05ca3fa8a0807251e012071bc22d644235b972",
+     "unclassified_findings.json": "054308a76090174ddb0697f48bb29347ee5cf1130f6589ecd7a6a737c8c61f14",
+     "week3_pipeline_status.json": "1efa956170156bffdb5814bafbe5a78bf2e3059dcb9fa2ee8709ece1f5c5e5c0"
+    }
+   },
+   "logs": [],
+   "round_records": [
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round21_t1_minimal_closure_20261007/dependency_execution_report_dependency-20261007T220450Z-33128621.json",
+     "bytes": 2312,
+     "sha256": "deab01288adebef7384394b2d271d12544fad56514fdf92b048a32317ba4be11"
+    },
+    {
+     "path": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/dependency-20261007T220450Z-33128621.json",
+     "bytes": 2175,
+     "sha256": "47562f02a3f231d998fb279113467cc9e168c935e4822657c4430bfb277b7aa1"
+    }
+   ],
+   "directory": {
+    "file_count": 22,
+    "directory_digest_sha256": "693b8cef71d28468660eacbf1b3929e7f594c6416a689ef5fbd715a041284206",
+    "per_file_hashes": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/run_directory_hashes/dependency-20261007T220450Z-33128621.json",
+    "content_location": "outputs/runs/dependency-20261007T220450Z-33128621/ (in the working tree; package with README step 6)"
+   },
+   "code_identity": {
+    "status": "SNAPSHOT_S0",
+    "snapshot": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S0_before_round22",
+    "head_json": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S0_before_round22/HEAD.json",
+    "basis": "S0 is the code of this execution: no code file changed between the execution and S0 (check 1, one-time); every code file Round 22 left untouched predates the execution (check 2); S0's own trace builder reproduces the execution's saved evidence_trace.json exactly (check 4); and today's pipeline reproduces the recorded recompute (check 5). The files Round 22 changed afterwards are listed (check 3).",
+    "proof": {
+     "execution": "dependency-20261007T220450Z-33128621",
+     "execution_files_last_written_local": "2026-10-07T15:04:53",
+     "snapshot_S0": {
+      "dir": "docs/audit_artifacts/round_source_linking_t0_t2/round22_t1_closeout_20261007/code_snapshots/S0_before_round22",
+      "created_at_utc": "2026-10-07T23:29:35+00:00",
+      "head_sha": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc"
+     },
+     "check_1_no_code_file_changed_between_execution_and_snapshot": {
+      "performed": "immediately before S0 was taken, before any Round 22 edit",
+      "command": "find comqutor_alpha tradingagents scripts -name '*.py' -newer outputs/runs/dependency-20261007T220450Z-33128621/metadata.json -not -path '*/__pycache__/*'",
+      "result": "no file",
+      "re_runnable_now": false,
+      "why_not": "Round 22 has since modified code files, so the same command now lists them"
+     },
+     "check_2_untouched_code_files_were_last_modified_before_the_execution": {
+      "checked": 267,
+      "modified_after_the_execution": []
+     },
+     "check_3_code_files_changed_by_round22": [
+      "comqutor_alpha/adapters/tradingagents_output_writer.py",
+      "comqutor_alpha/api/artifact_export.py",
+      "comqutor_alpha/api/evidence_trace.py",
+      "comqutor_alpha/capture_artifacts.py",
+      "comqutor_alpha/storage/file_store.py",
+      "tradingagents/dataflows/market_data_validator.py",
+      "tradingagents/dataflows/source_capture.py",
+      "tradingagents/dataflows/stockstats_utils.py",
+      "tradingagents/dataflows/yfinance_news.py"
+     ],
+     "check_4_s0_trace_builder_reproduces_the_saved_evidence_trace": {
+      "items": 54,
+      "equal": true
+     },
+     "check_5_current_pipeline_reproduces_the_recorded_dry_run_comparison": {
+      "equal": true,
+      "zero_call_attempts": 0
+     },
+     "basis": "S0 is the code of this execution: no code file changed between the execution and S0 (check 1, one-time); every code file Round 22 left untouched predates the execution (check 2); S0's own trace builder reproduces the execution's saved evidence_trace.json exactly (check 4); and today's pipeline reproduces the recorded recompute (check 5). The files Round 22 changed afterwards are listed (check 3).",
+     "proven": true
+    },
+    "note": "the code that ran is S0; the files Round 22 changed afterwards are in round22_changes.patch"
+   }
+  }
+ },
+ "unknowns": [
+  "Code at execution time is UNKNOWN for every run except dependency-20261007T220450Z-33128621 (no snapshot was taken when they ran).",
+  "Per-call provider fetch times are not recorded for any run: the source registry carries a registry-write-time upper bound only.",
+  "Raw provider tool responses are not saved by any run listed here; provider_response_audit.json exists only for runs made after Round 22's capture change (none yet).",
+  "The input series behind technical indicators is not saved by any run listed here; derived_inputs.json exists only for runs made after Round 22's capture change (none yet).",
+  "Historical per-step model configuration is whatever the run's own metadata / semantic manifest recorded; nothing is filled in from the current configuration.",
+  "The database backing runs other than the dependency-* executions and the viewer is NOT_RECORDED."
+ ]
+}

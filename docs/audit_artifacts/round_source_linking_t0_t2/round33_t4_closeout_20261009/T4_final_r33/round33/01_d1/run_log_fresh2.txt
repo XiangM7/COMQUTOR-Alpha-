@@ -1,0 +1,14 @@
+# 2026-10-09T22:04:48Z code identity: 6cdd51e3/10ee7518
+$ python tools/run_with_network_trap.py docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/tools/d1_offline_reproduction.py --run 12591384-0b26-470d-a99d-a49c00be440b --out 01_d1/d1_fresh2.json
+seq 0 sentiment_agent        segs=64  cand=0   chars=29048  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 1 market_agent           segs=64  cand=1   chars=28113  sent_timeout_reply_arrived_after_deadline  saved=WEEK2_LLM_TIMEOUT | prod: arrivals=1 req==saved=True body==wire=True ledger=None | validator=enrichment item fields do not match the strict schema | control: whole=True items_ok=64/64
+seq 2 news_agent             segs=64  cand=0   chars=27137  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 3 fundamental_agent      segs=64  cand=3   chars=49441  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 4 sentiment_agent        segs=27  cand=0   chars=13587  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 5 market_agent           segs=45  cand=1   chars=18974  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 6 news_agent             segs=59  cand=0   chars=28348  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 7 fundamental_agent      segs=64  cand=4   chars=61127  not_sent_local_refusal                     saved=WEEK2_LLM_INPUT_TOO_LARGE | prod: arrivals=0 req==saved=None body==wire=None ledger=WEEK2_LLM_INPUT_TOO_LARGE | validator=None | control: whole=None items_ok=None/None
+seq 8 fundamental_agent      segs=30  cand=4   chars=47807  sent_reply_received_in_time                saved=None | prod: arrivals=1 req==saved=True body==wire=True ledger=None | validator=enrichment item fields do not match the strict schema | control: whole=True items_ok=30/30
+send status: {'sent_timeout_no_reply': 6, 'sent_timeout_reply_arrived_after_deadline': 1, 'not_sent_local_refusal': 1, 'sent_reply_received_in_time': 1}
+exit code: 0 | network attempts: 0
+[exit 0]

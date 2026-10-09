@@ -1,0 +1,152 @@
+# unzip verification 20261009T222629Z; fresh directory: /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z
+$ ls -l /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_round33_20261009.zip
+-rw-r--r--@ 1 xiangmao  staff  46743357 Oct  9 15:21 /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_round33_20261009.zip
+[exit 0]
+
+$ shasum -a 256 /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_round33_20261009.zip
+62a0867ce1da71feaced2cd942a17829c7ad3ae2523c69463dbb08ed9b00b8ba  /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_round33_20261009.zip
+[exit 0]
+
+$ unzip -tq /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_round33_20261009.zip
+No errors detected in compressed data of /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_round33_20261009.zip.
+[exit 0]
+
+$ mkdir /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_readme_rerun_20261009T222629Z
+[exit 0]
+
+$ python3 -m zipfile -e /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_round33_20261009.zip /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z
+[exit 0]
+
+$ bash -c find '/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z' -type f | wc -l; find '/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z' -name __pycache__ | wc -l; find '/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z' -maxdepth 2 | sort
+     216
+       0
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33/00_T4最终交付报告.md
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33/README.md
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33/manifest.json
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33/report_figures.json
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33/round32
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33/round33
+/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33/verify_package33.py
+[exit 0]
+
+## 1. in-package check from the unzipped root (the command in README section 1)
+$ python3 verify_package33.py
+package: T4_final_r33
+[PASS] 1 manifest
+    files=215
+[PASS] 2 round32
+    round32_manifest_files=176, byte_identical=171
+[PASS] 3 figures
+    figures=88, from_round32=61, from_round33=27
+[PASS] 4 round33
+[PASS] 5 references
+    found=93
+    repository paths (need the original repository): ['comqutor_alpha/api/stage_disclosure.py', 'comqutor_alpha/structure_engine/structured_output_adapter.py', 'comqutor_alpha/structure_engine/week2_llm.py', 'contracts.py', 'docs/audit_artifacts/round_source_linking_t0_t2', 'docs/specs/week2_semantic_runtime_integration_contract_v1.md', 'outputs/t4_r32_demo_runs', 'outputs/t4_runs/12591384-0b26-470d-a99d-a49c00be440b', 'round14_recovery_closure_20261006/regression_attribution_manifest.md', 'round15_recovery_prep_20261006/regression_evidence/full_run.junit.xml', 'round23_t2_completion_20261007/test_evidence/full_suite_AFTER.junit.xml', 'round26_t3_closeout_20261008/test_evidence/README.md', 'round28_t4_launch_protection_20261008/test_evidence/affected_junit.xml', 'round30_t4_nvda_fresh_run2_20261009/FRESH_RUN2_REPORT.md', 'round31_t4_delivery_20261009/T4_delivery/00_T4交付主报告.md', 'round32_t4_closure_20261009/T4_final/00_T4最终交付报告.md', 'round32_t4_closure_20261009/T4_final/03_not_sent/未发送记录修复说明.md', 'round32_t4_closure_20261009/T4_final/05_stage_disclosure/结构抽取与降级披露.md', 'structured_output_adapter.py', 'tests/test_structured_output_adapter.py', 'tests/test_t1_source_linking_pipeline.py', 'tests/test_week2_llm.py']
+[PASS] 6 credentials
+    blobs_scanned=532
+ALL CHECKS PASSED
+[exit 0]
+
+[--json exit 0] -> unzip_verification/verify_package33_result.json
+$ bash -c find '/private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33' -name __pycache__ | wc -l
+       0
+[exit 0]
+
+## 2. the unzipped package equals the build directory; round32/ equals the Round 32 ZIP except the logged edits / superseded files
+$ python3 - /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33 /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/T4_final_r33 /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/../round32_t4_closure_20261009/T4_final_round32_20261009.zip
+unzipped == build dir: True 216 216
+Round 32 ZIP files: 177 | byte-identical in round32/: 172 | edited: ['01_regressions/回归失败分析.md', '05_stage_disclosure/结构抽取与降级披露.md'] | superseded (not copied): ['00_T4最终交付报告.md', 'README.md', 'report_figures.json']
+ok: True
+[exit 0]
+
+## 3. README section 2 commands re-run from the repository root (outputs to a scratch directory instead of /tmp), compared with the package
+$ python docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/tools/run_with_network_trap.py docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/tools/d1_offline_reproduction.py --run 12591384-0b26-470d-a99d-a49c00be440b --out /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_readme_rerun_20261009T222629Z/d1_recheck.json
+seq 0 sentiment_agent        segs=64  cand=0   chars=29048  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 1 market_agent           segs=64  cand=1   chars=28113  sent_timeout_reply_arrived_after_deadline  saved=WEEK2_LLM_TIMEOUT | prod: arrivals=1 req==saved=True body==wire=True ledger=None | validator=enrichment item fields do not match the strict schema | control: whole=True items_ok=64/64
+seq 2 news_agent             segs=64  cand=0   chars=27137  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 3 fundamental_agent      segs=64  cand=3   chars=49441  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 4 sentiment_agent        segs=27  cand=0   chars=13587  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 5 market_agent           segs=45  cand=1   chars=18974  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 6 news_agent             segs=59  cand=0   chars=28348  sent_timeout_no_reply                      saved=WEEK2_LLM_TIMEOUT | prod: arrivals=None req==saved=None body==wire=None ledger=None | validator=None | control: whole=None items_ok=None/None
+seq 7 fundamental_agent      segs=64  cand=4   chars=61127  not_sent_local_refusal                     saved=WEEK2_LLM_INPUT_TOO_LARGE | prod: arrivals=0 req==saved=None body==wire=None ledger=WEEK2_LLM_INPUT_TOO_LARGE | validator=None | control: whole=None items_ok=None/None
+seq 8 fundamental_agent      segs=30  cand=4   chars=47807  sent_reply_received_in_time                saved=None | prod: arrivals=1 req==saved=True body==wire=True ledger=None | validator=enrichment item fields do not match the strict schema | control: whole=True items_ok=30/30
+send status: {'sent_timeout_no_reply': 6, 'sent_timeout_reply_arrived_after_deadline': 1, 'not_sent_local_refusal': 1, 'sent_reply_received_in_time': 1}
+exit code: 0 | network attempts: 0
+[exit 0]
+
+$ python3 docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/tools/run_with_network_trap.py docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/tools/reconcile_not_sent.py --out-json /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_readme_rerun_20261009T222629Z/reconcile.json --out-md /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_readme_rerun_20261009T222629Z/reconcile.md
+{
+ "send_ledger": {
+  "ledger_records": 1220,
+  "sent_with_http_attempt": 1204,
+  "http_attempts": 1204,
+  "gateway_budget_reservations": 1204,
+  "wire_audit_request_rows": 1204,
+  "wire_audit_reply_rows": 1198,
+  "same_run_cache_hits_not_sent": 10,
+  "cache_hits_by_task": {
+   "alpha_classifier": 10
+  },
+  "refused_locally_input_too_large": 6,
+  "refused_by_task": {
+   "structured_adapter": 1,
+   "content_support_verification": 5
+  },
+  "other_not_sent": 0,
+  "identity": "1220 = 1204 sent + 10 cache hits + 6 refused",
+  "balances": true
+ },
+ "facts": {
+  "refused": 6,
+  "refused_cs": 5,
+  "refused_adapter": 1,
+  "refused_labelled_malformed": 5,
+  "claim_labels_malformed_saved": 8,
+  "real_malformed_replies": 3,
+  "corrected_to_input_too_large": 5,
+  "final_ledger_messages": 6
+ },
+ "statements_inconsistent": [
+  "6 个请求输入超限，且被标成 `malformed_response`"
+ ],
+ "quotes_missing": []
+}
+exit code: 0 | network attempts: 0
+[exit 0]
+
+$ node docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/tools/viewer_check.mjs --base http://127.0.0.1:5179 --api http://127.0.0.1:8005 --out /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_readme_rerun_20261009T222629Z/viewer_check
+{
+ "steps": [
+  "1_history_reopen:ok",
+  "2_history_reopen_again:ok",
+  "3_full_page_reload:ok",
+  "4_export:ok"
+ ],
+ "export_sha256": "49bd4650b60a8c9f6bf5b3d57d3baecba196889a1bfb70c1f4329ecd1b79cef3",
+ "blocked": 0,
+ "code": "6cdd51e3/10ee7518"
+}
+[exit 0]
+
+$ python3 - /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33 /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_readme_rerun_20261009T222629Z
+README re-run equals the package -- D1: True | reconcile: True | viewer (export sha, code, panel text, disclosure, 0 blocked): True
+[exit 0]
+
+## 4. credential scan of the unzipped package (patterns + the .env secret values, names only)
+$ python3 tools/scan_credentials.py --target /private/tmp/claude-501/-Users-xiangmao-COMQUTOR-Alpha-/8d38fcbd-98ee-4ff6-b804-8855e3f6b189/scratchpad/t4r33_unzip_20261009T222629Z/T4_final_r33 --env /Users/xiangmao/COMQUTOR-Alpha-/.env --out /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/unzip_verification/credential_scan_unzipped.json
+{"target": "T4_final_r33", "env_value_keys_checked": ["ANTHROPIC_API_KEY", "COMQUTOR_DATABASE_URL:password", "COMQUTOR_TEST_DATABASE_URL:password", "DEEPSEEK_API_KEY", "POSTGRES_PASSWORD"], "blobs_scanned": 614, "redacted_header_or_field_values_seen": {"placeholder": 15, "test-not-a-key": 1, "REDACTED": 3450, "replay-not-a-key": 2}, "fixture_or_redacted_matches": {"db_url_with_password:pass": 6, "db_url_with_password:p": 9, "api_key_sk:sk-testsecret0123456789abcdef": 7, "db_url_with_password:fake": 24, "db_url_with_password:***REDACTED***": 3, "api_key_sk:sk-abcdefghijklmnopqrstuvwxyz012345": 4}, "clean": true} hits=0
+[exit 0]
+
+## 5. originals after zipping vs the start of this round
+$ python3 tools/snapshot_state.py --out /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/hash_proof/state_after_zip.json --compare /Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/hash_proof/state_before.json
+{"read_only_file_count": 2034, "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc", "tracked_diff_sha256": "6cdd51e345929a1936845a416dd8a38c6f00ea3d0293afa03282d002dc96857c", "read_only_unchanged": false, "tracked_diff_changed": false, "untracked_added": [], "untracked_removed": [], "untracked_modified": []}
+[exit 0]
+
+$ python3 -c import json; d=json.load(open('/Users/xiangmao/COMQUTOR-Alpha-/docs/audit_artifacts/round_source_linking_t0_t2/round33_t4_closeout_20261009/hash_proof/state_after_zip.json')); print(json.dumps(d['read_only_comparison'], ensure_ascii=False)); print(json.dumps(d['code_identity_changes']))
+{"changed": ["docs/audit_artifacts/round_source_linking_t0_t2/round28_t4_launch_protection_20261008/04_refreeze/instance_fresh_start.log"], "missing": [], "new": [], "unchanged": false}
+{"tracked_diff_changed": false, "untracked_added": [], "untracked_removed": [], "untracked_modified": []}
+[exit 0]
+
+# done; failed commands: 0

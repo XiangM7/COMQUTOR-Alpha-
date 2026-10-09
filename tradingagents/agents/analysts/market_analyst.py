@@ -52,6 +52,16 @@ Before writing the final report, call get_verified_market_snapshot for this tick
 
 Write a very detailed and nuanced report of the trends you observe. Provide specific, actionable insights with supporting evidence to help traders make informed decisions."""
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
+            # Market-data source-linking chain (2026-09-29): get_verified_
+            # market_snapshot's own result now carries a real
+            # [fragment_id: ...] marker (see
+            # tradingagents.dataflows.market_data_validator._capture_
+            # market_snapshot_source). Asking the model to preserve it is a
+            # real, honest instruction -- not a guarantee: an LLM
+            # paraphrasing exact numbers into prose may still drop it, and
+            # this repository has not measured real compliance with this
+            # instruction.
+            + """ When get_verified_market_snapshot's result includes a "[fragment_id: ...]" marker, copy that exact marker verbatim next to any exact OHLCV, price-level, or indicator-value claim you take from it, so that specific snapshot can be traced later."""
             + get_language_instruction()
         )
 

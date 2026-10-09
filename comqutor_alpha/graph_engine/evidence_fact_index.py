@@ -34,6 +34,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from comqutor_alpha.graph_engine.claim_data_grounding import dependency_anchors
 from comqutor_alpha.graph_engine.graph_schema import is_finite_number
 from comqutor_alpha.structure_engine.claim_quality import (
     CONSUMER_ACTIVATION,
@@ -238,7 +239,19 @@ def _jaccard(a: frozenset[str], b: frozenset[str]) -> float:
 class EvidenceFactCandidate:
     """One piece of evidence eligible to be grouped. ``claim_id`` must be
     unique across the candidate pool passed to one
-    :func:`group_evidence_candidates` call."""
+    :func:`group_evidence_candidates` call.
+
+    ``linked_source_id`` (T1 source-linking chain, COMQUTOR Alpha
+    next-round task, 2026-09-26): this claim's own already-validated
+    ``comqutor_alpha.source_provenance.validate_source_reference`` result
+    (``SOURCE_LINK_VALID`` only -- never a candidate/unvalidated id). Two
+    claims that cite the SAME real, validated underlying source are, by
+    definition, not independent evidence, however differently worded --
+    this is a strong, ID-based merge signal, checked before the text-
+    signature/Jaccard passes below and independent of them. ``None`` (no
+    validated link, or a historical claim predating this field) never
+    merges anything on this basis alone -- every other pass still applies
+    unchanged."""
 
     claim_id: str
     claim_text: str
@@ -247,6 +260,12 @@ class EvidenceFactCandidate:
     semantic_polarity: str = "unknown"
     duplicate_group_id: str | None = None
     relation_triple: tuple[str, str, str, str] | None = None
+    linked_source_id: str | None = None
+    # T1 closure (claim_data_points.v1, ``claim_data_grounding``): the saved observations this claim literally
+    # states (``data_stated``) and all it relies on (``data_inputs`` = stated + the inputs of a reproduced
+    # calculation). Empty -> the dependency pass below never fires for this claim (legacy grouping, byte-identical).
+    data_stated: tuple[str, ...] = ()
+    data_inputs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -404,6 +423,85 @@ def group_evidence_candidates(
                     continue
                 if _jaccard(a.token_set, b.token_set) >= NEAR_MATCH_JACCARD_THRESHOLD:
                     uf.union(a.candidate.claim_id, b.candidate.claim_id)
+
+    # T1 source-linking chain (COMQUTOR Alpha next-round task, 2026-09-26,
+    # tightened 2026-09-28 per explicit review: "不要仅凭签名不冲突就断定两个
+    # 内容是同一个事实"): claims sharing the same VALIDATED linked_source_id
+    # trace to the identical underlying source -- but a shared source_id is
+    # NEVER used as a fact identity on its own (one article can report
+    # several distinct, non-contradictory facts too, e.g. "revenue beat
+    # estimates" and "the company hired a new CFO" -- absence of a
+    # signature CONFLICT is not evidence of SAMENESS). This pass now
+    # requires BOTH:
+    #   1. no conflicting deterministic signature (semantic polarity must
+    #      agree -- a same-source supporting claim is never merged with a
+    #      same-source OPPOSING one, direction is never lost to a merge --
+    #      and any of numeric/date/event/relation_triple BOTH sides
+    #      actually carry must agree where present); AND
+    #   2. POSITIVE evidence the two claims describe the SAME fact: a
+    #      shared non-empty factor_signature, a shared non-empty
+    #      event_signature, a shared relation_triple, OR the SAME strict
+    #      token-Jaccard threshold the standalone near-match pass already
+    #      uses (NEAR_MATCH_JACCARD_THRESHOLD -- no new, weaker threshold
+    #      invented just for this pass). A shared source lowers evidentiary
+    #      friction for wording differences of an ALREADY-similar pair; it
+    #      is never, by itself, proof that two otherwise-unrelated
+    #      sentences are the same fact.
+    by_linked_source: dict[str, list[str]] = {}
+    for c in candidates:
+        if c.linked_source_id:
+            by_linked_source.setdefault(c.linked_source_id, []).append(c.claim_id)
+    for claim_ids in by_linked_source.values():
+        ordered = sorted(claim_ids)
+        for i in range(len(ordered)):
+            for j in range(i + 1, len(ordered)):
+                a = signed_by_id[ordered[i]]
+                b = signed_by_id[ordered[j]]
+                if uf.find(a.candidate.claim_id) == uf.find(b.candidate.claim_id):
+                    continue
+                if a.candidate.semantic_polarity != b.candidate.semantic_polarity:
+                    continue
+                if a.numeric_signature and b.numeric_signature and a.numeric_signature != b.numeric_signature:
+                    continue
+                if a.date_signature and b.date_signature and a.date_signature != b.date_signature:
+                    continue
+                if a.event_signature and b.event_signature and a.event_signature != b.event_signature:
+                    continue
+                if (
+                    a.candidate.relation_triple
+                    and b.candidate.relation_triple
+                    and a.candidate.relation_triple != b.candidate.relation_triple
+                ):
+                    continue
+                same_fact_signal = (
+                    (a.factor_signature and a.factor_signature == b.factor_signature)
+                    or (a.event_signature and a.event_signature == b.event_signature)
+                    or (
+                        a.candidate.relation_triple is not None
+                        and a.candidate.relation_triple == b.candidate.relation_triple
+                    )
+                    or _jaccard(a.token_set, b.token_set) >= NEAR_MATCH_JACCARD_THRESHOLD
+                )
+                if not same_fact_signal:
+                    continue
+                uf.union(a.candidate.claim_id, b.candidate.claim_id)
+
+    # T1 closure (claim_data_points.v1): a claim that is a DERIVED EXPRESSION of another claim's saved observations
+    # (every observation it relies on is one the other claim literally states) is the same underlying evidence, so
+    # it joins that claim's group instead of adding an independent fact. Deliberately narrow: sharing a source, or
+    # sharing only some observations, never merges (see claim_data_grounding.dependency_anchors); an opposite
+    # semantic polarity never merges (a contradiction about the same numbers is not a restatement); and a claim
+    # with no grounded observations is untouched, so every run without the data-point annotation groups exactly
+    # as before.
+    if any(c.data_inputs for c in candidates):
+        anchors = dependency_anchors(
+            {c.claim_id: c.data_inputs for c in candidates if c.data_inputs},
+            {c.claim_id: c.data_stated for c in candidates if c.data_stated},
+        )
+        for claim_id, anchor_id in sorted(anchors.items()):
+            if signed_by_id[claim_id].candidate.semantic_polarity != signed_by_id[anchor_id].candidate.semantic_polarity:
+                continue
+            uf.union(claim_id, anchor_id)
 
     groups: dict[str, list[EvidenceFactCandidate]] = {}
     for c in candidates:

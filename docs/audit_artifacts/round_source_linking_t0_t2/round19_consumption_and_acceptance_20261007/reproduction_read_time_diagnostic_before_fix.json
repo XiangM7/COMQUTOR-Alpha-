@@ -1,0 +1,50 @@
+{
+ "purpose": "reproduction of the read-time diagnostic defect BEFORE the fix (live service on current code, restarted this round)",
+ "claim_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:10",
+ "api_verified_support_diagnostic": {
+  "category": "REFERENCE_MISSING_OR_INVALID",
+  "detail_code": "REVIEW_SOURCE_NOT_LINKED_TO_CLAIM"
+ },
+ "api_public_record_keys": [
+  "agent",
+  "agent_output_id",
+  "assertion_status",
+  "claim",
+  "claim_id",
+  "claim_index",
+  "confidence",
+  "content_support_method",
+  "content_support_review",
+  "content_support_status",
+  "direction",
+  "entities",
+  "evidence",
+  "external_source",
+  "external_source_status",
+  "extraction_method",
+  "factors",
+  "linked_source",
+  "linked_source_id",
+  "output_type",
+  "run_id",
+  "semantic_polarity",
+  "source_agent_output_id",
+  "source_link_method",
+  "source_link_status",
+  "source_refs",
+  "source_section",
+  "source_type",
+  "ticker",
+  "timestamp",
+  "verified_support_diagnostic"
+ ],
+ "api_has_linked_source_ids": false,
+ "api_linked_source_id": "src_7e133fa786f7aaa0",
+ "api_review": {
+  "status": "SUPPORTS",
+  "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+  "linked_source_id": "src_582ac24bf4319648",
+  "content_hash": "086818dfdc10e841ef906ae1906580ffa711a38d201cae815156c206486c01e9"
+ },
+ "stored_artifact_says": "ELIGIBLE (structured_agent_outputs.json carries linked_source_ids=[src_7e133fa786f7aaa0, src_582ac24bf4319648]; the review binds src_582ac24bf4319648)"
+}

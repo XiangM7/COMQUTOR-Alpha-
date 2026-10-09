@@ -1,0 +1,59 @@
+{
+  "schema_version": "v0.2.day4b_provider_validation.v1",
+  "metric_family": "DAY4B_PROVIDER_BACKED_VALIDATION",
+  "validation_type": "OLD_RESULT_REEVALUATED_UNDER_NEW_RULES -- same frozen 200-sample independent holdout, same reviewer labels, new (v4) Provider-facing prompt",
+  "holdout_source": "item2_blind_holdout4 (200 samples, unchanged denominator/labels/exclusions)",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "prompt_version": "week2.alpha_classifier.v4",
+  "real_provider_calls": 200,
+  "retries": 0,
+  "timeouts": 0,
+  "unavailable_count": 0,
+  "wall_clock_seconds": 305.04,
+  "pre_remediation": {
+    "correct": 148,
+    "denominator": 200,
+    "accuracy_percent": 74.0
+  },
+  "post_remediation": {
+    "correct": 139,
+    "denominator": 200,
+    "failures": 61,
+    "accuracy_percent": 69.5
+  },
+  "target_met": false,
+  "category_comparison": {
+    "SYSTEM_FALSE_NEGATIVE_LLM_NONE": {
+      "previously_wrong": 26,
+      "now_corrected": 5,
+      "still_wrong": 21
+    },
+    "SYSTEM_FALSE_POSITIVE_OVERMATCH": {
+      "previously_wrong": 10,
+      "now_corrected": 8,
+      "still_wrong": 2
+    },
+    "OTHER_WRONG_ALPHA_SUBSTITUTION": {
+      "previously_wrong": 10,
+      "now_corrected": 1,
+      "still_wrong": 9
+    },
+    "CROSS_FAMILY_GROWTH_VS_RISK_CONFUSION": {
+      "previously_wrong": 4,
+      "now_corrected": 2,
+      "still_wrong": 2
+    },
+    "A101_A102_A103_BOUNDARY_CONFUSION": {
+      "previously_wrong": 2,
+      "now_corrected": 0,
+      "still_wrong": 2
+    }
+  },
+  "new_regressions_count": 25,
+  "new_regressions_note": "24 of 25 new regressions are previously-correct selections that flipped to decision=none; 1 is a new false-positive (holdout4-160, expected=None, now=A304). Net effect: the prompt's new 'bare figure alone is insufficient' / conservatism-inducing guidance over-corrected, making the model substantially more likely to decline (none) even on claims it previously classified correctly, outweighing the gains from the false-positive and false-negative fixes it also produced.",
+  "conclusion": "Net regression: 148/200 (74.00%) pre-remediation -> 139/200 (69.50%) post-remediation. Below John's >=80% target, and below the pre-remediation baseline. No further prompt/code change applied in this task per explicit instruction (one remediation, one formal validation).",
+  "candidate_status": "REJECTED_NET_REGRESSION",
+  "candidate_status_reason": "74.00% (148/200) -> 69.50% (139/200), with 25 new regressions (24 previously-correct cases flipped to none, 1 new false positive). Rejected as final production prompt per Day 4C.",
+  "rejection_recorded_by": "JOHN_DAY_4C"
+}

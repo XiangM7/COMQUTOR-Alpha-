@@ -1,0 +1,634 @@
+{
+ "schema": "t4.round31.run_identity.v1",
+ "run_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8",
+ "ticker": "NVDA",
+ "analysis_date": "2026-10-08",
+ "started_by": "项目负责人 Xiang Mao 在 http://127.0.0.1:5177/research 网页亲自点击 Start Research（负责人陈述；8002 日志中每次一个 POST /api/research）；没有启动录像",
+ "status": {
+  "final_status_api": "partial",
+  "alpha_classification_status": "incomplete",
+  "completion": {
+   "total_claims": 870,
+   "valid_select_count": 190,
+   "valid_none_count": 678,
+   "call_failure_count": 2,
+   "not_executed_count": 0,
+   "not_executed_configuration_count": 0,
+   "not_executed_fault_count": 0,
+   "complete": false
+  },
+  "summary_text": "Alpha classification is incomplete for this research run: 2 of 870 claims have no usable classification result (2 call failure(s), 0 not executed), so the absence of a dominant Alpha structure or admitted conflict cannot yet be read as 'none exists'.",
+  "db_record": "未记录",
+  "status_source": "run1_fa642639/research_response.json (GET /api/research/{run_id} after the run) and db_export_status_check.json"
+ },
+ "code": {
+  "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "committed": false,
+  "uncommitted_changes": true,
+  "tracked_diff_sha256_recorded_by_run": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+  "untracked_runtime_source_sha256_recorded_by_run": "38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad",
+  "untracked_runtime_source_files_recorded_by_run": 26,
+  "computed_at": "2026-10-09T01:03:51.015625+00:00",
+  "snapshot_in_package": {
+   "tracked_diff": "code_identity/tracked_diff_vs_HEAD.diff",
+   "tracked_diff_file_sha256": "1b53b9218286fd2f9954c3d64b60a031b5a8cbc5fa8b78eab55c55ede1a1f363",
+   "tracked_diff_matches_run": true,
+   "untracked_tar": "code_identity/untracked_runtime_source.tar.gz",
+   "files_listed": 26,
+   "files_in_tar": 26,
+   "missing_from_tar": [],
+   "listed_sha_mismatch": [],
+   "recomputed_untracked_runtime_source_sha256": "38ef636f302f60b97b03317bed0981e38b4a769841ecb4baeb22428d29671bad",
+   "untracked_matches_run": true,
+   "taken_at": "Round 28 re-freeze (2026-10-09 ~00:47Z), docs/audit_artifacts/round_source_linking_t0_t2/round28_t4_launch_protection_20261008/04_refreeze/code_snapshot/"
+  },
+  "statement": "代码 = git HEAD 7a9aefa + 未提交的完整 tracked diff + 未跟踪运行源码快照；没有提交，不能称为已提交版本"
+ },
+ "execution_type": "fresh_run",
+ "database": {
+  "status": "known",
+  "dialect": "postgresql",
+  "database": "comqutor_alpha_t4_test"
+ },
+ "effective_config_recorded_by_run": {
+  "research_agents": {
+   "max_actual_requests": "100",
+   "max_retries": "0",
+   "profile_id": "comqutor_deepseek_default_v1",
+   "provider": "deepseek",
+   "quick_model": "deepseek-v4-flash",
+   "deep_model": "deepseek-v4-flash",
+   "thinking": "disabled",
+   "max_debate_rounds": 1,
+   "max_risk_discuss_rounds": 1
+  },
+  "week2_semantic": {
+   "enabled": true,
+   "execution_profile": "t3_verified_20261008",
+   "profile_error": null,
+   "provider": "deepseek",
+   "model": "deepseek-v4-flash",
+   "base_url_configured": false,
+   "request_response_audit": true,
+   "max_calls": 1800,
+   "shared_timeout_seconds_other_tasks": 45.0,
+   "gateway_max_retries": 0,
+   "tasks": {
+    "content_support_verification": {
+     "client_read_timeout_seconds": 120.0,
+     "application_timeout_seconds": 120.0,
+     "application_retries": 0,
+     "sdk_retries": 0,
+     "batch_size": 1,
+     "max_tokens": null
+    },
+    "alpha_classifier": {
+     "client_read_timeout_seconds": 45.0,
+     "application_timeout_seconds": 45.0,
+     "application_retries": 0,
+     "sdk_retries": 0,
+     "path": "single",
+     "concurrency": 4,
+     "max_tokens": null
+    },
+    "evidence_stance_classifier": {
+     "client_read_timeout_seconds": 120.0,
+     "application_timeout_seconds": 120.0,
+     "application_retries": 0,
+     "sdk_retries": 0,
+     "batch_size": 10,
+     "concurrency": 4
+    }
+   }
+  }
+ },
+ "config_notes": {
+  "structured_adapter_and_structure_extractor_timeout": "共享 45 s（effective_config.week2_semantic.shared_timeout_seconds_other_tasks），没有单独的 profile 设置",
+  "retries": "两层都是 0：research_agents.max_retries=0；Week 2 gateway_max_retries=0，每个任务 application_retries=0、sdk_retries=0",
+  "week2_cap": "1800 次网关预算占用（不是 HTTP 请求数）",
+  "frozen_config": "code_identity/frozen_config.json（Round 28 冻结，sha256 见 manifest）"
+ },
+ "models_and_prompts": {
+  "research_agents": {
+   "calls": 19,
+   "provider_model_as_logged": {
+    "openai|deepseek-v4-flash": 19
+   },
+   "provider_note": "调用日志的 provider 字段记为 openai：LangChain 对 DeepSeek 的 OpenAI 兼容客户端的标记；模型名 deepseek-v4-flash，effective_config 记 provider=deepseek",
+   "prompt_hash": "未记录（研究 Agent 层的调用日志没有 prompt 哈希）",
+   "profile": {
+    "max_actual_requests": "100",
+    "max_retries": "0",
+    "profile_id": "comqutor_deepseek_default_v1",
+    "provider": "deepseek",
+    "quick_model": "deepseek-v4-flash",
+    "deep_model": "deepseek-v4-flash",
+    "thinking": "disabled",
+    "max_debate_rounds": 1,
+    "max_risk_discuss_rounds": 1
+   }
+  },
+  "week2_semantic_by_task": [
+   {
+    "task": "alpha_classifier",
+    "prompt_version": "week2.alpha_classifier.v7",
+    "prompt_sha256": "ac48723f15cf347590ad2cb175f76cd438dbc4181c7b781aa0cfffaafe589b95",
+    "input_schema_version": "week2.alpha_classifier.input.v2",
+    "output_schema_version": "week2.alpha_classifier.output.v3",
+    "taxonomy_version": "alpha_taxonomy_v1",
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "logical_calls": 870
+   },
+   {
+    "task": "content_support_verification",
+    "prompt_version": "content_support.llm.v2.1",
+    "prompt_sha256": "6abae47b6a6a52966f74f3bf9a3189f6898e21764a8a92f3d18779d9943a1f06",
+    "input_schema_version": "content_support.llm.input.v2",
+    "output_schema_version": "content_support.llm.output.v2.1",
+    "taxonomy_version": null,
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "logical_calls": 174
+   },
+   {
+    "task": "evidence_stance_classifier",
+    "prompt_version": "evidence_stance.llm_classifier.v3",
+    "prompt_sha256": "d9455fd5ff337c670ed7d146da3362ae656fd542f456690859fcb15564d0b6f2",
+    "input_schema_version": "evidence_stance.llm_classifier.input.v1",
+    "output_schema_version": "evidence_stance.llm_classifier.output.v1",
+    "taxonomy_version": "alpha_taxonomy_v1",
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "logical_calls": 20
+   },
+   {
+    "task": "structure_extractor",
+    "prompt_version": "week2.structure_extractor.v1",
+    "prompt_sha256": "326622a1786be03909e3d6dbcfca5069fe3cd4b31f0aab2da36bf8be324edbbc",
+    "input_schema_version": "week2.structure_extractor.input.v1",
+    "output_schema_version": "week2.structure_extractor.output.v1",
+    "taxonomy_version": null,
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "logical_calls": 8
+   },
+   {
+    "task": "structured_adapter",
+    "prompt_version": "week2.claim_batch_enrichment.v1",
+    "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+    "input_schema_version": "week2.claim_batch_enrichment.input.v1",
+    "output_schema_version": "week2.claim_batch_enrichment.output.v1",
+    "taxonomy_version": null,
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "logical_calls": 9
+   }
+  ]
+ },
+ "inputs": {
+  "raw_agent_outputs_sha256": "ea6b6de485b58914b13a4a4787839488b1f090ccccb87bbe3c38cdb93f0b3fca",
+  "source_registry_sha256": "d01379340f49f88c29f5083460c872d963b3d1408878ceaebbcad39538cb9718",
+  "market_data_snapshot_sha256": "2a279675720155115849a82447df43974681f4c50e1f598dd4064a2f4f747361",
+  "derived_inputs_sha256": "5f2b10566b7a0afefacae38fe3d81cda027eb4ec500a06345eb33033b819387a",
+  "sources": {
+   "count": 35,
+   "by_type": {
+    "news": 30,
+    "financial": 4,
+    "market": 1
+   },
+   "with_content_hash": 5,
+   "metadata_status": {
+    "TRACEABLE": 30,
+    "PARTIAL": 5
+   }
+  },
+  "agents": [
+   "market_agent",
+   "sentiment_agent",
+   "news_agent",
+   "fundamental_agent",
+   "bull_researcher",
+   "bear_researcher",
+   "research_manager",
+   "trader",
+   "aggressive_risk_analyst",
+   "conservative_risk_analyst",
+   "neutral_risk_analyst",
+   "portfolio_manager"
+  ],
+  "selected_analysts": [
+   "market",
+   "sentiment",
+   "news",
+   "fundamentals"
+  ]
+ },
+ "evidence_cutoff": {
+  "recorded_field": "未记录（运行没有专门的证据截止字段）",
+  "derived_from_saved_files": {
+   "analysis_date": "2026-10-08",
+   "news_published_at_range": [
+    "2026-10-07T00:00:00",
+    "2026-10-08T18:01:28.657164"
+   ],
+   "sources_retrieved_at_range": [
+    "2026-10-09T01:03:50Z",
+    "2026-10-09T01:03:50Z"
+   ],
+   "market_snapshot": {
+    "provider": "yfinance",
+    "provider_version": "1.5.1",
+    "retrieved_at": "2026-10-09T06:22:25Z",
+    "query": {
+     "start_date": "2025-09-03",
+     "end_exclusive": "2026-10-09",
+     "interval": "1d",
+     "auto_adjust": false,
+     "repair": false
+    },
+    "last_row_date": "2026-10-08",
+    "rows": 277
+   }
+  },
+  "note": "以上是从已保存文件推出的范围，不是运行记录的截止参数"
+ },
+ "rules_and_versions": {
+  "formal_status": "needs_review",
+  "acceptance_engine": "acceptance_engine.v2",
+  "gold_contract": {
+   "path": "docs/audit_artifacts/v0_2_gold_operational_contract.json",
+   "sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+   "schema_version": "gold_operational_contract.v0.2",
+   "gold_version": "v0.2",
+   "freeze_status": "FROZEN_GOLD_V0_2",
+   "freeze_timestamp": "2026-09-10T21:04:41+00:00",
+   "total_rule_count": 19,
+   "authority_field_in_file": {
+    "approval_authority": "John",
+    "approval_status": "APPROVED",
+    "model": "EVIDENCE_CONDITIONAL",
+    "supersedes": "The previous model in which every ticker had a fixed mandatory Alpha set -- Gold v0.2 does not recreate fixed expected-Alpha lists; every rule is evidence-gated.",
+    "taxonomy_authority_sources": [
+     "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml (canonical Alpha definitions, conflict_alphas, relations)",
+     "docs/specs/product_decisions_and_unknowns.md PD-017 (Development Plan v1.0 Section 4's six mandatory conflict pairs, cross-confirming the taxonomy's own conflict_alphas)",
+     "docs/specs/product_decisions_and_unknowns.md PD-011/012/013/014 (Alpha mapping cardinality, score semantics, threshold, no-match behavior -- reused conceptually for evidence-condition language, not re-derived)"
+    ]
+   },
+   "authority_note": "the file's authority.approval_status is a field the Step-1 instruction supplied as a template; it is not cited as evidence. Each executed rule cites the John decision it implements (rules_in_effect[].authority_basis).",
+   "integrity": {
+    "expected_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "expected_from": "docs/audit_artifacts/v0_2_gold_freeze_manifest.json",
+    "freeze_manifest_sha256": "081e66b405ac039f9fe64c2689e346c6f91de1448d6405e449e49ce74e8e0540",
+    "matches": true
+   },
+   "markdown_companion": {
+    "path": "docs/audit_artifacts/v0_2_gold_operational_contract.md",
+    "sha256_now": "efc7a82b33e6f4c5aea5fa9c14d6c62ce97245534ff2b17b568074762d989eca",
+    "sha256_frozen": "8e184d7ed41cbe253b5aa7e97e150e9c7f4dbfd6852d411e9874dbe299bf9f04",
+    "matches_frozen": false,
+    "read_by_executor": false,
+    "note": "rewritten on John's instruction of 2026-09-15 (final submission cleanup: a short John-facing definition of the six semantics); the rule records live in the JSON, which is byte-identical to the frozen file"
+   },
+   "trigger_matrix": {
+    "path": "docs/audit_artifacts/v0_2_evidence_trigger_matrix.json",
+    "sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+    "expected_sha256": "3e8e7402803632198b01c2a08a98929031929cc4b909927dc7e475d37b5d22a1",
+    "matches_expected": true,
+    "written_against_contract_sha256": "e2df7139e19ec998afc6335caf4d53528dd3f4356a46d4e9a88d9d04b520000f",
+    "bound_runs": {
+     "AMD": "949f685a-3945-4fd0-b7b9-362b37c90721",
+     "MSFT": "43472ace-454f-4c69-892c-adca91c25be7",
+     "NVDA": "57d7b4c4-dbb9-4134-b962-ee2a873941cc",
+     "QQQ": "f88c8956-cb62-48aa-9951-89f8e8a95f83",
+     "SNDK": "e8e0f398-7b26-4462-8135-a1410ea5b335",
+     "TSM": "dfc7ceb3-3584-4514-bd84-6c371aab3e95"
+    },
+    "determination_method": "the evidence of each bound run was read once, by hand, from that run's structured_agent_outputs.json; there is no approved executable method that determines the trigger for any other run",
+    "executable_method_for_other_runs": null
+   },
+   "detection_authority": {
+    "source": "run_audit.json -> activation_summary.per_alpha[alpha_id].level, read as regression_report_v3._detected_alphas does",
+    "detected_levels": [
+     "active",
+     "dominant",
+     "regime_level"
+    ],
+    "not_detected_levels": [
+     "candidate",
+     "capped_active",
+     "blocked",
+     "unavailable"
+    ]
+   },
+   "rules_in_effect": [
+    {
+     "rule_id": "NVDA-A101-AI-GROWTH",
+     "ticker": "NVDA",
+     "family": "must_detect_if_evidence_present",
+     "hit_type": "ALPHA_HIT",
+     "acceptable_alphas": [
+      "A101"
+     ],
+     "allowed_main_conflicts": [],
+     "blocking": true,
+     "executor": "gold_contract_rules.evaluate_alpha_rule",
+     "trigger_source": "frozen evidence trigger matrix, for run 57d7b4c4-dbb9-4134-b962-ee2a873941cc only; any other run -> NOT_EVALUABLE",
+     "authority_basis": [
+      "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: 'A101: must_detect_if_evidence_present'; section 2: NVDA is Formal Gold, blocking = true",
+      "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 8.A (mapping, condition, 'do NOT force A101 when such evidence is absent')",
+      "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+     ]
+    },
+    {
+     "rule_id": "NVDA-A304-VALUATION-RISK",
+     "ticker": "NVDA",
+     "family": "must_detect_if_evidence_present",
+     "hit_type": "ALPHA_HIT",
+     "acceptable_alphas": [
+      "A304"
+     ],
+     "allowed_main_conflicts": [],
+     "blocking": true,
+     "executor": "gold_contract_rules.evaluate_alpha_rule",
+     "trigger_source": "frozen evidence trigger matrix, for run 57d7b4c4-dbb9-4134-b962-ee2a873941cc only; any other run -> NOT_EVALUABLE",
+     "authority_basis": [
+      "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: 'A304: must_detect_if_evidence_present'; section 2: NVDA is Formal Gold, blocking = true",
+      "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 8.C",
+      "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+     ]
+    },
+    {
+     "rule_id": "NVDA-GROWTH-VS-VALUATION-CONFLICT",
+     "ticker": "NVDA",
+     "family": "conditional_only",
+     "hit_type": "COMPOSITE_STRUCTURE_HIT",
+     "acceptable_alphas": [
+      "A101",
+      "A301",
+      "A304"
+     ],
+     "allowed_main_conflicts": [
+      "A101__A304",
+      "A301__A304"
+     ],
+     "blocking": true,
+     "executor": "gold_contract_rules.evaluate_composite_rule",
+     "trigger_source": "frozen evidence trigger matrix, for run 57d7b4c4-dbb9-4134-b962-ee2a873941cc only; any other run -> NOT_EVALUABLE",
+     "authority_basis": [
+      "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 4: composite allowed pairs A101__A304 and A301__A304 'only when both relevant evidence sides are present; do not force a conflict if only one side is supported'",
+      "Frozen-gold vs frozen-trigger comparison protocol (Step 4), 2026-09-10T21:52:47Z, section 13: any allowed evidence-supported conflict admitted -> PASS; none admitted -> REVIEW with adjudication; outside the allowed family -> FAIL or REVIEW",
+      "v0_2_john_frozen_gold_baseline.yaml (authority JOHN_WRITTEN_V0_2_BASELINE): allowed_main_conflicts NVDA = A101__A304, A301__A304"
+     ]
+    },
+    {
+     "rule_id": "MSFT-A102-DIRECT-INFERENCE-TRIGGER",
+     "ticker": "MSFT",
+     "family": "must_detect_if_evidence_present",
+     "hit_type": "ALPHA_HIT",
+     "acceptable_alphas": [
+      "A102"
+     ],
+     "allowed_main_conflicts": [],
+     "blocking": false,
+     "executor": "gold_contract_rules.evaluate_alpha_rule",
+     "trigger_source": "frozen evidence trigger matrix, for run 43472ace-454f-4c69-892c-adca91c25be7 only; any other run -> NOT_EVALUABLE",
+     "authority_basis": [
+      "John's final decisions for the Gold v0.2 freeze (Step 2), 2026-09-10T21:02:57Z, section 1.G (final decision): DIRECT_INFERENCE_TRIGGER -> must_detect_if_evidence_present -> A102; section 2: MSFT is Silver, blocking = false",
+      "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 11.B (the 'must/should' wording that decision G resolved)",
+      "v0_2_gold_freeze_manifest.json (contract JSON sha256 e2df7139e19e...; 9 review items resolved, none remaining)"
+     ]
+    },
+    {
+     "rule_id": "AMD-AI-GROWTH-VS-VALUATION",
+     "ticker": "AMD",
+     "family": "conditional_only",
+     "hit_type": "COMPOSITE_STRUCTURE_HIT",
+     "acceptable_alphas": [
+      "A101",
+      "A201",
+      "A301",
+      "A304"
+     ],
+     "allowed_main_conflicts": [
+      "A101__A304",
+      "A301__A304"
+     ],
+     "blocking": false,
+     "executor": "gold_contract_rules.evaluate_composite_rule",
+     "trigger_source": "frozen evidence trigger matrix, for run 949f685a-3945-4fd0-b7b9-362b37c90721 only; any other run -> NOT_EVALUABLE",
+     "authority_basis": [
+      "John's Gold v0.2 operationalization instruction (Step 1), 2026-09-10T20:43:46Z, section 13 (composite; 'do not force either pair'; Silver, non-blocking)",
+      "Frozen-gold vs frozen-trigger comparison protocol (Step 4), 2026-09-10T21:52:47Z, sections 13 and 20",
+      "v0_2_john_frozen_gold_baseline.yaml (authority JOHN_WRITTEN_V0_2_BASELINE): allowed_main_conflicts AMD = A101__A304, A201__A304, A301__A304 (the baseline controls; the contract lists only A101__A304 and A301__A304)"
+     ]
+    }
+   ],
+   "rules_not_in_effect": [
+    {
+     "rule_id": "NVDA-A301-FUNDAMENTAL-GROWTH",
+     "ticker": "NVDA",
+     "rule_type": [
+      "should_detect_if_supported",
+      "conditional_only"
+     ],
+     "hit_type": "ALPHA_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "NVDA-SUPPORTING-STRUCTURES",
+     "ticker": "NVDA",
+     "rule_type": "should_detect_if_supported",
+     "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+     "blocking": false,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "QQQ-A001-RATE-CUT-CYCLE",
+     "ticker": "QQQ",
+     "rule_type": [
+      "should_detect_if_supported",
+      "conditional_only"
+     ],
+     "hit_type": "ALPHA_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "QQQ-A003-LIQUIDITY-EXPANSION",
+     "ticker": "QQQ",
+     "rule_type": [
+      "should_detect_if_supported",
+      "conditional_only"
+     ],
+     "hit_type": "ALPHA_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "QQQ-A304-VALUATION-RISK",
+     "ticker": "QQQ",
+     "rule_type": "conditional_only",
+     "hit_type": "ALPHA_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "QQQ-A501-RECESSION-RISK",
+     "ticker": "QQQ",
+     "rule_type": [
+      "should_detect_if_supported",
+      "conditional_only"
+     ],
+     "hit_type": "ALPHA_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "QQQ-A601-NARRATIVE-MOMENTUM",
+     "ticker": "QQQ",
+     "rule_type": "should_detect_if_supported",
+     "hit_type": "ALPHA_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "QQQ-ETF-CONTEXT-CONTROL",
+     "ticker": "QQQ",
+     "rule_type": "forbidden_dominant_without_strong_evidence",
+     "hit_type": "NEGATIVE_CONTROL_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "SNDK-A201-SEMICONDUCTOR-CYCLE",
+     "ticker": "SNDK",
+     "rule_type": [
+      "should_detect_if_supported",
+      "conditional_only"
+     ],
+     "hit_type": "ALPHA_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "SNDK-ANTI-OVER-AI-CONTROL",
+     "ticker": "SNDK",
+     "rule_type": "forbidden_dominant_without_strong_evidence",
+     "hit_type": "NEGATIVE_CONTROL_HIT",
+     "blocking": true,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "MSFT-A101-ENTERPRISE-AI-CONDITIONAL",
+     "ticker": "MSFT",
+     "rule_type": "conditional_only",
+     "hit_type": "ALPHA_HIT",
+     "blocking": false,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "MSFT-A102-INDIRECT-INFERENCE-SUPPORT",
+     "ticker": "MSFT",
+     "rule_type": "should_detect_if_supported",
+     "hit_type": "ALPHA_HIT",
+     "blocking": false,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "MSFT-CAPEX-BURDEN-CONDITIONAL",
+     "ticker": "MSFT",
+     "rule_type": "conditional_only",
+     "hit_type": "CONDITIONAL_ACCEPTANCE_HIT",
+     "blocking": false,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    },
+    {
+     "rule_id": "TSM-AI-TO-FOUNDRY-TRANSMISSION",
+     "ticker": "TSM",
+     "rule_type": "conditional_only",
+     "hit_type": "COMPOSITE_STRUCTURE_HIT",
+     "blocking": false,
+     "reason_code": "NOT_EXECUTED_THIS_ROUND",
+     "reason": "outside the five contract rules this round executes; not evaluated, not counted in any verdict"
+    }
+   ]
+  },
+  "taxonomy": {
+   "path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+   "sha256": "c6d523beaee4942c71756a3fddbb8213d4ba2f8653fded088d73031ca80f3bfa",
+   "declared_alpha_count": 10,
+   "schema_version": "alpha_taxonomy_v1",
+   "content_version": "1.1.0",
+   "canonical_conflict_pairs": [
+    "A001__A501",
+    "A003__A501",
+    "A101__A304",
+    "A102__A304",
+    "A201__A304",
+    "A301__A304",
+    "A304__A601",
+    "A501__A601"
+   ]
+  },
+  "label_v2": {
+   "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+   "sha256": "667262aaa15a94a5c660488493f7386a4e6ec6b8c02f1293927d887bf7920ba6",
+   "label_version": "j2.provisional.v0.2",
+   "evaluation_mode": "shadow",
+   "status": "provisional_ai_predicted",
+   "evaluation_authority": "provisional",
+   "formal_product_owner_approval": "pending",
+   "approved_by": null,
+   "taxonomy_version": "alpha_taxonomy_v1",
+   "taxonomy_content_version": "1.1.0"
+  },
+  "label_v1": {
+   "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+   "sha256": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1",
+   "label_version": "j2.provisional.v0.1",
+   "used_for": "forbidden_dominant_without_strong_evidence (should_not_be_dominant_without_strong_evidence)"
+  },
+  "source": "runs/<run_id>/formal_acceptance.json（运行时写入的哈希）"
+ },
+ "week2_gateway_budget": {
+  "schema_version": "comqutor.week2_gateway_budget.v1",
+  "max_calls": 1800,
+  "budget_reservations": 1042,
+  "written_at": "2026-10-09T06:22:25.286930+00:00"
+ },
+ "dependency_versions": "未记录（运行时没有记录依赖版本；不用今天的环境补填）",
+ "artifacts": {
+  "results_dir_original": "outputs/t4_runs/fa642639-8d93-4f9a-9de1-2c4d789eade8/（仓库相对路径；本包 runs/fa642639-8d93-4f9a-9de1-2c4d789eade8/ 是逐字节副本）",
+  "call_logs": {
+   "research_agents": "runs/fa642639-8d93-4f9a-9de1-2c4d789eade8/tradingagents_llm_calls.jsonl",
+   "week2_ledger": "runs/fa642639-8d93-4f9a-9de1-2c4d789eade8/llm_semantic_calls.jsonl",
+   "week2_wire_audit_requests": "runs/fa642639-8d93-4f9a-9de1-2c4d789eade8/error_logs/week2_llm_provider_request_audit.jsonl",
+   "week2_wire_audit_responses": "runs/fa642639-8d93-4f9a-9de1-2c4d789eade8/error_logs/week2_llm_provider_response_audit.jsonl",
+   "usage_report": "runs/fa642639-8d93-4f9a-9de1-2c4d789eade8/llm_usage_report.json"
+  },
+  "api_export_zip": {
+   "path": "run1_fa642639/api_export.zip",
+   "sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38"
+  },
+  "page_download_export_zip": {
+   "path": "run1_fa642639/page_download_export.zip",
+   "sha256": "7c77ec5918278533ba7247d1f8e66d6f955efe63d221f4ee76ec74c9bb915f38"
+  }
+ }
+}

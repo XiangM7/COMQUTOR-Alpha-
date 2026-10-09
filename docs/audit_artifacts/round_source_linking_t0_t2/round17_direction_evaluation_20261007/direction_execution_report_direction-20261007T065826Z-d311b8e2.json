@@ -1,0 +1,64 @@
+{
+  "outcome": {
+    "stop_reason": "first_batch_gate_failed",
+    "stop_detail": {
+      "state": "failed",
+      "failure_reason": "timeout",
+      "rule": "no further batch is scheduled unless the first batch produced a protocol-valid response"
+    },
+    "groups_run": 1,
+    "batches_total": 17,
+    "batch_states": {
+      "failed": 1
+    },
+    "batches_never_scheduled": 16,
+    "requests_audited_total": 1,
+    "request_tasks_observed": {
+      "evidence_stance_classifier": 1
+    },
+    "refused_tasks": [],
+    "gateway_call_count": 1,
+    "hard_request_cap": 17,
+    "checkpoint_path": "/Users/xiangmao/COMQUTOR-Alpha-/outputs/runs/direction-20261007T065826Z-d311b8e2/checkpoint_direction.json"
+  },
+  "results_summary": {
+    "pairs_total": 162,
+    "llm_results": 0,
+    "deterministic_fallback": 10,
+    "fallback_by_reason": {
+      "timeout": 10
+    },
+    "never_scheduled_or_unknown": 152,
+    "llm_stance_distribution": {},
+    "complete": false,
+    "batches": {
+      "failed": 1,
+      "never_scheduled": 16
+    }
+  },
+  "finalized": null,
+  "hashes_at_start": {
+    "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+    "note": "the working tree carries uncommitted changes (this project's rounds are uncommitted); the per-file hashes below are the real code identity",
+    "code_sha256": {
+      "comqutor_alpha/direction_evaluation.py": "2957712729655c85383759640e7f141d6891cd13e186c64a0187bfe02be96c11",
+      "comqutor_alpha/classification_recovery.py": "236c1726d9727d32ddc6d0841176f73898a7b4c6d1bc68d0c5c92c10bb96c240",
+      "comqutor_alpha/structure_engine/evidence_stance_llm.py": "5f789d9dcc81fa168681878df960dc13cd9eceb0e430e4f6169a9b01d49d6386",
+      "comqutor_alpha/structure_engine/evidence_stance.py": "9ae3aaeb14b453672445eeb6db6dccc6f526e3bc84bfec2776625436c27e14a6",
+      "comqutor_alpha/structure_engine/week2_llm.py": "fd338648401ab2ce18763ec0d22d9f9d1678437699a959508e737c476ef00910",
+      "comqutor_alpha/structure_engine/alpha_mapper.py": "54c635c61989642fd09bce5feed9222dd232d07522bb11a6c55c5613db42549d",
+      "comqutor_alpha/graph_engine/activation_scorer_v2.py": "b31ce6805d0f6ab421a0bbf9c3b11d8e6208e616cb2f45fa937800e9adfde6af",
+      "comqutor_alpha/conflict_engine/conflict_detector.py": "8addddab4beb1966d85790a44ee286ae25d924009603deb75b95b8fb04d0ff21",
+      "comqutor_alpha/graph_engine/pipeline.py": "3c1f3df51e89beeb633c313a45782500907f4a3c8ad64d8fd065ac330ef15125",
+      "comqutor_alpha/api/routes_research.py": "eec95010f775dc141bbc64dcd3faff3eea17bcd9e7444afcbd720c0e1a7b4efb",
+      "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml": "18a0dc6b5de7bbae3541272fbd66fa1172e62eed172fd86e97a72e1a40d90972"
+    },
+    "taxonomy_file_sha256": "18a0dc6b5de7bbae3541272fbd66fa1172e62eed172fd86e97a72e1a40d90972",
+    "parent_run_files": 29,
+    "root_run_files": 29
+  },
+  "protected_runs_unchanged": {
+    "parent": true,
+    "root": true
+  }
+}

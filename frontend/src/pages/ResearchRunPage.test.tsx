@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as client from "../api/client";
+import { ApiError } from "../api/errors";
 import type {
   AgentOutputsResponse,
   CanonicalResearchResponse,
@@ -499,6 +500,88 @@ describe("ResearchRunPage", () => {
     for (const forbidden of ["raw_output", "prompt", "/Users/", "postgresql://", "final_state"]) {
       expect(text).not.toContain(forbidden);
     }
+  });
+
+  describe("External source traceability (John MVP Final Gap Closure)", () => {
+    it("renders a genuine external source's name and clickable URL", async () => {
+      mockAgentOutputs([
+        findingRecord({
+          direction: "positive",
+          external_source: {
+            source_id: "src_abc",
+            source_type: "news",
+            name: "Barron's",
+            title: "A Genuine Headline",
+            url: "https://barrons.com/x",
+            published_at: "2026-09-17T10:00:00",
+            retrieved_at: null,
+            external_record_id: null,
+            locator: null,
+            provider: "yfinance",
+            metadata_status: "TRACEABLE",
+          },
+          external_source_status: "TRACEABLE",
+        }),
+      ]);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("Barron's")).toBeInTheDocument());
+      const link = screen.getByRole("link", { name: /open source/i });
+      expect(link).toHaveAttribute("href", "https://barrons.com/x");
+    });
+
+    it("never renders a fake link when the source has no URL", async () => {
+      mockAgentOutputs([
+        findingRecord({
+          direction: "positive",
+          external_source: {
+            source_id: "src_partial",
+            source_type: "macro_dataset",
+            name: "FRED",
+            title: null,
+            url: null,
+            published_at: null,
+            retrieved_at: null,
+            external_record_id: "CPIAUCSL",
+            locator: null,
+            provider: "fred",
+            metadata_status: "PARTIAL",
+          },
+          external_source_status: "PARTIAL",
+        }),
+      ]);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("FRED")).toBeInTheDocument());
+      expect(screen.queryByRole("link", { name: /open source/i })).not.toBeInTheDocument();
+      expect(screen.getByText("CPIAUCSL")).toBeInTheDocument();
+    });
+
+    it("renders an honest unavailable state instead of any fabricated source", async () => {
+      mockAgentOutputs([
+        findingRecord({ direction: "positive", external_source: null, external_source_status: "UNAVAILABLE" }),
+      ]);
+      renderPage();
+      await waitFor(() =>
+        expect(screen.getByText(/external source metadata is not available/i)).toBeInTheDocument()
+      );
+      expect(screen.queryByRole("link", { name: /open source/i })).not.toBeInTheDocument();
+    });
+
+    it("keeps claim_id visible only as an internal reference, never styled or labeled as an external source", async () => {
+      mockAgentOutputs([
+        findingRecord({
+          claim_id: "c-internal-123",
+          direction: "positive",
+          external_source: null,
+          external_source_status: "UNAVAILABLE",
+        }),
+      ]);
+      renderPage();
+      await waitFor(() => expect(screen.getByText("c-internal-123")).toBeInTheDocument());
+      // The claim_id sits in its own confidence/id line, never inside the
+      // external-source display block.
+      const externalSourceBlock = screen.getByText(/external source metadata is not available/i);
+      expect(externalSourceBlock.textContent).not.toContain("c-internal-123");
+    });
   });
 
   describe("Data Quality panel", () => {
@@ -1311,6 +1394,122 @@ describe("ResearchRunPage", () => {
         expect(panelText).toContain("Historical memory modulation is currently applied to this run's activation.");
         expect(panelText).not.toContain("does not alter the current activation result");
       });
+    });
+  });
+
+  // John MVP Gap Closure, Gap B (User-Facing Result Export). Distinct from
+  // the QA-only "Download full audit" (unclassified_findings.json) link
+  // exercised elsewhere in this file -- these tests cover the main,
+  // user-facing "Export research" control only.
+  describe("Export research (John MVP Gap Closure, Gap B)", () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+
+    it("shows an Export research control for a completed run", async () => {
+      mockAgentOutputs([]);
+      renderPage();
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: /export research/i })).toBeInTheDocument()
+      );
+    });
+
+    it("does not show the export control while a run is still in progress", async () => {
+      vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+        makeRunRecord({ status: "running", stage: "market_analysis", message: "Running." })
+      );
+      renderPage();
+      await waitFor(() => expect(screen.getByText(/research run is running/i)).toBeInTheDocument());
+      expect(screen.queryByRole("button", { name: /export research/i })).not.toBeInTheDocument();
+    });
+
+    it("does not show the export control for a failed run", async () => {
+      vi.spyOn(client, "getResearchRunStatus").mockResolvedValue(
+        makeRunRecord({ status: "failed", error_code: "REAL_RUN_FAILED", message: "It failed." })
+      );
+      renderPage();
+      await waitFor(() => expect(screen.getByText("This research run failed")).toBeInTheDocument());
+      expect(screen.queryByRole("button", { name: /export research/i })).not.toBeInTheDocument();
+    });
+
+    it("clicking Export uses the currently displayed run_id and triggers a download", async () => {
+      mockAgentOutputs([]);
+      const blob = new Blob(["zip-bytes"], { type: "application/zip" });
+      const exportSpy = vi
+        .spyOn(client, "exportResearchRun")
+        .mockResolvedValue({ blob, filename: "NVDA_run-1_research_export.zip" });
+      const createObjectUrlSpy = vi.fn().mockReturnValue("blob:mock-url");
+      const revokeObjectUrlSpy = vi.fn();
+      vi.stubGlobal("URL", { ...URL, createObjectURL: createObjectUrlSpy, revokeObjectURL: revokeObjectUrlSpy });
+      const clickSpy = vi.fn();
+      const originalCreateElement = document.createElement.bind(document);
+      vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+        const element = originalCreateElement(tagName);
+        if (tagName === "a") {
+          (element as HTMLAnchorElement).click = clickSpy;
+        }
+        return element;
+      });
+
+      renderPage();
+      const user = userEvent.setup();
+      const exportButton = await screen.findByRole("button", { name: /export research/i });
+      await user.click(exportButton);
+
+      await waitFor(() => expect(exportSpy).toHaveBeenCalledWith("run-1"));
+      expect(createObjectUrlSpy).toHaveBeenCalledWith(blob);
+      expect(clickSpy).toHaveBeenCalled();
+      expect(revokeObjectUrlSpy).toHaveBeenCalledWith("blob:mock-url");
+    });
+
+    it("shows a loading state while the export is being prepared", async () => {
+      mockAgentOutputs([]);
+      let resolveExport: (value: { blob: Blob; filename: string }) => void = () => {};
+      vi.spyOn(client, "exportResearchRun").mockReturnValue(
+        new Promise((resolve) => {
+          resolveExport = resolve;
+        })
+      );
+      vi.stubGlobal("URL", { ...URL, createObjectURL: vi.fn().mockReturnValue("blob:mock-url"), revokeObjectURL: vi.fn() });
+      const originalCreateElement = document.createElement.bind(document);
+      vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+        const element = originalCreateElement(tagName);
+        if (tagName === "a") {
+          (element as HTMLAnchorElement).click = vi.fn();
+        }
+        return element;
+      });
+
+      renderPage();
+      const user = userEvent.setup();
+      const exportButton = await screen.findByRole("button", { name: /export research/i });
+      await user.click(exportButton);
+
+      expect(await screen.findByRole("button", { name: /preparing export/i })).toBeInTheDocument();
+      resolveExport({ blob: new Blob(["x"]), filename: "x.zip" });
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: /^export research$/i })).toBeInTheDocument()
+      );
+    });
+
+    it("shows a visible failure state and never appears to succeed when export fails", async () => {
+      mockAgentOutputs([]);
+      vi.spyOn(client, "exportResearchRun").mockRejectedValue(
+        ApiError.http(
+          409,
+          "EXPORT_NOT_READY",
+          "This research run has not finished processing yet, so no export package is available."
+        )
+      );
+
+      renderPage();
+      const user = userEvent.setup();
+      const exportButton = await screen.findByRole("button", { name: /export research/i });
+      await user.click(exportButton);
+
+      await waitFor(() => expect(screen.getByText(/has not finished processing yet/i)).toBeInTheDocument());
+      expect(screen.getByRole("button", { name: /^export research$/i })).toBeInTheDocument();
     });
   });
 });

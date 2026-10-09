@@ -6,6 +6,8 @@ import type {
   ConflictMissingEvidenceItem,
   ConflictQualificationGapItem,
 } from "../api/types";
+import { EvidenceBasisToggle } from "./EvidenceTraceDetail";
+import { ExternalSourceDisplay } from "./ExternalSourceDisplay";
 
 // B5 Conflict Radar Evidence UI (task B5_CONFLICT_RADAR_EVIDENCE_UI). Every
 // list here is already deterministically ordered by the backend (ticker-
@@ -28,7 +30,7 @@ function stanceMethodLabel(item: ConflictEvidenceUIItem): string {
   return "deterministic (LLM not attempted)";
 }
 
-function EvidenceFactCard({ item }: { item: ConflictEvidenceUIItem }) {
+function EvidenceFactCard({ item, runId }: { item: ConflictEvidenceUIItem; runId?: string }) {
   const otherMembers = item.member_claim_ids.filter((id) => id !== item.representative_claim_id);
   return (
     <li className="evidence-ui-item">
@@ -73,16 +75,34 @@ function EvidenceFactCard({ item }: { item: ConflictEvidenceUIItem }) {
         <code>{item.evidence_fact_group_id}</code>
         {item.source_agent_output_ids.length > 0 ? (
           <>
-            {" · Source: "}
+            {/* Internal reference only -- which agent-output record this
+                came from, never an external citation. Deliberately not
+                labeled "Source" so it can never be confused with
+                ExternalSourceDisplay below (John MVP Final Gap Closure,
+                Section 10: internal trace ids must stay visually distinct
+                from external source provenance). */}
+            {" · Internal ref: "}
             <code>{item.source_agent_output_ids.join(", ")}</code>
           </>
         ) : null}
       </p>
+      <ExternalSourceDisplay source={item.external_source} status={item.external_source_status} />
+      {/* T1 closeout: the same claim-level basis the Structure and Research pages show -- what the run historically did
+          with this claim (read from its own saved conflict) next to what can be shown about its basis today. */}
+      {runId ? <EvidenceBasisToggle runId={runId} claimId={item.representative_claim_id} /> : null}
     </li>
   );
 }
 
-function EvidenceFactList({ items, emptyMessage }: { items: ConflictEvidenceUIItem[]; emptyMessage: string }) {
+function EvidenceFactList({
+  items,
+  emptyMessage,
+  runId,
+}: {
+  items: ConflictEvidenceUIItem[];
+  emptyMessage: string;
+  runId?: string;
+}) {
   const [expanded, setExpanded] = useState(false);
   if (items.length === 0) {
     return <p className="evidence-ui-section-empty">{emptyMessage}</p>;
@@ -95,6 +115,7 @@ function EvidenceFactList({ items, emptyMessage }: { items: ConflictEvidenceUIIt
           <EvidenceFactCard
             key={`${item.evidence_fact_group_id}::${item.counter_target_alpha_id ?? item.target_alpha_id}`}
             item={item}
+            runId={runId}
           />
         ))}
       </ul>
@@ -115,17 +136,19 @@ function EvidenceSection({
   title,
   items,
   emptyMessage,
+  runId,
 }: {
   title: string;
   items: ConflictEvidenceUIItem[];
   emptyMessage: string;
+  runId?: string;
 }) {
   return (
     <section className="evidence-ui-section">
       <h4>
         {title} ({items.length})
       </h4>
-      <EvidenceFactList items={items} emptyMessage={emptyMessage} />
+      <EvidenceFactList items={items} emptyMessage={emptyMessage} runId={runId} />
     </section>
   );
 }
@@ -134,10 +157,12 @@ function CounterEvidenceSection({
   items,
   bullAlphaId,
   bearAlphaId,
+  runId,
 }: {
   items: ConflictEvidenceUIItem[];
   bullAlphaId: string;
   bearAlphaId: string;
+  runId?: string;
 }) {
   const againstBull = items.filter((item) => item.counter_target_alpha_id === bullAlphaId);
   const againstBear = items.filter((item) => item.counter_target_alpha_id === bearAlphaId);
@@ -150,6 +175,7 @@ function CounterEvidenceSection({
           <EvidenceFactList
             items={againstBull}
             emptyMessage="No counter evidence against the bull structure."
+            runId={runId}
           />
         </div>
         <div className="counter-evidence-group">
@@ -157,6 +183,7 @@ function CounterEvidenceSection({
           <EvidenceFactList
             items={againstBear}
             emptyMessage="No counter evidence against the bear structure."
+            runId={runId}
           />
         </div>
       </div>
@@ -256,23 +283,35 @@ export function ConflictEvidenceSections({
   evidenceUi,
   bullAlphaId,
   bearAlphaId,
+  runId,
 }: {
   evidenceUi: ConflictEvidenceUI;
   bullAlphaId: string;
   bearAlphaId: string;
+  /** When given, each evidence item offers "View basis" (the claim-level trace of this run). */
+  runId?: string;
 }) {
   return (
     <div className="conflict-evidence-ui">
+      <p className="evidence-source-disclosure">
+        This evidence text is each agent&apos;s own research output. Where the underlying research
+        genuinely supplied one, each item below shows its real external source — otherwise it honestly
+        shows source metadata as unavailable. A <code>claim_id</code> or{" "}
+        <code>evidence_fact_group_id</code> is always an internal reference only, never external
+        source verification by itself.
+      </p>
       <div className="evidence-ui-row">
         <EvidenceSection
           title="Bull Evidence"
           items={evidenceUi.bull_evidence}
           emptyMessage="No supporting evidence for the bull structure."
+          runId={runId}
         />
         <EvidenceSection
           title="Bear Evidence"
           items={evidenceUi.bear_evidence}
           emptyMessage="No supporting evidence for the bear structure."
+          runId={runId}
         />
       </div>
       <div className="evidence-ui-row">
@@ -280,6 +319,7 @@ export function ConflictEvidenceSections({
           items={evidenceUi.counter_evidence}
           bullAlphaId={bullAlphaId}
           bearAlphaId={bearAlphaId}
+          runId={runId}
         />
         <MissingEvidenceSection items={evidenceUi.missing_evidence} />
       </div>

@@ -1,0 +1,378 @@
+{
+ "nvda_034a0a60_2026-10-02": {
+  "source_unchanged": true,
+  "upstream_agents": 12,
+  "research_agent": {
+   "logical_calls": 20,
+   "actual_http_requests": 20,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 20,
+    "failure": 0,
+    "timeout": 0,
+    "unknown": 0
+   },
+   "requests_missing_usage": 0,
+   "usage_missing_ratio": 0.0,
+   "tokens_known": {
+    "input": 263735,
+    "output": 44137,
+    "reasoning": null,
+    "cache_hit": null,
+    "cache_miss": null
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.066043,
+    "peak_ceiling": 0.132085,
+    "requests_estimated": 20,
+    "requests_not_estimable": 0,
+    "not_estimable_reasons": {}
+   }
+  },
+  "week2_semantic": {
+   "logical_calls": 838,
+   "actual_http_requests": 448,
+   "retries": 10,
+   "not_sent": 400,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 437,
+    "failure": 0,
+    "timeout": 9,
+    "unknown": 2
+   },
+   "requests_missing_usage": 11,
+   "usage_missing_ratio": 0.024554,
+   "tokens_known": {
+    "input": 888469,
+    "output": 204063,
+    "reasoning": 145927,
+    "cache_hit": 566912,
+    "cache_miss": 321557
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.172342,
+    "peak_ceiling": 0.344747,
+    "requests_estimated": 437,
+    "requests_not_estimable": 11,
+    "not_estimable_reasons": {
+     "usage_missing": 11
+    }
+   }
+  },
+  "corrections": [
+   {
+    "field": "provider",
+    "reported": "openai",
+    "resolved": "deepseek",
+    "requests": 20,
+    "basis": "the reported value is the OpenAI-compatible client class LangChain tags; the model name (pricing table) and the configured DeepSeek endpoint identify the billing provider; the original value is kept in provider_reported"
+   }
+  ],
+  "deduplication": {
+   "rule": "one record per HTTP request: Week 2 ledger attempts (never its top-level last-attempt usage) joined with the wire audit by attempt_id; research-agent calls one record each",
+   "ledger_records_where_top_level_usage_is_last_attempt_only": 10
+  },
+  "known_gaps": [
+   "docs/audit_artifacts/round_source_linking_t0_t2/nvda_run_request_reconciliation_and_audit_fix.md: the Week 2 ledger records 448 real attempts while about 688 requests were actually made -- about 240 attempts lost their per-attempt record to the concurrent-audit bug fixed in round 12/13; their usage and cost are unknown and are NOT in this report's totals. 400 alpha_classifier calls were refused at the 700-call budget (not sent)."
+  ]
+ },
+ "amd_1bad76a7_2026-10-05": {
+  "source_unchanged": true,
+  "upstream_agents": 10,
+  "research_agent": {
+   "logical_calls": 15,
+   "actual_http_requests": 15,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 15,
+    "failure": 0,
+    "timeout": 0,
+    "unknown": 0
+   },
+   "requests_missing_usage": 0,
+   "usage_missing_ratio": 0.0,
+   "tokens_known": {
+    "input": 144075,
+    "output": 25004,
+    "reasoning": null,
+    "cache_hit": null,
+    "cache_miss": null
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.036614,
+    "peak_ceiling": 0.073225,
+    "requests_estimated": 15,
+    "requests_not_estimable": 0,
+    "not_estimable_reasons": {}
+   }
+  },
+  "week2_semantic": {
+   "logical_calls": 555,
+   "actual_http_requests": 450,
+   "retries": 4,
+   "not_sent": 107,
+   "served_from_cache": 2,
+   "outcomes": {
+    "success": 445,
+    "failure": 0,
+    "timeout": 5,
+    "unknown": 0
+   },
+   "requests_missing_usage": 5,
+   "usage_missing_ratio": 0.011111,
+   "tokens_known": {
+    "input": 921725,
+    "output": 333044,
+    "reasoning": 305582,
+    "cache_hit": 597120,
+    "cache_miss": 324605
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.250322,
+    "peak_ceiling": 0.500583,
+    "requests_estimated": 445,
+    "requests_not_estimable": 5,
+    "not_estimable_reasons": {
+     "usage_missing": 5
+    }
+   }
+  },
+  "corrections": [
+   {
+    "field": "provider",
+    "reported": "openai",
+    "resolved": "deepseek",
+    "requests": 15,
+    "basis": "the reported value is the OpenAI-compatible client class LangChain tags; the model name (pricing table) and the configured DeepSeek endpoint identify the billing provider; the original value is kept in provider_reported"
+   }
+  ],
+  "deduplication": {
+   "rule": "one record per HTTP request: Week 2 ledger attempts (never its top-level last-attempt usage) joined with the wire audit by attempt_id; research-agent calls one record each",
+   "ledger_records_where_top_level_usage_is_last_attempt_only": 4
+  },
+  "known_gaps": []
+ },
+ "amd_c904d4cc_2026-10-06": {
+  "source_unchanged": true,
+  "upstream_agents": 11,
+  "research_agent": {
+   "logical_calls": 21,
+   "actual_http_requests": 21,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 21,
+    "failure": 0,
+    "timeout": 0,
+    "unknown": 0
+   },
+   "requests_missing_usage": 0,
+   "usage_missing_ratio": 0.0,
+   "tokens_known": {
+    "input": 258917,
+    "output": 42177,
+    "reasoning": null,
+    "cache_hit": null,
+    "cache_miss": null
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.064145,
+    "peak_ceiling": 0.128285,
+    "requests_estimated": 21,
+    "requests_not_estimable": 0,
+    "not_estimable_reasons": {}
+   }
+  },
+  "week2_semantic": {
+   "logical_calls": 12,
+   "actual_http_requests": 12,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 8,
+    "failure": 0,
+    "timeout": 4,
+    "unknown": 0
+   },
+   "requests_missing_usage": 4,
+   "usage_missing_ratio": 0.333333,
+   "tokens_known": {
+    "input": 26183,
+    "output": 28055,
+    "reasoning": 15910,
+    "cache_hit": 2816,
+    "cache_miss": 23367
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.020346,
+    "peak_ceiling": 0.040693,
+    "requests_estimated": 8,
+    "requests_not_estimable": 4,
+    "not_estimable_reasons": {
+     "usage_missing": 4
+    }
+   }
+  },
+  "corrections": [
+   {
+    "field": "provider",
+    "reported": "openai",
+    "resolved": "deepseek",
+    "requests": 21,
+    "basis": "the reported value is the OpenAI-compatible client class LangChain tags; the model name (pricing table) and the configured DeepSeek endpoint identify the billing provider; the original value is kept in provider_reported"
+   }
+  ],
+  "deduplication": {
+   "rule": "one record per HTTP request: Week 2 ledger attempts (never its top-level last-attempt usage) joined with the wire audit by attempt_id; research-agent calls one record each"
+  },
+  "known_gaps": [
+   "docs/audit_artifacts/round_source_linking_t0_t2/round12_alpha_classifier_audit_fix_20261006/: 973 of 975 alpha_classifier calls of this run failed inside the audit layer (concurrent-attempt refusal) and left no semantic-ledger record; whether each reached the provider is recorded there, not here."
+  ]
+ },
+ "amd_recovery-20261007T053635Z-26d6cd1a": {
+  "source_unchanged": true,
+  "upstream_agents": 11,
+  "research_agent": {
+   "logical_calls": 0,
+   "actual_http_requests": 0,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 0,
+    "failure": 0,
+    "timeout": 0,
+    "unknown": 0
+   },
+   "requests_missing_usage": 0,
+   "usage_missing_ratio": null,
+   "tokens_known": {
+    "input": null,
+    "output": null,
+    "reasoning": null,
+    "cache_hit": null,
+    "cache_miss": null
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0,
+    "peak_ceiling": 0,
+    "requests_estimated": 0,
+    "requests_not_estimable": 0,
+    "not_estimable_reasons": {}
+   }
+  },
+  "week2_semantic": {
+   "logical_calls": 973,
+   "actual_http_requests": 955,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 18,
+   "outcomes": {
+    "success": 954,
+    "failure": 0,
+    "timeout": 1,
+    "unknown": 0
+   },
+   "requests_missing_usage": 1,
+   "usage_missing_ratio": 0.001047,
+   "tokens_known": {
+    "input": 1884981,
+    "output": 545572,
+    "reasoning": 532943,
+    "cache_hit": 1236608,
+    "cache_miss": 648373
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.428323,
+    "peak_ceiling": 0.856537,
+    "requests_estimated": 954,
+    "requests_not_estimable": 1,
+    "not_estimable_reasons": {
+     "usage_missing": 1
+    }
+   }
+  },
+  "corrections": [],
+  "deduplication": {
+   "rule": "one record per HTTP request: Week 2 ledger attempts (never its top-level last-attempt usage) joined with the wire audit by attempt_id; research-agent calls one record each"
+  },
+  "known_gaps": []
+ },
+ "t3joint-20261008T170322Z-bd99811e": {
+  "source_unchanged": true,
+  "upstream_agents": 0,
+  "research_agent": {
+   "logical_calls": 0,
+   "actual_http_requests": 0,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 0,
+    "failure": 0,
+    "timeout": 0,
+    "unknown": 0
+   },
+   "requests_missing_usage": 0,
+   "usage_missing_ratio": null,
+   "tokens_known": {
+    "input": null,
+    "output": null,
+    "reasoning": null,
+    "cache_hit": null,
+    "cache_miss": null
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0,
+    "peak_ceiling": 0,
+    "requests_estimated": 0,
+    "requests_not_estimable": 0,
+    "not_estimable_reasons": {}
+   }
+  },
+  "week2_semantic": {
+   "logical_calls": 43,
+   "actual_http_requests": 60,
+   "retries": 0,
+   "not_sent": 0,
+   "served_from_cache": 0,
+   "outcomes": {
+    "success": 60,
+    "failure": 0,
+    "timeout": 0,
+    "unknown": 0
+   },
+   "requests_missing_usage": 0,
+   "usage_missing_ratio": 0.0,
+   "tokens_known": {
+    "input": 280069,
+    "output": 212035,
+    "reasoning": 202087,
+    "cache_hit": 181630,
+    "cache_miss": 98439
+   },
+   "cost_estimate_usd": {
+    "off_peak_floor": 0.142531,
+    "peak_ceiling": 0.285061,
+    "requests_estimated": 60,
+    "requests_not_estimable": 0,
+    "not_estimable_reasons": {}
+   }
+  },
+  "corrections": [],
+  "deduplication": {
+   "rule": "one record per HTTP request: Week 2 ledger attempts (never its top-level last-attempt usage) joined with the wire audit by attempt_id; research-agent calls one record each",
+   "audit_only_requests": 17
+  },
+  "known_gaps": [
+   "content_support_verification was not in the semantic-call ledger at execution time (fixed in round 26); its 17 requests come from the wire audit only."
+  ]
+ }
+}

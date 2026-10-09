@@ -1,0 +1,120 @@
+{
+ "table_counts": {
+  "research_runs": 5,
+  "agent_outputs": 3894,
+  "structure_graphs": 4,
+  "alpha_matches": 2928,
+  "alpha_activations": 40,
+  "alpha_conflicts": 32,
+  "research_run_progress": 3
+ },
+ "runs": {
+  "dependency-20261008T213330Z-d6f60d8d": {
+   "db_status": "partial",
+   "db_ticker": "AMD",
+   "run_dir_exists": true,
+   "metadata_run_id_matches": true,
+   "metadata_ticker_matches": true,
+   "run_environment": {
+    "execution_type": "old_result_reevaluation",
+    "database": {
+     "status": "known",
+     "dialect": "postgresql",
+     "database": "comqutor_alpha_t4_test"
+    },
+    "code_identity_status": "known",
+    "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+    "week2_enabled": false
+   },
+   "lineage": {
+    "based_on_run_id": "dependency-20261007T220450Z-33128621",
+    "root_research_run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+    "input_alpha_matches_sha256_equals_base": true,
+    "base_copy_alpha_matches_equals_original": true,
+    "base_run_environment_recorded_as": null
+   }
+  },
+  "dependency-20261008T213350Z-89497ab9": {
+   "db_status": "completed",
+   "db_ticker": "SNDK",
+   "run_dir_exists": true,
+   "metadata_run_id_matches": true,
+   "metadata_ticker_matches": true,
+   "run_environment": {
+    "execution_type": "old_result_reevaluation",
+    "database": {
+     "status": "known",
+     "dialect": "postgresql",
+     "database": "comqutor_alpha_t4_test"
+    },
+    "code_identity_status": "known",
+    "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+    "week2_enabled": false
+   },
+   "lineage": {
+    "based_on_run_id": "52c23371-c374-4064-a91c-20c599ffa79c",
+    "root_research_run_id": "52c23371-c374-4064-a91c-20c599ffa79c",
+    "input_alpha_matches_sha256_equals_base": true,
+    "base_copy_alpha_matches_equals_original": true,
+    "base_run_environment_recorded_as": null
+   }
+  },
+  "t4-frozen-nvda-034a0a60-20261008": {
+   "db_status": "completed",
+   "db_ticker": "NVDA",
+   "run_dir_exists": true,
+   "metadata_run_id_matches": true,
+   "metadata_ticker_matches": true,
+   "run_environment": {
+    "execution_type": "frozen_input_recompute",
+    "database": {
+     "status": "known",
+     "dialect": "postgresql",
+     "database": "comqutor_alpha_t4_test"
+    },
+    "code_identity_status": "known",
+    "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+    "week2_enabled": false
+   },
+   "raw_outputs_equal_source_run": true,
+   "agents_equal_source_run": true,
+   "raw_output_sha256_equal": true
+  },
+  "t4-simulated-failure-20261008": {
+   "db_status": "completed",
+   "db_ticker": "NVDA",
+   "run_dir_exists": true,
+   "metadata_run_id_matches": true,
+   "metadata_ticker_matches": true,
+   "run_environment": {
+    "execution_type": "frozen_input_recompute",
+    "database": {
+     "status": "known",
+     "dialect": "postgresql",
+     "database": "comqutor_alpha_t4_test"
+    },
+    "code_identity_status": "known",
+    "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+    "week2_enabled": false
+   }
+  },
+  "t4-simulated-interrupted-20261008": {
+   "db_status": "failed",
+   "db_ticker": "NVDA",
+   "run_dir_exists": true,
+   "metadata_run_id_matches": true,
+   "metadata_ticker_matches": true,
+   "run_environment": {
+    "execution_type": "frozen_input_recompute",
+    "database": {
+     "status": "known",
+     "dialect": "postgresql",
+     "database": "comqutor_alpha_t4_test"
+    },
+    "code_identity_status": "known",
+    "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+    "week2_enabled": false
+   }
+  }
+ }
+}

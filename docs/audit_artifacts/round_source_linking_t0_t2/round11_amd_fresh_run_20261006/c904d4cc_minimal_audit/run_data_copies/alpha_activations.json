@@ -1,0 +1,4595 @@
+{
+  "schema_version": "alpha_activations.export.v1",
+  "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+  "ticker": "AMD",
+  "primary_activation_version": "activation.v2.evidence_local_structure.verified_gate.v1",
+  "activation": {
+    "formula_version": "activation.v2.evidence_local_structure.verified_gate.v1",
+    "weights": {
+      "evidence_quality": 0.35,
+      "agent_independence": 0.2,
+      "local_structure_support": 0.2,
+      "ticker_specificity": 0.1,
+      "recency": 0.1,
+      "direction_consistency": 0.05
+    },
+    "run_timestamp": "2026-10-06",
+    "as_of": "2026-10-06",
+    "alphas": [
+      {
+        "alpha_id": "A001",
+        "alpha_name": "Rate Cut Cycle",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": null,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": null,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "missing_seed",
+          "would_block_dominant": false,
+          "would_block_regime_level": false,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_QUALIFICATION_APPLIED",
+            "EXPOSURE_SEED_MISSING",
+            "SEED_ENTRY_MISSING"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A003",
+        "alpha_name": "Liquidity Expansion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": null,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": null,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "missing_seed",
+          "would_block_dominant": false,
+          "would_block_regime_level": false,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_QUALIFICATION_APPLIED",
+            "EXPOSURE_SEED_MISSING",
+            "SEED_ENTRY_MISSING"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A101",
+        "alpha_name": "AI Expansion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.8,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.4,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A102",
+        "alpha_name": "Inference Explosion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.55,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.275,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": true,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_DOMINANT_THRESHOLD",
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A103",
+        "alpha_name": "AI Infrastructure",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.65,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.325,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A201",
+        "alpha_name": "Semiconductor Supercycle",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.85,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.425,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A301",
+        "alpha_name": "Revenue Expansion",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.7,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.35,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A304",
+        "alpha_name": "Multiple Compression",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.75,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.375,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A501",
+        "alpha_name": "Recession Risk",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": null,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": null,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "missing_seed",
+          "would_block_dominant": false,
+          "would_block_regime_level": false,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_QUALIFICATION_APPLIED",
+            "EXPOSURE_SEED_MISSING",
+            "SEED_ENTRY_MISSING"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      },
+      {
+        "alpha_id": "A601",
+        "alpha_name": "Narrative Momentum",
+        "formula_version": "activation.v2.evidence_local_structure.v1",
+        "activation_score": 0.0,
+        "uncapped_score": 0.0,
+        "eligible_cap": null,
+        "cap_was_binding": false,
+        "cap_reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "binding_cap_reason_codes": [],
+        "status": "candidate",
+        "direction": "unknown",
+        "components": {
+          "evidence_quality": {
+            "raw": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "unique_semantic_groups": 0,
+            "unique_contribution_sum": 0,
+            "saturation": 4.0
+          },
+          "agent_independence": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "distinct_agents": 0,
+            "agents": [],
+            "agent_coverage": 0.0,
+            "cross_agent_confirmed_groups": 0,
+            "cross_agent_confirmation": 0.0,
+            "coverage_denominator": 3,
+            "confirmation_denominator": 2
+          },
+          "local_structure_support": {
+            "raw": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "local_edge_count": 0,
+            "asserted_local_edge_count": 0,
+            "conditional_local_edge_count": 0,
+            "local_edge_ids": [],
+            "local_claim_ids": [],
+            "unique_edge_contribution_sum": 0,
+            "saturation": 2.0,
+            "incident_graph_edge_count": 0,
+            "qualifying_local_edge_count": 0,
+            "nonqualifying_local_edge_count": 0,
+            "local_edge_exclusion_reasons": [
+              "NO_COMMITTED_ALPHA_MATCH"
+            ]
+          },
+          "ticker_specificity": {
+            "raw": 0.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "ticker_specific_evidence_count": 0,
+            "total_unique_evidence_count": 0
+          },
+          "recency": {
+            "raw": 100.0,
+            "weight": 0.1,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "age_days": 0,
+            "decay_window_days": 90,
+            "fallback": false
+          },
+          "direction_consistency": {
+            "raw": 0.0,
+            "weight": 0.05,
+            "contribution": 0.0,
+            "evidence_gated": true,
+            "qualifying_group_count": 0,
+            "weighted_signed_average": 0.0
+          }
+        },
+        "evidence_count": 0,
+        "unique_evidence_count": 0,
+        "distinct_supporting_agents": 0,
+        "ticker_specific_evidence_count": 0,
+        "local_edge_count": 0,
+        "regime_gate_passed": false,
+        "regime_gate_failures": [],
+        "evidence_integrity_warnings": [],
+        "claim_ids": [],
+        "evidence": [],
+        "reason_codes": [
+          "NO_QUALIFYING_EVIDENCE"
+        ],
+        "raw_supporting_claim_count": 0,
+        "unique_evidence_fact_count": 0,
+        "distinct_supporting_agent_count": 0,
+        "evidence_overlap_ratio": 0.0,
+        "high_overlap_warning": false,
+        "evidence_fact_groups": [],
+        "evidence_qualification": {
+          "policy_version": "evidence_source_role_v1",
+          "raw_unique_evidence_fact_count": 0,
+          "qualified_unique_evidence_fact_count": 0,
+          "qualification_reason_counts": {}
+        },
+        "evidence_detail": [],
+        "entity_exposure": {
+          "historical_mapping": 0.75,
+          "current_evidence": 0.0,
+          "agent_confidence": 0.0,
+          "final_exposure": 0.375,
+          "seed_version": "v0.1",
+          "seed_effective_date": "2026-08-11",
+          "seed_approval_status": "approved_gating",
+          "owner": "John",
+          "approved_by": "John",
+          "approved_at": "2026-08-11",
+          "configured_status": "approved_gating",
+          "effective_status": "approved_gating",
+          "mode": "enforced",
+          "exposure_status": "computed",
+          "would_block_dominant": false,
+          "would_block_regime_level": true,
+          "override_candidate": false,
+          "qualification_effect_applied": true,
+          "unique_evidence_fact_count": 0,
+          "ticker_specific_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "reason_codes": [
+            "EXPOSURE_BELOW_REGIME_THRESHOLD",
+            "EXPOSURE_QUALIFICATION_APPLIED"
+          ]
+        },
+        "target_level": "candidate",
+        "qualified_level": "candidate",
+        "is_blocked": false,
+        "blocked_from": [],
+        "blocked_reason_codes": [],
+        "diagnostic_reason_codes": [],
+        "classification_version": "b4.alpha_level.v1",
+        "activation_level": "candidate"
+      }
+    ]
+  },
+  "activation_versions": {
+    "v1": {
+      "formula_version": "week3.activation.mvp_v1",
+      "weights": {
+        "matched_evidence": 0.35,
+        "agent_agreement": 0.2,
+        "graph_coherence": 0.25,
+        "recency": 0.1,
+        "direction_strength": 0.1
+      },
+      "run_timestamp": "2026-10-06",
+      "as_of": "2026-10-06",
+      "alphas": [
+        {
+          "alpha_id": "A001",
+          "alpha_name": "Rate Cut Cycle",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A003",
+          "alpha_name": "Liquidity Expansion",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A101",
+          "alpha_name": "AI Expansion",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A102",
+          "alpha_name": "Inference Explosion",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A103",
+          "alpha_name": "AI Infrastructure",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A201",
+          "alpha_name": "Semiconductor Supercycle",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A301",
+          "alpha_name": "Revenue Expansion",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A304",
+          "alpha_name": "Multiple Compression",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A501",
+          "alpha_name": "Recession Risk",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 2,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A601",
+          "alpha_name": "Narrative Momentum",
+          "activation_score": 0.0,
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "matched_evidence": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_committed_claims": 0,
+              "unique_ambiguous_claims": 0,
+              "weighted_evidence_sum": 0.0,
+              "saturation": 2.0,
+              "ambiguous_weight": 0.15
+            },
+            "agent_agreement": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "denominator": 3,
+              "denominator_source": "taxonomy.agent_sources",
+              "agents": []
+            },
+            "graph_coherence": {
+              "raw": 90.0,
+              "weight": 0.25,
+              "contribution": 0.0,
+              "scope": "global_run_level",
+              "evidence_gated": true
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_strength": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "qualifying_claim_count": 0,
+              "average_signed_strength": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_EVIDENCE"
+          ],
+          "evidence_detail": []
+        }
+      ]
+    },
+    "v2": {
+      "formula_version": "activation.v2.evidence_local_structure.v1",
+      "weights": {
+        "evidence_quality": 0.35,
+        "agent_independence": 0.2,
+        "local_structure_support": 0.2,
+        "ticker_specificity": 0.1,
+        "recency": 0.1,
+        "direction_consistency": 0.05
+      },
+      "run_timestamp": "2026-10-06",
+      "as_of": "2026-10-06",
+      "alphas": [
+        {
+          "alpha_id": "A001",
+          "alpha_name": "Rate Cut Cycle",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A003",
+          "alpha_name": "Liquidity Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A101",
+          "alpha_name": "AI Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A102",
+          "alpha_name": "Inference Explosion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A103",
+          "alpha_name": "AI Infrastructure",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A201",
+          "alpha_name": "Semiconductor Supercycle",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A301",
+          "alpha_name": "Revenue Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A304",
+          "alpha_name": "Multiple Compression",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A501",
+          "alpha_name": "Recession Risk",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        },
+        {
+          "alpha_id": "A601",
+          "alpha_name": "Narrative Momentum",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "inactive",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "_exposure_evidence": {
+            "evidence_fact_index_version": "evidence_fact_index.v1",
+            "facts": [],
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "qualifying_local_edge_count": 0
+          },
+          "evidence_detail": []
+        }
+      ]
+    },
+    "v2_verified": {
+      "formula_version": "activation.v2.evidence_local_structure.verified_gate.v1",
+      "weights": {
+        "evidence_quality": 0.35,
+        "agent_independence": 0.2,
+        "local_structure_support": 0.2,
+        "ticker_specificity": 0.1,
+        "recency": 0.1,
+        "direction_consistency": 0.05
+      },
+      "run_timestamp": "2026-10-06",
+      "as_of": "2026-10-06",
+      "alphas": [
+        {
+          "alpha_id": "A001",
+          "alpha_name": "Rate Cut Cycle",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": null,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": null,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "missing_seed",
+            "would_block_dominant": false,
+            "would_block_regime_level": false,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_QUALIFICATION_APPLIED",
+              "EXPOSURE_SEED_MISSING",
+              "SEED_ENTRY_MISSING"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A003",
+          "alpha_name": "Liquidity Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": null,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": null,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "missing_seed",
+            "would_block_dominant": false,
+            "would_block_regime_level": false,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_QUALIFICATION_APPLIED",
+              "EXPOSURE_SEED_MISSING",
+              "SEED_ENTRY_MISSING"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A101",
+          "alpha_name": "AI Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.8,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.4,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_BELOW_REGIME_THRESHOLD",
+              "EXPOSURE_QUALIFICATION_APPLIED"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A102",
+          "alpha_name": "Inference Explosion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.55,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.275,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "computed",
+            "would_block_dominant": true,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_BELOW_DOMINANT_THRESHOLD",
+              "EXPOSURE_BELOW_REGIME_THRESHOLD",
+              "EXPOSURE_QUALIFICATION_APPLIED"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A103",
+          "alpha_name": "AI Infrastructure",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.65,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.325,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_BELOW_REGIME_THRESHOLD",
+              "EXPOSURE_QUALIFICATION_APPLIED"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A201",
+          "alpha_name": "Semiconductor Supercycle",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.85,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.425,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_BELOW_REGIME_THRESHOLD",
+              "EXPOSURE_QUALIFICATION_APPLIED"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A301",
+          "alpha_name": "Revenue Expansion",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.7,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.35,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_BELOW_REGIME_THRESHOLD",
+              "EXPOSURE_QUALIFICATION_APPLIED"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A304",
+          "alpha_name": "Multiple Compression",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.75,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.375,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_BELOW_REGIME_THRESHOLD",
+              "EXPOSURE_QUALIFICATION_APPLIED"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A501",
+          "alpha_name": "Recession Risk",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": null,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": null,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "missing_seed",
+            "would_block_dominant": false,
+            "would_block_regime_level": false,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_QUALIFICATION_APPLIED",
+              "EXPOSURE_SEED_MISSING",
+              "SEED_ENTRY_MISSING"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        },
+        {
+          "alpha_id": "A601",
+          "alpha_name": "Narrative Momentum",
+          "formula_version": "activation.v2.evidence_local_structure.v1",
+          "activation_score": 0.0,
+          "uncapped_score": 0.0,
+          "eligible_cap": null,
+          "cap_was_binding": false,
+          "cap_reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "binding_cap_reason_codes": [],
+          "status": "candidate",
+          "direction": "unknown",
+          "components": {
+            "evidence_quality": {
+              "raw": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "unique_semantic_groups": 0,
+              "unique_contribution_sum": 0,
+              "saturation": 4.0
+            },
+            "agent_independence": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "distinct_agents": 0,
+              "agents": [],
+              "agent_coverage": 0.0,
+              "cross_agent_confirmed_groups": 0,
+              "cross_agent_confirmation": 0.0,
+              "coverage_denominator": 3,
+              "confirmation_denominator": 2
+            },
+            "local_structure_support": {
+              "raw": 0.0,
+              "weight": 0.2,
+              "contribution": 0.0,
+              "local_edge_count": 0,
+              "asserted_local_edge_count": 0,
+              "conditional_local_edge_count": 0,
+              "local_edge_ids": [],
+              "local_claim_ids": [],
+              "unique_edge_contribution_sum": 0,
+              "saturation": 2.0,
+              "incident_graph_edge_count": 0,
+              "qualifying_local_edge_count": 0,
+              "nonqualifying_local_edge_count": 0,
+              "local_edge_exclusion_reasons": [
+                "NO_COMMITTED_ALPHA_MATCH"
+              ]
+            },
+            "ticker_specificity": {
+              "raw": 0.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "ticker_specific_evidence_count": 0,
+              "total_unique_evidence_count": 0
+            },
+            "recency": {
+              "raw": 100.0,
+              "weight": 0.1,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "age_days": 0,
+              "decay_window_days": 90,
+              "fallback": false
+            },
+            "direction_consistency": {
+              "raw": 0.0,
+              "weight": 0.05,
+              "contribution": 0.0,
+              "evidence_gated": true,
+              "qualifying_group_count": 0,
+              "weighted_signed_average": 0.0
+            }
+          },
+          "evidence_count": 0,
+          "unique_evidence_count": 0,
+          "distinct_supporting_agents": 0,
+          "ticker_specific_evidence_count": 0,
+          "local_edge_count": 0,
+          "regime_gate_passed": false,
+          "regime_gate_failures": [],
+          "evidence_integrity_warnings": [],
+          "claim_ids": [],
+          "evidence": [],
+          "reason_codes": [
+            "NO_QUALIFYING_EVIDENCE"
+          ],
+          "raw_supporting_claim_count": 0,
+          "unique_evidence_fact_count": 0,
+          "distinct_supporting_agent_count": 0,
+          "evidence_overlap_ratio": 0.0,
+          "high_overlap_warning": false,
+          "evidence_fact_groups": [],
+          "evidence_qualification": {
+            "policy_version": "evidence_source_role_v1",
+            "raw_unique_evidence_fact_count": 0,
+            "qualified_unique_evidence_fact_count": 0,
+            "qualification_reason_counts": {}
+          },
+          "evidence_detail": [],
+          "entity_exposure": {
+            "historical_mapping": 0.75,
+            "current_evidence": 0.0,
+            "agent_confidence": 0.0,
+            "final_exposure": 0.375,
+            "seed_version": "v0.1",
+            "seed_effective_date": "2026-08-11",
+            "seed_approval_status": "approved_gating",
+            "owner": "John",
+            "approved_by": "John",
+            "approved_at": "2026-08-11",
+            "configured_status": "approved_gating",
+            "effective_status": "approved_gating",
+            "mode": "enforced",
+            "exposure_status": "computed",
+            "would_block_dominant": false,
+            "would_block_regime_level": true,
+            "override_candidate": false,
+            "qualification_effect_applied": true,
+            "unique_evidence_fact_count": 0,
+            "ticker_specific_fact_count": 0,
+            "distinct_supporting_agent_count": 0,
+            "reason_codes": [
+              "EXPOSURE_BELOW_REGIME_THRESHOLD",
+              "EXPOSURE_QUALIFICATION_APPLIED"
+            ]
+          },
+          "target_level": "candidate",
+          "qualified_level": "candidate",
+          "is_blocked": false,
+          "blocked_from": [],
+          "blocked_reason_codes": [],
+          "diagnostic_reason_codes": [],
+          "classification_version": "b4.alpha_level.v1",
+          "activation_level": "candidate"
+        }
+      ]
+    }
+  }
+}

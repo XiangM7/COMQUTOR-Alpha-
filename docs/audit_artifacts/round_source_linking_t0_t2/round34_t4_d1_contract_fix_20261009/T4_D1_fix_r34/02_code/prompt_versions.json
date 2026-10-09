@@ -1,0 +1,51 @@
+{
+ "how_the_identity_is_computed": "sha256 of shared JSON-only prefix + task instruction + the literal identity separator \\nINPUT_JSON:\\n (Week2LLMGateway.prompt_identity_text); the dynamic payload is excluded",
+ "identity_prefix": "You are a constrained COMQUTOR extraction component. Return strict JSON only, with no markdown and no hidden reasoning. ",
+ "identity_separator": "\\nINPUT_JSON:\\n",
+ "v1_retired": {
+  "prompt_version": "week2.claim_batch_enrichment.v1",
+  "input_schema_version": "week2.claim_batch_enrichment.input.v1",
+  "output_schema_version": "week2.claim_batch_enrichment.output.v1",
+  "instruction": "Enrich each already-segmented claim in the supplied segments array. Return one JSON object with a claims array containing exactly one item per input segment, matched by segment_id. Each item must contain segment_id, claim, evidence, source_section, entities, factors, direction, and confidence. claim, evidence, and source_section must be returned byte-for-byte identical to the input segment with that segment_id -- never rewritten, merged with another segment, or split. Never omit a segment_id and never invent one that was not supplied.",
+  "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+  "prompt_sha256_via_gateway": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+  "recorded_by_both_fresh_runs": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9"
+ },
+ "v2_live": {
+  "prompt_version": "week2.claim_batch_enrichment.v2",
+  "input_schema_version": "week2.claim_batch_enrichment.input.v2",
+  "output_schema_version": "week2.claim_batch_enrichment.output.v2",
+  "instruction": "Enrich each already-segmented claim in the supplied segments array. Return one JSON object with a claims array containing exactly one item per input segment, matched by segment_id. Each item must contain segment_id, claim, evidence, source_section, entities, factors, direction, confidence, and cited_source_id. claim, evidence, and source_section must be returned byte-for-byte identical to the input segment with that segment_id -- never rewritten, merged with another segment, or split. Never omit a segment_id and never invent one that was not supplied. cited_source_id is either a fragment_id string copied from candidate_sources or null. Each candidate_sources entry is a saved source fragment (source_id, fragment_id, excerpt) and its segment_ids list names the only segments it may be cited for. Set a segment's cited_source_id to the fragment_id of a candidate whose segment_ids include that segment's segment_id only when that candidate's excerpt is the source of the segment's claim or evidence; when no candidate lists the segment, or none of them is its source, set cited_source_id to null. Never cite a candidate for a segment it does not list, never cite an id that is not in candidate_sources, and never write a URL, a source name, or a new id.",
+  "prompt_sha256": "fc01ae0d261f63bf081610a22c99486186d10677d94ddbabb21f2fa602d4f628",
+  "prompt_sha256_via_gateway": "fc01ae0d261f63bf081610a22c99486186d10677d94ddbabb21f2fa602d4f628"
+ },
+ "replay_registry_structured_adapter": [
+  {
+   "prompt_version": "week2.claim_batch_enrichment.v1",
+   "prompt_sha256": "c6822099e2171c6fbad72c36bf2881bcd59bd4d4ad2fc20e10ab62af50b5bfd9",
+   "input_schema_version": "week2.claim_batch_enrichment.input.v1",
+   "output_schema_version": "week2.claim_batch_enrichment.output.v1",
+   "taxonomy_version": null
+  },
+  {
+   "prompt_version": "week2.claim_batch_enrichment.v2",
+   "prompt_sha256": "fc01ae0d261f63bf081610a22c99486186d10677d94ddbabb21f2fa602d4f628",
+   "input_schema_version": "week2.claim_batch_enrichment.input.v2",
+   "output_schema_version": "week2.claim_batch_enrichment.output.v2",
+   "taxonomy_version": null
+  }
+ ],
+ "v1_sentences_verbatim_in_v2": [
+  "Enrich each already-segmented claim in the supplied segments array.",
+  "Return one JSON object with a claims array containing exactly one item per input segment, matched by segment_id.",
+  "claim, evidence, and source_section must be returned byte-for-byte identical to the input segment with that segment_id -- never rewritten, merged with another segment, or split.",
+  "Never omit a segment_id and never invent one that was not supplied."
+ ],
+ "v1_sentences_changed_in_v2": [
+  {
+   "v1": "Each item must contain segment_id, claim, evidence, source_section, entities, factors, direction, and confidence.",
+   "v2": "Each item must contain segment_id, claim, evidence, source_section, entities, factors, direction, confidence, and cited_source_id.",
+   "v2_contains_it": true
+  }
+ ]
+}

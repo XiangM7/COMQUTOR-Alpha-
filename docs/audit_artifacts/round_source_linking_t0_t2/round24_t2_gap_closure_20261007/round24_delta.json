@@ -1,0 +1,109 @@
+{
+ "patch": "round24_delta.patch",
+ "patch_sha256": "7ce0bef4cb04ed698f06fae8f247da3afcdfbb9ae89516290c1733262b842c53",
+ "files": [
+  {
+   "path": "comqutor_alpha/api/formal_acceptance_artifact.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "fdd403d9de28bc22235fa7ce7f2934e5ba4fc1dc1067197587b0bc8437923d94"
+  },
+  {
+   "path": "comqutor_alpha/regression/acceptance_engine.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "27b833eee110b4180072bd53985bc3e2786add6669970039b7db9ceeb743866c"
+  },
+  {
+   "path": "comqutor_alpha/regression/formal_acceptance_report.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "002bc583f335ccdda386e9f42cae5539deaa16c72beabc9edc29b2cb962b1aae"
+  },
+  {
+   "path": "comqutor_alpha/regression/open_review_ledger.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "ae9e9586f3a75eb61965d5fc5bbb0aae83ff383dccdac556ecb55830a8cf7d37"
+  },
+  {
+   "path": "docs/specs/product_decisions_and_unknowns.md",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "7093e0b660e58f0d8883d0d05c7be52aa327d96e3a0a0f95bdfec3fe12c8792b"
+  },
+  {
+   "path": "docs/specs/t2_acceptance_scenario_map.json",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "ee46b784dac2019f2692d0b42bffeec63ae4f5cee83ef7c3458a294f4d27845a"
+  },
+  {
+   "path": "scripts/run_formal_acceptance.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "6f61d867303e15a73fc78142ed4b870492f102d9a3d45cd8073c3e380515c33d"
+  },
+  {
+   "path": "tests/test_acceptance_engine.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "d037e284b5c1453fde7abd06ea07e516fdbd4b21f51c7d7de226a34c478458af"
+  },
+  {
+   "path": "tests/test_formal_acceptance_artifact_production_wiring.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "091c6599e7670f9369b2a0b55fd7d9cd040d35d3bf2682c05532a45bf70d17e6"
+  },
+  {
+   "path": "tests/test_formal_acceptance_report.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "39033a4b580e2bac9a0d3f9bab001efe29e64cd09eda5b965ba4f85b8a1d5cab"
+  },
+  {
+   "path": "tests/test_no_gold_label_import_in_research_path.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "178c58a9839fd0950c7f9b9daa29be5573e1bbfec69377834b4a19ffb5616725"
+  },
+  {
+   "path": "tests/test_open_review_ledger.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "e0604f24729a6d124beb4ba8c2b44e9c5922b3d402d6ad598a9c2039a99137d3"
+  },
+  {
+   "path": "tests/test_t2_acceptance_engine_qualified_evidence_scenarios.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "0061a77fcbd76f259b2b7659b0dcd864181576ee52489681c984858a3ca33afc"
+  },
+  {
+   "path": "tests/test_t2_rule_config_errors.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "4f55e0e8e6bbdacd3401e5d31c9ea61bba7f0f48e3732fac3c18c7654fa38bb0"
+  },
+  {
+   "path": "tests/test_t2_scenario_map_points_at_real_tests.py",
+   "kind": "modified_since_round23",
+   "sha256_working_tree": "60eceffddf0b8807809ee7b3dadcdf9d2abb106a7ec37c3e19a1b0a47141fdac"
+  },
+  {
+   "path": "comqutor_alpha/regression/gold_contract_rules.py",
+   "kind": "new_in_round24",
+   "sha256_working_tree": "92c5de98e4685af5a2e9a729564d5e74b1d69cf4d4927bf8f59c86858796a261"
+  },
+  {
+   "path": "tests/test_t2_gold_contract_alpha_rules.py",
+   "kind": "new_in_round24",
+   "sha256_working_tree": "c3fb6cb2767ef20893a6596d6358a4d1b84e5aadbfabb47f4b520d454e53fb32"
+  },
+  {
+   "path": "tests/test_t2_conflict_semantics_real_b2.py",
+   "kind": "new_in_round24",
+   "sha256_working_tree": "43803475c4d7e687df0273d8ce79fd43b9758d67e92d92dad0c3fef709690904"
+  }
+ ],
+ "totals": {
+  "files": 18,
+  "lines_added": 3441,
+  "lines_removed": 232
+ },
+ "appended_only_note": {
+  "docs/specs/product_decisions_and_unknowns.md": "Round 23 text = the current file without the appended PD-018..PD-021 block (verified against Round 23's recorded sha256)"
+ },
+ "verification": {
+  "method": "Round 23 state of each modified file + git apply in a temp directory, hashes compared with the working tree",
+  "problems": [],
+  "ok": true
+ }
+}

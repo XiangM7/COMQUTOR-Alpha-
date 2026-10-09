@@ -1,0 +1,15 @@
+$ python docs/audit_artifacts/round_source_linking_t0_t2/round34_t4_d1_contract_fix_20261009/tools/run_with_network_trap.py docs/audit_artifacts/round_source_linking_t0_t2/round34_t4_d1_contract_fix_20261009/tools/d1_before_after.py --label after --out docs/audit_artifacts/round_source_linking_t0_t2/round34_t4_d1_contract_fix_20261009/01_before_after/after.json
+[after] code 0070cdf4/10ee7518 prompt week2.claim_batch_enrichment.v2 fc01ae0d261f
+  seq 1 (64 items, reply unchanged=True): ledger prompt week2.claim_batch_enrichment.v2 | request == run's request: False | enrichment returned: False | rejected / WEEK2_LLM_VALIDATION_FAILED | validator: enrichment item fields do not match the strict schema
+  seq 8 (30 items, reply unchanged=True): ledger prompt week2.claim_batch_enrichment.v2 | request == run's request: False | enrichment returned: False | rejected / WEEK2_LLM_VALIDATION_FAILED | validator: enrichment item fields do not match the strict schema
+  batch seq 0 sentiment_agent    segs=64  chars run=29048  this code=29048  refused=False
+  batch seq 1 market_agent       segs=64  chars run=28113  this code=30158  refused=False
+  batch seq 2 news_agent         segs=64  chars run=27137  this code=27137  refused=False
+  batch seq 3 fundamental_agent  segs=64  chars run=49441  this code=52243  refused=False
+  batch seq 4 sentiment_agent    segs=27  chars run=13587  this code=13587  refused=False
+  batch seq 5 market_agent       segs=45  chars run=18974  this code=21260  refused=False
+  batch seq 6 news_agent         segs=59  chars run=28348  this code=28348  refused=False
+  batch seq 7 fundamental_agent  segs=64  chars run=61127  this code=62985  refused=True
+  batch seq 8 fundamental_agent  segs=30  chars run=47807  this code=49585  refused=False
+exit code: 0 | network attempts: 0
+[exit 0]

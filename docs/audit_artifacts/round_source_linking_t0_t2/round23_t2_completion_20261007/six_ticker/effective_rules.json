@@ -1,0 +1,132 @@
+{
+  "schema_version": "acceptance_engine.v2",
+  "taxonomy": {
+    "path": "comqutor_alpha/alpha_library/alpha_taxonomy_v1.yaml",
+    "sha256": "c6d523beaee4942c71756a3fddbb8213d4ba2f8653fded088d73031ca80f3bfa",
+    "declared_alpha_count": 10,
+    "schema_version": "alpha_taxonomy_v1",
+    "content_version": "1.1.0",
+    "canonical_conflict_pairs": [
+      "A001__A501",
+      "A003__A501",
+      "A101__A304",
+      "A102__A304",
+      "A201__A304",
+      "A301__A304",
+      "A304__A601",
+      "A501__A601"
+    ]
+  },
+  "label_v2": {
+    "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.2.yaml",
+    "sha256": "667262aaa15a94a5c660488493f7386a4e6ec6b8c02f1293927d887bf7920ba6",
+    "label_version": "j2.provisional.v0.2",
+    "evaluation_mode": "shadow",
+    "status": "provisional_ai_predicted",
+    "evaluation_authority": "provisional",
+    "formal_product_owner_approval": "pending",
+    "approved_by": null,
+    "taxonomy_version": "alpha_taxonomy_v1",
+    "taxonomy_content_version": "1.1.0"
+  },
+  "label_v1": {
+    "path": "comqutor_alpha/config/j2_provisional_regression_labels_v0.1.yaml",
+    "sha256": "3eec746e1f0fed0f568d77cb5a4368b5fa6d19421b305c54c6d24132cacbe9f1",
+    "label_version": "j2.provisional.v0.1",
+    "used_for": "forbidden_dominant_without_strong_evidence (should_not_be_dominant_without_strong_evidence)"
+  },
+  "ticker_rule_keys": {
+    "allowed_conflicts": "allowed_main_conflicts",
+    "conditional_conflicts": "conditional_only + should_detect_if_supported",
+    "product_decision_pending": "context: pair kept out of every verdict (never pass/fail)",
+    "remove_while_undeclared": "context: pair no longer an executable expectation",
+    "required_conflicts": "must_detect_if_evidence_present",
+    "run_bound_expectations": "recorded only: no rule family evaluates it",
+    "should_not_be_dominant_without_strong_evidence": "forbidden_dominant_without_strong_evidence",
+    "source_basis": "provenance text",
+    "structural_expectations": "context: informational (a missing structural Alpha never fails a run)"
+  },
+  "declared_but_not_evaluated": {
+    "run_bound_expectations": [
+      "NVDA"
+    ]
+  },
+  "rule_families": {
+    "must_detect_if_evidence_present": {
+      "config_source": "j2_provisional_regression_labels_v0.2.yaml: required_conflicts",
+      "applicable_target": "declared conflict pair, per ticker",
+      "execution_function": "acceptance_engine.evaluate_must_detect_if_evidence_present",
+      "trigger_condition": "pair is in the ticker's required_conflicts AND B2 arbitration recorded >= 1 stance-confirmed supporting claim on EACH side (bull_supporting_evidence_count and bear_supporting_evidence_count from conflicts.json's own arbitration.candidate_evaluations[].admissibility)",
+      "evidence_requirement": ">= 1 supporting claim per side (weaker than B2's own admission threshold of 2 -- this rule asks 'was evidence present at all', not 'did it clear B2's admission bar')",
+      "verdict_result": [
+        "pass",
+        "fail",
+        "not_applicable",
+        "not_evaluable"
+      ]
+    },
+    "should_detect_if_supported": {
+      "config_source": "j2_provisional_regression_labels_v0.2.yaml: conditional_conflicts",
+      "applicable_target": "declared conflict pair, per ticker",
+      "execution_function": "acceptance_engine.evaluate_should_detect_if_supported",
+      "trigger_condition": "pair is in the ticker's conditional_conflicts AND evidence is present per the same bar as must_detect_if_evidence_present AND stance_source is llm_semantic or mixed (evaluator.stance_source) -- offline runs with deterministic-baseline-only stance cannot reliably judge 'supported' and are marked pending_review instead",
+      "evidence_requirement": "evidence present (>= 1 supporting claim per side) AND LLM-semantic stance resolution actually ran for this replay",
+      "verdict_result": [
+        "pass",
+        "needs_review",
+        "pending_review",
+        "not_applicable",
+        "not_evaluable"
+      ]
+    },
+    "conditional_only": {
+      "config_source": "j2_provisional_regression_labels_v0.2.yaml: conditional_conflicts",
+      "applicable_target": "declared conflict pair, per ticker",
+      "execution_function": "evaluation_contract.apply_v2_contract (conditional_conflict_results)",
+      "trigger_condition": "pair is in the ticker's conditional_conflicts",
+      "evidence_requirement": "none required to trigger; a miss is always informational, never a fail",
+      "verdict_result": [
+        "pass",
+        "informational_mismatch",
+        "not_evaluable"
+      ]
+    },
+    "do_not_force": {
+      "config_source": "conflicts.json: conflicts[] cross-checked against arbitration.candidate_evaluations[].admissibility",
+      "applicable_target": "every admitted conflict, per ticker (a run-wide invariant, not a per-pair rule)",
+      "execution_function": "acceptance_engine.evaluate_do_not_force_invariant",
+      "trigger_condition": "always evaluated when the ticker is evaluable",
+      "evidence_requirement": "every pair in evaluate_ticker's admitted_conflicts must have a matching arbitration.candidate_evaluations entry whose own admissibility.status is 'admitted' -- proves B2's evidence gate was not bypassed, never a second judgment call",
+      "verdict_result": [
+        "invariant_held",
+        "invariant_violated",
+        "not_evaluable"
+      ]
+    },
+    "allowed_main_conflicts": {
+      "config_source": "j2_provisional_regression_labels_v0.2.yaml: allowed_conflicts",
+      "applicable_target": "declared conflict pair, per ticker",
+      "execution_function": "evaluation_contract.apply_v2_contract (allowed_conflict_results)",
+      "trigger_condition": "pair is in the ticker's allowed_conflicts",
+      "evidence_requirement": "none -- legal structures, never mandatory outputs; absence is never a failure",
+      "verdict_result": [
+        "observed_admitted",
+        "observed_candidate",
+        "not_observed",
+        "not_evaluable"
+      ]
+    },
+    "forbidden_dominant_without_strong_evidence": {
+      "config_source": "j2_provisional_regression_labels_v0.1.yaml: should_not_be_dominant_without_strong_evidence (the v0.1 runtime field; the v0.2 file carries an identical copy and effective_rules() refuses the execution if the two differ)",
+      "applicable_target": "Alpha, per ticker",
+      "execution_function": "evaluator.dominance_guard_flags",
+      "trigger_condition": "Alpha is listed in the ticker's should_not_be_dominant_without_strong_evidence AND reached dominant/regime_level status",
+      "evidence_requirement": "none to trigger the flag itself -- flags for human review (the evidence counts are reported next to the flag), never auto-fails",
+      "verdict_result": [
+        "review_required",
+        "not_triggered",
+        "not_evaluable"
+      ]
+    }
+  }
+}

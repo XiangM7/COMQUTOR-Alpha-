@@ -1,0 +1,881 @@
+{
+  "schema_version": "week2.extracted_structures.v2",
+  "run_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8",
+  "ticker": "NVDA",
+  "nodes": [
+    {
+      "id": "ai_capex",
+      "label": "AI CapEx",
+      "canonical_factor": "AI CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:13",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:13",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "AI infrastructure spending is still being funded and expanded.",
+        "NVDA is growing revenue at +106% YoY with accelerating sequential dollar additions, at 75% gross margins and 66% operating margins, trading at a 14.5x forward P/E and 0.29 PEG, in a confirmed multi-timeframe uptrend, with recession risk being priced out and AI infrastructure spending intact."
+      ],
+      "score": 0.95
+    },
+    {
+      "id": "ai_demand",
+      "label": "AI Demand",
+      "canonical_factor": "AI Demand",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:claim:46",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:claim:65",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:58",
+        "canrel_93e5946b13fd5716",
+        "canrel_68353d18180e7011"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:claim:46",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:claim:65",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:58",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:29",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:14"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "AI demand is still enormous and accelerating.",
+        "Signal: AI demand stack expansion; Direction: Bullish; Source: StockTwits; Supporting evidence: \"$140B revenue just between Anthropic & OpenAI… AI revenue is now almost $400B plus\"",
+        "Meanwhile, Needham raised its NVDA quarterly revenue estimate to $109B on AI demand.",
+        "the Needham revision — quarterly revenue estimate raised to $109 billion on AI-related demand",
+        "the Needham revision to $109 billion lines up almost exactly with what the company just printed"
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "ai_infrastructure",
+      "label": "AI Infrastructure",
+      "canonical_factor": "AI Infrastructure",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:claim:23",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:13",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:14",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:54",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:93",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:101",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:3",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:44",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report:claim:23",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:13",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:14",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:54",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:93",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:101",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:3",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:44",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:sentiment_agent:sentiment_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "One idiosyncratic negative datapoint: \"@SamsonCapital: nvidia-backed firmus is set to postpone IPO, weigh private round\" — a soft signal on the AI-infrastructure financing environment.",
+        "AI infrastructure spending is still being funded and expanded.",
+        "\"Silicon Motion Boosts AI Infrastructure Capabilities\" shows continued capital allocation into the AI storage/controller layer, consistent with an intact datacenter buildout.",
+        "\"Silicon Motion Boosts AI Infrastructure Capabilities: Reason to Buy?\" — continued investment into AI-adjacent storage/controller silicon.",
+        "#: 9; Category: AI Infra; Observation: Silicon Motion boosts AI infrastructure capabilities; Evidence / Source: Zacks; NVDA Implication: Datacenter buildout still funded; Direction: Positive",
+        "Rationale: The fundamental AI/datacenter demand chain shows no evidence of breaking — recession risk is being priced out, AI infrastructure investment continues, and the semiconductor cycle is producing record profitability.",
+        "The company remains the dominant merchant supplier of accelerated computing platforms — GPUs, networking, and full-stack AI systems — sold primarily into hyperscale datacenters, sovereign AI buildouts, and increasingly enterprise/edge inference deployments.",
+        "Silicon Motion boosting AI infrastructure capabilities confirms the datacenter buildout is intact.",
+        "NVDA is growing revenue at +106% YoY with accelerating sequential dollar additions, at 75% gross margins and 66% operating margins, trading at a 14.5x forward P/E and 0.29 PEG, in a confirmed multi-timeframe uptrend, with recession risk being priced out and AI infrastructure spending intact."
+      ],
+      "score": 0.95
+    },
+    {
+      "id": "datacenter_capex",
+      "label": "Datacenter CapEx",
+      "canonical_factor": "Datacenter CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:13",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:14",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:93",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:44",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:13",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:14",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:93",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:44",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "AI infrastructure spending is still being funded and expanded.",
+        "\"Silicon Motion Boosts AI Infrastructure Capabilities\" shows continued capital allocation into the AI storage/controller layer, consistent with an intact datacenter buildout.",
+        "#: 9; Category: AI Infra; Observation: Silicon Motion boosts AI infrastructure capabilities; Evidence / Source: Zacks; NVDA Implication: Datacenter buildout still funded; Direction: Positive",
+        "Silicon Motion boosting AI infrastructure capabilities confirms the datacenter buildout is intact.",
+        "NVDA is growing revenue at +106% YoY with accelerating sequential dollar additions, at 75% gross margins and 66% operating margins, trading at a 14.5x forward P/E and 0.29 PEG, in a confirmed multi-timeframe uptrend, with recession risk being priced out and AI infrastructure spending intact."
+      ],
+      "score": 0.95
+    },
+    {
+      "id": "gpu_demand",
+      "label": "GPU Demand",
+      "canonical_factor": "GPU Demand",
+      "node_type": "factor",
+      "source_records": [
+        "canrel_55b5d488134cd86e",
+        "canrel_967d542a5cb70256"
+      ],
+      "source_claim_ids": [],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "Revenue is compounding at ~+18% QoQ and ~+106% YoY, with *accelerating* sequential dollar additions."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "narrative_momentum",
+      "label": "Narrative Momentum",
+      "canonical_factor": "Narrative Momentum",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:59"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:59"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report"
+      ],
+      "evidence": [
+        "stamp of approval) represent a competing-narrative risk: capital and media attention rotating toward quantum as the \"next thing.\" This is a narrative-momentum consideration, not a near-term fundamental threat to NVDA's GPU franchise."
+      ],
+      "score": 0.4
+    },
+    {
+      "id": "nvda_revenue_growth",
+      "label": "NVDA Revenue Growth",
+      "canonical_factor": "Revenue Growth",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:57",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:31",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:57",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:17",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:19",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:19",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:68",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan:claim:11",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan:claim:42",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:4",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:51",
+        "canrel_55b5d488134cd86e",
+        "canrel_9904aaaf6acee6cb",
+        "canrel_967d542a5cb70256",
+        "canrel_8143ce482f1ed500",
+        "canrel_a7e3d1dbcf30f90a",
+        "canrel_ad6df8cea6b2b2f5",
+        "canrel_0879636748c3a4df",
+        "canrel_93e5946b13fd5716",
+        "canrel_3349e9fdd1e772c3",
+        "canrel_87d7e8442d9b2be7",
+        "canrel_e2c65b62d9e0fff5",
+        "canrel_1d5eeefb5da501fc",
+        "canrel_ba9f8aeffd004ed5",
+        "canrel_68353d18180e7011"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:57",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:31",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:57",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:17",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:19",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:19",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:68",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan:claim:11",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan:claim:42",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:4",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:51",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:125",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:42",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:22",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:29",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:19",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:23",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history:claim:33",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:7",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:14"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "Falling AI inference prices are a double-edged sword for NVDA: they expand the addressable market by making inference economically viable at scale, but they also invite the question of whether compute pricing power erodes over time.",
+        "R&D grew +11.6% QoQ (well below revenue growth), so incremental revenue is dropping through at very high margins.",
+        "Accounts receivable jumped from $40,710M to $63,059M — a +$22.3B (+54.9%) QoQ surge against revenue growth of only +17.9%.",
+        "You're paying a discount to the market multiple for triple-digit revenue growth.",
+        "The bear's strongest point is the AR build: receivables rose from $40,710M to $63,059M [fragmentid: src368d04e64ccecd8c:frag:0], a +54.9% QoQ surge against +17.9% revenue growth, pushing DSO from 45 to 65 days.",
+        "Accounts receivable surged from $40,710M to $63,059M [fragmentid: src368d04e64ccecd8c:frag:0] — +54.9% QoQ against +17.9% revenue growth.",
+        "\"Fundamentals are accelerating\" — but FCF collapsed 56% QoQ, cash conversion is 40%, receivables are up 54.9% against 17.9% revenue growth, and 11% of net income is non-operating gains.",
+        "Receivables rose from $40,710M to $63,059M [fragmentid: src368d04e64ccecd8c:frag:0] — +54.9% QoQ against +17.9% revenue growth.",
+        "Downside trigger to downgrade to Underweight: A break below the 50 SMA (220.44) [fragmentid: src595f49aa32852d5c:frag:0], or a second consecutive quarter of AR growth outpacing revenue growth, or any sign that the forward EPS estimate is being revised down.",
+        "A 54.9% sequential jump in receivables against 17.9% sequential revenue growth means DSO expanded from roughly 45 days to roughly 65 days in a single quarter.",
+        "Hard risk line: A second consecutive quarter of AR growth outpacing revenue growth, or any sign the forward EPS estimate is being revised down, warrants a downgrade to Underweight regardless of the technical structure.",
+        "Revenue is compounding at ~+18% QoQ and ~+106% YoY, with *accelerating* sequential dollar additions.",
+        "The forward P/E of 14.5x is only \"cheap\" if the aggressive forward EPS estimate is achieved.",
+        "Multiple compression on a 14.5x forward P/E with a 0.29 PEG is not a reason to sell — it's a reason to accumulate a business growing earnings at triple digits.",
+        "That forward P/E is only \"cheap\" **if the forward EPS estimate of $15.91 is achieved** — which requires roughly a **doubling of TTM EPS of $7.91**.",
+        "The critical asymmetry: the bull's entire \"cheap at 14.5x forward\" argument depends on an EPS doubling that is *partly propped up by non-operating gains* and *not yet confirmed by cash flow*.",
+        "The conservative's \"no cuts\" fear is already in the price. The upside case is that earnings delivery alone — no re-rating required — drives the stock higher.",
+        "the Needham revision — quarterly revenue estimate raised to $109 billion on AI-related demand",
+        "The Aggressive Analyst is treating a valuation cushion that may not exist as if it is a floor.",
+        "It tells us the market is de-rating semiconductor equities even when the fundamental news is good.",
+        "In a world with no cuts, a bad quarter has nowhere to hide.",
+        "A 14.5x forward P/E on *inflated* forward EPS is not cheap at all.",
+        "the chip sector is de-rating even on good news",
+        "the Needham revision to $109 billion lines up almost exactly with what the company just printed"
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "rate_cut_cycle",
+      "label": "Rate Cut Cycle",
+      "canonical_factor": "Rate Cut Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:88",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history:claim:35"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:88",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history:claim:35"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history"
+      ],
+      "evidence": [
+        "#: 4; Category: Rates; Observation: All \"N cuts\" buckets (6–12+) priced at 0%; Evidence / Source: Polymarket, $3.98M–$5.28M vol each; NVDA Implication: Easing-cycle thesis is dead for 2026; Direction: Negative",
+        "If the cash-conversion binary resolves bearish, the multiple can compress further, and there's no rate cut coming to bail it out."
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "recession_risk",
+      "label": "Recession Risk",
+      "canonical_factor": "Recession Risk",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:8",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:44",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:76",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:101",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:36",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:39",
+        "canrel_df85062daf9801e3",
+        "canrel_dfa2a2e639e08019"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:8",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:44",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:76",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:101",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:36",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:64",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:39",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:49"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history"
+      ],
+      "evidence": [
+        "Recession risk is being priced out, not in.",
+        "Recession risk is being actively priced out.",
+        "Recession risk being priced out (−2.0pp to 6%) is a genuine positive for semiconductor unit demand.",
+        "Rationale: The fundamental AI/datacenter demand chain shows no evidence of breaking — recession risk is being priced out, AI infrastructure investment continues, and the semiconductor cycle is producing record profitability.",
+        "Recession risk is being priced OUT, not in — 6% Yes, down 2.0pp on the week.",
+        "NVDA is growing revenue at +106% YoY with accelerating sequential dollar additions, at 75% gross margins and 66% operating margins, trading at a 14.5x forward P/E and 0.29 PEG, in a confirmed multi-timeframe uptrend, with recession risk being priced out and AI infrastructure spending intact.",
+        "The bull leans on \"recession risk is being priced out\" as a positive.",
+        "the market is de-rating the entire semiconductor group even on good news."
+      ],
+      "score": 0.95
+    },
+    {
+      "id": "semiconductor_cycle",
+      "label": "Semiconductor Cycle",
+      "canonical_factor": "Semiconductor Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:12",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:91",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:101",
+        "canrel_df85062daf9801e3",
+        "canrel_dfa2a2e639e08019",
+        "canrel_87d7e8442d9b2be7",
+        "canrel_ba9f8aeffd004ed5"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:12",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:91",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:101",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:76",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:49",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:23",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:7"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "\"Chip stocks retreat despite Samsung's record profit guidance\" is the single most NVDA-relevant headline in the window: it implies the semiconductor cycle is fundamentally strong (record memory/component profitability) while price action is de-rating the group anyway — a classic valuation/multiple-compression signature rather than a demand-collapse signature.",
+        "#: 7; Category: Growth; Observation: US recession by end-2026 priced at 6% Yes, −2.0pp wk; Evidence / Source: Polymarket, $2.28M vol; NVDA Implication: Cyclical chip demand supported; Direction: Positive",
+        "Rationale: The fundamental AI/datacenter demand chain shows no evidence of breaking — recession risk is being priced out, AI infrastructure investment continues, and the semiconductor cycle is producing record profitability.",
+        "Recession risk being priced out (−2.0pp to 6%) is a genuine positive for semiconductor unit demand.",
+        "the market is de-rating the entire semiconductor group even on good news.",
+        "It tells us the market is de-rating semiconductor equities even when the fundamental news is good.",
+        "the chip sector is de-rating even on good news"
+      ],
+      "score": 0.8
+    },
+    {
+      "id": "valuation_risk",
+      "label": "Valuation Risk",
+      "canonical_factor": "Valuation Risk",
+      "node_type": "factor",
+      "source_records": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:12",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:52",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:74",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:92",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:102",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:124",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:2",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:42",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:3",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:72",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan:claim:23",
+        "canrel_9904aaaf6acee6cb",
+        "canrel_8143ce482f1ed500",
+        "canrel_a7e3d1dbcf30f90a",
+        "canrel_ad6df8cea6b2b2f5",
+        "canrel_0879636748c3a4df",
+        "canrel_3349e9fdd1e772c3",
+        "canrel_e2c65b62d9e0fff5",
+        "canrel_1d5eeefb5da501fc"
+      ],
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:12",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:52",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:74",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:92",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:102",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:124",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:2",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:42",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:3",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:72",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan:claim:23",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:125",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:22",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:19",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history:claim:33"
+      ],
+      "source_agent_output_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "\"Chip stocks retreat despite Samsung's record profit guidance\" is the single most NVDA-relevant headline in the window: it implies the semiconductor cycle is fundamentally strong (record memory/component profitability) while price action is de-rating the group anyway — a classic valuation/multiple-compression signature rather than a demand-collapse signature.",
+        "The fact that chip stocks fell on that news tells us the market is not pricing a demand problem; it is pricing valuation risk and/or positioning exhaustion.",
+        "If chip stocks keep falling on good fundamental news (Samsung's record guidance), that is multiple compression, and it can persist.",
+        "#: 8; Category: Semis; Observation: Chip stocks retreat despite Samsung record profit guidance; Evidence / Source: Yahoo Finance, AlphaCheck; NVDA Implication: Multiple compression, not demand collapse; Direction: Mixed",
+        "However, the rate regime is decisively hostile (96% odds of no 2026 cuts), and the market is demonstrably de-rating chip stocks even on good news, which is a multiple-compression signal that can persist.",
+        "Valuation risk: P/B of 24.3x, beta of 2.22, and a stock near 52-week highs mean the equity is highly sensitive to any growth disappointment or multiple compression.",
+        "Let me engage directly with the bear's argument, because I think it makes a classic mistake: it's treating a data-collection failure as if it were a fundamental deterioration, and it's treating a multiple-compression regime as if it were a demand problem.",
+        "Multiple compression on a 14.5x forward P/E with a 0.29 PEG is not a reason to sell — it's a reason to accumulate a business growing earnings at triple digits.",
+        "The bull wants you to believe this is a \"data gap, not a signal\" story and that the fundamentals are \"accelerating.\" But when you actually stress-test the numbers the bull is citing, a very different picture emerges — one of deteriorating cash quality, a stock priced for perfection, and a macro regime that is actively hostile to long-duration growth names.",
+        "This is a different regime: sticky rates, deteriorating cash quality, crowded retail positioning, and a stock priced for perfection.",
+        "In a stock priced for perfection, an unproven cash-conversion assumption is exactly the kind of risk that should cap position sizing.",
+        "The forward P/E of 14.5x is only \"cheap\" if the aggressive forward EPS estimate is achieved.",
+        "That forward P/E is only \"cheap\" **if the forward EPS estimate of $15.91 is achieved** — which requires roughly a **doubling of TTM EPS of $7.91**.",
+        "The critical asymmetry: the bull's entire \"cheap at 14.5x forward\" argument depends on an EPS doubling that is *partly propped up by non-operating gains* and *not yet confirmed by cash flow*.",
+        "The conservative's \"no cuts\" fear is already in the price. The upside case is that earnings delivery alone — no re-rating required — drives the stock higher.",
+        "The Aggressive Analyst is treating a valuation cushion that may not exist as if it is a floor.",
+        "In a world with no cuts, a bad quarter has nowhere to hide.",
+        "A 14.5x forward P/E on *inflated* forward EPS is not cheap at all."
+      ],
+      "score": 0.8
+    }
+  ],
+  "edges": [
+    {
+      "source": "recession_risk",
+      "target": "semiconductor_cycle",
+      "source_label": "Recession Risk",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_df85062daf9801e3",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:76"
+      ],
+      "relation_id": "canrel_df85062daf9801e3",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+      "evidence": "Recession risk being priced out (−2.0pp to 6%) is a genuine positive for semiconductor unit demand.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "semiconductor_cycle",
+      "source_label": "Recession Risk",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_dfa2a2e639e08019",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history:claim:49"
+      ],
+      "relation_id": "canrel_dfa2a2e639e08019",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "the market is de-rating the entire semiconductor group even on good news.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "semiconductor_cycle",
+      "target": "nvda_revenue_growth",
+      "source_label": "Semiconductor Cycle",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Semiconductor Cycle conflicts with Revenue Growth.",
+      "source_record_id": "canrel_87d7e8442d9b2be7",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:23"
+      ],
+      "relation_id": "canrel_87d7e8442d9b2be7",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "It tells us the market is de-rating semiconductor equities even when the fundamental news is good.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "semiconductor_cycle",
+      "target": "nvda_revenue_growth",
+      "source_label": "Semiconductor Cycle",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Semiconductor Cycle conflicts with Revenue Growth.",
+      "source_record_id": "canrel_ba9f8aeffd004ed5",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:7"
+      ],
+      "relation_id": "canrel_ba9f8aeffd004ed5",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision",
+      "evidence": "the chip sector is de-rating even on good news",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "semiconductor_cycle",
+      "target": "valuation_risk",
+      "source_label": "Semiconductor Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "conflicting",
+      "confidence": 0.8,
+      "rule_name": "llm_relation_validated",
+      "reason": "Strict JSON relation passed deterministic evidence validation.",
+      "assertion_status": "asserted",
+      "source_claim": "\"Chip stocks retreat despite Samsung's record profit guidance\" is the single most NVDA-relevant headline in the window: it implies the semiconductor cycle is fundamentally strong (record memory/component profitability) while price action is de-rating the group anyway — a classic valuation/multiple-compression signature rather than a demand-collapse signature.",
+      "source_record_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:12",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report:claim:12"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:news_agent:news_report",
+      "evidence": "\"Chip stocks retreat despite Samsung's record profit guidance\" is the single most NVDA-relevant headline in the window: it implies the semiconductor cycle is fundamentally strong (record memory/component profitability) while price action is de-rating the group anyway — a classic valuation/multiple-compression signature rather than a demand-collapse signature.",
+      "extraction_method": "llm_strict_json"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_0879636748c3a4df",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:22"
+      ],
+      "relation_id": "canrel_0879636748c3a4df",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "The conservative's \"no cuts\" fear is already in the price. The upside case is that earnings delivery alone — no re-rating required — drives the stock higher.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.65,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_1d5eeefb5da501fc",
+      "source_claim_ids": [],
+      "relation_id": "canrel_1d5eeefb5da501fc",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision",
+      "evidence": "A 14.5x forward P/E on *inflated* forward EPS is not cheap at all.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_3349e9fdd1e772c3",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history:claim:19"
+      ],
+      "relation_id": "canrel_3349e9fdd1e772c3",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "The Aggressive Analyst is treating a valuation cushion that may not exist as if it is a floor.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_8143ce482f1ed500",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:42"
+      ],
+      "relation_id": "canrel_8143ce482f1ed500",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "Multiple compression on a 14.5x forward P/E with a 0.29 PEG is not a reason to sell — it's a reason to accumulate a business growing earnings at triple digits.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_9904aaaf6acee6cb",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report:claim:125"
+      ],
+      "relation_id": "canrel_9904aaaf6acee6cb",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report",
+      "evidence": "The forward P/E of 14.5x is only \"cheap\" if the aggressive forward EPS estimate is achieved.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_a7e3d1dbcf30f90a",
+      "source_claim_ids": [],
+      "relation_id": "canrel_a7e3d1dbcf30f90a",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "That forward P/E is only \"cheap\" **if the forward EPS estimate of $15.91 is achieved** — which requires roughly a **doubling of TTM EPS of $7.91**.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_ad6df8cea6b2b2f5",
+      "source_claim_ids": [],
+      "relation_id": "canrel_ad6df8cea6b2b2f5",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:research_manager:investment_plan",
+      "evidence": "The critical asymmetry: the bull's entire \"cheap at 14.5x forward\" argument depends on an EPS doubling that is *partly propped up by non-operating gains* and *not yet confirmed by cash flow*.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "nvda_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_e2c65b62d9e0fff5",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history:claim:33"
+      ],
+      "relation_id": "canrel_e2c65b62d9e0fff5",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "In a world with no cuts, a bad quarter has nowhere to hide.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_demand",
+      "target": "nvda_revenue_growth",
+      "source_label": "AI Demand",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Demand supports Revenue Growth.",
+      "source_record_id": "canrel_68353d18180e7011",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision:claim:14"
+      ],
+      "relation_id": "canrel_68353d18180e7011",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:portfolio_manager:final_trade_decision",
+      "evidence": "the Needham revision to $109 billion lines up almost exactly with what the company just printed",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_demand",
+      "target": "nvda_revenue_growth",
+      "source_label": "AI Demand",
+      "target_label": "NVDA Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Demand supports Revenue Growth.",
+      "source_record_id": "canrel_93e5946b13fd5716",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:29"
+      ],
+      "relation_id": "canrel_93e5946b13fd5716",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "the Needham revision — quarterly revenue estimate raised to $109 billion on AI-related demand",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_infrastructure",
+      "target": "datacenter_capex",
+      "source_label": "AI Infrastructure",
+      "target_label": "Datacenter CapEx",
+      "edge_type": "supportive",
+      "confidence": 0.8,
+      "rule_name": "llm_relation_validated",
+      "reason": "Strict JSON relation passed deterministic evidence validation.",
+      "assertion_status": "asserted",
+      "source_claim": "Silicon Motion boosting AI infrastructure capabilities confirms the datacenter buildout is intact.",
+      "source_record_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:44",
+      "source_claim_ids": [
+        "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history:claim:44"
+      ],
+      "relation_id": null,
+      "lineage_status": null,
+      "lineage_method": null,
+      "lineage_reasons": [],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "Silicon Motion boosting AI infrastructure capabilities confirms the datacenter buildout is intact.",
+      "extraction_method": "llm_strict_json"
+    },
+    {
+      "source": "nvda_revenue_growth",
+      "target": "gpu_demand",
+      "source_label": "NVDA Revenue Growth",
+      "target_label": "GPU Demand",
+      "edge_type": "supportive",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Revenue Growth supports GPU Demand.",
+      "source_record_id": "canrel_55b5d488134cd86e",
+      "source_claim_ids": [],
+      "relation_id": "canrel_55b5d488134cd86e",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:fundamental_agent:fundamentals_report",
+      "evidence": "Revenue is compounding at ~+18% QoQ and ~+106% YoY, with *accelerating* sequential dollar additions.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "nvda_revenue_growth",
+      "target": "gpu_demand",
+      "source_label": "NVDA Revenue Growth",
+      "target_label": "GPU Demand",
+      "edge_type": "supportive",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Revenue Growth supports GPU Demand.",
+      "source_record_id": "canrel_967d542a5cb70256",
+      "source_claim_ids": [],
+      "relation_id": "canrel_967d542a5cb70256",
+      "lineage_status": "unresolved",
+      "lineage_method": "none",
+      "lineage_reasons": [
+        "SOURCE_CLAIM_NOT_FOUND"
+      ],
+      "source_agent_output_id": "fa642639-8d93-4f9a-9de1-2c4d789eade8:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "Revenue is compounding at ~+18% QoQ and ~+106% YoY, with *accelerating* sequential dollar additions.",
+      "extraction_method": "tradingagents_canonical_output"
+    }
+  ],
+  "metadata": {
+    "node_count": 11,
+    "edge_count": 18,
+    "extractor": "llm_with_deterministic_validation_and_fallback",
+    "extractor_version": "week2.structure_extractor.v2",
+    "llm_enabled": true,
+    "llm_edge_count": 2,
+    "deterministic_edge_count": 0,
+    "canonical_relation_edge_count": 16
+  }
+}

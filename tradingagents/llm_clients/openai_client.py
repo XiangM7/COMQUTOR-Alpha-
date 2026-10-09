@@ -98,6 +98,23 @@ class DeepSeekChatOpenAI(NormalizedChatOpenAI):
     Tool-choice handling for V4 and reasoner — those models reject the
     ``tool_choice`` parameter — is handled by the capability dispatch in
     ``NormalizedChatOpenAI.with_structured_output``, not here.
+
+    ``max_completion_tokens`` compatibility fix (2026-10-01): langchain_openai's
+    own base class (``ChatOpenAI._default_params``/``_get_request_payload``)
+    unconditionally renames ``max_tokens`` -> ``max_completion_tokens`` for
+    every model, following OpenAI's own September 2024 API deprecation. This
+    is not a rename DeepSeek's own API recognizes -- their official reference
+    (api-docs.deepseek.com/api/create-chat-completion, confirmed this round)
+    documents only ``max_tokens``; ``max_completion_tokens`` appears nowhere
+    in DeepSeek's own parameter list. Renamed back to ``max_tokens`` here,
+    scoped to this DeepSeek-specific subclass only -- ``NormalizedChatOpenAI``
+    (used by every other OpenAI-compatible provider) and the real native
+    OpenAI client are both untouched, so this never changes behavior for any
+    other provider. This only corrects which field name is sent; it does not
+    verify DeepSeek's server-side enforcement of the value (see
+    docs/audit_artifacts/round_source_linking_t0_t2/
+    t3live_20261001T014648Z_1fb9c9d5_max_output_tokens_diagnostic.md for that
+    boundary).
     """
 
     def _get_request_payload(self, input_, *, stop=None, **kwargs):
@@ -109,6 +126,8 @@ class DeepSeekChatOpenAI(NormalizedChatOpenAI):
             reasoning = message.additional_kwargs.get("reasoning_content")
             if reasoning is not None:
                 message_dict["reasoning_content"] = reasoning
+        if "max_completion_tokens" in payload:
+            payload["max_tokens"] = payload.pop("max_completion_tokens")
         return payload
 
     def _create_chat_result(self, response, generation_info=None):
@@ -162,9 +181,15 @@ class MinimaxChatOpenAI(NormalizedChatOpenAI):
         return payload
 
 
-# Kwargs forwarded from user config to ChatOpenAI
+# Kwargs forwarded from user config to ChatOpenAI. "max_tokens" (a real
+# ChatOpenAI field, aliased internally to max_completion_tokens for
+# reasoning models -- confirmed directly against the installed
+# langchain_openai this round) is the minimum necessary per-call output cap
+# for the Research Agent layer, which had no enforceable call-shape limit
+# of any kind before this round (2026-09-30, T3/T4 joint-verification
+# execution-path task).
 _PASSTHROUGH_KWARGS = (
-    "timeout", "max_retries", "reasoning_effort", "temperature",
+    "timeout", "max_retries", "reasoning_effort", "temperature", "max_tokens",
     "api_key", "callbacks", "http_client", "http_async_client",
 )
 

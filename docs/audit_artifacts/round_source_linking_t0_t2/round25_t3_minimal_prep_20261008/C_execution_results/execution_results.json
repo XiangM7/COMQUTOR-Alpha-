@@ -1,0 +1,214 @@
+{
+ "schema_version": "t3_round25_execution_results.v1",
+ "execution_id": "t3joint-20261008T170322Z-bd99811e",
+ "authorized_by": "Xiang Mao (项目负责人)",
+ "authorization_reference": "2026-10-08 session message from the project owner authorizing the B_execution_proposal.md execution: content support <=17, Alpha 40, stance <=13, collection <=4 (total external <=74, model <=70); frozen configuration; NOT a John approval and NOT a completed human review",
+ "run_summary": {
+  "started_at": "2026-10-08T17:41:59.923465+00:00",
+  "finished_at": "2026-10-08T17:55:25.020372+00:00",
+  "guard_tripped": null,
+  "request_caps": {
+   "content_support_verification": 17,
+   "alpha_classifier": 40,
+   "evidence_stance_classifier": 13
+  }
+ },
+ "tasks": {
+  "content_support_verification": {
+   "request_cap": 17,
+   "gateway_budget_reservations": 17,
+   "attempts_reaching_the_transport": 17,
+   "http_requests_forwarded": 17,
+   "attempt_states": {
+    "http_200": 17
+   },
+   "valid_chat_completions": 17,
+   "finish_reason": {
+    "stop": 17
+   },
+   "truncated_finish_reason_length": 0,
+   "model_reported_by_responses": {
+    "deepseek-flash": 17
+   },
+   "usage_from_responses": {
+    "prompt_tokens": 191015,
+    "completion_tokens": 160509,
+    "reasoning_tokens": 152340,
+    "prompt_cache_hit_tokens": 110336,
+    "responses_reporting_reasoning_tokens": 17
+   },
+   "responses_without_usage": 0,
+   "requests_without_any_response_record": 0,
+   "error_log_codes": {},
+   "semantic_ledger_records": "not recorded (task not in the ledger registry); see request/response audit and task_audit.json",
+   "items": {
+    "requested": 17,
+    "llm_verified": 11,
+    "fallbacks": 6,
+    "fallback_reasons": {
+     "quote_or_data_not_found": 6
+    }
+   }
+  },
+  "alpha_classifier": {
+   "request_cap": 40,
+   "gateway_budget_reservations": 40,
+   "attempts_reaching_the_transport": 40,
+   "http_requests_forwarded": 40,
+   "attempt_states": {
+    "http_200": 40
+   },
+   "valid_chat_completions": 40,
+   "finish_reason": {
+    "stop": 40
+   },
+   "truncated_finish_reason_length": 0,
+   "model_reported_by_responses": {
+    "deepseek-flash": 40
+   },
+   "usage_from_responses": {
+    "prompt_tokens": 80477,
+    "completion_tokens": 42254,
+    "reasoning_tokens": 41710,
+    "prompt_cache_hit_tokens": 69630,
+    "responses_reporting_reasoning_tokens": 40
+   },
+   "responses_without_usage": 0,
+   "requests_without_any_response_record": 0,
+   "error_log_codes": {},
+   "semantic_ledger_records": 40
+  },
+  "evidence_stance_classifier": {
+   "request_cap": 13,
+   "gateway_budget_reservations": 3,
+   "attempts_reaching_the_transport": 3,
+   "http_requests_forwarded": 3,
+   "attempt_states": {
+    "http_200": 3
+   },
+   "valid_chat_completions": 3,
+   "finish_reason": {
+    "stop": 3
+   },
+   "truncated_finish_reason_length": 0,
+   "model_reported_by_responses": {
+    "deepseek-flash": 3
+   },
+   "usage_from_responses": {
+    "prompt_tokens": 8577,
+    "completion_tokens": 9272,
+    "reasoning_tokens": 8037,
+    "prompt_cache_hit_tokens": 1664,
+    "responses_reporting_reasoning_tokens": 3
+   },
+   "responses_without_usage": 0,
+   "requests_without_any_response_record": 0,
+   "error_log_codes": {},
+   "semantic_ledger_records": 3,
+   "items": {
+    "requested_pairs": 21,
+    "llm_results": 21,
+    "deterministic_fallbacks": 0,
+    "fallback_reasons": {}
+   }
+  }
+ },
+ "model_requests_forwarded_total": 60,
+ "collection_requests_forwarded": 4,
+ "links": {
+  "L1": {
+   "NOT_SUBMITTED": 23,
+   "TASK_FAILED": 6,
+   "LLM_RESULT": 11
+  },
+  "L1_content_support_status": {
+   "CONDITIONAL": 6,
+   "SUPPORTS": 1,
+   "PENDING_REVIEW": 3,
+   "BACKGROUND": 1
+  },
+  "L2_outcome": {
+   "NONE": 16,
+   "MATCHED": 21,
+   "SELECTED_BUT_NOT_MATCHED": 3
+  },
+  "L2_raw_selection": {
+   "None": 16,
+   "A304": 7,
+   "A001": 4,
+   "A101": 5,
+   "A102": 4,
+   "A501": 4
+  },
+  "L2_final": {
+   "None": 19,
+   "A304": 7,
+   "A001": 1,
+   "A101": 5,
+   "A102": 4,
+   "A501": 4
+  },
+  "L2_selected_but_overridden_by_gates": [
+   "t3v3-019",
+   "t3v3-027R",
+   "t3v3-028"
+  ],
+  "L3": {
+   "NOT_APPLICABLE": 19,
+   "LLM_RESULT": 21
+  },
+  "L3_stance": {
+   "supports_alpha": 16,
+   "opposes_alpha": 4,
+   "neutral_background": 1
+  },
+  "L4": {
+   "NOT_APPLICABLE": 19,
+   "DETERMINED": 21
+  },
+  "L4_activation_pool_eligible": {
+   "False": 21
+  },
+  "L4_conflict_side_eligible": {
+   "False": 21
+  },
+  "L4_failing_condition_kind": {
+   "semantic_or_review": 11,
+   "mechanical": 10
+  },
+  "L4_verified_support_reason": {
+   "NOT_REVIEWED": 2,
+   "SUPPORT_STATUS_NOT_RESOLVED": 4,
+   "SOURCE_LINK_NOT_VALID": 14,
+   "ELIGIBLE": 1
+  },
+  "L4_selector_excluded_reason": {
+   "NON_ANALYTICAL_QUALITY": 4,
+   "RELATION_NOT_SUPPORTING": 4,
+   "None": 13
+  }
+ },
+ "material_coverage_final": {
+  "COMPLETE": 27,
+  "PARTIAL": 7,
+  "NO_FACTUAL_ELEMENT": 2,
+  "NO_RUN_MATERIAL__COLLECTED_FOR_THIS_VERIFICATION": 4
+ },
+ "historical_comparison": {
+  "samples_with_historical_answer": 33,
+  "same_raw_selection_as_history": 30,
+  "note": "consistency with earlier production answers; not accuracy, not this execution's evaluation"
+ },
+ "scoring": {
+  "scoring_status": "BLOCKED_NO_REFERENCE_JUDGMENTS",
+  "skipped": {
+   "PENDING_REVIEW": 40
+  },
+  "invalid": []
+ },
+ "notes": [
+  "reservations, forwarded requests, valid responses and successful judgments are counted separately; they are not assumed equal",
+  "a response reporting reasoning tokens shows only that this response reported reasoning usage; it does not confirm every server default",
+  "no reference judgment with a named reviewer exists yet: no accuracy, precision or recall is computed"
+ ]
+}

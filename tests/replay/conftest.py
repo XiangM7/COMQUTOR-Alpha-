@@ -7,18 +7,49 @@ from pathlib import Path
 import pytest
 
 import comqutor_alpha.api.routes_research as routes_research
+from comqutor_alpha.structure_engine.claim_semantics import (
+    ALPHA_POSITIVE_REQUIREMENT_CLASSIFIERS,
+    ALPHA_SPECIFIC_INVALIDATION_PATTERNS,
+)
 from comqutor_alpha.structure_engine.week2_llm import Week2LLMGateway
+
+# 2026-09-29 replay-fixture staleness fix: some Alphas (currently only
+# A001, via the v0.2 QQQ A001 mapping remediation) carry their own narrow,
+# taxonomy-native negative/positive-requirement gates (claim_semantics.py)
+# that run AFTER the semantic classifier and veto a "select" decision back
+# to no_match unless the claim text genuinely asserts that Alpha's own core
+# thesis. This fixture's claim text ("AI demand drives GPU demand and
+# revenue growth...") never asserts A001's Rate Cut Cycle thesis, so
+# picking "whichever alpha_id sorts first" (previously A001, before that
+# remediation existed) is no longer safe -- it silently produced
+# matched_alpha=None despite a genuine LLM "select", which cascaded into
+# this whole file's shared model.calls/manifest-task-count assertions.
+# Selecting the first UNGATED alpha_id keeps this mock's assumption
+# ("select" is a real, bindable, non-null decision) true regardless of
+# which alpha_id a future taxonomy edit happens to sort first, and remains
+# correct if a future Alpha gains its own narrow gate too.
+_GATED_ALPHA_IDS = frozenset(ALPHA_SPECIFIC_INVALIDATION_PATTERNS) | frozenset(
+    ALPHA_POSITIVE_REQUIREMENT_CLASSIFIERS
+)
+
+
+def _ungated_alpha_id(alpha_taxonomy: list[dict]) -> str:
+    for alpha in alpha_taxonomy:
+        alpha_id = alpha["alpha_id"]
+        if alpha_id not in _GATED_ALPHA_IDS:
+            return alpha_id
+    raise AssertionError("no ungated alpha_id available in alpha_taxonomy")
 
 
 class OfflineSemanticModel:
     """Prompt-aware Provider double used only while producing a live fixture.
 
     ``alpha_decision`` controls the alpha_classifier branch's response --
-    "select" (default, the taxonomy's own first alpha_id, sorted, stable
-    across runs) for a genuine, bindable MATCHED decision, or "none" for a
-    genuine, bindable semantic-NONE decision. Both are real, valid LLM
-    decisions under Pure-LLM Alpha semantic authority -- never a defer/
-    fallback stand-in."""
+    "select" (default, the first Alpha-specific-gate-free alpha_id, stable
+    across runs -- see ``_ungated_alpha_id`` above) for a genuine, bindable
+    MATCHED decision, or "none" for a genuine, bindable semantic-NONE
+    decision. Both are real, valid LLM decisions under Pure-LLM Alpha
+    semantic authority -- never a defer/fallback stand-in."""
 
     def __init__(self, *, alpha_decision: str = "select") -> None:
         self.calls = 0
@@ -41,6 +72,18 @@ class OfflineSemanticModel:
                     ],
                     "direction": "positive",
                     "confidence": 0.91,
+                    # T1 source-linking chain, 2026-09-28: cited_source_id
+                    # became a REQUIRED (nullable) field in the real
+                    # enrichment schema (_LLM_BATCH_ENRICHMENT_REQUIRED_
+                    # FIELDS) after this mock was last updated -- this
+                    # fixture's own request never offers any real
+                    # candidate_sources for this claim, so null is the
+                    # honest answer, not a fallback stand-in. Omitting it
+                    # entirely used to silently fail this call's own strict
+                    # field-set check and fall back to deterministic
+                    # enrichment, which is what broke this whole file's
+                    # shared model.calls/manifest assertions.
+                    "cited_source_id": None,
                 }
                 for segment in payload["segments"]
             ]
@@ -54,7 +97,7 @@ class OfflineSemanticModel:
             # "alpha_taxonomy": [...]}. One decision per claim_id, matching
             # the same alpha_decision ("select"/"none") this fixture was
             # already parameterized on.
-            first_alpha_id = payload["alpha_taxonomy"][0]["alpha_id"]
+            first_alpha_id = _ungated_alpha_id(payload["alpha_taxonomy"])
             decisions = [
                 (
                     {"claim_id": claim["claim_id"], "decision": "none", "selected_alpha_id": None}
@@ -73,12 +116,13 @@ class OfflineSemanticModel:
                 return _Response(json.dumps({"decision": "none", "selected_alpha_id": None}))
             # Pure-LLM Alpha Semantic Authority: "defer" is no longer a
             # recognized decision value -- the mock returns a genuine,
-            # deterministic "select" (the taxonomy's own first alpha_id,
-            # sorted, so this is stable across runs) so the fixture exercises
-            # a real, bindable semantic decision and matched_alpha stays
-            # non-null (B1's stance upgrade still has a real Alpha to
-            # evaluate; see eligible_live_source's own comment below).
-            first_alpha_id = payload["alpha_taxonomy"][0]["alpha_id"]
+            # deterministic "select" (the first Alpha-specific-gate-free
+            # alpha_id, stable across runs -- see _ungated_alpha_id above)
+            # so the fixture exercises a real, bindable semantic decision
+            # and matched_alpha stays non-null (B1's stance upgrade still
+            # has a real Alpha to evaluate; see eligible_live_source's own
+            # comment below).
+            first_alpha_id = _ungated_alpha_id(payload["alpha_taxonomy"])
             return _Response(
                 json.dumps({"decision": "select", "selected_alpha_id": first_alpha_id})
             )

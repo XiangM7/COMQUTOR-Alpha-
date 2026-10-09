@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from comqutor_alpha.conflict_engine.conflict_detector import detect_alpha_conflicts
+from comqutor_alpha.graph_engine.verified_evidence_gate import EvidenceGateInputError
 from comqutor_alpha.storage.file_store import atomic_write_text, run_dir_for
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,9 @@ def run_week4_conflict_pipeline(
     alpha_matches_payload: Mapping[str, Any],
     repository: Any,
     output_root: Any,
+    structured_records: Any = None,
+    sources: list[dict[str, Any]] | None = None,
+    require_verified_evidence_gate: bool = False,
 ) -> bool:
     """Detect and persist this run's Week 4 conflicts. Returns True on
     success, False on a safely-logged failure. Never raises.
@@ -74,11 +78,44 @@ def run_week4_conflict_pipeline(
     the Structure Graph for this run -- the caller is responsible for that
     ordering (see ``routes_research._run_week3_graph_pipeline``). Does not
     recompute activation: consumes ``graph_payload["activation"]`` exactly
-    as Week 3 produced it in this same request. Does not write a
+    as Week 3 produced it in this same request -- Week 3 has already made
+    that the OFFICIAL (verified-primary, when the gate applies) view, so no
+    separate "verified activation" is threaded here. Does not write a
     ``conflicts.json`` artifact -- the W4.2 database row is the only source
     of truth for W4.3 conflicts.
+
+    ``structured_records``/``sources`` (T1 verified-support eligibility
+    gate; escalated 2026-09-28 from "additive diagnostic" to "official
+    result"): OPTIONAL, forwarded unchanged to ``detect_alpha_conflicts``
+    -- see that function's own docstring for how they make ADMITTED/
+    conflicts/main_conflict itself gate-filtered. Omitting them (every
+    pre-existing caller) computes exactly today's original behavior.
+
+    ``require_verified_evidence_gate`` (2026-09-28 closing fix): OPTIONAL,
+    default ``False``, forwarded unchanged to ``detect_alpha_conflicts``.
+    Must be the SAME value the caller passed to this same run's
+    ``graph_engine.pipeline.score_and_assemble_structure_graph`` call, so
+    Activation and conflict admissibility can never diverge (one gated, the
+    other not). A resulting
+    :class:`~comqutor_alpha.graph_engine.verified_evidence_gate.
+    EvidenceGateInputError` is still caught here like any other failure
+    (this function's own "never raises" contract is unchanged) but logged
+    under the distinct ``evidence_gate_required_input_unavailable`` stage
+    rather than the generic ``conflict_detection`` one.
     """
     activation_payload = graph_payload.get("activation") if isinstance(graph_payload, Mapping) else None
+    # When Week 3 escalated to a verified-primary official result, its own
+    # activation_versions["v2"] is the TRUE raw view (pre-exposure/
+    # classification for this run) -- passed through only so
+    # detect_alpha_conflicts's diagnostic-only comparison field can score
+    # like-for-like against the raw pipeline; never consulted for the
+    # official result itself.
+    activation_versions = graph_payload.get("activation_versions") if isinstance(graph_payload, Mapping) else None
+    activation_payload_diagnostic_raw = (
+        activation_versions.get("v2")
+        if isinstance(activation_versions, Mapping) and graph_payload.get("evidence_gate_applied")
+        else None
+    )
     matches = alpha_matches_payload.get("matches") if isinstance(alpha_matches_payload, Mapping) else None
     if not isinstance(matches, list):
         matches = []
@@ -89,7 +126,14 @@ def run_week4_conflict_pipeline(
             ticker=ticker,
             activation_payload=activation_payload,
             alpha_matches=matches,
+            structured_records=structured_records,
+            sources=sources,
+            activation_payload_diagnostic_raw=activation_payload_diagnostic_raw,
+            require_verified_evidence_gate=require_verified_evidence_gate,
         )
+    except EvidenceGateInputError:
+        _log_week4_pipeline_error(run_id, output_root, "evidence_gate_required_input_unavailable")
+        return False
     except Exception:
         _log_week4_pipeline_error(run_id, output_root, "conflict_detection")
         return False

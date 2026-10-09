@@ -110,6 +110,90 @@ def test_alpha_specific_invalidation_matched_false_for_genuine_cut_language():
     )
 
 
+# ---------------------------------------------------------------------------
+# 2026-10-01 (AI-review comparison round): negation/reduction-scope guard on
+# the hike/odds alternatives. Confirmed real false positive from execution
+# t3live_20261001T014648Z_1fb9c9d5's prod-run-008: "...calmer yields as rate
+# hike bets wane...This is a supportive macro backdrop..." matched bare
+# "rate hike" and was vetoed as NEGATIVE_OR_HAWKISH despite the claim's own
+# explicit conclusion being supportive. The veto must not fire when a hike/
+# odds mention is immediately followed (or preceded) by a word reporting
+# that pressure is DECREASING.
+# ---------------------------------------------------------------------------
+
+
+def test_alpha_specific_invalidation_matched_false_for_hike_bets_waning():
+    # The exact real false positive -- rate-hike BETS WANE reports hawkish
+    # pressure decreasing, not an assertion that a hike happened/is expected.
+    assert not alpha_specific_invalidation_matched(
+        "Calmer yields as rate hike bets wane. This is a supportive macro "
+        "backdrop for high-multiple growth names.",
+        "A001",
+    )
+
+
+def test_alpha_specific_invalidation_matched_false_for_hike_odds_fading():
+    assert not alpha_specific_invalidation_matched(
+        "Hike odds are fading as the labor market cools.", "A001"
+    )
+
+
+def test_alpha_specific_invalidation_matched_true_for_hike_odds_rising_control():
+    # Control: rate-hike odds RISING (not reducing) must remain vetoed --
+    # this is the exact real pattern already pinned by
+    # test_negative_rate_hike_odds_pushed_past_threshold above; repeated
+    # here as an explicit before/after contrast with the waning case.
+    assert alpha_specific_invalidation_matched(
+        "Rising rate-hike odds (September odds past 60% after a blowout "
+        "jobs report) are being shrugged off by chip stocks.",
+        "A001",
+    )
+
+
+def test_alpha_specific_invalidation_matched_true_when_unrelated_hawkish_signal_present():
+    # The reduction guard must only neutralize the SPECIFIC hike/odds
+    # mention it modifies -- a separate, genuine hawkish signal elsewhere in
+    # the same text must still fire the veto.
+    assert alpha_specific_invalidation_matched(
+        "Rate hike bets wane for next month, but the Fed remains restrictive "
+        "on policy overall.",
+        "A001",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-01, scope-validation follow-up: an initial window-based version of
+# the reduction guard above (any reducing word within N characters) was too
+# loose on two axes -- negation of the reducing word itself, and bridging
+# across an unrelated clause's own subject. Both are real failure modes a
+# bigger or smaller window cannot fix (the task explicitly ruled that out);
+# the actual fix made the match grammatically precise (direct predicate/
+# adjectival modifier of the hike/odds phrase itself) instead of proximity-
+# based. These two cases are the scope-validation evidence for that fix.
+# ---------------------------------------------------------------------------
+
+
+def test_alpha_specific_invalidation_matched_true_for_double_negative_not_waning():
+    # "do NOT wane" is a double negative -- the hike bets are NOT decreasing,
+    # i.e. still hawkish. A bare window scan for "wane" (ignoring the "not"
+    # immediately before it) would wrongly suppress this.
+    assert alpha_specific_invalidation_matched("Rate hike bets do not wane.", "A001")
+    assert classify_a001_directional_semantics("Rate hike bets do not wane.") == "NEGATIVE_OR_HAWKISH"
+
+
+def test_alpha_specific_invalidation_matched_true_when_reducing_word_belongs_to_another_clause():
+    # "stocks fall" is a separate clause's own subject/predicate -- it has
+    # nothing to do with "rate hike odds rise" earlier in the sentence. A
+    # bare window scan for "fall" after the hike/odds match would wrongly
+    # suppress this (and would also, via the unrelated `rates? .{0,30}
+    # fall` positive pattern, have caused classify_a001_directional_
+    # semantics to wrongly return POSITIVE_EASING instead of NEGATIVE_OR_
+    # HAWKISH -- confirmed and fixed by making the negative check correct
+    # and first in priority order, not by touching the positive patterns).
+    assert alpha_specific_invalidation_matched("Rate hike odds rise; stocks fall.", "A001")
+    assert classify_a001_directional_semantics("Rate hike odds rise; stocks fall.") == "NEGATIVE_OR_HAWKISH"
+
+
 def test_alpha_specific_invalidation_matched_false_for_unregistered_alpha():
     # No registered pattern for A101 -- must never fabricate a veto.
     assert not alpha_specific_invalidation_matched(

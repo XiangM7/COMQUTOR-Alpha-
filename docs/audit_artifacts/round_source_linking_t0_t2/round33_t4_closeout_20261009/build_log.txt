@@ -1,0 +1,42 @@
+# build started 2026-10-09T22:18:55Z; python3 3.12.6
+$ rm -rf T4_final_r33 hash_proof/state_after_build.json
+[exit 0]
+
+$ python3 tools/snapshot_state.py --out hash_proof/state_after_build.json --compare hash_proof/state_before.json
+{"read_only_file_count": 2034, "git_head": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc", "tracked_diff_sha256": "6cdd51e345929a1936845a416dd8a38c6f00ea3d0293afa03282d002dc96857c", "read_only_unchanged": false, "tracked_diff_changed": false, "untracked_added": [], "untracked_removed": [], "untracked_modified": []}
+[exit 0]
+
+$ python3 tools/build_package33.py --pkg T4_final_r33 --state-before hash_proof/state_before.json --state-after hash_proof/state_after_build.json
+{"round32_files": 174, "superseded_not_copied": ["00_T4最终交付报告.md", "README.md", "report_figures.json"], "edited": ["01_regressions/回归失败分析.md", "05_stage_disclosure/结构抽取与降级披露.md"], "round33_files": {"01_d1": 5, "02_viewer": 13, "03_not_sent_reconcile": 3, "tools": 11}, "figures": {"round32": 61, "round33": 27}}
+[exit 0]
+
+$ python3 tools/scan_credentials.py --target T4_final_r33 --env /Users/xiangmao/COMQUTOR-Alpha-/.env --out T4_final_r33/round33/records/credential_scan_result.json
+{"target": "T4_final_r33", "env_value_keys_checked": ["ANTHROPIC_API_KEY", "COMQUTOR_DATABASE_URL:password", "COMQUTOR_TEST_DATABASE_URL:password", "DEEPSEEK_API_KEY", "POSTGRES_PASSWORD"], "blobs_scanned": 612, "redacted_header_or_field_values_seen": {"placeholder": 15, "test-not-a-key": 1, "REDACTED": 3450, "replay-not-a-key": 2}, "fixture_or_redacted_matches": {"db_url_with_password:pass": 6, "db_url_with_password:p": 9, "api_key_sk:sk-testsecret0123456789abcdef": 6, "db_url_with_password:fake": 24, "db_url_with_password:***REDACTED***": 3, "api_key_sk:sk-abcdefghijklmnopqrstuvwxyz012345": 3}, "clean": true} hits=0
+[exit 0]
+
+$ python3 tools/finalize_manifest33.py --pkg T4_final_r33
+manifest: 215 files, 121,653,718 bytes
+[exit 0]
+
+$ python3 verify_package33.py
+package: T4_final_r33
+[PASS] 1 manifest
+    files=215
+[PASS] 2 round32
+    round32_manifest_files=176, byte_identical=171
+[PASS] 3 figures
+    figures=88, from_round32=61, from_round33=27
+[PASS] 4 round33
+[PASS] 5 references
+    found=93
+    repository paths (need the original repository): ['comqutor_alpha/api/stage_disclosure.py', 'comqutor_alpha/structure_engine/structured_output_adapter.py', 'comqutor_alpha/structure_engine/week2_llm.py', 'contracts.py', 'docs/audit_artifacts/round_source_linking_t0_t2', 'docs/specs/week2_semantic_runtime_integration_contract_v1.md', 'outputs/t4_r32_demo_runs', 'outputs/t4_runs/12591384-0b26-470d-a99d-a49c00be440b', 'round14_recovery_closure_20261006/regression_attribution_manifest.md', 'round15_recovery_prep_20261006/regression_evidence/full_run.junit.xml', 'round23_t2_completion_20261007/test_evidence/full_suite_AFTER.junit.xml', 'round26_t3_closeout_20261008/test_evidence/README.md', 'round28_t4_launch_protection_20261008/test_evidence/affected_junit.xml', 'round30_t4_nvda_fresh_run2_20261009/FRESH_RUN2_REPORT.md', 'round31_t4_delivery_20261009/T4_delivery/00_T4交付主报告.md', 'round32_t4_closure_20261009/T4_final/00_T4最终交付报告.md', 'round32_t4_closure_20261009/T4_final/03_not_sent/未发送记录修复说明.md', 'round32_t4_closure_20261009/T4_final/05_stage_disclosure/结构抽取与降级披露.md', 'structured_output_adapter.py', 'tests/test_structured_output_adapter.py', 'tests/test_t1_source_linking_pipeline.py', 'tests/test_week2_llm.py']
+[PASS] 6 credentials
+    blobs_scanned=532
+ALL CHECKS PASSED
+[exit 0]
+
+$ python3 tools/make_zip.py --pkg T4_final_r33 --out T4_final_round33_20261009.zip
+T4_final_round33_20261009.zip: 216 files, 46,743,357 bytes, sha256 62a0867ce1da71feaced2cd942a17829c7ad3ae2523c69463dbb08ed9b00b8ba
+[exit 0]
+
+# build finished 2026-10-09T22:21:28Z

@@ -1,0 +1,316 @@
+{
+ "run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+ "research_agent_layer": {
+  "upstream_agent_outputs": 12,
+  "logical_calls": 19,
+  "http_requests": 19,
+  "retries": 0,
+  "outcomes": {
+   "success": 19,
+   "failure": 0,
+   "timeout": 0,
+   "unknown": 0
+  },
+  "requests_missing_usage": 0,
+  "cost_estimate_usd": {
+   "off_peak_floor": 0.063587,
+   "peak_ceiling": 0.127174,
+   "requests_estimated": 19,
+   "requests_not_estimable": 0,
+   "not_estimable_reasons": {}
+  }
+ },
+ "week2_layer": {
+  "logical_calls": 1220,
+  "served_from_cache": 10,
+  "not_sent": 6,
+  "not_sent_reasons": {
+   "WEEK2_LLM_INPUT_TOO_LARGE": 6
+  },
+  "gateway_budget_reservations": 1204,
+  "gateway_cap": 1800,
+  "http_requests_wire_audit": 1204,
+  "responses_received_wire_audit": 1198,
+  "response_status_codes": {
+   "200": 1198
+  },
+  "http_requests_usage_report": 1204,
+  "retries": 0,
+  "outcomes": {
+   "success": 1197,
+   "failure": 0,
+   "timeout": 7,
+   "unknown": 0
+  },
+  "requests_missing_usage": 7,
+  "cost_estimate_usd": {
+   "off_peak_floor": 1.736566,
+   "peak_ceiling": 3.473185,
+   "requests_estimated": 1197,
+   "requests_not_estimable": 7,
+   "not_estimable_reasons": {
+    "usage_missing": 7
+   }
+  },
+  "by_task": {
+   "alpha_classifier": {
+    "logical_calls": 951,
+    "served_from_cache": 10,
+    "not_sent": {},
+    "ledger_attempts": 941,
+    "http_requests_wire_audit": 941,
+    "ledger_outcome": {
+     "success|accepted|None": 941,
+     "not_called|accepted|None": 10
+    },
+    "usage_report": {
+     "actual_http_requests": 941,
+     "retries": 0,
+     "outcomes": {
+      "success": 941,
+      "failure": 0,
+      "timeout": 0,
+      "unknown": 0
+     },
+     "requests_with_usage": 941,
+     "requests_missing_usage": 0,
+     "cost_estimate_usd": {
+      "off_peak_floor": 0.390006,
+      "peak_ceiling": 0.780071,
+      "requests_estimated": 941,
+      "requests_not_estimable": 0,
+      "not_estimable_reasons": {}
+     }
+    }
+   },
+   "structured_adapter": {
+    "logical_calls": 9,
+    "served_from_cache": 0,
+    "not_sent": {
+     "WEEK2_LLM_INPUT_TOO_LARGE": 1
+    },
+    "ledger_attempts": 8,
+    "http_requests_wire_audit": 8,
+    "ledger_outcome": {
+     "timeout|not_run|WEEK2_LLM_TIMEOUT": 7,
+     "not_called|not_run|WEEK2_LLM_INPUT_TOO_LARGE": 1,
+     "success|rejected|None": 1
+    },
+    "usage_report": {
+     "actual_http_requests": 8,
+     "retries": 0,
+     "outcomes": {
+      "success": 1,
+      "failure": 0,
+      "timeout": 7,
+      "unknown": 0
+     },
+     "requests_with_usage": 1,
+     "requests_missing_usage": 7,
+     "cost_estimate_usd": {
+      "off_peak_floor": 0.009145,
+      "peak_ceiling": 0.01829,
+      "requests_estimated": 1,
+      "requests_not_estimable": 7,
+      "not_estimable_reasons": {
+       "usage_missing": 7
+      }
+     }
+    }
+   },
+   "content_support_verification": {
+    "logical_calls": 241,
+    "served_from_cache": 0,
+    "not_sent": {
+     "WEEK2_LLM_INPUT_TOO_LARGE": 5
+    },
+    "ledger_attempts": 236,
+    "http_requests_wire_audit": 236,
+    "ledger_outcome": {
+     "success|accepted|None": 185,
+     "success|rejected|None": 51,
+     "not_called|not_run|WEEK2_LLM_INPUT_TOO_LARGE": 5
+    },
+    "usage_report": {
+     "actual_http_requests": 236,
+     "retries": 0,
+     "outcomes": {
+      "success": 236,
+      "failure": 0,
+      "timeout": 0,
+      "unknown": 0
+     },
+     "requests_with_usage": 236,
+     "requests_missing_usage": 0,
+     "cost_estimate_usd": {
+      "off_peak_floor": 1.238159,
+      "peak_ceiling": 2.476313,
+      "requests_estimated": 236,
+      "requests_not_estimable": 0,
+      "not_estimable_reasons": {}
+     }
+    }
+   },
+   "evidence_stance_classifier": {
+    "logical_calls": 17,
+    "served_from_cache": 0,
+    "not_sent": {},
+    "ledger_attempts": 17,
+    "http_requests_wire_audit": 17,
+    "ledger_outcome": {
+     "success|accepted|None": 17
+    },
+    "usage_report": {
+     "actual_http_requests": 17,
+     "retries": 0,
+     "outcomes": {
+      "success": 17,
+      "failure": 0,
+      "timeout": 0,
+      "unknown": 0
+     },
+     "requests_with_usage": 17,
+     "requests_missing_usage": 0,
+     "cost_estimate_usd": {
+      "off_peak_floor": 0.093596,
+      "peak_ceiling": 0.18719,
+      "requests_estimated": 17,
+      "requests_not_estimable": 0,
+      "not_estimable_reasons": {}
+     }
+    }
+   },
+   "structure_extractor": {
+    "logical_calls": 2,
+    "served_from_cache": 0,
+    "not_sent": {},
+    "ledger_attempts": 2,
+    "http_requests_wire_audit": 2,
+    "ledger_outcome": {
+     "success|rejected|None": 2
+    },
+    "usage_report": {
+     "actual_http_requests": 2,
+     "retries": 0,
+     "outcomes": {
+      "success": 2,
+      "failure": 0,
+      "timeout": 0,
+      "unknown": 0
+     },
+     "requests_with_usage": 2,
+     "requests_missing_usage": 0,
+     "cost_estimate_usd": {
+      "off_peak_floor": 0.00566,
+      "peak_ceiling": 0.011321,
+      "requests_estimated": 2,
+      "requests_not_estimable": 0,
+      "not_estimable_reasons": {}
+     }
+    }
+   }
+  },
+  "claims_by_task": {
+   "alpha_classifier": 951,
+   "content_support_verification": 241
+  }
+ },
+ "all_layers_cost_estimate_usd": {
+  "off_peak_floor": 1.800153,
+  "peak_ceiling": 3.600359,
+  "requests_estimated": 1216,
+  "requests_not_estimable": 7,
+  "not_estimable_reasons": {
+   "usage_missing": 7
+  }
+ },
+ "content_support_status_vs_request": {
+  "status_counts_over_all_claims": {
+   "NOT_APPLICABLE": 705,
+   "SUPPORTS": 61,
+   "CONDITIONAL": 79,
+   "PENDING_REVIEW": 95,
+   "BACKGROUND": 9,
+   "OPPOSES": 2
+  },
+  "crosstab": [
+   {
+    "final_status": "NOT_APPLICABLE",
+    "request": "no_request (NOT_LINKED)",
+    "claims": 615
+   },
+   {
+    "final_status": "NOT_APPLICABLE",
+    "request": "no_request (NO_SOURCE_REGISTRY)",
+    "claims": 90
+   },
+   {
+    "final_status": "CONDITIONAL",
+    "request": "request_sent (accepted)",
+    "claims": 79
+   },
+   {
+    "final_status": "SUPPORTS",
+    "request": "request_sent (accepted)",
+    "claims": 56
+   },
+   {
+    "final_status": "PENDING_REVIEW",
+    "request": "request_sent (rejected)",
+    "claims": 51
+   },
+   {
+    "final_status": "PENDING_REVIEW",
+    "request": "request_sent (accepted)",
+    "claims": 39
+   },
+   {
+    "final_status": "BACKGROUND",
+    "request": "request_sent (accepted)",
+    "claims": 9
+   },
+   {
+    "final_status": "SUPPORTS",
+    "request": "no_request (AUTOMATED_DATA_FACT_VERIFIED)",
+    "claims": 5
+   },
+   {
+    "final_status": "PENDING_REVIEW",
+    "request": "not_sent (WEEK2_LLM_INPUT_TOO_LARGE)",
+    "claims": 5
+   },
+   {
+    "final_status": "OPPOSES",
+    "request": "request_sent (accepted)",
+    "claims": 2
+   }
+  ],
+  "requests_sent": 236,
+  "supports_plus_conditional_plus_pending_review": 235,
+  "of_which_without_a_sent_request": 10,
+  "sent_requests_with_other_final_status": 11,
+  "identity": "235 - 10 + 11 = 236 (requests sent: 236)"
+ },
+ "pricing": {
+  "source": {
+   "deepseek:deepseek-v4-flash": {
+    "url": "https://api-docs.deepseek.com/quick_start/pricing",
+    "queried_at": "2026-09-30",
+    "note": "deepseek-v4-flash is the vendor's documented legacy alias of deepseek-flash; off-peak / peak by time of day"
+   }
+  },
+  "unit": "USD per 1,000,000 tokens",
+  "deepseek_v4_flash_off_peak": {
+   "input_cache_miss": 0.15,
+   "input_cache_hit": 0.003,
+   "output": 0.6
+  },
+  "deepseek_v4_flash_peak": {
+   "input_cache_miss": 0.3,
+   "input_cache_hit": 0.006,
+   "output": 1.2
+  },
+  "formula": "cost = cache-miss input x input rate + cache-hit input x cache-hit rate + output x output rate (reasoning tokens are part of output); when a response reports no cache split all input is priced at the cache-miss rate; off-peak floor and peak ceiling; ESTIMATES, not billed amounts",
+  "scope": "estimates over the requests whose provider returned usage; requests without usage are 'not estimable' and EXCLUDED (not counted as zero); not a bill or an actual charge"
+ }
+}

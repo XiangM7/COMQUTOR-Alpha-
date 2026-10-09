@@ -1,0 +1,196 @@
+{
+ "label": "cap1800",
+ "week2_max_calls": 1800,
+ "run_id": "t4-rehearsal-cap1800-a1c391f1",
+ "response_status": "partial",
+ "response_error_code": null,
+ "db_status": null,
+ "requests_seen_by_transport": 1213,
+ "requests_by_task": {
+  "claim_batch_enrichment": 8,
+  "content_support_verification": 122,
+  "alpha_classifier": 1036,
+  "evidence_stance_classifier": 31,
+  "structure_extractor": 16
+ },
+ "wire_shape_by_task": {
+  "claim_batch_enrichment": [
+   {
+    "read_timeout": "45.0",
+    "retry_count": "0",
+    "body_keys": "messages,model,stream",
+    "model": "deepseek-v4-flash",
+    "url": "https://api.deepseek.com/chat/completions",
+    "requests": 8
+   }
+  ],
+  "content_support_verification": [
+   {
+    "read_timeout": "120.0",
+    "retry_count": "0",
+    "body_keys": "messages,model,stream",
+    "model": "deepseek-v4-flash",
+    "url": "https://api.deepseek.com/chat/completions",
+    "requests": 122
+   }
+  ],
+  "alpha_classifier": [
+   {
+    "read_timeout": "45.0",
+    "retry_count": "0",
+    "body_keys": "messages,model,stream",
+    "model": "deepseek-v4-flash",
+    "url": "https://api.deepseek.com/chat/completions",
+    "requests": 1036
+   }
+  ],
+  "evidence_stance_classifier": [
+   {
+    "read_timeout": "120.0",
+    "retry_count": "0",
+    "body_keys": "messages,model,stream",
+    "model": "deepseek-v4-flash",
+    "url": "https://api.deepseek.com/chat/completions",
+    "requests": 31
+   }
+  ],
+  "structure_extractor": [
+   {
+    "read_timeout": "45.0",
+    "retry_count": "0",
+    "body_keys": "messages,model,stream",
+    "model": "deepseek-v4-flash",
+    "url": "https://api.deepseek.com/chat/completions",
+    "requests": 16
+   }
+  ]
+ },
+ "alpha_plans_applied": {
+  "dropped_after_send": 103,
+  "select": 310,
+  "none": 522,
+  "http_500": 105
+ },
+ "alpha_misrouted_or_misrecorded": [],
+ "alpha_classification_completion": {
+  "total_claims": 1040,
+  "valid_select_count": 310,
+  "valid_none_count": 522,
+  "call_failure_count": 208,
+  "not_executed_count": 0,
+  "not_executed_configuration_count": 0,
+  "not_executed_fault_count": 0,
+  "complete": false
+ },
+ "ledger_records_by_task_and_status": {
+  "structured_adapter:success": 8,
+  "content_support_verification:success": 122,
+  "alpha_classifier:success": 828,
+  "alpha_classifier:provider_error": 208,
+  "alpha_classifier:not_called": 4,
+  "evidence_stance_classifier:success": 31,
+  "structure_extractor:success": 16
+ },
+ "ledger_attempts_total": 1213,
+ "audit_request_rows": 1213,
+ "usage_report_totals": {
+  "logical_calls": 1217,
+  "served_from_cache": 4,
+  "not_sent": 0,
+  "not_sent_reasons": {},
+  "budget_reservations": 1213,
+  "actual_http_requests": 1213,
+  "retries": 0,
+  "outcomes": {
+   "success": 1005,
+   "failure": 105,
+   "timeout": 0,
+   "unknown": 103
+  },
+  "tokens_known": {
+   "input": 100500,
+   "output": 10050,
+   "reasoning": null,
+   "cache_hit": 60300,
+   "cache_miss": 40200
+  },
+  "requests_with_usage": 1005,
+  "requests_missing_usage": 208,
+  "usage_missing_ratio": 0.171476,
+  "cache_split_reported_requests": 1005,
+  "cost_estimate_usd": {
+   "off_peak_floor": 0.01206,
+   "peak_ceiling": 0.02412,
+   "requests_estimated": 1005,
+   "requests_not_estimable": 208,
+   "not_estimable_reasons": {
+    "usage_missing": 208
+   }
+  }
+ },
+ "artifacts": [
+  "alpha_activations.json",
+  "alpha_matches.json",
+  "artifact_manifest.json",
+  "conflicts.json",
+  "data_sanity.json",
+  "entity_alpha_exposures.json",
+  "evidence_facts.json",
+  "evidence_stance_audit.json",
+  "extracted_structures.json",
+  "formal_acceptance.json",
+  "llm_semantic_calls.jsonl",
+  "llm_semantic_manifest.json",
+  "llm_usage_report.json",
+  "market_data_snapshot.json",
+  "metadata.json",
+  "raw_agent_outputs.json",
+  "run_audit.json",
+  "source_registry.json",
+  "structure_graph.json",
+  "structured_adapter_authority_routing.json",
+  "structured_agent_outputs.json",
+  "summary.json",
+  "unclassified_findings.json",
+  "week3_pipeline_status.json"
+ ],
+ "metadata_run_environment": {
+  "enabled": true,
+  "execution_profile": "t3_verified_20261008",
+  "profile_error": null,
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "base_url_configured": false,
+  "request_response_audit": true,
+  "max_calls": 1800,
+  "shared_timeout_seconds_other_tasks": 45.0,
+  "gateway_max_retries": 0,
+  "tasks": {
+   "content_support_verification": {
+    "client_read_timeout_seconds": 120.0,
+    "application_timeout_seconds": 120.0,
+    "application_retries": 0,
+    "sdk_retries": 0,
+    "batch_size": 1,
+    "max_tokens": null
+   },
+   "alpha_classifier": {
+    "client_read_timeout_seconds": 45.0,
+    "application_timeout_seconds": 45.0,
+    "application_retries": 0,
+    "sdk_retries": 0,
+    "path": "single",
+    "concurrency": 4,
+    "max_tokens": null
+   },
+   "evidence_stance_classifier": {
+    "client_read_timeout_seconds": 120.0,
+    "application_timeout_seconds": 120.0,
+    "application_retries": 0,
+    "sdk_retries": 0,
+    "batch_size": 10,
+    "concurrency": 4
+   }
+  }
+ }
+}

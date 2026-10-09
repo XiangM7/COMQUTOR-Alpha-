@@ -6,43 +6,58 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # ---------------------------------------------------------------------------
-# Database environment isolation (Gate 0, Activation v2 sprint).
+# .env-leak environment isolation (Gate 0, Activation v2 sprint; extended
+# 2026-09-26 for the Data Sanity network leak below).
 #
 # ``import tradingagents`` runs load_dotenv() as an import side effect, which
-# injects COMQUTOR_DATABASE_URL / COMQUTOR_TEST_DATABASE_URL / COMQUTOR_ENV
-# from a developer's local .env into the test process -- silently defeating
-# ``env -u ...`` shell isolation and pointing "offline" tests at a real
-# database. Force that side effect to happen exactly once, right now, and
-# then restore these three variables to their pre-import (shell-provided)
-# state: a value the shell explicitly exported survives; a value injected
-# only by .env is removed. Because tradingagents is now cached in
-# sys.modules, no later import can re-inject them mid-suite.
+# injects COMQUTOR_DATABASE_URL / COMQUTOR_TEST_DATABASE_URL / COMQUTOR_ENV /
+# COMQUTOR_DATA_SANITY_ENABLED from a developer's local .env into the test
+# process -- silently defeating ``env -u ...`` shell isolation and pointing
+# "offline" tests at a real database, or (COMQUTOR_DATA_SANITY_ENABLED=true
+# in .env) making comqutor_alpha.data_sanity.pipeline.is_data_sanity_enabled()
+# return True inside every test that calls comqutor_alpha.api.routes_research
+# .run_research_request -- which unconditionally runs run_data_sanity_stage,
+# which then genuinely calls YFinanceMarketDataProvider.get_history_rows and
+# makes a REAL HTTPS request to Yahoo Finance (confirmed reproduced: see
+# tests/structured_output_shadow/conftest.py). Force load_dotenv's side
+# effect to happen exactly once, right now, and then restore these four
+# variables to their pre-import (shell-provided) state: a value the shell
+# explicitly exported survives; a value injected only by .env is removed.
+# Because tradingagents is now cached in sys.modules, no later import can
+# re-inject them mid-suite.
 # ---------------------------------------------------------------------------
 
-_DB_ISOLATION_ENV_VARS = ("COMQUTOR_DATABASE_URL", "COMQUTOR_TEST_DATABASE_URL", "COMQUTOR_ENV")
-_SHELL_PROVIDED_DB_ENV = {
-    name: os.environ[name] for name in _DB_ISOLATION_ENV_VARS if name in os.environ
+_DOTENV_LEAK_ISOLATION_VARS = (
+    "COMQUTOR_DATABASE_URL",
+    "COMQUTOR_TEST_DATABASE_URL",
+    "COMQUTOR_ENV",
+    "COMQUTOR_DATA_SANITY_ENABLED",
+)
+_SHELL_PROVIDED_DOTENV_LEAK_ENV = {
+    name: os.environ[name] for name in _DOTENV_LEAK_ISOLATION_VARS if name in os.environ
 }
 
 import tradingagents  # noqa: E402,F401  -- deliberate: trigger load_dotenv now
 
-for _name in _DB_ISOLATION_ENV_VARS:
-    if _name in _SHELL_PROVIDED_DB_ENV:
-        os.environ[_name] = _SHELL_PROVIDED_DB_ENV[_name]
+for _name in _DOTENV_LEAK_ISOLATION_VARS:
+    if _name in _SHELL_PROVIDED_DOTENV_LEAK_ENV:
+        os.environ[_name] = _SHELL_PROVIDED_DOTENV_LEAK_ENV[_name]
     else:
         os.environ.pop(_name, None)
 
 
 @pytest.fixture(autouse=True)
 def _isolate_database_env(request, monkeypatch):
-    """Non-integration tests must never see a database environment variable.
+    """Non-integration tests must never see a database environment variable,
+    and no test ever sees a .env-leaked Data Sanity enable flag.
 
     Integration tests keep COMQUTOR_TEST_DATABASE_URL (which they are
-    required to read explicitly) but still never see COMQUTOR_DATABASE_URL
-    or COMQUTOR_ENV.
+    required to read explicitly) but still never see COMQUTOR_DATABASE_URL,
+    COMQUTOR_ENV, or COMQUTOR_DATA_SANITY_ENABLED.
     """
     monkeypatch.delenv("COMQUTOR_DATABASE_URL", raising=False)
     monkeypatch.delenv("COMQUTOR_ENV", raising=False)
+    monkeypatch.delenv("COMQUTOR_DATA_SANITY_ENABLED", raising=False)
     if request.node.get_closest_marker("integration") is None:
         monkeypatch.delenv("COMQUTOR_TEST_DATABASE_URL", raising=False)
 

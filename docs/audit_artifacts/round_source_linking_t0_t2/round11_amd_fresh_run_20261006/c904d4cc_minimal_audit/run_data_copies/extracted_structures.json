@@ -1,0 +1,820 @@
+{
+  "schema_version": "week2.extracted_structures.v2",
+  "run_id": "c904d4cc-dc09-495c-aec5-b056979948e1",
+  "ticker": "AMD",
+  "nodes": [
+    {
+      "id": "ai_capex",
+      "label": "AI CapEx",
+      "canonical_factor": "AI CapEx",
+      "node_type": "factor",
+      "source_records": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:68"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:68"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report"
+      ],
+      "evidence": [
+        "The AI infrastructure buildout remains the market's core growth engine — the news flow shows no evidence of AI capex deceleration; the pressure is entirely on the discount rate side, not the demand side."
+      ],
+      "score": 0.4
+    },
+    {
+      "id": "ai_demand",
+      "label": "AI Demand",
+      "canonical_factor": "AI Demand",
+      "node_type": "factor",
+      "source_records": [
+        "canrel_8bee7f1d49ed9861"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:5"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "AMD's strategic positioning is heavily levered to data-center AI accelerator demand, server CPU share gains, and the broader AI infrastructure buildout."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "ai_infrastructure",
+      "label": "AI Infrastructure",
+      "canonical_factor": "AI Infrastructure",
+      "node_type": "factor",
+      "source_records": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:68",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:59",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:79",
+        "canrel_01dd33b4132e118c"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:68",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:59",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:79",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:5"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report"
+      ],
+      "evidence": [
+        "The AI infrastructure buildout remains the market's core growth engine — the news flow shows no evidence of AI capex deceleration; the pressure is entirely on the discount rate side, not the demand side.",
+        "That's the high-reward path — you stay exposed to the genuine AI infrastructure inflection while refusing to pay up for it at a stretched, low-volume, decelerating-momentum, high-macro-risk entry.",
+        "The aggressive analyst wants to stay exposed to the AI infrastructure inflection.",
+        "AMD's strategic positioning is heavily levered to data-center AI accelerator demand, server CPU share gains, and the broader AI infrastructure buildout."
+      ],
+      "score": 0.55
+    },
+    {
+      "id": "amd_revenue_growth",
+      "label": "AMD Revenue Growth",
+      "canonical_factor": "Revenue Growth",
+      "node_type": "factor",
+      "source_records": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:30",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:69",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:110",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:6",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:77",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:98",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:79",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:95",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:41",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:trader:trader_investment_plan:claim:2",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:70",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:71",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:71",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:73",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:20",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:28",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:57",
+        "canrel_8bee7f1d49ed9861",
+        "canrel_01dd33b4132e118c",
+        "canrel_60335faa912484c3",
+        "canrel_116695ef35959336",
+        "canrel_0bdba72a93a33dcb",
+        "canrel_640ccaaf78b6d482",
+        "canrel_243606abc6db8c71",
+        "canrel_e76666bee046d6d5"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:30",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:69",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:110",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:6",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:77",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:98",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:79",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:95",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:41",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:trader:trader_investment_plan:claim:2",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:70",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:71",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:71",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:73",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:20",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:28",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:57",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:5",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:111",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:121",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:52",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:14",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:34"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:trader:trader_investment_plan",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history"
+      ],
+      "evidence": [
+        "Revenue acceleration is dramatic.",
+        "Receivables jumped to $7,281M from $6,035M QoQ (+20.6%), outpacing the +12.5% revenue growth.",
+        "Traders should treat the forward EPS of $15.72 as the key hurdle — evidence of continued sequential revenue growth and gross-margin defense above 53% is required to justify the multiple.",
+        "But here's the thing — none of those are reasons to sell a stock that just posted +50% YoY revenue growth, swung operating income from negative to nearly $2 billion, and is riding the single most powerful secular demand wave in modern tech.",
+        "Meanwhile, the fundamentals report has hard, verified numbers: revenue acceleration, margin expansion, operating leverage, net cash, capex ramp.",
+        "The bull case rests on verified revenue growth of +50% YoY, gross margin expansion of 1,400 bps, operating income swinging $2.1B positive, and a fortress balance sheet.",
+        "Receivables jumped to $7,281M from $6,035M QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] — that's +20.6% against revenue growth of +12.5%.",
+        "The bull says \"the bull is arguing from presence of evidence.\" But the evidence he cites — revenue growth, margin expansion — is backward-looking.",
+        "The bear's sharpest sub-point — receivables up +20.6% QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] against revenue growth of +12.5%, i.e., receivables growing faster than revenue — is a legitimate early-warning flag that the bull did not address.",
+        "Technicals confirm the warning — MACD histogram contracting from 15.05 to 3.91 [fragmentid: src388228ad9e12e09d:frag:0], price 73% above the 200 SMA [fragmentid: src388228ad9e12e09d:frag:0], and a new high on only 16,782,886 shares [fragmentid: src388228ad9e12e09d:frag:0] versus 44.5M on the September breakout — while receivables grew +20.6% QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] against +12.5% revenue growth.",
+        "I would add two more conditions: receivables growth must decelerate back toward revenue growth, and free cash flow must recover as capex normalizes.",
+        "Because receivables grew +20.6% QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] against +12.5% revenue growth, and free cash flow fell to $1,558M from $2,566M sequentially [fragmentid: src4045667791b919f9:frag:0] on a $808M capex step-up and a $730M working-capital drag.",
+        "Third, on the re-entry bar: the conservative analyst wants to add two conditions — receivables growth decelerating back toward revenue growth, and free cash flow recovering as capex normalizes.",
+        "He cites receivables growing +20.6% QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] against +12.5% revenue growth as a warning sign, and free cash flow falling to $1,558M from $2,566M sequentially [fragmentid: src4045667791b919f9:frag:0] on a $808M capex step-up and a $730M working-capital drag.",
+        "The neutral analyst's three adjustments are the right ones: nudge the trim from one-third to about 40%, place the stop at roughly 610 rather than exactly at the 10 EMA at 618.52 [fragmentid: src388228ad9e12e09d:frag:0] where it is the most obvious stop-run level on the chart, and treat the conservative analyst's additional re-entry conditions (receivables growth decelerating back toward revenue growth, free cash flow recovering as capex normalizes) as confirmatory rather than disqualifying.",
+        "And the working-capital flags are real: receivables grew +20.6% QoQ [fragmentid: srcd889dd1e36a5d55a:frag:0] against +12.5% revenue growth, and free cash flow fell to $1,558M from $2,566M sequentially [fragmentid: src4045667791b919f9:frag:0] on a $808M capex step-up and a $730M working-capital drag.",
+        "Receivables growth decelerates back toward revenue growth.",
+        "AMD's strategic positioning is heavily levered to data-center AI accelerator demand, server CPU share gains, and the broader AI infrastructure buildout.",
+        "The bear has a valuation argument. The bull has a business argument.",
+        "The business argument and the stock argument are not the same thing, and at $654.91, the stock argument is losing.",
+        "The bull proved AMD is a good business. He did not prove AMD is a good stock at $654.91.",
+        "The forward P/E of 41.67 with a PEG of 0.64 is not \"priced for perfection\" in the way you want to claim; it's priced for a ramp that the last four quarters of data actually support.",
+        "The revenue can be real and the multiple can still compress.",
+        "The bull's thesis requires the ~3x EPS ramp delivered, rates cooperative, no share loss, and no macro shock. The bear's thesis requires one thing to go wrong."
+      ],
+      "score": 0.85
+    },
+    {
+      "id": "gpu_demand",
+      "label": "GPU Demand",
+      "canonical_factor": "GPU Demand",
+      "node_type": "factor",
+      "source_records": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:54",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:78",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:82",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:53"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:54",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:78",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:82",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:53"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "The bull's entire thesis rests on AI accelerator demand, and there's a live, non-trivial legislative risk to the export channel that he doesn't mention once.",
+        "If AI accelerator demand softens even modestly, that WIP becomes a write-down.",
+        "This is a direct revenue-channel risk to the AI accelerator demand that underwrites the entire bull thesis, and the bull never addressed it.",
+        "This is a direct revenue-channel risk to the AI accelerator demand that underwrites the entire bull thesis."
+      ],
+      "score": 0.4
+    },
+    {
+      "id": "narrative_momentum",
+      "label": "Narrative Momentum",
+      "canonical_factor": "Narrative Momentum",
+      "node_type": "factor",
+      "source_records": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:90",
+        "canrel_597c2e1652fbc087",
+        "canrel_94f6f438f21dbd8c"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:90",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:66",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:81"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history"
+      ],
+      "evidence": [
+        "That means the price is being driven by Narrative Momentum — the crowded, reflexive flows the report warns about — not by fundamentals the market just learned.",
+        "Chip stocks are explicitly named as market leaders",
+        "When the chip complex leads, AMD leads with it."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "rate_cut_cycle",
+      "label": "Rate Cut Cycle",
+      "canonical_factor": "Rate Cut Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:28",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:98",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:108",
+        "canrel_e6991f1dfdcfcc95",
+        "canrel_3cc623fb0da9491d",
+        "canrel_5949f4e42af30b61",
+        "canrel_8f021bd2e625335f",
+        "canrel_b5073111209945b8"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:28",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:98",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:108",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:43",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:17",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:43",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:43",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:14"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "\"Dow, S&P 500, Nasdaq stage comeback as Treasury yields fall, chip stocks gain\" (Yahoo Finance, Oct 1) — chip stocks specifically named as leaders.",
+        "Category: Fed path; Signal: No cuts, hike likely; Evidence: 96% no cuts in 2026; 76% another hike; 2-hike bucket +18pp w/w; Implication for AMD: Bearish — \"Rate Cut Cycle\" tailwind priced out",
+        "Sources: Yahoo Finance global market news feed (2026-09-22 → 2026-10-06); Polymarket live prediction markets (Fed rate cut, Fed rate hike 2026, recession 2026, US CPI inflation, AI chip, government shutdown).",
+        "the \"Rate Cut Cycle\" tailwind that semiconductor bulls have relied on is priced out for 2026",
+        "Distant cash flows get discounted harder when the 10-year yield hits a 24-year high.",
+        "In a higher-for-longer regime, long-duration semiconductor multiples compress",
+        "He is right on valuation, right on rate transmission, right on earnings quality"
+      ],
+      "score": 0.75
+    },
+    {
+      "id": "recession_risk",
+      "label": "Recession Risk",
+      "canonical_factor": "Recession Risk",
+      "node_type": "factor",
+      "source_records": [
+        "canrel_4d4e7e8b41122b61",
+        "canrel_ae62c12bd42a4786"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:34",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:16"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "A no-recession, no-cut, sticky-inflation world is one where unit demand holds and multiples get capped — not one where demand breaks and multiples collapse."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "semiconductor_cycle",
+      "label": "Semiconductor Cycle",
+      "canonical_factor": "Semiconductor Cycle",
+      "node_type": "factor",
+      "source_records": [
+        "canrel_597c2e1652fbc087",
+        "canrel_94f6f438f21dbd8c",
+        "canrel_4d4e7e8b41122b61",
+        "canrel_ae62c12bd42a4786"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:66",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:81",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:34",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:16"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision"
+      ],
+      "evidence": [
+        "Chip stocks are explicitly named as market leaders",
+        "When the chip complex leads, AMD leads with it.",
+        "A no-recession, no-cut, sticky-inflation world is one where unit demand holds and multiples get capped — not one where demand breaks and multiples collapse."
+      ],
+      "score": 0.6
+    },
+    {
+      "id": "valuation_risk",
+      "label": "Valuation Risk",
+      "canonical_factor": "Valuation Risk",
+      "node_type": "factor",
+      "source_records": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:9",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:70",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:85",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:100",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:112",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:13",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:29",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:83",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:120",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:14",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:31",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:36",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:14",
+        "canrel_e6991f1dfdcfcc95",
+        "canrel_60335faa912484c3",
+        "canrel_116695ef35959336",
+        "canrel_0bdba72a93a33dcb",
+        "canrel_3cc623fb0da9491d",
+        "canrel_640ccaaf78b6d482",
+        "canrel_5949f4e42af30b61",
+        "canrel_243606abc6db8c71",
+        "canrel_8f021bd2e625335f",
+        "canrel_e76666bee046d6d5",
+        "canrel_b5073111209945b8"
+      ],
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:9",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:70",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:85",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:100",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:112",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:13",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:29",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:83",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:120",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:14",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:31",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:36",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:14",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:43",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:111",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:121",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:52",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:17",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:43",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:43",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:34"
+      ],
+      "source_agent_output_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan",
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history"
+      ],
+      "evidence": [
+        "The dominant risk to AMD right now is not demand — it is discount rates and multiple compression, partially offset by a still-intact AI/chip leadership tape.",
+        "With 96% odds of no cuts and 76% odds of a hike, the Valuation Risk factor is elevated for all long-duration semis.",
+        "The primary risk is multiple compression without a demand break — a \"good news is bad news\" regime.",
+        "Any earnings miss against the $15.72 forward EPS expectation risks severe multiple compression.",
+        "Given the combination of a genuine fundamental inflection and a very rich valuation with high beta, the risk/reward is balanced-to-constructive but highly event-dependent — position sizing and volatility management are critical.",
+        "Now, the bear will say \"that ramp is priced for perfection.\" But here's the counter: the ramp is already showing up in the quarterly prints.",
+        "The bear says \"any earnings miss risks severe multiple compression.\" Fair.",
+        "Bear claim: \"The primary risk is multiple compression without a demand break.\" Rebuttal: Multiple compression requires either (a) rising rates — already priced in at 96% no-cuts, or (b) earnings disappointment — contradicted by four straight quarters of accelerating results.",
+        "The bull is answering the wrong questions — solvency instead of multiple compression, backward-looking growth instead of forward-looking valuation.",
+        "The forward P/E of 41.67 with a PEG of 0.64 is not \"priced for perfection\" in the way you want to claim; it's priced for a ramp that the last four quarters of data actually support.",
+        "He treats \"multiple compression\" as if it were a certainty rather than a risk.",
+        "The conservative analyst is pricing the multiple-compression scenario as if it were the base case, when the market is actually pricing it as a moderate tightening path with intact demand.",
+        "Where the conservative analyst overreaches: He is right on valuation, right on rate transmission, right on earnings quality — but he treats \"multiple compression\" as a certainty rather than a risk.",
+        "the \"Rate Cut Cycle\" tailwind that semiconductor bulls have relied on is priced out for 2026",
+        "The bear has a valuation argument. The bull has a business argument.",
+        "The business argument and the stock argument are not the same thing, and at $654.91, the stock argument is losing.",
+        "The bull proved AMD is a good business. He did not prove AMD is a good stock at $654.91.",
+        "Distant cash flows get discounted harder when the 10-year yield hits a 24-year high.",
+        "In a higher-for-longer regime, long-duration semiconductor multiples compress",
+        "The revenue can be real and the multiple can still compress.",
+        "The bull's thesis requires the ~3x EPS ramp delivered, rates cooperative, no share loss, and no macro shock. The bear's thesis requires one thing to go wrong.",
+        "He is right on valuation, right on rate transmission, right on earnings quality"
+      ],
+      "score": 0.85
+    }
+  ],
+  "edges": [
+    {
+      "source": "ai_demand",
+      "target": "amd_revenue_growth",
+      "source_label": "AI Demand",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "causal",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Demand drives Revenue Growth.",
+      "source_record_id": "canrel_8bee7f1d49ed9861",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:5"
+      ],
+      "relation_id": "canrel_8bee7f1d49ed9861",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report",
+      "evidence": "AMD's strategic positioning is heavily levered to data-center AI accelerator demand, server CPU share gains, and the broader AI infrastructure buildout.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_3cc623fb0da9491d",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:17"
+      ],
+      "relation_id": "canrel_3cc623fb0da9491d",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan",
+      "evidence": "Distant cash flows get discounted harder when the 10-year yield hits a 24-year high.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_5949f4e42af30b61",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:43"
+      ],
+      "relation_id": "canrel_5949f4e42af30b61",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "In a higher-for-longer regime, long-duration semiconductor multiples compress",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.65,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_8f021bd2e625335f",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:43"
+      ],
+      "relation_id": "canrel_8f021bd2e625335f",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "In a higher-for-longer regime, long-duration semiconductor multiples compress",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.5,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_b5073111209945b8",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:14"
+      ],
+      "relation_id": "canrel_b5073111209945b8",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision",
+      "evidence": "He is right on valuation, right on rate transmission, right on earnings quality",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "rate_cut_cycle",
+      "target": "valuation_risk",
+      "source_label": "Rate Cut Cycle",
+      "target_label": "Valuation Risk",
+      "edge_type": "causal",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Rate Cut Cycle drives Valuation Risk.",
+      "source_record_id": "canrel_e6991f1dfdcfcc95",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:43"
+      ],
+      "relation_id": "canrel_e6991f1dfdcfcc95",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+      "evidence": "the \"Rate Cut Cycle\" tailwind that semiconductor bulls have relied on is priced out for 2026",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "semiconductor_cycle",
+      "source_label": "Recession Risk",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_4d4e7e8b41122b61",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history:claim:34"
+      ],
+      "relation_id": "canrel_4d4e7e8b41122b61",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:neutral_risk_analyst:risk_debate_state.neutral_history",
+      "evidence": "A no-recession, no-cut, sticky-inflation world is one where unit demand holds and multiples get capped — not one where demand breaks and multiples collapse.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "recession_risk",
+      "target": "semiconductor_cycle",
+      "source_label": "Recession Risk",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "conflicting",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Recession Risk conflicts with Semiconductor Cycle.",
+      "source_record_id": "canrel_ae62c12bd42a4786",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:16"
+      ],
+      "relation_id": "canrel_ae62c12bd42a4786",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision",
+      "evidence": "A no-recession, no-cut, sticky-inflation world is one where unit demand holds and multiples get capped — not one where demand breaks and multiples collapse.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "amd_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_0bdba72a93a33dcb",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan:claim:52"
+      ],
+      "relation_id": "canrel_0bdba72a93a33dcb",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:research_manager:investment_plan",
+      "evidence": "The bull proved AMD is a good business. He did not prove AMD is a good stock at $654.91.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "amd_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_116695ef35959336",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history:claim:121"
+      ],
+      "relation_id": "canrel_116695ef35959336",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bear_researcher:investment_debate_state.bear_history",
+      "evidence": "The business argument and the stock argument are not the same thing, and at $654.91, the stock argument is losing.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "amd_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.7,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_243606abc6db8c71",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:46"
+      ],
+      "relation_id": "canrel_243606abc6db8c71",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:conservative_risk_analyst:risk_debate_state.conservative_history",
+      "evidence": "The revenue can be real and the multiple can still compress.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "amd_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_60335faa912484c3",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:111"
+      ],
+      "relation_id": "canrel_60335faa912484c3",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "The bear has a valuation argument. The bull has a business argument.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "amd_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_640ccaaf78b6d482",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:14"
+      ],
+      "relation_id": "canrel_640ccaaf78b6d482",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+      "evidence": "The forward P/E of 41.67 with a PEG of 0.64 is not \"priced for perfection\" in the way you want to claim; it's priced for a ramp that the last four quarters of data actually support.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "valuation_risk",
+      "target": "amd_revenue_growth",
+      "source_label": "Valuation Risk",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "conflicting",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Valuation Risk conflicts with Revenue Growth.",
+      "source_record_id": "canrel_e76666bee046d6d5",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision:claim:34"
+      ],
+      "relation_id": "canrel_e76666bee046d6d5",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:portfolio_manager:final_trade_decision",
+      "evidence": "The bull's thesis requires the ~3x EPS ramp delivered, rates cooperative, no share loss, and no macro shock. The bear's thesis requires one thing to go wrong.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "ai_infrastructure",
+      "target": "amd_revenue_growth",
+      "source_label": "AI Infrastructure",
+      "target_label": "AMD Revenue Growth",
+      "edge_type": "supportive",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "AI Infrastructure supports Revenue Growth.",
+      "source_record_id": "canrel_01dd33b4132e118c",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report:claim:5"
+      ],
+      "relation_id": "canrel_01dd33b4132e118c",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:fundamental_agent:fundamentals_report",
+      "evidence": "AMD's strategic positioning is heavily levered to data-center AI accelerator demand, server CPU share gains, and the broader AI infrastructure buildout.",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "semiconductor_cycle",
+      "source_label": "Narrative Momentum",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "supportive",
+      "confidence": 0.6,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum supports Semiconductor Cycle.",
+      "source_record_id": "canrel_597c2e1652fbc087",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report:claim:66"
+      ],
+      "relation_id": "canrel_597c2e1652fbc087",
+      "lineage_status": "resolved",
+      "lineage_method": "containment",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:news_agent:news_report",
+      "evidence": "Chip stocks are explicitly named as market leaders",
+      "extraction_method": "tradingagents_canonical_output"
+    },
+    {
+      "source": "narrative_momentum",
+      "target": "semiconductor_cycle",
+      "source_label": "Narrative Momentum",
+      "target_label": "Semiconductor Cycle",
+      "edge_type": "supportive",
+      "confidence": 0.55,
+      "rule_name": "tradingagents_canonical_relation",
+      "reason": "TradingAgents' own existing LLM call reported this relation via the COMQUTOR Structure Output Contract.",
+      "assertion_status": "asserted",
+      "source_claim": "Narrative Momentum supports Semiconductor Cycle.",
+      "source_record_id": "canrel_94f6f438f21dbd8c",
+      "source_claim_ids": [
+        "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history:claim:81"
+      ],
+      "relation_id": "canrel_94f6f438f21dbd8c",
+      "lineage_status": "resolved",
+      "lineage_method": "exact",
+      "lineage_reasons": [],
+      "source_agent_output_id": "c904d4cc-dc09-495c-aec5-b056979948e1:bull_researcher:investment_debate_state.bull_history",
+      "evidence": "When the chip complex leads, AMD leads with it.",
+      "extraction_method": "tradingagents_canonical_output"
+    }
+  ],
+  "metadata": {
+    "node_count": 10,
+    "edge_count": 17,
+    "extractor": "llm_with_deterministic_validation_and_fallback",
+    "extractor_version": "week2.structure_extractor.v2",
+    "llm_enabled": true,
+    "llm_edge_count": 0,
+    "deterministic_edge_count": 0,
+    "canonical_relation_edge_count": 17
+  }
+}

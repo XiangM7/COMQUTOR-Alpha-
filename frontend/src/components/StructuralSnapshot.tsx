@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom";
-import type { AlphaActivation, AlphaConflict, CanonicalResearchResponse } from "../api/types";
+import type {
+  AlphaActivation,
+  AlphaClassificationCompletion,
+  AlphaConflict,
+  CanonicalResearchResponse,
+} from "../api/types";
 import { describeApiError } from "../api/errors";
 import { useResearchGraph } from "../hooks/useResearchGraph";
-import { ALPHA_LEVEL_BUCKETS, bucketForAlpha, type AlphaLevelBucket } from "../pages/StructureGraphPage";
+import { ALPHA_LEVEL_BUCKETS, bucketForAlpha, type AlphaLevelBucket } from "../utils/alphaLevelBucketing";
 import { LoadingPanel } from "./LoadingPanel";
 
 // Product Demo Hardening Phase 2B: a compact, top-level orientation section
@@ -43,8 +48,34 @@ function AlphaChip({ alphaId, alphaName }: { alphaId: string; alphaName: string 
   );
 }
 
-function ActiveStructuresSection({ runId }: { runId: string }) {
-  const { graph, isLoading, error, runMismatch, reload } = useResearchGraph(runId);
+// 2026-10-06 (round 14, section 6): when the backend reports Alpha
+// classification as incomplete, an empty active/dominant/conflict result is
+// "cannot be determined yet", never "none exists". Read verbatim from the
+// backend's own alpha_classification_status -- not re-derived here.
+function isClassificationIncomplete(research: CanonicalResearchResponse): boolean {
+  return research.alpha_classification_status === "incomplete";
+}
+
+function unresolvedClaimsText(completion: AlphaClassificationCompletion | null | undefined): string | null {
+  if (!completion) return null;
+  const unresolved = completion.call_failure_count + completion.not_executed_count;
+  return `${unresolved} of ${completion.total_claims} claims have no usable classification result`;
+}
+
+function ClassificationIncompleteNotice({ research }: { research: CanonicalResearchResponse }) {
+  const detail = unresolvedClaimsText(research.alpha_classification_completion);
+  return (
+    <p className="structural-snapshot-classification-incomplete" role="status">
+      Alpha classification is incomplete for this run{detail ? ` (${detail})` : ""}. Empty results below cannot yet be
+      read as &ldquo;no such structure exists&rdquo;.
+    </p>
+  );
+}
+
+type GraphState = ReturnType<typeof useResearchGraph>;
+
+function ActiveStructuresSection({ graphState, incomplete }: { graphState: GraphState; incomplete: boolean }) {
+  const { graph, isLoading, error, runMismatch, reload } = graphState;
 
   if (isLoading && !graph) {
     return (
@@ -94,9 +125,13 @@ function ActiveStructuresSection({ runId }: { runId: string }) {
     <div className="structural-snapshot-part structural-snapshot-active">
       <h3>Active structures</h3>
       {activeAlphas.length === 0 ? (
-        <p className="structural-snapshot-legitimate-empty">
-          No Alpha structure currently meets the active threshold.
-        </p>
+        incomplete ? (
+          <p className="structural-snapshot-not-ready">Cannot be determined yet: Alpha classification is incomplete.</p>
+        ) : (
+          <p className="structural-snapshot-legitimate-empty">
+            No Alpha structure currently meets the active threshold.
+          </p>
+        )
       ) : (
         <ul className="structural-snapshot-alpha-chip-list">
           {activeAlphas.map((alpha) => (
@@ -108,7 +143,13 @@ function ActiveStructuresSection({ runId }: { runId: string }) {
   );
 }
 
-function DominantStructureSection({ research }: { research: CanonicalResearchResponse }) {
+function DominantStructureSection({
+  research,
+  graphState,
+}: {
+  research: CanonicalResearchResponse;
+  graphState: GraphState;
+}) {
   if (research.structure_graph_status !== "ready") {
     return (
       <div className="structural-snapshot-part structural-snapshot-dominant">
@@ -118,14 +159,47 @@ function DominantStructureSection({ research }: { research: CanonicalResearchRes
     );
   }
 
+  if (research.dominant_alphas.length === 0 && isClassificationIncomplete(research)) {
+    return (
+      <div className="structural-snapshot-part structural-snapshot-dominant">
+        <h3>Dominant structure</h3>
+        <p className="structural-snapshot-not-ready">Cannot be determined yet: Alpha classification is incomplete.</p>
+      </div>
+    );
+  }
+
   if (research.dominant_alphas.length === 0) {
+    // 2026-10-06 (round 12 audit fix): this detail text previously rendered
+    // unconditionally whenever dominant_alphas was empty, asserting "several
+    // active forces are present" even when activeAlphasFrom(graph.activation
+    // .alphas) is ALSO empty -- confirmed factually wrong against a real run
+    // (c904d4cc) with zero active AND zero dominant alphas. Now reads the
+    // SAME graph data ActiveStructuresSection already fetches (passed down
+    // from the shared parent fetch, not a second independent call) so the
+    // two panels can never contradict each other.
+    const graph = graphState.graph;
+    const hasActiveAlphas =
+      graph && "nodes" in graph ? activeAlphasFrom(graph.activation.alphas).length > 0 : null;
+
     return (
       <div className="structural-snapshot-part structural-snapshot-dominant">
         <h3>Dominant structure</h3>
         <p className="structural-snapshot-legitimate-empty">No single structure currently dominates.</p>
-        <p className="structural-snapshot-legitimate-empty-detail">
-          Several active forces are present, but none has reached dominant status.
-        </p>
+        {hasActiveAlphas === true && (
+          <p className="structural-snapshot-legitimate-empty-detail">
+            Several active forces are present, but none has reached dominant status.
+          </p>
+        )}
+        {hasActiveAlphas === false && (
+          <p className="structural-snapshot-legitimate-empty-detail">
+            No active structure currently exists for this run.
+          </p>
+        )}
+        {hasActiveAlphas === null && (
+          <p className="structural-snapshot-legitimate-empty-detail">
+            Active-structure detail could not be loaded to confirm whether any force is currently active.
+          </p>
+        )}
       </div>
     );
   }
@@ -164,6 +238,18 @@ function MainConflictSection({ runId, research }: { runId: string; research: Can
 
   const conflict = research.main_conflict;
 
+  if (!conflict && isClassificationIncomplete(research)) {
+    return (
+      <div className="structural-snapshot-part structural-snapshot-conflict">
+        <h3>Main structural conflict</h3>
+        <p className="structural-snapshot-not-ready">Cannot be determined yet: Alpha classification is incomplete.</p>
+        <Link to={`/runs/${encodeURIComponent(runId)}/conflicts`} className="structural-snapshot-nav-link">
+          View conflict details
+        </Link>
+      </div>
+    );
+  }
+
   if (!conflict) {
     return (
       <div className="structural-snapshot-part structural-snapshot-conflict">
@@ -201,12 +287,19 @@ function MainConflictSection({ runId, research }: { runId: string; research: Can
 }
 
 export function StructuralSnapshot({ runId, research }: { runId: string; research: CanonicalResearchResponse }) {
+  // Fetched ONCE here and passed to both ActiveStructuresSection and
+  // DominantStructureSection -- previously each panel that needed it would
+  // have fetched independently, and DominantStructureSection did not fetch
+  // it at all (see that component's own note on the real contradiction this
+  // caused).
+  const graphState = useResearchGraph(runId);
   return (
     <section className="panel structural-snapshot-panel" aria-labelledby="structural-snapshot-heading">
       <h2 id="structural-snapshot-heading">Structural snapshot</h2>
+      {isClassificationIncomplete(research) && <ClassificationIncompleteNotice research={research} />}
       <div className="structural-snapshot-grid">
-        <ActiveStructuresSection runId={runId} />
-        <DominantStructureSection research={research} />
+        <ActiveStructuresSection graphState={graphState} incomplete={isClassificationIncomplete(research)} />
+        <DominantStructureSection research={research} graphState={graphState} />
         <MainConflictSection runId={runId} research={research} />
       </div>
       <Link to={`/runs/${encodeURIComponent(runId)}/structure`} className="structural-snapshot-nav-link">

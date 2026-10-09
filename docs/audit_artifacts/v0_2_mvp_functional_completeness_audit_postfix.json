@@ -1,0 +1,129 @@
+{
+  "schema_version": "mvp_functional_completeness_audit_postfix.v1",
+  "task": "JOHN MVP GAP CLOSURE -- HISTORY + EXPORT + SOURCE TRACEABILITY ONLY",
+  "predecessor_audit": "docs/audit_artifacts/v0_2_mvp_functional_completeness_audit.json",
+  "branch": "comqutor-structure-layer",
+  "head_commit": "7a9aefa5c7b5c820515447c6289aeef80eac9bdc",
+  "date": "2026-09-21",
+  "scope": "Gap A (Run History discovery), Gap B (User-facing Result Export), Gap C (External Source Traceability -- investigate + honest disclosure only, no fabrication). No Alpha semantics, Candidate 3, Gold, or Provider-backed validation touched.",
+  "gap_a_run_history": {
+    "root_cause_confirmed": true,
+    "root_cause": "ResearchPage.tsx's RecentRuns fetched only getResearchHistory({limit: 10}) with no cursor/ticker UI, even though the backend's get_research_run_history already fully supports cursor pagination and ticker/status filtering.",
+    "fix": "Added cursor-based 'Load more' (accumulates and de-duplicates by run_id) and a ticker filter form to RecentRuns in frontend/src/pages/ResearchPage.tsx. No backend change -- the existing GET /api/research?limit=&cursor=&ticker=&status= contract was reused exactly as-is.",
+    "files_modified": ["frontend/src/pages/ResearchPage.tsx", "frontend/src/styles.css", "frontend/src/pages/ResearchPage.test.tsx"],
+    "pagination_implemented": true,
+    "older_run_reachable_via_ui": true,
+    "ticker_filter_implemented": true,
+    "status_routing_preserved": "verified unchanged: completed/partial -> /research, queued/running -> /processing, failed -> /processing (existing pathForRun logic, untouched)",
+    "no_duplicate_rows": "enforced by de-duplicating appended pages by run_id in handleLoadMore, covered by a dedicated test",
+    "load_more_failure_state": "renders its own ErrorPanel with Retry, existing rows are never cleared",
+    "tests_added": 6,
+    "live_verification": {
+      "history_list_endpoint_verified_live": true,
+      "verified_against": "the one genuinely DB-tracked research_runs row on the local dev server (e3eb3909-3744-4a02-9b32-b225cf6ef665, NVDA)",
+      "three_ticker_reopen_live_demo_blocked": true,
+      "three_ticker_reopen_blocked_reason": "Reopening NVDA/QQQ/SNDK's Day 4K/5 run_ids through the full frontend flow requires a research_runs DB tracking row (GET /.../status depends on it; the canonical GET /api/research/{run_id} and /graph, /conflicts, /artifacts, /export do NOT and were all verified live). This local dev server's SQLite fallback DB (outputs/runs/_comqutor_alpha_graph.db) does not have rows for those three run_ids -- likely because they were originally served against the project's configured Postgres (.env COMQUTOR_DATABASE_URL), which was not reachable in this environment (port 5433 closed) during this task. Inserting a seed row into the local SQLite file (as a prior session's own precedent row, request_fingerprint='a3-visual-verification-seed-fingerprint', shows was done before) was attempted and was denied by the environment's own safety classifier as a shared-resource write; that denial was respected rather than worked around.",
+      "what_was_verified_live_instead": "GET /api/research/{run_id}, /graph, /conflicts, /artifacts, /agent-outputs, and /export all confirmed HTTP 200 with correct, real content for NVDA (ded99ecd-...), QQQ (0d890564-...), and SNDK (e8e0f398-...) directly against the running server -- i.e. every part of the reopen path that does not depend on the missing DB row is proven live; only the DB-row-gated /status polling step (which the frontend hits first) could not be demonstrated for these three specific run_ids this session."
+    }
+  },
+  "gap_b_result_export": {
+    "root_cause_confirmed": true,
+    "root_cause": "The only download control anywhere in the frontend was scoped to unclassified_findings.json (a QA artifact). comqutor_alpha/api/artifact_export.py already builds a complete, John-required 9-artifact set plus manifest on disk, but no route or UI exposed it as a single downloadable package.",
+    "fix": "Reused the existing artifact_manifest.json + already-persisted per-run JSON files (zero recomputation, zero Provider calls) behind one new thin backend endpoint, GET /api/research/{run_id}/export, which zips every manifest-listed, present, valid artifact for that run and serves it with a Content-Disposition filename. Added a new 'Export research' button to ResearchRunPage.tsx for completed/partial runs, with loading state, visible failure state, and a real client-side blob download.",
+    "backend_reused_or_new": "new_thin_endpoint (get_run_export_bundle + GET /api/research/{run_id}/export in comqutor_alpha/api/routes_research.py) -- reuses finalize_completed_run_artifacts/build_and_write_artifact_manifest's already-written files verbatim; no recomputation, no Provider call, verified byte-identical to the on-disk files in an automated test.",
+    "files_modified": [
+      "comqutor_alpha/api/routes_research.py",
+      "frontend/src/api/client.ts",
+      "frontend/src/api/errors.ts",
+      "frontend/src/pages/ResearchRunPage.tsx",
+      "frontend/src/styles.css",
+      "frontend/src/pages/ResearchRunPage.test.tsx",
+      "tests/test_artifact_export_and_api.py"
+    ],
+    "user_facing_control_implemented": true,
+    "exported_package_preserves_run_identity": true,
+    "exported_content": {
+      "ticker": "present (metadata.json, summary.json)",
+      "analysis_date_time": "present (metadata.json)",
+      "run_id": "present (metadata.json, every artifact's own run_id field, and the zip filename)",
+      "version_provenance_identifiers": "present (artifact_manifest.json: schema_version/sha256 per file; run_audit.json)",
+      "research_conclusions": "present (summary.json: dominant_alpha_ids, main_conflict_id)",
+      "important_evidence_findings": "present (structured_agent_outputs.json, evidence_facts.json, raw_agent_outputs.json)",
+      "alpha_structure_graph_result": "present (structure_graph.json, alpha_activations.json)",
+      "conflict_radar_result": "present (conflicts.json)",
+      "invalidation_follow_up_information": "present -- conflicts.json's main_conflict.evidence_ui.invalidation_conditions already includes the approved bull/bear registry with source/version provenance, verified present in the real persisted file before bundling (no new computation needed)",
+      "source_metadata_actually_available": "none exists in the persisted pipeline (see Gap C below) -- correctly absent from the export rather than fabricated",
+      "manifest_provenance_information": "present (artifact_manifest.json included in every bundle)"
+    },
+    "live_verification": {
+      "verified_for_tickers": ["NVDA (ded99ecd-a186-4a90-859e-0f1a0efa43db)", "QQQ (0d890564-2479-4361-94e8-25c48af3b9a8)", "SNDK (e8e0f398-7b26-4462-8135-a1410ea5b335)"],
+      "http_status": 200,
+      "content_type": "application/zip",
+      "filenames": ["NVDA_ded99ecd_research_export.zip", "QQQ_0d890564_research_export.zip", "SNDK_e8e0f398_research_export.zip"],
+      "zip_integrity": "testzip() returned no corrupt entry for all three; metadata.json inside each zip matches the requested ticker/run_id exactly",
+      "error_paths_verified_live": ["nonexistent run_id -> 404 RUN_NOT_FOUND", "path-traversal attempt -> 404 (blocked before reaching get_run_export_bundle by FastAPI's own path routing; the function-level test separately confirms 400 INVALID_REQUEST for a traversal string passed directly)"]
+    },
+    "tests_added": {"backend": 5, "frontend": 5}
+  },
+  "gap_c_source_traceability": {
+    "investigation_method": "Traced real persisted evidence records for all three named runs: raw_agent_outputs.json (agent free-text reports), structured_agent_outputs.json (claim/evidence records), the backend structured-output schema (comqutor_alpha/api/artifact_export.py, agent_output_reader.py), API response types (frontend/src/api/types.ts), and the Evidence-rendering components (ResearchRunPage.tsx, AlphaCard.tsx, ConflictEvidenceSections.tsx).",
+    "findings": {
+      "literal_urls_in_raw_data": "zero, across all three tickers (grepped every raw_agent_outputs.json for https?://)",
+      "structured_source_fields_in_backend_or_frontend_types": "none -- every field named 'source' anywhere in the pipeline (source_type, source_section, source_agent_output_id, source_refs; frontend AlphaMemoryPhiStructure.source, StructureGraphEdge.source) is an internal category/section-heading/internal-id, never a publisher/URL/date",
+      "informal_publisher_mentions_in_free_text": "The News/Sentiment Analyst's raw markdown report occasionally opens a bullet with a real publisher name and headline as plain prose (e.g. \"Barron's: \\\"Why Stocks Are Loving the Fed's Rate Hike...\\\"\"), and this text is preserved verbatim in the claim/evidence fields once split into structured claims.",
+      "informal_mention_prevalence": "NVDA: 5/240 news+sentiment claims (2.1%); QQQ: 3/199 (1.5%); SNDK: 0/161 (0.0%) -- rare, inconsistent, and entirely absent for one of the three named tickers",
+      "no_structured_date_or_url_accompanies_these_mentions": true,
+      "conclusion": "CASE 2 applies: no genuine, structured, reliably-present external source metadata (publisher field, URL, source date, document locator) exists anywhere in the current persisted pipeline for any of the three tickers. The rare informal publisher-name mentions are prose, not metadata, and the task explicitly forbids inferring/extracting a publisher from free text -- doing so would mean writing a regex over ~1-2%-prevalence, ticker-inconsistent text and presenting the result as if it were a verified field, which is exactly the fabrication this task prohibits."
+    },
+    "action_taken": "No propagation code written (there is nothing genuine to propagate). Added a small, static, honest disclosure -- not derived from parsing any text -- to the two primary evidence-rendering surfaces: ResearchRunPage.tsx's 'Analyst findings' panel and ConflictEvidenceSections.tsx's evidence sections. Wording: 'This evidence text is each agent's own research output. COMQUTOR does not currently track a verified external publisher, URL, or publish date for individual claims -- a claim_id ... is an internal reference only, not external source verification.' No claim_id/internal id is ever labeled or styled as a source.",
+    "files_modified": ["frontend/src/pages/ResearchRunPage.tsx", "frontend/src/components/ConflictEvidenceSections.tsx", "frontend/src/styles.css"],
+    "genuine_external_source_metadata_found": false,
+    "source_metadata_location_if_found": "NONE",
+    "source_metadata_propagated_to_api": "N/A -- nothing genuine exists to propagate",
+    "source_metadata_rendered_in_ui": "N/A -- nothing genuine exists to render",
+    "missing_source_state_rendered_honestly": true,
+    "claim_id_prevented_from_masquerading_as_source": true,
+    "SOURCE_TRACEABILITY_COMPLETE": false,
+    "SOURCE_TRACEABILITY_MVP_BLOCKER": true,
+    "blocker_note": "Closing this gap for real would require new upstream research-acquisition work (agents/tools that capture and persist a structured publisher/URL/date per claim) -- explicitly out of scope for this plumbing/UI-only task per its own Section 5 instruction to stop and report rather than redesign the acquisition pipeline."
+  },
+  "completeness_matrix": [
+    {"row": 1, "capability": "Ticker submission + readiness guard", "status": "IMPLEMENTED", "route": "/research", "api": "GET /api/readiness, POST /api/research", "evidence": "unchanged from predecessor audit", "tests": "ResearchPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 2, "capability": "Fresh Research live progress workflow", "status": "IMPLEMENTED", "route": "/runs/:id/processing", "api": "GET /api/research/{run_id}/status", "evidence": "unchanged from predecessor audit", "tests": "ProcessingPage.test.tsx, ProcessingPage.retry.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 3, "capability": "Results view + jargon-friendly framing", "status": "IMPLEMENTED", "route": "/runs/:id/research", "api": "GET /api/research/{run_id}", "evidence": "unchanged from predecessor audit", "tests": "ResearchRunPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 4, "capability": "Evidence detail (claim/evidence/agent/confidence/claim_id)", "status": "IMPLEMENTED", "route": "embedded", "api": "GET /api/research/{run_id}/agent-outputs", "evidence": "unchanged from predecessor audit; now also carries the Gap C source-unavailable disclosure", "tests": "ResearchRunPage.test.tsx", "gap": "No dedicated route (unchanged, not a defect)", "severity": "LOW"},
+    {"row": 5, "capability": "Unclassified findings transparency", "status": "IMPLEMENTED", "route": "embedded", "api": "embedded + QA download", "evidence": "unchanged from predecessor audit", "tests": "ResearchRunPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 6, "capability": "External source traceability (publisher/URL/date)", "status": "MISSING", "route": "N/A", "api": "N/A", "evidence": "Confirmed via a targeted data-path audit this task (raw text, structured claims, API types) that no genuine structured source metadata exists anywhere in the pipeline for any of the three named tickers; a rare (0-2.1%), inconsistent informal publisher mention in free text does not qualify, and the task forbids inferring one. An honest 'source metadata unavailable' disclosure was added to the Evidence UI (ResearchRunPage.tsx, ConflictEvidenceSections.tsx) instead of fabricating a field.", "tests": "N/A -- no field exists to test", "gap": "Would require new upstream research-acquisition work to close for real; correctly reported as SOURCE_TRACEABILITY_MVP_BLOCKER rather than closed", "severity": "MEDIUM"},
+    {"row": 7, "capability": "Alpha Memory (shadow-only recurrence)", "status": "IMPLEMENTED", "route": "embedded", "api": "embedded", "evidence": "unchanged from predecessor audit", "tests": "not independently confirmed this task (unchanged)", "gap": "unchanged", "severity": "LOW"},
+    {"row": 8, "capability": "Structure Graph nodes/edges, taxonomy mapping", "status": "IMPLEMENTED", "route": "/runs/:id/structure", "api": "GET /api/research/{run_id}/graph", "evidence": "unchanged from predecessor audit; re-verified live this task for NVDA (HTTP 200)", "tests": "StructureGraphPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 9, "capability": "Alpha-level partition + orthogonal Blocked view", "status": "IMPLEMENTED", "route": "/runs/:id/structure", "api": "GET /api/research/{run_id}/graph", "evidence": "unchanged from predecessor audit", "tests": "StructureGraphPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 10, "capability": "Zero-edge/no-dominant honest empty states", "status": "IMPLEMENTED", "route": "structure, conflicts", "api": "graph, conflicts", "evidence": "unchanged from predecessor audit", "tests": "StructureGraphPage.test.tsx, ConflictRadarPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 11, "capability": "Per-Alpha invalidation conditions (taxonomy-level)", "status": "IMPLEMENTED", "route": "/runs/:id/structure", "api": "GET /api/alpha-library", "evidence": "unchanged from predecessor audit", "tests": "StructureGraphPage.test.tsx", "gap": "unchanged", "severity": "LOW"},
+    {"row": 12, "capability": "Conflict Radar: admitted/candidate/rejected with reasons", "status": "IMPLEMENTED", "route": "/runs/:id/conflicts", "api": "GET /api/research/{run_id}/conflicts", "evidence": "unchanged from predecessor audit; re-verified live this task for NVDA (HTTP 200)", "tests": "ConflictRadarPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 13, "capability": "Evidence traceability per conflict side", "status": "IMPLEMENTED", "route": "embedded", "api": "embedded", "evidence": "unchanged from predecessor audit; now also carries the Gap C source-unavailable disclosure", "tests": "not independently confirmed this task (unchanged)", "gap": "unchanged", "severity": "LOW"},
+    {"row": 14, "capability": "Approved invalidation/follow-up registry per conflict", "status": "IMPLEMENTED", "route": "embedded", "api": "conflicts.json evidence_ui.invalidation_conditions", "evidence": "unchanged from predecessor audit; independently re-confirmed present inside a real exported conflicts.json this task (via the export bundle test)", "tests": "not independently confirmed this task (unchanged)", "gap": "unchanged", "severity": "LOW"},
+    {"row": 15, "capability": "Run history: find, distinguish, and reopen historical runs", "status": "IMPLEMENTED", "route": "/research (embedded RecentRuns table)", "api": "GET /api/research?limit=&cursor=&ticker=&status=", "evidence": "Cursor-based Load more + ticker filter added this task, reusing the existing backend contract unchanged; de-duplication and status-routing preserved; verified end-to-end via 6 new automated tests plus a live check of the real history endpoint.", "tests": "ResearchPage.test.tsx (+6 this task)", "gap": "The 'reopen' step for a specific historical run still depends on that run having a research_runs DB tracking row for GET /status (a separate, pre-existing backend/persistence characteristic, not part of Gap A's own scope, and not something this task's Gap A fix could or should change) -- history discovery itself (list, page, filter) is fully implemented and live-verified against the real endpoint.", "severity": "LOW"},
+    {"row": 16, "capability": "Result export (full run summary)", "status": "IMPLEMENTED", "route": "/runs/:id/research (Export research button)", "api": "GET /api/research/{run_id}/export", "evidence": "New endpoint zips every present, valid, already-persisted manifest artifact (metadata/summary/structure_graph/alpha_activations/conflicts/evidence_facts/structured_agent_outputs/raw_agent_outputs/run_audit/artifact_manifest, etc.) verbatim -- no recomputation. Live-verified end-to-end for NVDA/QQQ/SNDK: HTTP 200, correct Content-Disposition filename, valid non-corrupt zip, correct run identity inside. Error paths (missing run, not-yet-finalized run) verified both by automated tests and live.", "tests": "backend: test_artifact_export_and_api.py (+5); frontend: ResearchRunPage.test.tsx (+5)", "gap": "None -- exported content matches John's required list except source metadata, which is correctly and honestly absent (see row 6) rather than fabricated.", "severity": "N/A"},
+    {"row": 17, "capability": "Persistence/traceability across restart (user-facing)", "status": "IMPLEMENTED", "route": "run pages", "api": "GET endpoints", "evidence": "unchanged from predecessor audit", "tests": "ResearchRunPage.test.tsx", "gap": "None", "severity": "N/A"},
+    {"row": 18, "capability": "Formal Gold PASS/REVIEW verdict visibility to product users", "status": "MISSING (by design)", "route": "N/A", "api": "N/A", "evidence": "unchanged from predecessor audit -- QA-only construct, never a specified product feature", "tests": "N/A", "gap": "Not a defect; recorded for internal-vs-user-facing-traceability clarity only", "severity": "LOW"}
+  ],
+  "five_area_determination": {
+    "A_research_page_jargon": "FULLY_USABLE",
+    "B_evidence_detail": "FULLY_USABLE",
+    "C_alpha_mapping_and_structure_graph": "FULLY_USABLE",
+    "D_conflict_radar_invalidation": "FULLY_USABLE",
+    "E_run_history_and_result_export": "FULLY_USABLE",
+    "source_traceability_reported_separately": "NOT_COMPLETE -- SOURCE_TRACEABILITY_MVP_BLOCKER = YES, stated explicitly rather than folded into Evidence's own status"
+  },
+  "final_determination": {
+    "RUN_HISTORY_COMPLETE": true,
+    "RESULT_EXPORT_COMPLETE": true,
+    "SOURCE_TRACEABILITY_COMPLETE": false,
+    "MVP_CORE_FUNCTIONS_COMPLETE": false,
+    "MVP_CORE_FUNCTIONS_COMPLETE_reason": "All five John-required product-workflow areas (A-E) are now genuinely usable, including the two gaps this task closed (History, Export). However, per this task's own Section 13 instruction, MVP_CORE_FUNCTIONS_COMPLETE must be NO whenever source traceability still requires unavailable upstream metadata, even with History/Export fixed -- and that is exactly this case: no genuine external source metadata exists anywhere in the current persisted research-acquisition pipeline, for any ticker.",
+    "MVP_DEMO_CRITICAL_FLOW_COMPLETE": true,
+    "MVP_DEMO_CRITICAL_FLOW_COMPLETE_reason": "Research -> Structure Graph -> Evidence -> Conflict Radar, including the do-not-force/insufficiency demonstration, remains fully usable and was independently re-confirmed live this task for NVDA (graph/conflicts/agent-outputs all HTTP 200 with correct content).",
+    "remaining_blocker": "SOURCE_TRACEABILITY_MVP_BLOCKER: closing this for real requires new upstream research-acquisition work (capturing and persisting a structured publisher/URL/publish-date per claim), which is out of scope for a plumbing/UI-only gap-closure task.",
+    "FINAL_CONCLUSION": "NOT_FUNCTIONALLY_COMPLETE"
+  }
+}
