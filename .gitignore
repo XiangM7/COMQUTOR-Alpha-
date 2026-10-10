@@ -237,3 +237,18 @@ frontend/playwright-report/
 frontend/test-results/
 .demo/
 *.pid
+
+# ---- Local-only evidence, delivery packages and run history (decided 2026-10-10) ----
+# They stay on disk for the engineers; GitHub carries source, tests, configuration, README, the design notes in
+# docs/specs and docs/adr, and the short reader documents in docs/john_review.
+# Everything else under docs/ is local-only. The ~180 docs files that code or tests read (listed in
+# docs/audit_artifacts/round_source_linking_t0_t2/round35_github_cleanup_20261010/keep_tracked.txt) stay tracked on purpose;
+# tracked files stay tracked whatever this file says. To add a NEW file there, use `git add -f`.
+/docs/*
+!/docs/john_review/
+!/docs/specs/
+!/docs/adr/
+/frontend/.vite/
+*.zip
+*.tar.gz
+*.mp4
