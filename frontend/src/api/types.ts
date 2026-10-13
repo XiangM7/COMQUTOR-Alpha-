@@ -389,6 +389,9 @@ export interface AlphaClassificationCompletion {
   total_claims: number;
   valid_select_count: number;
   valid_none_count: number;
+  /** 2026-10-13: the model selected an Alpha but a production gate turned it
+   * into no match -- not a valid NONE (additive; absent on older backends). */
+  gate_overridden_selection_count?: number | null;
   /** A real attempt that produced no usable result (provider error,
    * timeout, rate limit, invalid/truncated output). */
   call_failure_count: number;
@@ -551,6 +554,12 @@ export interface AlphaEvidenceDetail {
   matched_factors: string[];
   assertion_status: string;
   direction: string;
+  /** alpha_evidence_consumption.v2 (v2 views only): present when the claim's negation does not govern this
+   * Alpha's statement (alpha_statement_scope). `relation` / `assertion_status` above are then the re-read
+   * the v2 scorers weighted; these keep the text rule's own reading. Absent on every other entry. */
+  text_rule_relation?: string;
+  text_rule_assertion_status?: string;
+  reading_policy?: string;
 }
 
 /** John's B3 gated seed lifecycle (task B3_ENTITY_EXPOSURE_GATED_STATES) --

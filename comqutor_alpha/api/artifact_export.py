@@ -20,6 +20,14 @@ from comqutor_alpha.api.unclassified_findings import (
     build_unclassified_findings_export,
 )
 from comqutor_alpha.conflict_engine.conflict_admissibility import CANDIDATE as B2_CANDIDATE
+from comqutor_alpha.graph_engine.evidence_consumption import (
+    CONSUMPTION_CONTRACT_V2,
+    PAYLOAD_CONTRACT_KEY,
+    STANCE_POLICY_VERSION,
+    EvidenceConsumptionError,
+    attribution_decision_for_record,
+    block_for_match,
+)
 from comqutor_alpha.storage.file_store import load_json_record_if_exists, run_dir_for, save_json_record
 from comqutor_alpha.structure_engine.evidence_stance import (
     CLASSIFIER_VERSION as EVIDENCE_STANCE_VERSION,
@@ -101,6 +109,13 @@ PRESENT_ONLY_ARTIFACT_FILENAMES = (
     # that recomputes a run under it); any other run's manifest is byte-for-byte what it was.
     "evidence_trace.json",
     "dependency_lineage.json",
+    # T1 integration (2026-10-11): present only in a derived execution that recomputed a saved run under an explicitly chosen evidence
+    # contract (and, after a rollback, its rollback record); any other run's manifest is byte-for-byte what it was.
+    "consumption_lineage.json",
+    "consumption_rollback.json",
+    # P4 phase 1 (2026-10-12): present only in a run the experimental relevance entry judged; any other run's manifest is
+    # byte-for-byte what it was. (Its separate alpha_relevance_ledger/ stays local, like the run's main semantic ledger.)
+    "alpha_relevance_judgments.json",
     # T1 closeout (Round 22): written by the run itself only when a call site captured them (see capture_artifacts), so any
     # other run's manifest is byte-for-byte what it was.
     "derived_inputs.json",
@@ -387,6 +402,22 @@ def _conflict_fact_group_ids(conflict_payload: Any) -> set[str]:
     return group_ids
 
 
+def _statement_scope_reading(block: Any) -> dict[str, Any] | None:
+    """The matched pair's ``alpha_statement_scope`` decision: the reading the selector's relation / assertion gates and the v2
+    weights used. The record's own ``relation`` / ``assertion_status`` stay the stored text-rule fields."""
+    scope = block.get("statement_scope") if isinstance(block, dict) else None
+    if not isinstance(scope, dict):
+        return None
+    return {
+        "policy": scope.get("policy"),
+        "applies": scope.get("applies"),
+        "governing_negation": scope.get("governing_negation"),
+        "changed": scope.get("changed"),
+        "effective": scope.get("effective"),
+        "removed_bases": sorted({str(r.get("basis")) for r in scope.get("removed") or [] if isinstance(r, dict)}),
+    }
+
+
 def build_evidence_stance_audit(
     *,
     run_id: str,
@@ -419,6 +450,12 @@ def build_evidence_stance_audit(
     deterministic_fallback_count = 0
     fallback_reason_counts: dict[str, int] = dict.fromkeys(sorted(VALID_FALLBACK_REASONS), 0)
 
+    # alpha_evidence_consumption.v2: for a run that applied the contract the audit reports what the contract actually did.
+    # A legacy run keeps the historical fields exactly (including the non-discriminative ``ticker_specific``; see the
+    # separately listed legacy export difference).
+    consumption_v2 = isinstance(alpha_matches_payload, dict) and alpha_matches_payload.get(PAYLOAD_CONTRACT_KEY) == CONSUMPTION_CONTRACT_V2
+    stance_excluded_pairs = 0
+
     matches = alpha_matches_payload.get("matches") if isinstance(alpha_matches_payload, dict) else None
     for match in matches or []:
         if not isinstance(match, dict):
@@ -427,6 +464,14 @@ def build_evidence_stance_audit(
         group_ids = sorted(claim_group_ids.get(str(claim_id), set()))
         used_in_activation = bool(group_ids)
         used_in_conflict = bool(set(group_ids) & conflict_group_ids)
+        name_present: bool | None = None
+        matched_block: dict[str, Any] | None = None
+        if consumption_v2:
+            try:
+                name_present = attribution_decision_for_record(match, ticker)
+            except EvidenceConsumptionError:
+                name_present = None  # an invalid block is reported as unknown, never as the legacy always-true value
+            matched_block = block_for_match(match)
         for candidate in match.get("candidate_scores") or []:
             if not isinstance(candidate, dict) or "evidence_stance" not in candidate:
                 continue
@@ -445,6 +490,19 @@ def build_evidence_stance_audit(
                 deterministic_fallback_count += 1
                 if stance_fallback_reason in fallback_reason_counts:
                     fallback_reason_counts[stance_fallback_reason] += 1
+            consumption_fields: dict[str, Any] = {}
+            if consumption_v2:
+                is_matched_pair = matched_block is not None and candidate.get("alpha_id") == match.get("matched_alpha")
+                admission = (matched_block or {}).get("positive_admission") if is_matched_pair else None
+                if admission is not None and not admission.get("admitted"):
+                    stance_excluded_pairs += 1
+                consumption_fields = {
+                    "consumption_contract": CONSUMPTION_CONTRACT_V2,
+                    "target_name_present": name_present,
+                    "stance_state": ((matched_block or {}).get("stance") or {}).get("state") if is_matched_pair else None,
+                    "positive_admission": admission,
+                    "statement_scope": _statement_scope_reading(matched_block) if is_matched_pair else None,
+                }
             records.append(
                 {
                     "run_id": run_id,
@@ -461,7 +519,9 @@ def build_evidence_stance_audit(
                     "assertion_status": match.get("assertion_status"),
                     "semantic_polarity": match.get("semantic_polarity"),
                     "claim_quality": match.get("claim_quality"),
-                    "ticker_specific": bool(match.get("ticker")) and match.get("ticker") == ticker,
+                    # legacy: true for every record whose own ticker equals the run's (non-discriminative). v2: the name
+                    # decision of the consumption contract (name presence only; ``None`` = block invalid/unknown).
+                    "ticker_specific": name_present if consumption_v2 else bool(match.get("ticker")) and match.get("ticker") == ticker,
                     "evidence_stance": stance,
                     "counter_alpha_id": candidate.get("counter_alpha_id"),
                     "stance_reason_codes": list(candidate.get("stance_reason_codes") or []),
@@ -480,6 +540,7 @@ def build_evidence_stance_audit(
                     "stance_method": stance_method,
                     "stance_fallback_reason": stance_fallback_reason,
                     "evidence_stance_version": candidate.get("evidence_stance_version"),
+                    **consumption_fields,
                 }
             )
 
@@ -488,8 +549,12 @@ def build_evidence_stance_audit(
         "run_id": run_id,
         "ticker": ticker,
         "classifier_version": EVIDENCE_STANCE_VERSION,
-        "effect_mode": "shadow",
-        "stance_effect_applied": False,
+        # legacy: the stance never affects scoring. v2: ONE effect is applied and it is reported as such -- a model-judged
+        # stance can exclude a claim from the matched Alpha's positive pool (alpha_stance_policy.v1); nothing else.
+        "effect_mode": "positive_pool_exclusion" if consumption_v2 else "shadow",
+        "stance_effect_applied": bool(consumption_v2),
+        **({"stance_effect": {"policy": STANCE_POLICY_VERSION, "scope": "matched Alpha's positive pool only", "excluded_pairs": stance_excluded_pairs}}
+           if consumption_v2 else {}),
         "summary": {
             "claim_alpha_pair_count": len(records),
             "supports_alpha_count": counts["supports_alpha"],

@@ -1290,6 +1290,14 @@ def compute_alpha_classification_completion(alpha_matches_payload: Mapping[str, 
     function has no access to) combine the two to reach the full 4-state
     judgment the API/summary/page all need to share; see
     routes_research.py's own build_research_response for that combination.
+
+    2026-10-13 (John's named T3 cases 019 / 027R / 028): a claim the
+    classifier DID select an Alpha for, but a deterministic production gate
+    (the Alpha-specific invalidation veto or the positive-requirement gate)
+    then turned into no_match, is not a "valid NONE" -- the model chose an
+    Alpha. It is counted separately as ``gate_overridden_selection_count``
+    (with the gate in ``gate_overridden_by_gate``) and no longer inflates
+    ``valid_none_count``. ``complete`` is unchanged (it never depended on it).
     """
     matches = (
         alpha_matches_payload.get("matches")
@@ -1300,6 +1308,7 @@ def compute_alpha_classification_completion(alpha_matches_payload: Mapping[str, 
 
     valid_select_count = 0
     valid_none_count = 0
+    gate_overridden_by_gate = {"alpha_specific_invalidation": 0, "alpha_positive_requirement": 0, "other_gate": 0}
     call_failure_count = 0
     not_executed_configuration_count = 0
     not_executed_fault_count = 0
@@ -1311,6 +1320,14 @@ def compute_alpha_classification_completion(alpha_matches_payload: Mapping[str, 
         if method == "llm" and fallback_reason is None:
             if match.get("matched_alpha"):
                 valid_select_count += 1
+            elif str(match.get("llm_selected_alpha_id") or "").strip():
+                # selected by the model, vetoed by a production gate: not a valid NONE
+                if match.get("alpha_specific_invalidation_override"):
+                    gate_overridden_by_gate["alpha_specific_invalidation"] += 1
+                elif match.get("alpha_positive_requirement_override"):
+                    gate_overridden_by_gate["alpha_positive_requirement"] += 1
+                else:
+                    gate_overridden_by_gate["other_gate"] += 1
             else:
                 valid_none_count += 1
         elif fallback_reason in _NEVER_SENT_FALLBACK_REASONS:
@@ -1338,6 +1355,8 @@ def compute_alpha_classification_completion(alpha_matches_payload: Mapping[str, 
         "total_claims": total_claims,
         "valid_select_count": valid_select_count,
         "valid_none_count": valid_none_count,
+        "gate_overridden_selection_count": sum(gate_overridden_by_gate.values()),
+        "gate_overridden_by_gate": gate_overridden_by_gate,
         "call_failure_count": call_failure_count,
         "not_executed_count": not_executed_count,
         # Split of not_executed_count (always sums to it): a deliberately

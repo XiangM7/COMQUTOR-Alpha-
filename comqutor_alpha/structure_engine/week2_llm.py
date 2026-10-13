@@ -959,7 +959,8 @@ class Week2LLMInvocation:
     # (2026-10-01): sanitized request-control/response-metadata, populated
     # only by invoke_json_with_trace on a real provider-called attempt (see
     # _request_control_snapshot/_response_provider_metadata). None for every
-    # other call shape, including cache hits and invoke_prebuilt_json_prompt.
+    # other call shape, including cache hits. 2026-10-12 (P4 phase 2):
+    # invoke_prebuilt_json_prompt populates both too, on a provider-called attempt.
     request_control: Mapping[str, Any] | None = None
     provider_response_metadata: Mapping[str, Any] | None = None
     # v7 limited real-verification round (2026-10-01): one entry per REAL
@@ -2123,6 +2124,11 @@ class Week2LLMGateway:
         last_error_code: str | None = "WEEK2_LLM_PROVIDER_ERROR"
         response_received = False
         token_usage: dict[str, int | None] | None = None
+        # 2026-10-12 (P4 phase 2): the same sanitized request-control / response metadata invoke_json_with_trace records (the requested
+        # model name and token cap; the model name the provider returned, finish_reason, raw usage), so a real call through this seam
+        # keeps what the provider actually reported. Read-only on the request; never retried or re-sent for it.
+        request_control: dict[str, Any] | None = None
+        provider_response: dict[str, Any] | None = None
         attempt_history: list[dict[str, Any]] = []
         for attempt in range(1, effective_retries + 2):
             if self._provider_stop_refusal(task) is not None:
@@ -2148,6 +2154,7 @@ class Week2LLMGateway:
                     )
                 break
             provider_attempts += 1
+            request_control = _request_control_snapshot(self._model, prompt)
             try:
                 response = call_with_timeout(
                     lambda: self._model.invoke(prompt),
@@ -2155,6 +2162,7 @@ class Week2LLMGateway:
                 )
                 response_received = True
                 token_usage = _response_token_usage(response)
+                provider_response = _response_provider_metadata(response)
             except TimeoutError:
                 last_provider_status = "timeout"
                 last_error_code = "WEEK2_LLM_TIMEOUT"
@@ -2269,6 +2277,8 @@ class Week2LLMGateway:
                     response_received=True,
                     token_usage=token_usage,
                     attempt_history=tuple(attempt_history),
+                    request_control=request_control,
+                    provider_response_metadata=provider_response,
                 )
 
         return Week2LLMInvocation(
@@ -2290,6 +2300,8 @@ class Week2LLMGateway:
             response_received=response_received,
             token_usage=token_usage,
             attempt_history=tuple(attempt_history),
+            request_control=request_control,
+            provider_response_metadata=provider_response,
         )
 
     def finalize_semantic_invocation(

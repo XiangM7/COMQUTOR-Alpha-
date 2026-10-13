@@ -1,0 +1,355 @@
+{
+  "item": {
+    "alpha_match": {
+      "alpha_match_method": "llm",
+      "label": "Matched to an Alpha by the model's selection",
+      "llm_selected_alpha_id": "A301",
+      "mapper_override": null,
+      "match_status": "matched",
+      "matched_alpha": "A301",
+      "reason": "The classifier selected A301 (Revenue Expansion) from the full taxonomy.",
+      "status_code": "MATCHED"
+    },
+    "calculation": {
+      "ambiguous_tokens": [],
+      "data_points": [
+        {
+          "aliases": [
+            "Operating Revenue"
+          ],
+          "content_hash": "c15786dc964a289f9867fd92ba871af855582351a215a81346a505d5318fc64f",
+          "fragment_id": "src_bce051a83ee448c8:frag:0",
+          "kind": "statement_row",
+          "label": "Total Revenue",
+          "observation_key": "src_bce051a83ee448c8|2025-07-31|46743000000.0",
+          "period": "2025-07-31",
+          "role": "stated",
+          "source_id": "src_bce051a83ee448c8",
+          "token": "$46.7B",
+          "unit": "UNKNOWN_CURRENCY",
+          "value": 46743000000.0
+        },
+        {
+          "aliases": [
+            "Operating Revenue"
+          ],
+          "content_hash": "c15786dc964a289f9867fd92ba871af855582351a215a81346a505d5318fc64f",
+          "fragment_id": "src_bce051a83ee448c8:frag:0",
+          "kind": "statement_row",
+          "label": "Total Revenue",
+          "observation_key": "src_bce051a83ee448c8|2026-07-31|96221000000.0",
+          "period": "2026-07-31",
+          "role": "stated",
+          "source_id": "src_bce051a83ee448c8",
+          "token": "$96.2B",
+          "unit": "UNKNOWN_CURRENCY",
+          "value": 96221000000.0
+        }
+      ],
+      "derived_calculations": [],
+      "numbers_not_found_in_saved_data": [],
+      "scope_note": null,
+      "unreproduced_percent_tokens": []
+    },
+    "claim": {
+      "agent": "aggressive_risk_analyst",
+      "agent_wording": {
+        "matched_terms": [],
+        "note": null,
+        "self_labeled_verified": false
+      },
+      "claim_quality": "analytical",
+      "confidence": 0.75,
+      "direction": "unknown",
+      "evidence_text": null,
+      "key_conclusion_group": null,
+      "report_location": {
+        "agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history",
+        "char_offset": 459,
+        "claim_index": 4,
+        "paragraph": "First, to the conservative analyst: your entire thesis rests on the receivables and FCF deterioration, and I'm going to dismantle that. You're pointing at AR growing +54.9% QoQ against revenue +17.9% QoQ and calling it a red flag. But look at what's actually happening underneath. This is a company that just grew revenue 106% year-over-year, from $46.7B to $96.2B in four quarters. When you're onboarding hyperscaler customers at that velocity — and the report explicitly notes these are large hyperscaler customers being extended terms — receivables balloon because the customer base is transforming from a broad retail/enterprise mix into a handful of mega-cap buyers who negotiate 60-90 day terms",
+        "section": null
+      },
+      "text": "This is a company that just grew revenue 106% year-over-year, from $46.7B to $96.2B in four quarters."
+    },
+    "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:5",
+    "conflict_adoption": {
+      "entries": [],
+      "note": null
+    },
+    "consumption": {
+      "alpha_id": "A301",
+      "attribution": {
+        "basis": [],
+        "category": "NO_TARGET_NAME",
+        "explanation": "The target company's name is not present in the claim text.",
+        "limits": [],
+        "other_issuers_named": [],
+        "policy": "company_attribution.name.v1",
+        "subject_determined": false,
+        "text_sha256": "e6d014a6738f0e7cfd553f65f26a282a68536e4c1b57f4d72e1ba0d56aaf8bc2",
+        "ticker_specific": false
+      },
+      "binding": {
+        "input_sha256": "2e8cfd65195831f8569cfae9fe8615013f0a10c1aeb5da14b0793ca6497e9ddc",
+        "ledger": {
+          "available": true,
+          "binding": "OWN_RUN",
+          "integrity": "MATCHES_MANIFEST",
+          "owner_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+          "sha256": "6076153fdde048e52adfd17b11279cde8a6977c866478683acb6597136d3067f",
+          "usable": true
+        },
+        "source_state_sha256": "90b3092116abdd75e833a800e62d763e55d223ec368d7115a9299ac5bafbe671"
+      },
+      "contract": "alpha_evidence_consumption.v2",
+      "execution_basis": {
+        "based_on_run_id": null,
+        "execution_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+        "execution_type": null,
+        "label": "Original research run.",
+        "recomputation_of_saved_inputs": false,
+        "root_research_run_id": null,
+        "stance_ledger": {
+          "available": true,
+          "binding": "OWN_RUN",
+          "integrity": "MATCHES_MANIFEST",
+          "owner_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+          "sha256": "6076153fdde048e52adfd17b11279cde8a6977c866478683acb6597136d3067f",
+          "usable": true
+        }
+      },
+      "policies": {
+        "attribution": "company_attribution.name.v1",
+        "relevance": "alpha_relevance_fallback.v1",
+        "stance": "alpha_stance_policy.v1"
+      },
+      "positive_admission": {
+        "admitted": true,
+        "explanation": "No exclusion from A301's positive pool by the stance policy (every other gate still applies).",
+        "label": null,
+        "policy": "alpha_stance_policy.v1",
+        "reason_code": null
+      },
+      "relevance": {
+        "effective_weight": 0.1873,
+        "lexical_baseline": 0.1873,
+        "model_level": null,
+        "model_weight": null,
+        "note": "No relevance judgment exists in this contract version. The lexical score is consumed unchanged; it is not a model strength.",
+        "policy": "alpha_relevance_fallback.v1",
+        "state": "UNJUDGED",
+        "weight_authority": "LEXICAL_RULE_FALLBACK"
+      },
+      "source_support": {
+        "content_support_method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "content_support_status": "SUPPORTS",
+        "eligibility_reason": "ELIGIBLE",
+        "link_status": "VALID",
+        "linked_source_id": "src_bce051a83ee448c8",
+        "verified_eligible": true
+      },
+      "stance": {
+        "counter_alpha_id": null,
+        "explanation": "The model judged the stance toward A301 as supports_alpha (confirmed by the run's own validated ledger output).",
+        "label": "supports_alpha",
+        "ledger": "VERIFIED",
+        "method": "llm",
+        "state": "MODEL_JUDGED",
+        "unjudged_category": null,
+        "unjudged_reason": null,
+        "version": "evidence_stance.llm.v1"
+      },
+      "state": "CURRENT",
+      "text_rule": {
+        "assertion_status": "asserted",
+        "relation": "activation",
+        "semantic_polarity": "activation"
+      },
+      "verification_error": null
+    },
+    "dependency": {
+      "contract": "claim_data_points.v1",
+      "depended_by": [
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:43"
+      ],
+      "depends_on": null,
+      "note": "Claims in the same evidence fact keep their own citations and wording; they count as ONE independent fact because every observation a dependent claim uses is stated by its anchor claim. Sharing a source or only some data does not merge claims.",
+      "same_evidence_fact_members": [
+        "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:5",
+        "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:43"
+      ],
+      "shares_inputs_with": []
+    },
+    "note": "Source support, Alpha match, stance and scoring are separate checks; passing one does not imply the others.",
+    "run_basis": {
+      "link_fields_saved": true,
+      "note": null
+    },
+    "scoring": {
+      "alpha_id": "A301",
+      "alpha_result": {
+        "claims_in_pool": 3,
+        "distinct_agents": 1,
+        "distinct_sources": 1,
+        "independent_facts": 1,
+        "level": "candidate",
+        "score": 22.0056
+      },
+      "assertion_status": "asserted",
+      "fact_group": {
+        "id": "2e2b69971b0baaea24ee27d9",
+        "member_claim_ids": [
+          "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:5",
+          "12591384-0b26-470d-a99d-a49c00be440b:fundamental_agent:fundamentals_report:claim:43"
+        ],
+        "role": {
+          "activation_eligible": false,
+          "activation_qualification_reason": "SECONDARY_DUPLICATE_OF_PRIMARY",
+          "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:aggressive_risk_analyst:risk_debate_state.aggressive_history:claim:5",
+          "source_agent": "aggressive_risk_analyst",
+          "source_role": "SECONDARY_DECISION_OR_DEBATE"
+        },
+        "supporting_agents": [
+          "aggressive_risk_analyst",
+          "fundamental_agent"
+        ]
+      },
+      "in_official_pool": true,
+      "label": "Counted in the Alpha's official score",
+      "match_score_lexical": 0.1873,
+      "not_scored_code": null,
+      "reason": "Counted as evidence for A301 (official score 22.0056, level candidate). The weight uses the rule-based lexical match score. A score of 0.0 means the rule found no keyword/factor overlap; it is NOT a model judgment that the claim is irrelevant (the model was never asked for a relevance strength).",
+      "relation": "activation",
+      "status_code": "IN_OFFICIAL_POOL",
+      "weight_contribution": 0.1873
+    },
+    "source_support": {
+      "content_support": {
+        "core_proposition": "NVDA's revenue grew about 106% year-over-year, from approximately $46.7B in the year-ago quarter to approximately $96.2B in the latest quarter.",
+        "fallback_reason": null,
+        "llm_status": "SUPPORTS",
+        "method": "LLM_CONTENT_SUPPORT_VERIFIED",
+        "rationale": "The material gives NVDA quarterly Total Revenue of 96.221B for 2026-07-31 and 46.743B for 2025-07-31. Because those periods are four quarters apart, the stated figures support a year-over-year growth calculation of about 105.85%, which rounds to 106%. The claim's $46.7B and $96.2B are rounded versions of the material's 46.743B and 96.221B.",
+        "status": "SUPPORTS",
+        "support_basis": "DERIVED_CALCULATION",
+        "supporting_quote_or_data": "Total Revenue: 2026-07-31=96221000000.0; 2025-07-31=46743000000.0",
+        "task_version": "content_support.llm.v2.1",
+        "unsupported_materiality": "NONE",
+        "unsupported_remainder": null,
+        "used_location": "data_snapshot.periods (Total Revenue) / excerpt Total Revenue quarterly series",
+        "used_source_id": "src_bce051a83ee448c8"
+      },
+      "eligibility": {
+        "eligible": true,
+        "reason_code": "ELIGIBLE",
+        "time_basis": {
+          "basis": "REGISTRY_WRITE_TIME_UPPER_BOUND",
+          "note": "capture time is an upper bound (the registry write time), not the per-call fetch time",
+          "value": "2026-10-09T14:47:37Z"
+        }
+      },
+      "label": "Verified: the saved source content supports this claim",
+      "link": {
+        "method": "NORMALIZED_FIELD_MATCH_CANDIDATE",
+        "status": "VALID"
+      },
+      "reason": "The material gives NVDA quarterly Total Revenue of 96.221B for 2026-07-31 and 46.743B for 2025-07-31. Because those periods are four quarters apart, the stated figures support a year-over-year growth calculation of about 105.85%, which rounds to 106%. The claim's $46.7B and $96.2B are rounded versions of the material's 46.743B and 96.221B.",
+      "status_code": "VERIFIED_SUPPORT"
+    },
+    "sources": [
+      {
+        "content_hash": "c15786dc964a289f9867fd92ba871af855582351a215a81346a505d5318fc64f",
+        "derived_inputs": null,
+        "excerpt": {
+          "length": 7640,
+          "text": "NVDA income statement (quarterly) Total Revenue: 2026-07-31=96221000000.0; 2026-04-30=81615000000.0; 2026-01-31=68127000000.0; 2025-10-31=57006000000.0; 2025-07-31=46743000000.0 | NVDA income statement (quarterly) Tax Effect Of Unusual Items: 2026-07-31=1282215000.0; 2026-04-30=0.0; 2026-01-31=0.0; 2025-10-31=0.0; 2025-07-31=343791000.0 | NVDA income statement (quarterly) Tax Rate For Calcs: 2026-07-31=0.165; 2026-04-30=0.165687; 2026-01-31=0.147585; 2025-10-31=0.158846; 2025-07-31=0.153304 | NVDA income statement (quarterly) Normalized EBITDA: 2026-07-31=65090000000.0; 2026-04-30=71002000000.0; 2026-01-31=51283000000.0; 2025-10-31=38748000000.0; 2025-07-31=29690000000.0 | NVDA income statem",
+          "truncated": true
+        },
+        "fragment_id": "src_bce051a83ee448c8:frag:0",
+        "has_saved_content": true,
+        "instrument": "NVDA",
+        "material_rows": [
+          {
+            "cells": [
+              {
+                "period": "2026-07-31",
+                "token": "$96.2B",
+                "used": true,
+                "value": 96221000000.0
+              },
+              {
+                "period": "2026-04-30",
+                "token": null,
+                "used": false,
+                "value": 81615000000.0
+              },
+              {
+                "period": "2026-01-31",
+                "token": null,
+                "used": false,
+                "value": 68127000000.0
+              },
+              {
+                "period": "2025-10-31",
+                "token": null,
+                "used": false,
+                "value": 57006000000.0
+              },
+              {
+                "period": "2025-07-31",
+                "token": "$46.7B",
+                "used": true,
+                "value": 46743000000.0
+              }
+            ],
+            "kind": "statement_row",
+            "label": "Total Revenue",
+            "unit": "UNKNOWN_CURRENCY"
+          }
+        ],
+        "name": "Yahoo Finance",
+        "observation_date": "2026-07-31",
+        "provider": "yfinance",
+        "published_at": null,
+        "resolved": true,
+        "retrieved_at": "2026-10-09T14:47:37Z",
+        "role": "verified_basis",
+        "source_id": "src_bce051a83ee448c8",
+        "source_type": "financial",
+        "time_basis": {
+          "basis": "REGISTRY_WRITE_TIME_UPPER_BOUND",
+          "note": "capture time is an upper bound (the registry write time), not the per-call fetch time",
+          "value": "2026-10-09T14:47:37Z"
+        },
+        "title": "NVDA income statement Total Revenue snapshot 2026-07-31 (quarterly)",
+        "unit": "UNKNOWN_CURRENCY",
+        "url": null
+      }
+    ],
+    "stance": {
+      "assertion_status": "asserted",
+      "evidence_stance": "supports_alpha",
+      "label": "Stance judged by the model",
+      "method": "llm",
+      "reason": "The model judged the stance toward A301 as supports_alpha.",
+      "relation": "activation",
+      "relation_basis": "text rule (claim_semantics)",
+      "semantic_polarity": "activation",
+      "stance_fallback_reason": null,
+      "status_code": "MODEL_JUDGED",
+      "target_alpha_id": "A301",
+      "version": "evidence_stance.llm.v1"
+    },
+    "summary": {
+      "alpha_match": "MATCHED",
+      "scoring": "IN_OFFICIAL_POOL",
+      "source_support": "VERIFIED_SUPPORT",
+      "stance": "MODEL_JUDGED"
+    }
+  },
+  "run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+  "schema_version": "evidence_trace.v1",
+  "status": "ok",
+  "ticker": "NVDA"
+}

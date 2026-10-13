@@ -33,6 +33,10 @@ def test_only_approved_runtime_integration_points_import_runtime() -> None:
             if any(module.startswith("comqutor_alpha.llm_runtime") for module in imported_modules(path)):
                 importers.append(str(path.relative_to(REPOSITORY)))
         assert sorted(importers) == [
+            # P4 phase 1 (2026-10-12): the experimental relevance judgment's ONLY entry -- it creates the semantic session that
+            # records the relevance task into a run's separate alpha_relevance_ledger/. The task modules themselves do not import
+            # the runtime (they hash with a byte-identical local canonical form).
+            "comqutor_alpha/alpha_relevance_experiment.py",
             "comqutor_alpha/api/routes_research.py",
             "comqutor_alpha/structure_engine/structured_output_live_shadow.py",
             "comqutor_alpha/structure_engine/structured_output_shadow_provider.py",

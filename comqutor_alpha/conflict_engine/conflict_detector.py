@@ -90,6 +90,7 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     _is_ticker_specific,
 )
 from comqutor_alpha.graph_engine.claim_data_grounding import grounded_points
+from comqutor_alpha.graph_engine.evidence_consumption import block_for_match, compact_block
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     EvidenceFactCandidate,
     evidence_fact_group_id,
@@ -489,6 +490,11 @@ class _EvidenceResult:
     ambiguous_only: bool
 
 
+def _consumption_member_fields(record: Mapping[str, Any]) -> dict[str, Any]:
+    block = block_for_match(record)
+    return {"consumption": compact_block(block)} if block is not None else {}
+
+
 def _gather_qualifying_evidence(
     alpha_id: str,
     alpha_matches: Sequence[Mapping[str, Any]],
@@ -607,6 +613,11 @@ def _gather_qualifying_evidence(
                         # (empty unless the run opted in) -- only ever handed to the shared Evidence Fact Index.
                         "data_stated": grounded_points(record, "stated"),
                         "data_inputs": grounded_points(record, "inputs"),
+                        # alpha_evidence_consumption.v2: the compact block (identity + name decision) so the shared
+                        # ticker-specificity function gives the conflict side the SAME answer Activation gets. Present
+                        # only when the record has a block (every legacy record: absent, member unchanged). It changes
+                        # no admission, no relation gate, no score and no stance filter on this side.
+                        **_consumption_member_fields(record),
                     }
                 )
 

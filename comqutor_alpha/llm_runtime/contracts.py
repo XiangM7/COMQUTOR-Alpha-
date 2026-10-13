@@ -78,6 +78,13 @@ SEMANTIC_TASKS = frozenset(
         # from llm_semantic_calls.jsonl. Registry completion only, like
         # evidence_stance_classifier above: no prompt, schema or judgment change.
         "content_support_verification",
+        # 2026-10-12 (P4 phase 1): the experimental, default-off Alpha
+        # relevance judgment (structure_engine/alpha_relevance_llm.py,
+        # LLM_TASK_NAME). It sends its own prompt through
+        # invoke_prebuilt_json_prompt (never _TASK_INSTRUCTIONS) and records
+        # into a run's separate alpha_relevance_ledger/ directory, never into
+        # the run's main semantic ledger. No live caller exists.
+        "alpha_relevance_judge",
     }
 )
 EXECUTION_MODES = frozenset({"live", "shadow", "replay_fixture", "test"})

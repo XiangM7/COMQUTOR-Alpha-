@@ -55,6 +55,11 @@ def test_structured_claim_shadow_is_additive_to_semantic_tasks():
         # existing task removed or changed. This expectation was not updated
         # at the time (T4 round 32 correction).
         "content_support_verification",
+        # 2026-10-12 (P4 phase 1): alpha_relevance_judge, the experimental,
+        # default-off relevance judgment (its own prompt via
+        # invoke_prebuilt_json_prompt; no live caller) -- additive, no
+        # existing task removed or changed.
+        "alpha_relevance_judge",
     } == SEMANTIC_TASKS
 
 

@@ -77,6 +77,13 @@ ALLOWED_ARTIFACT_FILENAMES = {
     # the lineage record of the offline execution that recomputes a run with the fact-dependency contract.
     "evidence_trace.json",
     "dependency_lineage.json",
+    # T1 integration (2026-10-11): the lineage record of a derived execution that recomputes a SAVED run's inputs under an explicitly
+    # chosen evidence contract (comqutor_alpha.consumption_recompute), and the record of rolling that execution back to legacy.
+    "consumption_lineage.json",
+    "consumption_rollback.json",
+    # P4 phase 1 (2026-10-12): the versioned record of the experimental Alpha relevance judgments (alpha_relevance_judgment.v1),
+    # written only by comqutor_alpha.alpha_relevance_experiment on a run it judged. Never read by selection, stance or scoring.
+    "alpha_relevance_judgments.json",
     # T1 closeout (Round 22): additive, present-only capture artifacts -- the COMPLETE input window behind a derived value
     # (technical indicators) and the sanitized raw provider response. Never required, never backfilled.
     "derived_inputs.json",

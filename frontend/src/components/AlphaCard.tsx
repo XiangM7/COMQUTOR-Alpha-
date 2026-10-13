@@ -580,6 +580,14 @@ export function AlphaCard({
                   {" · "}
                   <span>Assertion: {item.assertion_status}</span>
                 </p>
+                {item.text_rule_relation ? (
+                  <p className="alpha-card-evidence-reread" data-testid="alpha-card-evidence-reread">
+                    Re-read for this Alpha ({item.reading_policy}): the text rule read{" "}
+                    {item.text_rule_relation} / {item.text_rule_assertion_status}, but its negation does
+                    not govern this Alpha&apos;s statement; the score weights the relation and assertion
+                    shown above.
+                  </p>
+                ) : null}
                 {item.matched_keywords.length > 0 ? (
                   <p className="alpha-card-evidence-keywords">
                     Matched keywords: {item.matched_keywords.join(", ")}

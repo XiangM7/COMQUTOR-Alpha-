@@ -100,6 +100,20 @@ export function KeyConclusionsPanel({ runId }: { runId: string | undefined }) {
       {!view && !error ? <p className="evidence-trace-loading">Loading key-conclusion statuses…</p> : null}
       {view ? (
         <>
+          {view.execution_basis ? (
+            <p
+              className={view.execution_basis.recomputation_of_saved_inputs ? "evidence-trace-execution-basis-label" : "evidence-trace-note"}
+              data-testid="key-conclusions-execution-basis"
+            >
+              {view.execution_basis.label ?? "The execution basis was not recorded."}
+              {view.execution_basis.based_on_run_id ? (
+                <>
+                  {" "}
+                  Saved run: <code>{view.execution_basis.based_on_run_id}</code>.
+                </>
+              ) : null}
+            </p>
+          ) : null}
           <p className="key-conclusions-summary">
             {view.claim_count} claims ·{" "}
             {Object.entries(view.status_counts.source_support ?? {})

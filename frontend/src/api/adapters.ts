@@ -174,6 +174,12 @@ function adaptAlphaClassificationCompletion(value: unknown): AlphaClassification
     total_claims: value.total_claims as number,
     valid_select_count: value.valid_select_count as number,
     valid_none_count: value.valid_none_count as number,
+    // 2026-10-13, additive: present only when the backend sends a valid count (older backends never do)
+    ...(isNumber(value.gate_overridden_selection_count) &&
+    Number.isInteger(value.gate_overridden_selection_count) &&
+    value.gate_overridden_selection_count >= 0
+      ? { gate_overridden_selection_count: value.gate_overridden_selection_count }
+      : {}),
     call_failure_count: value.call_failure_count as number,
     not_executed_count: value.not_executed_count as number,
     complete: value.complete,
@@ -1167,6 +1173,14 @@ function adaptAlphaEvidenceDetail(value: unknown): AlphaEvidenceDetail[] {
       matched_factors: isStringArray(item.matched_factors) ? item.matched_factors : [],
       assertion_status: isString(item.assertion_status) ? item.assertion_status : "unknown",
       direction: isString(item.direction) ? item.direction : "unknown",
+      // v2 views only: the text rule's own reading of a claim re-read by alpha_statement_scope
+      ...(isString(item.text_rule_relation) && isString(item.text_rule_assertion_status)
+        ? {
+            text_rule_relation: item.text_rule_relation,
+            text_rule_assertion_status: item.text_rule_assertion_status,
+            reading_policy: isString(item.reading_policy) ? item.reading_policy : "unknown",
+          }
+        : {}),
     }));
 }
 

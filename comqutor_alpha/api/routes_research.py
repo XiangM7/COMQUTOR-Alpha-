@@ -54,9 +54,17 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
 from comqutor_alpha.graph_engine.alpha_level_classifier import (
     REASON_LOW_ENTITY_EXPOSURE,
 )
+from comqutor_alpha.graph_engine.canonical_edge_scope import apply_canonical_edge_scope
 from comqutor_alpha.graph_engine.claim_data_grounding import (
     FACT_DEPENDENCY_CONTRACT,
     annotate_matches_with_data_points,
+)
+from comqutor_alpha.graph_engine.evidence_consumption import (
+    CONSUMPTION_METADATA_KEY,
+    EvidenceConsumptionError,
+    apply_alpha_evidence_consumption,
+    resolve_stance_ledger,
+    strip_alpha_evidence_consumption,
 )
 from comqutor_alpha.graph_engine.evidence_fact_index import (
     ALPHA_ACTIVATION_EVIDENCE_V1,
@@ -963,6 +971,22 @@ def build_research_response(run_id, output_root="outputs/runs", *, graph_reposit
             "execution_type": metadata.get("execution_type"),
             "lineage_artifact": "dependency_lineage.json" if (run_dir / "dependency_lineage.json").exists() else None,
             "fact_dependency_contract": metadata.get("fact_dependency_contract"),
+        }
+    elif metadata.get("execution_type") == "alpha_evidence_consumption_recompute" and metadata.get("based_on_run_id"):
+        # T1 integration (2026-10-11): a recomputation of a saved run's inputs under an explicitly chosen evidence contract --
+        # NOT a Fresh Run (zero model / search / fetch calls). Source identity, execution identity and the stance-ledger binding
+        # are reported separately.
+        response["lineage"] = {
+            "based_on_run_id": metadata.get("based_on_run_id"),
+            "root_research_run_id": metadata.get("root_research_run_id"),
+            "execution_type": metadata.get("execution_type"),
+            "execution_run_id": run_id,
+            "recomputation_of_saved_inputs": True,
+            "fresh_run": False,
+            "lineage_artifact": "consumption_lineage.json" if (run_dir / "consumption_lineage.json").exists() else None,
+            "alpha_evidence_consumption": metadata.get("alpha_evidence_consumption"),
+            "stance_ledger_binding": metadata.get("stance_ledger_binding"),
+            "rollback_artifact": "consumption_rollback.json" if (run_dir / "consumption_rollback.json").exists() else None,
         }
     elif metadata.get("execution_type") == "alpha_direction_evaluation" and metadata.get("based_on_run_id"):
         # Round 17: a direction-evaluation execution reports its direct parent, the original research run, and
@@ -3018,6 +3042,50 @@ def _run_week3_graph_pipeline(
         _log_week3_pipeline_error(run_id, output_root, "structure_graph_inputs")
         return
 
+    # alpha_evidence_consumption.v2 (T1 follow-up migration): opt-in per run through metadata.json; ABSENT -> legacy, nothing
+    # below changes a byte. The one application point for every caller of this function (a new run, a content-support
+    # re-evaluation, a derived execution). It recomputes the per-pair consumption block from TODAY's records, sources and
+    # semantic ledger (so a re-evaluation can never reuse a stale block), writes the additive result back to
+    # alpha_matches.json BEFORE scoring, and fails closed: an unknown contract version, a ticker/pair mismatch or a stale
+    # binding is logged under its own stage code and no score is produced -- never a silent fallback that then reports
+    # success. Rolling a run back = removing the metadata key: the next pass strips the blocks and restores the legacy payload.
+    consumption_summary = None
+    consumption_flag = metadata.get(CONSUMPTION_METADATA_KEY) if isinstance(metadata, dict) else None
+    try:
+        if consumption_flag is not None:
+            consumption_summary = apply_alpha_evidence_consumption(
+                alpha_matches_payload,
+                structured_records,
+                sources,
+                ticker=(metadata.get("ticker") if isinstance(metadata, dict) else None) or alpha_matches_payload.get("ticker"),
+                contract=consumption_flag,
+                ledger=resolve_stance_ledger(run_dir, metadata),
+            )
+            save_json_record(run_id, "alpha_matches.json", alpha_matches_payload, output_root=output_root)
+        elif strip_alpha_evidence_consumption(alpha_matches_payload):
+            save_json_record(run_id, "alpha_matches.json", alpha_matches_payload, output_root=output_root)
+    except EvidenceConsumptionError as exc:
+        _log_week3_pipeline_error(run_id, output_root, f"evidence_consumption:{exc.reason_code}")
+        return
+    except Exception:
+        _log_week3_pipeline_error(run_id, output_root, "evidence_consumption_apply")
+        return
+
+    # alpha_evidence_consumption.v2 (canonical_edge_scope.v1, 2026-10-13): under the contract, a TradingAgents canonical relation
+    # whose own quote negates an endpoint ("a no-cut regime ...") or is conditional is withheld from the graph and from scoring
+    # (subtract only, in memory: the saved extracted_structures.json is never rewritten). Legacy runs skip this entirely.
+    canonical_edge_scope_summary = None
+    if consumption_summary is not None:
+        try:
+            extracted_structures_payload, canonical_edge_scope_summary = apply_canonical_edge_scope(
+                extracted_structures_payload,
+                structured_payload.get("canonical_relations") if isinstance(structured_payload, dict) else None,
+            )
+        except Exception:
+            _log_week3_pipeline_error(run_id, output_root, "canonical_edge_scope")
+            return
+        consumption_summary["canonical_edge_scope"] = canonical_edge_scope_summary
+
     # T1 closure (claim_data_points.v1): opt-in per run through metadata.json (absent -> legacy grouping,
     # byte-identical). Stamps, in memory only, the saved observations each matched claim states / relies on so the
     # one shared Evidence Fact Index can treat a derived expression of the SAME observations as the same
@@ -3052,6 +3120,9 @@ def _run_week3_graph_pipeline(
     except EvidenceGateInputError:
         _log_week3_pipeline_error(run_id, output_root, "evidence_gate_required_input_unavailable")
         return
+    except EvidenceConsumptionError as exc:
+        _log_week3_pipeline_error(run_id, output_root, f"evidence_consumption:{exc.reason_code}")
+        return
     except Exception:
         _log_week3_pipeline_error(run_id, output_root, "activation_scoring")
         return
@@ -3060,6 +3131,8 @@ def _run_week3_graph_pipeline(
             "contract": FACT_DEPENDENCY_CONTRACT,
             "claims_with_grounded_observations": fact_dependency_annotated,
         }
+    if consumption_summary is not None:
+        graph_payload["evidence_consumption"] = consumption_summary
     _report_progress_stage(progress_reporter, "activation_scoring")
 
     try:

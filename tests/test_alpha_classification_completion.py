@@ -56,6 +56,10 @@ def test_valid_select_valid_none_failure_and_not_executed_are_four_distinct_buck
         "not_executed_configuration_count": 2,  # disabled, unavailable -- configuration, not faults
         "not_executed_fault_count": 2,          # audit_unavailable, call_budget_exhausted
         "complete": False,
+        # 2026-10-13 (T3 019 / 027R / 028): a model selection a mapper gate vetoed is counted here, never as a valid NONE;
+        # none of these records carries a vetoed selection
+        "gate_overridden_selection_count": 0,
+        "gate_overridden_by_gate": {"alpha_specific_invalidation": 0, "alpha_positive_requirement": 0, "other_gate": 0},
     }
 
 

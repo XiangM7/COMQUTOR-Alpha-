@@ -1,0 +1,1577 @@
+{
+ "schema": "alpha_relevance_elements.v1",
+ "status": "EXPERIMENTAL (P4 phase 1). Element content copied verbatim from the round-36 A9 v2 draft element ownership table (alpha_tier_element_ownership.v2) for alpha_taxonomy_v1; the taxonomy itself is not edited. Used only as the definition anchors of the alpha_relevance_judge task. Not approved, not gold, carries no weights.",
+ "source_schema": "alpha_tier_element_ownership.v2",
+ "source_sha256": "2e1ff9d1d587709a7d8322df4dc4cab0e43daeaac9ec5adaa7effcfd411a8da2",
+ "taxonomy_content_version": "1.1.0",
+ "rules": {
+  "U1_unit": "The unit of judgment is the substantive VARIABLE (a named quantity, event or state) with direction, magnitude, comparison baseline and time stripped. A 'condition' list entry ('revenue accelerates') contributes its variable ('revenue'); a 'relation' entry ('stock falls despite earnings') is its own element of kind 'relation'.",
+  "U2_heads": "Each list entry contributes its HEAD variable(s): the quantity whose state the entry asserts. Other variables that appear only as targets/baselines of the asserted relation are RELATA; relata never confer ownership.",
+  "U3_relations": "A relation element is engaged only when the claim states the relation; stating a relatum alone does not engage it.",
+  "U4_engaged_vs_mentioned": "ENGAGED: the claim's content is ABOUT the variable (asserts, reports, measures, forecasts, conditions on, negates, or asks about its state or change). MENTIONED: the name appears but the content is about something else (list label, denominator, adjective, qualifier, surface collision).",
+  "identity": "Two list entries name the SAME element only if they name the same head quantity in the same domain (inflection, direction words, a literal synonym, or a specific/general pair of the same quantity are allowed). A measure, proxy, consequence or accumulation of a quantity is a DIFFERENT element ('orders' is not 'demand'; 'backlog' is not 'orders'; 'AI revenue' is not 'demand for accelerators'). Merges that involve a confirmation entry are tier-relevant and carry judgment=true when they are not literal; near-identical pairs deliberately NOT merged are recorded in related_not_merged with the tier that merging would produce.",
+  "priority": "Q1-first (unchanged): an element is core-owned if it has a head occurrence in core_thesis, trigger_signals or invalidation_conditions; it is strong-eligible only if its head occurrences are all in confirmation_signals. A confirmation entry whose element is core-owned is SHADOWED: it can never produce 'strong'. Claim tier = highest tier among ENGAGED elements (core > strong); a claim that engages no element but mentions elements or uses topic terms is weak; otherwise none. 'moderate' has no closed set in the taxonomy and is UNDEFINED here."
+ },
+ "alphas": {
+  "A001": {
+   "elements": [
+    {
+     "id": "A001.interest_rates",
+     "label": "interest rates",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "Falling rates",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "rates rise",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A001.bond_yields",
+     "label": "bond yields",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "yields fall",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A001.discount_rates",
+     "label": "discount rates",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "discount rates",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A001.long_duration_growth_assets",
+     "label": "long-duration growth assets (support)",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "long-duration growth assets",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A001.fed_policy_stance",
+     "label": "Fed policy stance",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "Fed pivots dovish",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "Fed stays restrictive",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A001.inflation",
+     "label": "inflation",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "inflation cools",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "inflation reaccelerates",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A001.growth_multiples",
+     "label": "growth-stock valuation multiples",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "growth multiples expand",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A001.financial_conditions",
+     "label": "financial conditions",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "financial conditions ease",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A001.growth_multiples",
+     "b": "A001.long_duration_growth_assets",
+     "reason": "A valuation multiple is one measure of the asset support the thesis names; the quantities differ (multiple vs. asset performance).",
+     "if_merged_tier": "core"
+    },
+    {
+     "a": "A001.financial_conditions",
+     "b": "A001.interest_rates",
+     "reason": "Financial conditions are a broader composite than the rate level.",
+     "if_merged_tier": "core"
+    },
+    {
+     "a": "A001.bond_yields",
+     "b": "A001.interest_rates",
+     "reason": "Yields and policy rates are different quoted quantities of the same family; both are core, so the choice does not change any tier.",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A003": {
+   "elements": [
+    {
+     "id": "A003.liquidity",
+     "label": "liquidity",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "Improving liquidity",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "liquidity improves",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "liquidity drains",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A003.risk_appetite",
+     "label": "risk appetite",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "risk appetite",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A003.equity_inflows",
+     "label": "equity inflows",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "equity inflows",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A003.cash_into_risk_assets",
+     "label": "cash moving into risk assets",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "cash moves into risk assets",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A003.reserves",
+     "label": "reserves",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "reserves rise",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A003.credit_conditions",
+     "label": "credit conditions",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "credit tightens",
+       "role": "head"
+      },
+      {
+       "list": "confirmation_signals",
+       "phrase": "credit conditions improve",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "same head 'credit', opposite direction; the confirmation entry is shadowed by the invalidation entry"
+     }
+    },
+    {
+     "id": "A003.cash_hoarding",
+     "label": "cash hoarding",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "cash hoarding rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A003.equity_participation",
+     "label": "breadth of equity participation",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "broad equity participation",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A003.equity_participation",
+     "b": "A003.equity_inflows",
+     "reason": "Participation is the breadth of stocks taking part; inflows are money flows. Different quantities.",
+     "if_merged_tier": "core"
+    },
+    {
+     "a": "A003.cash_into_risk_assets",
+     "b": "A003.equity_inflows",
+     "reason": "Flows into risk assets vs. flows into equities (specific/general); both core, tier-neutral.",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A101": {
+   "elements": [
+    {
+     "id": "A101.ai_training_adoption",
+     "label": "AI training and adoption",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "AI training and adoption",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "AI training demand increases",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A101.accelerator_demand",
+     "label": "demand for accelerators / GPUs",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "demand for accelerators",
+       "role": "head"
+      },
+      {
+       "list": "confirmation_signals",
+       "phrase": "GPU demand rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "specific_general",
+      "judgment": true,
+      "note": "GPU is a kind of accelerator; same quantity (demand). The confirmation entry is shadowed by the thesis phrase."
+     }
+    },
+    {
+     "id": "A101.ai_related_equities",
+     "label": "AI-related equities",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "AI-related equities",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A101.ai_capex",
+     "label": "AI capex of cloud providers",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "cloud providers raise AI capex",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "AI capex cuts",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A101.model_demand",
+     "label": "demand for AI models",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "model demand slows",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A101.accelerator_supply_balance",
+     "label": "accelerator/GPU supply relative to demand",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "GPU oversupply",
+       "role": "head"
+      },
+      {
+       "list": "confirmation_signals",
+       "phrase": "accelerator supply tightens",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "specific_general",
+      "judgment": true,
+      "note": "oversupply and tightening are opposite directions of the same supply balance; the confirmation entry is shadowed by the invalidation entry"
+     }
+    },
+    {
+     "id": "A101.ai_revenue",
+     "label": "AI revenue",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "AI revenue grows",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A101.ai_revenue",
+     "b": "A101.accelerator_demand",
+     "reason": "AI revenue is realized sales of AI products; the thesis names demand for accelerators. A measure/consequence of a quantity is a different element.",
+     "if_merged_tier": "core"
+    },
+    {
+     "a": "A101.model_demand",
+     "b": "A101.ai_training_adoption",
+     "reason": "Model demand vs. AI training and adoption; both core, tier-neutral.",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A102": {
+   "elements": [
+    {
+     "id": "A102.enterprise_ai_usage",
+     "label": "enterprise AI usage/adoption",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "Enterprise AI applications and AI agents",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "enterprise AI usage rises",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "enterprise AI adoption slows",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "usage/adoption: tier-neutral (all three are Q1 occurrences)"
+     }
+    },
+    {
+     "id": "A102.inference_compute_demand",
+     "label": "inference compute demand / workloads",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "inference compute demand",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "inference workloads grow",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "tier-neutral (both Q1)"
+     }
+    },
+    {
+     "id": "A102.inference_cost_blocks_deployment",
+     "label": "inference costs blocking deployment",
+     "kind": "relation",
+     "relata": [
+      "inference costs",
+      "deployment"
+     ],
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "inference costs block deployment",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A102.cloud_inference_capacity",
+     "label": "cloud inference capacity",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "cloud inference capacity expands",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A102.deployment_activity",
+     "label": "deployment activity",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "deployment activity rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A102.cloud_inference_capacity",
+     "b": "A102.inference_compute_demand",
+     "reason": "Capacity is supply; the thesis names demand. Different quantities.",
+     "if_merged_tier": "core"
+    }
+   ],
+   "relatum_overlaps": [
+    {
+     "element": "A102.deployment_activity",
+     "relation": "A102.inference_cost_blocks_deployment",
+     "rule": "Relata confer no ownership (U2/U3): a claim that deployment activity alone changed matches only the confirmation entry; a claim that inference costs block deployment states the invalidation relation.",
+     "if_relatum_counted_tier": "core"
+    }
+   ]
+  },
+  "A103": {
+   "elements": [
+    {
+     "id": "A103.ai_buildout",
+     "label": "AI buildout",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "AI buildout",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A103.datacenter",
+     "label": "datacenter spending/capex",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "datacenter",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "datacenter spending rises",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "datacenter capex delayed",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "tier-neutral (all Q1)"
+     }
+    },
+    {
+     "id": "A103.power_cooling",
+     "label": "power and cooling demand",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "power, cooling",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "power and cooling demand increases",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A103.networking_demand",
+     "label": "networking demand",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "networking",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A103.server_demand",
+     "label": "server demand",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "server demand",
+       "role": "head"
+      },
+      {
+       "list": "confirmation_signals",
+       "phrase": "server demand rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "the confirmation entry is shadowed by the thesis phrase"
+     }
+    },
+    {
+     "id": "A103.infrastructure_bottlenecks",
+     "label": "infrastructure bottlenecks",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "infrastructure bottlenecks worsen",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A103.networking_orders",
+     "label": "networking orders",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "networking orders rise",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A103.networking_orders",
+     "b": "A103.networking_demand",
+     "reason": "Orders are the usual measure of demand but a different quantity (order intake vs. demand).",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A201": {
+   "elements": [
+    {
+     "id": "A201.chip_cycle",
+     "label": "chip-cycle upturn",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "chip-cycle upturn",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A201.inventory",
+     "label": "inventory",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "inventory",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "inventory improves",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "inventory glut returns",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A201.pricing",
+     "label": "pricing / ASP",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "pricing",
+       "role": "head"
+      },
+      {
+       "list": "confirmation_signals",
+       "phrase": "ASP stabilizes",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "synonym",
+      "judgment": true,
+      "note": "ASP (average selling price) is the standard quantity behind 'pricing'; the confirmation entry is shadowed by the thesis phrase"
+     }
+    },
+    {
+     "id": "A201.capex",
+     "label": "capex",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "capex",
+       "role": "head"
+      },
+      {
+       "list": "confirmation_signals",
+       "phrase": "capex recovers",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "the confirmation entry is shadowed by the thesis phrase"
+     }
+    },
+    {
+     "id": "A201.semiconductor_demand",
+     "label": "semiconductor/chip demand",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "semiconductor demand",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "chip demand rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "synonym",
+      "judgment": false,
+      "note": "chip = semiconductor; tier-neutral (both Q1)"
+     }
+    },
+    {
+     "id": "A201.orders",
+     "label": "orders",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "orders recover",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "order cuts resume",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A201.backlog",
+     "label": "backlog",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "backlog improves",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A201.backlog",
+     "b": "A201.orders",
+     "reason": "Backlog is the accumulated unfilled orders (a stock); 'orders recover' is order flow. Different quantities.",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A301": {
+   "elements": [
+    {
+     "id": "A301.demand",
+     "label": "demand",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "Strong demand",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "demand beats expectations",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "demand weakens",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A301.revenue_guidance",
+     "label": "revenue guidance",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "revenue guidance",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "guidance raised",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "guide-down",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "guidance / guide: inflection of the same head; tier-neutral (all Q1)"
+     }
+    },
+    {
+     "id": "A301.eps_revisions",
+     "label": "EPS revisions",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "EPS revisions",
+       "role": "head"
+      },
+      {
+       "list": "confirmation_signals",
+       "phrase": "EPS revisions rise",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false,
+      "note": "THE conflict that triggered this revision: the confirmation entry is shadowed by the thesis phrase, so an EPS-revision claim is core"
+     }
+    },
+    {
+     "id": "A301.repricing_potential",
+     "label": "repricing potential",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "repricing potential",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A301.revenue",
+     "label": "revenue",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "revenue accelerates",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "revenue misses",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A301.margins",
+     "label": "margins",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "margins hold",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A301.bookings",
+     "label": "bookings",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "bookings strengthen",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A301.bookings",
+     "b": "A301.demand",
+     "reason": "Bookings (order intake) are a measure of demand, not demand itself.",
+     "if_merged_tier": "core"
+    },
+    {
+     "a": "A301.revenue",
+     "b": "A301.revenue_guidance",
+     "reason": "Realized revenue vs. guidance about revenue; both core, tier-neutral.",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A304": {
+   "context_phrases": [
+    {
+     "list": "core_thesis",
+     "phrase": "strong fundamentals",
+     "judgment": true,
+     "reason": "Concessive clause ('... despite strong fundamentals'): it states what the thesis holds IN SPITE OF, not what it predicts. Treated as context, not as a head (U2), so it confers no ownership.",
+     "if_counted_as_head_tier": "core",
+     "consequence_if_counted": "Any claim about strong fundamentals would be core for A304, although the thesis says valuation risk exists even when fundamentals are strong. Recorded as an open judgment for the owner."
+    }
+   ],
+   "elements": [
+    {
+     "id": "A304.valuation",
+     "label": "valuation",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "Rich valuation",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "valuation risk rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A304.multiples",
+     "label": "multiples",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "high multiples",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "multiples stretch",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A304.downside_risk",
+     "label": "downside risk",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "downside risk",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A304.rates",
+     "label": "discount rate / rates",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "discount rate rises",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "rates fall sharply",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A304.earnings_growth_vs_valuation",
+     "label": "earnings growth exceeding valuation",
+     "kind": "relation",
+     "relata": [
+      "earnings growth",
+      "valuation"
+     ],
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "earnings growth exceeds valuation",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A304.stock_falls_despite_earnings",
+     "label": "stock falling despite earnings",
+     "kind": "relation",
+     "relata": [
+      "stock price",
+      "earnings"
+     ],
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "stock falls despite earnings",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A304.estimates_vs_price",
+     "label": "estimates failing to support price",
+     "kind": "relation",
+     "relata": [
+      "estimates",
+      "price"
+     ],
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "estimates fail to support price",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A304.stock_falls_despite_earnings",
+     "b": "A304.downside_risk",
+     "reason": "'Downside risk' is a risk statement; the confirmation is its realized price outcome in a specific divergence.",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A501": {
+   "elements": [
+    {
+     "id": "A501.credit_spreads",
+     "label": "credit spreads",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "credit spreads",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "credit spreads widen",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "spreads tighten",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.economic_slowdown",
+     "label": "economic slowdown",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "economic slowdown",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.economic_growth",
+     "label": "economic growth",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "growth accelerates",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.earnings",
+     "label": "earnings",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "earnings",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "earnings improve",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.risk_appetite",
+     "label": "risk appetite",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "risk appetite",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.unemployment",
+     "label": "unemployment",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "unemployment rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.pmis",
+     "label": "PMIs",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "trigger_signals",
+       "phrase": "PMIs weaken",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.earnings_estimates",
+     "label": "earnings estimates",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "earnings estimates fall",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A501.defensives_relative_performance",
+     "label": "defensives' relative performance",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "defensives outperform",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A501.earnings_estimates",
+     "b": "A501.earnings",
+     "reason": "Estimates are expectations of earnings, a different quantity from reported earnings.",
+     "if_merged_tier": "core"
+    },
+    {
+     "a": "A501.economic_growth",
+     "b": "A501.economic_slowdown",
+     "reason": "Growth vs. slowdown are two names of the same family; both core, tier-neutral.",
+     "if_merged_tier": "core"
+    }
+   ]
+  },
+  "A601": {
+   "elements": [
+    {
+     "id": "A601.attention",
+     "label": "investor/media attention",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "Investor attention",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "media attention rises",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A601.narratives",
+     "label": "crowded narratives",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "crowded narratives",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "narrative fatigue",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A601.flows",
+     "label": "reflexive flows",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "reflexive flows",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "flows chase theme",
+       "role": "head"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "flow reversal",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A601.momentum",
+     "label": "momentum",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "momentum",
+       "role": "head"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "price momentum strengthens",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "literal",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A601.positioning",
+     "label": "positioning",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "invalidation_conditions",
+       "phrase": "positioning unwind",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A601.sentiment",
+     "label": "sentiment",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "sentiment improves",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    },
+    {
+     "id": "A601.theme_breadth",
+     "label": "breadth within the theme",
+     "kind": "variable",
+     "occurrences": [
+      {
+       "list": "confirmation_signals",
+       "phrase": "breadth within theme expands",
+       "role": "head"
+      }
+     ],
+     "identity": {
+      "basis": "single",
+      "judgment": false
+     }
+    }
+   ],
+   "related_not_merged": [
+    {
+     "a": "A601.sentiment",
+     "b": "A601.attention",
+     "reason": "Sentiment is the polarity of opinion; attention is its intensity. Different quantities.",
+     "if_merged_tier": "core"
+    },
+    {
+     "a": "A601.sentiment",
+     "b": "A601.narratives",
+     "reason": "Sentiment readings vs. the presence of a crowded narrative.",
+     "if_merged_tier": "core"
+    }
+   ]
+  }
+ }
+}

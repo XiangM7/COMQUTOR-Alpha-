@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adaptAlphaLibraryResponse, adaptCanonicalResearchResponse } from "./adapters";
+import { adaptAlphaLibraryResponse, adaptCanonicalResearchResponse, adaptStructureGraphResponse } from "./adapters";
 
 const VALID_ARTIFACTS = {
   metadata: true,
@@ -317,6 +317,16 @@ describe("adaptCanonicalResearchResponse -- alpha classification completion (rou
     expect(absent.ok && absent.value.alpha_classification_completion).toBeNull();
   });
 
+  it("carries the gate-overridden selection count when the backend sends it, and never invents one", () => {
+    const withGate = { ...completion, valid_none_count: 764, gate_overridden_selection_count: 23 };
+    const result = adaptCanonicalResearchResponse(validPayload({ alpha_classification_completion: withGate }));
+    expect(result.ok && result.value.alpha_classification_completion).toEqual(withGate);
+    const invalid = adaptCanonicalResearchResponse(
+      validPayload({ alpha_classification_completion: { ...completion, gate_overridden_selection_count: -1 } })
+    );
+    expect(invalid.ok && invalid.value.alpha_classification_completion).toEqual(completion);
+  });
+
   it("drops a half-valid completion record to null rather than rendering partial numbers", () => {
     for (const bad of [
       { ...completion, call_failure_count: -1 },
@@ -327,5 +337,47 @@ describe("adaptCanonicalResearchResponse -- alpha classification completion (rou
       const result = adaptCanonicalResearchResponse(validPayload({ alpha_classification_completion: bad }));
       expect(result.ok && result.value.alpha_classification_completion).toBeNull();
     }
+  });
+});
+
+describe("adaptStructureGraphResponse evidence detail", () => {
+  const entry = {
+    claim_id: "run-1:conservative_risk_analyst:risk_debate_state.conservative_history:claim:12",
+    claim: "They're not -- they're a measure of how much growth is already embedded in consensus.",
+    agent: "conservative_risk_analyst",
+    source_agent_output_id: "run-1:conservative_risk_analyst:risk_debate_state.conservative_history",
+    match_score: 0.5,
+    relation: "activation",
+    matched_keywords: [],
+    matched_factors: [],
+    assertion_status: "asserted",
+    direction: "positive",
+  };
+  const reading = {
+    text_rule_relation: "mention",
+    text_rule_assertion_status: "negated",
+    reading_policy: "alpha_statement_scope.v2",
+  };
+  const graph = (detail: Record<string, unknown>[]) => ({
+    run_id: "run-1",
+    schema_version: "structure_graph.v2",
+    nodes: [],
+    edges: [],
+    activation: {
+      alphas: [{ alpha_id: "A304", alpha_name: "Valuation Risk", activation_score: 50.2, status: "candidate", evidence_detail: detail }],
+    },
+  });
+
+  it("carries the text rule's own reading of a re-read v2 entry and never invents one", () => {
+    const result = adaptStructureGraphResponse(
+      graph([{ ...entry, ...reading }, { ...entry, claim_id: "c2" }, { ...entry, claim_id: "c3", text_rule_relation: "mention" }])
+    );
+    expect(result.ok).toBe(true);
+    const detail = (result.ok ? result.value.activation.alphas[0]?.evidence_detail : undefined) ?? [];
+    expect(detail).toHaveLength(3);
+    expect(detail[0]).toEqual({ ...entry, ...reading });
+    expect(detail[1]).toEqual({ ...entry, claim_id: "c2" });
+    // half a reading (no assertion) is not shown as one
+    expect(detail[2]).toEqual({ ...entry, claim_id: "c3" });
   });
 });

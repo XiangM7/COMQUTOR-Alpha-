@@ -21,6 +21,7 @@ from comqutor_alpha.graph_engine.activation_scorer_v2 import (
     score_alpha_activations_v2,
 )
 from comqutor_alpha.graph_engine.alpha_level_classifier import classify_and_rebuild_collections
+from comqutor_alpha.graph_engine.evidence_consumption import effective_text_rule
 from comqutor_alpha.graph_engine.graph_builder import build_structure_graph
 from comqutor_alpha.graph_engine.graph_schema import (
     ACTIVATION_SCORER_VERSION,
@@ -28,6 +29,7 @@ from comqutor_alpha.graph_engine.graph_schema import (
     GRAPH_SCHEMA_VERSION_V2,
 )
 from comqutor_alpha.graph_engine.issuer_aliases import company_names_for_ticker
+from comqutor_alpha.graph_engine.statement_scope import STATEMENT_SCOPE_POLICY_VERSION
 from comqutor_alpha.graph_engine.verified_evidence_gate import (
     EVIDENCE_GATE_POLICY_VERSION,
     EVIDENCE_GATE_SOURCES_UNAVAILABLE,
@@ -65,12 +67,22 @@ def _match_relation_details(record: Mapping[str, Any], alpha_id: str) -> dict[st
 def _attach_evidence_detail(
     activation_alphas: list[dict[str, Any]],
     alpha_matches_payload: Mapping[str, Any],
+    *,
+    statement_scope_reading: bool = False,
 ) -> None:
     """Additively attach full per-claim evidence provenance to each scored
     alpha (claim text, agent, source_agent_output_id, match score, relation,
     matched keywords/factors, assertion status, direction). Purely a
     read-back join against ``alpha_matches`` records -- the frozen activation
-    formula, weights, and every existing field stay byte-identical."""
+    formula, weights, and every existing field stay byte-identical.
+
+    ``statement_scope_reading`` (the v2 views only): under
+    ``alpha_evidence_consumption.v2`` the v2 scorers weight a pair's
+    ``alpha_statement_scope`` reading, so the detail records the relation
+    and assertion they weighted and keeps the text rule's own reading beside
+    them (``text_rule_relation`` / ``text_rule_assertion_status``). v1 weights
+    the stored fields, and a record without a consumption block reads exactly
+    as before."""
     matches = (
         alpha_matches_payload.get("matches") if isinstance(alpha_matches_payload, Mapping) else None
     )
@@ -88,6 +100,18 @@ def _attach_evidence_detail(
             if record is None:
                 continue
             relation_details = _match_relation_details(record, alpha_id)
+            assertion_status = str(record.get("assertion_status") or "unknown")
+            text_rule_reading: dict[str, Any] = {}
+            effective = effective_text_rule(record, alpha_id) if statement_scope_reading else None
+            if effective is not None:
+                weighted = (str(effective.get("relation") or "unknown"), str(effective.get("assertion_status") or "unknown"))
+                if weighted != (relation_details["relation"], assertion_status):
+                    text_rule_reading = {
+                        "text_rule_relation": relation_details["relation"],
+                        "text_rule_assertion_status": assertion_status,
+                        "reading_policy": STATEMENT_SCOPE_POLICY_VERSION,
+                    }
+                    relation_details["relation"], assertion_status = weighted
             details.append(
                 {
                     "claim_id": str(claim_id),
@@ -95,9 +119,10 @@ def _attach_evidence_detail(
                     "agent": str(record.get("agent") or ""),
                     "source_agent_output_id": str(record.get("source_agent_output_id") or ""),
                     "match_score": record.get("score", 0.0),
-                    "assertion_status": str(record.get("assertion_status") or "unknown"),
+                    "assertion_status": assertion_status,
                     "direction": str(record.get("direction") or "unknown"),
                     **relation_details,
+                    **text_rule_reading,
                 }
             )
         details.sort(key=lambda item: item["claim_id"])
@@ -271,7 +296,7 @@ def score_and_assemble_structure_graph(
         run_timestamp=run_timestamp,
         as_of=as_of,
     )
-    _attach_evidence_detail(activation_v2["alphas"], alpha_matches_payload)
+    _attach_evidence_detail(activation_v2["alphas"], alpha_matches_payload, statement_scope_reading=True)
 
     if require_verified_evidence_gate:
         if structured_records is None:
@@ -315,7 +340,7 @@ def score_and_assemble_structure_graph(
             run_timestamp=run_timestamp,
             as_of=as_of,
         )
-        _attach_evidence_detail(activation_v2_verified["alphas"], alpha_matches_payload)
+        _attach_evidence_detail(activation_v2_verified["alphas"], alpha_matches_payload, statement_scope_reading=True)
 
     # The OFFICIAL pool: v2_verified when this run supports the gate,
     # otherwise v2 exactly as before. B3 Exposure and B4 classification run

@@ -396,6 +396,24 @@ describe("AlphaCard", () => {
     expect(screen.getByText("run1:news_agent:news_report:claim:1")).toBeInTheDocument();
     // Supporting agents surfaced from evidence provenance.
     expect(screen.getByText("news_agent")).toBeInTheDocument();
+    expect(screen.queryByTestId("alpha-card-evidence-reread")).not.toBeInTheDocument();
+  });
+
+  it("shows the text rule's own reading beside the re-read relation the v2 score weighted", () => {
+    const [base] = EVIDENCE;
+    if (!base) throw new Error("EVIDENCE fixture is empty");
+    const reread: AlphaEvidenceDetail = {
+      ...base,
+      text_rule_relation: "mention",
+      text_rule_assertion_status: "negated",
+      reading_policy: "alpha_statement_scope.v2",
+    };
+    renderCard({ evidenceDetail: [reread] });
+    expect(screen.getByText(/Relation: activation/)).toBeInTheDocument();
+    expect(screen.getByText(/Assertion: asserted/)).toBeInTheDocument();
+    const note = screen.getByTestId("alpha-card-evidence-reread");
+    expect(note).toHaveTextContent("Re-read for this Alpha (alpha_statement_scope.v2)");
+    expect(note).toHaveTextContent("the text rule read mention / negated");
   });
 
   // B4 Activation Level Alignment (task B4_ACTIVATION_LEVEL_ALIGNMENT).

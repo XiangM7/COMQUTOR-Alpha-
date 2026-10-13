@@ -40,7 +40,31 @@ from comqutor_alpha.graph_engine.claim_data_grounding import (
     iter_source_cells,
     shared_input_claims,
 )
+from comqutor_alpha.graph_engine.evidence_consumption import (
+    CONSUMPTION_BLOCK_KEY,
+    CONSUMPTION_CONTRACT_V2,
+    CONSUMPTION_METADATA_KEY,
+    CONSUMPTION_RECOMPUTE_EXECUTION_TYPE,
+    LEDGER_BINDING_SOURCE_DECLARED,
+    PAYLOAD_CONTRACT_KEY,
+    EvidenceConsumptionError,
+    block_for_match,
+    build_block,
+    ledger_description,
+    matched_candidate,
+    resolve_stance_ledger,
+    verify_payload,
+)
+from comqutor_alpha.graph_engine import alpha_relevance_judgment as relevance_record
+from comqutor_alpha.graph_engine.alpha_relevance_judgment import RelevanceVerification, verify_relevance_judgments
 from comqutor_alpha.graph_engine.evidence_fact_index import select_supporting_alpha_claims
+from comqutor_alpha.graph_engine.statement_scope import (
+    BASIS_CONTRAST_ALTERNATIVE,
+    BASIS_OTHER_CLAUSE,
+    REMAINING_ALPHA_TERMS_ONLY_IN_REMOVED_PART,
+    STATEMENT_SCOPE_POLICY_VERSION,
+)
+from comqutor_alpha.structure_engine import alpha_relevance_llm as relevance_task
 from comqutor_alpha.source_provenance import compute_verified_support_eligibility, evaluate_source_availability
 from comqutor_alpha.storage.file_store import load_json_record_if_exists, run_dir_for, validate_run_id_for_path
 
@@ -117,6 +141,7 @@ NOT_SCORED_REASONS = {
     "VERIFIED_GATE_SUPPORT_STATUS_NOT_RESOLVED": "Content verification did not resolve to supports/opposes (partial support, background only, or pending).",
     "VERIFIED_GATE_SOURCE_OPPOSES_CLAIM": "The source content opposes the claim, so it is not supporting evidence.",
     "VERIFIED_GATE_OTHER": "Did not pass the verified-evidence gate (see the source-support status).",
+    "STANCE_MODEL_NOT_SUPPORTING": "A model-judged stance toward this Alpha (opposes, background, mention only, or supports the counter-Alpha) keeps the claim out of the Alpha's positive pool (alpha_stance_policy.v1, R-1). The text-rule relation and the reverse-evidence channel are unchanged.",
     "RELATION_NOT_SUPPORTING": "Verified, but the text rule classified its relation to the Alpha as non-supporting (mention or negation) and no model stance judgment was obtained to resolve it.",
     "ASSERTION_NEGATED": "Verified, but the text rule marked the assertion as negated, which carries zero weight; no model judgment was obtained to resolve it.",
     "ROLE_OR_GROUPING_GATE": "Verified and relation-qualified, but excluded by the Primary/Secondary role or evidence-grouping rule.",
@@ -154,6 +179,13 @@ class TraceContext:
     alpha_blocks: dict[str, dict[str, Any]] = field(default_factory=dict)
     pool_index: dict[str, tuple[str, dict[str, Any]]] = field(default_factory=dict)
     group_index: dict[str, dict[str, Any]] = field(default_factory=dict)
+    # alpha_evidence_consumption.v2: only set for a run that applied the contract (legacy runs: inactive, nothing shown)
+    consumption_active: bool = False
+    consumption_states: dict[str, str] = field(default_factory=dict)
+    consumption_error: str | None = None
+    consumption_ledger: Any = None
+    # P4 phase 1: the run's relevance judgments, verified once per read (no results file = every matched pair UNJUDGED)
+    relevance: RelevanceVerification | None = None
     _selector_cache: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
     _cells_cache: dict[str, list[Any]] = field(default_factory=dict)
     _grounding_cache: dict[str, ClaimGrounding] = field(default_factory=dict)
@@ -211,6 +243,23 @@ def load_trace_context(run_id: Any, output_root: Any) -> TraceContext | None:
         graph=graph if isinstance(graph, dict) else {},
         raw_text_by_output_id=raw_text,
     )
+    ctx.consumption_active = bool(ctx.metadata.get(CONSUMPTION_METADATA_KEY)) or (
+        isinstance(matches_payload, dict) and PAYLOAD_CONTRACT_KEY in matches_payload
+    )
+    if ctx.consumption_active:
+        # read-only: compare every saved block with a fresh recomputation from today's records, sources and ledger
+        try:
+            ctx.consumption_ledger = resolve_stance_ledger(run_dir, ctx.metadata)
+            states = verify_payload(matches_payload, records, sources, ticker=ctx.ticker or "", ledger=ctx.consumption_ledger)
+            ctx.consumption_states = {str(s["claim_id"]): str(s["state"]) for s in states}
+        except EvidenceConsumptionError as exc:
+            ctx.consumption_error = exc.reason_code
+        except Exception:
+            ctx.consumption_error = "EVIDENCE_CONSUMPTION_VERIFY_FAILED"
+    try:
+        ctx.relevance = verify_relevance_judgments(run_dir, run_id=safe_run_id, ticker=ctx.ticker or "", matches=matches)
+    except Exception:  # read-only trace: an unexpected error is disclosed on every matched claim, never raised
+        ctx.relevance = None
     ctx.conflict_index = _conflict_adoption_index(conflicts)
     ctx.derived_inputs = {
         str(e.get("source_id")): e
@@ -532,6 +581,17 @@ def _stance_status(match: Mapping[str, Any] | None) -> dict[str, Any]:
     method = candidate.get("stance_method")
     relation = candidate.get("relation")
     assertion = match.get("assertion_status") if match else None
+    polarity = match.get("semantic_polarity") if match else None
+    relation_basis = "text rule (claim_semantics)"
+    # alpha_evidence_consumption.v2 (alpha_statement_scope): the gates and the weights read the block's per-pair negation scope,
+    # so this explanation reads the same fields (the block's own validity is shown by the consumption section).
+    block = block_for_match(match) if match else None
+    scope = block.get("statement_scope") if isinstance(block, Mapping) else None
+    if isinstance(scope, Mapping) and isinstance(scope.get("effective"), Mapping):
+        effective = scope["effective"]
+        relation, assertion, polarity = effective.get("relation"), effective.get("assertion_status"), effective.get("semantic_polarity")
+        if scope.get("changed"):
+            relation_basis = f"text rule re-read for this Alpha ({STATEMENT_SCOPE_POLICY_VERSION}: the negation does not govern its statement)"
     stance = candidate.get("evidence_stance")
     if method == "llm":
         code, reason = "MODEL_JUDGED", f"The model judged the stance toward {candidate.get('alpha_id')} as {stance}."
@@ -553,16 +613,241 @@ def _stance_status(match: Mapping[str, Any] | None) -> dict[str, Any]:
         "status_code": code, "label": STANCE_LABELS[code], "reason": reason, "evidence_stance": stance,
         "method": "llm" if method == "llm" else ("deterministic_fallback" if method else "deterministic"),
         "version": candidate.get("evidence_stance_version"), "stance_fallback_reason": candidate.get("stance_fallback_reason"),
-        "relation": relation, "assertion_status": assertion, "semantic_polarity": match.get("semantic_polarity") if match else None,
-        "relation_basis": "text rule (claim_semantics)", "target_alpha_id": candidate.get("alpha_id"),
+        "relation": relation, "assertion_status": assertion, "semantic_polarity": polarity,
+        "relation_basis": relation_basis, "target_alpha_id": candidate.get("alpha_id"),
     }
 
 
 def _selector_excluded(ctx: TraceContext, alpha_id: str) -> dict[str, dict[str, Any]]:
     if alpha_id not in ctx._selector_cache:
-        _eligible, excluded, _warnings = select_supporting_alpha_claims(ctx.matches, alpha_id)
+        try:
+            _eligible, excluded, _warnings = select_supporting_alpha_claims(ctx.matches, alpha_id)
+        except EvidenceConsumptionError as exc:  # an invalid block: shown as such, never silently treated as "no exclusion"
+            ctx.consumption_error = ctx.consumption_error or exc.reason_code
+            excluded = []
         ctx._selector_cache[alpha_id] = {str(e.get("claim_id")): e for e in excluded if e.get("claim_id")}
     return ctx._selector_cache[alpha_id]
+
+
+def _execution_basis(ctx: TraceContext) -> dict[str, Any]:
+    """Which run executed this evaluation and on what basis -- the executing run, the saved run it was derived from, and WHOSE model
+    ledger corroborated the stances -- kept apart, so a recomputation of saved inputs is never presented as a Fresh Run."""
+    metadata = ctx.metadata if isinstance(ctx.metadata, Mapping) else {}
+    execution_type = metadata.get("execution_type")
+    based_on = metadata.get("based_on_run_id")
+    if execution_type == CONSUMPTION_RECOMPUTE_EXECUTION_TYPE:
+        rules = "under the evidence contract" if ctx.consumption_active else "under the legacy rules (no evidence contract declared)"
+        label = (f"Recomputation of a saved run's inputs {rules} -- not a Fresh Run. This execution made no model, "
+                 "search or data-fetch call; every stance is the source run's saved result (nothing was re-judged).")
+    elif based_on:
+        label = f"Derived execution ({execution_type or 'unknown type'}) based on the saved run {based_on} -- not a Fresh Run."
+    else:
+        label = "Original research run."
+    return {
+        "execution_run_id": ctx.run_id,
+        "execution_type": execution_type,
+        "based_on_run_id": based_on,
+        "root_research_run_id": metadata.get("root_research_run_id"),
+        "recomputation_of_saved_inputs": bool(based_on),
+        "label": label,
+        "stance_ledger": ledger_description(ctx.consumption_ledger),
+    }
+
+
+def _attribution_view(attribution: Any) -> Any:
+    """The name decision in words -- the same sentence for a matched claim and for a claim matched to no Alpha."""
+    if not isinstance(attribution, Mapping):
+        return attribution
+    return {
+        **attribution,
+        "explanation": (
+            "The target company's name is present in the claim text; this does not establish that the claim is ABOUT the target."
+            if attribution.get("ticker_specific") else "The target company's name is not present in the claim text."
+        ),
+    }
+
+
+def _consumption_view(ctx: TraceContext, claim_id: str, match: Mapping[str, Any] | None) -> dict[str, Any]:
+    """The alpha_evidence_consumption.v2 block of one claim as the trace shows it: what the contract decided, from which
+    raw inputs, under which policy versions -- and whether the saved block still equals a fresh recomputation (``CURRENT``),
+    has gone ``STALE`` (the source state or ledger moved since it was written), or is ``MISSING`` / ``INVALID``."""
+    state = ctx.consumption_states.get(claim_id)
+    out: dict[str, Any] = {
+        "contract": CONSUMPTION_CONTRACT_V2,
+        "state": state or ("NOT_APPLICABLE" if match is None else "UNKNOWN"),
+        "verification_error": ctx.consumption_error,
+        "execution_basis": _execution_basis(ctx),
+    }
+    if match is None:
+        return out
+    if match.get("match_status") != "matched":
+        top = match.get(CONSUMPTION_BLOCK_KEY)
+        if isinstance(top, Mapping):
+            out["scope"] = "attribution_only (the claim is matched to no Alpha)"
+            out["attribution"] = _attribution_view(top.get("attribution"))
+        return out
+    block = block_for_match(match)
+    if block is None:
+        return out
+    stance, admission, attribution = block.get("stance") or {}, block.get("positive_admission") or {}, block.get("attribution") or {}
+    alpha_id = block.get("alpha_id")
+    if stance.get("state") == "MODEL_JUDGED":
+        ledger_ref = (block.get("binding") or {}).get("ledger") or {}
+        if ledger_ref.get("binding") == LEDGER_BINDING_SOURCE_DECLARED:
+            whose = f"the validated ledger output of the saved source run {ledger_ref.get('owner_run_id')}, bound by its declared hash"
+        else:
+            whose = "the run's own validated ledger output"
+        stance_text = f"The model judged the stance toward {alpha_id} as {stance.get('label')} (confirmed by {whose})."
+    else:
+        stance_text = (f"The stance toward {alpha_id} is unjudged ({stance.get('unjudged_category')}: {stance.get('unjudged_reason')}); "
+                       "this adds no exclusion, and the other gates still apply.")
+    out.update({
+        "alpha_id": alpha_id,
+        "policies": block.get("policies"),
+        "text_rule": block.get("text_rule"),
+        "stance": {**stance, "explanation": stance_text},
+        "positive_admission": {
+            **admission,
+            "explanation": (
+                f"Excluded from {alpha_id}'s positive pool by alpha_stance_policy.v1 (R-1). Only this Alpha's pool is affected; the "
+                "original selection, the text-rule relation, the assertion and the reverse-evidence channel are unchanged."
+                if not admission.get("admitted") else
+                f"No exclusion from {alpha_id}'s positive pool by the stance policy (every other gate still applies)."
+            ),
+        },
+        "attribution": _attribution_view(attribution),
+        "relevance": block.get("relevance"),
+        "source_support": block.get("source_support"),
+        "binding": block.get("binding"),
+        "statement_scope": _statement_scope_view(block.get("statement_scope"), alpha_id),
+    })
+    if state == "STALE":
+        out["recomputed_now"] = build_block(
+            match, matched_candidate(match) or {}, str(alpha_id), str(block.get("ticker")),
+            record=ctx.records_by_id.get(claim_id), sources=ctx.sources, taxonomy=None, ledger=ctx.consumption_ledger,
+        )
+    return out
+
+
+_SCOPE_BASIS_LABELS = {
+    "CITATION_MARKER": "a citation marker",
+    "CONTRAST_ALTERNATIVE": "the rejected alternative of a contrast",
+    "NEGATED_PROTECTION_AFFIRMS_RISK": "a negated protection, which affirms the risk",
+    "NEGATION_IN_ANOTHER_CLAUSE": "another clause than the one carrying this Alpha's matched terms",
+}
+
+
+def _statement_scope_view(scope: Any, alpha_id: Any) -> dict[str, Any] | None:
+    """The statement scope as the trace shows it: why the text rule's whole-claim negation does or does not negate this Alpha's
+    statement, and which text-rule fields the positive gates and the weights read (the stored ones stay unchanged)."""
+    if not isinstance(scope, Mapping):
+        return None
+    effective = scope.get("effective") or {}
+    def _bases(items: Any) -> str:
+        return " and ".join(sorted({_SCOPE_BASIS_LABELS.get(str(i.get("basis")), str(i.get("basis"))) for i in items or [] if isinstance(i, Mapping)}))
+    if not scope.get("applies"):
+        explanation = "The text rule did not mark this claim negated; its stored fields are used as they are."
+    elif scope.get("governing_negation") and scope.get("not_applied") and scope.get("remaining_negators") != [REMAINING_ALPHA_TERMS_ONLY_IN_REMOVED_PART]:
+        explanation = (f"The text rule marked the claim negated. The negation may sit only in {_bases(scope.get('not_applied'))}, but "
+                       f"the words alone cannot tell whether {alpha_id}'s statement is the kept or the rejected part, and this pair has "
+                       f"no ledger-corroborated model judgment that the claim supports {alpha_id} (the anchor this rule needs); the "
+                       "claim is read as negated.")
+    elif scope.get("governing_negation"):
+        remaining = scope.get("remaining_negators") or []
+        why = (f"its own matched terms are only in {_bases(scope.get('removed'))}" if remaining == [REMAINING_ALPHA_TERMS_ONLY_IN_REMOVED_PART]
+               else ", ".join(str(n) for n in remaining) or "a negator")
+        explanation = (f"The text rule marked the claim negated, and the negation still governs {alpha_id}'s statement ({why}); "
+                       "the claim is read as negated.")
+    else:
+        anchored = any(str(i.get("basis")) in (BASIS_CONTRAST_ALTERNATIVE, BASIS_OTHER_CLAUSE) for i in scope.get("removed") or [] if isinstance(i, Mapping))
+        explanation = (f"The text rule marked the whole claim negated, but the negation sits only in {_bases(scope.get('removed'))}; it "
+                       f"does not negate {alpha_id}'s statement"
+                       + (f" (which side carries the statement is anchored by the ledger-corroborated model judgment that the claim "
+                          f"supports {alpha_id})" if anchored else "")
+                       + f". Read without that part: relation {effective.get('relation')}, assertion {effective.get('assertion_status')}. "
+                       "The positive gates and the weights use these; the stored text-rule fields are unchanged, and the stance, source "
+                       "and every other gate still apply.")
+    return {**dict(scope), "explanation": explanation}
+
+
+_RELEVANCE_LABELS = {
+    relevance_task.STATE_UNJUDGED: "No relevance judgment exists for this claim and its matched Alpha.",
+    relevance_task.STATE_JUDGED: "Relevance to {alpha} judged: {tier}.",
+    relevance_task.STATE_UNRESOLVED: "The relevance judgment explicitly could not determine a tier for {alpha}.",
+    relevance_task.STATE_FAILED: "The relevance judgment for {alpha} failed; no tier is shown.",
+}
+RELEVANCE_TEST_DATA_NOTE = "SIMULATED TEST DATA -- produced by the P4 phase-1 simulated gateway, not a model judgment."
+RELEVANCE_CONSUMPTION_NOTE = ("Experimental label only (P4 phase 1): not read by Alpha selection, stance, admission or scoring, and "
+                              "no weight is derived from it (model_weight stays null).")
+
+
+def _relevance_view(ctx: TraceContext, claim_id: str, match: Mapping[str, Any]) -> dict[str, Any]:
+    """The experimental relevance judgment of one claim and its MATCHED Alpha, as verified on this read: state, tier (JUDGED only),
+    the definition elements it is anchored to, the short basis, the source (which run executed the trace, which saved run it derives
+    from, which run owns the judgment and its ledger) and the failure / unjudged reason. Nothing is judged here."""
+    alpha_id = str(match.get("matched_alpha") or "")
+    verification = ctx.relevance
+    if verification is None:
+        view: Mapping[str, Any] = {"state": relevance_task.STATE_FAILED, "tier": None, "reason": "relevance_verification_error",
+                                   "reason_detail": None, "anchor_element_ids": [], "basis": None, "unresolved_reason": None, "call_id": None,
+                                   "anchor_evidence": [], "versions": None}
+    else:
+        view = verification.pairs.get((claim_id, alpha_id)) or {
+            "state": relevance_task.STATE_UNJUDGED, "tier": None, "reason": relevance_record.UNJUDGED_PAIR_NOT_REQUESTED, "reason_detail": None,
+            "anchor_element_ids": [], "basis": None, "unresolved_reason": None, "call_id": None, "anchor_evidence": [], "versions": None}
+    definitions = (verification.definitions if verification is not None else None) or {}
+    definition = definitions.get(alpha_id)
+    anchors = [
+        {"element_id": element_id,
+         "label": definition.labels.get(element_id) if definition else None,
+         "ownership": definition.ownership.get(element_id) if definition else None,
+         "occurrences": [{"list": name, "phrase": phrase} for name, phrase in (definition.occurrences.get(element_id) or ())] if definition else [],
+         # output v2: the claim's own words the judgment quoted for this element (empty for a judgment recorded under output v1)
+         "evidence_quotes": [str(e.get("quote")) for e in view.get("anchor_evidence") or []
+                             if isinstance(e, Mapping) and e.get("element_id") == element_id and e.get("quote")],
+         # output v3: how each quoted statement is made (assertion, forecast, probability ...), aligned with evidence_quotes
+         "evidence_modes": [str(e.get("mode") or "") for e in view.get("anchor_evidence") or []
+                            if isinstance(e, Mapping) and e.get("element_id") == element_id and e.get("quote")]}
+        for element_id in view.get("anchor_element_ids") or []
+    ]
+    versions = view.get("versions") or {}  # the versions the record itself was made under -- never the current ones by assumption
+    source = view.get("source") or {}
+    experiment = (verification.experiment if verification is not None else None) or {}
+    test_data = bool(source.get("test_data") or experiment.get("test_data"))
+    state = view["state"]
+    label = _RELEVANCE_LABELS[state].format(alpha=alpha_id, tier=view.get("tier"))
+    return {
+        "contract": relevance_record.RESULTS_SCHEMA_VERSION,
+        "alpha_id": alpha_id,
+        "state": state,
+        "tier": view.get("tier") if state == relevance_task.STATE_JUDGED else None,
+        "reason": view.get("reason"),
+        "reason_detail": view.get("reason_detail"),
+        "label": f"{RELEVANCE_TEST_DATA_NOTE} {label}" if test_data and state != relevance_task.STATE_UNJUDGED else label,
+        "anchors": anchors,
+        "basis": view.get("basis"),
+        "unresolved_reason": view.get("unresolved_reason"),
+        # output v3: every statement the judgment reported (hit or not) and where the tier came from -- recorded, not re-judged here
+        "statements": [dict(s) for s in view.get("statements") or [] if isinstance(s, Mapping)],
+        "tier_source": view.get("tier_source"),
+        "test_data": test_data and state != relevance_task.STATE_UNJUDGED,
+        "source": {
+            "execution_run_id": ctx.run_id,
+            "based_on_run_id": ctx.metadata.get("based_on_run_id"),
+            "owner_run_id": verification.owner_run_id if verification is not None else None,
+            "call_id": view.get("call_id"),
+            "task": relevance_task.LLM_TASK_NAME,
+            "prompt_version": versions.get("prompt_version"),
+            "criterion_version": versions.get("criterion_version"),
+            "output_schema_version": versions.get("output_schema_version"),
+            "provider": source.get("provider"),
+            "model": source.get("model"),
+            "execution_mode": source.get("execution_mode"),
+            "ledger": verification.ledger.description() if verification is not None and verification.ledger is not None else None,
+        },
+        "model_weight": None,
+        "consumption_note": RELEVANCE_CONSUMPTION_NOTE,
+    }
 
 
 def _alpha_result(ctx: TraceContext, alpha_id: str, block: Mapping[str, Any]) -> dict[str, Any]:
@@ -743,6 +1028,10 @@ def build_claim_trace(ctx: TraceContext, claim_id: str) -> dict[str, Any] | None
             if grounding.derived_calculations else None,
         },
         "dependency": dependency,
+        # present only for a run that applied alpha_evidence_consumption.v2 -- a legacy run's trace has no such key
+        **({"consumption": _consumption_view(ctx, claim_id, match)} if ctx.consumption_active else {}),
+        # P4 phase 1: the experimental relevance judgment of the claim and its matched Alpha (a claim matched to no Alpha has none)
+        **({"relevance_judgment": _relevance_view(ctx, claim_id, match)} if match is not None and match.get("match_status") == "matched" else {}),
         "conflict_adoption": {
             "entries": ctx.conflict_index.get(claim_id, []),
             "note": HISTORICAL_USE_NOTE if ctx.conflict_index.get(claim_id) else None,
@@ -795,10 +1084,14 @@ def build_key_conclusions(ctx: TraceContext) -> dict[str, Any]:
         total += 1
         for dimension, code in trace["summary"].items():
             status_counts[dimension][code] = status_counts[dimension].get(code, 0) + 1
+    # the run-level execution basis, for a run under the evidence contract or produced by the consumption recompute entry (every other
+    # run's view is unchanged): the research page states, before any claim is opened, that a recomputation is not a Fresh Run
+    basis_shown = ctx.consumption_active or (ctx.metadata or {}).get("execution_type") == CONSUMPTION_RECOMPUTE_EXECUTION_TYPE
     return {
         "rule": KEY_CONCLUSION_RULE, "claim_count": total, "status_counts": status_counts,
         "groups": [{"group": name, "rows": rows} for name, rows in groups.items()],
         "agent_wording_verified_count": sum(1 for rows in groups.values() for r in rows if r["agent_wording"]["self_labeled_verified"]),
+        **({"execution_basis": _execution_basis(ctx)} if basis_shown else {}),
     }
 
 
@@ -862,10 +1155,16 @@ def build_evidence_trace_artifact(run_id: Any, output_root: Any, *, ctx: TraceCo
         "schema_version": EVIDENCE_TRACE_SCHEMA_VERSION,
         "run_id": ctx.run_id, "ticker": ctx.ticker,
         "lineage": {k: ctx.metadata.get(k) for k in ("based_on_run_id", "root_research_run_id", "execution_type") if ctx.metadata.get(k)},
-        "contracts": {"fact_dependency_contract": ctx.metadata.get("fact_dependency_contract")},
+        "contracts": {
+            "fact_dependency_contract": ctx.metadata.get("fact_dependency_contract"),
+            **({CONSUMPTION_METADATA_KEY: CONSUMPTION_CONTRACT_V2} if ctx.consumption_active else {}),
+        },
         "scope": "official-pool claims of every Alpha plus the final-decision chain (key conclusions); any other claim is available from the API by claim_id",
         "four_checks_note": SCOPE_OF_VERIFICATION_NOTE,
         "key_conclusions": build_key_conclusions(ctx),
+        # P4 phase 1: the run's experimental relevance judgments in counts (present: false = none exist; nothing is consumed)
+        "relevance_judgments": ctx.relevance.summary() if ctx.relevance is not None else {
+            "contract": relevance_record.RESULTS_SCHEMA_VERSION, "error": "relevance_verification_error"},
         "calculations": _calculation_summary(ctx),
         "alphas": _alpha_summaries(ctx),
         "item_count": len(items),

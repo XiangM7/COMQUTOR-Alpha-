@@ -1,0 +1,219 @@
+{
+  "item": {
+    "alpha_match": {
+      "alpha_match_method": "llm",
+      "label": "Matched to an Alpha by the model's selection",
+      "llm_selected_alpha_id": "A501",
+      "mapper_override": null,
+      "match_status": "matched",
+      "matched_alpha": "A501",
+      "reason": "The classifier selected A501 (Recession Risk) from the full taxonomy.",
+      "status_code": "MATCHED"
+    },
+    "calculation": {
+      "ambiguous_tokens": [],
+      "data_points": [],
+      "derived_calculations": [],
+      "numbers_not_found_in_saved_data": [],
+      "scope_note": null,
+      "unreproduced_percent_tokens": []
+    },
+    "claim": {
+      "agent": "bull_researcher",
+      "agent_wording": {
+        "matched_terms": [],
+        "note": null,
+        "self_labeled_verified": false
+      },
+      "claim_quality": "analytical",
+      "confidence": 0.75,
+      "direction": "negative",
+      "evidence_text": null,
+      "key_conclusion_group": null,
+      "report_location": {
+        "agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history",
+        "char_offset": 4183,
+        "claim_index": 34,
+        "paragraph": "And the bear's own macro report concedes the crucial point: **\"US recession by end of 2026?\" is priced at just 6% and falling** [Polymarket]. The classic killer of a capex cycle — recession — is being priced *out*. Meanwhile **\"AI bubble burst in 2026?\" sits at 6% and falling** [Polymarket]. The bear's own data says the tail risk is *shrinking*, not growing.",
+        "section": "4. The Valuation Argument Actually Cuts FOR the Bull"
+      },
+      "text": "And the bear's own macro report concedes the crucial point: \"US recession by end of 2026?\" is priced at just 6% and falling [Polymarket]."
+    },
+    "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:bull_researcher:investment_debate_state.bull_history:claim:35",
+    "conflict_adoption": {
+      "entries": [],
+      "note": null
+    },
+    "consumption": {
+      "alpha_id": "A501",
+      "attribution": {
+        "basis": [],
+        "category": "NO_TARGET_NAME",
+        "explanation": "The target company's name is not present in the claim text.",
+        "limits": [],
+        "other_issuers_named": [],
+        "policy": "company_attribution.name.v1",
+        "subject_determined": false,
+        "text_sha256": "27f9d64059ebe2b8549d5acde4f69f7c98889056fc74dfcf64c19d3631f5e258",
+        "ticker_specific": false
+      },
+      "binding": {
+        "input_sha256": "8593c7291b32ee5150dfa6334d0d55689d904f28e906ad0a74b3edc9c7753fd5",
+        "ledger": {
+          "available": true,
+          "binding": "OWN_RUN",
+          "integrity": "MATCHES_MANIFEST",
+          "owner_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+          "sha256": "6076153fdde048e52adfd17b11279cde8a6977c866478683acb6597136d3067f",
+          "usable": true
+        },
+        "source_state_sha256": "5f3665b081724817b959324d385e24fe367c3b585fc991bd70157cb86b86ac9f"
+      },
+      "contract": "alpha_evidence_consumption.v2",
+      "execution_basis": {
+        "based_on_run_id": null,
+        "execution_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+        "execution_type": null,
+        "label": "Original research run.",
+        "recomputation_of_saved_inputs": false,
+        "root_research_run_id": null,
+        "stance_ledger": {
+          "available": true,
+          "binding": "OWN_RUN",
+          "integrity": "MATCHES_MANIFEST",
+          "owner_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+          "sha256": "6076153fdde048e52adfd17b11279cde8a6977c866478683acb6597136d3067f",
+          "usable": true
+        }
+      },
+      "policies": {
+        "attribution": "company_attribution.name.v1",
+        "relevance": "alpha_relevance_fallback.v1",
+        "stance": "alpha_stance_policy.v1"
+      },
+      "positive_admission": {
+        "admitted": true,
+        "explanation": "No exclusion from A501's positive pool by the stance policy (every other gate still applies).",
+        "label": null,
+        "policy": "alpha_stance_policy.v1",
+        "reason_code": null
+      },
+      "relevance": {
+        "effective_weight": 0.2962,
+        "lexical_baseline": 0.2962,
+        "model_level": null,
+        "model_weight": null,
+        "note": "No relevance judgment exists in this contract version. The lexical score is consumed unchanged; it is not a model strength.",
+        "policy": "alpha_relevance_fallback.v1",
+        "state": "UNJUDGED",
+        "weight_authority": "LEXICAL_RULE_FALLBACK"
+      },
+      "source_support": {
+        "content_support_method": "NOT_LINKED",
+        "content_support_status": "NOT_APPLICABLE",
+        "eligibility_reason": "SOURCE_LINK_NOT_VALID",
+        "link_status": "NOT_PROVIDED",
+        "linked_source_id": null,
+        "verified_eligible": false
+      },
+      "stance": {
+        "counter_alpha_id": null,
+        "explanation": "The stance toward A501 is unjudged (MISSING: missing_result); this adds no exclusion, and the other gates still apply.",
+        "label": "supports_alpha",
+        "ledger": "NOT_CHECKED",
+        "method": "deterministic_fallback",
+        "state": "UNJUDGED",
+        "unjudged_category": "MISSING",
+        "unjudged_reason": "missing_result",
+        "version": "evidence_stance.deterministic.v1"
+      },
+      "state": "CURRENT",
+      "text_rule": {
+        "assertion_status": "asserted",
+        "relation": "activation",
+        "semantic_polarity": "activation"
+      },
+      "verification_error": null
+    },
+    "dependency": {
+      "contract": "claim_data_points.v1",
+      "depended_by": [],
+      "depends_on": null,
+      "note": null,
+      "same_evidence_fact_members": [],
+      "shares_inputs_with": []
+    },
+    "note": "Source support, Alpha match, stance and scoring are separate checks; passing one does not imply the others.",
+    "run_basis": {
+      "link_fields_saved": true,
+      "note": null
+    },
+    "scoring": {
+      "alpha_id": "A501",
+      "in_official_pool": false,
+      "label": "Not counted in any official score",
+      "match_score_lexical": 0.2962,
+      "not_scored_code": "VERIFIED_GATE_SOURCE_LINK_NOT_VALID",
+      "reason": "No valid source link, so the verified-evidence gate keeps it out of the official score.",
+      "status_code": "NOT_SCORED",
+      "weight_contribution": null
+    },
+    "source_support": {
+      "content_support": {
+        "core_proposition": null,
+        "fallback_reason": null,
+        "llm_status": null,
+        "method": "NOT_LINKED",
+        "rationale": null,
+        "status": "NOT_APPLICABLE",
+        "support_basis": null,
+        "supporting_quote_or_data": null,
+        "task_version": null,
+        "unsupported_materiality": null,
+        "unsupported_remainder": null,
+        "used_location": null,
+        "used_source_id": null
+      },
+      "eligibility": {
+        "eligible": false,
+        "reason_code": "SOURCE_LINK_NOT_VALID",
+        "time_basis": {
+          "basis": "NOT_APPLICABLE",
+          "value": null
+        }
+      },
+      "label": "No source linked; not verified",
+      "link": {
+        "method": "NONE",
+        "status": "NOT_PROVIDED"
+      },
+      "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified.",
+      "status_code": "NOT_LINKED"
+    },
+    "sources": [],
+    "stance": {
+      "assertion_status": "asserted",
+      "evidence_stance": "supports_alpha",
+      "label": "Stance is the deterministic rule result; no model judgment obtained",
+      "method": "deterministic_fallback",
+      "reason": "The stance (supports_alpha) is the deterministic shadow classifier's result. A model direction judgment was never obtained for this claim-Alpha pair (it is not a model finding of 'no stance').",
+      "relation": "activation",
+      "relation_basis": "text rule (claim_semantics)",
+      "semantic_polarity": "activation",
+      "stance_fallback_reason": "missing_result",
+      "status_code": "RULE_ONLY",
+      "target_alpha_id": "A501",
+      "version": "evidence_stance.deterministic.v1"
+    },
+    "summary": {
+      "alpha_match": "MATCHED",
+      "scoring": "NOT_SCORED",
+      "source_support": "NOT_LINKED",
+      "stance": "RULE_ONLY"
+    }
+  },
+  "run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+  "schema_version": "evidence_trace.v1",
+  "status": "ok",
+  "ticker": "NVDA"
+}

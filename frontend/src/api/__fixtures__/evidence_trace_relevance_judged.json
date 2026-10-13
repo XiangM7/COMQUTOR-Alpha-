@@ -1,0 +1,276 @@
+{
+ "run_id": "consumption-20261012T061945Z-23daf5e3",
+ "ticker": "NVDA",
+ "status": "ok",
+ "schema_version": "evidence_trace.v1",
+ "item": {
+  "claim_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision:claim:62",
+  "claim": {
+   "text": "Why not the alternatives: Sell/Underweight is refuted by the revenue trajectory and the fully stacked bull structure.",
+   "evidence_text": null,
+   "agent": "portfolio_manager",
+   "claim_quality": "analytical",
+   "direction": "neutral",
+   "confidence": 0.4,
+   "report_location": {
+    "agent_output_id": "12591384-0b26-470d-a99d-a49c00be440b:portfolio_manager:final_trade_decision",
+    "section": "Final Transaction Proposal",
+    "claim_index": 61,
+    "char_offset": null,
+    "paragraph": null
+   },
+   "agent_wording": {
+    "self_labeled_verified": false,
+    "matched_terms": [],
+    "note": null
+   },
+   "key_conclusion_group": "portfolio_manager / Final Transaction Proposal"
+  },
+  "sources": [],
+  "source_support": {
+   "status_code": "NOT_LINKED",
+   "label": "No source linked; not verified",
+   "reason": "No source reference was linked to this claim. Commentary and recommendations need no external source, but this statement is not verified.",
+   "link": {
+    "status": "NOT_PROVIDED",
+    "method": "NONE"
+   },
+   "content_support": {
+    "status": "NOT_APPLICABLE",
+    "method": "NOT_LINKED",
+    "task_version": null,
+    "llm_status": null,
+    "support_basis": null,
+    "core_proposition": null,
+    "used_source_id": null,
+    "used_location": null,
+    "supporting_quote_or_data": null,
+    "rationale": null,
+    "unsupported_remainder": null,
+    "unsupported_materiality": null,
+    "fallback_reason": null
+   },
+   "eligibility": {
+    "eligible": false,
+    "reason_code": "SOURCE_LINK_NOT_VALID",
+    "time_basis": {
+     "basis": "NOT_APPLICABLE",
+     "value": null
+    }
+   }
+  },
+  "alpha_match": {
+   "status_code": "MATCHED",
+   "label": "Matched to an Alpha by the model's selection",
+   "reason": "The classifier selected A301 (Revenue Expansion) from the full taxonomy.",
+   "match_status": "matched",
+   "matched_alpha": "A301",
+   "llm_selected_alpha_id": "A301",
+   "alpha_match_method": "llm",
+   "mapper_override": null
+  },
+  "stance": {
+   "status_code": "RELATION_UNRESOLVED",
+   "label": "Relation to the Alpha is not established",
+   "reason": "The model judged the stance as supports_alpha, but the relation used for scoring is still the text rule's result (the text rule classified the relation as 'mention'), which the model's stance does not update; the claim therefore does not count as supporting evidence.",
+   "evidence_stance": "supports_alpha",
+   "method": "llm",
+   "version": "evidence_stance.llm.v1",
+   "stance_fallback_reason": null,
+   "relation": "mention",
+   "assertion_status": "negated",
+   "semantic_polarity": "mention",
+   "relation_basis": "text rule (claim_semantics)",
+   "target_alpha_id": "A301"
+  },
+  "scoring": {
+   "status_code": "NOT_SCORED",
+   "label": "Not counted in any official score",
+   "reason": "No valid source link, so the verified-evidence gate keeps it out of the official score.",
+   "in_official_pool": false,
+   "alpha_id": "A301",
+   "weight_contribution": null,
+   "match_score_lexical": 0.0673,
+   "not_scored_code": "VERIFIED_GATE_SOURCE_LINK_NOT_VALID"
+  },
+  "calculation": {
+   "data_points": [],
+   "derived_calculations": [],
+   "ambiguous_tokens": [],
+   "unreproduced_percent_tokens": [],
+   "numbers_not_found_in_saved_data": [],
+   "scope_note": null
+  },
+  "dependency": {
+   "contract": "claim_data_points.v1",
+   "same_evidence_fact_members": [],
+   "depends_on": null,
+   "depended_by": [],
+   "shares_inputs_with": [],
+   "note": null
+  },
+  "consumption": {
+   "contract": "alpha_evidence_consumption.v2",
+   "state": "CURRENT",
+   "verification_error": null,
+   "execution_basis": {
+    "execution_run_id": "consumption-20261012T061945Z-23daf5e3",
+    "execution_type": "alpha_evidence_consumption_recompute",
+    "based_on_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+    "root_research_run_id": null,
+    "recomputation_of_saved_inputs": true,
+    "label": "Recomputation of a saved run's inputs under the evidence contract -- not a Fresh Run. This execution made no model, search or data-fetch call; every stance is the source run's saved result (nothing was re-judged).",
+    "stance_ledger": {
+     "available": true,
+     "integrity": "MATCHES_MANIFEST",
+     "sha256": "6076153fdde048e52adfd17b11279cde8a6977c866478683acb6597136d3067f",
+     "owner_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+     "binding": "SOURCE_RUN_DECLARED",
+     "usable": true
+    }
+   },
+   "alpha_id": "A301",
+   "policies": {
+    "stance": "alpha_stance_policy.v1",
+    "attribution": "company_attribution.name.v1",
+    "relevance": "alpha_relevance_fallback.v1"
+   },
+   "text_rule": {
+    "relation": "mention",
+    "assertion_status": "negated",
+    "semantic_polarity": "mention"
+   },
+   "stance": {
+    "state": "MODEL_JUDGED",
+    "label": "supports_alpha",
+    "method": "llm",
+    "version": "evidence_stance.llm.v1",
+    "counter_alpha_id": null,
+    "unjudged_category": null,
+    "unjudged_reason": null,
+    "ledger": "VERIFIED",
+    "explanation": "The model judged the stance toward A301 as supports_alpha (confirmed by the validated ledger output of the saved source run 12591384-0b26-470d-a99d-a49c00be440b, bound by its declared hash)."
+   },
+   "positive_admission": {
+    "admitted": true,
+    "reason_code": null,
+    "label": null,
+    "policy": "alpha_stance_policy.v1",
+    "explanation": "No exclusion from A301's positive pool by the stance policy (every other gate still applies)."
+   },
+   "attribution": {
+    "policy": "company_attribution.name.v1",
+    "category": "NO_TARGET_NAME",
+    "ticker_specific": false,
+    "subject_determined": false,
+    "basis": [],
+    "other_issuers_named": [],
+    "limits": [],
+    "text_sha256": "89e226788389dce6f644eebbc6ca5e4752fbea2b32a233edecad90aa85194e6a",
+    "explanation": "The target company's name is not present in the claim text."
+   },
+   "relevance": {
+    "policy": "alpha_relevance_fallback.v1",
+    "state": "UNJUDGED",
+    "model_level": null,
+    "model_weight": null,
+    "lexical_baseline": 0.0673,
+    "effective_weight": 0.0673,
+    "weight_authority": "LEXICAL_RULE_FALLBACK",
+    "note": "No relevance judgment exists in this contract version. The lexical score is consumed unchanged; it is not a model strength."
+   },
+   "source_support": {
+    "link_status": "NOT_PROVIDED",
+    "linked_source_id": null,
+    "content_support_status": "NOT_APPLICABLE",
+    "content_support_method": "NOT_LINKED",
+    "verified_eligible": false,
+    "eligibility_reason": "SOURCE_LINK_NOT_VALID"
+   },
+   "binding": {
+    "input_sha256": "7a4a9920c084a21efd920008a78ae3cdd7b0206da51e7812e4ab751d78d41abb",
+    "source_state_sha256": "5f3665b081724817b959324d385e24fe367c3b585fc991bd70157cb86b86ac9f",
+    "ledger": {
+     "available": true,
+     "integrity": "MATCHES_MANIFEST",
+     "sha256": "6076153fdde048e52adfd17b11279cde8a6977c866478683acb6597136d3067f",
+     "owner_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+     "binding": "SOURCE_RUN_DECLARED",
+     "usable": true
+    }
+   }
+  },
+  "relevance_judgment": {
+   "contract": "alpha_relevance_judgment.v1",
+   "alpha_id": "A301",
+   "state": "JUDGED",
+   "tier": "core",
+   "reason": null,
+   "reason_detail": null,
+   "label": "SIMULATED TEST DATA -- produced by the P4 phase-1 simulated gateway, not a model judgment. Relevance to A301 judged: core.",
+   "anchors": [
+    {
+     "element_id": "A301.demand",
+     "label": "demand",
+     "ownership": "core",
+     "occurrences": [
+      {
+       "list": "core_thesis",
+       "phrase": "Strong demand"
+      },
+      {
+       "list": "trigger_signals",
+       "phrase": "demand beats expectations"
+      },
+      {
+       "list": "invalidation_conditions",
+       "phrase": "demand weakens"
+      }
+     ]
+    }
+   ],
+   "basis": "SIMULATED TEST DATA (rule simulated_hash_buckets.v1, bucket 3) -- not a model judgment.",
+   "unresolved_reason": null,
+   "test_data": true,
+   "source": {
+    "execution_run_id": "consumption-20261012T061945Z-23daf5e3",
+    "based_on_run_id": "12591384-0b26-470d-a99d-a49c00be440b",
+    "owner_run_id": "consumption-20261012T061945Z-23daf5e3",
+    "call_id": "consumption-20261012T061945Z-23daf5e3:semantic:8:5049bf3de3cc413faa7012abf0a675b3",
+    "task": "alpha_relevance_judge",
+    "prompt_version": "alpha_relevance.judge.prompt.v1",
+    "criterion_version": "alpha_relevance_criterion.exp1",
+    "provider": "simulated",
+    "model": "simulated-relevance.v1",
+    "execution_mode": "test",
+    "ledger": {
+     "directory": "alpha_relevance_ledger",
+     "available": true,
+     "integrity": "MATCHES_MANIFEST",
+     "calls_file_sha256": "fa0e0a9746364730a4254b8e436ef76cee0892f4cd6be20537855a1ccd94ab0f",
+     "manifest_calls_file_sha256": "fa0e0a9746364730a4254b8e436ef76cee0892f4cd6be20537855a1ccd94ab0f",
+     "relevance_records": 26,
+     "other_task_records_ignored": 0,
+     "usable": true
+    }
+   },
+   "model_weight": null,
+   "consumption_note": "Experimental label only (P4 phase 1): not read by Alpha selection, stance, admission or scoring, and no weight is derived from it (model_weight stays null)."
+  },
+  "conflict_adoption": {
+   "entries": [],
+   "note": null
+  },
+  "run_basis": {
+   "link_fields_saved": true,
+   "note": null
+  },
+  "summary": {
+   "source_support": "NOT_LINKED",
+   "alpha_match": "MATCHED",
+   "stance": "RELATION_UNRESOLVED",
+   "scoring": "NOT_SCORED"
+  },
+  "note": "Source support, Alpha match, stance and scoring are separate checks; passing one does not imply the others."
+ }
+}

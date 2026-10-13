@@ -430,6 +430,34 @@ def _clean_markdown_inline(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
+# A full stop after one of these abbreviations is not a sentence end (2026-10-13: "the Roundtable 100 ranking (No. 76) introduce
+# mild competitive/reputational noise ..." was saved as two claims, the first ending at "(No."). Three closed lists, each with the
+# condition under which the split is undone; every other full stop / ? / ! / 。！？ followed by whitespace splits as before. The
+# abbreviation must start a word (after whitespace, a bracket, a quote, a dash or "/"): "up." is not "p.", "0.5pp." is not "pp.".
+_WORD_START = r"(?<![^\s(\[\"'“‘—/-])"
+_NEVER_SENTENCE_END = re.compile(_WORD_START + r"(?:vs|e\.g|i\.e|Mr|Mrs|Ms|Dr)\.$")
+_BEFORE_A_NUMBER = re.compile(_WORD_START + r"(?:No|Nos|Fig|Figs|Vol|p|pp|approx|est|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.$")
+_BEFORE_LOWERCASE_OR_PARENTHESIS = re.compile(_WORD_START + r"(?:U\.S|U\.K|St|Inc|Corp|Co|Ltd)\.$")
+
+
+def _split_sentences(text):
+    """The sentences of one cleaned block (single spaces). "vs." / "e.g." / "i.e." / "Mr." never end a sentence; "No. 76",
+    "Fig. 3", "Aug. 26" go on when a number follows; "U.S.", "Inc." and the like can end a sentence, so they go on only when a
+    lowercase word or "(" follows."""
+    sentences = []
+    for piece in re.split(r"(?<=[.!?。！？])\s+", text):
+        previous, first = (sentences[-1] if sentences else ""), piece[:1]
+        if previous and (
+            _NEVER_SENTENCE_END.search(previous)
+            or (first.isdigit() and _BEFORE_A_NUMBER.search(previous))
+            or ((first.islower() or first == "(") and _BEFORE_LOWERCASE_OR_PARENTHESIS.search(previous))
+        ):
+            sentences[-1] = f"{previous} {piece}"
+        else:
+            sentences.append(piece)
+    return sentences
+
+
 def _is_table_separator_row(line):
     """A GFM table's own ``| --- | --- |`` / ``|:---:|---:|`` divider row --
     never a header, never a data row, never a claim."""
@@ -610,7 +638,7 @@ def extract_claim_segments_with_audit(raw_text):
     filtered = []
     for block_section, block in blocks:
         cleaned_block = _clean_markdown_inline(block)
-        sentences = re.split(r"(?<=[.!?。！？])\s+", cleaned_block)
+        sentences = _split_sentences(cleaned_block)
         for sentence in sentences:
             claim = _clean_markdown_inline(sentence)
             reason_code = classify_filtered_claim(claim)

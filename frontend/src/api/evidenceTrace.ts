@@ -235,6 +235,202 @@ export interface TraceRunBasis {
   note: string | null;
 }
 
+/**
+ * alpha_evidence_consumption.v2 -- how the evidence contract treated ONE claim: the model's stance toward the matched Alpha, whether
+ * that stance keeps the claim out of the Alpha's positive pool, whether the target company's NAME is present in the claim text
+ * (never "the claim is about the company"), and which weight the scorers consumed (today always the rule-based lexical score,
+ * labelled as such). `null` on the item = the run never declared the contract (legacy behaviour, nothing here is shown).
+ */
+export interface TraceConsumptionStance {
+  /** MODEL_JUDGED (a valid model result confirmed by the run's own validated ledger) or UNJUDGED (no exclusion follows from it). */
+  state: string;
+  label: string | null;
+  method: string | null;
+  version: string | null;
+  counter_alpha_id: string | null;
+  /** MISSING / TIMEOUT / PARSE_FAILED / FALLBACK / UNVERIFIED -- only for UNJUDGED. */
+  unjudged_category: string | null;
+  unjudged_reason: string | null;
+  ledger: string | null;
+  explanation: string | null;
+}
+
+export interface TraceConsumptionAdmission {
+  admitted: boolean;
+  /** STANCE_MODEL_NOT_SUPPORTING when the claim is kept out of this Alpha's positive pool. */
+  reason_code: string | null;
+  label: string | null;
+  policy: string | null;
+  explanation: string | null;
+}
+
+export interface TraceConsumptionAttribution {
+  category: string | null;
+  /** "The target's name is present in the claim text" -- NOT "the claim is about the target". */
+  ticker_specific: boolean;
+  subject_determined: boolean;
+  limits: string[];
+  other_issuers_named: string[];
+  basis: { kind: string; term: string }[];
+  policy: string | null;
+  explanation: string | null;
+}
+
+export interface TraceConsumptionRelevance {
+  state: string | null;
+  model_level: string | null;
+  model_weight: number | null;
+  lexical_baseline: number | null;
+  effective_weight: number | null;
+  /** LEXICAL_RULE_FALLBACK: the rule-based score is consumed unchanged; it is not a model strength. */
+  weight_authority: string | null;
+  policy: string | null;
+  note: string | null;
+}
+
+export interface TraceConsumptionTextRule {
+  relation: string | null;
+  assertion_status: string | null;
+  semantic_polarity: string | null;
+}
+
+/** alpha_statement_scope (2026-10-13; v2): whether the text rule's whole-claim negation negates THIS Alpha's statement. */
+export interface TraceConsumptionStatementScope {
+  applies: boolean;
+  governing_negation: boolean;
+  changed: boolean;
+  removed: { basis: string; text: string }[];
+  /** v2: the contrast / other-clause parts the rule did NOT remove because the pair has no anchor (a ledger-corroborated model
+   * judgment that the claim supports this Alpha) -- without it the words cannot tell which side carries the Alpha's statement. */
+  not_applied: { basis: string; text: string }[];
+  /** v2: what anchored the contrast / other-clause removals ("MODEL_JUDGED_SUPPORTS_ALPHA"), null when nothing did. */
+  anchor: string | null;
+  remaining_negators: string[];
+  /** The text-rule fields the positive gates and the weights read (the stored ones are unchanged). */
+  effective: TraceConsumptionTextRule | null;
+  policy: string | null;
+  explanation: string | null;
+}
+
+export interface TraceConsumptionBinding {
+  input_sha256: string | null;
+  source_state_sha256: string | null;
+  ledger_integrity: string | null;
+  ledger_sha256: string | null;
+  /** WHOSE model ledger corroborated the stance (a derived execution binds the ledger of the saved run it recomputes). */
+  ledger_owner_run_id: string | null;
+  /** OWN_RUN or SOURCE_RUN_DECLARED. */
+  ledger_binding: string | null;
+}
+
+export interface TraceStanceLedgerRef {
+  available: boolean;
+  integrity: string | null;
+  sha256: string | null;
+  owner_run_id: string | null;
+  binding: string | null;
+}
+
+/** Which run executed the evaluation and on what basis -- executing run, saved source run and ledger owner kept apart. */
+export interface TraceExecutionBasis {
+  execution_run_id: string | null;
+  execution_type: string | null;
+  based_on_run_id: string | null;
+  root_research_run_id: string | null;
+  /** True for a derived execution: a recomputation of saved inputs, never a Fresh Run. */
+  recomputation_of_saved_inputs: boolean;
+  label: string | null;
+  stance_ledger: TraceStanceLedgerRef | null;
+}
+
+export interface TraceConsumption {
+  contract: string;
+  /** CURRENT / STALE / MISSING / INVALID:<reason> / NOT_APPLICABLE / UNKNOWN (the saved decision against a fresh recomputation). */
+  state: string;
+  verification_error: string | null;
+  /** Set for a claim matched to no Alpha: only the name decision exists. */
+  scope: string | null;
+  alpha_id: string | null;
+  policies: Record<string, string>;
+  text_rule: TraceConsumptionTextRule | null;
+  stance: TraceConsumptionStance | null;
+  positive_admission: TraceConsumptionAdmission | null;
+  attribution: TraceConsumptionAttribution | null;
+  relevance: TraceConsumptionRelevance | null;
+  binding: TraceConsumptionBinding | null;
+  execution_basis: TraceExecutionBasis | null;
+  /** Additive (2026-10-13); null on older backends. */
+  statement_scope: TraceConsumptionStatementScope | null;
+}
+
+export interface TraceRelevanceAnchor {
+  element_id: string;
+  label: string | null;
+  /** "core" (core thesis / trigger / invalidation) or "strong" (confirmation only). */
+  ownership: string | null;
+  occurrences: { list: string; phrase: string }[];
+  /** Output v2 (prompt v2): the claim's own words the judgment quoted for this element; empty for a judgment recorded under output v1. */
+  evidence_quotes: string[];
+  /** Output v3: how each quoted statement is made (assertion, forecast, probability ...), aligned with evidence_quotes; empty before v3. */
+  evidence_modes: string[];
+}
+
+/** Output v3: one statement the judgment reported -- recorded as the model gave it; the API never re-judges it. */
+export interface TraceRelevanceStatement {
+  quote: string;
+  object: string | null;
+  property: string | null;
+  mode: string | null;
+  element_id: string | null;
+  hit: boolean;
+  why: string | null;
+}
+
+export interface TraceRelevanceSource {
+  execution_run_id: string | null;
+  based_on_run_id: string | null;
+  /** The run that owns the judgment and its relevance ledger. */
+  owner_run_id: string | null;
+  call_id: string | null;
+  task: string | null;
+  prompt_version: string | null;
+  criterion_version: string | null;
+  provider: string | null;
+  model: string | null;
+  execution_mode: string | null;
+  ledger_integrity: string | null;
+  ledger_directory: string | null;
+}
+
+/** P4 phase 1 -- the experimental relevance judgment of a claim and its MATCHED Alpha (absent for a claim matched to no Alpha). */
+export interface TraceRelevanceJudgment {
+  contract: string;
+  alpha_id: string | null;
+  /** UNJUDGED / JUDGED / UNRESOLVED / FAILED. */
+  state: string;
+  /** core / strong / weak / none -- set ONLY when state is JUDGED (never "none" for a missing judgment). */
+  tier: string | null;
+  reason: string | null;
+  reason_detail: string | null;
+  label: string | null;
+  anchors: TraceRelevanceAnchor[];
+  basis: string | null;
+  unresolved_reason: string | null;
+  /** Output v3: every statement the judgment reported (hit or not); empty before v3. */
+  statements: TraceRelevanceStatement[];
+  /** Output v3: "element_ownership_q1" (core / strong derived from the hit elements) or "model_no_hit" (weak / none); null otherwise. */
+  tier_source: string | null;
+  /** True when the judgment came from the simulated gateway: TEST DATA, never a model judgment. */
+  test_data: boolean;
+  source: TraceRelevanceSource;
+  /** Always null in this phase: no weight is derived from the label. */
+  model_weight: number | null;
+  consumption_note: string | null;
+}
+
+const RELEVANCE_STATES = new Set(["UNJUDGED", "JUDGED", "UNRESOLVED", "FAILED"]);
+const RELEVANCE_TIERS = new Set(["core", "strong", "weak", "none"]);
+
 export interface EvidenceTraceItem {
   claim_id: string;
   claim: TraceClaim;
@@ -251,6 +447,10 @@ export interface EvidenceTraceItem {
   dependency: TraceDependency;
   conflict_adoption: TraceConflictAdoption;
   run_basis: TraceRunBasis;
+  /** null = the run never declared alpha_evidence_consumption.v2 (nothing to show). */
+  consumption: TraceConsumption | null;
+  /** null = the claim has no matched Alpha, or the payload predates the relevance record. */
+  relevance_judgment: TraceRelevanceJudgment | null;
   note: string | null;
 }
 
@@ -279,6 +479,8 @@ export interface KeyConclusionsView {
   agent_wording_verified_count: number;
   status_counts: Record<string, Record<string, number>>;
   groups: KeyConclusionGroup[];
+  /** Only for a run under the evidence contract or produced by the consumption recompute entry; null for every other run. */
+  execution_basis: TraceExecutionBasis | null;
 }
 
 export interface EvidenceTraceItemResponse {
@@ -390,6 +592,218 @@ function adaptDerivedInputs(raw: unknown): TraceDerivedInputs | null {
     recomputation_indicators_checked: num(recomputation.indicators_checked),
     recomputation_mismatched: strList(recomputation.mismatched),
     note: str(raw.note),
+  };
+}
+
+function adaptExecutionBasis(raw: unknown): TraceExecutionBasis | null {
+  if (!isRecord(raw)) return null;
+  const ledger = isRecord(raw.stance_ledger) ? raw.stance_ledger : null;
+  return {
+    execution_run_id: str(raw.execution_run_id),
+    execution_type: str(raw.execution_type),
+    based_on_run_id: str(raw.based_on_run_id),
+    root_research_run_id: str(raw.root_research_run_id),
+    recomputation_of_saved_inputs: bool(raw.recomputation_of_saved_inputs),
+    label: str(raw.label),
+    stance_ledger: ledger
+      ? {
+          available: bool(ledger.available),
+          integrity: str(ledger.integrity),
+          sha256: str(ledger.sha256),
+          owner_run_id: str(ledger.owner_run_id),
+          binding: str(ledger.binding),
+        }
+      : null,
+  };
+}
+
+export function adaptRelevanceJudgment(raw: unknown): TraceRelevanceJudgment | null {
+  if (!isRecord(raw)) return null;
+  const contract = str(raw.contract);
+  const state = str(raw.state);
+  if (!contract || !state || !RELEVANCE_STATES.has(state)) return null;
+  const tier = str(raw.tier);
+  const source = rec(raw.source);
+  const ledger = rec(source.ledger);
+  return {
+    contract,
+    alpha_id: str(raw.alpha_id),
+    state,
+    // a tier is shown only for a JUDGED pair, and only from the closed vocabulary
+    tier: state === "JUDGED" && tier !== null && RELEVANCE_TIERS.has(tier) ? tier : null,
+    reason: str(raw.reason),
+    reason_detail: str(raw.reason_detail),
+    label: str(raw.label),
+    anchors: list(raw.anchors)
+      .map((anchorRaw) => {
+        const anchor = rec(anchorRaw);
+        const elementId = str(anchor.element_id);
+        if (!elementId) return null;
+        return {
+          element_id: elementId,
+          label: str(anchor.label),
+          ownership: str(anchor.ownership),
+          occurrences: list(anchor.occurrences)
+            .map((occurrenceRaw) => {
+              const occurrence = rec(occurrenceRaw);
+              const listName = str(occurrence.list);
+              const phrase = str(occurrence.phrase);
+              return listName && phrase ? { list: listName, phrase } : null;
+            })
+            .filter((entry): entry is { list: string; phrase: string } => entry !== null),
+          evidence_quotes: strList(anchor.evidence_quotes).filter((quote) => quote.trim() !== ""),
+          evidence_modes: list(anchor.evidence_modes).map((mode) => str(mode) ?? ""),
+        };
+      })
+      .filter((entry): entry is TraceRelevanceAnchor => entry !== null),
+    basis: str(raw.basis),
+    unresolved_reason: str(raw.unresolved_reason),
+    statements: list(raw.statements)
+      .map((statementRaw) => {
+        const s = rec(statementRaw);
+        const quote = str(s.quote);
+        if (!quote) return null;
+        return { quote, object: str(s.object), property: str(s.property), mode: str(s.mode), element_id: str(s.element_id), hit: bool(s.hit), why: str(s.why) };
+      })
+      .filter((entry): entry is TraceRelevanceStatement => entry !== null),
+    tier_source: str(raw.tier_source),
+    test_data: bool(raw.test_data),
+    source: {
+      execution_run_id: str(source.execution_run_id),
+      based_on_run_id: str(source.based_on_run_id),
+      owner_run_id: str(source.owner_run_id),
+      call_id: str(source.call_id),
+      task: str(source.task),
+      prompt_version: str(source.prompt_version),
+      criterion_version: str(source.criterion_version),
+      provider: str(source.provider),
+      model: str(source.model),
+      execution_mode: str(source.execution_mode),
+      ledger_integrity: str(ledger.integrity),
+      ledger_directory: str(ledger.directory),
+    },
+    model_weight: num(raw.model_weight),
+    consumption_note: str(raw.consumption_note),
+  };
+}
+
+function adaptConsumption(raw: unknown): TraceConsumption | null {
+  if (!isRecord(raw)) return null;
+  const contract = str(raw.contract);
+  if (!contract) return null;
+  const stance = isRecord(raw.stance) ? raw.stance : null;
+  const admission = isRecord(raw.positive_admission) ? raw.positive_admission : null;
+  const attribution = isRecord(raw.attribution) ? raw.attribution : null;
+  const relevance = isRecord(raw.relevance) ? raw.relevance : null;
+  const textRule = isRecord(raw.text_rule) ? raw.text_rule : null;
+  const scope = isRecord(raw.statement_scope) ? raw.statement_scope : null;
+  const scopeEffective = scope && isRecord(scope.effective) ? scope.effective : null;
+  const binding = isRecord(raw.binding) ? raw.binding : null;
+  const ledger = rec(binding?.ledger);
+  const policies: Record<string, string> = {};
+  for (const [name, version] of Object.entries(rec(raw.policies))) {
+    const text = str(version);
+    if (text !== null) policies[name] = text;
+  }
+  return {
+    contract,
+    state: str(raw.state) ?? "UNKNOWN",
+    verification_error: str(raw.verification_error),
+    scope: str(raw.scope),
+    alpha_id: str(raw.alpha_id),
+    policies,
+    text_rule: textRule
+      ? { relation: str(textRule.relation), assertion_status: str(textRule.assertion_status), semantic_polarity: str(textRule.semantic_polarity) }
+      : null,
+    statement_scope: scope
+      ? {
+          applies: scope.applies === true,
+          governing_negation: scope.governing_negation === true,
+          changed: scope.changed === true,
+          removed: list(scope.removed).flatMap((entry) => {
+            const basis = str(rec(entry).basis);
+            const text = str(rec(entry).text);
+            return basis && text !== null ? [{ basis, text }] : [];
+          }),
+          not_applied: list(scope.not_applied).flatMap((entry) => {
+            const basis = str(rec(entry).basis);
+            const text = str(rec(entry).text);
+            return basis && text !== null ? [{ basis, text }] : [];
+          }),
+          anchor: str(scope.anchor),
+          remaining_negators: strList(scope.remaining_negators),
+          effective: scopeEffective
+            ? {
+                relation: str(scopeEffective.relation),
+                assertion_status: str(scopeEffective.assertion_status),
+                semantic_polarity: str(scopeEffective.semantic_polarity),
+              }
+            : null,
+          policy: str(scope.policy),
+          explanation: str(scope.explanation),
+        }
+      : null,
+    stance: stance
+      ? {
+          state: str(stance.state) ?? "UNKNOWN",
+          label: str(stance.label),
+          method: str(stance.method),
+          version: str(stance.version),
+          counter_alpha_id: str(stance.counter_alpha_id),
+          unjudged_category: str(stance.unjudged_category),
+          unjudged_reason: str(stance.unjudged_reason),
+          ledger: str(stance.ledger),
+          explanation: str(stance.explanation),
+        }
+      : null,
+    positive_admission: admission
+      ? {
+          admitted: admission.admitted !== false,
+          reason_code: str(admission.reason_code),
+          label: str(admission.label),
+          policy: str(admission.policy),
+          explanation: str(admission.explanation),
+        }
+      : null,
+    attribution: attribution
+      ? {
+          category: str(attribution.category),
+          ticker_specific: bool(attribution.ticker_specific),
+          subject_determined: bool(attribution.subject_determined),
+          limits: strList(attribution.limits),
+          other_issuers_named: strList(attribution.other_issuers_named),
+          basis: list(attribution.basis).flatMap((entry) => {
+            const kind = str(rec(entry).kind);
+            const term = str(rec(entry).term);
+            return kind && term ? [{ kind, term }] : [];
+          }),
+          policy: str(attribution.policy),
+          explanation: str(attribution.explanation),
+        }
+      : null,
+    relevance: relevance
+      ? {
+          state: str(relevance.state),
+          model_level: str(relevance.model_level),
+          model_weight: num(relevance.model_weight),
+          lexical_baseline: num(relevance.lexical_baseline),
+          effective_weight: num(relevance.effective_weight),
+          weight_authority: str(relevance.weight_authority),
+          policy: str(relevance.policy),
+          note: str(relevance.note),
+        }
+      : null,
+    binding: binding
+      ? {
+          input_sha256: str(binding.input_sha256),
+          source_state_sha256: str(binding.source_state_sha256),
+          ledger_integrity: str(ledger.integrity),
+          ledger_sha256: str(ledger.sha256),
+          ledger_owner_run_id: str(ledger.owner_run_id),
+          ledger_binding: str(ledger.binding),
+        }
+      : null,
+    execution_basis: adaptExecutionBasis(raw.execution_basis),
   };
 }
 
@@ -576,6 +990,8 @@ export function adaptEvidenceTraceItem(raw: unknown): TraceAdaptResult<EvidenceT
       calculation_note: str(calc.scope_note),
       conflict_adoption: adaptConflictAdoption(r.conflict_adoption),
       run_basis: { link_fields_saved: rec(r.run_basis).link_fields_saved !== false, note: str(rec(r.run_basis).note) },
+      consumption: adaptConsumption(r.consumption),
+      relevance_judgment: adaptRelevanceJudgment(r.relevance_judgment),
       dependency: {
         contract: str(dep.contract),
         same_evidence_fact_members: strList(dep.same_evidence_fact_members),
@@ -662,6 +1078,7 @@ export function adaptKeyConclusionsResponse(payload: unknown): TraceAdaptResult<
         agent_wording_verified_count: num(k.agent_wording_verified_count) ?? 0,
         status_counts: counts,
         groups,
+        execution_basis: adaptExecutionBasis(k.execution_basis),
       },
     },
   };

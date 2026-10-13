@@ -35,6 +35,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from comqutor_alpha.graph_engine.claim_data_grounding import dependency_anchors
+from comqutor_alpha.graph_engine.evidence_consumption import (
+    REASON_STANCE_MODEL_NOT_SUPPORTING,
+    effective_text_rule,
+    positive_admission_exclusion,
+)
 from comqutor_alpha.graph_engine.graph_schema import is_finite_number
 from comqutor_alpha.structure_engine.claim_quality import (
     CONSUMER_ACTIVATION,
@@ -65,6 +70,9 @@ REASON_MISSING_CLAIM_ID_OR_EVIDENCE = "MISSING_CLAIM_ID_OR_EVIDENCE"
 REASON_INVALID_MATCH_SCORE = "INVALID_MATCH_SCORE"
 REASON_RELATION_NOT_SUPPORTING = "RELATION_NOT_SUPPORTING"
 REASON_ASSERTION_NEGATED = "ASSERTION_NEGATED"
+# T1 follow-up migration (alpha_evidence_consumption.v2, R-1): the one reason code for a claim a MODEL-JUDGED stance keeps out
+# of this Alpha's positive pool. Defined in graph_engine.evidence_consumption so every entry reads the same constant.
+REASON_STANCE_NOT_SUPPORTING = REASON_STANCE_MODEL_NOT_SUPPORTING
 REASON_DUPLICATE_CLAIM_ID = "DUPLICATE_CLAIM_ID"
 WARNING_NON_FINITE_OR_OUT_OF_RANGE_MATCH_SCORE = "NON_FINITE_OR_OUT_OF_RANGE_MATCH_SCORE"
 
@@ -147,16 +155,33 @@ def select_supporting_alpha_claims(
             excluded.append({"claim_id": claim_id, "reason": REASON_INVALID_MATCH_SCORE})
             continue
 
-        relation = relation_for_match(record, alpha_id)
+        # alpha_evidence_consumption.v2 (alpha_statement_scope): under the contract the relation / assertion gates read the
+        # block's per-pair negation scope (a negator that does not govern this Alpha's statement no longer turns the whole claim
+        # into a mention); a legacy record has no block and reads the stored text-rule fields exactly as before.
+        effective = effective_text_rule(record, alpha_id)
+        relation = (
+            str(effective.get("relation") or "unknown").strip().lower() if effective is not None else relation_for_match(record, alpha_id)
+        )
         if relation not in QUALIFYING_RELATIONS:
             excluded.append(
                 {"claim_id": claim_id, "reason": REASON_RELATION_NOT_SUPPORTING, "relation": relation}
             )
             continue
 
-        assertion_status = str(record.get("assertion_status") or "unknown").strip().lower()
+        assertion_status = str(
+            (effective.get("assertion_status") if effective is not None else record.get("assertion_status")) or "unknown"
+        ).strip().lower()
         if assertion_status == "negated":
             excluded.append({"claim_id": claim_id, "reason": REASON_ASSERTION_NEGATED})
+            continue
+
+        # alpha_evidence_consumption.v2 (R-1): an explicit, subtractive positive-admission field -- NOT a rewritten relation.
+        # Legacy records carry no consumption block and are never affected; an invalid block raises (never a silent fallback).
+        stance_exclusion = positive_admission_exclusion(record, alpha_id)
+        if stance_exclusion is not None:
+            excluded.append(
+                {"claim_id": claim_id, "reason": stance_exclusion["reason_code"], "label": stance_exclusion.get("label")}
+            )
             continue
 
         if claim_id in by_claim_id:

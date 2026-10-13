@@ -1,0 +1,91 @@
+{
+ "schema": "alpha_relevance_element_hints.v1",
+ "elements_version": "alpha_relevance_elements.v1",
+ "taxonomy_content_version": "1.1.0",
+ "principle": "Owner decision, 2026-10-12 (session 6): a hint is a semantic hint, never an automatic hit -- the claim states the element only when the object, the property and the scope also match. Only true synonyms or same-property subcategories that the definition itself supports are registered.",
+ "hints": [
+  {
+   "id": "H-A103-server-demand-ai-servers",
+   "alpha_id": "A103",
+   "element_id": "A103.server_demand",
+   "relation": "same_property_subcategory",
+   "expressions": [
+    "AI-server demand",
+    "demand for AI servers"
+   ],
+   "object": "AI servers (a subcategory of servers)",
+   "property": "demand",
+   "scope": "demand for the servers themselves; a server backlog, server orders or server makers' share prices are other properties",
+   "basis": "A103 core thesis 'AI buildout drives ... server demand'; confirmation signal 'server demand rises'",
+   "source": "owner brief 2026-10-12 (session 6): the named example of the first registrations"
+  },
+  {
+   "id": "H-A201-semiconductor-demand-memory",
+   "alpha_id": "A201",
+   "element_id": "A201.semiconductor_demand",
+   "relation": "same_property_subcategory",
+   "expressions": [
+    "AI memory demand",
+    "memory demand",
+    "memory chip demand",
+    "DRAM demand",
+    "NAND demand",
+    "HBM demand"
+   ],
+   "object": "memory chips (DRAM, NAND, HBM: a subcategory of semiconductors)",
+   "property": "demand",
+   "scope": "demand for the chips; a memory shortage, memory prices, inventory or a backlog are other properties",
+   "basis": "A201 core thesis '... semiconductor demand'; trigger signal 'chip demand rises'",
+   "source": "owner brief 2026-10-12 (session 4), exp2 rule A example: 'AI memory demand states semiconductor demand'"
+  },
+  {
+   "id": "H-A501-economic-slowdown-recession",
+   "alpha_id": "A501",
+   "element_id": "A501.economic_slowdown",
+   "relation": "same_property_subcategory",
+   "expressions": [
+    "recession",
+    "US recession",
+    "economic recession"
+   ],
+   "object": "the economy",
+   "property": "contraction of economic activity (the severe end of an economic slowdown)",
+   "scope": "economy-wide; an 'earnings recession' is the earnings element, and a sector or company downturn is not the economy",
+   "basis": "A501 core thesis '... economic slowdown ...'; A501 topic terms list 'recession', 'recession risk' and 'economic slowdown'",
+   "source": "engineering selection under the owner's principle (2026-10-12, session 6): supported by the definition's own topic terms; the owner may remove it"
+  }
+ ],
+ "not_registered": [
+  {
+   "expression": "agentic AI demand",
+   "candidate_element": "A102.enterprise_ai_usage",
+   "why": "owner decision 2026-10-12: needs a concrete statement and definition support; not registered for now"
+  },
+  {
+   "expression": "inference market growth",
+   "candidate_element": "A102.inference_compute_demand",
+   "why": "owner decision 2026-10-12: not registered for now"
+  },
+  {
+   "expression": "breadth of any researched asset",
+   "candidate_element": "A601.theme_breadth",
+   "why": "owner decision 2026-10-12: not registered for now"
+  },
+  {
+   "expression": "AI capex (cycle)",
+   "candidate_element": "A103.ai_buildout",
+   "why": "spending and the buildout are different properties and the definition does not name AI capex; left to the statement-level judgment"
+  },
+  {
+   "expression": "AI-server backlog",
+   "candidate_element": "A103.server_demand",
+   "why": "a backlog (orders not yet delivered) is a different property; A103's own definition lists orders as a different quantity from demand"
+  },
+  {
+   "expression": "liquidity read from a company's current ratio",
+   "candidate_element": "A003.liquidity",
+   "why": "owner decision 2026-10-12: balance-sheet liquidity is a different property from market liquidity"
+  }
+ ],
+ "note": "'not_registered' documents decisions and is never sent to the model; only 'hints' (element, relation, expressions, object, property, scope) is sent."
+}

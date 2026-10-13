@@ -56,6 +56,11 @@ from comqutor_alpha.graph_engine.evidence_fact_index import (
     relation_triple_index,
     select_supporting_alpha_claims,
 )
+from comqutor_alpha.graph_engine.evidence_consumption import (
+    attribution_decision_for_record,
+    effective_text_rule,
+    positive_admission_exclusion,
+)
 from comqutor_alpha.graph_engine.graph_schema import (
     MVP_ALPHA_IDS,
     clamp_percent,
@@ -240,7 +245,20 @@ def _is_ticker_specific(
     appears in the claim text -- upstream extraction appends the run ticker
     to every claim's entities unconditionally, so entity presence alone is
     not evidence of specificity. Pure sector/macro statements never
-    qualify."""
+    qualify.
+
+    alpha_evidence_consumption.v2 (T1 follow-up migration): when the record
+    carries a consumption block, THAT block's name decision
+    (``company_attribution.name.v1``: the ticker symbol, an approved issuer name,
+    or a product alias with explicit product context) is the answer at every
+    entry that calls this function -- Activation, the conflict side, the
+    evidence display, unclassified findings -- so the rule cannot differ between
+    them. The block's contract, target ticker and claim/Alpha pair are validated
+    first and a mismatch raises. A record with no block (every legacy run) takes
+    the unchanged path below, byte for byte."""
+    consumed = attribution_decision_for_record(record, ticker)
+    if consumed is not None:
+        return consumed
     text = str(record.get("claim") or record.get("evidence") or "")
     if not text:
         return False
@@ -364,8 +382,17 @@ def _gather_qualifying_evidence(
         claim_id = str(record.get("claim_id") or "").strip()
         evidence_text = str(record.get("evidence") or record.get("claim") or "").strip()
         score = float(record.get("score"))
-        relation = _relation_for_match(record, alpha_id)
-        assertion_status = str(record.get("assertion_status") or "unknown").strip().lower()
+        # alpha_evidence_consumption.v2 (alpha_statement_scope): the weights read the same effective text-rule fields the
+        # selector's gates read (a claim admitted because a negator does not govern this Alpha's statement is weighted as the
+        # re-read statement, not as "negated" = 0); a legacy record reads the stored fields exactly as before.
+        effective = effective_text_rule(record, alpha_id)
+        relation = str(effective["relation"]).strip().lower() if effective is not None else _relation_for_match(record, alpha_id)
+        assertion_status = str(
+            (effective["assertion_status"] if effective is not None else record.get("assertion_status")) or "unknown"
+        ).strip().lower()
+        semantic_polarity = str(
+            (effective["semantic_polarity"] if effective is not None else record.get("semantic_polarity")) or "unknown"
+        ).strip().lower()
         by_claim_id[claim_id] = {
             "claim_id": claim_id,
             "agent": str(record.get("agent") or "").strip(),
@@ -382,7 +409,7 @@ def _gather_qualifying_evidence(
             "factors": tuple(
                 str(f) for f in (record.get("factors") or []) if str(f or "").strip()
             ),
-            "semantic_polarity": str(record.get("semantic_polarity") or "unknown").strip().lower(),
+            "semantic_polarity": semantic_polarity,
             "duplicate_group_id": duplicate_group_ids.get(claim_id),
             "relation_triple": relation_triples.get(claim_id),
             # T1 closure (claim_data_points.v1): saved observations this claim states / relies on; empty unless the
@@ -746,8 +773,15 @@ def _gather_direction_evidence(
         score = record.get("score", None)
         if not is_finite_number(score) or not 0.0 <= float(score) <= 1.0:
             continue
-        relation = _relation_for_match(record, alpha_id)
+        # alpha_evidence_consumption.v2: the sign is read from the same effective text-rule relation as the positive pool
+        # (alpha_statement_scope), and a claim R-1 keeps out of the positive pool -- a MODEL-JUDGED opposing, background,
+        # mention-only or counter-Alpha stance -- is never counted as POSITIVE direction evidence (alpha_direction_stance_policy.v1;
+        # subtract only: a negative or neutral sign is unchanged). A legacy record has no block and is read exactly as before.
+        effective = effective_text_rule(record, alpha_id)
+        relation = str(effective["relation"]).strip().lower() if effective is not None else _relation_for_match(record, alpha_id)
         if relation not in DIRECTION_SIGNED_RELATIONS:
+            continue
+        if DIRECTION_SIGNED_RELATIONS[relation] > 0 and positive_admission_exclusion(record, alpha_id) is not None:
             continue
         key = _semantic_group_key(record, duplicate_group_ids)
         candidate = {"relation": relation, "match_score": float(score)}

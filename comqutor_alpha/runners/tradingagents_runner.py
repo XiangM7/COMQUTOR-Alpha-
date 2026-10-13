@@ -313,6 +313,22 @@ def _relocate_run_outputs(temp_run_dir, target_run_id, output_root):
         registry["run_id"] = safe_target
         save_json_record(safe_target, "source_registry.json", registry, output_root=output_root)
 
+    # T1 follow-up migration, P1: the two capture artifacts (comqutor_alpha.capture_artifacts) are written by the same
+    # pre-relocation save_comqutor_run_outputs call, so they carry the same stale temp run_id unless rewritten here too.
+    # Only their top-level run_id changes -- sources, content hashes, the input series and the calculation lineage stay
+    # exactly as saved. Both are optional like the registry: one that was never captured does not exist,
+    # load_json_record_if_exists returns {} for it, and nothing is written (no bogus {"run_id": ...}-only file).
+    from comqutor_alpha.capture_artifacts import (
+        DERIVED_INPUTS_FILENAME,
+        PROVIDER_RESPONSE_AUDIT_FILENAME,
+    )
+
+    for capture_artifact in (DERIVED_INPUTS_FILENAME, PROVIDER_RESPONSE_AUDIT_FILENAME):
+        payload = load_json_record_if_exists(safe_target, capture_artifact, output_root=output_root)
+        if isinstance(payload, dict) and "run_id" in payload:
+            payload["run_id"] = safe_target
+            save_json_record(safe_target, capture_artifact, payload, output_root=output_root)
+
     return target_dir
 
 ## Streaming Research

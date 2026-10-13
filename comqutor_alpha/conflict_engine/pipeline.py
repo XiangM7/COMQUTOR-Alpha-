@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from comqutor_alpha.conflict_engine.conflict_detector import detect_alpha_conflicts
+from comqutor_alpha.graph_engine.evidence_consumption import EvidenceConsumptionError
 from comqutor_alpha.graph_engine.verified_evidence_gate import EvidenceGateInputError
 from comqutor_alpha.storage.file_store import atomic_write_text, run_dir_for
 
@@ -133,6 +134,10 @@ def run_week4_conflict_pipeline(
         )
     except EvidenceGateInputError:
         _log_week4_pipeline_error(run_id, output_root, "evidence_gate_required_input_unavailable")
+        return False
+    except EvidenceConsumptionError as exc:
+        # an invalid consumption block (unknown contract version, ticker/pair mismatch, stale binding): its own stage code
+        _log_week4_pipeline_error(run_id, output_root, f"evidence_consumption:{exc.reason_code}")
         return False
     except Exception:
         _log_week4_pipeline_error(run_id, output_root, "conflict_detection")
